@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!-- dead_dance · Founders Welcome landing (2026-06-24). The inside-out launch from Santa Cruz.
+     Personalized per founding partner via ?who=robbie|kristen|michele. HONEST-STATE: v1 prototype;
+     names + titles used with the partners' consent; NO scraped social data, NO personal photos
+     (monograms only — add real portraits later with each person's OK). All money/accounts mocked. -->
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>dead_dance · Welcome</title>
+<meta name="theme-color" content="#2a1b3d">
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--paper:#f3ece0;--cream:#faf5ea;--ink:#241a2b;--muted:#cdbfe0;
+--gold:#d8a24a;--rose:#b5384e;--blue:#3f6fb0;--ok:#2e7d52;--body:'Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:#fff;background:
+  radial-gradient(120% 90% at 80% -10%,#5a3b86 0%,#2a1b3d 55%,#190f26 100%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px 18px 48px}
+.wrap{width:100%;max-width:680px}
+.kicker{display:inline-block;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);
+  border:1px solid #d8a24a55;border-radius:999px;padding:6px 13px;margin-bottom:18px}
+.crown{font-size:60px;line-height:1;margin-bottom:6px}
+h1{font-size:40px;line-height:1.04;letter-spacing:-.02em;margin-bottom:6px}
+h1 .nm{color:#fff}
+.title{font-size:20px;color:var(--gold);font-weight:800;letter-spacing:.01em;margin-bottom:2px}
+.where{font-size:14px;color:var(--muted);margin-bottom:22px}
+.lead{font-size:17px;line-height:1.62;color:#efe9f6;background:#ffffff10;border:1px solid #ffffff1f;
+  border-radius:16px;padding:18px 18px;margin-bottom:18px}
+.lead b{color:#fff}
+.boom{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-align:center;margin:4px 0 22px}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin-bottom:26px}
+.btn{flex:1;min-width:200px;text-align:center;text-decoration:none;border-radius:13px;padding:15px 18px;
+  font-weight:800;font-size:15.5px;cursor:pointer;border:0}
+.btn.go{background:var(--gold);color:var(--purple)}
+.btn.inv{background:#ffffff14;color:#fff;border:1.5px solid #ffffff33}
+.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:8px 4px 11px}
+.trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fc{background:#ffffff0f;border:1px solid #ffffff1f;border-radius:14px;padding:15px 10px;text-align:center}
+.fc .mono{width:50px;height:50px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:18px;color:var(--purple);background:var(--gold)}
+.fc.you{outline:2px solid var(--gold);background:#ffffff1a}
+.fc b{font-size:14px}.fc .t{font-size:11.5px;color:var(--gold);margin-top:2px}
+.note{font-size:12px;color:var(--muted);line-height:1.6;background:#00000022;border:1px solid #ffffff14;
+  border-radius:12px;padding:12px 14px;margin-top:22px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#120b1c;color:#fff;
+  border:1px solid #ffffff22;border-radius:11px;padding:12px 18px;font-size:13.5px;max-width:88%;text-align:center;display:none}
+.rose{color:var(--rose)}
+@media(max-width:520px){h1{font-size:32px}.trio{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="wrap" id="wlcm">
+  <div class="kicker">🌹 dead_dance · founding partner</div>
+  <div class="crown" id="crown">👑</div>
+  <h1>Welcome, <span class="nm" id="fname">family</span>.</h1>
+  <div class="title" id="ftitle">A Founder of dead_dance</div>
+  <div class="where" id="fwhere">Santa Cruz, California</div>
+
+  <div class="lead" id="flead"></div>
+  <div class="boom">★ &nbsp; the inside-out launch &nbsp;·&nbsp; BOOM from Santa Cruz &nbsp; ★</div>
+
+  <div class="cta">
+    <a class="btn go" href="index.html">Enter dead_dance →</a>
+    <button class="btn inv" onclick="invite()">Invite a chapter leader</button>
+  </div>
+
+  <div class="sec">The three who start the fire</div>
+  <div class="trio" id="trio"></div>
+
+  <div class="note">
+    You three are the <b>king-makers</b>: you charter the first chapters and invite the leaders who carry the
+    flame to their cities. Santa Cruz is the heart; the country grows out from here, chapter by chapter, anchored
+    to where the bands actually play. <span class="rose">Honest-state:</span> this is a v1 prototype — founding
+    partnership terms and any revenue share are drafted for your review and finalized with counsel before anyone
+    relies on them. Names &amp; titles shown with your consent; no social data is pulled, no photos without your OK.
+    <br><br><b>This page is yours.</b> Your name, your title (change "The Chancellor" to anything you like), and these
+    very words are all editable — tap <b>Enter</b> and make it yours; this landing updates to match.
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var FOUNDERS={
+  robbie:{name:"Robert",full:"Robert Garcia",title:"The Chancellor",crown:"👑",mono:"RG"},
+  kristen:{name:"Kristen",full:"Kristen Young",title:"The Chancellorina",crown:"👑",mono:"KY"},
+  michele:{name:"Michele",full:"Michele Murphy",title:"The Queen Bee",crown:"🐝",mono:"MM"},
+  matt:{name:"Matt",full:"Matt Hartle",title:"The Ice Cream Kid",crown:"🎸",mono:"MH"},
+  michael:{name:"Michael",full:"Michael Lukas",title:"The Founder",crown:"🌹",mono:"ML"}
+};
+var ORDER=["robbie","kristen","michele"];
+function leadMsg(f,key){
+  if(key==="matt"){
+    return "Matt — <b>The Ice Cream Kid</b>, and now a <b>Chancellor-level vote</b> in the family. The way you play, night "+
+      "after night, with such love and passion — pushing those limits like before Jerry's stroke, and you can <i>see</i> "+
+      "how much you love it. That spirit is the whole reason this exists. China Cats, Painted Mandolin, Spirit of '76, the "+
+      "Hartle Gold Band, Grateful Sundays — All Dead, All Jerry, all the time. You get a <b>piece</b> of this, a <b>Studio</b> "+
+      "that posts your gigs everywhere, and your <b>time back</b>. (Still not sure about that GuitarJo thing you fake as a "+
+      "banjo. 😄) Love ya, Matt. — Michael";
+  }
+  return "You helped build this family in the flesh — on the lot, in the room, year after year. Now "+
+    "<b>dead_dance</b> gives it a home online that feels as easy and warm as the scene itself: every show that "+
+    "plays, every tape, every artist on Shakedown, every chapter rolling up to the whole bus. <b>"+f.name+"</b>, "+
+    "you're not a user here — you're a <b>founder</b>. Charter your chapter, bring in the leaders you trust, and "+
+    "let's light it up from Santa Cruz outward.";
+}
+function getWho(){try{var m=(location.search.match(/who=([a-z]+)/i)||[])[1];return m&&FOUNDERS[m.toLowerCase()]?m.toLowerCase():null;}catch(e){return null;}}
+/* read the founder's own edits (name/title/landing) saved from their page — same origin as the app */
+function savedProfile(key){try{var s=localStorage.getItem("dd.profile."+key);if(s)return JSON.parse(s);}catch(e){}return null;}
+function render(){
+  var key=getWho(), f=key?FOUNDERS[key]:null;
+  var sp=key?savedProfile(key):null;
+  if(f){
+    var S=function(x){return (typeof x==="string"&&x)?x:null;};   /* validate types from localStorage */
+    var nm=(sp&&S(sp.name))||f.full;
+    document.getElementById("fname").textContent=nm.split(/\s+/)[0];
+    document.getElementById("ftitle").textContent=(sp&&S(sp.title))||f.title;
+    document.getElementById("crown").textContent=f.crown;
+    var fl=document.getElementById("flead");
+    if(sp&&S(sp.landing)){fl.textContent=sp.landing;} else {fl.innerHTML=leadMsg(f,key);}
+  } else {
+    document.getElementById("flead").innerHTML="The family that built this in the flesh now has a home online — "+
+      "as warm and easy as the lot itself. <b>Founders</b> charter the first chapters and invite the leaders who "+
+      "carry it to their cities. Welcome to <b>dead_dance</b>.";
+  }
+  document.getElementById("trio").innerHTML=ORDER.map(function(k){var g=FOUNDERS[k];var you=(k===key);
+    return '<div class="fc'+(you?' you':'')+'"><div class="mono">'+g.mono+'</div><b>'+g.full+'</b><div class="t">'+g.title+'</div></div>';
+  }).join("");
+  /* carry the founder identity into the app so they land on THEIR page */
+  var enter=document.querySelector(".btn.go"); if(enter) enter.href="index.html"+(location.search||"");
+}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.style.display="block";setTimeout(function(){t.style.display="none";},2600);}
+function invite(){toast("✉️ Invite a chapter leader — drafted for you to send. Nothing auto-sends (v1 mock).");}
+render();
+</script>
+</body></html>

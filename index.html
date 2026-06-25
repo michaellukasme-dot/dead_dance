@@ -1,1034 +1,974 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PostMind — Claude writes. PostMind posts.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- dead_dance · v1 (2026-06-24) · familiar/easy social network + market-of-markets for the Grateful Dead / Jerry world.
+     Frameworkless offline PWA. HONEST-STATE: demo data; NO real auth / payments / marketplace (counsel-gated); NO
+     audio served until LICENSED (JGB/GD — default-deny). Shakedown Street market, the live Archive (cassette + JGB
+     catalog), the show-attendance badge, chapters, events, Farrah. H&F design — lot-culture-at-dusk palette. -->
+<html lang="en" data-theme="light"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>dead_dance</title>
+<meta name="theme-color" content="#2a1b3d">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
-:root {
-  --ink: #0D0D0D;
-  --paper: #F7F4EF;
-  --paper2: #EFEBE3;
-  --accent: #1A3A5C;
-  --gold: #C17F24;
-  --green: #1C5C3A;
-  --red: #8C1F1F;
-  --border: rgba(13,13,13,0.12);
-  --border-strong: rgba(13,13,13,0.28);
-  --radius: 4px;
-  --radius-lg: 8px;
-  --mono: 'DM Mono', monospace;
-  --serif: 'DM Serif Display', serif;
-  --sans: 'Instrument Sans', sans-serif;
-  --shadow: 0 2px 12px rgba(13,13,13,0.08), 0 1px 3px rgba(13,13,13,0.06);
-  --shadow-lg: 0 8px 40px rgba(13,13,13,0.14), 0 2px 8px rgba(13,13,13,0.08);
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; }
-body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
-
-/* ── SCREEN SYSTEM ── */
-.screen { display: none; min-height: 100vh; }
-.screen.active { display: flex; flex-direction: column; }
-.screen-body { flex: 1; display: flex; flex-direction: column; }
-
-/* ── TOPBAR ── */
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 56px; border-bottom: 1px solid var(--border); background: var(--paper); position: sticky; top: 0; z-index: 100; }
-.logo { font-family: var(--serif); font-size: 22px; color: var(--ink); letter-spacing: -0.5px; }
-.logo span { color: var(--gold); }
-.topbar-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: rgba(13,13,13,0.5); }
-.brand-pill { background: var(--ink); color: var(--paper); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; }
-
-/* ── LANDING ── */
-#landing { background: var(--paper); }
-.landing-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 56px); padding: 80px 32px; text-align: center; }
-.landing-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 24px; }
-.landing-h1 { font-family: var(--serif); font-size: clamp(42px, 7vw, 80px); line-height: 1.05; color: var(--ink); letter-spacing: -2px; max-width: 800px; margin-bottom: 24px; }
-.landing-h1 em { font-style: italic; color: var(--accent); }
-.landing-sub { font-size: 18px; color: rgba(13,13,13,0.55); max-width: 520px; line-height: 1.65; margin-bottom: 48px; }
-.landing-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-.btn-primary { background: var(--ink); color: var(--paper); font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 13px 28px; border-radius: var(--radius); border: none; cursor: pointer; transition: opacity .15s; letter-spacing: 0.01em; }
-.btn-primary:hover { opacity: 0.85; }
-.btn-secondary { background: transparent; color: var(--ink); font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 13px 28px; border-radius: var(--radius); border: 1px solid var(--border-strong); cursor: pointer; transition: background .15s; }
-.btn-secondary:hover { background: var(--paper2); }
-.landing-proof { display: flex; gap: 32px; margin-top: 64px; flex-wrap: wrap; justify-content: center; }
-.proof-stat { text-align: center; }
-.proof-n { font-family: var(--serif); font-size: 36px; color: var(--ink); }
-.proof-l { font-size: 12px; color: rgba(13,13,13,0.45); margin-top: 4px; font-family: var(--mono); }
-
-/* ── API KEY MODAL ── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px); }
-.modal { background: var(--paper); border-radius: var(--radius-lg); padding: 32px; max-width: 480px; width: 100%; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
-.modal-title { font-family: var(--serif); font-size: 24px; margin-bottom: 8px; }
-.modal-sub { font-size: 13px; color: rgba(13,13,13,0.55); margin-bottom: 24px; line-height: 1.6; }
-.field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(13,13,13,0.5); margin-bottom: 6px; font-family: var(--mono); }
-.field-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-family: var(--mono); font-size: 13px; background: white; color: var(--ink); outline: none; transition: border-color .15s; }
-.field-input:focus { border-color: var(--accent); }
-.field-hint { font-size: 11px; color: rgba(13,13,13,0.4); margin-top: 6px; font-family: var(--mono); }
-.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-.modal-actions .btn-primary { flex: 2; }
-.modal-actions .btn-secondary { flex: 1; }
-
-/* ── ONBOARDING ── */
-#onboarding .screen-body { padding: 48px 32px; max-width: 720px; margin: 0 auto; width: 100%; }
-.ob-progress { display: flex; align-items: center; gap: 0; margin-bottom: 40px; }
-.ob-step { display: flex; align-items: center; gap: 8px; }
-.ob-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; font-family: var(--mono); border: 1.5px solid var(--border-strong); background: var(--paper); color: rgba(13,13,13,0.35); transition: all .25s; flex-shrink: 0; }
-.ob-dot.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.ob-dot.done { background: var(--green); color: white; border-color: var(--green); }
-.ob-step-label { font-size: 12px; font-family: var(--mono); color: rgba(13,13,13,0.4); white-space: nowrap; }
-.ob-step-label.active { color: var(--ink); font-weight: 500; }
-.ob-line { flex: 1; height: 1px; background: var(--border); margin: 0 12px; min-width: 20px; }
-.ob-line.done { background: var(--green); }
-
-.ob-panel { display: none; }
-.ob-panel.active { display: block; animation: fadeUp .3s ease; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.ob-heading { font-family: var(--serif); font-size: 32px; letter-spacing: -0.5px; margin-bottom: 8px; }
-.ob-sub { font-size: 14px; color: rgba(13,13,13,0.5); margin-bottom: 32px; line-height: 1.6; }
-.form-field { margin-bottom: 20px; }
-.chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.chip { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border-strong); font-size: 13px; cursor: pointer; background: white; color: var(--ink); transition: all .15s; user-select: none; }
-.chip:hover { background: var(--paper2); }
-.chip.selected { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.ob-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; }
-.btn-back { background: none; border: none; font-family: var(--sans); font-size: 14px; color: rgba(13,13,13,0.45); cursor: pointer; padding: 0; }
-.btn-back:hover { color: var(--ink); }
-
-/* ── INTERVIEW ── */
-.interview-chat { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; min-height: 280px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-.bubble { max-width: 82%; padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
-.bubble.ai { background: var(--paper2); color: var(--ink); align-self: flex-start; border-radius: 3px 12px 12px 12px; }
-.bubble.user { background: var(--ink); color: var(--paper); align-self: flex-end; border-radius: 12px 3px 12px 12px; font-family: var(--mono); font-size: 13px; }
-.bubble.thinking { background: var(--paper2); align-self: flex-start; border-radius: 3px 12px 12px 12px; padding: 14px 18px; }
-.thinking-dots { display: flex; gap: 5px; }
-.thinking-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(13,13,13,0.3); animation: pulse 1.2s infinite; }
-.thinking-dots span:nth-child(2) { animation-delay: .2s; }
-.thinking-dots span:nth-child(3) { animation-delay: .4s; }
-@keyframes pulse { 0%,60%,100%{transform:scale(1);opacity:.4} 30%{transform:scale(1.3);opacity:1} }
-
-.interview-input-row { display: flex; gap: 10px; }
-.interview-input-row .field-input { flex: 1; }
-.btn-send { background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); width: 44px; height: 44px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity .15s; }
-.btn-send:hover { opacity: 0.8; }
-.interview-progress { font-family: var(--mono); font-size: 11px; color: rgba(13,13,13,0.4); margin-top: 8px; }
-
-/* ── JSON PREVIEW ── */
-.json-box { background: #0D0D0D; color: #A8D8A8; border-radius: var(--radius-lg); padding: 20px; font-family: var(--mono); font-size: 12px; line-height: 1.7; white-space: pre-wrap; max-height: 320px; overflow-y: auto; margin-bottom: 20px; }
-.json-key { color: #88BBEE; }
-.json-str { color: #A8D8A8; }
-.json-arr { color: #EEC88A; }
-
-/* ── DASHBOARD ── */
-#dashboard .screen-body { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
-.sidebar { border-right: 1px solid var(--border); padding: 24px 0; background: var(--paper); }
-.sidebar-brand { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
-.sidebar-brand-name { font-weight: 600; font-size: 14px; }
-.sidebar-brand-meta { font-size: 11px; color: rgba(13,13,13,0.45); font-family: var(--mono); margin-top: 2px; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; color: rgba(13,13,13,0.5); cursor: pointer; border-left: 2px solid transparent; transition: all .15s; }
-.nav-item:hover { color: var(--ink); background: var(--paper2); }
-.nav-item.active { color: var(--ink); border-left-color: var(--ink); background: var(--paper2); }
-.nav-icon { font-size: 15px; opacity: 0.7; }
-.sidebar-section { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(13,13,13,0.3); padding: 16px 20px 6px; }
-
-.main-panel { padding: 32px; overflow-y: auto; }
-.dash-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
-.dash-title { font-family: var(--serif); font-size: 28px; letter-spacing: -0.5px; }
-.dash-sub { font-size: 13px; color: rgba(13,13,13,0.45); margin-top: 4px; font-family: var(--mono); }
-
-/* ── CALENDAR ── */
-.calendar-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-.filter-chip { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; background: white; color: rgba(13,13,13,0.6); transition: all .15s; }
-.filter-chip:hover { border-color: var(--border-strong); color: var(--ink); }
-.filter-chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.generate-btn { margin-left: auto; }
-
-.post-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 10px; transition: box-shadow .15s, border-color .15s; cursor: pointer; }
-.post-card:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
-.post-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-.post-date { font-family: var(--mono); font-size: 11px; color: rgba(13,13,13,0.4); min-width: 58px; }
-.plat-badge { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; }
-.plat-reddit { background: #FFF0EA; color: #8C3010; }
-.plat-linkedin { background: #E6F1FB; color: #0C447C; }
-.plat-instagram { background: #FBEAF0; color: #72243E; }
-.plat-twitter { background: #EEF6FF; color: #0C447C; }
-.plat-facebook { background: #E6F1FB; color: #185FA5; }
-.plat-threads { background: #F1EFE8; color: #444441; }
-.plat-producthunt { background: #FAEEDA; color: #633806; }
-.plat-press { background: #EAF3DE; color: #27500A; }
-.pillar-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--paper2); color: rgba(13,13,13,0.55); }
-.post-text { font-size: 13px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; margin-bottom: 8px; max-height: 100px; overflow: hidden; position: relative; }
-.post-text.expanded { max-height: none; }
-.post-text::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, white); pointer-events: none; }
-.post-text.expanded::after { display: none; }
-.post-tags { font-size: 11px; color: var(--accent); font-family: var(--mono); margin-bottom: 8px; }
-.post-footer { display: flex; align-items: center; justify-content: space-between; }
-.post-actions { display: flex; gap: 6px; }
-.action-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: white; color: rgba(13,13,13,0.55); cursor: pointer; font-family: var(--sans); transition: all .15s; }
-.action-btn:hover { background: var(--paper2); color: var(--ink); border-color: var(--border-strong); }
-.action-btn.approve { background: var(--green); color: white; border-color: var(--green); }
-.post-status { font-size: 10px; font-family: var(--mono); }
-.status-scheduled { color: var(--gold); }
-.status-approved { color: var(--green); }
-.status-draft { color: rgba(13,13,13,0.35); }
-
-/* ── NETWORK SCREEN ── */
-.network-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 24px; }
-.network-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; cursor: pointer; transition: all .15s; }
-.network-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
-.network-card.connected { border-color: var(--green); }
-.network-icon { font-size: 22px; margin-bottom: 8px; }
-.network-name { font-size: 12px; font-weight: 500; }
-.network-status { font-size: 10px; font-family: var(--mono); margin-top: 3px; color: rgba(13,13,13,0.4); }
-.network-status.ok { color: var(--green); }
-.network-add { background: var(--paper2); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; cursor: pointer; transition: all .15s; }
-.network-add:hover { background: var(--paper); }
-
-/* ── WRITING INDICATOR ── */
-.writing-bar { background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: var(--radius); font-family: var(--mono); font-size: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.writing-dots { display: flex; gap: 4px; }
-.writing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s infinite; }
-.writing-dots span:nth-child(2) { animation-delay: .15s; }
-.writing-dots span:nth-child(3) { animation-delay: .3s; }
-
-/* ── STAT CARDS ── */
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
-.stat-n { font-family: var(--serif); font-size: 32px; letter-spacing: -0.5px; }
-.stat-l { font-size: 11px; font-family: var(--mono); color: rgba(13,13,13,0.4); margin-top: 2px; }
-
-/* ── TOAST ── */
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-family: var(--mono); z-index: 999; animation: slideUp .25s ease; box-shadow: var(--shadow-lg); }
-@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ── GENERATING OVERLAY ── */
-.gen-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.75); z-index: 300; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
-.gen-box { background: var(--paper); border-radius: var(--radius-lg); padding: 40px 48px; text-align: center; max-width: 440px; border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
-.gen-title { font-family: var(--serif); font-size: 28px; margin-bottom: 8px; }
-.gen-sub { font-size: 13px; color: rgba(13,13,13,0.5); font-family: var(--mono); margin-bottom: 24px; line-height: 1.6; }
-.gen-progress-bar { height: 3px; background: var(--paper2); border-radius: 2px; overflow: hidden; }
-.gen-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .4s ease; }
-.gen-step { font-size: 12px; font-family: var(--mono); color: rgba(13,13,13,0.4); margin-top: 12px; }
-
-textarea.field-input { resize: vertical; min-height: 80px; font-family: var(--sans); font-size: 14px; line-height: 1.6; }
-</style>
-</head>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--paper:#f3ece0;--cream:#faf5ea;--card:#fffaf2;--ink:#241a2b;--muted:#7a6a82;
+--line:#e6dccb;--gold:#d8a24a;--rose:#b5384e;--blue:#3f6fb0;--ok:#2e7d52;
+--head:'Helvetica Neue',Arial,sans-serif;--body:'Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--body);background:var(--paper);color:var(--ink);padding-bottom:64px}
+.top{position:sticky;top:0;z-index:30;background:var(--purple);color:#fff;display:flex;align-items:center;gap:10px;padding:9px 14px;box-shadow:0 2px 8px #0004}
+.brand{font-weight:800;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:7px}
+.brand .em{font-size:19px}
+.top .sp{flex:1}
+.search{flex:1;max-width:340px;background:#ffffff22;border:0;color:#fff;border-radius:999px;padding:8px 13px;font-size:13.5px}
+.search::placeholder{color:#ffffffaa}
+.av{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;cursor:pointer;flex:none}
+.wrap{max-width:680px;margin:0 auto;padding:14px 12px 30px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:13px;overflow:hidden;box-shadow:0 1px 2px #0000000a}
+.pad{padding:13px 15px}
+.row{display:flex;align-items:center;gap:10px}
+.h3{font-size:16px;font-weight:800}
+.muted{color:var(--muted);font-size:12.5px}
+.composer{display:flex;gap:10px;align-items:center}
+.composer input{flex:1;background:var(--cream);border:1px solid var(--line);border-radius:999px;padding:11px 15px;font-size:14px}
+.post .ph{height:190px;background:linear-gradient(135deg,#2a1b3d22,#d8a24a33);display:flex;align-items:center;justify-content:center;font-size:58px}
+.post .acts{display:flex;border-top:1px solid var(--line);margin-top:11px;padding-top:7px;gap:4px}
+.post .acts button{flex:1;background:none;border:0;color:var(--muted);font-weight:700;font-size:13px;padding:7px;border-radius:8px;cursor:pointer}
+.post .acts button:hover{background:var(--cream)}
+.post .acts button.on{color:var(--rose)}
+.chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#efe5d4;color:#8a5a0a}
+.chip.purple{background:#ece3f4;color:var(--purple)}.chip.rose{background:#f7e1e5;color:var(--rose)}.chip.ok{background:#e3f3ea;color:var(--ok)}
+.sec-h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:6px 4px 9px}
+.btn{background:var(--purple);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--purple);border:1.5px solid var(--purple)}
+.btn.rose{background:var(--rose)}.btn.gold{background:var(--gold);color:var(--purple)}
+.btn.sm{padding:7px 12px;font-size:12.5px;border-radius:8px}
+.list .it{display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line)}
+.list .it:last-child{border:0}
+.ic{width:42px;height:42px;border-radius:11px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
+.it .nm{flex:1}.it .nm b{font-size:14.5px}.it .nm .s{font-size:12px;color:var(--muted)}
+/* show-attendance badge */
+.badge{background:radial-gradient(120% 120% at 80% 0%,#4a2e6e,#221331);color:#fff;border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.badge .star{position:absolute;top:-8px;right:-8px;font-size:84px;opacity:.13}
+.badge .nm{font-size:13px;letter-spacing:.18em;text-transform:uppercase;opacity:.85}
+.badge .big{font-size:42px;font-weight:800;line-height:1;margin-top:4px}
+.badge .sub{font-size:13px;opacity:.9;margin-top:4px}
+.badge .stats{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge .st{background:#ffffff1c;border:1px solid #ffffff2a;border-radius:9px;padding:7px 10px;font-size:12px}
+.badge .st b{display:block;font-size:15px}
+/* cassette mini */
+.tape{background:linear-gradient(135deg,#2c4327,#1c2b1a);color:#f4ead6;border-radius:14px;padding:16px;position:relative}
+.tape .lbl{font-family:'Bradley Hand','Segoe Script',cursive;font-size:18px;border-bottom:1.5px solid #f4ead655;padding-bottom:4px;max-width:75%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tape .win{background:#f4ead6;color:#1a1207;border-radius:8px;border-top:6px solid var(--gold);padding:11px;text-align:center;margin:12px 0}
+.tape .win b{color:var(--rose)}
+.tape .reels{display:flex;gap:14px;justify-content:center;align-items:center}
+.tape .reel{width:30px;height:30px;border-radius:50%;border:3px solid #f4ead6;display:flex;align-items:center;justify-content:center}.tape .reel:after{content:'✸'}
+.note{background:#fff;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 9px 9px 0;padding:10px 13px;font-size:12px;color:var(--ink);line-height:1.55;margin:12px 0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .d{aspect-ratio:1;border-radius:8px;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px}
+.cal .d.has{background:#ece3f4;font-weight:800;color:var(--purple)}.cal .d .dot{width:6px;height:6px;border-radius:50%;background:var(--rose);margin-top:2px}
+.cal .dh{text-align:center;font-size:11px;color:var(--muted);font-weight:700;padding:2px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:flex;padding:5px 4px 7px;box-shadow:0 -2px 10px #0001}
+.nav button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:10.5px;font-weight:700;cursor:pointer;padding:5px 2px}
+.nav button .ni{font-size:21px;line-height:1}
+.nav button.on{color:var(--purple)}
+.farrah{position:fixed;right:14px;bottom:74px;z-index:45;width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--purple);border:0;font-size:22px;box-shadow:0 6px 18px #0005;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:11px;padding:11px 17px;font-size:13.5px;z-index:60;box-shadow:0 8px 24px #0006;max-width:88%;text-align:center}
+.foot{text-align:center;color:var(--muted);font-size:11px;padding:14px;line-height:1.6}
+a{color:inherit}
+.band{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.band:last-child{border:0}.band .nm{flex:1}.band .nm b{font-size:14.5px}.band .nm .s{font-size:12px;color:var(--muted)}
+.tierpill{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--rose);color:#fff;letter-spacing:.03em}
+.tierpill.Regional{background:var(--purple)}.tierpill.Local{background:var(--gold);color:var(--purple)}
+.show{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.show:last-child{border:0}.show .nm{flex:1}.show .nm b{font-size:14px}.show .nm .s{font-size:12px;color:var(--muted)}
+.show .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.minib{background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--purple);cursor:pointer}
+.minib.rose{background:var(--rose);color:#fff;border-color:var(--rose)}
+.ovl{position:fixed;inset:0;background:rgba(20,14,28,.55);display:none;align-items:flex-end;justify-content:center;z-index:70}
+.ovl.on{display:flex}
+.sheet{background:var(--paper);width:100%;max-width:680px;border-radius:18px 18px 0 0;max-height:88vh;overflow-y:auto;padding:18px 16px 28px}
+.sheet h3{font-size:18px;margin-bottom:3px}.sheet .sb{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.draft{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:11px}
+.draft .dh{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--rose);margin-bottom:5px}
+.draft .tx{font-size:13.5px;line-height:1.55;white-space:pre-wrap}
+.draft .cp{margin-top:9px;background:var(--purple);color:#fff;border:0;border-radius:8px;padding:7px 13px;font-size:12.5px;font-weight:700;cursor:pointer}
+.close{background:var(--ink);color:#fff;border:0;border-radius:11px;padding:12px;width:100%;font-weight:700;margin-top:8px;cursor:pointer}
+/* 📍 Near You — glanceable, top-right */
+.nearchip{position:relative;display:flex;align-items:center;gap:4px;background:#ffffff22;border-radius:999px;padding:6px 10px;font-size:13px;color:#fff;cursor:pointer;flex:none;font-weight:700}
+.nearchip .ncount{background:var(--gold);color:var(--purple);border-radius:999px;padding:0 6px;font-size:11px;font-weight:800;min-width:17px;text-align:center}
+.nearpanel{position:fixed;top:52px;right:10px;z-index:50;width:308px;max-width:calc(100vw - 20px);background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 38px #0005;overflow:hidden}
+.nearpanel .nh{background:var(--purple);color:#fff;padding:10px 13px;font-size:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px;line-height:1.3}
+.nearpanel .nh .x{cursor:pointer;opacity:.85;flex:none}
+.nearrow{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line);cursor:pointer}
+.nearrow:last-of-type{border:0}.nearrow:hover{background:var(--cream)}
+.nearrow .when{flex:none;font-size:9px;font-weight:800;letter-spacing:.04em;border-radius:6px;padding:3px 6px;text-transform:uppercase}
+.when.today{background:var(--rose);color:#fff}.when.tom{background:#ece3f4;color:var(--purple)}
+.nearrow .nm{flex:1;min-width:0}.nearrow .nm b{font-size:13.5px}.nearrow .nm .s{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nearrow .mi{flex:none;font-size:12px;font-weight:800;color:var(--purple)}
+.nearpanel .nf{font-size:10.5px;color:var(--muted);padding:9px 13px;line-height:1.5;background:var(--cream)}
+/* 🌹 dead_dance — the namesake event, special in the widget: dancers + bursting stars */
+.ddparty{position:relative;overflow:hidden;cursor:pointer;padding:13px;border-bottom:1px solid var(--line);background:linear-gradient(115deg,#3c2a54,#2a1b3d 70%,#4a2e6e);color:#fff;box-shadow:inset 0 0 24px #d8a24a22}
+.ddparty .dd-h{font-size:13.5px;font-weight:800}.ddparty .dd-h b{color:var(--gold)}
+.ddparty .dd-s{font-size:11.5px;opacity:.9;margin-top:2px}
+.ddparty .dancers{font-size:22px;letter-spacing:3px;line-height:1;margin-bottom:5px}
+.ddparty .dancers span{display:inline-block;animation:ddbob .8s ease-in-out infinite;transform-origin:bottom center}
+.ddparty .dancers span:nth-child(2){animation-delay:.2s}.ddparty .dancers span:nth-child(3){animation-delay:.4s}.ddparty .dancers span:nth-child(4){animation-delay:.6s}
+@keyframes ddbob{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-6px) rotate(7deg)}}
+.ddparty .star{position:absolute;font-size:13px;opacity:0;pointer-events:none;animation:ddburst 1.7s ease-out infinite}
+@keyframes ddburst{0%{opacity:0;transform:scale(.2)}25%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(.5) translateY(-6px)}}
+</style></head>
 <body>
-
-<!-- ══════════════════════════════════════════════════════════════
-     SCREEN 1: LANDING
-══════════════════════════════════════════════════════════════ -->
-<div id="landing" class="screen active">
-  <nav class="topbar">
-    <div class="logo">Post<span>Mind</span></div>
-    <div class="topbar-right">
-      <span>Powered by Claude</span>
-      <button class="brand-pill" onclick="showApiModal()">Connect API →</button>
-    </div>
-  </nav>
-  <div class="screen-body">
-    <div class="landing-hero">
-      <div class="landing-eyebrow">Universal social publishing infrastructure</div>
-      <h1 class="landing-h1">Claude writes.<br><em>PostMind posts.</em></h1>
-      <p class="landing-sub">Enter your brand. Connect your accounts. Claude writes every post, every platform, every day — autonomously. Any network. Any niche. Any scale.</p>
-      <div class="landing-cta">
-        <button class="btn-primary" onclick="showApiModal()">Start your first brand →</button>
-        <button class="btn-secondary" onclick="showScreen('dashboard'); loadDemoData()">See a live demo</button>
-      </div>
-      <div class="landing-proof">
-        <div class="proof-stat"><div class="proof-n">9+</div><div class="proof-l">Platforms connected</div></div>
-        <div class="proof-stat"><div class="proof-n">∞</div><div class="proof-l">Networks supported</div></div>
-        <div class="proof-stat"><div class="proof-n">0</div><div class="proof-l">Posts written by humans</div></div>
-        <div class="proof-stat"><div class="proof-n">Claude</div><div class="proof-l">Writing engine</div></div>
-      </div>
-    </div>
-  </div>
+<div class="top">
+  <div class="brand"><span class="em">🌹</span> dead_dance</div>
+  <div class="sp"></div>
+  <input class="search" placeholder="Search heads, shows, tapes, art…">
+  <div class="nearchip" id="nearChip" onclick="toggleNear()" title="Shows near you">📍<span id="nearCount" class="ncount">··</span></div>
+  <div class="av" onclick="go('you')">RG</div>
 </div>
+<div class="nearpanel" id="nearPanel" style="display:none"></div>
+<div class="wrap"><div id="view"></div><div id="archivepanel" style="display:none"></div></div>
+<button class="farrah" title="Farrah" onclick="farrah()">🎙️</button>
+<div class="nav" id="nav"></div>
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     API KEY MODAL
-══════════════════════════════════════════════════════════════ -->
-<div id="apiModal" class="modal-overlay" style="display:none">
-  <div class="modal">
-    <div class="modal-title">Connect Claude</div>
-    <div class="modal-sub">PostMind uses the Claude API to write every post. Your key is stored locally in this browser — never sent to any server other than Anthropic's.</div>
-    <div class="form-field">
-      <div class="field-label">Anthropic API Key</div>
-      <input type="password" class="field-input" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
-      <div class="field-hint">Get your key at console.anthropic.com → API Keys</div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeApiModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveApiKey()">Connect & Continue →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     SCREEN 2: ONBOARDING
-══════════════════════════════════════════════════════════════ -->
-<div id="onboarding" class="screen">
-  <nav class="topbar">
-    <div class="logo">Post<span>Mind</span></div>
-    <div class="topbar-right"><span id="ob-brand-preview" style="font-family:var(--mono);font-size:12px"></span></div>
-  </nav>
-  <div class="screen-body">
-    <div class="ob-progress" id="obProgress">
-      <div class="ob-step">
-        <div class="ob-dot active" id="dot1">1</div>
-        <div class="ob-step-label active" id="lbl1">Brief</div>
-      </div>
-      <div class="ob-line" id="line1"></div>
-      <div class="ob-step">
-        <div class="ob-dot" id="dot2">2</div>
-        <div class="ob-step-label" id="lbl2">Interview</div>
-      </div>
-      <div class="ob-line" id="line2"></div>
-      <div class="ob-step">
-        <div class="ob-dot" id="dot3">3</div>
-        <div class="ob-step-label" id="lbl3">Profile</div>
-      </div>
-    </div>
-
-    <!-- PANEL 1: BRIEF -->
-    <div class="ob-panel active" id="panel1">
-      <h2 class="ob-heading">Tell me about your brand</h2>
-      <p class="ob-sub">Ninety seconds. This gives Claude enough context to ask the right questions.</p>
-      <div class="form-field">
-        <div class="field-label">Brand or business name</div>
-        <input type="text" class="field-input" id="brandName" placeholder="e.g. Apex Roofing, PostMind, AT Trek Planner...">
-      </div>
-      <div class="form-field">
-        <div class="field-label">Industry</div>
-        <input type="text" class="field-input" id="brandIndustry" placeholder="e.g. Home services, SaaS, outdoor recreation...">
-      </div>
-      <div class="form-field">
-        <div class="field-label">Primary goal on social media</div>
-        <div class="chip-group" id="goalChips">
-          <div class="chip" onclick="toggleChip(this,'goal')">Generate leads</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">Build awareness</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">Drive app downloads</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">Educate audience</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">Recruit / hire</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">E-commerce sales</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">Press & media coverage</div>
-          <div class="chip" onclick="toggleChip(this,'goal')">Community building</div>
-        </div>
-      </div>
-      <div class="form-field">
-        <div class="field-label">Who is your target audience?</div>
-        <input type="text" class="field-input" id="brandAudience" placeholder="e.g. Homeowners 35-65, solo founders, AT thru-hikers...">
-      </div>
-      <div class="form-field">
-        <div class="field-label">Tone</div>
-        <div class="chip-group" id="toneChips">
-          <div class="chip" onclick="toggleChip(this,'tone')">Trustworthy</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Authoritative</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Friendly & local</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Bold & direct</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Humorous</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Premium</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Authentic & raw</div>
-          <div class="chip" onclick="toggleChip(this,'tone')">Educational</div>
-        </div>
-      </div>
-      <div class="ob-nav">
-        <span></span>
-        <button class="btn-primary" onclick="goToInterview()">Continue to interview →</button>
-      </div>
-    </div>
-
-    <!-- PANEL 2: INTERVIEW -->
-    <div class="ob-panel" id="panel2">
-      <h2 class="ob-heading">Claude wants to know you</h2>
-      <p class="ob-sub" id="interviewSub">Answering honestly gets you a dramatically better brand profile. Claude asks 5–7 questions, one at a time.</p>
-      <div class="interview-chat" id="chatBox"></div>
-      <div class="interview-input-row">
-        <input type="text" class="field-input" id="userMsg" placeholder="Your answer..." onkeydown="if(event.key==='Enter')sendMsg()">
-        <button class="btn-send" onclick="sendMsg()" title="Send">→</button>
-      </div>
-      <div class="interview-progress" id="interviewProgress">Question 1 of 6</div>
-      <div class="ob-nav" style="margin-top:16px">
-        <button class="btn-back" onclick="goPanel(1)">← Back</button>
-        <button class="btn-primary" id="buildProfileBtn" onclick="buildProfile()" style="display:none">Build my brand profile →</button>
-      </div>
-    </div>
-
-    <!-- PANEL 3: PROFILE REVIEW -->
-    <div class="ob-panel" id="panel3">
-      <h2 class="ob-heading">Your brand profile</h2>
-      <p class="ob-sub">Claude extracted this from your brief and interview. You can edit and refine it later.</p>
-      <div class="json-box" id="profileJson"></div>
-      <div class="ob-nav">
-        <button class="btn-back" onclick="goPanel(2)">← Back</button>
-        <button class="btn-primary" onclick="goToDashboard()">Launch content calendar →</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     SCREEN 3: DASHBOARD
-══════════════════════════════════════════════════════════════ -->
-<div id="dashboard" class="screen">
-  <nav class="topbar">
-    <div class="logo">Post<span>Mind</span></div>
-    <div class="topbar-right">
-      <span id="dash-brand-name" style="font-family:var(--mono);font-size:12px"></span>
-      <button class="brand-pill" onclick="showScreen('onboarding');goPanel(1)">+ Add brand</button>
-    </div>
-  </nav>
-  <div class="screen-body">
-    <div class="sidebar">
-      <div class="sidebar-brand">
-        <div class="sidebar-brand-name" id="sidebar-brand-name">—</div>
-        <div class="sidebar-brand-meta" id="sidebar-brand-meta">No brand loaded</div>
-      </div>
-      <div class="nav-item active" id="nav-calendar" onclick="switchTab('calendar')">
-        <span class="nav-icon">📅</span> Content Calendar
-      </div>
-      <div class="nav-item" id="nav-networks" onclick="switchTab('networks')">
-        <span class="nav-icon">🔗</span> Networks
-      </div>
-      <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
-        <span class="nav-icon">🧠</span> Brand Profile
-      </div>
-      <div class="sidebar-section">Your brands</div>
-      <div id="brand-list-sidebar"></div>
-    </div>
-
-    <div class="main-panel">
-
-      <!-- CALENDAR TAB -->
-      <div id="tab-calendar">
-        <div class="dash-header">
-          <div>
-            <div class="dash-title" id="cal-title">Content Calendar</div>
-            <div class="dash-sub" id="cal-sub">Claude-written posts, ready to publish</div>
-          </div>
-          <button class="btn-primary generate-btn" id="generateBtn" onclick="generateCalendar()">✦ Generate 30-day calendar</button>
-        </div>
-        <div class="stat-grid" id="statGrid" style="display:none">
-          <div class="stat-card"><div class="stat-n" id="stat-posts">0</div><div class="stat-l">Posts generated</div></div>
-          <div class="stat-card"><div class="stat-n" id="stat-platforms">0</div><div class="stat-l">Platforms</div></div>
-          <div class="stat-card"><div class="stat-n" id="stat-pillars">0</div><div class="stat-l">Content pillars</div></div>
-          <div class="stat-card"><div class="stat-n" id="stat-press">0</div><div class="stat-l">Press pitches</div></div>
-        </div>
-        <div class="calendar-controls" id="calControls" style="display:none">
-          <div class="filter-chip active" onclick="filterPosts('all',this)">All</div>
-          <div class="filter-chip" onclick="filterPosts('linkedin',this)">LinkedIn</div>
-          <div class="filter-chip" onclick="filterPosts('reddit',this)">Reddit</div>
-          <div class="filter-chip" onclick="filterPosts('instagram',this)">Instagram</div>
-          <div class="filter-chip" onclick="filterPosts('twitter',this)">X</div>
-          <div class="filter-chip" onclick="filterPosts('press',this)">Press</div>
-        </div>
-        <div id="postsContainer">
-          <div style="text-align:center;padding:80px 20px;color:rgba(13,13,13,0.3)">
-            <div style="font-family:var(--serif);font-size:32px;margin-bottom:12px">Ready when you are</div>
-            <div style="font-family:var(--mono);font-size:13px">Hit "Generate 30-day calendar" and Claude writes everything</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NETWORKS TAB -->
-      <div id="tab-networks" style="display:none">
-        <div class="dash-header">
-          <div>
-            <div class="dash-title">Connected Networks</div>
-            <div class="dash-sub">Any platform. Any niche. No API required.</div>
-          </div>
-        </div>
-        <div class="network-grid" id="networkGrid"></div>
-        <div style="margin-top:8px;padding:16px 20px;background:var(--paper2);border-radius:var(--radius-lg);font-size:13px;color:rgba(13,13,13,0.55)">
-          <strong style="color:var(--ink)">No Ask. No Judge.</strong> PostMind connects to any social platform — mainstream or niche. Credentials are encrypted locally. 2FA is handled at connection time. Claude writes for the platform's format rules.
-        </div>
-      </div>
-
-      <!-- PROFILE TAB -->
-      <div id="tab-profile" style="display:none">
-        <div class="dash-header">
-          <div>
-            <div class="dash-title">Brand Intelligence Profile</div>
-            <div class="dash-sub">The DNA Claude uses to write every post</div>
-          </div>
-        </div>
-        <div class="json-box" id="dashProfileJson" style="max-height:600px">No profile loaded. Complete onboarding to generate.</div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     GENERATING OVERLAY
-══════════════════════════════════════════════════════════════ -->
-<div id="genOverlay" class="gen-overlay" style="display:none">
-  <div class="gen-box">
-    <div class="gen-title">Claude is writing</div>
-    <div class="gen-sub" id="genSubText">Building your brand intelligence profile from the interview...</div>
-    <div class="gen-progress-bar"><div class="gen-progress-fill" id="genFill" style="width:0%"></div></div>
-    <div class="gen-step" id="genStep">Initializing...</div>
-  </div>
-</div>
-
+<script src="bands.js"></script>
+<script src="market-core.js"></script>
+<script src="cassette-reader.js"></script>
+<script src="ad-engine.js"></script>
 <script>
-// ── STATE ─────────────────────────────────────────────────────────────────────
-var state = {
-  apiKey: localStorage.getItem('pm_api_key') || '',
-  currentBrand: null,
-  brands: JSON.parse(localStorage.getItem('pm_brands') || '[]'),
-  posts: [],
-  interviewAnswers: [],
-  questionCount: 0,
-  maxQuestions: 6,
-  interviewDone: false
+/* ============================ demo data (honest-state: representative) ============================ */
+/* Founders — an invite link (welcome.html?who=) drops them straight onto THEIR page. */
+var FOUNDERS={
+ robbie:{full:"Robert Garcia",first:"Robert",initials:"RG",title:"The Chancellor"},
+ kristen:{full:"Kristen Young",first:"Kristen",initials:"KY",title:"The Chancellorina"},
+ michele:{full:"Michele Murphy",first:"Michele",initials:"MM",title:"The Queen Bee"},
+ matt:{full:"Matt Hartle",first:"Matt",initials:"MH",title:"The Ice Cream Kid"},
+ michael:{full:"Michael Lukas",first:"Michael",initials:"ML",title:"The Founder"}
 };
+var CHANCELLORS=["robbie","kristen","michele","matt","michael"];   /* 4 voting Chancellors + Michael as tie-breaker */
+function isChancellor(){return CHANCELLORS.indexOf(WHO||"")>=0;}
+function whoParam(){try{var m=(location.search.match(/who=([a-z]+)/i)||[])[1];return m&&FOUNDERS[m.toLowerCase()]?m.toLowerCase():null;}catch(e){return null;}}
+var WHO=whoParam();
+var ME={name:"Robert Garcia",initials:"RG",partner:"Kristen Young",title:"The Chancellor",where:"Santa Cruz, CA"};
+if(WHO){var _f=FOUNDERS[WHO];ME.name=_f.full;ME.initials=_f.initials;ME.title=_f.title;
+ ME.partner=(WHO==="kristen")?"Robert Garcia":(WHO==="michele")?"":"Kristen Young";}
+/* Editable profile — local-only (honest-state: no backend; lives in THIS browser until accounts ship).
+   The founder OWNS everything here: name, title, bio, AND their invitation landing message — all editable. */
+var PKEY="dd.profile."+(WHO||"me");
+function escA(x){return esc(x).replace(/"/g,"&quot;");}
+function clamp(s,n){s=String(s==null?"":s);return s.length>n?s.slice(0,n):s;}   /* harden: cap editable fields */
+function inits(nm){return ((nm||"").trim().split(/\s+/).map(function(w){return w[0]||"";}).join("").slice(0,2).toUpperCase())||"DD";}
+function defaultBio(){return PROFILE.title+" · "+ME.where+". On the bus a long time — on the lot, in the room, year after year. This is home base online for the family.";}
+function defaultLanding(){return "Welcome home — this is your page. The family that built this in the flesh now has a home online, as warm and easy as the lot itself. Charter your chapter, bring in the leaders you trust, and let's light it up from Santa Cruz outward.";}
+function loadProfile(){try{var s=localStorage.getItem(PKEY);if(s)return JSON.parse(s);}catch(e){}return null;}
+var PROFILE=loadProfile()||{};
+if(!PROFILE.name)PROFILE.name=ME.name;
+if(!PROFILE.title)PROFILE.title=ME.title;
+if(!PROFILE.socials)PROFILE.socials=["","","",""];
+if(!PROFILE.bio)PROFILE.bio=defaultBio();
+if(!PROFILE.landing)PROFILE.landing=defaultLanding();
+if(typeof PROFILE.cover!=="string")PROFILE.cover="";
+if(typeof PROFILE.photo!=="string")PROFILE.photo="";
+function saveProfile(){try{localStorage.setItem(PKEY,JSON.stringify(PROFILE));}catch(e){}}
+var BADGE={shows:147,since:1987,venues:34,longest:"'89 Fall Tour (12 in a row)",topVenue:"The Spectrum, Philly"};
+var FEED=[
+ {who:"Shakedown · Kara's Prints",av:"KP",t:"1h",txt:"New batch of show posters up on Shakedown — Spring '90 series. Hand-pulled, numbered. 🌹",em:"🖼️",likes:54,c:9,liked:false},
+ {who:"Philly Heads",av:"PH",t:"4h",txt:"Bus is rolling to Saturday's tribute at the Ardmore. Seats left — pull up a thread to carpool. 🚌",em:"🚌",likes:38,c:15,liked:true},
+ {who:"TapeVault",av:"TV",t:"1d",txt:"Found a killer aud of 5/8/77 — once JGB/GD clears the license, it streams right in the Archive. Rights, not copies. 🎚️",em:"📼",likes:29,c:7,liked:false},
+ {who:"Kristen Young",av:"KY",t:"2d",txt:"Grilled cheese on lot Saturday for the Ardmore show — all proceeds to the chapter fund. Come hungry. 🧀",em:"🧀",likes:72,c:20,liked:false}
+];
+/* The country, divided by where the tribute bands actually tour (macro data) — kept deliberately
+   few so each chapter stays a real scene. Santa Cruz is the Founders' HQ; all roll up to National. */
+var CHAPTERS=[
+ {n:"Santa Cruz · Founders' Chapter",loc:"Santa Cruz, CA",m:312,em:"👑",mine:true,hq:true,leads:"Robbie · Kristen · Michele"},
+ {n:"Bay Area Family",loc:"San Francisco / Oakland, CA",m:980,em:"🌉"},
+ {n:"Pacific Northwest",loc:"Portland · Seattle",m:430,em:"🌲"},
+ {n:"SoCal Heads",loc:"Los Angeles · San Diego",m:611,em:"🌴"},
+ {n:"Rocky Mountain",loc:"Denver · Boulder",m:540,em:"⛰️"},
+ {n:"Lone Star + Southwest",loc:"Austin · Phoenix · Santa Fe",m:298,em:"🤠"},
+ {n:"Great Lakes",loc:"Chicago · Detroit · Minneapolis",m:505,em:"🌊"},
+ {n:"Southeast",loc:"Asheville · Atlanta · Nashville",m:470,em:"🍑"},
+ {n:"Mid-Atlantic",loc:"Philadelphia · DC · Baltimore",m:412,em:"🔔"},
+ {n:"Northeast + New England",loc:"NYC · Boston · Vermont",m:690,em:"🗽"}
+];
+var EVENTS=[
+ {d:6,date:"Sat Jul 6",title:"Tribute night @ Ardmore Music Hall",ch:"Philly Heads",type:"Show",em:"🎸",rsvp:64,roles:[{r:"Carpool lead",who:"Robbie"},{r:"Grilled cheese (lot)",who:"Kristen"}]},
+ {d:13,date:"Sat Jul 13",title:"Tape trade & art swap",ch:"Philly Heads",type:"Meet",em:"📼",rsvp:31,roles:[{r:"Deck + dubbing",who:"TapeVault"},{r:"Table setup",who:null}]},
+ {d:20,date:"Sat Jul 20",title:"Lot gathering — Shakedown day",ch:"NorthEast Tapers",type:"Market",em:"🌹",rsvp:120,roles:[{r:"Vendor check-in",who:null},{r:"Sound",who:null}]}
+];
+var DEALERS=[
+ {n:"Kara's Prints",kind:"Artist",em:"🖼️",items:[["Show poster (Spring '90, /50)","$85"],["Sticker pack","$12"]]},
+ {n:"TapeVault",kind:"Tapes",em:"📼",items:[["Tape lot (12, aud)","$45"],["Blank Maxell (sealed)","$8"]]},
+ {n:"Philly Heads — chapter stall",kind:"Chapter stall",em:"🔁",items:[["Grilled cheese (lot)","$6"],["Chapter patch","$10"]]}
+];
+var JGB_LINK="../../../00_House_Admin/market_surface/core/jgb_reader_demo.html";
 
-var INTERVIEW_QUESTIONS = [
-  "What makes your brand genuinely different from competitors? Not the marketing answer — what do your best customers actually say?",
-  "Describe your worst nightmare post. The one that would make you cringe and say 'that is absolutely not us.'",
-  "What topics, competitors, or language should Claude never mention or use?",
-  "What has worked before — a post, an ad, a pitch — that really landed? What made it work?",
-  "What is your real call-to-action style? Soft ('give us a call when you're ready') or direct ('book now')?",
-  "One sentence: who are you, and why should anyone care?"
+/* The live Archive — embedded inline (the cassette that plays). Band-sanctioned recordings stream from the
+   Internet Archive etree collection (taping always allowed). Same verified set as the standalone GD Archive. */
+var GD_SHOWS = [
+  {id:"s0",date:"1987-04-03",year:1987,venue:"The Centrum",city:"Worcester",state:"MA",country:"USA",band:"Grateful Dead",source:"Audience",rating:4.6,segues:true,
+   nowPlaying:"Hell in a Bucket",
+   audioBase:"https://archive.org/download/gd87-04-03.sennme80.clark-miller.24898.sbeok.shnf/gd87-04-03d",
+   tracks:[
+     {f:"1t01",t:"Hell in a Bucket"},{f:"1t02",t:"Sugaree"},{f:"1t03",t:"C C Rider"},{f:"1t04",t:"It Must Have Been the Roses"},{f:"1t05",t:"It's All Over Now"},{f:"1t06",t:"Big Railroad Blues"},{f:"1t07",t:"Let It Grow"},{f:"1t08",t:"Don't Ease Me In"},
+     {f:"2t01",t:"China Cat Sunflower"},{f:"2t02",t:"I Know You Rider"},{f:"2t03",t:"Man Smart, Woman Smarter"},{f:"2t04",t:"Crazy Fingers"},{f:"2t05",t:"Samson and Delilah"},{f:"2t06",t:"Drums"},{f:"2t07",t:"Space"},{f:"2t08",t:"The Other One"},{f:"2t09",t:"Wharf Rat"},{f:"2t10",t:"Throwing Stones"},{f:"2t11",t:"Not Fade Away"},{f:"2t12",t:"U.S. Blues"}],
+   sets:[{name:"SET 1",songs:["Hell in a Bucket","Sugaree","C C Rider","It Must Have Been the Roses","It's All Over Now","Big Railroad Blues","Let It Grow","Don't Ease Me In"]},
+         {name:"SET 2",songs:["China Cat Sunflower","I Know You Rider","Man Smart, Woman Smarter","Crazy Fingers","Samson and Delilah","Drums","Space","The Other One","Wharf Rat","Throwing Stones","Not Fade Away","U.S. Blues"]}],
+   notes:"▶ PLAYS THE WHOLE SHOW — band-sanctioned taper recording from the Internet Archive. Songs auto-advance, no leaving the app. Press play; the reels spin."},
+  {id:"s1",date:"1977-05-08",year:1977,venue:"Barton Hall, Cornell",city:"Ithaca",state:"NY",country:"USA",band:"Grateful Dead",source:"Audience",rating:4.9,segues:true,
+   nowPlaying:"Minglewood Blues",
+   audioBase:"https://archive.org/download/gd1977-05-08.shure57.stevenson.29303.flac16/gd1977-05-08d",
+   tracks:[
+     {f:"01t02",t:"Minglewood Blues"},{f:"01t03",t:"Loser"},{f:"01t04",t:"El Paso"},{f:"01t05",t:"They Love Each Other"},{f:"01t06",t:"Jack Straw"},{f:"01t07",t:"Deal"},{f:"01t08",t:"Lazy Lightning > Supplication"}],
+   sets:[{name:"SET 1",songs:["Minglewood Blues","Loser","El Paso","They Love Each Other","Jack Straw","Deal","Lazy Lightning > Supplication"]},
+         {name:"SET 2",songs:["Scarlet Begonias > Fire on the Mountain","Estimated Prophet","Saint Stephen > Not Fade Away","Morning Dew","One More Saturday Night (E)"]}],
+   notes:"The legendary Cornell '77 — band-sanctioned audience tape (Internet Archive). ▶ plays Set 1, song to song. Set 2's Scarlet>Fire wires in with the full transfer."},
+  {id:"s1b",date:"1980-12-06",year:1980,venue:"Mill Valley Rec Center",city:"Mill Valley",state:"CA",country:"USA",band:"Grateful Dead",source:"Audience",rating:4.7,
+   nowPlaying:"Dire Wolf",
+   tracks:[
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/02%20Dire%20Wolf.mp3",t:"Dire Wolf"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/03%20On%20The%20Road%20Again.mp3",t:"On the Road Again"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/04%20I%27ve%20Been%20All%20Around%20This%20World.mp3",t:"I've Been All Around This World"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/05%20Monkey%20And%20The%20Engineer.mp3",t:"Monkey and the Engineer"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/06%20Jack-A-Roe.mp3",t:"Jack-A-Roe"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/07%20Cassidy.mp3",t:"Cassidy"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/08%20Bird%20Song.mp3",t:"Bird Song"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/09%20Ain%27t%20No%20Lie.mp3",t:"Oh Babe, It Ain't No Lie"},
+     {u:"https://archive.org/download/gd1980-12-06.151263.betty.master.flac16/10%20Ripple.mp3",t:"Ripple"}],
+   sets:[{name:"SET 1 · acoustic",songs:["Dire Wolf","On the Road Again","I've Been All Around This World","Monkey and the Engineer","Jack-A-Roe","Cassidy","Bird Song","Oh Babe It Ain't No Lie","Ripple"]}],
+   notes:"A rare ACOUSTIC set — Betty Cantor-Jackson's master tape (Internet Archive). Played at a children's Muscular Dystrophy benefit. ▶ plays the whole set, song to song."},
+  {id:"s2",date:"1976-06-12",year:1976,venue:"Boston Music Hall",city:"Boston",state:"MA",country:"USA",band:"Grateful Dead",source:"FM/Soundboard",rating:4.6,segues:true,
+   nowPlaying:"Samson and Delilah",
+   audioBase:"https://archive.org/download/gd1976-06-12.fm.sbd.moore.berger.100328.flac16/gd76-06-12d",
+   tracks:[
+     {f:"1t01",t:"Samson and Delilah"},{f:"1t02",t:"Row Jimmy"},{f:"1t03",t:"The Music Never Stopped"},{f:"1t04",t:"Brown Eyed Women"},{f:"1t05",t:"Big River"},{f:"1t06",t:"Mission in the Rain"},{f:"1t07",t:"Looks Like Rain"},{f:"1t08",t:"Friend of the Devil"},{f:"1t09",t:"Lazy Lightning >"},{f:"1t10",t:"Supplication"}],
+   sets:[{name:"SET 1",songs:["Samson and Delilah","Row Jimmy","The Music Never Stopped","Brown Eyed Women","Big River","Mission in the Rain","Looks Like Rain","Friend of the Devil","Lazy Lightning > Supplication"]},
+         {name:"SET 2",songs:["High Time","The Promised Land","Cassidy","Tennessee Jed","Let It Grow","Wharf Rat","Comes a Time","Dancin' in the Street","Around and Around","Sugar Magnolia > U.S. Blues"]}],
+   notes:"Boston Music Hall '76 — FM/soundboard master (Internet Archive). ▶ plays Set 1, song to song. Surfaces under 'On This Day' every June 12."},
+  {id:"s3",date:"1972-05-26",year:1972,venue:"Lyceum Theatre",city:"London",state:"",country:"England",band:"Grateful Dead",source:"Soundboard",rating:4.8,segues:true,
+   nowPlaying:"The Promised Land",
+   audioBase:"https://archive.org/download/gd1972-05-26.sbd.waddell.89641.sbeok.flac16/gd72-05-26.GEMS.d",
+   tracks:[
+     {f:"1t01",t:"The Promised Land"},{f:"1t02",t:"Sugaree"},{f:"1t03",t:"Mr. Charlie"},{f:"1t04",t:"Black-Throated Wind"},{f:"1t05",t:"Loser"},{f:"1t06",t:"Next Time You See Me"},{f:"1t07",t:"El Paso"},{f:"1t08",t:"Dire Wolf"},{f:"1t09",t:"Two Souls in Communion"}],
+   sets:[{name:"SET 1",songs:["The Promised Land","Sugaree","Mr. Charlie","Black-Throated Wind","Loser","Next Time You See Me","El Paso","Dire Wolf","Two Souls in Communion"]},
+         {name:"SET 2",songs:["Playing in the Band","He's Gone","Cumberland Blues","Jack Straw","Chinatown Shuffle","China Cat Sunflower > I Know You Rider","Truckin' > The Other One > Drums"]}],
+   notes:"Europe '72 — the Lyceum, London. Soundboard (Internet Archive). ▶ plays Set 1, song to song. Find it via the STATE pill — England sits under the states."},
+  {id:"s4",date:"1978-12-16",year:1978,venue:"Nashville Municipal Auditorium",city:"Nashville",state:"TN",country:"USA",band:"Grateful Dead",source:"Audience",rating:4.5,segues:true,startTrack:5,
+   nowPlaying:"Stagger Lee",
+   audioBase:"https://archive.org/download/gd1978-12-16.sonyecm250-no-dolby.walker-scotton.miller.82212.sbeok.flac16/gd78-12-16d",
+   tracks:[
+     {f:"1t01",t:"Sugaree"},{f:"1t02",t:"Beat It On Down the Line"},{f:"1t03",t:"Candyman"},{f:"1t04",t:"Me and My Uncle"},{f:"1t05",t:"Big River"},{f:"1t06",t:"Stagger Lee"},{f:"1t07",t:"Looks Like Rain"},{f:"1t08",t:"Tennessee Jed"},{f:"1t09",t:"Lazy Lightning"},{f:"1t10",t:"Supplication"}],
+   sets:[{name:"SET 1",songs:["Sugaree","Beat It On Down the Line","Candyman","Me and My Uncle > Big River","Stagger Lee","Looks Like Rain","Tennessee Jed","Lazy Lightning > Supplication"]}],
+   notes:"STAGGER LEE — your namesake, fresh in the rotation (it debuted in 1978). Band-sanctioned tape from the Internet Archive. ▶ opens right on Stagger Lee; ⏮ ⏭ walk the set."},
+  {id:"s5",date:"1969-02-27",year:1969,venue:"Fillmore West",city:"San Francisco",state:"CA",country:"USA",band:"Grateful Dead",source:"Soundboard",rating:4.9,segues:true,startTrack:5,
+   nowPlaying:"Dark Star",
+   audioBase:"https://archive.org/download/gd1969-02-27.132573.sbd.16track.healy-latvala-wise.flac16/t",
+   tracks:[
+     {f:"01",t:"Good Morning Little Schoolgirl"},{f:"02",t:"Doin' That Rag"},{f:"03",t:"Cryptical Envelopment"},{f:"04",t:"Dupree's Diamond Blues"},{f:"05",t:"Mountains of the Moon"},{f:"06",t:"Dark Star"},{f:"07",t:"Saint Stephen"},{f:"08",t:"The Eleven"},{f:"09",t:"Turn On Your Lovelight"},{f:"10",t:"Cosmic Charlie"}],
+   sets:[{name:"SET 1",songs:["Good Morning Little Schoolgirl","Doin' That Rag","Cryptical Envelopment","Dupree's Diamond Blues","Mountains of the Moon","Dark Star","Saint Stephen","The Eleven","Turn On Your Lovelight","Cosmic Charlie"]}],
+   notes:"The Live/Dead era — Fillmore West, the 16-track soundboard (Internet Archive). ▶ opens right on Dark Star — this is the reel that fed the Live/Dead album. The whole set plays, song to song."},
+  {id:"s6",date:"1989-07-07",year:1989,venue:"John F. Kennedy Stadium",city:"Philadelphia",state:"PA",country:"USA",band:"Grateful Dead",source:"Matrix/Soundboard",rating:4.5,segues:true,
+   nowPlaying:"Hell in a Bucket",
+   audioBase:"https://archive.org/download/gd1989-07-07.140262.UltraMatrix.sbd.cm.miller.flac1644/",
+   tracks:[
+     {f:"02HellInABucket",t:"Hell in a Bucket"},{f:"03IkoIko",t:"Iko Iko"},{f:"04LittleRedRooster",t:"Little Red Rooster"},{f:"05RambleOnRose",t:"Ramble On Rose"},{f:"06StuckInsideAMobileWithTheMemphisBluesAgain",t:"Memphis Blues Again"},{f:"07Loser",t:"Loser"},{f:"08LetItGrow",t:"Let It Grow"}],
+   sets:[{name:"SET 1",songs:["Hell in a Bucket","Iko Iko","Little Red Rooster","Ramble On Rose","Stuck Inside a Mobile with the Memphis Blues Again","Loser","Let It Grow"]},
+         {name:"SET 2",songs:["Box of Rain","Scarlet Begonias > Fire on the Mountain","Estimated Prophet","Standing on the Moon","Drums > Space","The Other One","Wharf Rat","Turn On Your Lovelight","Knockin' on Heaven's Door (E)"]}],
+   notes:"Near you (PA) — JFK Stadium, Philadelphia. UltraMatrix soundboard (Internet Archive). ▶ plays Set 1, song to song. Surfaces under 'Near Me'."}
 ];
 
-// ── SCREEN NAVIGATION ──────────────────────────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+/* ============================ app shell ============================ */
+var S={tab:(WHO?"you":"home"),liked:{},editBio:false,editId:false,editLand:false,editPhoto:false};
+function go(t){S.tab=t;render();window.scrollTo(0,0);}
+function toast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2000);}
+function esc(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function gate(what){toast("🔒 "+what+" — counsel-gated in v1 (no real money/accounts yet).");}
+
+var NAV=[["home","Home","🏠"],["chapters","Chapters","🔔"],["events","Shows","📅"],["shakedown","Shakedown","🌹"],["archive","Archive","📼"],["you","You","🪪"]];
+function nav(){document.getElementById("nav").innerHTML=NAV.map(function(n){return '<button class="'+(S.tab===n[0]?"on":"")+'" onclick="go(\''+n[0]+'\')"><span class="ni">'+n[2]+'</span>'+n[1]+'</button>';}).join("");}
+
+function feedCard(p,i){return '<div class="card post"><div class="pad"><div class="row"><div class="av" style="background:#ece3f4;color:var(--purple)">'+esc(p.av)+'</div>'+
+ '<div style="flex:1"><b>'+esc(p.who)+'</b><div class="muted">'+esc(p.t)+' ago</div></div></div>'+
+ '<div style="margin:10px 0 0;font-size:14.5px;line-height:1.5">'+esc(p.txt)+'</div></div>'+
+ '<div class="ph">'+esc(p.em)+'</div>'+
+ '<div class="pad" style="padding-top:6px"><div class="muted">♥ '+(p.likes+(S.liked[i]?1:0))+' · '+p.c+' comments</div>'+
+ '<div class="acts"><button class="'+((p.liked||S.liked[i])?"on":"")+'" onclick="like('+i+')">♥ Like</button><button onclick="toast(\'Comments — demo\')">💬 Comment</button><button onclick="toast(\'Share — demo\')">↪ Share</button></div></div></div>';}
+function like(i){S.liked[i]=!S.liked[i];render();}
+
+function viewHome(){
+ return '<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
+   '<input placeholder="What\'s the word on the lot?" onkeydown="if(event.key===\'Enter\'){toast(\'Posted (demo)\');this.value=\'\'}"><button class="btn sm" onclick="toast(\'Posted (demo)\')">Post</button></div></div>'+
+   '<div class="card pad"><div class="row" style="gap:10px"><div class="ic">📥</div><div style="flex:1"><b style="font-size:14px">Bring a Facebook post in</b><div class="muted" style="font-size:12px">Share a post from any FB group into the same group here — in &amp; out.</div></div><button class="btn sm" onclick="captureShare(\'\',\'\')">Share in</button></div></div>'+
+   eventsView()+
+   sharesView()+
+   requestsView()+
+   FEED.map(feedCard).join("")+
+   '<div class="foot">Free for the family · v1 prototype · demo data · no ads, no tracking.</div>';
 }
-
-function showApiModal() {
-  document.getElementById('apiModal').style.display = 'flex';
-  document.getElementById('apiKeyInput').value = state.apiKey;
-  setTimeout(() => document.getElementById('apiKeyInput').focus(), 100);
+function viewChapters(){
+ var hq=CHAPTERS.filter(function(c){return c.hq;})[0]||CHAPTERS[0];
+ var rest=CHAPTERS.filter(function(c){return !c.hq;});
+ return '<div class="sec-h">👑 The Founders\' Chapter — Santa Cruz</div>'+
+  '<div class="card pad"><div class="row" style="gap:12px"><div class="ic">'+hq.em+'</div><div style="flex:1"><b>'+esc(hq.n)+'</b><div class="muted">'+esc(hq.loc)+' · '+hq.m+' members</div></div><span class="chip ok">HQ</span></div>'+
+   '<div class="muted" style="margin:9px 2px 0">King-makers: <b>'+esc(hq.leads||"")+'</b> — they charter the chapters and invite the leaders who carry the flame to their cities.</div>'+
+   '<button class="btn gold sm" style="margin-top:11px" onclick="toast(\'Invite a chapter leader — drafted for you to send (v1 mock).\')">Invite a chapter leader</button></div>'+
+  '<div class="sec-h">Chapters across the country</div>'+
+  '<div class="card list">'+rest.map(function(c){return '<div class="it"><div class="ic">'+c.em+'</div><div class="nm"><b>'+esc(c.n)+'</b><div class="s">'+esc(c.loc)+' · '+c.m+' members</div></div><button class="btn sm ghost" onclick="toast(\'Joined '+esc(c.n)+' (demo)\')">Join</button></div>';}).join("")+'</div>'+
+  '<div class="card pad row" style="gap:12px"><div class="ic">🌌</div><div style="flex:1"><b>dead_dance Family (National)</b><div class="muted">All chapters roll up here · the whole bus</div></div><span class="chip purple">Rollup</span></div>'+
+  '<div class="note"><b>How the map is drawn:</b> chapters are anchored to where the tribute bands actually tour — the Bay, the Northwest, SoCal, the Rockies (Red Rocks), Texas/SW, the Great Lakes (Chicago), the Southeast (Asheville/Nashville), the Mid-Atlantic, and the Northeast. Kept deliberately few so each one stays a real scene, not a ghost town.</div>'+
+  '<div class="note"><b>How chapters earn:</b> when a chapter or vendor sells on Shakedown, dead_dance is the clearing house — a share keeps each local scene self-funding, a founders\' share flows home to Santa Cruz, and the rest runs the platform. <i>Exact splits are drafted for the founders\' sign-off and finalized with counsel; v1 mocks all money.</i></div>';
 }
-
-function closeApiModal() { document.getElementById('apiModal').style.display = 'none'; }
-
-function saveApiKey() {
-  var key = document.getElementById('apiKeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) { showToast('Key must start with sk-ant-'); return; }
-  state.apiKey = key;
-  localStorage.setItem('pm_api_key', key);
-  closeApiModal();
-  showScreen('onboarding');
-  goPanel(1);
+function bandById(id){for(var i=0;i<DD_BANDS.length;i++)if(DD_BANDS[i].id===id)return DD_BANDS[i];return {name:id,link:""};}
+function follow(id){var b=bandById(id);b.follow=!b.follow;render();toast(b.follow?("🔔 Tracking "+b.name+" — heads-up when they play near you."):("Stopped tracking "+b.name+"."));}
+function viewEvents(){
+ if(typeof DD_BANDS==="undefined"||typeof DD_SHOWS==="undefined"){return '<div class="note">Couldn\'t load the band list (bands.js). Reload the page — the rest of dead_dance still works.</div>';}
+ var heads=DD_BANDS.filter(function(b){return b.tier==="Headliner";});
+ var rest=DD_BANDS.filter(function(b){return b.tier!=="Headliner";});
+ var bandCard=function(b){return '<div class="band"><div class="ic">🎸</div><div class="nm"><b>'+esc(b.name)+'</b> <span class="tierpill '+esc(b.tier)+'">'+esc(b.tier)+'</span><div class="s">'+esc(b.note)+'</div></div>'+
+   '<div style="display:flex;flex-direction:column;gap:5px"><button class="minib'+(b.follow?' rose':'')+'" onclick="follow(\''+b.id+'\')">'+(b.follow?'🔔 Following':'+ Follow')+'</button><button class="minib" onclick="bookBand()">📅 Book</button><button class="minib" onclick="tipJar()">💚 Tip</button></div></div>';};
+ var showCard=function(s,i){var b=bandById(s.bandId);return '<div class="show"><div class="ic">'+(s.near?'📍':'🎟️')+'</div><div class="nm"><b>'+esc(b.name)+'</b>'+(s.near?' <span class="chip rose">near you</span>':'')+(s.real?'':' <span class="chip">representative</span>')+
+   '<div class="s">'+esc(s.date)+' · '+esc(s.venue)+' · '+esc(s.city)+', '+esc(s.state)+'</div>'+
+   '<div class="acts"><button class="minib" onclick="toast(\'RSVP — see you there! (demo)\')">RSVP</button><button class="minib" onclick="sawShow()">I was there → badge</button><button class="minib rose" onclick="promote('+i+')">🚀 HyperPost</button></div></div></div>';};
+ return '<div class="sec-h">🎸 Headliners on tour — follow for local alerts</div>'+
+  '<div class="card">'+heads.map(bandCard).join("")+'</div>'+
+  '<div class="sec-h">Tonight &amp; near you</div>'+
+  '<div class="card">'+DD_SHOWS.map(showCard).join("")+'</div>'+
+  '<div class="sec-h">More bands (regional &amp; local)</div>'+
+  '<div class="card">'+rest.map(bandCard).join("")+'</div>'+
+  '<div class="note"><b>Band data via Compass Rose</b> (<a href="'+esc(DD_SOURCE.url)+'" target="_blank" rel="noopener">gratefuldeadtributebands.com</a>) — '+esc(DD_SOURCE.note)+' We promote bands locally and never sell their music. <b>Live tour-date sync is gated</b> on the source\'s permission/ToS (find-the-owners first, fully credited).</div>';
 }
+function sawShow(){BADGE.shows++;render();toast("🌹 Show added — your badge now reads "+BADGE.shows+" shows.");}
+function addShow(d){sawShow();}
 
-// ── CHIP SELECTION ─────────────────────────────────────────────────────────────
-function toggleChip(el, group) {
-  if (group === 'goal') {
-    el.classList.toggle('selected');
-  } else {
-    el.classList.toggle('selected');
-  }
+/* PostMind promote — ONE show → curated drafts per surface. JARVIS: drafted, the owner posts. Nothing auto-sends. */
+function makePromo(s,b){
+ var when=s.date, where=s.venue+", "+s.city+", "+s.state, link=b.link||"";
+ return [
+  {surface:"dead_dance · Family feed",tx:"🌹 Family — "+b.name+" is playing "+s.venue+" ("+s.city+", "+s.state+") on "+when+". Who's in? Drop a carpool thread below and let's roll a bus. 🚌"},
+  {surface:"Local lot / Shakedown board",tx:when+": "+b.name+" @ "+where+". Shakedown opens early — grilled cheese, tapes, art on the lot. Pull in by 5, find the family. 🧀📼"},
+  {surface:"Tour-stop announcement (FB event / external)",tx:b.name+" — live "+when+" at "+s.venue+", "+s.city+" "+s.state+". Tickets & info: "+(link||"(band page)")+"\n#GratefulDead #tributeband #deaddance"}
+ ];
 }
-
-function getSelectedChips(groupId) {
-  return Array.from(document.querySelectorAll('#' + groupId + ' .chip.selected')).map(c => c.textContent);
+function promote(i){
+ var s=DD_SHOWS[i], b=bandById(s.bandId), drafts=makePromo(s,b);
+ document.getElementById("sheet").innerHTML='<h3>📣 Promote: '+esc(b.name)+'</h3><div class="sb">'+esc(s.date)+' · '+esc(s.venue)+', '+esc(s.city)+' '+esc(s.state)+' · curated per surface — <b>you post, nothing auto-sends (Jarvis)</b></div>'+
+   drafts.map(function(d){return '<div class="draft"><div class="dh">'+esc(d.surface)+'</div><div class="tx">'+esc(d.tx)+'</div><button class="cp" onclick="copyDraft(this)">Copy</button></div>';}).join("")+
+   '<div class="note" style="margin:4px 0 0">Honest-state: these are <b>drafts for you to review &amp; post</b> — dead_dance never auto-posts on your behalf, and never sells the band\'s music. Promote locally; respect each surface\'s rules.</div>'+
+   '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
-
-// ── ONBOARDING NAVIGATION ─────────────────────────────────────────────────────
-function goPanel(n) {
-  document.querySelectorAll('.ob-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel' + n).classList.add('active');
-  for (var i = 1; i <= 3; i++) {
-    var dot = document.getElementById('dot' + i);
-    var lbl = document.getElementById('lbl' + i);
-    dot.className = 'ob-dot' + (i < n ? ' done' : i === n ? ' active' : '');
-    dot.textContent = i < n ? '✓' : i;
-    lbl.className = 'ob-step-label' + (i === n ? ' active' : '');
-    if (i < 3) {
-      var line = document.getElementById('line' + i);
-      line.className = 'ob-line' + (i < n ? ' done' : '');
-    }
-  }
+function copyDraft(btn){var tx=btn.parentNode.querySelector(".tx").textContent;try{(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(tx):Promise.reject()).then(function(){toast("Copied — paste it where you want it.");}).catch(function(){toast("Select & copy the text.");});}catch(e){toast("Select & copy the text.");}}
+function closeModal(){document.getElementById("ovl").classList.remove("on");}
+function viewShakedown(){
+ return '<div class="sec-h">🌹 Shakedown Street · stalls → vendors → The Dealer</div>'+
+  DEALERS.map(function(dl){return '<div class="card"><div class="pad row"><div class="ic">'+dl.em+'</div><div style="flex:1"><b>'+esc(dl.n)+'</b><div class="muted">'+esc(dl.kind)+'</div></div><span class="chip'+(dl.kind==="Chapter stall"?"":" purple")+'">'+(dl.kind==="Chapter stall"?"Chapter":dl.kind)+'</span></div>'+
+   '<div class="list">'+dl.items.map(function(it){return '<div class="it"><div class="ic">📦</div><div class="nm"><b>'+esc(it[0])+'</b><div class="s">'+esc(dl.n)+'</div></div><div class="row" style="gap:8px"><b style="color:var(--purple)">'+esc(it[1])+'</b><button class="btn sm" onclick="gate(\'Buying from the seller\')">View</button></div></div>';}).join("")+'</div></div>';}).join("")+
+  '<div class="note"><b>Lot rules:</b> the deal is between buyer and seller; dead_dance just sets the table and takes the agreed cut. Tapes & art are sold by their makers. <b>No band recordings are sold without a license.</b> All money paths are counsel-gated and mocked in v1.</div>';
 }
-
-function goToInterview() {
-  var name = document.getElementById('brandName').value.trim();
-  if (!name) { showToast('Enter a brand name to continue'); return; }
-  state.currentBrand = {
-    name: name,
-    industry: document.getElementById('brandIndustry').value.trim(),
-    goals: getSelectedChips('goalChips'),
-    audience: document.getElementById('brandAudience').value.trim(),
-    tone: getSelectedChips('toneChips'),
-    answers: [],
-    profile: null,
-    posts: []
-  };
-  document.getElementById('ob-brand-preview').textContent = name;
-  goPanel(2);
-  startInterview();
+/* viewArchive() removed — the Archive is now an inline mounted, dead_dance-themed cassette
+   that plays in-app (see buildArchive() below), plus the "I Was There" rooms. */
+/* ---- editable profile + HyperPost ---- */
+function startEditId(){S.editId=true;render();}
+function cancelId(){S.editId=false;render();}
+function saveId(){var n=document.getElementById("pName"),t=document.getElementById("pTitle");if(n&&n.value.trim())PROFILE.name=clamp(n.value.trim(),60);if(t&&t.value.trim())PROFILE.title=clamp(t.value.trim(),60);saveProfile();S.editId=false;render();toast("Saved — your name & title, your call.");}
+function startEditLand(){S.editLand=true;render();}
+function cancelLand(){S.editLand=false;render();}
+function saveLand(){var t=document.getElementById("landEdit");if(t)PROFILE.landing=clamp(t.value,800);saveProfile();S.editLand=false;render();toast("Saved — that's what your guests will see.");}
+function startEditPhoto(){S.editPhoto=true;render();}
+function cancelPhoto(){S.editPhoto=false;render();}
+function savePhoto(){var c=document.getElementById("pCover"),p=document.getElementById("pPhoto");if(c)PROFILE.cover=clamp(c.value.trim(),300);if(p)PROFILE.photo=clamp(p.value.trim(),300);saveProfile();S.editPhoto=false;render();toast("📷 Photos saved.");}
+function startEditBio(){S.editBio=true;render();}
+function cancelEditBio(){S.editBio=false;render();}
+function saveBio(){var t=document.getElementById("bioEdit");if(t){PROFILE.bio=clamp(t.value,600);saveProfile();}S.editBio=false;render();toast("Saved — your page, your words.");}
+function saveSocials(){for(var i=0;i<4;i++){var el=document.getElementById("sa"+i);if(el)PROFILE.socials[i]=clamp(el.value.trim(),200);}saveProfile();render();toast("🔗 Social accounts saved — HyperPost can line them up.");}
+function cancelSocials(){render();}
+/* HyperPost = ONE thought, tailored per surface. NOT instead of Facebook — it adds FB + your
+   chapter subgroups PLUS Instagram, TikTok, etc. Jarvis: drafts only, the owner presses post. */
+function hyperDrafts(msg){msg=(msg||"").trim()||"On the lot this weekend — come find the family. 🌹";
+ return [
+  {s:"dead_dance · Family feed",t:msg+" — see you in the room. 🌹"},
+  {s:"Facebook + your chapter subgroups",t:msg+"\n\n(Goes to your timeline AND the chapter groups you run — alongside Facebook, not instead of it.) #GratefulDead #deaddance"},
+  {s:"Instagram",t:msg+" ✨🌹\n#gratefuldead #deadhead #shakedownstreet #tiedye #livemusic #santacruz"},
+  {s:"TikTok",t:"POV: the family’s back on the lot 🌹 — "+msg+"\n#gratefuldead #deadtok #jamband #santacruz"}
+ ];
 }
-
-// ── INTERVIEW ─────────────────────────────────────────────────────────────────
-function startInterview() {
-  state.interviewAnswers = [];
-  state.questionCount = 0;
-  state.interviewDone = false;
-  document.getElementById('chatBox').innerHTML = '';
-  document.getElementById('buildProfileBtn').style.display = 'none';
-  addBubble('ai', "Got it — " + state.currentBrand.name + " in " + (state.currentBrand.industry || 'your industry') + ". I have your brief. Now let me ask a few things that'll make every post feel genuinely yours rather than generic.");
-  setTimeout(() => askQuestion(0), 800);
+function hyperPost(){
+ var ta=document.getElementById("hpMsg"); var drafts=hyperDrafts(ta?ta.value:"");
+ var linked=PROFILE.socials.filter(function(x){return x;}).length;
+ document.getElementById("sheet").innerHTML='<h3>🚀 HyperPost — one thought, everywhere</h3>'+
+  '<div class="sb"><b>Not instead of Facebook</b> — it posts to Facebook <b>and</b> your chapter subgroups, <b>plus</b> Instagram, TikTok, and more. Tailored per place. You press post; nothing auto-sends.</div>'+
+  drafts.map(function(d){return '<div class="draft"><div class="dh">'+esc(d.s)+'</div><div class="tx">'+esc(d.t)+'</div><button class="cp" onclick="copyDraft(this)">Copy</button></div>';}).join("")+
+  '<div class="note" style="margin:4px 0 0">'+(linked?("Lined up to your "+linked+" connected account"+(linked>1?"s":"")+"."):"Tip: add your profiles under <b>Social accounts</b> and HyperPost will line them all up.")+' <i>Honest-state: real auto-posting to Facebook/Instagram/TikTok needs their sign-in &amp; rules (counsel-gated); v1 hands you ready-to-paste drafts.</i></div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
-
-function askQuestion(idx) {
-  if (idx >= INTERVIEW_QUESTIONS.length) {
-    state.interviewDone = true;
-    addBubble('ai', "That's everything I need. I have a clear picture of " + state.currentBrand.name + ". Hit 'Build my brand profile' and I'll generate your Brand Intelligence Profile now.");
-    document.getElementById('buildProfileBtn').style.display = 'block';
-    document.getElementById('interviewProgress').textContent = 'Interview complete — ' + state.interviewAnswers.length + ' answers captured';
-    return;
-  }
-  document.getElementById('interviewProgress').textContent = 'Question ' + (idx + 1) + ' of ' + INTERVIEW_QUESTIONS.length;
-  addBubble('ai', INTERVIEW_QUESTIONS[idx]);
-  state.questionCount = idx;
+/* ---- Studio (Musician Mode): one gig moment → tailored TEXT + PHOTO/VIDEO per surface.
+   Media stays in the musician's OWN cloud (BYO-Cloud) — we place it, never store it. ---- */
+var TIMEBACK={mins:296};   /* demo: ~5h of weekly copy-paste posting reclaimed */
+function fmtMins(m){return Math.floor(m/60)+"h "+(m%60)+"m";}
+function gigHyper(moment){
+ var M={
+  next:{title:"📣 Next show",base:"China Cats — Fri at Felton Music Hall, 8pm (doors 7). Grateful Sunday crew, this is the one. 🌹"},
+  summer:{title:"☀️ Summer run",base:"Summer run just dropped ☀️ — Ashkenaz, Felton, Moe's Alley, Sweetwater + a Skull & Roses set. Dates + tix below. 🌹"},
+  recap:{title:"🎞️ Last week",base:"What a night, Santa Cruz — that 2nd-set Scarlet>Fire 🔥. Clips are up; the next one's already on the calendar. 🌹"}
+ }[moment];
+ var d=[
+  {s:"dead_dance · Family feed",t:M.base,m:"📸 venue photo (square) — from your cloud"},
+  {s:"Facebook + your subgroups",t:M.base+"\n\nTickets + details in comments. #GratefulDead #SantaCruz",m:"📸 flyer (4:5) — from your cloud"},
+  {s:"Instagram",t:M.base.split("—")[0].trim()+" 🌹✨\n#gratefuldead #jerrygarcia #deadhead #santacruz #livemusic #tiedye",m:"🎥 15s reel (9:16) + 📸 flyer (1:1) — auto-cropped from your cloud"},
+  {s:"TikTok",t:"POV: the family's back 🌹 "+M.base.split(".")[0]+"… #gratefuldead #deadtok #jamband",m:"🎥 30s clip (9:16) — auto-cropped from your cloud"},
+  {s:"Superfans (email / text)",t:M.base+" — you always get the first heads-up. Grab tix early.",m:"no media — direct & personal"}
+ ];
+ document.getElementById("sheet").innerHTML='<h3>'+M.title+' — lined up everywhere</h3>'+
+  '<div class="sb">One moment → tailored <b>text + photo/video</b> for each place. Media stays in <b>your</b> cloud; we just place it, sized right. You press post; nothing auto-sends.</div>'+
+  d.map(function(x){return '<div class="draft"><div class="dh">'+esc(x.s)+'</div><div class="tx">'+esc(x.t)+'</div><div class="muted" style="margin-top:6px">'+esc(x.m)+'</div><button class="cp" onclick="copyDraft(this)">Copy</button></div>';}).join("")+
+  '<div class="note" style="margin:4px 0 0">⏱️ <b>Posting time back:</b> ~45 min of copy-paste across 5 apps — done in one tap. <i>Honest-state: real auto-send needs each network\'s sign-in &amp; rules (counsel-gated); v1 hands you ready-to-post, perfectly sized.</i></div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
-
-function sendMsg() {
-  var input = document.getElementById('userMsg');
-  var msg = input.value.trim();
-  if (!msg) return;
-  addBubble('user', msg);
-  state.interviewAnswers.push({ q: INTERVIEW_QUESTIONS[state.questionCount], a: msg });
-  input.value = '';
-  if (!state.interviewDone) {
-    setTimeout(() => askQuestion(state.questionCount + 1), 600);
-  }
+/* ---- SHARE-TO dead_dance (compliant inbound). FB's Groups API was shut down (Apr 2024); the only
+   legitimate way in is USER-INITIATED sharing. We catch a shared post (Web Share Target or pasted link)
+   and drop a CARD into the same-named group — link + your note + attribution, NEVER a scraped copy. ---- */
+function safeUrl(u){u=String(u||"").trim();return /^https?:\/\//i.test(u)?u:"";}
+var SHARES=(function(){try{var s=localStorage.getItem("dd.shares");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
+function saveShares(){try{localStorage.setItem("dd.shares",JSON.stringify(SHARES.slice(0,200)));}catch(e){}}
+function groupNames(){var g={};SHARES.forEach(function(s){if(s.group)g[s.group]=1;});["Grateful Dead Tapers","Jerry Garcia Band Fans","Shakedown Street","Dead & Company Family","NorCal Deadheads"].forEach(function(n){g[n]=1;});return Object.keys(g);}
+function captureShare(url,text){
+ var groups=groupNames();
+ document.getElementById("sheet").innerHTML='<h3>📥 Drop it into a group</h3><div class="sb">Share a post you\'re looking at on Facebook into the same group here. <b>You\'re sharing, not scraping</b> — we keep your link + note (private group content stays private to that group).</div>'+
+  '<div style="margin-bottom:10px"><div class="muted" style="font-size:11.5px;margin-bottom:5px">Group (type a name or pick yours)</div><input id="shGroup" list="shGroups" placeholder="e.g., Grateful Dead Tapers" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"><datalist id="shGroups">'+groups.map(function(n){return '<option value="'+escA(n)+'">';}).join("")+'</datalist></div>'+
+  '<div style="margin-bottom:10px"><div class="muted" style="font-size:11.5px;margin-bottom:5px">Facebook post link</div><input id="shUrl" placeholder="paste the post link" value="'+escA(url||"")+'" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px"></div>'+
+  '<div style="margin-bottom:10px"><div class="muted" style="font-size:11.5px;margin-bottom:5px">Your note</div><textarea id="shNote" placeholder="why the family should see this…" style="width:100%;min-height:58px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit">'+esc(text||"")+'</textarea></div>'+
+  '<button class="btn gold" style="width:100%" onclick="dropShare()">📥 Drop it in the group</button>'+
+  '<div class="note" style="margin-top:10px">Honest-state: we store your <b>link + note + attribution</b> — not a copy of anyone else\'s post. Facebook\'s Groups API was shut down in 2024; this user-initiated share is the compliant way in.</div>'+
+  '<button class="close" onclick="closeModal()">Cancel</button>';
+ document.getElementById("ovl").classList.add("on");
 }
-
-function addBubble(type, text) {
-  var chat = document.getElementById('chatBox');
-  var div = document.createElement('div');
-  div.className = 'bubble ' + type;
-  div.textContent = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+function dropShare(){
+ var g=clamp(((document.getElementById("shGroup")||{}).value||"").trim(),80);
+ var u=safeUrl((document.getElementById("shUrl")||{}).value||"");
+ var n=clamp(((document.getElementById("shNote")||{}).value||"").trim(),500);
+ if(!g){toast("Pick a group name first.");return;}
+ if(!u&&!n){toast("Add a link or a note.");return;}
+ SHARES.unshift({id:"sh"+Date.now(),group:g,by:PROFILE.name,note:n,url:u,ts:Date.now()});
+ saveShares();closeModal();S.tab="home";render();toast("📥 Dropped into "+g+" — the family will see it.");
 }
-
-// ── CLAUDE API CALL ────────────────────────────────────────────────────────────
-async function callClaude(systemPrompt, userPrompt) {
-  if (!state.apiKey) throw new Error('No API key');
-  var resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': state.apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }]
-    })
-  });
-  if (!resp.ok) {
-    var err = await resp.json().catch(() => ({}));
-    throw new Error(err.error?.message || 'API error ' + resp.status);
-  }
-  var data = await resp.json();
-  return data.content[0].text;
+function sharesView(){
+ if(!SHARES.length)return "";
+ var byG={},order=[];SHARES.slice(0,12).forEach(function(s){if(!byG[s.group]){byG[s.group]=[];order.push(s.group);}byG[s.group].push(s);});
+ return '<div class="sec-h">📥 From your groups — shared in</div>'+order.map(function(g){return '<div class="card"><div class="pad" style="padding-bottom:6px"><span class="chip purple">'+esc(g)+'</span></div>'+byG[g].map(function(s){var link=safeUrl(s.url);return '<div class="pad" style="padding-top:6px;border-top:1px solid var(--line)"><div style="font-size:14px;line-height:1.5">'+esc(s.note||"(shared a post)")+'</div><div class="muted" style="font-size:11.5px;margin-top:4px">shared by '+esc(s.by)+(link?' · <a href="'+escA(link)+'" target="_blank" rel="noopener nofollow">view on Facebook ↗</a>':'')+'</div>'+(s.elevated?'<span class="chip ok" style="margin-top:7px;display:inline-block">⬆️ elevated → Local</span>':'<button class="minib" style="margin-top:7px" onclick="elevateShareToLocal(\''+s.id+'\')">⬆️ Elevate to Local Crowdsource</button>')+'</div>';}).join("")+'</div>';}).join("");
 }
-
-// ── BUILD BRAND PROFILE ───────────────────────────────────────────────────────
-async function buildProfile() {
-  showGenOverlay('Building your Brand Intelligence Profile...', [
-    {pct:15, label:'Processing your brief and interview answers...'},
-    {pct:45, label:'Extracting brand voice and tone patterns...'},
-    {pct:75, label:'Identifying content pillars and forbidden zones...'},
-    {pct:95, label:'Finalizing Brand Intelligence JSON...'}
-  ]);
-
-  var brand = state.currentBrand;
-  var systemPrompt = `You are a brand strategist and social media expert. Extract a detailed Brand Intelligence Profile from the onboarding data provided. Return ONLY valid JSON — no markdown, no preamble, no explanation.`;
-
-  var userPrompt = `Brand: ${brand.name}
-Industry: ${brand.industry || 'Not specified'}
-Goals: ${brand.goals.join(', ') || 'Not specified'}
-Audience: ${brand.audience || 'Not specified'}
-Tone preferences: ${brand.tone.join(', ') || 'Not specified'}
-
-Interview Q&A:
-${state.interviewAnswers.map((qa, i) => `Q${i+1}: ${qa.q}\nA: ${qa.a}`).join('\n\n')}
-
-Return a JSON object with these exact fields:
-{
-  "brand_name": "",
-  "industry": "",
-  "tagline": "",
-  "differentiator": "",
-  "target_audience": "",
-  "tone": [],
-  "content_pillars": [],
-  "forbidden_topics": [],
-  "forbidden_words": [],
-  "cta_style": "",
-  "emoji_usage": "",
-  "hashtag_strategy": {
-    "always": [],
-    "rotate": []
-  },
-  "platform_priorities": [],
-  "voice_in_one_sentence": "",
-  "good_example": "",
-  "bad_example": ""
+function initShare(){
+ try{var q=location.search;var m=/[?&]su=([^&]*)/.exec(q),mx=/[?&]sx=([^&]*)/.exec(q),mt=/[?&]st=([^&]*)/.exec(q);
+   var url=m?decodeURIComponent(m[1].replace(/\+/g," ")):"",text=mx?decodeURIComponent(mx[1].replace(/\+/g," ")):(mt?decodeURIComponent(mt[1].replace(/\+/g," ")):"");
+   if(url||text)captureShare(url,text);
+ }catch(e){}
 }
-
-Be specific. "Professional but warm" is not a differentiator. Extract the actual insight from their answers.`;
-
-  try {
-    var raw = await callClaude(systemPrompt, userPrompt);
-    var clean = raw.replace(/```json|```/g, '').trim();
-    var profile = JSON.parse(clean);
-    state.currentBrand.profile = profile;
-    hideGenOverlay();
-    renderProfile(profile);
-    goPanel(3);
-  } catch(e) {
-    hideGenOverlay();
-    showToast('Error: ' + e.message);
-  }
+/* ---- Crowdsource Requests — the Chapter Head engine that moves the community ---- */
+var CROWD_CATS=[["tape","🎚️ Tape Hunt"],["ride","🚐 Ride Board"],["crash","🛋️ Crash Network"],["photo","📸 Photo/Poster"],["lot","🌹 Lot Intel"],["lost","🧦 Lost & Found"],["story","🪪 I Was There"],["band","🎸 Band Scout"],["gear","🪕 Gear/Loan"],["memorial","🕯️ Memorial / Benefit"]];
+var REQUESTS=(function(){try{var s=localStorage.getItem("dd.requests");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
+function saveRequests(){try{localStorage.setItem("dd.requests",JSON.stringify(REQUESTS.slice(0,200)));}catch(e){}}
+function catLabel(id){for(var i=0;i<CROWD_CATS.length;i++)if(CROWD_CATS[i][0]===id)return CROWD_CATS[i][1];return "📣 Request";}
+function crowdRequest(){
+ document.getElementById("sheet").innerHTML='<h3>📣 Crowdsource a request</h3><div class="sb">Put the family to work. Pick a kind, write the ask — it posts to the feed for heads to answer.</div>'+
+  '<div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:11px">'+CROWD_CATS.map(function(c,i){return '<button class="minib'+(i===0?" rose":"")+'" data-cat="'+c[0]+'" onclick="pickCat(this)">'+esc(c[1])+'</button>';}).join("")+'</div>'+
+  '<textarea id="crqText" placeholder="e.g., Who\'s got a clean AUD of 5/8/77 Cornell Set 2?" style="width:100%;min-height:64px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit"></textarea>'+
+  '<button class="btn gold" style="width:100%;margin-top:9px" onclick="postRequest()">📣 Post the request</button>'+
+  '<div class="note" style="margin-top:10px">Demo: posts to the feed for the family to answer; Chapter Heads steward and close them. <b>🕯️ Memorial / Benefit:</b> we spread the word and rally a benefit — but the money goes through an <b>external fundraiser</b> (e.g., GoFundMe). dead_dance <b>never collects funds</b> (counsel-gated).</div>'+
+  '<button class="close" onclick="closeModal()">Cancel</button>';
+ document.getElementById("ovl").classList.add("on"); S._cat=CROWD_CATS[0][0];
 }
-
-function renderProfile(profile) {
-  var lines = JSON.stringify(profile, null, 2)
-    .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
-    .replace(/: "([^"]+)"/g, ': <span class="json-str">"$1"</span>')
-    .replace(/: \[/g, ': <span class="json-arr">[</span>')
-    .replace(/\]/g, '<span class="json-arr">]</span>');
-  document.getElementById('profileJson').innerHTML = lines;
+function pickCat(btn){S._cat=btn.getAttribute("data-cat");var ps=btn.parentNode.querySelectorAll(".minib");for(var i=0;i<ps.length;i++)ps[i].classList.remove("rose");btn.classList.add("rose");}
+function postRequest(){
+ var t=clamp(((document.getElementById("crqText")||{}).value||"").trim(),400);
+ if(!t){toast("Write the ask first.");return;}
+ REQUESTS.unshift({id:"rq"+Date.now(),cat:S._cat||"tape",text:t,by:PROFILE.name,status:"open",ts:Date.now()});
+ saveRequests();closeModal();S.tab="home";render();toast("📣 Posted — the family's on it.");
 }
-
-// ── GO TO DASHBOARD ───────────────────────────────────────────────────────────
-function goToDashboard() {
-  var brand = state.currentBrand;
-  if (!state.brands.find(b => b.name === brand.name)) {
-    state.brands.push(brand);
-    localStorage.setItem('pm_brands', JSON.stringify(state.brands));
-  }
-  showScreen('dashboard');
-  loadDashboard(brand);
+function answerRequest(id){for(var i=0;i<REQUESTS.length;i++)if(REQUESTS[i].id===id)REQUESTS[i].status="answered";saveRequests();render();toast("✓ Marked answered — nice.");}
+/* seed the worked example (Matt's hurdy gurdy) so the escalation ladder is demoable */
+if(!SHARES.length){SHARES.unshift({id:"shHurdy",group:"Bay Area Deadheads",by:"Matt Hartle",note:"Hey y'all — anybody got a Hurdy Gurdy to loan out for a while, or maybe one to sell?",url:"https://www.facebook.com/",ts:Date.now(),elevated:true});}
+if(!REQUESTS.length){REQUESTS.unshift({id:"rqHurdy",cat:"gear",text:"Matt needs a Hurdy Gurdy — loan or sell? (elevated from Bay Area Deadheads)",by:"Matt Hartle",status:"open",tier:"local",votes:["robbie","kristen"],origin:"shHurdy",group:"Bay Area Deadheads",ts:Date.now()});}
+function reqById(id){for(var i=0;i<REQUESTS.length;i++)if(REQUESTS[i].id===id)return REQUESTS[i];return null;}
+/* Tier 0 (vacuum) → Tier 1 (Local): a Chapter Head elevates a shared-in post */
+function elevateShareToLocal(id){
+ var s=null;for(var i=0;i<SHARES.length;i++)if(SHARES[i].id===id)s=SHARES[i];if(!s)return;
+ REQUESTS.unshift({id:"rq"+Date.now(),cat:"gear",text:(s.note||"(shared post)"),by:s.by,status:"open",tier:"local",votes:[],origin:s.id,group:s.group,url:s.url,ts:Date.now()});
+ s.elevated=true;saveShares();saveRequests();S.tab="home";render();toast("⬆️ Elevated to a Local Crowdsource for "+s.group+".");
 }
-
-function loadDashboard(brand) {
-  document.getElementById('dash-brand-name').textContent = brand ? brand.name : '';
-  document.getElementById('sidebar-brand-name').textContent = brand ? brand.name : '—';
-  document.getElementById('sidebar-brand-meta').textContent = brand ? (brand.industry || 'No industry set') : 'No brand loaded';
-  document.getElementById('cal-title').textContent = brand ? brand.name + ' — Content Calendar' : 'Content Calendar';
-  document.getElementById('dashProfileJson').textContent = brand && brand.profile ? JSON.stringify(brand.profile, null, 2) : 'No profile loaded.';
-  renderBrandList();
-  renderNetworks();
-  switchTab('calendar');
-  if (brand && brand.posts && brand.posts.length > 0) {
-    renderPosts(brand.posts);
-  } else {
-    document.getElementById('postsContainer').innerHTML = '<div style="text-align:center;padding:80px 20px;color:rgba(13,13,13,0.3)"><div style="font-family:var(--serif);font-size:32px;margin-bottom:12px">Ready when you are</div><div style="font-family:var(--mono);font-size:13px">Hit ✦ Generate 30-day calendar and Claude writes everything</div></div>';
-    document.getElementById('statGrid').style.display = 'none';
-    document.getElementById('calControls').style.display = 'none';
-  }
+/* Tier 1 (Local) → Tier 2 (House): Chancellor vote — needs Michael + a second */
+function voteElevate(id){
+ if(!isChancellor()){toast("Only Chancellor-level folks vote to elevate. (Try ?who=michael)");return;}
+ var r=reqById(id);if(!r||r.tier==="house")return;
+ r.votes=r.votes||[];if(r.votes.indexOf(WHO)<0)r.votes.push(WHO);
+ if(r.votes.length>=3){r.tier="house";toast("🏛️ Elevated to the whole family — House Crowdsource!");}
+ else toast("🗳️ Vote cast ("+r.votes.length+"/3). A majority of the Chancellors carries it — Michael breaks ties.");
+ saveRequests();render();
 }
-
-function loadDemoData() {
-  state.currentBrand = {
-    name: 'AT Trek Planner',
-    industry: 'Outdoor recreation / hiking technology',
-    goals: ['Build awareness', 'Drive app downloads', 'Press & media coverage'],
-    audience: 'AT thru-hikers and section hikers planning their hike',
-    tone: ['Authentic & raw', 'Educational', 'Friendly & local'],
-    profile: {
-      brand_name: 'AT Trek Planner',
-      industry: 'Outdoor recreation / hiking technology',
-      tagline: 'Built by a hiker, for hikers. Free. Forever.',
-      differentiator: 'Radical transparency — GPS offline, no login, no subscription, built by someone actually planning the same hike',
-      target_audience: 'AT thru-hikers and section hikers in planning stage, trail obsessives',
-      tone: ['authentic', 'first-person', 'self-deprecating', 'trail-vernacular'],
-      content_pillars: ['Tool features', 'Trail life and culture', 'Builder story (Stagger Lee)', 'Hiker education', 'Press milestones'],
-      forbidden_topics: ['Competitor names', 'Storm-chasing language', 'Paid app comparisons'],
-      forbidden_words: ['innovative', 'revolutionary', 'leverage', 'seamless'],
-      cta_style: 'Soft — link in bio, no pressure, no countdown timers',
-      emoji_usage: 'Minimal — trail and weather only',
-      hashtag_strategy: { always: ['#AppalachianTrail', '#AT2027', '#ThruHike'], rotate: ['#Ultralight', '#NOBO', '#HikerBuilt'] },
-      platform_priorities: ['Reddit', 'Instagram', 'Facebook Groups', 'LinkedIn', 'The Trek'],
-      voice_in_one_sentence: 'A school teacher and Deadhead who built the planning tool he always wanted, and gave it away for free',
-      good_example: 'Spent the winter building a thing. Free. Works offline. No account. No tracking. Just the trail.',
-      bad_example: 'Excited to announce our innovative AT planning solution!'
-    },
-    posts: [],
-    answers: []
-  };
-  loadDashboard(state.currentBrand);
+function requestsView(){
+ if(!REQUESTS.length)return "";
+ return '<div class="sec-h">📣 Crowdsource — the family\'s on it</div>'+REQUESTS.slice(0,8).map(function(r){
+  var tier=r.tier||"local";
+  var tierChip='<span class="chip '+(tier==="house"?"ok":"purple")+'">'+(tier==="house"?"🏛️ House · National":"📍 Local")+'</span>';
+  var vote=(tier!=="house"&&isChancellor())?'<button class="minib rose" onclick="voteElevate(\''+r.id+'\')">🗳️ Elevate to House ('+((r.votes||[]).length)+'/3)</button>':'';
+  return '<div class="card pad"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip rose">'+esc(catLabel(r.cat))+'</span>'+tierChip+(r.status==="answered"?'<span class="chip ok">answered</span>':'')+'</div><div style="font-size:14px;line-height:1.5;margin-top:7px">'+esc(r.text)+'</div><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><span class="muted" style="font-size:11.5px;flex:1">asked by '+esc(r.by)+'</span>'+vote+(r.status==="open"?'<button class="minib" onclick="answerRequest(\''+r.id+'\')">Mark answered</button>':'')+'</div></div>';
+ }).join("");
 }
-
-// ── GENERATE CALENDAR ─────────────────────────────────────────────────────────
-async function generateCalendar() {
-  var brand = state.currentBrand;
-  if (!brand) { showToast('No brand loaded'); return; }
-  if (!state.apiKey) { showApiModal(); return; }
-
-  showGenOverlay('Claude is writing your 30-day calendar...', [
-    {pct:10, label:'Analyzing brand profile and content pillars...'},
-    {pct:25, label:'Planning platform distribution across 30 days...'},
-    {pct:50, label:'Writing posts — Reddit, LinkedIn, Instagram...'},
-    {pct:70, label:'Writing press pitches and outreach emails...'},
-    {pct:90, label:'Formatting and finalizing all posts...'}
-  ]);
-
-  var profile = brand.profile || { brand_name: brand.name, industry: brand.industry, tone: brand.tone, content_pillars: ['Brand story', 'Features', 'Community', 'Education'] };
-
-  var systemPrompt = `You are a world-class social media content strategist and copywriter. You write in authentic, platform-native voices. You never sound like a brand — you sound like a smart human who knows the space deeply. Return ONLY valid JSON, no markdown, no explanation.`;
-
-  var userPrompt = `Brand Intelligence Profile:
-${JSON.stringify(profile, null, 2)}
-
-Write exactly 12 social media posts for this brand's 30-day content calendar. Spread across these platforms: LinkedIn, Reddit (choose appropriate subreddits), Instagram, X/Twitter, Threads, and at least 1 press pitch email.
-
-Return a JSON array of exactly 12 posts. Each post must have:
-{
-  "day": (number 1-30),
-  "platform": (linkedin|reddit|instagram|twitter|threads|facebook|press|producthunt),
-  "platform_label": (full label like "Reddit r/AppalachianTrail"),
-  "pillar": (content pillar name),
-  "text": (the full post text, authentic and platform-native, no placeholder text),
-  "hashtags": (comma-separated hashtags appropriate for platform),
-  "cta": (short call to action)
+/* ---- 👑 Chancellor user-type: Welcome-to-the-community page + mint new Chancellors ---- */
+var NEW_CHANCELLORS=(function(){try{var s=localStorage.getItem("dd.chancellors");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
+function saveChancellors(){try{localStorage.setItem("dd.chancellors",JSON.stringify(NEW_CHANCELLORS.slice(0,50)));}catch(e){}}
+function chancellorWelcome(){
+ var first=(PROFILE.name.split(/\s+/)[0])||"family";
+ return '<div class="sec-h">🌹 Welcome to the community</div><div class="card pad"><div style="font-size:14px;line-height:1.6">Welcome, <b>'+esc(first)+'</b>. You\'re a <b>Chancellor</b> of dead_dance now — one of the keepers of the flame. This started as a circle of Christmas lights on a parking lot at <b>Greyhound Rock</b>, Robbie\'s circle, the most beautiful sunset in the world, and it grew into a home for everyone who\'s ever danced inside those lights.<br><br>Your job isn\'t to <i>run</i> it — it\'s to keep it warm, keep it honest, keep it peaceful. Appoint the Chapter Heads you trust. Vote on what rises to the whole family. Protect the spirit: <b>rights not copies, the family never the product, no one ever the mark.</b><br><br>You earned this seat. Now hold the door open for the next head down the road. 🌹</div>'+
+  '<button class="btn gold sm" style="margin-top:11px" onclick="mintChancellor()">➕ Mint a Chancellor</button></div>';
 }
-
-Rules:
-- Write the FULL post text — no [INSERT], no placeholders
-- Match the brand's exact voice from their profile
-- Reddit posts must sound human, never promotional
-- LinkedIn posts can be longer and more reflective
-- Instagram posts need a strong hook in line 1
-- Press pitches must have a subject line as the first line
-- Each post must be genuinely different — no repetition of angles`;
-
-  try {
-    var raw = await callClaude(systemPrompt, userPrompt);
-    var clean = raw.replace(/```json|```/g, '').trim();
-    var match = clean.match(/\[[\s\S]*\]/);
-    if (!match) throw new Error('No JSON array found in response');
-    var posts = JSON.parse(match[0]);
-    state.currentBrand.posts = posts;
-    state.posts = posts;
-    var idx = state.brands.findIndex(b => b.name === brand.name);
-    if (idx >= 0) { state.brands[idx] = state.currentBrand; localStorage.setItem('pm_brands', JSON.stringify(state.brands)); }
-    hideGenOverlay();
-    renderPosts(posts);
-    showToast('✦ ' + posts.length + ' posts written by Claude');
-  } catch(e) {
-    hideGenOverlay();
-    showToast('Error: ' + e.message);
-    console.error(e);
-  }
+function mintList(){if(!NEW_CHANCELLORS.length)return "";return '<div class="card list">'+NEW_CHANCELLORS.map(function(c){return '<div class="it"><div class="ic">👑</div><div class="nm"><b>'+esc(c.name)+'</b><div class="s">'+esc(c.link)+'</div></div></div>';}).join("")+'</div>';}
+function mintChancellor(){
+ document.getElementById("sheet").innerHTML='<h3>➕ Mint a Chancellor</h3><div class="sb">Invite another Chancellor-level partner. Generates their invite link — they land on their page and edit it.</div>'+
+  '<input id="mcName" placeholder="Their name" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:8px">'+
+  '<input id="mcHandle" placeholder="a handle (letters only), e.g., jerry" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px">'+
+  '<button class="btn gold" style="width:100%;margin-top:9px" onclick="doMintChancellor()">Generate invite link</button>'+
+  '<div id="mcList" style="margin-top:11px">'+mintList()+'</div>'+
+  '<div class="note" style="margin-top:10px">Honest-state: records the invite + link. Real accounts (so their custom page follows them across devices) ride the counsel-gated auth milestone.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
-
-// ── RENDER POSTS ──────────────────────────────────────────────────────────────
-var currentFilter = 'all';
-var expandedPosts = new Set();
-
-function renderPosts(posts) {
-  var filtered = currentFilter === 'all' ? posts : posts.filter(p => {
-    if (currentFilter === 'press') return p.platform === 'press';
-    return p.platform === currentFilter;
-  });
-
-  var pressCount = posts.filter(p => p.platform === 'press').length;
-  var platforms = [...new Set(posts.map(p => p.platform))].length;
-  var pillars = [...new Set(posts.map(p => p.pillar))].length;
-
-  document.getElementById('stat-posts').textContent = posts.length;
-  document.getElementById('stat-platforms').textContent = platforms;
-  document.getElementById('stat-pillars').textContent = pillars;
-  document.getElementById('stat-press').textContent = pressCount;
-  document.getElementById('statGrid').style.display = 'grid';
-  document.getElementById('calControls').style.display = 'flex';
-
-  document.getElementById('postsContainer').innerHTML = filtered.map((p, i) => `
-    <div class="post-card" id="pc${i}">
-      <div class="post-card-header">
-        <span class="post-date">Day ${p.day}</span>
-        <span class="plat-badge plat-${p.platform}">${p.platform_label || p.platform}</span>
-        <span class="pillar-badge">${p.pillar}</span>
-      </div>
-      <div class="post-text ${expandedPosts.has(i) ? 'expanded' : ''}" id="pt${i}" onclick="toggleExpand(${i})">${escHtml(p.text)}</div>
-      ${p.hashtags ? `<div class="post-tags">${escHtml(p.hashtags)}</div>` : ''}
-      <div class="post-footer">
-        <span class="post-status status-draft">● Draft</span>
-        <div class="post-actions">
-          <button class="action-btn" onclick="copyPost(${i})">Copy</button>
-          <button class="action-btn" onclick="approvePost(${i})">Approve</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
+function doMintChancellor(){
+ var n=clamp(((document.getElementById("mcName")||{}).value||"").trim(),60);
+ var h=((((document.getElementById("mcHandle")||{}).value)||"").trim().toLowerCase().replace(/[^a-z]/g,"")).slice(0,20);
+ if(!n||!h){toast("Name + a letters-only handle, please.");return;}
+ NEW_CHANCELLORS.unshift({name:n,handle:h,link:"welcome.html?who="+h,ts:Date.now()});
+ saveChancellors();
+ var ml=document.getElementById("mcList");if(ml)ml.innerHTML=mintList();
+ toast("👑 Chancellor minted — invite: welcome.html?who="+h);
 }
-
-function toggleExpand(i) {
-  if (expandedPosts.has(i)) expandedPosts.delete(i);
-  else expandedPosts.add(i);
-  var el = document.getElementById('pt' + i);
-  if (el) el.classList.toggle('expanded');
-}
-
-function copyPost(i) {
-  var posts = state.posts;
-  if (!posts[i]) return;
-  var text = posts[i].text + (posts[i].hashtags ? '\n\n' + posts[i].hashtags : '');
-  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
-}
-
-function approvePost(i) {
-  var card = document.getElementById('pc' + i);
-  if (!card) return;
-  var status = card.querySelector('.post-status');
-  status.textContent = '● Approved';
-  status.className = 'post-status status-approved';
-  card.querySelector('.action-btn:last-child').className = 'action-btn approve';
-  card.querySelector('.action-btn:last-child').textContent = '✓ Approved';
-  showToast('Post approved — ready to schedule');
-}
-
-function filterPosts(filter, el) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  renderPosts(state.posts);
-}
-
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── NETWORKS ──────────────────────────────────────────────────────────────────
-var networks = [
-  { id:'instagram', name:'Instagram', icon:'📸', connected:false },
-  { id:'linkedin', name:'LinkedIn', icon:'💼', connected:false },
-  { id:'twitter', name:'X / Twitter', icon:'✖', connected:false },
-  { id:'facebook', name:'Facebook', icon:'📘', connected:false },
-  { id:'tiktok', name:'TikTok', icon:'🎵', connected:false },
-  { id:'threads', name:'Threads', icon:'🧵', connected:false },
-  { id:'pinterest', name:'Pinterest', icon:'📌', connected:false },
-  { id:'reddit', name:'Reddit', icon:'🔴', connected:false },
+/* ---- ⚖️ LEGAL (the Chapter Head's hardest job) + 🗺️ event location REVEAL with Farrah nav ----
+   NOT legal advice: a compliance CHECKLIST the Chapter Head takes to local authorities/counsel. */
+var LEGAL_ITEMS=[
+ "🪪 Land permission — written OK from the owner/manager, OR a county/state-park permit (Greyhound Rock is a county coastal park).",
+ "📋 Special-event / assembly permit if your jurisdiction requires one for the size.",
+ "🔊 Amplified-sound permit + noise-ordinance / curfew compliance.",
+ "🚗 Lawful parking — no blocked fire lanes or access; a traffic plan if it's big.",
+ "🌹 Vendors carry their OWN seller's / food-facility permits (you don't run their sales).",
+ "🔥 Fire & electrical safety — generators, lights, egress, first aid.",
+ "🛟 Liability insurance / waivers where appropriate.",
+ "🌊 Leave-no-trace / protected-area rules — pack in, pack out, no damage.",
+ "🚫 No facilitation of anything illegal — keep it peaceful and lawful.",
+ "👮 Good relations — know who to call; cooperate with authorities."
 ];
-
-function renderNetworks() {
-  var grid = document.getElementById('networkGrid');
-  grid.innerHTML = networks.map(n => `
-    <div class="network-card ${n.connected ? 'connected' : ''}" onclick="toggleNetwork('${n.id}')">
-      <div class="network-icon">${n.icon}</div>
-      <div class="network-name">${n.name}</div>
-      <div class="network-status ${n.connected ? 'ok' : ''}">${n.connected ? '✓ Connected' : 'Click to connect'}</div>
-    </div>
-  `).join('') + `
-    <div class="network-add" onclick="addCustomNetwork()">
-      <div style="font-size:24px;margin-bottom:8px;color:rgba(13,13,13,0.3)">+</div>
-      <div style="font-size:12px;font-weight:500;color:rgba(13,13,13,0.5)">Add any network</div>
-      <div style="font-size:10px;color:rgba(13,13,13,0.3);margin-top:3px;font-family:var(--mono)">FetLife, Substack, Mastodon...</div>
-    </div>`;
+var LEGAL_DONE={};
+function legalChecklist(){
+ document.getElementById("sheet").innerHTML='<h3>⚖️ Legal — your responsibility</h3><div class="sb"><b>This is the most important job.</b> Whatever local regulations it takes to make the dead_dance happen falls on you, the Chapter Head. <b>Not legal advice</b> — a checklist to take to your local authorities / a lawyer.</div>'+
+  LEGAL_ITEMS.map(function(it,i){return '<div class="show" onclick="toggleLegal('+i+')" style="cursor:pointer"><div class="ic">'+(LEGAL_DONE[i]?"✅":"⬜")+'</div><div class="nm"><div style="font-size:12.5px;line-height:1.45">'+esc(it)+'</div></div></div>';}).join("")+
+  '<div class="note" style="margin-top:10px;border-left-color:var(--rose)">Rules vary by city/county/state — <b>confirm with your local authorities; this is not legal advice.</b> Chapter Heads who don\'t keep it legal can be <b>replaced</b>. Legal first, lights second.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function toggleLegal(i){LEGAL_DONE[i]=!LEGAL_DONE[i];legalChecklist();}
+var EVENTS=(function(){try{var s=localStorage.getItem("dd.events");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
+if(!EVENTS.length){
+ EVENTS.push({id:"evA",type:"deaddance",by:"Bay Area Chapter",location:"Greyhound Rock — north lot, by the big rock",lat:37.0497,lng:-122.2719,when:Date.now()+20*60000,revealMin:30,legal:true});   /* already in reveal window */
+ EVENTS.push({id:"evB",type:"deaddance",by:"SoCal Chapter",location:"(set, hidden until reveal)",lat:34.05,lng:-118.24,when:Date.now()+180*60000,revealMin:60,legal:true});                       /* counting down */
+}
+function saveEvents(){try{localStorage.setItem("dd.events",JSON.stringify(EVENTS.slice(0,50)));}catch(e){}}
+function fmtCountdown(ms){ms=Math.max(0,ms);var m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);return m+"m "+(s<10?"0":"")+s+"s";}
+function planEvent(){
+ document.getElementById("sheet").innerHTML='<h3>🌹 Schedule a dead_dance</h3><div class="sb"><b>Our namesake event</b> — the circle of lights. It schedules like any event (date, reveal, Farrah guides everyone in) but it\'s <b>special</b>: it lands in the family\'s feed and bursts into the top-right widget with the dancers. Location can be fixed or fluid. <b>Legal first:</b> you can\'t publish without confirming you\'ve secured the arrangements.</div>'+
+  '<div style="margin-bottom:9px"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Location (kept hidden until reveal)</div><input id="evLoc" placeholder="e.g., the north lot at Greyhound Rock" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div>'+
+  '<div class="row" style="gap:8px;margin-bottom:9px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Starts in (min)</div><input id="evStart" type="number" value="120" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Reveal (min before)</div><input id="evReveal" type="number" value="60" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div></div>'+
+  '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.4;margin-bottom:11px"><input id="evLegal" type="checkbox" style="margin-top:2px"><span>I\'ve secured the <b>legal arrangements</b> for this location (permits / permission). I\'m responsible.</span></label>'+
+  '<button class="btn gold" style="width:100%" onclick="publishEvent()">Publish event</button>'+
+  '<div class="note" style="margin-top:10px">Honest-state: demo. The legal attestation is the Chapter Head\'s responsibility (not legal advice). Reveal is for crowd-management &amp; vibe — the gathering must be lawful first.</div>'+
+  '<button class="close" onclick="closeModal()">Cancel</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function publishEvent(){
+ var loc=clamp(((document.getElementById("evLoc")||{}).value||"").trim(),120);
+ var startMin=Math.max(1,+(((document.getElementById("evStart")||{}).value)||120));
+ var revMin=Math.max(0,+(((document.getElementById("evReveal")||{}).value)||60));
+ var legal=(document.getElementById("evLegal")||{}).checked;
+ if(!loc){toast("Set the location first.");return;}
+ if(!legal){toast("You must confirm the legal arrangements — that's the Chapter Head's responsibility.");return;}
+ EVENTS.unshift({id:"ev"+Date.now(),type:"deaddance",by:(PROFILE.name+"'s chapter"),location:loc,when:Date.now()+startMin*60000,revealMin:revMin,legal:true});
+ saveEvents();closeModal();S.tab="home";render();renderNear();toast("🌹 dead_dance scheduled — it's bursting in the widget. Location reveals "+revMin+" min before.");
+}
+function eventsView(){
+ if(!EVENTS.length)return "";
+ var now=Date.now();
+ return '<div class="sec-h">🗺️ dead_dance events — location reveal</div>'+EVENTS.slice(0,6).map(function(e){
+  var revealAt=e.when-e.revealMin*60000, revealed=now>=revealAt, startsIn=Math.max(0,Math.round((e.when-now)/60000));
+  return '<div class="card pad"><div class="row" style="gap:8px"><span class="chip purple">'+esc(e.by||"Chapter")+'</span>'+(revealed?'<span class="chip ok">📍 revealed</span>':'<span class="chip">🔒 hidden</span>')+'</div>'+
+   '<div style="font-size:14px;margin-top:7px"><b>dead_dance</b> · starts in ~'+startsIn+' min</div>'+
+   (revealed
+     ? '<div style="font-size:14px;margin-top:5px">📍 '+esc(e.location)+'</div><button class="btn gold sm" style="margin-top:8px" onclick="farrahGuide(\''+e.id+'\')">🎙️ Farrah, guide me there</button> <button class="btn ghost sm" style="margin-top:8px" onclick="checkInEvent(\''+e.id+'\')">✅ I\'m here (GPS)</button>'
+     : '<div class="muted" style="font-size:12.5px;margin-top:5px">Location reveals in <b class="ddcd" data-at="'+revealAt+'">'+fmtCountdown(revealAt-now)+'</b> — Farrah will guide you in.</div>')+
+   '</div>';
+ }).join("");
+}
+function farrahGuide(id){var e=null;for(var i=0;i<EVENTS.length;i++)if(EVENTS[i].id===id)e=EVENTS[i];if(!e)return;
+ var line="Routing you to "+e.location+". Follow the lights.";
+ try{if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(line);u.rate=.96;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(x){}
+ toast("🎙️ Farrah: routing you to "+e.location+"…");
+}
+/* GPS-confirmed attendance: at the show, geolocation proximity + your tap → a VERIFIED badge count */
+function checkInEvent(id){
+ var e=null;for(var i=0;i<EVENTS.length;i++)if(EVENTS[i].id===id)e=EVENTS[i];if(!e)return;
+ if(!isFinite(e.lat)||!navigator.geolocation){toast("📍 Location off — can't GPS-confirm (self-report stays honor-system).");return;}
+ navigator.geolocation.getCurrentPosition(function(pos){
+   var dist=haversine(pos.coords.latitude,pos.coords.longitude,e.lat,e.lng);
+   if(dist<=2){BADGE.shows++;BADGE.gps=(BADGE.gps||0)+1;render();toast("✅ GPS-confirmed — you're at the circle. Badge +1 (verified).");}
+   else toast("📍 You're ~"+Math.round(dist)+" mi away — get to the circle to check in.");
+ },function(){toast("Couldn't read your location.");},{timeout:7000,maximumAge:60000});
+}
+function tickCountdowns(){var ns=document.querySelectorAll(".ddcd");if(!ns.length)return;var flip=false;for(var i=0;i<ns.length;i++){var at=+ns[i].getAttribute("data-at");ns[i].textContent=fmtCountdown(at-Date.now());if(Date.now()>=at)flip=true;}if(flip)render();}
+/* ---- 📅 Band booking — venues/individuals self-schedule; band sets off-days + rates; dead_dance ADDS 10% ----
+   DECISION: the 10% is ADDED on top (band keeps full rate; booker pays the fee). Honest-state: requests only,
+   no payment taken (real money + the fee settle on the counsel-gated payment rail). */
+var BOOK_FEE=0.10;
+var BOOKING=(function(){try{var s=localStorage.getItem("dd.booking");if(s){var o=JSON.parse(s);if(o&&o.rates)return o;}}catch(e){}return {rates:{afternoon:800,evening:1500,private:2500},off:[]};})();
+function saveBooking(){try{localStorage.setItem("dd.booking",JSON.stringify(BOOKING));}catch(e){}}
+var BOOKINGS=(function(){try{var s=localStorage.getItem("dd.bookings");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
+function saveBookings(){try{localStorage.setItem("dd.bookings",JSON.stringify(BOOKINGS.slice(0,100)));}catch(e){}}
+function money(n){return "$"+Math.round(n).toLocaleString("en-US");}
+function next14(){var a=[],d=new Date();for(var i=1;i<=14;i++){var x=new Date(d.getTime()+i*864e5);var iso=x.getFullYear()+"-"+("0"+(x.getMonth()+1)).slice(-2)+"-"+("0"+x.getDate()).slice(-2);a.push({iso:iso,label:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getDay()]+" "+(x.getMonth()+1)+"/"+x.getDate()});}return a;}
+function bookingCalendar(){
+ var days=next14();
+ document.getElementById("sheet").innerHTML='<h3>📅 Your booking calendar</h3><div class="sb">Set your rates, mark your <b>off-days</b>. Venues &amp; private parties book the open days. dead_dance adds a 10% fee on top — <b>you keep your full rate.</b></div>'+
+  '<div class="row" style="gap:8px;margin-bottom:10px"><div style="flex:1"><div class="muted" style="font-size:11px">Afternoon $</div><input id="rAft" type="number" value="'+(+BOOKING.rates.afternoon)+'" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11px">Evening $</div><input id="rEve" type="number" value="'+(+BOOKING.rates.evening)+'" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11px">Private $</div><input id="rPri" type="number" value="'+(+BOOKING.rates.private)+'" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px"></div></div>'+
+  '<button class="btn gold sm" onclick="saveBookingRates()">Save rates</button>'+
+  '<div class="muted" style="font-size:11.5px;margin:11px 0 5px">Tap a day to mark it OFF:</div>'+
+  '<div style="display:flex;flex-wrap:wrap;gap:5px">'+days.map(function(d){var off=BOOKING.off.indexOf(d.iso)>=0;return '<span class="minib'+(off?" rose":"")+'" onclick="toggleOff(\''+d.iso+'\')">'+(off?"🚫 ":"")+esc(d.label)+'</span>';}).join("")+'</div>'+
+  '<div class="sec-h" style="margin-top:14px">Booking requests</div>'+(BOOKINGS.length?BOOKINGS.slice(0,6).map(function(b){return '<div class="card pad" style="padding:10px 12px"><div style="font-size:13.5px"><b>'+esc(b.by)+'</b> · '+esc(b.slot)+' · '+esc(b.date)+'</div><div class="muted" style="font-size:12px">'+money(b.price)+' + '+money(b.fee)+' fee = <b>'+money(b.total)+'</b> · '+esc(b.status)+'</div>'+(b.status==="requested"?'<button class="minib" style="margin-top:6px" onclick="acceptBooking(\''+b.id+'\')">Accept</button>':'')+'</div>';}).join(""):'<div class="note">No requests yet.</div>')+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function toggleOff(iso){var i=BOOKING.off.indexOf(iso);if(i>=0)BOOKING.off.splice(i,1);else BOOKING.off.push(iso);saveBooking();bookingCalendar();}
+function saveBookingRates(){var a=document.getElementById("rAft"),e=document.getElementById("rEve"),p=document.getElementById("rPri");BOOKING.rates={afternoon:Math.max(0,+a.value||0),evening:Math.max(0,+e.value||0),private:Math.max(0,+p.value||0)};saveBooking();toast("📅 Rates saved.");bookingCalendar();}
+function acceptBooking(id){for(var i=0;i<BOOKINGS.length;i++)if(BOOKINGS[i].id===id)BOOKINGS[i].status="accepted";saveBookings();bookingCalendar();toast("✅ Booking accepted (demo — payment is counsel-gated).");}
+function bookBand(){
+ var days=next14().filter(function(d){return BOOKING.off.indexOf(d.iso)<0;});
+ if(!days.length){toast("No open days right now — the band's booked up.");return;}
+ var slots=[["afternoon","🌤️ Afternoon"],["evening","🌙 Evening"],["private","🎉 Private event"]];
+ document.getElementById("sheet").innerHTML='<h3>📅 Book the band</h3><div class="sb">Venue or private party — pick an open day &amp; slot. <b>dead_dance adds a 10% booking fee</b>; the band keeps their full rate.</div>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Date</div><select id="bkDate" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:11px">'+days.map(function(d){return '<option value="'+d.iso+'">'+esc(d.label)+'</option>';}).join("")+'</select>'+
+  slots.map(function(s){var price=+BOOKING.rates[s[0]]||0,fee=Math.round(price*BOOK_FEE);return '<div class="card pad" style="padding:11px 13px;margin-bottom:8px"><div class="row" style="gap:8px"><div style="flex:1"><b>'+esc(s[1])+'</b><div class="muted" style="font-size:12px">'+money(price)+' + '+money(fee)+' fee = <b>'+money(price+fee)+'</b></div></div><button class="btn gold sm" onclick="requestBooking(\''+s[0]+'\')">Request</button></div></div>';}).join("")+
+  '<div class="note" style="margin-top:6px">Honest-state: sends a booking <b>request</b> to the band — no payment is taken. Real payments &amp; the 10% fee settle on the accounts/payment rail (counsel-gated).</div>'+
+  '<button class="close" onclick="closeModal()">Cancel</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function requestBooking(slot){
+ var iso=(document.getElementById("bkDate")||{}).value;var price=+BOOKING.rates[slot]||0,fee=Math.round(price*BOOK_FEE);
+ BOOKINGS.unshift({id:"bk"+Date.now(),date:iso,slot:slot,price:price,fee:fee,total:price+fee,by:PROFILE.name,status:"requested"});
+ saveBookings();closeModal();toast("📅 Booking requested · "+iso+" ("+slot+") · "+money(price+fee)+" total.");
+}
+/* ---- 📊 Chapter Performance Dashboard — single pane of glass; rolls up to National (founder) ---- */
+var CHAPTERS_LIST=[["santacruz","Santa Cruz · Founders",312],["bayarea","Bay Area",980],["pnw","Pacific Northwest",430],["socal","SoCal Heads",611],["rockies","Rocky Mountain",540],["lonestar","Lone Star + SW",298],["greatlakes","Great Lakes",505],["southeast","Southeast",470],["midatl","Mid-Atlantic",412],["northeast","Northeast + New England",690]];
+var VEND_NAMES=["Tie-Dye Co-op","TapeVault","Lot Grilled Cheese","BeadWorks","Show Posters","Pins & Patches","Crystal Cart","Veggie Burritos"];
+function bizFor(id,name,m){
+ var gmv=Math.round(m*27), orders=Math.round(m*0.45), bookings=Math.round(m*19/100)*100, fee=Math.round(bookings*0.10), dd=Math.max(1,Math.round(m/250));
+ var v=[],wt=[0.31,0.22,0.16,0.10]; for(var i=0;i<4;i++)v.push({n:VEND_NAMES[(id.length+i)%VEND_NAMES.length],s:Math.round(gmv*wt[i])});
+ return {id:id,name:name,members:m,gmv:gmv,orders:orders,bookings:bookings,fee:fee,dd:dd,vendors:v,take:Math.round(gmv*(id==="santacruz"?0.20:0.10))};
+}
+var CHAPTER_BIZ=CHAPTERS_LIST.map(function(c){return bizFor(c[0],c[1],c[2]);});
+function money2(n){return "$"+Math.round(n).toLocaleString("en-US");}
+function dbar(pct,col){return '<div style="height:7px;background:#e6dccb;border-radius:6px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+Math.max(2,Math.min(100,pct))+'%;background:'+(col||"var(--purple)")+'"></div></div>';}
+function statTile(label,val,sub){return '<div class="card pad" style="padding:12px 13px;margin:0"><div class="muted" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.04em">'+esc(label)+'</div><div style="font-size:22px;font-weight:800;margin-top:2px">'+val+'</div>'+(sub?'<div class="muted" style="font-size:11px">'+sub+'</div>':"")+'</div>';}
+function dashYour(){
+ var b=CHAPTER_BIZ[0];
+ var ddReal=(typeof EVENTS!=="undefined")?EVENTS.filter(function(e){return e.type==="deaddance";}).length:b.dd;
+ var bookReq=(typeof BOOKINGS!=="undefined")?BOOKINGS.filter(function(x){return x.status==="requested";}).length:0;
+ var vac=(typeof SHARES!=="undefined")?SHARES.length:0;
+ var crowd=(typeof REQUESTS!=="undefined")?REQUESTS.filter(function(r){return r.status==="open";}).length:0;
+ var topV=b.vendors[0].s||1;
+ return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">'+
+   statTile("Members",b.members,"+"+Math.round(b.members*0.04)+" this week")+
+   statTile("Bookings",money2(b.bookings),bookReq+" new · "+money2(b.fee)+" fee")+
+   statTile("dead_dances",ddReal,"scheduled")+
+   statTile("Shakedown GMV",money2(b.gmv),b.orders+" orders")+
+   statTile("Chapter take",money2(b.take),"20% (HQ)")+
+   statTile("Crowdsource",crowd,"open · "+vac+" vacuumed")+
+ '</div>'+
+ '<div class="sec-h" style="margin-top:14px">🌹 Shakedown — vendor performance</div><div class="card pad">'+
+   b.vendors.map(function(v){return '<div style="margin-bottom:10px"><div class="row" style="gap:8px"><div style="flex:1;font-size:13.5px"><b>'+esc(v.n)+'</b></div><div style="font-weight:800">'+money2(v.s)+'</div></div>'+dbar(v.s/topV*100,"var(--gold)")+'</div>';}).join("")+
+ '</div>';
+}
+function dashNational(){
+ var sorted=CHAPTER_BIZ.slice().sort(function(a,b){return b.gmv-a.gmv;});
+ var tot={members:0,gmv:0,bookings:0,fee:0,take:0,dd:0};
+ CHAPTER_BIZ.forEach(function(c){tot.members+=c.members;tot.gmv+=c.gmv;tot.bookings+=c.bookings;tot.fee+=c.fee;tot.take+=c.take;tot.dd+=c.dd;});
+ var rev=tot.fee+tot.take, topGmv=sorted[0].gmv;
+ var allV=[];CHAPTER_BIZ.forEach(function(c){c.vendors.forEach(function(v){allV.push({n:v.n,s:v.s,c:c.name});});});allV.sort(function(a,b){return b.s-a.s;});
+ return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">'+
+   statTile("Members",tot.members.toLocaleString("en-US"),CHAPTER_BIZ.length+" chapters")+
+   statTile("Network GMV",money2(tot.gmv),tot.dd+" dead_dances")+
+   statTile("Platform revenue",money2(rev),"fees + takes")+
+   statTile("Bookings",money2(tot.bookings),money2(tot.fee)+" in fees")+
+ '</div>'+
+ '<div class="sec-h" style="margin-top:14px">Chapters — ranked by GMV</div><div class="card pad">'+
+   sorted.map(function(c){return '<div style="margin-bottom:10px"><div class="row" style="gap:8px"><div style="flex:1;font-size:13px"><b>'+esc(c.name)+'</b> <span class="muted" style="font-size:11px">· '+c.members+'</span></div><div style="font-weight:800">'+money2(c.gmv)+'</div></div>'+dbar(c.gmv/topGmv*100)+'</div>';}).join("")+
+ '</div>'+
+ '<div class="sec-h" style="margin-top:14px">Top vendors — nationally</div><div class="card list">'+
+   allV.slice(0,6).map(function(v){return '<div class="it"><div class="ic">🌹</div><div class="nm"><b>'+esc(v.n)+'</b><div class="s">'+esc(v.c)+'</div></div><b>'+money2(v.s)+'</b></div>';}).join("")+
+ '</div>';
+}
+function toggleDashNat(){S._dashNat=!S._dashNat;render();}
+function viewDash(){
+ var canNat=(typeof isChancellor==="function"&&isChancellor());
+ var nat=S._dashNat&&canNat;
+ return '<div class="row" style="gap:10px;margin-bottom:6px"><button class="btn sm ghost" onclick="go(\'you\')">←</button><div style="flex:1"><b class="h3">📊 '+(nat?"National rollup":"Chapter dashboard")+'</b><div class="muted" style="font-size:12px">'+(nat?"Every chapter, one pane — how Michael runs the whole thing.":"Your chapter business at a glance.")+'</div></div></div>'+
+  (canNat?'<div class="row" style="gap:6px;margin-bottom:11px"><button class="btn sm'+(!nat?"":" ghost")+'" onclick="if(S._dashNat)toggleDashNat()">Your chapter</button><button class="btn sm'+(nat?" gold":" ghost")+'" onclick="if(!S._dashNat)toggleDashNat()">🌌 National</button></div>':"")+
+  (nat?dashNational():dashYour())+
+  '<div class="foot">Honest-state: representative demo figures; live metrics wire in with accounts + the payment rail (counsel-gated).</div>';
+}
+/* ---- 💚 Tip jar + 🏠 Welcome-home digest — WIN THE MUSICIANS: hide the work, show the rewards ---- */
+var TIPS=(function(){try{var s=localStorage.getItem("dd.tips");if(s){var o=JSON.parse(s);if(o&&typeof o.total==="number")return o;}}catch(e){}return {total:185,count:12};})();
+function saveTips(){try{localStorage.setItem("dd.tips",JSON.stringify(TIPS));}catch(e){}}
+function tipJar(){
+ document.getElementById("sheet").innerHTML='<h3>💚 Tip the band</h3><div class="sb">Show the love — it goes straight to the band. (Demo: real payouts ride the counsel-gated payment rail.)</div>'+
+  '<div class="row" style="gap:8px;flex-wrap:wrap">'+[5,10,20,50].map(function(a){return '<button class="btn gold sm" onclick="tipBand('+a+')">$'+a+'</button>';}).join("")+'</div>'+
+  '<div class="note" style="margin-top:11px">Tip jar tonight: <b>'+money(TIPS.total)+'</b> from '+TIPS.count+' fans.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function tipBand(a){TIPS.total+=a;TIPS.count++;saveTips();var sh=document.getElementById("sheet");if(sh&&/Tip the band/.test(sh.textContent))tipJar();else render();toast("💚 Tipped "+money(a)+" — the band feels the love.");}
+/* seed bookings so the welcome-home digest shows real outcomes */
+if(!BOOKINGS.length){
+ BOOKINGS.push({id:"bk1",date:next14()[2].iso,slot:"evening",price:1500,fee:150,total:1650,by:"The Ardmore",status:"requested"});
+ BOOKINGS.push({id:"bk2",date:next14()[5].iso,slot:"private",price:2500,fee:250,total:2750,by:"Kara's wedding",status:"requested"});
+ BOOKINGS.push({id:"bk3",date:next14()[8].iso,slot:"afternoon",price:800,fee:80,total:880,by:"Felton lot party",status:"requested"});
+ BOOKINGS.push({id:"bk4",date:next14()[1].iso,slot:"evening",price:1500,fee:150,total:1650,by:"Moe's Alley",status:"accepted"});
+ BOOKINGS.push({id:"bk5",date:next14()[0].iso,slot:"evening",price:1500,fee:150,total:1650,by:"Sweetwater",status:"accepted"});
+}
+function welcomeHome(){
+ var newReq=BOOKINGS.filter(function(b){return b.status==="requested";}).length;
+ var inAccount=BOOKINGS.filter(function(b){return b.status==="accepted"||b.status==="paid";}).reduce(function(s,b){return s+(+b.price||0);},0);
+ return '<div class="sec-h">🏠 Welcome home — while you were playing</div>'+
+  '<div class="card pad" style="background:linear-gradient(180deg,#d8a24a22,#fffaf2)">'+
+   '<div style="font-size:14.5px;line-height:1.8">Kick your boots off. We handled it.<br>'+
+   '✅ <b>Tonight\'s show got posted</b> to all your networks — recap, photos, the works.<br>'+
+   '📅 <b>'+newReq+' new booking requests</b> came in while you played.<br>'+
+   '💰 <b>'+money(inAccount)+'</b> is sitting in your account.<br>'+
+   '🫙 <b>Tip jar: '+money(TIPS.total)+'</b> from '+TIPS.count+' fans tonight.</div>'+
+   '<div class="row" style="gap:8px;margin-top:11px;flex-wrap:wrap"><button class="minib rose" onclick="gigHyper(\'recap\')">See tonight\'s posts</button><button class="minib" onclick="bookingCalendar()">View '+newReq+' bookings</button></div>'+
+   '<div class="muted" style="font-size:10.5px;margin-top:8px">Honest-state: demo figures. Real money &amp; payouts ride the counsel-gated payment rail — but the <i>work</i> is genuinely automated.</div>'+
+  '</div>';
+}
+/* ---- 🎪 Host the dead_dance: the physical circle-of-lights gathering at Greyhound Rock ---- */
+var CIRCLE_ITEMS=["💡 Circle of Christmas lights around the dancefloor","🚐 Cars park off the ring — center on Robbie's RV","🌈 Big tie-dye hung in a tree, blowing in the wind","🛢️ Liquid-light / blob projector running","🔊 Two big speakers, either side of the RV","🌹 Vendors set up (tie-dyes, crafts)","🧹 Pack it in, pack it out — protected beach"];
+var CIRCLE_DONE={};
+function hostCircle(){
+ document.getElementById("sheet").innerHTML='<h3>🎪 Host your circle</h3><div class="sb">Modeled on the original at <b>Greyhound Rock</b> — <b>Robbie\'s</b> circle (he owns that one, in the real world; the app stays out of his way). Build your chapter\'s own circle of lights — most beautiful sunset you can find. dead_dance happens <i>inside the lights.</i> Peaceful, leave-no-trace.</div>'+
+  CIRCLE_ITEMS.map(function(it,i){return '<div class="show" onclick="toggleCircle('+i+')" style="cursor:pointer"><div class="ic">'+(CIRCLE_DONE[i]?"✅":"⬜")+'</div><div class="nm"><b style="font-size:13.5px">'+esc(it)+'</b></div></div>';}).join("")+
+  '<div class="note" style="margin-top:10px">Every chapter builds its <b>own</b> circle — its own Greyhound Rock, wherever the family gathers. Leave it cleaner than you found it.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function toggleCircle(i){CIRCLE_DONE[i]=!CIRCLE_DONE[i];hostCircle();}
+function showBadge(){
+ return '<div class="badge"><div class="star">🌟</div><div class="nm">Shows on the bus</div>'+
+  '<div class="big">'+BADGE.shows+'</div><div class="sub">since '+BADGE.since+' · '+BADGE.venues+' venues</div>'+
+  '<div class="stats"><div class="st"><b>'+BADGE.venues+'</b>venues</div><div class="st"><b>'+(2026-BADGE.since)+'</b>yrs on the bus</div>'+(BADGE.gps?'<div class="st"><b>'+BADGE.gps+'</b>✅ GPS-confirmed</div>':'')+'<div class="st" style="flex:1"><b>'+esc(BADGE.longest)+'</b>longest run</div></div></div>';
+}
+function viewYou(){
+ var socials=PROFILE.socials.map(function(v,i){return '<div class="row" style="gap:8px;margin-bottom:8px"><span style="opacity:.45">🔗</span><input id="sa'+i+'" type="text" value="'+escA(v)+'" placeholder="Link to social profile '+(i+1)+'" style="flex:1;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px"></div>';}).join("");
+ var _cov=safeUrl(PROFILE.cover), _pho=safeUrl(PROFILE.photo);
+ var _coverStyle=_cov?('background:#1a1207 center/cover no-repeat url(&quot;'+escA(_cov)+'&quot;)'):'background:radial-gradient(120% 150% at 80% 0%,#5a3b86,#2a1b3d)';
+ var _avInner=_pho?'<img src="'+escA(_pho)+'" alt="" style="width:100%;height:100%;object-fit:cover">':esc(inits(PROFILE.name));
+ return welcomeHome()+'<div class="card" style="overflow:hidden"><div style="height:80px;'+_coverStyle+'"></div>'+
+   '<div class="pad" style="margin-top:-40px"><div class="row" style="align-items:flex-end;gap:12px"><div class="av" style="width:72px;height:72px;font-size:23px;margin:0;background:var(--gold);color:var(--purple);overflow:hidden">'+_avInner+'</div>'+
+   '<div style="flex:1;padding-bottom:4px">'+
+     (S.editId
+       ? '<input id="pName" value="'+escA(PROFILE.name)+'" placeholder="Your name" style="width:100%;margin-bottom:6px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:700 15px inherit"><input id="pTitle" value="'+escA(PROFILE.title)+'" placeholder="Your title — change it to anything" style="width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px"><div class="row" style="gap:8px;margin-top:7px"><button class="btn sm" onclick="saveId()">Save</button><button class="btn sm ghost" onclick="cancelId()">Cancel</button></div>'
+       : '<b class="h3">'+esc(PROFILE.name)+'</b> <span style="cursor:pointer;font-size:13px;opacity:.6" onclick="startEditId()" title="Edit name &amp; title">✏️</span><div class="muted">'+esc(PROFILE.title)+' · '+esc(ME.where||"Santa Cruz")+' · '+BADGE.shows+' shows</div>')+
+   '</div>'+
+   '<button class="minib" style="align-self:flex-start" onclick="startEditPhoto()" title="Cover &amp; photo">📷</button>'+
+   '</div>'+
+   (S.editPhoto?'<div style="margin-top:11px"><div class="muted" style="font-size:11.5px;margin:0 0 4px">Cover image URL</div><input id="pCover" value="'+escA(PROFILE.cover)+'" placeholder="https://… (a link from your cloud)" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:7px"><div class="muted" style="font-size:11.5px;margin:0 0 4px">Profile photo URL</div><input id="pPhoto" value="'+escA(PROFILE.photo)+'" placeholder="https://…" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px"><div class="row" style="gap:8px;margin-top:8px"><button class="btn sm" onclick="savePhoto()">Save</button><button class="btn sm ghost" onclick="cancelPhoto()">Cancel</button></div><div class="muted" style="font-size:10.5px;margin-top:6px">BYO-cloud: paste a link from the cloud you already pay for. We never upload or store the image.</div></div>':'')+
+   '</div></div>'+
+  (isChancellor()?chancellorWelcome():"")+
+  '<div class="sec-h">About</div>'+
+  (S.editBio
+    ? '<div class="card pad"><textarea id="bioEdit" style="width:100%;min-height:90px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit">'+esc(PROFILE.bio)+'</textarea><div class="row" style="gap:8px;margin-top:9px"><button class="btn sm" onclick="saveBio()">Save</button><button class="btn sm ghost" onclick="cancelEditBio()">Cancel</button></div></div>'
+    : '<div class="card pad"><div style="font-size:14px;line-height:1.55">'+esc(PROFILE.bio)+'</div><button class="btn sm ghost" style="margin-top:10px" onclick="startEditBio()">✏️ Edit</button></div>')+
+  '<div class="sec-h">Your invitation landing</div>'+
+  (S.editLand
+    ? '<div class="card pad"><textarea id="landEdit" style="width:100%;min-height:92px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit">'+esc(PROFILE.landing)+'</textarea><div class="row" style="gap:8px;margin-top:9px"><button class="btn sm" onclick="saveLand()">Save</button><button class="btn sm ghost" onclick="cancelLand()">Cancel</button></div></div>'
+    : '<div class="card pad"><div class="muted" style="font-size:11.5px;margin-bottom:7px">What guests see when they open your invite link — yours to rewrite.</div><div style="font-size:14px;line-height:1.55">'+esc(PROFILE.landing)+'</div><button class="btn sm ghost" style="margin-top:10px" onclick="startEditLand()">✏️ Edit your landing</button></div>')+
+  '<div class="sec-h">Social accounts</div>'+
+  '<div class="card pad">'+socials+'<div class="row" style="gap:8px;margin-top:4px"><button class="btn sm" onclick="saveSocials()">Save</button><button class="btn sm ghost" onclick="cancelSocials()">Cancel</button></div></div>'+
+  '<div class="sec-h">🚀 HyperPost</div>'+
+  '<div class="card pad"><div class="note" style="margin:0 0 11px"><b>HyperPost isn\'t instead of Facebook.</b> It posts to Facebook <b>and</b> your chapter subgroups, <b>plus</b> Instagram, TikTok, and more — one thought, tailored for each place. You press post; nothing auto-sends.</div><textarea id="hpMsg" placeholder="Share something with the family…" style="width:100%;min-height:68px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit"></textarea><button class="btn gold" style="width:100%;margin-top:9px" onclick="hyperPost()">🚀 HyperPost it everywhere</button></div>'+
+  '<div class="sec-h">🎚️ Studio — your gigs, your media, posted for you</div>'+
+  '<div class="card pad">'+
+   '<div class="note" style="margin:0 0 11px;border-left-color:var(--gold)"><b>We give you your posting time back.</b> Connect the cloud you already pay for — your photos &amp; videos stay <b>yours</b> (we never store them or bill you for storage). Pick a moment; we line up text + media for every network. ⏱️ ~'+fmtMins(TIMEBACK.mins)+' back this week.</div>'+
+   '<div class="row" style="gap:8px;margin-bottom:10px"><button class="minib" onclick="toast(\'🔌 Connect Google Photos / Drive — secure sign-in (counsel-gated in v1). Media stays in your Google cloud.\')">＋ Google Photos / Drive</button><button class="minib" onclick="toast(\'🔌 Connect Apple iCloud — secure sign-in (counsel-gated in v1). Media stays in your iCloud.\')">＋ Apple iCloud</button></div>'+
+   '<div class="row" style="gap:8px;margin-bottom:6px">'+["📸 soundcheck","🎥 2nd-set jam","📸 the lot","🎥 encore"].map(function(it){return '<div style="flex:1;min-width:0;background:var(--cream);border:1px solid var(--line);border-radius:9px;padding:10px 6px;text-align:center;font-size:11px"><div style="font-size:20px">'+it.split(" ")[0]+'</div>'+esc(it.slice(it.indexOf(" ")+1))+'</div>';}).join("")+'</div>'+
+   '<div class="muted" style="font-size:11.5px;margin-bottom:11px">↑ from <b>your</b> cloud — referenced, never re-hosted</div>'+
+   '<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn gold sm" onclick="gigHyper(\'next\')">📣 Next show</button><button class="btn gold sm" onclick="gigHyper(\'summer\')">☀️ Summer run</button><button class="btn gold sm" onclick="gigHyper(\'recap\')">🎞️ Last week</button></div>'+
+   '<button class="btn gold sm" style="display:block;width:100%;margin-top:10px" onclick="bookingCalendar()">📅 Your booking calendar — set rates &amp; off-days</button>'+
+   '<a class="btn sm ghost" href="studio_calculator.html" style="display:block;text-align:center;margin-top:8px;text-decoration:none">⏱️ See your time back + the post explosion →</a>'+
+   '<a class="btn sm ghost" href="post_scale.html" style="display:block;text-align:center;margin-top:8px;text-decoration:none">💥 By hand vs. one click — see the scale →</a>'+
+   '<div class="note" style="margin:11px 0 0">⭐ 7 superfans never miss your shows · 3 venues ready to re-book — <i>we keep the relationships warm in the background, so you just play.</i></div>'+
+  '</div>'+
+  '<div class="sec-h">🧭 Chapter Head — your responsibilities</div>'+
+  '<div class="card pad">'+
+   '<div class="note" style="margin:0 0 11px;border-left-color:var(--purple)">The 9 Chapter Heads are how the community moves. Three weekly jobs:</div>'+
+   '<div class="row" style="gap:8px;flex-wrap:wrap">'+
+    '<a class="minib" href="qr_print.html" target="_blank" style="text-decoration:none;display:inline-block">🪧 QR at shows</a>'+
+    '<button class="minib rose" onclick="captureShare(\'\',\'\')">🌀 Post-Vacuum (share in)</button>'+
+    '<button class="minib" onclick="crowdRequest()">📣 Crowdsource a request</button>'+
+    '<button class="minib" onclick="hostCircle()">🎪 Host your circle</button>'+
+    '<button class="minib" onclick="legalChecklist()">⚖️ Legal checklist</button>'+
+    '<button class="minib rose" onclick="planEvent()">🌹 Schedule a dead_dance</button>'+
+    '<button class="minib" onclick="go(\'dash\')">📊 Chapter dashboard</button>'+
+   '</div>'+
+   '<div class="muted" style="font-size:11.5px;margin-top:10px">QR at every show · vacuum the 3–5 best FB-group posts in · seed &amp; close crowdsource requests. Full list in the Chapter Head handbook.</div>'+
+  '</div>'+
+  '<div class="sec-h">Your badge — the shows you\'ve seen</div>'+showBadge()+
+  '<div class="note">Your badge is your <b>provenance</b> — every show you tap "I was there" rolls into it. Years on the bus, venues, the longest run. Quiet status among heads; yours, honestly earned.</div>'+
+  '<div class="sec-h">Your rooms — shows you claimed</div>'+
+  (function(){var ids=Object.keys(ATTENDED).filter(function(k){return ATTENDED[k];});
+   if(!ids.length)return '<div class="note">No rooms yet — open the <b>Archive</b> and tap “I was there” on a show you caught.</div>';
+   return '<div class="card">'+ids.map(function(id){var s=showById(id);if(!s)return"";return '<div class="show"><div class="ic">✓</div><div class="nm"><b>'+esc(s.venue)+'</b><div class="s">'+esc(s.date)+" · "+esc(s.city)+", "+esc(s.state||s.country)+'</div></div><button class="minib" onclick="room(\''+id+'\')">👥 who else</button></div>';}).join("")+'</div>';})()+
+  '<div class="card list"><div class="it" onclick="farrah()"><div class="ic">🎙️</div><div class="nm"><b>Farrah</b><div class="s">Voice — route me to the show, hands-free</div></div></div>'+
+   '<div class="it" onclick="toast(\'Settings (demo)\')"><div class="ic">⚙️</div><div class="nm"><b>Settings</b><div class="s">Notifications · privacy · install</div></div></div></div>';
+}
+function farrah(){
+ var line="Saturday's tribute is at the Ardmore Music Hall — Kristen's got grilled cheese on the lot. Want me to route you there?";
+ try{if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(line);u.rate=.96;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}
+ toast("🎙️ Farrah: routing you to the show…");
+}
+/* ===================== "I Was There" — every show is a room ======================
+   The viral core: mark the shows you caught → they roll into your badge → see who else
+   was in that room with you. HONEST-STATE: rosters are representative demo data until
+   real heads sign in (no private data, ever, without consent). */
+var ATTENDED={s1:true,s6:true};               /* Robbie's a Philly head — Cornell + JFK '89 */
+var HEADS_HERE={s0:760,s1:1240,s1b:210,s2:540,s3:430,s4:610,s5:880,s6:1510};
+var ROSTER=["Kristen Young","TapeVault","Kara (Kara's Prints)","Philly Heads chapter","NorthEast Tapers","SugareeSue","Deadhead_Dave","Bay Area Family"];
+function showById(id){for(var i=0;i<GD_SHOWS.length;i++)if(GD_SHOWS[i].id===id)return GD_SHOWS[i];return null;}
+function fmt(n){return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,"")+"k":(""+n);}
+function headsHere(id){return (HEADS_HERE[id]||420)+(ATTENDED[id]?1:0);}
+function renderIWT(){
+ var c=document.getElementById("iwt"); if(!c)return;
+ c.innerHTML='<div class="sec-h">🪪 I Was There — claim the shows you caught</div><div class="card">'+
+  GD_SHOWS.map(function(s){var on=!!ATTENDED[s.id];
+   return '<div class="show"><div class="ic">'+(on?"✓":"🎟️")+'</div><div class="nm"><b>'+esc(s.venue)+'</b>'+(on?' <span class="chip ok">You were here</span>':"")+
+    '<div class="s">'+esc(s.date)+" · "+esc(s.city)+", "+esc(s.state||s.country)+'</div>'+
+    '<div class="acts"><button class="minib" onclick="room(\''+s.id+'\')">👥 '+fmt(headsHere(s.id))+' here</button>'+
+    '<button class="minib'+(on?" rose":"")+'" onclick="toggleThere(\''+s.id+'\')">'+(on?"✓ I was there":"+ I was there")+'</button></div></div></div>';
+  }).join("")+'</div>'+
+  '<div class="note"><b>Every show is a room.</b> Claim the ones you caught — they roll into your badge, and you can see who else was in that room with you. <i>Honest-state: rosters are representative demo data until heads sign in.</i></div>';
+}
+function toggleThere(id){var was=!!ATTENDED[id];ATTENDED[id]=!was;BADGE.shows+=was?-1:1;renderIWT();if(S.tab==="you")render();toast(was?"Removed from your badge.":"🌹 You were there — badge now reads "+BADGE.shows+" shows.");}
+function room(id){var s=showById(id);if(!s)return;var on=!!ATTENDED[id];
+ var faces=ROSTER.slice(0,6).map(function(nm){return '<div class="it"><div class="ic">'+esc(nm[0])+'</div><div class="nm"><b>'+esc(nm)+'</b><div class="s">was in the room</div></div></div>';}).join("");
+ document.getElementById("sheet").innerHTML='<h3>'+esc(s.date)+" · "+esc(s.venue)+'</h3><div class="sb">'+esc(s.city)+", "+esc(s.state||s.country)+' · <b>'+fmt(headsHere(id))+' heads</b> say they were here</div>'+
+  (on?'<div class="note" style="border-left-color:var(--ok);margin:0 0 11px">✓ You were here. This room is yours too.</div>':"")+
+  '<div class="card list">'+faces+'</div>'+
+  '<button class="btn'+(on?" ghost":"")+'" style="width:100%;margin-bottom:8px" onclick="toggleThere(\''+id+'\');closeModal();">'+(on?"Remove “I was there”":"✓ I was there")+'</button>'+
+  '<div class="note">Honest-state: this roster is representative demo data — when heads sign in, it becomes the real list of who shared that night. No private data, ever, without consent.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
 
-function toggleNetwork(id) {
-  var n = networks.find(x => x.id === id);
-  if (!n) return;
-  if (n.connected) { n.connected = false; renderNetworks(); showToast(n.name + ' disconnected'); return; }
-  var name = prompt('Enter your ' + n.name + ' username or email:');
-  if (!name) return;
-  showToast('Connecting ' + n.name + ' — check your phone for 2FA...');
-  setTimeout(() => {
-    n.connected = true;
-    renderNetworks();
-    showToast('✓ ' + n.name + ' connected — Claude will now write for this platform');
-  }, 2000);
+/* The Archive lives in a PERSISTENT panel (mounted once) so playback survives tab switches —
+   the tape keeps rolling while you browse the feed, like a real music app. Themed dead_dance dusk. */
+var archiveBuilt=false;
+function buildArchive(){
+ var p=document.getElementById("archivepanel");
+ if(typeof CassetteReader==="undefined"){p.innerHTML='<div class="sec-h">📼 The Live Archive</div><div class="note">Couldn\'t load the cassette player (cassette-reader.js). Reload the page — the rest of dead_dance still works.</div>';archiveBuilt=true;return;}
+ p.innerHTML='<div class="sec-h">📼 The Live Archive · plays right here in the app</div>'+
+  '<div class="card" style="overflow:hidden"><div id="cassettehost"></div></div>'+
+  '<div class="card pad"><div class="row"><div class="ic">🌹</div><div style="flex:1"><b>JGB — licensed catalog</b><div class="muted">Jerry Garcia Band · 750 shows · Buy / subscribe per show</div></div></div>'+
+   '<button class="btn rose" style="display:block;width:100%;text-align:center;margin-top:12px" onclick="toast(\'JGB licensed catalog — per-show buy/subscribe wires in once Jerry Garcia Band licenses. Default-deny until then.\')">JGB catalog → licensing</button></div>'+
+  '<div class="note"><b>Rights, not copies.</b> The cassette streams <b>band-sanctioned recordings from the Internet Archive</b> (the etree collection — taping always allowed). JGB and anything unlicensed stays <b>default-deny</b> — setlists are factual; those recordings stream only under the license the rights-holders grant.</div>'+
+  '<div id="iwt"></div>';
+ CassetteReader.mount(document.getElementById("cassettehost"),{
+  brand:{name:"Every Show",sub:"Grateful Dead · live archive · in dead_dance",logo:"syf.png"},
+  marketId:"dead_dance_archive",account:{id:"head1",region:"US"},
+  theme:{tape:"#3c2a54",gold:"#d8a24a",rust:"#b5384e",blue:"#3f6fb0",paper:"#f3ece0",ink:"#241a2b",line:"#e6dccb"},
+  shows:GD_SHOWS
+ });
+ renderIWT();
+ archiveBuilt=true;
 }
-
-function addCustomNetwork() {
-  var name = prompt('Platform name (e.g. FetLife, Substack, Mastodon):');
-  if (!name) return;
-  var url = prompt('Platform URL:');
-  if (!url) return;
-  networks.push({ id: name.toLowerCase().replace(/\s/g,''), name, icon:'🌐', connected:false });
-  renderNetworks();
-  showToast(name + ' added — Claude will learn its format rules');
+/* ---- 📍 Near You — the country is the campus. GPS → who's playing today/tomorrow within 50 mi.
+   A self-aware Deadhead glance: one look, no click. Tap a show for the band's ad. Honest-state:
+   shows are placed near your real location to demo the feature until the live tour feed is cleared. ---- */
+var NEAR={loc:null,fallback:false,shows:[],open:false,shown:false};
+function haversine(a,b,c,d){var R=3958.8,p=Math.PI/180,dla=(c-a)*p,dlo=(d-b)*p,la1=a*p,la2=c*p;var h=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dlo/2)*Math.sin(dlo/2);return 2*R*Math.asin(Math.sqrt(h));}
+function offsetPt(lat,lng,mi,brg){var R=3958.8,p=Math.PI/180,d=mi/R,b=brg*p,la1=lat*p,lo1=lng*p;var la2=Math.asin(Math.sin(la1)*Math.cos(d)+Math.cos(la1)*Math.sin(d)*Math.cos(b));var lo2=lo1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(la1),Math.cos(d)-Math.sin(la1)*Math.sin(la2));return {lat:la2/p,lng:lo2/p};}
+/* the AD ENGINE powers Near You — each band registers its OWN ad (its copy, its ticket link);
+   the house targets by geo + date. Honest-state: editorial priority, no paid auction. */
+/* resilient: if ad-engine.js fails to load, Near You degrades to empty — the app never bricks */
+var AD = (typeof AdEngine!=="undefined" && AdEngine.create) ? AdEngine.create()
+  : {seed:function(){},serve:function(){return [];},track:function(){return false;},get:function(){return null;},stats:function(){return {impressions:0,clicks:0};},_ads:function(){return [];}};
+AD.seed([
+ {band:"Dark Star Orchestra",venue:"The Catalyst",demo:{mi:9,brg:35},when:0,time:"8:00 PM",priority:5,ad:"Dark Star Orchestra recreates a complete Grateful Dead show — full set list, different every night. Doors 7, show 8."},
+ {band:"Melvin Seals & JGB",venue:"Moe's Alley",demo:{mi:23,brg:150},when:0,time:"9:00 PM",priority:4,ad:"Melvin Seals brings the Jerry Garcia Band fire — that B-3 organ all night long. Late set, dance shoes required."},
+ {band:"The China Cats",venue:"Felton Music Hall",demo:{mi:37,brg:255},when:1,time:"8:30 PM",priority:6,ad:"Northern California's longest-running Dead tribute — Matt Hartle on the Jerry lead. Grateful Sundays energy."},
+ {band:"Joe Russo's Almost Dead",venue:"Rio Theatre",demo:{mi:46,brg:310},when:1,time:"7:30 PM",priority:5,ad:"JRAD — the most fearless reinvention of the Dead songbook going. Loud, fast, joyous. Early show."}
+]);
+function dayLabel(w){return w===0?"today":"tomorrow";}
+function genNear(lat,lng){return AD.serve({lat:lat,lng:lng,radiusMi:50}).map(function(a){return {id:a.id,band:a.band,venue:a.venue,dist:a._dist,when:a.when,time:a.time,ad:a.ad};});}
+/* 🌹 the NAMESAKE event — a scheduled dead_dance bursts into the widget with dancers + stars */
+function nearParties(){
+ if(typeof EVENTS==="undefined"||!EVENTS.length)return "";
+ var now=Date.now();
+ var up=EVENTS.filter(function(e){return e.type==="deaddance"&&e.when>now&&(e.when-now)<36*3600*1000;}).sort(function(a,b){return a.when-b.when;});
+ if(!up.length)return "";
+ return up.slice(0,2).map(function(e){
+   var revealAt=e.when-e.revealMin*60000, revealed=now>=revealAt, mins=Math.max(0,Math.round((e.when-now)/60000));
+   var when=mins<60?("~"+mins+" min"):("~"+Math.round(mins/60)+" hr");
+   return '<div class="ddparty" onclick="toggleNear();go(\'home\')">'+
+     '<span class="star" style="top:6px;left:26%">✨</span><span class="star" style="top:22px;right:16%;animation-delay:.5s">🌟</span><span class="star" style="bottom:8px;left:60%;animation-delay:1s">✨</span><span class="star" style="top:9px;left:8%;animation-delay:.8s">⭐</span><span class="star" style="bottom:10px;right:34%;animation-delay:1.3s">💫</span>'+
+     '<div class="dancers"><span>🕺</span><span>💃</span><span>🕺</span><span>💃</span></div>'+
+     '<div class="dd-h">🌹 <b>dead_dance</b> — '+esc(e.by||"a circle of lights")+'</div>'+
+     '<div class="dd-s">starts in '+when+' · '+(revealed?('📍 '+esc(e.location)):'🔒 location reveals soon — Farrah guides you in')+'</div>'+
+   '</div>';
+ }).join("");
 }
-
-// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
-function switchTab(tab) {
-  ['calendar','networks','profile'].forEach(t => {
-    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
-    document.getElementById('nav-' + t).classList.toggle('active', t === tab);
-  });
+function renderNear(){
+ var c=document.getElementById("nearCount"); var today=NEAR.shows.filter(function(s){return s.when===0;}).length;
+ if(c)c.textContent=NEAR.loc?String(today||NEAR.shows.length):"··";
+ var pn=document.getElementById("nearPanel"); if(!pn)return;
+ if(!NEAR.open){pn.style.display="none";return;}
+ pn.style.display="block";
+ var locline=NEAR.fallback?"Santa Cruz — turn on location for your spot":"Within 50 miles of you";
+ pn.innerHTML='<div class="nh"><span>📍 Tonight &amp; tomorrow · '+esc(locline)+'</span><span class="x" onclick="toggleNear()">✕</span></div>'+
+   nearParties()+
+   (NEAR.shows.length?NEAR.shows.map(function(s){return '<div class="nearrow" onclick="bandAd(\''+s.id+'\')"><span class="when '+(s.when===0?"today":"tom")+'">'+dayLabel(s.when)+'</span><div class="nm"><b>'+esc(s.band)+'</b><div class="s">'+esc(s.venue)+' · '+esc(s.time)+'</div></div><span class="mi">'+s.dist+' mi</span></div>';}).join(""):'<div class="nearrow"><div class="nm"><b>No shows within 50 miles today.</b><div class="s">The whole country\'s the campus — the family\'s always moving.</div></div></div>')+
+   '<div class="nf">🛰️ The country is the campus — your app knows where you are. <b>Tap a show for the band\'s ad.</b> Demo: placed near you to show the feature; live tour dates wire in once the band feed is cleared.</div>';
 }
-
-// ── BRAND SIDEBAR ─────────────────────────────────────────────────────────────
-function renderBrandList() {
-  var list = document.getElementById('brand-list-sidebar');
-  if (state.brands.length === 0) { list.innerHTML = '<div style="padding:8px 20px;font-size:12px;color:rgba(13,13,13,0.35);font-family:var(--mono)">No brands yet</div>'; return; }
-  list.innerHTML = state.brands.map(b => `
-    <div class="nav-item" onclick="switchBrand('${escHtml(b.name)}')" style="font-size:12px;">
-      <span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;display:inline-block"></span>
-      ${escHtml(b.name)}
-    </div>`).join('');
+function toggleNear(){NEAR.open=!NEAR.open;renderNear();}
+function bandAd(id){var s=null;for(var i=0;i<NEAR.shows.length;i++)if(NEAR.shows[i].id===id)s=NEAR.shows[i];if(!s)return;
+ AD.track(id,"click");
+ document.getElementById("sheet").innerHTML='<h3>🎟️ '+esc(s.band)+'</h3><div class="sb">'+esc(s.venue)+' · '+dayLabel(s.when)+' · '+esc(s.time)+' · '+s.dist+' mi from you</div>'+
+  '<div class="draft" style="border-left:3px solid var(--gold)"><div class="tx">'+esc(s.ad)+'</div></div>'+
+  '<div class="row" style="gap:8px"><button class="btn gold" style="flex:1" onclick="gate(\'Tickets\')">🎟️ Tickets</button><button class="btn ghost" style="flex:1" onclick="closeModal();toast(\'Drafted to HyperPost — tell the family.\')">📣 Tell the family</button></div>'+
+  '<div class="note" style="margin-top:10px">📡 Served by the ad engine — targeted to you by location &amp; date. In production this is the band\'s own promo for this date (their copy, their ticket link); the house just puts it in front of the right heads nearby. No paid auction — editorial placement (paid promotion = disclosure + counsel-gated).</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ NEAR.open=false;renderNear();document.getElementById("ovl").classList.add("on");
 }
-
-function switchBrand(name) {
-  var brand = state.brands.find(b => b.name === name);
-  if (!brand) return;
-  state.currentBrand = brand;
-  state.posts = brand.posts || [];
-  loadDashboard(brand);
+function initNear(){
+ function set(lat,lng,fb){NEAR.loc={lat:lat,lng:lng};NEAR.fallback=!!fb;NEAR.shows=genNear(lat,lng);NEAR.shows.forEach(function(s){AD.track(s.id,"view");});if(!NEAR.shown){NEAR.open=true;NEAR.shown=true;}renderNear();}
+ try{ if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(pos){set(pos.coords.latitude,pos.coords.longitude,false);},function(){set(36.9741,-122.0308,true);},{timeout:6000,maximumAge:600000});} else {set(36.9741,-122.0308,true);} }catch(e){set(36.9741,-122.0308,true);}
 }
-
-// ── GEN OVERLAY ───────────────────────────────────────────────────────────────
-var genTimer = null;
-function showGenOverlay(title, steps) {
-  document.getElementById('genOverlay').style.display = 'flex';
-  document.getElementById('genSubText').textContent = title;
-  var i = 0;
-  function tick() {
-    if (i >= steps.length) return;
-    document.getElementById('genFill').style.width = steps[i].pct + '%';
-    document.getElementById('genStep').textContent = steps[i].label;
-    i++;
-    genTimer = setTimeout(tick, 1800);
-  }
-  tick();
+function render(){
+ nav();
+ var avx=document.querySelector(".top .av"); if(avx)avx.textContent=inits(PROFILE.name);
+ var view=document.getElementById("view"),panel=document.getElementById("archivepanel");
+ if(S.tab==="archive"){ if(!archiveBuilt)buildArchive(); view.style.display="none"; panel.style.display="block"; return; }
+ panel.style.display="none"; view.style.display="block";
+ view.innerHTML={home:viewHome,chapters:viewChapters,events:viewEvents,shakedown:viewShakedown,you:viewYou,dash:viewDash}[S.tab]();
 }
-function hideGenOverlay() {
-  document.getElementById('genFill').style.width = '100%';
-  setTimeout(() => {
-    document.getElementById('genOverlay').style.display = 'none';
-    clearTimeout(genTimer);
-  }, 400);
-}
-
-// ── TOAST ─────────────────────────────────────────────────────────────────────
-var toastTimer = null;
-function showToast(msg) {
-  var existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  clearTimeout(toastTimer);
-  var t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  toastTimer = setTimeout(() => t.remove(), 3200);
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-if (state.apiKey) {
-  document.querySelector('.topbar-right .brand-pill').textContent = 'API connected ✓';
-}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+/* a11y: ESC closes any open modal/panel (Claudine: keyboard users were trapped) */
+document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;var ov=document.getElementById("ovl");if(ov&&ov.classList.contains("on"))closeModal();else if(typeof NEAR!=="undefined"&&NEAR.open)toggleNear();});
+render();
+/* welcome TOAST on initial entry — lands them softly and shows where they are */
+setTimeout(function(){ toast(WHO ? ("🌹 Welcome home, "+(PROFILE.name.split(/\s+/)[0])+" — this is your page. Make it yours.") : "🌹 Welcome to dead_dance — make it yours."); }, 500);
+initNear();
+initShare();   /* catch a Web Share Target / shared-link intake */
+setInterval(tickCountdowns,1000);   /* live location-reveal countdowns */
 </script>
-</body>
-</html>
+</body></html>

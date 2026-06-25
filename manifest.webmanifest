@@ -1,0 +1,19 @@
+{
+  "name": "dead_dance",
+  "short_name": "dead_dance",
+  "description": "The free social network + Shakedown Street market for the Grateful Dead / Jerry world. Chapters, shows, tapes & art, the live Archive, and the badge that counts your shows.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3ece0",
+  "theme_color": "#2a1b3d",
+  "icons": [
+    { "src": "syf.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": { "title": "st", "text": "sx", "url": "su" }
+  }
+}

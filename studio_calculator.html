@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!-- dead_dance · Musician calculator — "what we give you back" (time) + "the post explosion" (community reach).
+     Brilliantly simple: two sliders each, big honest numbers, everything else hidden. Honest-state: estimates,
+     transparent assumptions behind one toggle. Self-contained, no deps. -->
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>dead_dance · What we give you back</title>
+<meta name="theme-color" content="#2a1b3d">
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--paper:#f3ece0;--cream:#faf5ea;--ink:#241a2b;--muted:#7a6a82;
+--line:#e6dccb;--gold:#d8a24a;--rose:#b5384e;--ok:#2e7d52;--body:'Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);background:radial-gradient(120% 80% at 85% -10%,#4a2e6e,#2a1b3d 60%,#190f26);color:#fff;min-height:100vh;padding:26px 16px 50px}
+.wrap{max-width:620px;margin:0 auto}
+.kick{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:7px}
+h1{text-align:center;font-size:27px;line-height:1.12;letter-spacing:-.01em;margin-bottom:4px}
+.sub{text-align:center;color:#d8cce8;font-size:14px;margin-bottom:20px}
+.card{background:#ffffff12;border:1px solid #ffffff1f;border-radius:18px;padding:18px 17px;margin-bottom:15px}
+.ct{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.cl{font-size:13.5px;color:#e7def2;margin-bottom:14px;line-height:1.5}
+.big{font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em;color:#fff}
+.big .u{font-size:20px;font-weight:700;color:var(--gold);margin-left:4px}
+.sub2{font-size:14.5px;color:#efe9f6;margin-top:7px;line-height:1.45}
+.sub2 b{color:var(--gold)}
+.ctrl{margin:15px 0 2px}
+.ctrl label{display:flex;justify-content:space-between;font-size:13.5px;color:#e7def2;margin-bottom:7px}
+.ctrl label b{color:#fff}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:6px;background:#ffffff2e;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 2px 7px #0006}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radius:50%;background:var(--gold);cursor:pointer}
+.burst{height:96px;position:relative;margin:8px 0 2px}
+.dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);opacity:.85;transition:all .5s cubic-bezier(.2,.8,.2,1)}
+.dot.you{width:16px;height:16px;background:#fff;box-shadow:0 0 0 4px #ffffff33}
+.matt{display:block;width:100%;margin-top:13px;background:var(--gold);color:var(--purple);border:0;border-radius:11px;padding:13px;font-weight:800;font-size:14.5px;cursor:pointer}
+.note{font-size:11.5px;color:#cdbfe0;line-height:1.6;margin-top:8px}
+.how{color:var(--gold);font-size:12px;cursor:pointer;text-decoration:underline;display:inline-block;margin-top:10px}
+.howbox{display:none;font-size:11.5px;color:#cdbfe0;line-height:1.65;margin-top:8px;background:#00000026;border-radius:10px;padding:11px}
+.howbox.on{display:block}
+.back{display:block;text-align:center;color:#d8cce8;font-size:13px;margin-top:18px;text-decoration:none}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="kick">🎸 dead_dance · for the working musician</div>
+  <h1>You make the music.<br>We give you the rest back.</h1>
+  <div class="sub">Two sliders. The honest numbers. Nothing you don't need.</div>
+
+  <!-- TIME BACK -->
+  <div class="card">
+    <div class="ct">⏱️ Your time back</div>
+    <div class="cl">Every gig, you post the announce, the reminder, and the recap — to every network, by hand. We do it in one tap.</div>
+    <div class="big" id="hoursWeek">0<span class="u">hrs / week</span></div>
+    <div class="sub2" id="timeLine">—</div>
+    <div class="ctrl"><label>Shows you promote a week <b><span id="sLab">2</span></b></label>
+      <input type="range" id="shows" min="1" max="8" value="2"></div>
+    <div class="ctrl"><label>Networks you post to <b><span id="nLab">5</span></b></label>
+      <input type="range" id="nets" min="3" max="7" value="5"></div>
+    <button class="matt" onclick="loadMatt()">🎸 Load Matt's week (5 bands)</button>
+  </div>
+
+  <!-- POST EXPLOSION -->
+  <div class="card">
+    <div class="ct">💥 The post explosion</div>
+    <div class="cl">You don't post into the void. Post once — <b>the family carries it.</b> Chapters and superfans re-share to <i>their</i> people, and it goes off.</div>
+    <div class="burst" id="burst"></div>
+    <div class="big" id="reach">0<span class="u">reached</span></div>
+    <div class="sub2" id="reachLine">—</div>
+    <div class="ctrl"><label>Your followers (all networks) <b><span id="fLab">2,000</span></b></label>
+      <input type="range" id="foll" min="200" max="20000" step="200" value="2000"></div>
+    <div class="ctrl"><label>Your family — chapter &amp; superfans <b><span id="cLab">500</span></b></label>
+      <input type="range" id="fam" min="50" max="6000" step="50" value="500"></div>
+    <a href="post_scale.html" style="display:block;text-align:center;background:var(--gold);color:var(--purple);border-radius:11px;padding:12px;font-weight:800;font-size:14px;text-decoration:none;margin:4px 0 10px">💥 See it as a picture — by hand vs. one click →</a>
+    <span class="how" onclick="document.getElementById('how').classList.toggle('on')">how we figure this</span>
+    <div class="howbox" id="how">
+      <b>Time:</b> ~6 min to write + size + post one gig per network, ×3 posts a gig (announce / reminder / recap). dead_dance ≈ 3 min a gig to review &amp; send.<br>
+      <b>Explosion:</b> ~15% of your family re-shares, each to ~150 of their own people. Total reach = your followers + what the family carries. <i>Estimates to show the shape of it — not a promise.</i>
+    </div>
+  </div>
+
+  <div class="note">Honest-state: these are estimates to teach the idea. Real auto-posting connects each network (their sign-in &amp; rules; counsel-gated). Your media stays in your own cloud.</div>
+  <a class="back" href="index.html">← back to dead_dance</a>
+</div>
+
+<script>
+var MPP=6, POSTS=3, DD=3, SHARE=0.15, AUD=150;
+function commas(n){return Math.round(n).toLocaleString("en-US");}
+function fmtH(h){return (h>=10?Math.round(h):Math.round(h*10)/10);}
+function calcTime(){
+  var S=+document.getElementById("shows").value, N=+document.getElementById("nets").value;
+  document.getElementById("sLab").textContent=S; document.getElementById("nLab").textContent=N;
+  var manual=S*N*MPP*POSTS, dd=S*DD, saved=Math.max(0,manual-dd);
+  var hWeek=saved/60, hYear=hWeek*52, days=hYear/24;
+  document.getElementById("hoursWeek").innerHTML=fmtH(hWeek)+'<span class="u">hrs / week</span>';
+  document.getElementById("timeLine").innerHTML="That's <b>"+Math.round(days)+" days a year</b> back to music. You'd spend ~"+fmtH(manual/60)+" hrs — we do it in ~"+dd+" min a gig.";
+}
+function calcReach(){
+  var R0=+document.getElementById("foll").value, C=+document.getElementById("fam").value;
+  document.getElementById("fLab").textContent=commas(R0); document.getElementById("cLab").textContent=commas(C);
+  var secondary=C*SHARE*AUD, total=R0+secondary, mult=total/R0;
+  document.getElementById("reach").innerHTML=commas(total)+'<span class="u">reached</span>';
+  document.getElementById("reachLine").innerHTML="Your <b>"+commas(R0)+"</b> becomes <b>"+commas(total)+"</b> — <b>×"+(Math.round(mult*10)/10)+"</b> when the family carries it.";
+  // visual burst: dot count scales with the multiplier
+  var b=document.getElementById("burst"); b.innerHTML="";
+  var W=b.clientWidth||560, cx=W/2, cy=48, n=Math.max(6,Math.min(60,Math.round(mult*6)));
+  var you=document.createElement("div"); you.className="dot you"; you.style.left=(cx-8)+"px"; you.style.top=(cy-8)+"px"; b.appendChild(you);
+  for(var i=0;i<n;i++){ (function(i){ var d=document.createElement("div"); d.className="dot"; d.style.left=(cx-4)+"px"; d.style.top=(cy-4)+"px"; b.appendChild(d);
+    setTimeout(function(){ var ang=(i/n)*Math.PI*2, rad=20+Math.random()*(Math.min(W/2,46)); d.style.left=(cx-4+Math.cos(ang)*rad)+"px"; d.style.top=(cy-4+Math.sin(ang)*(rad*0.7))+"px"; d.style.opacity=0.35+Math.random()*0.5; },20);
+  })(i); }
+}
+function loadMatt(){
+  document.getElementById("shows").value=3; document.getElementById("nets").value=6;
+  document.getElementById("foll").value=6000; document.getElementById("fam").value=1500;
+  calcTime(); calcReach();
+}
+["shows","nets"].forEach(function(id){document.getElementById(id).addEventListener("input",calcTime);});
+["foll","fam"].forEach(function(id){document.getElementById(id).addEventListener("input",calcReach);});
+calcTime(); calcReach();
+</script>
+</body></html>
