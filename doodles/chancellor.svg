@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 680 348" preserveAspectRatio="xMidYMid slice" role="img">
+<title>The Chancellor and the family</title>
+<desc>Stylized character version of the family group photo: Mike back-center-left in sunglasses, Kristen mid-center, Robbie (Robert Garcia) reclining front-center in a cowboy hat.</desc>
+<defs>
+<radialGradient id="flare" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff7e0"/><stop offset="0.4" stop-color="#ffe6a8" stop-opacity="0.6"/><stop offset="1" stop-color="#ffe6a8" stop-opacity="0"/></radialGradient>
+<radialGradient id="pglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#9b4dff" stop-opacity="0.7"/><stop offset="1" stop-color="#9b4dff" stop-opacity="0"/></radialGradient>
+<radialGradient id="robglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff2c2" stop-opacity="0.85"/><stop offset="1" stop-color="#fff2c2" stop-opacity="0"/></radialGradient>
+<radialGradient id="kglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffd1ec" stop-opacity="0.8"/><stop offset="1" stop-color="#ffd1ec" stop-opacity="0"/></radialGradient>
+<radialGradient id="meglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#bfe3ff" stop-opacity="0.8"/><stop offset="1" stop-color="#bfe3ff" stop-opacity="0"/></radialGradient>
+<g id="p1"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#d63b6a"/><circle cx="0" cy="9" r="8" fill="#e8b98f"/><path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#3a2417"/></g>
+<g id="p2"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#ff9f3c"/><circle cx="0" cy="9" r="8" fill="#d99a6c"/><path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#6b4a2a"/></g>
+<g id="p3"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#3aa0c8"/><circle cx="0" cy="9" r="8" fill="#c98a5a"/><path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#14100c"/><path d="M-6,12 C-6,18 6,18 6,12 C4,16 -4,16 -6,12 Z" fill="#14100c"/></g>
+<g id="p4"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#5bbf6e"/><circle cx="0" cy="9" r="8" fill="#f0c9a0"/><path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#c9a24b"/></g>
+<g id="p5"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#8a5cff"/><circle cx="0" cy="9" r="8" fill="#b5764a"/><path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#100b08"/></g>
+<g id="p6"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#ff5db1"/><circle cx="0" cy="9" r="8" fill="#e8b98f"/><path d="M-8,8 a8,8 0 0 1 16,0 Z" fill="#ff3b6b"/></g>
+<g id="p7"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#c0433a"/><circle cx="0" cy="9" r="8" fill="#d99a6c"/><ellipse cx="0" cy="3" rx="13" ry="3.4" fill="#c8a24b"/><path d="M-7,3 C-7,-5 -4,-8 0,-8 C4,-8 7,-5 7,3 Z" fill="#b8923f"/></g>
+<g id="p8"><path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#2bbf9a"/><path d="M-9,8 C-12,18 -11,27 -9,33 M9,8 C12,18 11,27 9,33" stroke="#4a2f1c" stroke-width="4" fill="none"/><circle cx="0" cy="9" r="8" fill="#ecc09a"/><path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#4a2f1c"/></g>
+</defs>
+
+<rect x="0" y="0" width="680" height="348" fill="#0e0a1a"/>
+<rect x="0" y="0" width="680" height="126" fill="#171228"/>
+<g stroke="#2a2140" stroke-width="2"><line x1="0" y1="40" x2="680" y2="34"/><line x1="0" y1="62" x2="680" y2="58"/><line x1="0" y1="86" x2="680" y2="84"/></g>
+<g fill="#4a3d6b"><circle cx="120" cy="30" r="1.4"/><circle cx="220" cy="44" r="1.4"/><circle cx="360" cy="28" r="1.4"/><circle cx="520" cy="40" r="1.4"/><circle cx="600" cy="66" r="1.4"/><circle cx="80" cy="70" r="1.4"/><circle cx="300" cy="74" r="1.4"/><circle cx="460" cy="70" r="1.4"/></g>
+<rect x="300" y="6" width="90" height="10" rx="2" fill="#241a3e"/>
+<ellipse cx="60" cy="70" rx="150" ry="150" fill="url(#pglow)"/>
+<ellipse cx="486" cy="86" rx="190" ry="150" fill="url(#flare)"/>
+<circle cx="486" cy="80" r="10" fill="#fff7e0"/>
+
+<g transform="translate(96,82)"><g><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="16s" repeatCount="indefinite"/>
+<circle r="46" fill="#ff4d6d" opacity="0.85"/><circle r="38" fill="#ff9f1c" opacity="0.85"/><circle r="30" fill="#ffe14d" opacity="0.85"/><circle r="22" fill="#36d39a" opacity="0.85"/><circle r="15" fill="#2bb3ff" opacity="0.85"/><circle r="8" fill="#8a5cff" opacity="0.9"/>
+<path d="M0,-46 L6,-30 -6,-30 Z" fill="#fff" opacity="0.5"/><path d="M0,46 L6,30 -6,30 Z" fill="#fff" opacity="0.5"/><path d="M-46,0 L-30,6 -30,-6 Z" fill="#fff" opacity="0.5"/><path d="M46,0 L30,6 30,-6 Z" fill="#fff" opacity="0.5"/></g></g>
+
+<g>
+<use href="#p1" transform="translate(60,150) scale(0.58)"/><use href="#p3" transform="translate(82,150) scale(0.58)"/><use href="#p5" transform="translate(104,150) scale(0.58)"/><use href="#p2" transform="translate(126,150) scale(0.58)"/><use href="#p8" transform="translate(148,150) scale(0.58)"/><use href="#p4" transform="translate(170,150) scale(0.58)"/><use href="#p6" transform="translate(192,150) scale(0.58)"/><use href="#p3" transform="translate(214,150) scale(0.58)"/><use href="#p1" transform="translate(280,150) scale(0.58)"/><use href="#p7" transform="translate(302,150) scale(0.58)"/><use href="#p5" transform="translate(324,150) scale(0.58)"/><use href="#p2" transform="translate(346,150) scale(0.58)"/><use href="#p8" transform="translate(368,150) scale(0.58)"/><use href="#p4" transform="translate(390,150) scale(0.58)"/><use href="#p3" transform="translate(412,150) scale(0.58)"/><use href="#p1" transform="translate(434,150) scale(0.58)"/><use href="#p6" transform="translate(456,150) scale(0.58)"/><use href="#p5" transform="translate(478,150) scale(0.58)"/><use href="#p2" transform="translate(500,150) scale(0.58)"/><use href="#p8" transform="translate(522,150) scale(0.58)"/><use href="#p4" transform="translate(544,150) scale(0.58)"/><use href="#p3" transform="translate(566,150) scale(0.58)"/><use href="#p1" transform="translate(588,150) scale(0.58)"/><use href="#p7" transform="translate(610,150) scale(0.58)"/>
+</g>
+<g>
+<use href="#p2" transform="translate(72,171) scale(0.68)"/><use href="#p4" transform="translate(96,171) scale(0.68)"/><use href="#p1" transform="translate(120,171) scale(0.68)"/><use href="#p6" transform="translate(144,171) scale(0.68)"/><use href="#p3" transform="translate(168,171) scale(0.68)"/><use href="#p8" transform="translate(192,171) scale(0.68)"/><use href="#p5" transform="translate(216,171) scale(0.68)"/><use href="#p2" transform="translate(288,171) scale(0.68)"/><use href="#p7" transform="translate(312,171) scale(0.68)"/><use href="#p3" transform="translate(360,171) scale(0.68)"/><use href="#p6" transform="translate(384,171) scale(0.68)"/><use href="#p5" transform="translate(408,171) scale(0.68)"/><use href="#p2" transform="translate(432,171) scale(0.68)"/><use href="#p8" transform="translate(456,171) scale(0.68)"/><use href="#p1" transform="translate(480,171) scale(0.68)"/><use href="#p4" transform="translate(504,171) scale(0.68)"/><use href="#p3" transform="translate(528,171) scale(0.68)"/><use href="#p6" transform="translate(552,171) scale(0.68)"/><use href="#p5" transform="translate(576,171) scale(0.68)"/><use href="#p2" transform="translate(600,171) scale(0.68)"/>
+</g>
+<g>
+<use href="#p3" transform="translate(84,196) scale(0.8)"/><use href="#p1" transform="translate(114,196) scale(0.8)"/><use href="#p5" transform="translate(144,196) scale(0.8)"/><use href="#p8" transform="translate(174,196) scale(0.8)"/><use href="#p2" transform="translate(204,196) scale(0.8)"/><use href="#p4" transform="translate(234,196) scale(0.8)"/><use href="#p6" transform="translate(264,196) scale(0.8)"/><use href="#p3" transform="translate(396,196) scale(0.8)"/><use href="#p1" transform="translate(426,196) scale(0.8)"/><use href="#p7" transform="translate(456,196) scale(0.8)"/><use href="#p5" transform="translate(486,196) scale(0.8)"/><use href="#p2" transform="translate(516,196) scale(0.8)"/><use href="#p8" transform="translate(546,196) scale(0.8)"/><use href="#p4" transform="translate(576,196) scale(0.8)"/><use href="#p3" transform="translate(606,196) scale(0.8)"/>
+</g>
+<g>
+<use href="#p1" transform="translate(96,224) scale(0.92)"/><use href="#p4" transform="translate(130,224) scale(0.92)"/><use href="#p6" transform="translate(164,224) scale(0.92)"/><use href="#p2" transform="translate(198,224) scale(0.92)"/><use href="#p3" transform="translate(232,224) scale(0.92)"/><use href="#p7" transform="translate(396,224) scale(0.92)"/><use href="#p5" transform="translate(430,224) scale(0.92)"/><use href="#p1" transform="translate(464,224) scale(0.92)"/><use href="#p8" transform="translate(498,224) scale(0.92)"/><use href="#p2" transform="translate(532,224) scale(0.92)"/><use href="#p4" transform="translate(566,224) scale(0.92)"/><use href="#p3" transform="translate(600,224) scale(0.92)"/>
+</g>
+
+<rect x="0" y="305" width="680" height="43" fill="#d7cfc6"/>
+<rect x="0" y="305" width="680" height="4" fill="#bcb2a6"/>
+<g>
+<use href="#p2" transform="translate(70,250) scale(1.05)"/><use href="#p5" transform="translate(120,252) scale(1.1)"/><use href="#p8" transform="translate(168,250) scale(1.05)"/><use href="#p1" transform="translate(214,252) scale(1.1)"/><use href="#p4" transform="translate(440,252) scale(1.1)"/><use href="#p3" transform="translate(488,250) scale(1.05)"/><use href="#p6" transform="translate(534,252) scale(1.1)"/><use href="#p2" transform="translate(582,250) scale(1.05)"/><use href="#p7" transform="translate(626,252) scale(1.0)"/>
+</g>
+
+<ellipse cx="250" cy="172" rx="24" ry="28" fill="url(#meglow)"/>
+<g transform="translate(250,158) scale(0.86)">
+<path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#5d6470"/>
+<circle cx="0" cy="9" r="8" fill="#e0b58a"/>
+<path d="M-8,9 a8,8 0 0 1 16,0 Z" fill="#d7d2cb"/>
+<rect x="-7.5" y="6.6" width="15" height="4.6" rx="2.2" fill="#15121a"/>
+<path d="M-4,15 C-2,17 2,17 4,15" stroke="#8a6f4a" stroke-width="2" fill="none"/>
+</g>
+
+<ellipse cx="300" cy="232" rx="34" ry="40" fill="url(#kglow)"/>
+<g transform="translate(300,224) scale(1.0)">
+<path d="M-12,33 C-12,22 -6,18 0,18 C6,18 12,22 12,33 Z" fill="#caa6ff"/>
+<path d="M-10,8 C-14,20 -13,30 -10,36 M10,8 C14,20 13,30 10,36" stroke="#caa24b" stroke-width="5" fill="none"/>
+<circle cx="0" cy="9" r="8.4" fill="#f0c9a0"/>
+<path d="M-8.5,9 a8.5,8.5 0 0 1 17,0 Z" fill="#d9b24e"/>
+<path d="M-12,14 L-20,8 M12,14 L20,8" stroke="#f0c9a0" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+</g>
+
+<ellipse cx="372" cy="300" rx="82" ry="48" fill="url(#robglow)"/>
+<g transform="translate(338,300) scale(1.22)">
+<path d="M6,6 C24,4 42,8 54,17 L52,22 C40,15 22,13 8,14 Z" fill="#5a2d86"/>
+<path d="M30,15 C41,16 52,20 60,26 L58,31 C49,25 39,21 30,20 Z" fill="#c98a5a"/>
+<path d="M-26,-2 C-31,-2 -33,5 -28,9 C-17,15 4,15 12,10 C18,6 13,-3 4,-4 C-9,-5 -18,-3 -26,-2 Z" fill="#1c1622"/>
+<path d="M-26,3 C-35,7 -37,17 -35,23" stroke="#c98a5a" stroke-width="5" fill="none" stroke-linecap="round"/>
+<circle cx="-35" cy="-7" r="7.8" fill="#d6a074"/>
+<path d="M-40,-4 C-40,2 -30,2 -30,-4 C-32,-1 -38,-1 -40,-4 Z" fill="#7a5236"/>
+<ellipse cx="-35" cy="-11" rx="15.5" ry="4.2" fill="#141019"/>
+<path d="M-43,-11 C-43,-21 -40,-25 -35,-25 C-30,-25 -27,-21 -27,-11 Z" fill="#1d1626"/>
+<path d="M-43,-14 C-37,-16 -31,-16 -27,-14" stroke="#3a2d4a" stroke-width="1.6" fill="none"/>
+</g>
+
+<text x="196" y="150" font-family="Georgia, serif" font-size="11.5" fill="#dff1ff">Mike</text>
+<line x1="214" y1="146" x2="244" y2="160" stroke="#dff1ff" stroke-width="0.8" opacity="0.7"/>
+<text x="214" y="206" font-family="Georgia, serif" font-size="11.5" fill="#fff0d0">Kristen</text>
+<line x1="248" y1="202" x2="288" y2="218" stroke="#fff0d0" stroke-width="0.8" opacity="0.7"/>
+<text x="372" y="340" font-family="Georgia, serif" font-size="13" fill="#ffe9c7" text-anchor="middle">Robbie · The Chancellor</text>
+
+<text x="20" y="338" font-family="Georgia, serif" font-size="12.5" fill="#6a5f78">dead_dance · the family</text>
+</svg>

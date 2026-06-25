@@ -141,6 +141,7 @@ a{color:inherit}
 <script src="market-core.js"></script>
 <script src="cassette-reader.js"></script>
 <script src="ad-engine.js"></script>
+<script src="doodles.js"></script>
 <script>
 /* ============================ demo data (honest-state: representative) ============================ */
 /* Founders — an invite link (welcome.html?who=) drops them straight onto THEIR page. */
@@ -315,7 +316,7 @@ function like(i){S.liked[i]=!S.liked[i];render();}
 
 function rosebud(){return '<div class="rbud" title="Rosebud — your dead_dance mascot"><span class="star" style="left:36%;top:0">✨</span><span class="star" style="right:36%;top:7px;animation-delay:.7s">🌟</span><span class="star" style="left:50%;bottom:0;animation-delay:1.1s">💫</span><span class="rb">🌹</span></div>';}
 function viewHome(){
- return rosebud()+'<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
+ return '<div id="ddHero" class="dd-hero" aria-label="dead_dance headline"></div>'+rosebud()+'<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
    '<input placeholder="What\'s the word on the lot?" onkeydown="if(event.key===\'Enter\'){toast(\'Posted (demo)\');this.value=\'\'}"><button class="btn sm" onclick="toast(\'Posted (demo)\')">Post</button></div></div>'+
    '<div class="card pad"><div class="row" style="gap:10px"><div class="ic">📥</div><div style="flex:1"><b style="font-size:14px">Bring a Facebook post in</b><div class="muted" style="font-size:12px">Share a post from any FB group into the same group here — in &amp; out.</div></div><button class="btn sm" onclick="captureShare(\'\',\'\')">Share in</button></div></div>'+
    eventsView()+
@@ -1388,6 +1389,7 @@ function render(){
  if(S.tab==="archive"){ if(!archiveBuilt)buildArchive(); view.style.display="none"; panel.style.display="block"; return; }
  panel.style.display="none"; view.style.display="block";
  view.innerHTML={home:viewHome,chapters:viewChapters,events:viewEvents,shakedown:viewShakedown,you:viewYou,dash:viewDash}[S.tab]();
+ if(S.tab==="home"&&typeof ddHeroMount==="function")ddHeroMount();
 }
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
 /* a11y: ESC closes any open modal/panel (Claudine: keyboard users were trapped) */
