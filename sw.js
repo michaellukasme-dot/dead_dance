@@ -3,9 +3,10 @@
    • install is BEST-EFFORT (one missing asset can't abort the whole install)
    • HTML navigations are NETWORK-FIRST (no more stale index.html), cache as fallback
    • runtime cache is SAME-ORIGIN ONLY — never caches cross-origin archive.org audio (no quota blowout) */
-var CACHE = "deaddance-v16-2026-06-25";
+var CACHE = "deaddance-v29-2026-06-25";
 var ASSETS = ["./", "./index.html", "./welcome.html", "./studio_calculator.html", "./post_scale.html", "./qr_print.html",
-  "./manifest.webmanifest", "./bands.js", "./market-core.js", "./cassette-reader.js", "./ad-engine.js", "./syf.png"];
+  "./manifest.webmanifest", "./bands.js", "./market-core.js", "./cassette-reader.js", "./ad-engine.js", "./syf.png", "./lukas_a2hs.js",
+  "./lukas_chat.js", "./lukas_badge.js", "./rose.svg", "./rose-192.png", "./rose-512.png", "./rose-32.png"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(

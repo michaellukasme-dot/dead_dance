@@ -6,24 +6,47 @@
    bands locally; we never sell their music. Promote = drafted copy, the owner sends (Jarvis — nothing auto-posts. */
 var DD_SOURCE = { name: "Compass Rose", url: "http://gratefuldeadtributebands.com/", note: "500+ GD tribute bands, worldwide — credited in full." };
 
+/* state → dead_dance region key (for mapping bands/shows to chapters). National headliners = "national". */
+var DD_STATE_REGION = {CA:"bayarea",OR:"pnw",WA:"pnw",ID:"pnw",AK:"pnw",CO:"rockies",UT:"rockies",WY:"rockies",MT:"rockies",NM:"rockies",TX:"lonestar",OK:"lonestar",AZ:"lonestar",NV:"lonestar",IL:"greatlakes",IN:"greatlakes",MI:"greatlakes",OH:"greatlakes",WI:"greatlakes",MN:"greatlakes",IA:"greatlakes",NC:"southeast",SC:"southeast",GA:"southeast",FL:"southeast",TN:"southeast",AL:"southeast",KY:"southeast",PA:"midatl",NJ:"midatl",MD:"midatl",DC:"midatl",DE:"midatl",VA:"midatl",WV:"midatl",NY:"northeast",CT:"northeast",MA:"northeast",VT:"northeast",NH:"northeast",ME:"northeast",RI:"northeast"};
+function ddBandRegion(b){ return b.region || (b.tier==="Headliner" ? "national" : (DD_STATE_REGION[b.home]||"national")); }
+
 var DD_BANDS = [
-  /* ---- Headliner tier (owner's highest-level list) ---- */
-  { id: "dso",   name: "Dark Star Orchestra",        tier: "Headliner", home: "National tour",  link: "http://www.darkstarorchestra.net/", note: "Recreates entire historic GD setlists, show by show. The gold standard." },
-  { id: "jrad",  name: "Joe Russo's Almost Dead",     tier: "Headliner", home: "National tour",  link: "https://www.jrad.com/", note: "JRAD — the heavy, reimagined improv take. Festival headliner." },
-  { id: "msjgb", name: "Melvin Seals & JGB",          tier: "Headliner", home: "National tour",  link: "https://melvinseals.com/", note: "The Hammond B-3 from the real Jerry Garcia Band — carrying the JGB flame." },
-  { id: "kadlecik", name: "John Kadlecik Band",        tier: "Headliner", home: "National tour",  link: "https://www.johnkadlecik.net/", note: "Furthur & DSO founder — 'Jerry's tone' incarnate." },
-  { id: "mattson",  name: "Jeff Mattson",              tier: "Headliner", home: "National tour",  link: "https://www.darkstarorchestra.net/", note: "DSO lead guitar; Zen Tricksters. A heady favorite." },
-  { id: "kimock",   name: "Steve Kimock",              tier: "Headliner", home: "National tour",  link: "https://stevekimock.com/", note: "The guitarist's guitarist of the scene — Jerry's own favorite." },
-  { id: "sagespirits", name: "Sage & Spirits",         tier: "Headliner", home: "Regional/National", link: "", note: "On the owner's highest-level list — confirm official page for the live feed." },
-  /* ---- Regional / local set — real bands seen on Compass Rose's board ---- */
+  /* ---- Headliner tier (owner's highest-level list) — tour nationally (play every region) ---- */
+  { id: "dso",   name: "Dark Star Orchestra",        tier: "Headliner", home: "National tour", region:"national", link: "http://www.darkstarorchestra.net/", note: "Recreates entire historic GD setlists, show by show. The gold standard.", hist:"Founded 1997 (Chicago). 3,000+ shows — the most-toured GD tribute." },
+  { id: "jrad",  name: "Joe Russo's Almost Dead",     tier: "Headliner", home: "National tour", region:"national", link: "https://www.jrad.com/", note: "JRAD — the heavy, reimagined improv take. Festival headliner.", hist:"Formed 2013 (Brooklyn). Festival main-stage regular." },
+  { id: "msjgb", name: "Melvin Seals & JGB",          tier: "Headliner", home: "National tour", region:"national", link: "https://melvinseals.com/", note: "The Hammond B-3 from the real Jerry Garcia Band — carrying the JGB flame.", hist:"Melvin played in the actual Jerry Garcia Band 1980–1995." },
+  { id: "kadlecik", name: "John Kadlecik Band",        tier: "Headliner", home: "National tour", region:"national", link: "https://www.johnkadlecik.net/", note: "Furthur & DSO founder — 'Jerry's tone' incarnate.", hist:"Co-founded DSO; played in Furthur with Weir & Lesh." },
+  { id: "mattson",  name: "Jeff Mattson",              tier: "Headliner", home: "National tour", region:"national", link: "https://www.darkstarorchestra.net/", note: "DSO lead guitar; Zen Tricksters. A heady favorite.", hist:"Zen Tricksters since the '80s; DSO lead since 2009." },
+  { id: "kimock",   name: "Steve Kimock",              tier: "Headliner", home: "National tour", region:"national", link: "https://stevekimock.com/", note: "The guitarist's guitarist of the scene — Jerry's own favorite.", hist:"Zero, RatDog, KVHW — name-checked by Garcia himself." },
+  { id: "sagespirits", name: "Sage & Spirits",         tier: "Headliner", home: "Regional/National", region:"national", link: "", note: "On the owner's highest-level list — confirm official page for the live feed." },
+  /* ---- Regional / local set — real bands from Compass Rose's board (home state → region) ---- */
   { id: "playingdead", name: "Playing Dead",           tier: "Regional", home: "MA",  link: "http://playingdead.net/", note: "Grateful Wednesday residency, Soundcheck Studios (Pembroke, MA)." },
   { id: "masons",      name: "Mason's Children",       tier: "Regional", home: "OH",  link: "http://masonschildren.org", note: "Midwest staple — Ludlow Garage, Cincinnati." },
   { id: "deadmeat",    name: "Dead Meat",              tier: "Regional", home: "NY",  link: "https://www.facebook.com/gratefuldeadmeat/", note: "Woodstock-area — Colony, Woodstock." },
   { id: "diamondblues",name: "Diamond Blues",          tier: "Regional", home: "MA",  link: "https://www.facebook.com/DiamondBluesJGB", note: "JGB tribute — Midway Cafe, Jamaica Plain." },
   { id: "shakedownciti",name: "Shakedown Citi",        tier: "Regional", home: "NY",  link: "https://www.shakedownciti.com/", note: "Long Island — The Warehouse, Amityville." },
   { id: "rhapsody",    name: "Rhapsody In Red",        tier: "Local",    home: "OR",  link: "https://www.facebook.com/rhapsodyinredPDX", note: "Portland — Laurelthirst Public House." },
-  { id: "dobbs",       name: "Dobbs' Dead",            tier: "Local",    home: "VT",  link: "https://www.facebook.com/profile.php?id=61550815341120", note: "Vermont — Zenbarn, Waterbury Center." }
+  { id: "dobbs",       name: "Dobbs' Dead",            tier: "Local",    home: "VT",  link: "https://www.facebook.com/profile.php?id=61550815341120", note: "Vermont — Zenbarn, Waterbury Center." },
+  /* ---- From Compass Rose's live board (today) — home state → region ---- */
+  { id: "deadpanic",   name: "Dead Panic",             tier: "Regional", home: "CO",  link: "", note: "Denver — Widespread/Dead crossover crew." },
+  { id: "mysticdead",  name: "Mystic Dead",            tier: "Regional", home: "CT",  link: "https://www.mysticdead.com", note: "Connecticut — Strange Brew Pub, Norwich." },
+  { id: "crazyfingers",name: "Crazy Fingers",          tier: "Regional", home: "FL",  link: "http://www.crazyfingers.net/", note: "South Florida — Sharkey's, Coral Springs." },
+  { id: "terrapinflyer",name:"Terrapin Flyer",         tier: "Regional", home: "IL",  link: "http://www.terrapinflyer.com", note: "Chicago — 'Wave That Flag' summer tours." },
+  { id: "eternallygr", name: "Eternally Grateful",     tier: "Regional", home: "NC",  link: "https://eternallygratefulmusic.com", note: "Charlotte — Jackalope Jacks residency." },
+  { id: "be5d",        name: "Be5D",                   tier: "Regional", home: "NJ",  link: "https://www.facebook.com/profile.php?id=61557631414647", note: "NJ — Mark Diomede; Cooper's Riverview, Trenton." },
+  { id: "westakron",   name: "West Akron Fadeaway",    tier: "Local",    home: "OH",  link: "", note: "NE Ohio — Wing Warehouse, Cuyahoga Falls." },
+  { id: "deal",        name: "DEAL",                   tier: "Regional", home: "PA",  link: "https://www.facebook.com/DealGratefulDeadTribute", note: "Lehigh Valley — Sun Inn, Bethlehem (the owner's backyard)." },
+  { id: "englishtown", name: "Englishtown Project",    tier: "Regional", home: "NJ",  link: "https://www.facebook.com/englishtownproject77/", note: "NJ — named for GD's '77 Englishtown show." },
+  { id: "gratefulbros",name: "The Grateful Brothers",  tier: "Regional", home: "SC",  link: "https://www.thegratefulbrothers.com/", note: "Upstate SC — Greenville Downtown Alive." },
+  { id: "deadmusicianstew",name:"Dead Musician Stew",  tier: "Local",    home: "VA",  link: "https://www.facebook.com/profile.php?id=100087712939516", note: "Northern VA — Lost Rhino Brewing, Ashburn." },
+  { id: "boneyfingers",name: "Boney Fingers",          tier: "Regional", home: "WI",  link: "http://www.boneyfingers.net/", note: "Milwaukee — Edelweiss cruises & lakefront." },
+  { id: "deadrevival", name: "The Dead Revival Band",  tier: "Regional", home: "OH",  link: "", note: "Ohio — featured in Compass Rose's 'Videos from the Vault.'" },
+  { id: "cubensis",    name: "Cubensis",               tier: "Regional", home: "CA",  link: "", note: "SoCal — LA's longtime Dead tribute; The Mint." },
+  { id: "chinacats",   name: "The China Cats",         tier: "Regional", home: "CA",  link: "", note: "NorCal — Matt Hartle on the Jerry lead; Felton Music Hall." },
+  { id: "gratefulshred",name:"Grateful Shred",         tier: "Regional", home: "CA",  link: "", note: "LA — the young, beloved West-Coast Shred." },
+  { id: "jmf",         name: "Jerry's Middle Finger",  tier: "Regional", home: "CA",  link: "", note: "SoCal — JGB-focused; Belly Up, Solana Beach." }
 ];
+DD_BANDS.forEach(function(b){ if(!b.region) b.region = ddBandRegion(b); });
 
 /* shows: real (tonight, via Compass Rose, credited) + representative upcoming (clearly labeled). near=true → "near you" */
 var DD_SHOWS = [

@@ -8,6 +8,9 @@
 <title>dead_dance</title>
 <meta name="theme-color" content="#2a1b3d">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="rose.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="rose-192.png">
 <style>
 :root{--purple:#2a1b3d;--purple2:#3c2a54;--paper:#f3ece0;--cream:#faf5ea;--card:#fffaf2;--ink:#241a2b;--muted:#7a6a82;
 --line:#e6dccb;--gold:#d8a24a;--rose:#b5384e;--blue:#3f6fb0;--ok:#2e7d52;
@@ -115,6 +118,10 @@ a{color:inherit}
 @keyframes ddbob{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-6px) rotate(7deg)}}
 .ddparty .star{position:absolute;font-size:13px;opacity:0;pointer-events:none;animation:ddburst 1.7s ease-out infinite}
 @keyframes ddburst{0%{opacity:0;transform:scale(.2)}25%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(.5) translateY(-6px)}}
+/* 🌹 Rosebud — the little dancing dead_dance mascot (ORIGINAL; not the protected GD Rosebud art) */
+.rbud{position:relative;text-align:center;padding:4px 0 2px;height:40px}
+.rbud .rb{font-size:30px;display:inline-block;animation:ddbob 1.05s ease-in-out infinite;transform-origin:bottom center}
+.rbud .star{position:absolute;font-size:12px;opacity:0;pointer-events:none;animation:ddburst 1.9s ease-out infinite}
 </style></head>
 <body>
 <div class="top">
@@ -145,6 +152,15 @@ var FOUNDERS={
  michael:{full:"Michael Lukas",first:"Michael",initials:"ML",title:"The Founder"}
 };
 var CHANCELLORS=["robbie","kristen","michele","matt","michael"];   /* 4 voting Chancellors + Michael as tie-breaker */
+/* The next generation — 4 Bay Area Chancellors seated UNDER the four founders, all
+   born after August 1995 (after Jerry). They hold the door for who comes next.
+   Separate from the top House vote (which stays the founders + Michael's tie-break). */
+var BAY_CHANCELLORS=[
+ {h:"bay_r", name:"Open seat — appoint", under:"Robert", sub:"Bay Area · b. after Aug 1995"},
+ {h:"bay_k", name:"Open seat — appoint", under:"Kristen", sub:"Bay Area · b. after Aug 1995"},
+ {h:"bay_mi",name:"Open seat — appoint", under:"Michele", sub:"Bay Area · b. after Aug 1995"},
+ {h:"bay_ma",name:"Open seat — appoint", under:"Matt",    sub:"Bay Area · b. after Aug 1995"}
+];
 function isChancellor(){return CHANCELLORS.indexOf(WHO||"")>=0;}
 function whoParam(){try{var m=(location.search.match(/who=([a-z]+)/i)||[])[1];return m&&FOUNDERS[m.toLowerCase()]?m.toLowerCase():null;}catch(e){return null;}}
 var WHO=whoParam();
@@ -193,7 +209,7 @@ var CHAPTERS=[
 var EVENTS=[
  {d:6,date:"Sat Jul 6",title:"Tribute night @ Ardmore Music Hall",ch:"Philly Heads",type:"Show",em:"🎸",rsvp:64,roles:[{r:"Carpool lead",who:"Robbie"},{r:"Grilled cheese (lot)",who:"Kristen"}]},
  {d:13,date:"Sat Jul 13",title:"Tape trade & art swap",ch:"Philly Heads",type:"Meet",em:"📼",rsvp:31,roles:[{r:"Deck + dubbing",who:"TapeVault"},{r:"Table setup",who:null}]},
- {d:20,date:"Sat Jul 20",title:"Lot gathering — Shakedown day",ch:"NorthEast Tapers",type:"Market",em:"🌹",rsvp:120,roles:[{r:"Vendor check-in",who:null},{r:"Sound",who:null}]}
+ {d:20,date:"Sat Jul 20",title:"Lot gathering — Shakedown day",ch:"NorthEast Tapers",type:"Market",em:"🛍️",rsvp:120,roles:[{r:"Vendor check-in",who:null},{r:"Sound",who:null}]}
 ];
 var DEALERS=[
  {n:"Kara's Prints",kind:"Artist",em:"🖼️",items:[["Show poster (Spring '90, /50)","$85"],["Sticker pack","$12"]]},
@@ -283,7 +299,10 @@ function toast(m){var t=document.createElement("div");t.className="toast";t.text
 function esc(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function gate(what){toast("🔒 "+what+" — counsel-gated in v1 (no real money/accounts yet).");}
 
-var NAV=[["home","Home","🏠"],["chapters","Chapters","🔔"],["events","Shows","📅"],["shakedown","Shakedown","🌹"],["archive","Archive","📼"],["you","You","🪪"]];
+/* Jerry's guitars as the app's spirit animals (safe generic emoji — NOT the protected
+   GD/Jerry-Estate inlay artwork; original/rich icons are IP-counsel-gated): 🌹 Rosebud=Home,
+   🐺 Wolf=Chapters/the pack, 🐯 Tiger=Shows/the music, 🐊 Alligator=Shakedown/the lot. */
+var NAV=[["home","Home","🌹"],["chapters","Chapters","🐺"],["events","Shows","🐯"],["shakedown","Shakedown","🐊"],["archive","Archive","📼"],["you","You","🪪"]];
 function nav(){document.getElementById("nav").innerHTML=NAV.map(function(n){return '<button class="'+(S.tab===n[0]?"on":"")+'" onclick="go(\''+n[0]+'\')"><span class="ni">'+n[2]+'</span>'+n[1]+'</button>';}).join("");}
 
 function feedCard(p,i){return '<div class="card post"><div class="pad"><div class="row"><div class="av" style="background:#ece3f4;color:var(--purple)">'+esc(p.av)+'</div>'+
@@ -294,15 +313,252 @@ function feedCard(p,i){return '<div class="card post"><div class="pad"><div clas
  '<div class="acts"><button class="'+((p.liked||S.liked[i])?"on":"")+'" onclick="like('+i+')">♥ Like</button><button onclick="toast(\'Comments — demo\')">💬 Comment</button><button onclick="toast(\'Share — demo\')">↪ Share</button></div></div></div>';}
 function like(i){S.liked[i]=!S.liked[i];render();}
 
+function rosebud(){return '<div class="rbud" title="Rosebud — your dead_dance mascot"><span class="star" style="left:36%;top:0">✨</span><span class="star" style="right:36%;top:7px;animation-delay:.7s">🌟</span><span class="star" style="left:50%;bottom:0;animation-delay:1.1s">💫</span><span class="rb">🌹</span></div>';}
 function viewHome(){
- return '<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
+ return rosebud()+'<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
    '<input placeholder="What\'s the word on the lot?" onkeydown="if(event.key===\'Enter\'){toast(\'Posted (demo)\');this.value=\'\'}"><button class="btn sm" onclick="toast(\'Posted (demo)\')">Post</button></div></div>'+
    '<div class="card pad"><div class="row" style="gap:10px"><div class="ic">📥</div><div style="flex:1"><b style="font-size:14px">Bring a Facebook post in</b><div class="muted" style="font-size:12px">Share a post from any FB group into the same group here — in &amp; out.</div></div><button class="btn sm" onclick="captureShare(\'\',\'\')">Share in</button></div></div>'+
    eventsView()+
+   bandPostsView()+
    sharesView()+
    requestsView()+
    FEED.map(feedCard).join("")+
    '<div class="foot">Free for the family · v1 prototype · demo data · no ads, no tracking.</div>';
+}
+/* ---- 🎪 VENUE DIRECTORY — where Dead tribute bands play. Seeded from public listings via
+   Compass Rose (gratefuldeadtributebands.com), credited; a starter snapshot to VET, not a live
+   mirror (live sync stays gated on the source's permission). The supply side of the
+   "Become a dead_dance Venue" model. Nothing auto-contacts a venue. ---- */
+var REGION_NAMES={santacruz:"Santa Cruz · Founders",bayarea:"Bay Area",pnw:"Pacific Northwest",socal:"SoCal",rockies:"Rocky Mountain",lonestar:"Lone Star + SW",greatlakes:"Great Lakes",southeast:"Southeast",midatl:"Mid-Atlantic",northeast:"Northeast + New England"};
+var VENUES=[
+ ["The Catalyst","Santa Cruz","CA","santacruz"],["Moe's Alley","Santa Cruz","CA","santacruz"],["Felton Music Hall","Felton","CA","santacruz"],["Rio Theatre","Santa Cruz","CA","santacruz"],
+ ["Sweetwater Music Hall","Mill Valley","CA","bayarea"],["The Fillmore","San Francisco","CA","bayarea"],["The Chapel","San Francisco","CA","bayarea"],["The UC Theatre","Berkeley","CA","bayarea"],["Cornerstone","Berkeley","CA","bayarea"],["HopMonk Tavern","Novato","CA","bayarea"],
+ ["Crystal Ballroom","Portland","OR","pnw"],["Revolution Hall","Portland","OR","pnw"],["The Showbox","Seattle","WA","pnw"],["Nectar Lounge","Seattle","WA","pnw"],["The District Bar","Spokane","WA","pnw"],
+ ["Belly Up","Solana Beach","CA","socal"],["The Mint","Los Angeles","CA","socal"],["The Fonda Theatre","Los Angeles","CA","socal"],["Lodge Room","Highland Park","CA","socal"],["The Coach House","San Juan Capistrano","CA","socal"],["Saint Rocke","Hermosa Beach","CA","socal"],
+ ["Red Rocks Amphitheatre","Morrison","CO","rockies"],["Cervantes' Masterpiece Ballroom","Denver","CO","rockies"],["Ophelia's Electric Soapbox","Denver","CO","rockies"],["Boulder Theater","Boulder","CO","rockies"],["Mishawaka Amphitheatre","Bellvue","CO","rockies"],
+ ["Antone's","Austin","TX","lonestar"],["Gruene Hall","New Braunfels","TX","lonestar"],["The Kessler Theater","Dallas","TX","lonestar"],["Sam's Burger Joint","San Antonio","TX","lonestar"],["Last Concert Cafe","Houston","TX","lonestar"],
+ ["Martyrs'","Chicago","IL","greatlakes"],["The Cubby Bear","Chicago","IL","greatlakes"],["The Vogue","Indianapolis","IN","greatlakes"],["The Magic Bag","Ferndale","MI","greatlakes"],["Wing Warehouse","Cuyahoga Falls","OH","greatlakes"],
+ ["The Orange Peel","Asheville","NC","southeast"],["The Grey Eagle","Asheville","NC","southeast"],["Variety Playhouse","Atlanta","GA","southeast"],["Brooklyn Bowl Nashville","Nashville","TN","southeast"],["Sharkey's Bar & Grill","Coral Springs","FL","southeast"],
+ ["Ardmore Music Hall","Ardmore","PA","midatl"],["9:30 Club","Washington","DC","midatl"],["Sun Inn Tavern","Bethlehem","PA","midatl"],["Cooper's Riverview","Trenton","NJ","midatl"],["Rams Head On Stage","Annapolis","MD","midatl"],["Lost Rhino Brewing","Ashburn","VA","midatl"],
+ ["The Capitol Theatre","Port Chester","NY","northeast"],["Brooklyn Bowl","Brooklyn","NY","northeast"],["The Rooftop at Pier 17","New York","NY","northeast"],["Higher Ground","Burlington","VT","northeast"],["Strange Brew Pub","Norwich","CT","northeast"],["The Sinclair","Cambridge","MA","northeast"],["Port City Music Hall","Portland","ME","northeast"]
+];
+function venueRegions(){var g={};VENUES.forEach(function(v){(g[v[3]]=g[v[3]]||[]).push(v);});return g;}
+function venuesView(){
+ var g=venueRegions(),order=["santacruz","bayarea","pnw","socal","rockies","lonestar","greatlakes","southeast","midatl","northeast"];
+ return '<div class="sec-h">🎪 Venues on the circuit — '+VENUES.length+' rooms</div>'+
+  '<div class="muted" style="font-size:11.5px;margin:0 2px 8px">Where the Dead tribute bands play. <b>Become a dead_dance Venue</b>: feed the musicians, host a dead_dance, book through us. <i>Seed directory — candidates to vet, nothing auto-contacted.</i></div>'+
+  order.filter(function(r){return g[r]&&g[r].length;}).map(function(r){
+   return '<div class="card"><div class="pad" style="padding-bottom:6px"><span class="chip purple">'+esc(REGION_NAMES[r]||r)+'</span> <span class="muted" style="font-size:11px">'+g[r].length+' venues</span></div>'+
+    g[r].map(function(v){return '<div class="pad" style="padding:7px 13px;border-top:1px solid var(--line)"><div class="row" style="gap:8px;align-items:center"><div style="flex:1;font-size:13.5px;cursor:pointer" onclick="venueProfile('+VENUES.indexOf(v)+')"><b>'+esc(v[0])+'</b> <span style="opacity:.4;font-size:11px">›</span><div class="muted" style="font-size:11.5px">'+esc(v[1])+', '+esc(v[2])+'</div></div><button class="minib" onclick="toast(\'Become a dead_dance Venue — invite drafted (v1 mock; nothing auto-sends).\')">＋ Invite</button></div></div>';}).join("")+'</div>';
+  }).join("")+
+  '<div class="note">Directory seeded from public listings via <b>Compass Rose</b> (gratefuldeadtributebands.com), credited. A <b>starter snapshot to vet</b>, not a live mirror; live tour-date sync stays gated on the source\'s permission. Outreach is owner-action.</div>';
+}
+/* ---- 🪪 Default editable profiles — Bands + Venues. Easy to find (tap any band/venue),
+   easy to modify (edits saved locally; honest-state until accounts ship). ---- */
+function loadP(k){try{var s=localStorage.getItem(k);if(s)return JSON.parse(s);}catch(e){}return {};}
+function saveP(k,o){try{localStorage.setItem(k,JSON.stringify(o));}catch(e){}}
+function bandProfile(id){
+ var b=bandById(id);if(!b||!b.name)return;
+ var p=loadP("dd.bandp."+id);
+ document.getElementById("sheet").innerHTML='<h3>🎸 '+esc(b.name)+'</h3>'+
+  '<div class="sb">'+esc(REGION_NAMES[b.region]||b.region||"")+' · '+esc(b.tier||"")+(b.home&&b.home.length<=4?(" · "+esc(b.home)):"")+'</div>'+
+  '<div class="muted" style="font-size:12.5px;margin-bottom:8px">'+esc(b.note||"")+(b.hist?('<br><b>History:</b> '+esc(b.hist)):"")+(b.link?('<br><a href="'+escA(b.link)+'" target="_blank" rel="noopener nofollow">official page ↗</a>'):"")+'</div>'+
+  '<button class="btn gold sm" style="width:100%;margin:0 0 8px" onclick="bandHyperPost(\''+id+'\')">🛸 HyperPost a show to dead_dance</button>'+
+  '<button class="btn gold sm" style="width:100%;margin:0 0 8px;background:#2a6b46" onclick="ticketSheet(\''+id+'\',\''+escA(b.name)+'\')">🎟️ Tickets &amp; splits — see your take</button>'+
+  '<div class="row" style="gap:6px;margin:0 0 11px"><button class="btn ghost sm" style="flex:1" onclick="mexpSheet(\''+escA(b.name)+'\')">💼 Books</button><button class="btn ghost sm" style="flex:1" onclick="venueAnalysis(\''+id+'\',\''+escA(b.name)+'\')">📊 $/venue</button><button class="btn ghost sm" style="flex:1" onclick="pnlSheet(\''+escA(b.name)+'\')">📈 P&amp;L</button></div>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Bio (editable)</div><textarea id="bpBio" style="width:100%;min-height:60px;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;font-family:inherit">'+esc(p.bio||"")+'</textarea>'+
+  '<div class="muted" style="font-size:11.5px;margin:8px 0 4px">Booking contact (editable)</div><input id="bpContact" value="'+escA(p.contact||"")+'" placeholder="email / link" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px">'+
+  '<button class="btn gold" style="width:100%;margin-top:10px" onclick="saveBandProfile(\''+id+'\')">Save profile</button>'+
+  '<div class="note" style="margin-top:9px">Default band profile — easy to find &amp; modify. Band facts credited to <b>Compass Rose</b>. Honest-state: edits live on this device until accounts ship.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function saveBandProfile(id){saveP("dd.bandp."+id,{bio:clamp((document.getElementById("bpBio")||{}).value||"",600),contact:clamp((document.getElementById("bpContact")||{}).value||"",200)});closeModal();toast("🎸 Band profile saved.");}
+function venueProfile(idx){
+ var v=VENUES[idx];if(!v)return;var p=loadP("dd.venuep."+idx);
+ document.getElementById("sheet").innerHTML='<h3>🎪 '+esc(v[0])+'</h3>'+
+  '<div class="sb">'+esc(v[1])+', '+esc(v[2])+' · '+esc(REGION_NAMES[v[3]]||v[3])+'</div>'+
+  '<label class="row" style="gap:9px;align-items:flex-start;margin:2px 0 9px"><input type="checkbox" id="vpBadge" '+(p.badge?"checked":"")+' style="margin-top:2px"><span style="font-size:13px"><b>dead_dance Venue</b> — feed the musicians, host a dead_dance, book through us</span></label>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">About this room (editable)</div><textarea id="vpBio" style="width:100%;min-height:58px;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;font-family:inherit">'+esc(p.bio||"")+'</textarea>'+
+  '<div class="row" style="gap:8px;margin-top:8px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Capacity</div><input id="vpCap" value="'+escA(p.cap||"")+'" placeholder="e.g., 400" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Booking contact</div><input id="vpContact" value="'+escA(p.contact||"")+'" placeholder="email / link" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px"></div></div>'+
+  '<button class="btn gold" style="width:100%;margin-top:10px" onclick="saveVenueProfile('+idx+')">Save profile</button>'+
+  '<div class="note" style="margin-top:9px">Default venue profile — easy to find &amp; modify. Honest-state: edits live on this device; nothing auto-contacts the venue.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function saveVenueProfile(idx){var o={badge:!!(document.getElementById("vpBadge")||{}).checked,bio:clamp((document.getElementById("vpBio")||{}).value||"",600),cap:clamp((document.getElementById("vpCap")||{}).value||"",10),contact:clamp((document.getElementById("vpContact")||{}).value||"",200)};saveP("dd.venuep."+idx,o);closeModal();toast("🎪 Venue profile saved"+(o.badge?" — dead_dance Venue ✓":"")+".");}
+/* ---- 🛸 BAND HYPERPOST → dead_dance (the Borg). The INBOUND side of HyperPost: a band beams its
+   show IN, dead_dance ASSIMILATES it across the national calendar + its region's chapter calendar +
+   the feed. One post, the whole collective sees it. (Backend: dead_dance v2 /api/hyperpost.) ---- */
+var BANDPOSTS=(function(){try{var s=localStorage.getItem("dd.bandposts");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
+function saveBandPosts(){try{localStorage.setItem("dd.bandposts",JSON.stringify(BANDPOSTS.slice(0,200)));}catch(e){}}
+function bandHyperPost(id){
+ var b=bandById(id);if(!b)return;var t=new Date();
+ document.getElementById("sheet").innerHTML='<h3>🛸 '+esc(b.name)+' → HyperPost a show</h3><div class="sb">Beam your gig into dead_dance. We <b>assimilate</b> it — it lands on the national calendar, your region\'s chapter calendar, and the feed. One post, the whole collective sees it.</div>'+
+  '<div class="row" style="gap:8px;margin-bottom:8px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Day (this month)</div><input id="bhDay" type="number" min="1" max="31" value="'+t.getDate()+'" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">State</div><input id="bhSt" value="'+escA(b.home&&b.home.length===2?b.home:"")+'" placeholder="PA" maxlength="2" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;text-transform:uppercase"></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Venue</div><input id="bhVenue" placeholder="where you\'re playing" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:8px">'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">City</div><input id="bhCity" placeholder="city" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:8px">'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">A line for the family (optional)</div><input id="bhNote" placeholder="doors 8, two sets…" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px">'+
+  '<button class="btn gold" style="width:100%;margin-top:11px" onclick="bandHyperDrop(\''+id+'\')">🛸 Beam it into dead_dance</button>'+
+  '<div class="note" style="margin-top:9px">Honest-state: the band\'s own post (its words, its gig). Stored on this device until accounts + the HyperPost API ship. Nothing auto-posts elsewhere.</div>'+
+  '<button class="close" onclick="closeModal()">Cancel</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function bandHyperDrop(id){
+ var b=bandById(id);if(!b)return;
+ var day=Math.max(1,Math.min(31,+(((document.getElementById("bhDay")||{}).value)||1)));
+ var st=clamp((((document.getElementById("bhSt")||{}).value)||"").trim().toUpperCase(),2);
+ var venue=clamp((((document.getElementById("bhVenue")||{}).value)||"").trim(),80);
+ var city=clamp((((document.getElementById("bhCity")||{}).value)||"").trim(),60);
+ var note=clamp((((document.getElementById("bhNote")||{}).value)||"").trim(),200);
+ if(!venue){toast("Give us the venue.");return;}
+ var region=(typeof DD_STATE_REGION!=="undefined"&&DD_STATE_REGION[st])||b.region||"national";
+ BANDPOSTS.unshift({bandId:id,band:b.name,day:day,venue:venue,city:city,st:st,region:region,note:note,ts:Date.now()});
+ if(typeof mexpAddMile==="function")mexpAddMile(b.name+" → "+venue,120); /* auto-track mileage off the gig (estimated, editable) */
+ saveBandPosts();closeModal();S.tab="home";render();renderNear();
+ toast("🛸 Assimilated — "+b.name+" is on the calendar & the feed. The collective sees it.");
+}
+function bandPostsView(){
+ if(typeof BANDPOSTS==="undefined"||!BANDPOSTS.length)return "";
+ return '<div class="sec-h">🛸 From the bands — HyperPosted in</div>'+BANDPOSTS.slice(0,5).map(function(p){
+  return '<div class="card pad"><div class="row" style="gap:8px"><div class="ic">📣</div><div style="flex:1"><b style="font-size:14px;cursor:pointer" onclick="bandProfile(\''+esc(p.bandId)+'\')">'+esc(p.band)+'</b><div class="muted" style="font-size:12px">'+esc(p.venue)+(p.city?(' · '+esc(p.city)):'')+(p.st?(', '+esc(p.st)):'')+' · day '+p.day+'</div>'+(p.note?'<div style="font-size:13px;margin-top:3px">'+esc(p.note)+'</div>':'')+'</div></div></div>';
+ }).join("");
+}
+/* ---- 🎟️ TICKETING FACILITY — WIN THE MUSICIANS. If a band sells tickets for ANY show at ANY
+   venue, dead_dance sells them too. At event creation we confirm sales + price + the split (band/door/
+   dead_dance). The back-office math is HIDDEN from the musician — they just see THEIR clear number. ---- */
+var TIX=(function(){try{var s=localStorage.getItem("dd.tickets");if(s){var o=JSON.parse(s);if(o&&typeof o==="object")return o;}}catch(e){}return {};})();
+function saveTix(){try{localStorage.setItem("dd.tickets",JSON.stringify(TIX));}catch(e){}}
+function tmoney(n){return "$"+Math.round(n).toLocaleString("en-US");}
+function tixCalc(c){var gross=c.price*c.exp;var dd=gross*c.ddFee/100;var pool=gross-dd;var band=pool*c.bandPct/100;if(c.gtee>band)band=c.gtee;var venue=Math.max(0,pool-band);return {gross:gross,dd:dd,band:band,venue:venue};}
+function tixBreakHTML(r,c){return 'Gross '+tmoney(r.gross)+' · dead_dance fee ('+c.ddFee+'%) '+tmoney(r.dd)+' · <b>band '+tmoney(r.band)+'</b> · venue/door '+tmoney(r.venue)+(c.gtee>0?(' · guarantee '+tmoney(c.gtee)):'');}
+function tixRead(ref){var c=TIX[ref]||{};
+ var g=function(idv,d){var el=document.getElementById(idv);return el?(+el.value):d;};
+ return {on:true,sell:!!(document.getElementById("tixSell")||{checked:c.sell!==false}).checked,
+  price:Math.max(0,g("tixPrice",c.price||25)),exp:Math.max(0,g("tixExp",c.exp||150)),
+  bandPct:Math.max(0,Math.min(100,g("tixBand",c.bandPct||80))),ddFee:Math.max(0,Math.min(50,g("tixFee",c.ddFee||10))),gtee:Math.max(0,g("tixGtee",c.gtee||0))};}
+function tixUpdate(ref){var c=tixRead(ref),r=tixCalc(c);var t=document.getElementById("tixTake");if(t)t.textContent=tmoney(r.band);var br=document.getElementById("tixBreak");if(br)br.innerHTML=tixBreakHTML(r,c);}
+function tixSave(ref){var c=tixRead(ref);TIX[ref]=c;saveTix();var r=tixCalc(c);closeModal();toast("🎟️ Tickets confirmed — "+tmoney(c.price)+"/ea · you earn "+tmoney(r.band)+(c.sell?" · selling on dead_dance.":"."));}
+function isDDVenue(name){if(!name||typeof VENUES==="undefined")return false;for(var i=0;i<VENUES.length;i++)if(VENUES[i][0]===name)return true;return false;}
+function ticketSheet(ref,bandName,venueName){
+ var c=TIX[ref]||{on:true,sell:true,price:25,exp:150,bandPct:80,ddFee:10,gtee:0};var r=tixCalc(c);
+ var member="";
+ if(venueName){member=isDDVenue(venueName)
+   ? '<div class="card pad" style="padding:8px 12px;border-left:3px solid #2a6b46">✓ <b>'+esc(venueName)+'</b> is a dead_dance Venue — splits flow straight through.</div>'
+   : '<div class="card pad" style="padding:8px 12px;border-left:3px solid var(--gold)"><b>📍 '+esc(venueName)+' isn\'t a dead_dance Venue — doesn\'t matter.</b><div class="muted" style="font-size:11.5px;margin-top:2px">You\'re the artist. <b>dead_dance sells your tickets anywhere you play</b> — member room or not. (We\'ll send them an invite, too.)</div></div>';}
+ document.getElementById("sheet").innerHTML='<h3>🎟️ Tickets &amp; splits — '+esc(bandName||"this show")+'</h3>'+
+  '<div class="sb">If the band sells tickets anywhere, <b>dead_dance sells them too.</b> Set the price; we confirm sales &amp; the split. The math runs in the back office — you just see <b>your number.</b></div>'+
+  member+
+  '<div class="card pad" style="background:linear-gradient(180deg,#3b6b4a22,#fffaf2);text-align:center"><div class="muted" style="font-size:11.5px">🎸 You earn (projected)</div><div style="font-size:30px;font-weight:800;color:#2a6b46" id="tixTake">'+tmoney(r.band)+'</div><div class="muted" style="font-size:11.5px">'+c.exp+' tickets × '+tmoney(c.price)+' — your cut, clean</div></div>'+
+  '<div class="row" style="gap:8px;margin-top:9px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Ticket price</div><input id="tixPrice" type="number" value="'+c.price+'" onchange="tixUpdate(\''+ref+'\')" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Expected crowd</div><input id="tixExp" type="number" value="'+c.exp+'" onchange="tixUpdate(\''+ref+'\')" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px"></div></div>'+
+  '<label class="row" style="gap:9px;align-items:center;margin:10px 0 2px"><input type="checkbox" id="tixSell" '+(c.sell!==false?"checked":"")+' onchange="tixUpdate(\''+ref+'\')"><span style="font-size:13px"><b>Sell on dead_dance</b> — at ANY venue, member or not</span></label>'+
+  '<details style="margin-top:8px"><summary class="muted" style="font-size:12px;cursor:pointer">⚙︎ Operator details (the back office — hidden from the band view)</summary>'+
+   '<div class="card pad" style="margin-top:8px"><div class="row" style="gap:8px"><div style="flex:1"><div class="muted" style="font-size:11px">Band split %</div><input id="tixBand" type="number" value="'+c.bandPct+'" onchange="tixUpdate(\''+ref+'\')" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:7px;font-size:13px"></div><div style="flex:1"><div class="muted" style="font-size:11px">dead_dance fee %</div><input id="tixFee" type="number" value="'+c.ddFee+'" onchange="tixUpdate(\''+ref+'\')" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:7px;font-size:13px"></div><div style="flex:1"><div class="muted" style="font-size:11px">Band guarantee</div><input id="tixGtee" type="number" value="'+c.gtee+'" onchange="tixUpdate(\''+ref+'\')" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:7px;font-size:13px"></div></div>'+
+    '<div class="muted" style="font-size:12px;margin-top:9px" id="tixBreak">'+tixBreakHTML(r,c)+'</div></div></details>'+
+  '<button class="btn gold" style="width:100%;margin-top:10px" onclick="tixSave(\''+ref+'\')">Confirm tickets &amp; price</button>'+
+  '<div class="note" style="margin-top:9px">Honest-state: the facility computes the deal; <b>real ticket sales + payouts settle on the counsel-gated payment rail.</b> Musician-first — the band keeps its cut; dead_dance never skims the band, the fee rides on the ticket.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+/* 📍 GPS show confirmation — Matt walks into a DSO show, GPS fires a Toast to confirm (badge +1). */
+function gpsConfirmShow(band,venue){
+ if(!navigator.geolocation){toast("📍 Location off — can't GPS-confirm (self-report stays honor-system).");return;}
+ toast("📍 Checking you in at "+band+"…");
+ navigator.geolocation.getCurrentPosition(function(){
+   BADGE.shows++;BADGE.gps=(BADGE.gps||0)+1;render();
+   toast("✅ GPS-confirmed — you're at "+band+(venue?(" @ "+venue):"")+". Badge +1 (verified).");
+ },function(){toast("Couldn't read your location.");},{timeout:7000,maximumAge:60000});
+}
+/* ---- 💼 MUSICIAN'S BOOKS — WIN THE MUSICIANS. Mileage tracks automatically off their gigs; they
+   snap a receipt (hotel / gas / amp rental) and we file it. HIDE the bookkeeping, show the payoff:
+   costs + a tax-ready mileage deduction. Net it against their ticket take so they see the real number. ---- */
+var MEXP=(function(){try{var s=localStorage.getItem("dd.mexp");if(s){var o=JSON.parse(s);if(o&&typeof o==="object")return {exp:o.exp||[],mi:o.mi||[]};}}catch(e){}return {exp:[],mi:[]};})();
+function saveMexp(){try{localStorage.setItem("dd.mexp",JSON.stringify({exp:MEXP.exp.slice(0,500),mi:MEXP.mi.slice(0,500)}));}catch(e){}}
+var MILE_RATE=0.70; /* standard mileage rate — confirm current tax year */
+function mexpMiles(){return MEXP.mi.reduce(function(a,m){return a+(+m.miles||0);},0);}
+function mexpCosts(){return MEXP.exp.reduce(function(a,e){return a+(+e.amount||0);},0);}
+function mexpAddMile(label,miles){MEXP.mi.unshift({label:label,miles:miles,ts:Date.now()});saveMexp();}
+var _mxPhoto=null;
+function mexpSheet(bandName){
+ var miles=mexpMiles(),costs=mexpCosts(),deduct=miles*MILE_RATE;
+ document.getElementById("sheet").innerHTML='<h3>💼 Your books'+(bandName?(' — '+esc(bandName)):'')+'</h3>'+
+  '<div class="sb">We keep them for you. Snap a receipt — we file it. Your miles track as you play. You just play.</div>'+
+  '<div class="card pad" style="background:linear-gradient(180deg,#3b6b4a22,#fffaf2)"><div class="row" style="gap:6px;text-align:center"><div style="flex:1"><div class="muted" style="font-size:10.5px">Costs logged</div><div style="font-size:20px;font-weight:800">'+tmoney(costs)+'</div></div><div style="flex:1"><div class="muted" style="font-size:10.5px">Miles tracked</div><div style="font-size:20px;font-weight:800">'+Math.round(miles)+'</div></div><div style="flex:1"><div class="muted" style="font-size:10.5px">Mileage deduction</div><div style="font-size:20px;font-weight:800;color:#2a6b46">'+tmoney(deduct)+'</div></div></div><div class="muted" style="font-size:10.5px;text-align:center;margin-top:6px">at the standard mileage rate — ready for tax time</div></div>'+
+  '<input type="file" accept="image/*" capture="environment" id="mxPhoto" onchange="mexpSnap(this)" style="display:none">'+
+  '<div class="row" style="gap:8px;margin-top:10px"><button class="btn gold" style="flex:1" onclick="document.getElementById(\'mxPhoto\').click()">📷 Snap a receipt</button><button class="btn ghost" style="flex:1" onclick="mexpForm(false)">➕ Add expense</button></div>'+
+  (MEXP.exp.length?('<div class="sec-h" style="margin-top:12px">Recent receipts</div>'+MEXP.exp.slice(0,6).map(function(e){return '<div class="card pad" style="padding:8px 12px"><div class="row" style="gap:8px;align-items:center"><div class="ic">'+(e.icon||'💼')+'</div><div style="flex:1;font-size:13px"><b>'+esc(e.cat)+'</b>'+(e.photo?' <span class="chip ok">📷</span>':'')+(e.note?('<div class="muted" style="font-size:11.5px">'+esc(e.note)+'</div>'):'')+'</div><b>'+tmoney(e.amount)+'</b></div></div>';}).join("")):'')+
+  (MEXP.mi.length?('<div class="sec-h" style="margin-top:12px">Miles (auto)</div>'+MEXP.mi.slice(0,5).map(function(m){return '<div class="card pad" style="padding:7px 12px"><div class="row" style="gap:8px"><div class="ic">🚐</div><div style="flex:1;font-size:13px">'+esc(m.label)+'</div><b>'+Math.round(m.miles)+' mi</b></div></div>';}).join("")):'')+
+  '<div class="note" style="margin-top:10px">Honest-state: receipts captured on-device (BYO-cloud like your photos — we don\'t upload them); miles auto-accrue from your gigs (estimated, editable). Not tax advice — a clean export for your accountant ships with accounts.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function mexpSnap(input){var f=input.files&&input.files[0];_mxPhoto=f?(f.name||"receipt"):"receipt";mexpForm(true);}
+function mexpForm(hasPhoto){
+ var cats=[["Hotel","🏨"],["Gas / Car","⛽"],["Amp / Gear rental","🎸"],["Food","🍔"],["Tolls","🛣️"],["Other","💼"]];
+ document.getElementById("sheet").innerHTML='<h3>'+(hasPhoto?'📷 Receipt — log it':'➕ Add expense')+'</h3>'+(hasPhoto?'<div class="sb">📎 '+esc(_mxPhoto||"receipt")+' attached. Pick a category &amp; amount — that\'s it.</div>':'<div class="sb">Quick — category &amp; amount.</div>')+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Category</div><select id="mxCat" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+cats.map(function(c){return '<option>'+c[1]+' '+c[0]+'</option>';}).join("")+'</select>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Amount</div><input id="mxAmt" type="number" placeholder="$" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Note (optional)</div><input id="mxNote" placeholder="e.g. La Quinta, Asheville" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px">'+
+  '<button class="btn gold" style="width:100%;margin-top:11px" onclick="mexpSaveExpense('+(hasPhoto?'true':'false')+')">Save</button>'+
+  '<button class="close" onclick="mexpSheet(\'\')">Back</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function mexpSaveExpense(hasPhoto){
+ var cat=((document.getElementById("mxCat")||{}).value||"💼 Other");var icon=cat.split(" ")[0];
+ var amount=Math.max(0,+(((document.getElementById("mxAmt")||{}).value)||0));
+ var note=clamp((((document.getElementById("mxNote")||{}).value)||"").trim(),120);
+ if(!amount){toast("Pop in the amount.");return;}
+ MEXP.exp.unshift({cat:cat.replace(/^\S+\s/,""),icon:icon,amount:amount,note:note,photo:!!hasPhoto,ts:Date.now()});
+ _mxPhoto=null;saveMexp();mexpSheet("");toast("💼 Logged — we'll have it ready at tax time.");
+}
+/* ---- 📊 MUSICIAN VENUE ANALYSIS — plain information: which rooms pay, which are dogs, and where
+   you're charging UNDER the room average (money left on the table). YOU set your price; we inform. ---- */
+function venueAnalysis(bandId,bandName){
+ var b=bandById(bandId);var yourPrice=(TIX[bandId]&&TIX[bandId].price)||22;
+ var all=(typeof VENUES!=="undefined"?VENUES:[]);
+ var pool=all.filter(function(v){return b&&(b.region==="national"||v[3]===b.region);});
+ if(pool.length<6)pool=pool.concat(all.slice(0,8));
+ var seen={},rows=[];
+ pool.forEach(function(v){ if(seen[v[0]])return;seen[v[0]]=1;
+   var h=0,str=bandId+"|"+v[0];for(var i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))>>>0;
+   rows.push({venue:v[0],city:v[1],st:v[2],nights:1+(h%6),crowd:60+(h%240),venueAvg:15+(h%26),take:300+(h%2200),your:yourPrice});
+ });
+ if(!rows.length){toast("Add a few gigs and your venue analysis fills in.");return;}
+ rows.sort(function(a,b){return b.take-a.take;});
+ var best=rows.slice(0,3),dogs=rows.slice(-3).reverse();
+ var under=rows.filter(function(r){return r.your<r.venueAvg-2;}).sort(function(a,b){return (b.venueAvg-b.your)*b.crowd-(a.venueAvg-a.your)*a.crowd;}).slice(0,4);
+ var card=function(r){return '<div class="card pad" style="padding:9px 12px"><div class="row" style="gap:8px"><div style="flex:1;font-size:13.5px"><b>'+esc(r.venue)+'</b><div class="muted" style="font-size:11.5px">'+esc(r.city)+', '+esc(r.st)+' · '+r.nights+' night'+(r.nights>1?'s':'')+' · ~'+r.crowd+' heads</div></div><div style="text-align:right"><b>'+tmoney(r.take)+'</b><div class="muted" style="font-size:10.5px">avg/night</div></div></div></div>';};
+ document.getElementById("sheet").innerHTML='<h3>📊 Where you make money'+(bandName?(' — '+esc(bandName)):'')+'</h3>'+
+  '<div class="sb">The rooms that pay, the rooms that don\'t, and where you\'re leaving money on the table. Plain info, no spin.</div>'+
+  '<div class="sec-h">🔥 Your best rooms</div>'+best.map(card).join("")+
+  '<div class="sec-h" style="margin-top:10px">🐶 The dogs — think twice</div>'+dogs.map(card).join("")+
+  (under.length?('<div class="sec-h" style="margin-top:10px">💸 You\'re charging under the room</div>'+under.map(function(r){var upside=(r.venueAvg-r.your)*r.crowd;return '<div class="card pad" style="padding:9px 12px;border-left:3px solid var(--gold)"><div style="font-size:13.5px"><b>'+esc(r.venue)+'</b> — you charge <b>'+tmoney(r.your)+'</b>, the room averages <b>'+tmoney(r.venueAvg)+'</b>.</div><div class="muted" style="font-size:11.5px;margin-top:2px">Match the average and that\'s ~<b>'+tmoney(upside)+'</b> more a night you\'re leaving on the table.</div></div>';}).join("")):'')+
+  '<div class="note" style="margin-top:10px">Honest-state: representative until your real gig history accrues — then it runs off YOUR actual nights + the room\'s real averages. Information for you; you set your price.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+/* ---- 📈 MUSICIAN P&L — month / quarter / year. We do the accounting; they read one number.
+   Revenue (gig income + tips) − Expenses (logged receipts + mileage deduction + touring costs) = Net. ---- */
+var PNL_PERIOD="month";
+function pnlScale(p){return p==="year"?12:p==="quarter"?3:1;}
+function pnlSet(p,bandName){PNL_PERIOD=p;pnlSheet(bandName);}
+function pnlSheet(bandName){
+ var k=pnlScale(PNL_PERIOD),plabel=PNL_PERIOD==="year"?"This year":PNL_PERIOD==="quarter"?"This quarter":"This month";
+ var gigs=Math.max((typeof BANDPOSTS!=="undefined"?BANDPOSTS.length:0),4), avgTake=1200;
+ var tips=(typeof TIPS!=="undefined"&&TIPS.total)?TIPS.total:0;
+ var GI=Math.round(gigs*avgTake*k), TI=Math.round(tips*k), R=GI+TI;
+ var Elog=Math.round(mexpCosts()), Emile=Math.round(mexpMiles()*MILE_RATE), Eother=Math.round(650*k), E=Elog+Emile+Eother, N=R-E;
+ var tab=function(p,lbl){return '<button class="btn sm'+(PNL_PERIOD===p?" gold":" ghost")+'" onclick="pnlSet(\''+p+'\',\''+escA(bandName||"")+'\')">'+lbl+'</button>';};
+ var line=function(lbl,amt,bold){return '<div class="row" style="gap:8px;padding:5px 0;border-top:1px solid var(--line)"><div style="flex:1;font-size:13px'+(bold?";font-weight:800":"")+'">'+esc(lbl)+'</div><div style="font-weight:'+(bold?800:600)+'">'+tmoney(amt)+'</div></div>';};
+ document.getElementById("sheet").innerHTML='<h3>📈 P&amp;L'+(bandName?(' — '+esc(bandName)):'')+'</h3>'+
+  '<div class="sb">Your books, totaled. We do the accounting — you read one number.</div>'+
+  '<div class="row" style="gap:6px;margin-bottom:9px">'+tab("month","Month")+tab("quarter","Quarter")+tab("year","Year")+'</div>'+
+  '<div class="sec-h">Revenue · '+esc(plabel.toLowerCase())+'</div><div class="card pad" style="padding:4px 12px">'+line("Gig income",GI)+line("Tips",TI)+line("Total revenue",R,true)+'</div>'+
+  '<div class="sec-h" style="margin-top:10px">Expenses</div><div class="card pad" style="padding:4px 12px">'+line("Logged receipts",Elog)+line("Mileage deduction ("+Math.round(mexpMiles())+" mi)",Emile)+line("Other touring costs",Eother)+line("Total expenses",E,true)+'</div>'+
+  '<div class="card pad" style="margin-top:10px;background:linear-gradient(180deg,'+(N>=0?"#3b6b4a22":"#b02a4822")+',#fffaf2);text-align:center"><div class="muted" style="font-size:11px">Net profit · '+esc(plabel.toLowerCase())+'</div><div style="font-size:28px;font-weight:800;color:'+(N>=0?"#2a6b46":"#b02a48")+'">'+tmoney(N)+'</div></div>'+
+  '<div class="note" style="margin-top:10px">Honest-state: representative figures that fill in from your real takes, tips, receipts &amp; miles as they accrue. A clean export for your accountant ships with accounts. Not tax advice.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
 function viewChapters(){
  var hq=CHAPTERS.filter(function(c){return c.hq;})[0]||CHAPTERS[0];
@@ -314,6 +570,7 @@ function viewChapters(){
   '<div class="sec-h">Chapters across the country</div>'+
   '<div class="card list">'+rest.map(function(c){return '<div class="it"><div class="ic">'+c.em+'</div><div class="nm"><b>'+esc(c.n)+'</b><div class="s">'+esc(c.loc)+' · '+c.m+' members</div></div><button class="btn sm ghost" onclick="toast(\'Joined '+esc(c.n)+' (demo)\')">Join</button></div>';}).join("")+'</div>'+
   '<div class="card pad row" style="gap:12px"><div class="ic">🌌</div><div style="flex:1"><b>dead_dance Family (National)</b><div class="muted">All chapters roll up here · the whole bus</div></div><span class="chip purple">Rollup</span></div>'+
+  venuesView()+
   '<div class="note"><b>How the map is drawn:</b> chapters are anchored to where the tribute bands actually tour — the Bay, the Northwest, SoCal, the Rockies (Red Rocks), Texas/SW, the Great Lakes (Chicago), the Southeast (Asheville/Nashville), the Mid-Atlantic, and the Northeast. Kept deliberately few so each one stays a real scene, not a ghost town.</div>'+
   '<div class="note"><b>How chapters earn:</b> when a chapter or vendor sells on Shakedown, dead_dance is the clearing house — a share keeps each local scene self-funding, a founders\' share flows home to Santa Cruz, and the rest runs the platform. <i>Exact splits are drafted for the founders\' sign-off and finalized with counsel; v1 mocks all money.</i></div>';
 }
@@ -323,11 +580,11 @@ function viewEvents(){
  if(typeof DD_BANDS==="undefined"||typeof DD_SHOWS==="undefined"){return '<div class="note">Couldn\'t load the band list (bands.js). Reload the page — the rest of dead_dance still works.</div>';}
  var heads=DD_BANDS.filter(function(b){return b.tier==="Headliner";});
  var rest=DD_BANDS.filter(function(b){return b.tier!=="Headliner";});
- var bandCard=function(b){return '<div class="band"><div class="ic">🎸</div><div class="nm"><b>'+esc(b.name)+'</b> <span class="tierpill '+esc(b.tier)+'">'+esc(b.tier)+'</span><div class="s">'+esc(b.note)+'</div></div>'+
+ var bandCard=function(b){return '<div class="band"><div class="ic">🎸</div><div class="nm"><b style="cursor:pointer" onclick="bandProfile(\''+b.id+'\')">'+esc(b.name)+'</b> <span class="tierpill '+esc(b.tier)+'">'+esc(b.tier)+'</span><div class="s">'+esc(b.note)+'</div></div>'+
    '<div style="display:flex;flex-direction:column;gap:5px"><button class="minib'+(b.follow?' rose':'')+'" onclick="follow(\''+b.id+'\')">'+(b.follow?'🔔 Following':'+ Follow')+'</button><button class="minib" onclick="bookBand()">📅 Book</button><button class="minib" onclick="tipJar()">💚 Tip</button></div></div>';};
  var showCard=function(s,i){var b=bandById(s.bandId);return '<div class="show"><div class="ic">'+(s.near?'📍':'🎟️')+'</div><div class="nm"><b>'+esc(b.name)+'</b>'+(s.near?' <span class="chip rose">near you</span>':'')+(s.real?'':' <span class="chip">representative</span>')+
    '<div class="s">'+esc(s.date)+' · '+esc(s.venue)+' · '+esc(s.city)+', '+esc(s.state)+'</div>'+
-   '<div class="acts"><button class="minib" onclick="toast(\'RSVP — see you there! (demo)\')">RSVP</button><button class="minib" onclick="sawShow()">I was there → badge</button><button class="minib rose" onclick="promote('+i+')">🚀 HyperPost</button></div></div></div>';};
+   '<div class="acts"><button class="minib" onclick="toast(\'RSVP — see you there! (demo)\')">RSVP</button><button class="minib" onclick="gpsConfirmShow('+JSON.stringify(b.name).replace(/"/g,"&quot;")+','+JSON.stringify(s.venue||"").replace(/"/g,"&quot;")+')">📍 I\'m here (GPS)</button><button class="minib" onclick="ticketSheet('+JSON.stringify(s.bandId+"@"+(s.venue||"")).replace(/"/g,"&quot;")+','+JSON.stringify(b.name).replace(/"/g,"&quot;")+','+JSON.stringify(s.venue||"").replace(/"/g,"&quot;")+')">🎟️ Tickets</button><button class="minib rose" onclick="promote('+i+')">🚀 HyperPost</button></div></div></div>';};
  return '<div class="sec-h">🎸 Headliners on tour — follow for local alerts</div>'+
   '<div class="card">'+heads.map(bandCard).join("")+'</div>'+
   '<div class="sec-h">Tonight &amp; near you</div>'+
@@ -359,7 +616,7 @@ function promote(i){
 function copyDraft(btn){var tx=btn.parentNode.querySelector(".tx").textContent;try{(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(tx):Promise.reject()).then(function(){toast("Copied — paste it where you want it.");}).catch(function(){toast("Select & copy the text.");});}catch(e){toast("Select & copy the text.");}}
 function closeModal(){document.getElementById("ovl").classList.remove("on");}
 function viewShakedown(){
- return '<div class="sec-h">🌹 Shakedown Street · stalls → vendors → The Dealer</div>'+
+ return '<div class="sec-h">🛍️ Shakedown Street · stalls → vendors → The Dealer</div>'+
   DEALERS.map(function(dl){return '<div class="card"><div class="pad row"><div class="ic">'+dl.em+'</div><div style="flex:1"><b>'+esc(dl.n)+'</b><div class="muted">'+esc(dl.kind)+'</div></div><span class="chip'+(dl.kind==="Chapter stall"?"":" purple")+'">'+(dl.kind==="Chapter stall"?"Chapter":dl.kind)+'</span></div>'+
    '<div class="list">'+dl.items.map(function(it){return '<div class="it"><div class="ic">📦</div><div class="nm"><b>'+esc(it[0])+'</b><div class="s">'+esc(dl.n)+'</div></div><div class="row" style="gap:8px"><b style="color:var(--purple)">'+esc(it[1])+'</b><button class="btn sm" onclick="gate(\'Buying from the seller\')">View</button></div></div>';}).join("")+'</div></div>';}).join("")+
   '<div class="note"><b>Lot rules:</b> the deal is between buyer and seller; dead_dance just sets the table and takes the agreed cut. Tapes & art are sold by their makers. <b>No band recordings are sold without a license.</b> All money paths are counsel-gated and mocked in v1.</div>';
@@ -519,7 +776,17 @@ function saveChancellors(){try{localStorage.setItem("dd.chancellors",JSON.string
 function chancellorWelcome(){
  var first=(PROFILE.name.split(/\s+/)[0])||"family";
  return '<div class="sec-h">🌹 Welcome to the community</div><div class="card pad"><div style="font-size:14px;line-height:1.6">Welcome, <b>'+esc(first)+'</b>. You\'re a <b>Chancellor</b> of dead_dance now — one of the keepers of the flame. This started as a circle of Christmas lights on a parking lot at <b>Greyhound Rock</b>, Robbie\'s circle, the most beautiful sunset in the world, and it grew into a home for everyone who\'s ever danced inside those lights.<br><br>Your job isn\'t to <i>run</i> it — it\'s to keep it warm, keep it honest, keep it peaceful. Appoint the Chapter Heads you trust. Vote on what rises to the whole family. Protect the spirit: <b>rights not copies, the family never the product, no one ever the mark.</b><br><br>You earned this seat. Now hold the door open for the next head down the road. 🌹</div>'+
-  '<button class="btn gold sm" style="margin-top:11px" onclick="mintChancellor()">➕ Mint a Chancellor</button></div>';
+  '<button class="btn gold sm" style="margin-top:11px" onclick="mintChancellor()">➕ Mint a Chancellor</button></div>'+
+  bayChancellorRoster();
+}
+function bayChancellorRoster(){
+ var founders=[["Robert Garcia","The Chancellor","RG"],["Kristen Young","The Chancellorina","KY"],["Michele Murphy","The Queen Bee","MM"],["Matt Hartle","The Ice Cream Kid","MH"]];
+ return '<div class="sec-h">👑 The Chancellors — Bay Area</div><div class="card list">'+
+   founders.map(function(f){return '<div class="it"><div class="ic">'+f[2]+'</div><div class="nm"><b>'+esc(f[0])+'</b><div class="s">'+esc(f[1])+'</div></div></div>';}).join("")+'</div>'+
+   '<div class="muted" style="font-size:11.5px;margin:9px 2px 5px">Seated under them — the next generation, all <b>born after August 1995</b> (after Jerry), holding the door for who comes next:</div>'+
+   '<div class="card list">'+BAY_CHANCELLORS.map(function(c){
+     return '<div class="it"><div class="ic">🌹</div><div class="nm"><b>'+esc(c.name)+'</b><div class="s">under '+esc(c.under)+' · '+esc(c.sub)+'</div></div><button class="minib" onclick="mintChancellor()">Appoint</button></div>';
+   }).join("")+'</div>';
 }
 function mintList(){if(!NEW_CHANCELLORS.length)return "";return '<div class="card list">'+NEW_CHANCELLORS.map(function(c){return '<div class="it"><div class="ic">👑</div><div class="nm"><b>'+esc(c.name)+'</b><div class="s">'+esc(c.link)+'</div></div></div>';}).join("")+'</div>';}
 function mintChancellor(){
@@ -541,6 +808,94 @@ function doMintChancellor(){
  var ml=document.getElementById("mcList");if(ml)ml.innerHTML=mintList();
  toast("👑 Chancellor minted — invite: welcome.html?who="+h);
 }
+/* ---- ✅ Hidden Chapter-Leader CRM — hide the BS, just the simple weekly to-dos & reminders
+   around running the chapter. Rolls all the way up to Michael (the national board). ---- */
+var CRM_TASKS=[
+ {id:"qr",t:"Put a QR up at this week's show",why:"how new heads scan in"},
+ {id:"vac",t:"Vacuum in the 3–5 best posts",why:"keeps the home feed alive"},
+ {id:"crowd",t:"Answer & close any open requests",why:"the community moves"},
+ {id:"legal",t:"Check legal on any scheduled dead_dance",why:"legal first, lights second"},
+ {id:"welcome",t:"Welcome the new heads who scanned in",why:"keep it warm"},
+ {id:"feed",t:"Post one thing to the chapter feed",why:"show you're here"}
+];
+var CRMKEY="dd.crm."+(WHO||"me");
+var CRM=(function(){try{var s=localStorage.getItem(CRMKEY);if(s){var o=JSON.parse(s);if(o&&typeof o==="object")return o;}}catch(e){}return {};})();
+function crmSave(){try{localStorage.setItem(CRMKEY,JSON.stringify(CRM));}catch(e){}}
+function crmDone(){var n=0;CRM_TASKS.forEach(function(t){if(CRM[t.id])n++;});return n;}
+function crmToggle(id){CRM[id]=!CRM[id];crmSave();crmSheet();}
+function crmSheet(){
+ var done=crmDone(),tot=CRM_TASKS.length,pct=Math.round(done/tot*100);
+ document.getElementById("sheet").innerHTML='<h3>✅ Your chapter — this week</h3><div class="sb">The simple stuff that keeps your chapter humming. We hide the rest — just check it off.</div>'+
+  '<div style="height:9px;background:#e6dccb;border-radius:6px;overflow:hidden;margin:2px 0 4px"><div style="height:100%;width:'+pct+'%;background:'+(done===tot?"#3b6b4a":"var(--gold-deep)")+'"></div></div>'+
+  '<div class="muted" style="font-size:12px;margin-bottom:8px">'+(done===tot?"🌹 All clear — your chapter's humming.":done+" of "+tot+" done")+'</div>'+
+  CRM_TASKS.map(function(t){var on=!!CRM[t.id];return '<label class="row" style="gap:10px;align-items:flex-start;padding:9px 2px;border-top:1px solid var(--line);cursor:pointer"><input type="checkbox" '+(on?"checked":"")+' onclick="crmToggle(\''+t.id+'\')" style="margin-top:2px"><span style="flex:1;font-size:13.5px'+(on?";opacity:.5;text-decoration:line-through":"")+'">'+esc(t.t)+'<div class="muted" style="font-size:11px;text-decoration:none">'+esc(t.why)+'</div></span></label>';}).join("")+
+  (isChancellor()?'<button class="btn ghost sm" style="margin-top:11px" onclick="crmNational()">🌌 Roll up — all chapters</button>':'')+
+  '<div class="note" style="margin-top:10px">Honest-state: your checklist lives on this device; resets weekly when accounts ship. The work stays hidden — you just get the to-dos.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function crmNational(){
+ var rows=(typeof CHAPTERS_LIST!=="undefined"?CHAPTERS_LIST:[["bayarea","Bay Area",980]]).map(function(c,i){
+   var d=(c[0]==="santacruz")?crmDone():((c[2]*7+i*3)%7); return {name:c[1],done:Math.min(6,d),tot:6};});
+ var avg=Math.round(rows.reduce(function(a,r){return a+r.done/r.tot;},0)/rows.length*100);
+ rows.sort(function(a,b){return b.done-a.done;});
+ document.getElementById("sheet").innerHTML='<h3>🌌 All chapters — this week</h3><div class="sb">Every chapter at a glance — how the whole family\'s keeping up. Rolls all the way to you.</div>'+
+  '<div class="muted" style="font-size:12px;margin-bottom:8px">Network: <b>'+avg+'%</b> of weekly to-dos done</div>'+
+  '<div class="card list">'+rows.map(function(r){var p=Math.round(r.done/r.tot*100);return '<div class="it"><div class="ic">'+(r.done===r.tot?"🌹":r.done>=4?"✅":"⏳")+'</div><div class="nm"><b>'+esc(r.name)+'</b><div class="s">'+r.done+'/'+r.tot+' done</div></div><b>'+p+'%</b></div>';}).join("")+'</div>'+
+  '<button class="btn ghost sm" style="margin-top:10px" onclick="crmSheet()">← Back to my to-dos</button>'+
+  '<div class="note" style="margin-top:10px">Honest-state: representative figures; live per-chapter status wires in with accounts + the backend.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+}
+
+/* ---- 📅 Chapter Calendar inside the Near You widget — small at the bottom, expands to the
+   whole month; rolls up to a NATIONAL view of who's playing around the country. ---- */
+var CAL_CHAPTERS=["Bay Area","Santa Cruz","SoCal","Pacific NW","Rocky Mtn","Lone Star","Great Lakes","Southeast","Mid-Atlantic","Northeast"];
+var CAL_VIEW={open:false,scope:"national",chapter:"Bay Area",day:null};
+function calMonthInfo(){var d=new Date();return {y:d.getFullYear(),m:d.getMonth(),name:d.toLocaleDateString(undefined,{month:"long"}),days:new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),first:new Date(d.getFullYear(),d.getMonth(),1).getDay(),today:d.getDate()};}
+function calShows(){
+ var mi=calMonthInfo();
+ /* GENERATED from the real bands × venues so the national calendar AND every chapter
+    calendar fill. Region bands play their region; national Headliners play everywhere. */
+ var CAL_REGION={santacruz:"Santa Cruz",bayarea:"Bay Area",pnw:"Pacific NW",socal:"SoCal",rockies:"Rocky Mtn",lonestar:"Lone Star",greatlakes:"Great Lakes",southeast:"Southeast",midatl:"Mid-Atlantic",northeast:"Northeast"};
+ var byReg={}, nat=[];
+ if(typeof DD_BANDS!=="undefined")DD_BANDS.forEach(function(b){ if(b.region==="national")nat.push(b); else (byReg[b.region]=byReg[b.region]||[]).push(b); });
+ var rows=[];
+ (typeof VENUES!=="undefined"?VENUES:[]).forEach(function(v,i){
+   var rkey=v[3], pool=(byReg[rkey]||[]).concat(nat); if(!pool.length)return;
+   var n=(i%3===0)?2:1;
+   for(var k=0;k<n;k++){
+     var day=((i*5+k*11)%mi.days)+1, band=pool[(i+k)%pool.length];
+     rows.push({day:day,band:band.name,venue:v[0],city:v[1],st:v[2],chapter:CAL_REGION[rkey]||rkey,dd:false});
+   }
+ });
+ if(typeof EVENTS!=="undefined")EVENTS.forEach(function(e){if(e.type!=="deaddance")return;var dt=new Date(e.when);if(dt.getMonth()===mi.m&&dt.getFullYear()===mi.y)rows.push({day:dt.getDate(),band:"🌹 dead_dance",venue:e.location||"(reveals soon)",city:"",st:"",chapter:(e.by||"").replace(/ Chapter$/,""),dd:true});});
+ /* 🛸 ASSIMILATED — shows the BANDS HyperPosted into dead_dance land on the calendar too */
+ if(typeof BANDPOSTS!=="undefined")BANDPOSTS.forEach(function(b){if(b.day>=1&&b.day<=mi.days)rows.push({day:b.day,band:b.band+" 📣",venue:b.venue,city:b.city,st:b.st,chapter:CAL_REGION[b.region]||b.region||"",dd:false});});
+ return rows;
+}
+function calFiltered(){var rows=calShows();if(CAL_VIEW.scope==="chapter")rows=rows.filter(function(r){return r.chapter===CAL_VIEW.chapter;});return rows;}
+function calToggle(){CAL_VIEW.open=!CAL_VIEW.open;CAL_VIEW.day=null;renderNear();}
+function calScope(s){CAL_VIEW.scope=s;CAL_VIEW.day=null;renderNear();}
+function calSetChapter(v){CAL_VIEW.chapter=v;CAL_VIEW.day=null;renderNear();}
+function calPickDay(d){CAL_VIEW.day=(CAL_VIEW.day===d?null:d);renderNear();}
+function calBar(){
+ var mi=calMonthInfo(),rows=calFiltered(),byDay={};rows.forEach(function(r){(byDay[r.day]=byDay[r.day]||[]).push(r);});
+ if(!CAL_VIEW.open)
+   return '<div onclick="calToggle()" style="cursor:pointer;padding:10px 13px;border-top:1px solid var(--line);background:#241634;color:#f0e6ff;display:flex;align-items:center;gap:8px;font-size:12.5px">📅 <b>'+mi.name+'</b> · '+rows.length+' shows '+(CAL_VIEW.scope==="national"?"around the country":"in "+esc(CAL_VIEW.chapter))+'<span style="margin-left:auto">▾</span></div>';
+ function sb(s,lbl){return '<button onclick="calScope(\''+s+'\')" style="border:0;border-radius:7px;padding:4px 9px;font-size:11px;cursor:pointer;background:'+(CAL_VIEW.scope===s?"var(--gold)":"#3a2a52")+';color:'+(CAL_VIEW.scope===s?"#2a1b3d":"#f0e6ff")+'">'+lbl+'</button>';}
+ var head='<div style="padding:9px 11px 6px;background:#241634;color:#f0e6ff;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b style="font-size:12.5px">📅 '+mi.name+'</b><span style="margin-left:auto"></span>'+sb("national","🌌 National")+sb("chapter","My chapter")+'<span onclick="calToggle()" style="cursor:pointer;padding:0 4px">▴</span>'+
+   (CAL_VIEW.scope==="chapter"?'<select onchange="calSetChapter(this.value)" style="width:100%;margin-top:6px;background:#1a1027;color:#f0e6ff;border:1px solid #4a3a62;border-radius:7px;padding:5px;font-size:12px">'+CAL_CHAPTERS.map(function(c){return '<option'+(c===CAL_VIEW.chapter?" selected":"")+'>'+esc(c)+'</option>';}).join("")+'</select>':'')+'</div>';
+ var wk=["S","M","T","W","T","F","S"].map(function(d){return '<div style="text-align:center;font-size:9px;color:#a98fd0;padding:2px 0">'+d+'</div>';}).join("");
+ var cells='';for(var i=0;i<mi.first;i++)cells+='<div></div>';
+ for(var d=1;d<=mi.days;d++){var has=byDay[d],isT=d===mi.today,sel=CAL_VIEW.day===d;
+   cells+='<div onclick="'+(has?"calPickDay("+d+")":"")+'" style="text-align:center;padding:4px 0;border-radius:7px;font-size:11px;cursor:'+(has?"pointer":"default")+';background:'+(sel?"var(--gold)":isT?"#3a2a52":"transparent")+';color:'+(sel?"#2a1b3d":"#e8dcff")+'">'+d+(has?'<div style="height:4px;width:4px;border-radius:50%;background:'+(sel?"#2a1b3d":"var(--gold)")+';margin:1px auto 0"></div>':'')+'</div>';}
+ var grid='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:6px 10px;background:#1a1027">'+wk+cells+'</div>';
+ var detail;
+ if(CAL_VIEW.day&&byDay[CAL_VIEW.day])detail='<div style="padding:4px 12px 10px;background:#1a1027">'+byDay[CAL_VIEW.day].map(function(r){return '<div style="padding:5px 0;border-top:1px solid #33254a;font-size:12px;color:#f0e6ff"><b>'+esc(r.band)+'</b> · '+esc(r.venue)+(r.city?' · '+esc(r.city)+', '+esc(r.st):'')+(CAL_VIEW.scope==="national"?' <span style="color:#a98fd0">· '+esc(r.chapter)+'</span>':'')+'</div>';}).join("")+'</div>';
+ else detail='<div style="padding:6px 12px 10px;background:#1a1027;font-size:11px;color:#a98fd0">Tap a 🌹 day to see who\'s playing'+(CAL_VIEW.scope==="national"?" around the country":"")+'.</div>';
+ return head+grid+detail;
+}
+
 /* ---- ⚖️ LEGAL (the Chapter Head's hardest job) + 🗺️ event location REVEAL with Farrah nav ----
    NOT legal advice: a compliance CHECKLIST the Chapter Head takes to local authorities/counsel. */
 var LEGAL_ITEMS=[
@@ -575,11 +930,13 @@ function planEvent(){
  document.getElementById("sheet").innerHTML='<h3>🌹 Schedule a dead_dance</h3><div class="sb"><b>Our namesake event</b> — the circle of lights. It schedules like any event (date, reveal, Farrah guides everyone in) but it\'s <b>special</b>: it lands in the family\'s feed and bursts into the top-right widget with the dancers. Location can be fixed or fluid. <b>Legal first:</b> you can\'t publish without confirming you\'ve secured the arrangements.</div>'+
   '<div style="margin-bottom:9px"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Location (kept hidden until reveal)</div><input id="evLoc" placeholder="e.g., the north lot at Greyhound Rock" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div>'+
   '<div class="row" style="gap:8px;margin-bottom:9px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Starts in (min)</div><input id="evStart" type="number" value="120" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Reveal (min before)</div><input id="evReveal" type="number" value="60" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div></div>'+
-  '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.4;margin-bottom:11px"><input id="evLegal" type="checkbox" style="margin-top:2px"><span>I\'ve secured the <b>legal arrangements</b> for this location (permits / permission). I\'m responsible.</span></label>'+
+  '<div id="ddProgram"></div>'+
+  '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.4;margin:11px 0 11px"><input id="evLegal" type="checkbox" style="margin-top:2px"><span>I\'ve secured the <b>legal arrangements</b> for this location (permits / permission). I\'m responsible.</span></label>'+
   '<button class="btn gold" style="width:100%" onclick="publishEvent()">Publish event</button>'+
   '<div class="note" style="margin-top:10px">Honest-state: demo. The legal attestation is the Chapter Head\'s responsibility (not legal advice). Reveal is for crowd-management &amp; vibe — the gathering must be lawful first.</div>'+
   '<button class="close" onclick="closeModal()">Cancel</button>';
  document.getElementById("ovl").classList.add("on");
+ ddProgInit();ddProgPaint();
 }
 function publishEvent(){
  var loc=clamp(((document.getElementById("evLoc")||{}).value||"").trim(),120);
@@ -588,8 +945,51 @@ function publishEvent(){
  var legal=(document.getElementById("evLegal")||{}).checked;
  if(!loc){toast("Set the location first.");return;}
  if(!legal){toast("You must confirm the legal arrangements — that's the Chapter Head's responsibility.");return;}
- EVENTS.unshift({id:"ev"+Date.now(),type:"deaddance",by:(PROFILE.name+"'s chapter"),location:loc,when:Date.now()+startMin*60000,revealMin:revMin,legal:true});
+ EVENTS.unshift({id:"ev"+Date.now(),type:"deaddance",by:(PROFILE.name+"'s chapter"),location:loc,when:Date.now()+startMin*60000,revealMin:revMin,legal:true,program:ddProgSummary()});
  saveEvents();closeModal();S.tab="home";render();renderNear();toast("🌹 dead_dance scheduled — it's bursting in the widget. Location reveals "+revMin+" min before.");
+}
+/* ---- 🎶 dead_dance PROGRAM scheduler — pick the SHOW, fill the window with BONUS SETS.
+   ONLY for the dead_dance EVENT (the namesake circle), never the main archive. Robbie books,
+   say, 6–9pm (180 min); not every show fills it, so he adds a bonus set from a DIFFERENT show.
+   A "set" here is a real set off a real show (SET 1 / SET 2). Lengths are representative. ---- */
+var DDPROG={programMin:180,showId:null,bonus:[]};
+function ddShowById(id){for(var i=0;i<GD_SHOWS.length;i++)if(GD_SHOWS[i].id===id)return GD_SHOWS[i];return null;}
+function ddSetLen(sh,i){if(!sh||!sh.sets||!sh.sets[i])return 0;return Math.max(35,Math.round(sh.sets[i].songs.length*9/5)*5);} /* ~9 min/song, 5-min granularity */
+function ddShowLen(id){var sh=ddShowById(id);if(!sh||!sh.sets)return 0;var t=0;for(var i=0;i<sh.sets.length;i++)t+=ddSetLen(sh,i);return t;}
+function ddBonusLen(){return DDPROG.bonus.reduce(function(a,b){return a+ddSetLen(ddShowById(b.showId),b.setIdx);},0);}
+function ddFilled(){return (DDPROG.showId?ddShowLen(DDPROG.showId):0)+ddBonusLen();}
+function ddShowLabel(sh){return sh.date+" · "+sh.venue;}
+function ddProgInit(){DDPROG={programMin:180,showId:null,bonus:[]};}
+function ddProgPaint(){var h=document.getElementById("ddProgram");if(h)h.innerHTML=ddProgBody();}
+function ddSetProgLen(){var v=+((document.getElementById("ddPMin")||{}).value);DDPROG.programMin=Math.max(30,Math.min(360,v||180));ddProgPaint();}
+function ddPickShow(){DDPROG.showId=(document.getElementById("ddShowSel")||{}).value||null;DDPROG.bonus=[];ddProgPaint();}
+function ddAddBonus(){var v=(document.getElementById("ddBonusSel")||{}).value;if(!v)return;var p=v.split(":");DDPROG.bonus.push({showId:p[0],setIdx:+p[1]});ddProgPaint();}
+function ddRemoveBonus(i){DDPROG.bonus.splice(i,1);ddProgPaint();}
+function ddProgBody(){
+ var filled=ddFilled(),rem=DDPROG.programMin-filled,pct=Math.max(0,Math.min(100,Math.round(filled/DDPROG.programMin*100)));
+ var showOpts='<option value="">— pick the show —</option>'+GD_SHOWS.map(function(s){return '<option value="'+s.id+'"'+(DDPROG.showId===s.id?' selected':'')+'>'+esc(ddShowLabel(s))+' (~'+ddShowLen(s.id)+' min)</option>';}).join("");
+ var html='<div class="sec-h" style="margin-top:8px">🎶 The music program</div>'+
+   '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Program length (min) — 6–9pm = 180</div><input id="ddPMin" type="number" value="'+DDPROG.programMin+'" onchange="ddSetProgLen()" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:8px">'+
+   '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Pick the show</div><select id="ddShowSel" onchange="ddPickShow()" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:8px">'+showOpts+'</select>';
+ if(DDPROG.showId){
+  var sh=ddShowById(DDPROG.showId);
+  html+='<div class="card pad" style="padding:10px 12px"><b style="font-size:13px">'+esc(ddShowLabel(sh))+'</b>'+(sh.sets||[]).map(function(st,i){return '<div class="muted" style="font-size:12px">• '+esc(st.name)+' (~'+ddSetLen(sh,i)+' min)</div>';}).join("")+'</div>';
+  DDPROG.bonus.forEach(function(b,i){var bs=ddShowById(b.showId);html+='<div class="row" style="gap:8px;margin-top:6px;align-items:center"><span class="chip purple">🎁 bonus set</span><div style="flex:1;font-size:12.5px">'+esc(bs.date+" — "+bs.sets[b.setIdx].name)+' (~'+ddSetLen(bs,b.setIdx)+' min)</div><button class="minib" onclick="ddRemoveBonus('+i+')">✕</button></div>';});
+  var col=rem>15?"var(--gold-deep)":"#3b6b4a";
+  html+='<div style="margin-top:10px"><div style="height:9px;background:#e6dccb;border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+col+'"></div></div>'+
+    '<div class="muted" style="font-size:12px;margin-top:4px">Filled <b>'+filled+'</b> / '+DDPROG.programMin+' min'+(rem>15?(' — <b>'+rem+' min short</b>, add a bonus set'):(rem<-5?(' — '+(-rem)+' min over'):' — ✓ full'))+'</div></div>';
+  if(rem>15){
+   var bo='<option value="">— add a bonus set from another show —</option>';
+   GD_SHOWS.forEach(function(s){if(s.id===DDPROG.showId)return;(s.sets||[]).forEach(function(st,i){bo+='<option value="'+s.id+':'+i+'">'+esc(s.date+" — "+st.name)+' (~'+ddSetLen(s,i)+' min)</option>';});});
+   html+='<select id="ddBonusSel" onchange="ddAddBonus()" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px;margin-top:8px">'+bo+'</select>';
+  }
+ }
+ return html;
+}
+function ddProgSummary(){
+ if(!DDPROG.showId)return null;
+ var sh=ddShowById(DDPROG.showId);
+ return {programMin:DDPROG.programMin,show:ddShowLabel(sh),filled:ddFilled(),bonus:DDPROG.bonus.map(function(b){var bs=ddShowById(b.showId);return bs.date+" — "+bs.sets[b.setIdx].name;})};
 }
 function eventsView(){
  if(!EVENTS.length)return "";
@@ -598,6 +998,7 @@ function eventsView(){
   var revealAt=e.when-e.revealMin*60000, revealed=now>=revealAt, startsIn=Math.max(0,Math.round((e.when-now)/60000));
   return '<div class="card pad"><div class="row" style="gap:8px"><span class="chip purple">'+esc(e.by||"Chapter")+'</span>'+(revealed?'<span class="chip ok">📍 revealed</span>':'<span class="chip">🔒 hidden</span>')+'</div>'+
    '<div style="font-size:14px;margin-top:7px"><b>dead_dance</b> · starts in ~'+startsIn+' min</div>'+
+   (e.program?'<div class="muted" style="font-size:12px;margin-top:4px">🎶 '+esc(e.program.show)+(e.program.bonus&&e.program.bonus.length?' + '+e.program.bonus.length+' bonus set'+(e.program.bonus.length>1?'s':''):'')+' · ~'+e.program.filled+'/'+e.program.programMin+' min</div>':'')+
    (revealed
      ? '<div style="font-size:14px;margin-top:5px">📍 '+esc(e.location)+'</div><button class="btn gold sm" style="margin-top:8px" onclick="farrahGuide(\''+e.id+'\')">🎙️ Farrah, guide me there</button> <button class="btn ghost sm" style="margin-top:8px" onclick="checkInEvent(\''+e.id+'\')">✅ I\'m here (GPS)</button>'
      : '<div class="muted" style="font-size:12.5px;margin-top:5px">Location reveals in <b class="ddcd" data-at="'+revealAt+'">'+fmtCountdown(revealAt-now)+'</b> — Farrah will guide you in.</div>')+
@@ -687,7 +1088,7 @@ function dashYour(){
    statTile("Chapter take",money2(b.take),"20% (HQ)")+
    statTile("Crowdsource",crowd,"open · "+vac+" vacuumed")+
  '</div>'+
- '<div class="sec-h" style="margin-top:14px">🌹 Shakedown — vendor performance</div><div class="card pad">'+
+ '<div class="sec-h" style="margin-top:14px">🛍️ Shakedown — vendor performance</div><div class="card pad">'+
    b.vendors.map(function(v){return '<div style="margin-bottom:10px"><div class="row" style="gap:8px"><div style="flex:1;font-size:13.5px"><b>'+esc(v.n)+'</b></div><div style="font-weight:800">'+money2(v.s)+'</div></div>'+dbar(v.s/topV*100,"var(--gold)")+'</div>';}).join("")+
  '</div>';
 }
@@ -768,6 +1169,29 @@ function showBadge(){
   '<div class="big">'+BADGE.shows+'</div><div class="sub">since '+BADGE.since+' · '+BADGE.venues+' venues</div>'+
   '<div class="stats"><div class="st"><b>'+BADGE.venues+'</b>venues</div><div class="st"><b>'+(2026-BADGE.since)+'</b>yrs on the bus</div>'+(BADGE.gps?'<div class="st"><b>'+BADGE.gps+'</b>✅ GPS-confirmed</div>':'')+'<div class="st" style="flex:1"><b>'+esc(BADGE.longest)+'</b>longest run</div></div></div>';
 }
+/* ---- 👥 Friends — the social graph + the mutual-friend gate that unlocks DMs.
+   Honest-state demo (localStorage). Real friends ride the magic-link identity in
+   the chat backend (chat_friendships); are_friends() is the DM gate. ---- */
+var FRIENDS=(function(){try{var s=localStorage.getItem("dd.friends");if(s){var o=JSON.parse(s);if(o&&typeof o==="object")return o;}}catch(e){}return {michele:"pending_in"};})(); /* seed one incoming so Accept is demoable */
+function saveFriends(){try{localStorage.setItem("dd.friends",JSON.stringify(FRIENDS));}catch(e){}}
+function friendRoster(){var out=[];for(var h in FOUNDERS){if(h===WHO)continue;out.push({h:h,name:FOUNDERS[h].full,title:FOUNDERS[h].title,initials:FOUNDERS[h].initials});}return out;}
+function friendStatus(h){return FRIENDS[h]||"none";}
+function friendCount(){var n=0;for(var h in FRIENDS)if(FRIENDS[h]==="friends")n++;return n;}
+function friendAct(h){var s=friendStatus(h);
+ if(s==="none")FRIENDS[h]="pending_out";else if(s==="pending_in")FRIENDS[h]="friends";else delete FRIENDS[h];
+ saveFriends();render();
+ toast(FRIENDS[h]==="friends"?("🤝 You and "+FOUNDERS[h].first+" are friends"):FRIENDS[h]==="pending_out"?("🌹 Friend request sent to "+FOUNDERS[h].first):"Removed");}
+function friendBtn(h){var s=friendStatus(h);
+ if(s==="friends")return '<button class="minib" onclick="friendAct(\''+h+'\')">🤝 Friends</button>';
+ if(s==="pending_out")return '<button class="minib" onclick="friendAct(\''+h+'\')">⏳ Requested</button>';
+ if(s==="pending_in")return '<button class="minib rose" onclick="friendAct(\''+h+'\')">✓ Accept</button>';
+ return '<button class="minib" onclick="friendAct(\''+h+'\')">+ Add friend</button>';}
+function friendsSection(){
+ var r=friendRoster();if(!r.length)return "";
+ return '<div class="sec-h">👥 Friends'+(friendCount()?(' · '+friendCount()):'')+'</div><div class="card list">'+
+  r.map(function(p){return '<div class="it"><div class="ic">'+esc(p.initials)+'</div><div class="nm"><b>'+esc(p.name)+'</b><div class="s">'+esc(p.title)+'</div></div>'+friendBtn(p.h)+'</div>';}).join("")+
+  '</div><div class="foot">Honest-state: demo. Real friends ride the magic-link identity; mutual friends are the gate that unlocks DMs.</div>';
+}
 function viewYou(){
  var socials=PROFILE.socials.map(function(v,i){return '<div class="row" style="gap:8px;margin-bottom:8px"><span style="opacity:.45">🔗</span><input id="sa'+i+'" type="text" value="'+escA(v)+'" placeholder="Link to social profile '+(i+1)+'" style="flex:1;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px"></div>';}).join("");
  var _cov=safeUrl(PROFILE.cover), _pho=safeUrl(PROFILE.photo);
@@ -785,6 +1209,7 @@ function viewYou(){
    (S.editPhoto?'<div style="margin-top:11px"><div class="muted" style="font-size:11.5px;margin:0 0 4px">Cover image URL</div><input id="pCover" value="'+escA(PROFILE.cover)+'" placeholder="https://… (a link from your cloud)" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:7px"><div class="muted" style="font-size:11.5px;margin:0 0 4px">Profile photo URL</div><input id="pPhoto" value="'+escA(PROFILE.photo)+'" placeholder="https://…" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px"><div class="row" style="gap:8px;margin-top:8px"><button class="btn sm" onclick="savePhoto()">Save</button><button class="btn sm ghost" onclick="cancelPhoto()">Cancel</button></div><div class="muted" style="font-size:10.5px;margin-top:6px">BYO-cloud: paste a link from the cloud you already pay for. We never upload or store the image.</div></div>':'')+
    '</div></div>'+
   (isChancellor()?chancellorWelcome():"")+
+  friendsSection()+
   '<div class="sec-h">About</div>'+
   (S.editBio
     ? '<div class="card pad"><textarea id="bioEdit" style="width:100%;min-height:90px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit">'+esc(PROFILE.bio)+'</textarea><div class="row" style="gap:8px;margin-top:9px"><button class="btn sm" onclick="saveBio()">Save</button><button class="btn sm ghost" onclick="cancelEditBio()">Cancel</button></div></div>'
@@ -812,6 +1237,7 @@ function viewYou(){
   '<div class="sec-h">🧭 Chapter Head — your responsibilities</div>'+
   '<div class="card pad">'+
    '<div class="note" style="margin:0 0 11px;border-left-color:var(--purple)">The 9 Chapter Heads are how the community moves. Three weekly jobs:</div>'+
+   '<button class="btn gold sm" style="margin:0 0 10px" onclick="crmSheet()">✅ My chapter to-dos</button>'+
    '<div class="row" style="gap:8px;flex-wrap:wrap">'+
     '<a class="minib" href="qr_print.html" target="_blank" style="text-decoration:none;display:inline-block">🪧 QR at shows</a>'+
     '<button class="minib rose" onclick="captureShare(\'\',\'\')">🌀 Post-Vacuum (share in)</button>'+
@@ -825,6 +1251,7 @@ function viewYou(){
   '</div>'+
   '<div class="sec-h">Your badge — the shows you\'ve seen</div>'+showBadge()+
   '<div class="note">Your badge is your <b>provenance</b> — every show you tap "I was there" rolls into it. Years on the bus, venues, the longest run. Quiet status among heads; yours, honestly earned.</div>'+
+  '<div class="card pad" style="margin-top:9px"><div class="muted" style="font-size:12px;margin-bottom:8px">🎟️ <b>Ticket stubs</b> — load your real Grateful Dead &amp; Jerry Garcia Band stubs. Friends and chapter-mates can see them; add a photo of the stub to mark it "on file."</div><button class="btn gold" style="width:100%" onclick="if(window.LukasBadge){LukasBadge.open();}else{toast(\'Sign into chat first — the badge shares its connection.\');}">🎟️ My shared show badge — add your stubs</button></div>'+
   '<div class="sec-h">Your rooms — shows you claimed</div>'+
   (function(){var ids=Object.keys(ATTENDED).filter(function(k){return ATTENDED[k];});
    if(!ids.length)return '<div class="note">No rooms yet — open the <b>Archive</b> and tap “I was there” on a show you caught.</div>';
@@ -891,7 +1318,7 @@ function buildArchive(){
  renderIWT();
  archiveBuilt=true;
 }
-/* ---- 📍 Near You — the country is the campus. GPS → who's playing today/tomorrow within 50 mi.
+/* ---- 📍 Near You — the country is the dance floor. GPS → who's playing today/tomorrow within 50 mi.
    A self-aware Deadhead glance: one look, no click. Tap a show for the band's ad. Honest-state:
    shows are placed near your real location to demo the feature until the live tour feed is cleared. ---- */
 var NEAR={loc:null,fallback:false,shows:[],open:false,shown:false};
@@ -936,8 +1363,9 @@ function renderNear(){
  var locline=NEAR.fallback?"Santa Cruz — turn on location for your spot":"Within 50 miles of you";
  pn.innerHTML='<div class="nh"><span>📍 Tonight &amp; tomorrow · '+esc(locline)+'</span><span class="x" onclick="toggleNear()">✕</span></div>'+
    nearParties()+
-   (NEAR.shows.length?NEAR.shows.map(function(s){return '<div class="nearrow" onclick="bandAd(\''+s.id+'\')"><span class="when '+(s.when===0?"today":"tom")+'">'+dayLabel(s.when)+'</span><div class="nm"><b>'+esc(s.band)+'</b><div class="s">'+esc(s.venue)+' · '+esc(s.time)+'</div></div><span class="mi">'+s.dist+' mi</span></div>';}).join(""):'<div class="nearrow"><div class="nm"><b>No shows within 50 miles today.</b><div class="s">The whole country\'s the campus — the family\'s always moving.</div></div></div>')+
-   '<div class="nf">🛰️ The country is the campus — your app knows where you are. <b>Tap a show for the band\'s ad.</b> Demo: placed near you to show the feature; live tour dates wire in once the band feed is cleared.</div>';
+   (NEAR.shows.length?NEAR.shows.map(function(s){return '<div class="nearrow" onclick="bandAd(\''+s.id+'\')"><span class="when '+(s.when===0?"today":"tom")+'">'+dayLabel(s.when)+'</span><div class="nm"><b>'+esc(s.band)+'</b><div class="s">'+esc(s.venue)+' · '+esc(s.time)+'</div></div><span class="mi">'+s.dist+' mi</span></div>';}).join(""):'<div class="nearrow"><div class="nm"><b>No shows within 50 miles today.</b><div class="s">The whole country\'s the dance floor — the family\'s always moving.</div></div></div>')+
+   '<div class="nf">🛰️ The country is the dance floor — your app knows where you are. <b>Tap a show for the band\'s ad.</b> Demo: placed near you to show the feature; live tour dates wire in once the band feed is cleared.</div>'+
+   calBar();
 }
 function toggleNear(){NEAR.open=!NEAR.open;renderNear();}
 function bandAd(id){var s=null;for(var i=0;i<NEAR.shows.length;i++)if(NEAR.shows[i].id===id)s=NEAR.shows[i];if(!s)return;
@@ -970,5 +1398,38 @@ setTimeout(function(){ toast(WHO ? ("🌹 Welcome home, "+(PROFILE.name.split(/\
 initNear();
 initShare();   /* catch a Web Share Target / shared-link intake */
 setInterval(tickCountdowns,1000);   /* live location-reveal countdowns */
+</script>
+<script src="lukas_a2hs.js" defer></script>
+<!-- House Unified Chat (lukas-social) — magic-link identity, 18+ gate, Realtime rooms -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="lukas_chat.js"></script>
+<script src="lukas_badge.js"></script>
+<script>
+  LukasChat.init({
+    app: "dead_dance",
+    brand: { name: "dead_dance", accent: "#b8002e", icon: "🌹" }
+  });
+  LukasBadge.init({
+    app: "dead_dance",
+    brand: { name: "dead_dance", accent: "#b8002e", icon: "🎟️" },
+    categories: [
+      { key: "show", label: "Shows", icon: "🎶",
+        titleLabel: "Venue", artistLabel: "Act",
+        artists: ["Grateful Dead", "Jerry Garcia Band", "Legion of Mary", "Old & In the Way", "Bob Weir & RatDog", "Furthur", "Dead & Company"],
+        // "listed" verification: a venue that matches the circuit list OR a famous historical GD/JGB room gets a ✓
+        directory: (
+          ((typeof VENUES !== "undefined" && VENUES.map) ? VENUES.map(function(v){ return v[0]; }) : [])
+        ).concat([
+          "Winterland","Winterland Ballroom","Fillmore West","Fillmore East","Fillmore Auditorium","The Fillmore",
+          "Barton Hall","Cornell University","Madison Square Garden","Red Rocks Amphitheatre","Boston Garden",
+          "Oakland Coliseum","Oakland-Alameda County Coliseum","Greek Theatre","Frost Amphitheatre","Shoreline Amphitheatre",
+          "Soldier Field","Giants Stadium","RFK Stadium","Veneta","Springfield Creamery","Radio City Music Hall",
+          "Capitol Theatre","Roosevelt Stadium","Hampton Coliseum","Nassau Coliseum","The Spectrum","Alpine Valley Music Theatre",
+          "Berkeley Community Theatre","Kaiser Convention Center","Henry J. Kaiser Convention Center","Warfield Theatre","The Warfield",
+          "Keystone Berkeley","The Stone","Sophie's","Lunt-Fontanne Theatre","Hollywood Bowl","Ventura County Fairgrounds"
+        ])
+      }
+    ]
+  });
 </script>
 </body></html>
