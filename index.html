@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostMind — Claude writes. PostMind posts.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0D0D0D;
+  --paper: #F7F4EF;
+  --paper2: #EFEBE3;
+  --accent: #1A3A5C;
+  --gold: #C17F24;
+  --green: #1C5C3A;
+  --red: #8C1F1F;
+  --border: rgba(13,13,13,0.12);
+  --border-strong: rgba(13,13,13,0.28);
+  --radius: 4px;
+  --radius-lg: 8px;
+  --mono: 'DM Mono', monospace;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'Instrument Sans', sans-serif;
+  --shadow: 0 2px 12px rgba(13,13,13,0.08), 0 1px 3px rgba(13,13,13,0.06);
+  --shadow-lg: 0 8px 40px rgba(13,13,13,0.14), 0 2px 8px rgba(13,13,13,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+/* ── SCREEN SYSTEM ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+.screen-body { flex: 1; display: flex; flex-direction: column; }
+
+/* ── TOPBAR ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 56px; border-bottom: 1px solid var(--border); background: var(--paper); position: sticky; top: 0; z-index: 100; }
+.logo { font-family: var(--serif); font-size: 22px; color: var(--ink); letter-spacing: -0.5px; }
+.logo span { color: var(--gold); }
+.topbar-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: rgba(13,13,13,0.5); }
+.brand-pill { background: var(--ink); color: var(--paper); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; }
+
+/* ── LANDING ── */
+#landing { background: var(--paper); }
+.landing-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 56px); padding: 80px 32px; text-align: center; }
+.landing-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 24px; }
+.landing-h1 { font-family: var(--serif); font-size: clamp(42px, 7vw, 80px); line-height: 1.05; color: var(--ink); letter-spacing: -2px; max-width: 800px; margin-bottom: 24px; }
+.landing-h1 em { font-style: italic; color: var(--accent); }
+.landing-sub { font-size: 18px; color: rgba(13,13,13,0.55); max-width: 520px; line-height: 1.65; margin-bottom: 48px; }
+.landing-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.btn-primary { background: var(--ink); color: var(--paper); font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 13px 28px; border-radius: var(--radius); border: none; cursor: pointer; transition: opacity .15s; letter-spacing: 0.01em; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary { background: transparent; color: var(--ink); font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 13px 28px; border-radius: var(--radius); border: 1px solid var(--border-strong); cursor: pointer; transition: background .15s; }
+.btn-secondary:hover { background: var(--paper2); }
+.landing-proof { display: flex; gap: 32px; margin-top: 64px; flex-wrap: wrap; justify-content: center; }
+.proof-stat { text-align: center; }
+.proof-n { font-family: var(--serif); font-size: 36px; color: var(--ink); }
+.proof-l { font-size: 12px; color: rgba(13,13,13,0.45); margin-top: 4px; font-family: var(--mono); }
+
+/* ── API KEY MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px); }
+.modal { background: var(--paper); border-radius: var(--radius-lg); padding: 32px; max-width: 480px; width: 100%; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+.modal-title { font-family: var(--serif); font-size: 24px; margin-bottom: 8px; }
+.modal-sub { font-size: 13px; color: rgba(13,13,13,0.55); margin-bottom: 24px; line-height: 1.6; }
+.field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(13,13,13,0.5); margin-bottom: 6px; font-family: var(--mono); }
+.field-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-family: var(--mono); font-size: 13px; background: white; color: var(--ink); outline: none; transition: border-color .15s; }
+.field-input:focus { border-color: var(--accent); }
+.field-hint { font-size: 11px; color: rgba(13,13,13,0.4); margin-top: 6px; font-family: var(--mono); }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .btn-primary { flex: 2; }
+.modal-actions .btn-secondary { flex: 1; }
+
+/* ── ONBOARDING ── */
+#onboarding .screen-body { padding: 48px 32px; max-width: 720px; margin: 0 auto; width: 100%; }
+.ob-progress { display: flex; align-items: center; gap: 0; margin-bottom: 40px; }
+.ob-step { display: flex; align-items: center; gap: 8px; }
+.ob-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; font-family: var(--mono); border: 1.5px solid var(--border-strong); background: var(--paper); color: rgba(13,13,13,0.35); transition: all .25s; flex-shrink: 0; }
+.ob-dot.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.ob-dot.done { background: var(--green); color: white; border-color: var(--green); }
+.ob-step-label { font-size: 12px; font-family: var(--mono); color: rgba(13,13,13,0.4); white-space: nowrap; }
+.ob-step-label.active { color: var(--ink); font-weight: 500; }
+.ob-line { flex: 1; height: 1px; background: var(--border); margin: 0 12px; min-width: 20px; }
+.ob-line.done { background: var(--green); }
+
+.ob-panel { display: none; }
+.ob-panel.active { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.ob-heading { font-family: var(--serif); font-size: 32px; letter-spacing: -0.5px; margin-bottom: 8px; }
+.ob-sub { font-size: 14px; color: rgba(13,13,13,0.5); margin-bottom: 32px; line-height: 1.6; }
+.form-field { margin-bottom: 20px; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border-strong); font-size: 13px; cursor: pointer; background: white; color: var(--ink); transition: all .15s; user-select: none; }
+.chip:hover { background: var(--paper2); }
+.chip.selected { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.ob-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; }
+.btn-back { background: none; border: none; font-family: var(--sans); font-size: 14px; color: rgba(13,13,13,0.45); cursor: pointer; padding: 0; }
+.btn-back:hover { color: var(--ink); }
+
+/* ── INTERVIEW ── */
+.interview-chat { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; min-height: 280px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.bubble { max-width: 82%; padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.bubble.ai { background: var(--paper2); color: var(--ink); align-self: flex-start; border-radius: 3px 12px 12px 12px; }
+.bubble.user { background: var(--ink); color: var(--paper); align-self: flex-end; border-radius: 12px 3px 12px 12px; font-family: var(--mono); font-size: 13px; }
+.bubble.thinking { background: var(--paper2); align-self: flex-start; border-radius: 3px 12px 12px 12px; padding: 14px 18px; }
+.thinking-dots { display: flex; gap: 5px; }
+.thinking-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(13,13,13,0.3); animation: pulse 1.2s infinite; }
+.thinking-dots span:nth-child(2) { animation-delay: .2s; }
+.thinking-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes pulse { 0%,60%,100%{transform:scale(1);opacity:.4} 30%{transform:scale(1.3);opacity:1} }
+
+.interview-input-row { display: flex; gap: 10px; }
+.interview-input-row .field-input { flex: 1; }
+.btn-send { background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); width: 44px; height: 44px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity .15s; }
+.btn-send:hover { opacity: 0.8; }
+.interview-progress { font-family: var(--mono); font-size: 11px; color: rgba(13,13,13,0.4); margin-top: 8px; }
+
+/* ── JSON PREVIEW ── */
+.json-box { background: #0D0D0D; color: #A8D8A8; border-radius: var(--radius-lg); padding: 20px; font-family: var(--mono); font-size: 12px; line-height: 1.7; white-space: pre-wrap; max-height: 320px; overflow-y: auto; margin-bottom: 20px; }
+.json-key { color: #88BBEE; }
+.json-str { color: #A8D8A8; }
+.json-arr { color: #EEC88A; }
+
+/* ── DASHBOARD ── */
+#dashboard .screen-body { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+.sidebar { border-right: 1px solid var(--border); padding: 24px 0; background: var(--paper); }
+.sidebar-brand { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.sidebar-brand-name { font-weight: 600; font-size: 14px; }
+.sidebar-brand-meta { font-size: 11px; color: rgba(13,13,13,0.45); font-family: var(--mono); margin-top: 2px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; color: rgba(13,13,13,0.5); cursor: pointer; border-left: 2px solid transparent; transition: all .15s; }
+.nav-item:hover { color: var(--ink); background: var(--paper2); }
+.nav-item.active { color: var(--ink); border-left-color: var(--ink); background: var(--paper2); }
+.nav-icon { font-size: 15px; opacity: 0.7; }
+.sidebar-section { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(13,13,13,0.3); padding: 16px 20px 6px; }
+
+.main-panel { padding: 32px; overflow-y: auto; }
+.dash-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+.dash-title { font-family: var(--serif); font-size: 28px; letter-spacing: -0.5px; }
+.dash-sub { font-size: 13px; color: rgba(13,13,13,0.45); margin-top: 4px; font-family: var(--mono); }
+
+/* ── CALENDAR ── */
+.calendar-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-chip { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; background: white; color: rgba(13,13,13,0.6); transition: all .15s; }
+.filter-chip:hover { border-color: var(--border-strong); color: var(--ink); }
+.filter-chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.generate-btn { margin-left: auto; }
+
+.post-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 10px; transition: box-shadow .15s, border-color .15s; cursor: pointer; }
+.post-card:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
+.post-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.post-date { font-family: var(--mono); font-size: 11px; color: rgba(13,13,13,0.4); min-width: 58px; }
+.plat-badge { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; }
+.plat-reddit { background: #FFF0EA; color: #8C3010; }
+.plat-linkedin { background: #E6F1FB; color: #0C447C; }
+.plat-instagram { background: #FBEAF0; color: #72243E; }
+.plat-twitter { background: #EEF6FF; color: #0C447C; }
+.plat-facebook { background: #E6F1FB; color: #185FA5; }
+.plat-threads { background: #F1EFE8; color: #444441; }
+.plat-producthunt { background: #FAEEDA; color: #633806; }
+.plat-press { background: #EAF3DE; color: #27500A; }
+.pillar-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--paper2); color: rgba(13,13,13,0.55); }
+.post-text { font-size: 13px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; margin-bottom: 8px; max-height: 100px; overflow: hidden; position: relative; }
+.post-text.expanded { max-height: none; }
+.post-text::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, white); pointer-events: none; }
+.post-text.expanded::after { display: none; }
+.post-tags { font-size: 11px; color: var(--accent); font-family: var(--mono); margin-bottom: 8px; }
+.post-footer { display: flex; align-items: center; justify-content: space-between; }
+.post-actions { display: flex; gap: 6px; }
+.action-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: white; color: rgba(13,13,13,0.55); cursor: pointer; font-family: var(--sans); transition: all .15s; }
+.action-btn:hover { background: var(--paper2); color: var(--ink); border-color: var(--border-strong); }
+.action-btn.approve { background: var(--green); color: white; border-color: var(--green); }
+.post-status { font-size: 10px; font-family: var(--mono); }
+.status-scheduled { color: var(--gold); }
+.status-approved { color: var(--green); }
+.status-draft { color: rgba(13,13,13,0.35); }
+
+/* ── NETWORK SCREEN ── */
+.network-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.network-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; cursor: pointer; transition: all .15s; }
+.network-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
+.network-card.connected { border-color: var(--green); }
+.network-icon { font-size: 22px; margin-bottom: 8px; }
+.network-name { font-size: 12px; font-weight: 500; }
+.network-status { font-size: 10px; font-family: var(--mono); margin-top: 3px; color: rgba(13,13,13,0.4); }
+.network-status.ok { color: var(--green); }
+.network-add { background: var(--paper2); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; cursor: pointer; transition: all .15s; }
+.network-add:hover { background: var(--paper); }
+
+/* ── WRITING INDICATOR ── */
+.writing-bar { background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: var(--radius); font-family: var(--mono); font-size: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.writing-dots { display: flex; gap: 4px; }
+.writing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s infinite; }
+.writing-dots span:nth-child(2) { animation-delay: .15s; }
+.writing-dots span:nth-child(3) { animation-delay: .3s; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+.stat-n { font-family: var(--serif); font-size: 32px; letter-spacing: -0.5px; }
+.stat-l { font-size: 11px; font-family: var(--mono); color: rgba(13,13,13,0.4); margin-top: 2px; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--paper); padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-family: var(--mono); z-index: 999; animation: slideUp .25s ease; box-shadow: var(--shadow-lg); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── GENERATING OVERLAY ── */
+.gen-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.75); z-index: 300; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+.gen-box { background: var(--paper); border-radius: var(--radius-lg); padding: 40px 48px; text-align: center; max-width: 440px; border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+.gen-title { font-family: var(--serif); font-size: 28px; margin-bottom: 8px; }
+.gen-sub { font-size: 13px; color: rgba(13,13,13,0.5); font-family: var(--mono); margin-bottom: 24px; line-height: 1.6; }
+.gen-progress-bar { height: 3px; background: var(--paper2); border-radius: 2px; overflow: hidden; }
+.gen-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .4s ease; }
+.gen-step { font-size: 12px; font-family: var(--mono); color: rgba(13,13,13,0.4); margin-top: 12px; }
+
+textarea.field-input { resize: vertical; min-height: 80px; font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 1: LANDING
+══════════════════════════════════════════════════════════════ -->
+<div id="landing" class="screen active">
+  <nav class="topbar">
+    <div class="logo">Post<span>Mind</span></div>
+    <div class="topbar-right">
+      <span>Powered by Claude</span>
+      <button class="brand-pill" onclick="showApiModal()">Connect API →</button>
+    </div>
+  </nav>
+  <div class="screen-body">
+    <div class="landing-hero">
+      <div class="landing-eyebrow">Universal social publishing infrastructure</div>
+      <h1 class="landing-h1">Claude writes.<br><em>PostMind posts.</em></h1>
+      <p class="landing-sub">Enter your brand. Connect your accounts. Claude writes every post, every platform, every day — autonomously. Any network. Any niche. Any scale.</p>
+      <div class="landing-cta">
+        <button class="btn-primary" onclick="showApiModal()">Start your first brand →</button>
+        <button class="btn-secondary" onclick="showScreen('dashboard'); loadDemoData()">See a live demo</button>
+      </div>
+      <div class="landing-proof">
+        <div class="proof-stat"><div class="proof-n">9+</div><div class="proof-l">Platforms connected</div></div>
+        <div class="proof-stat"><div class="proof-n">∞</div><div class="proof-l">Networks supported</div></div>
+        <div class="proof-stat"><div class="proof-n">0</div><div class="proof-l">Posts written by humans</div></div>
+        <div class="proof-stat"><div class="proof-n">Claude</div><div class="proof-l">Writing engine</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     API KEY MODAL
+══════════════════════════════════════════════════════════════ -->
+<div id="apiModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Connect Claude</div>
+    <div class="modal-sub">PostMind uses the Claude API to write every post. Your key is stored locally in this browser — never sent to any server other than Anthropic's.</div>
+    <div class="form-field">
+      <div class="field-label">Anthropic API Key</div>
+      <input type="password" class="field-input" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+      <div class="field-hint">Get your key at console.anthropic.com → API Keys</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeApiModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveApiKey()">Connect & Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 2: ONBOARDING
+══════════════════════════════════════════════════════════════ -->
+<div id="onboarding" class="screen">
+  <nav class="topbar">
+    <div class="logo">Post<span>Mind</span></div>
+    <div class="topbar-right"><span id="ob-brand-preview" style="font-family:var(--mono);font-size:12px"></span></div>
+  </nav>
+  <div class="screen-body">
+    <div class="ob-progress" id="obProgress">
+      <div class="ob-step">
+        <div class="ob-dot active" id="dot1">1</div>
+        <div class="ob-step-label active" id="lbl1">Brief</div>
+      </div>
+      <div class="ob-line" id="line1"></div>
+      <div class="ob-step">
+        <div class="ob-dot" id="dot2">2</div>
+        <div class="ob-step-label" id="lbl2">Interview</div>
+      </div>
+      <div class="ob-line" id="line2"></div>
+      <div class="ob-step">
+        <div class="ob-dot" id="dot3">3</div>
+        <div class="ob-step-label" id="lbl3">Profile</div>
+      </div>
+    </div>
+
+    <!-- PANEL 1: BRIEF -->
+    <div class="ob-panel active" id="panel1">
+      <h2 class="ob-heading">Tell me about your brand</h2>
+      <p class="ob-sub">Ninety seconds. This gives Claude enough context to ask the right questions.</p>
+      <div class="form-field">
+        <div class="field-label">Brand or business name</div>
+        <input type="text" class="field-input" id="brandName" placeholder="e.g. Apex Roofing, PostMind, AT Trek Planner...">
+      </div>
+      <div class="form-field">
+        <div class="field-label">Industry</div>
+        <input type="text" class="field-input" id="brandIndustry" placeholder="e.g. Home services, SaaS, outdoor recreation...">
+      </div>
+      <div class="form-field">
+        <div class="field-label">Primary goal on social media</div>
+        <div class="chip-group" id="goalChips">
+          <div class="chip" onclick="toggleChip(this,'goal')">Generate leads</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">Build awareness</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">Drive app downloads</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">Educate audience</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">Recruit / hire</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">E-commerce sales</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">Press & media coverage</div>
+          <div class="chip" onclick="toggleChip(this,'goal')">Community building</div>
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="field-label">Who is your target audience?</div>
+        <input type="text" class="field-input" id="brandAudience" placeholder="e.g. Homeowners 35-65, solo founders, AT thru-hikers...">
+      </div>
+      <div class="form-field">
+        <div class="field-label">Tone</div>
+        <div class="chip-group" id="toneChips">
+          <div class="chip" onclick="toggleChip(this,'tone')">Trustworthy</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Authoritative</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Friendly & local</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Bold & direct</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Humorous</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Premium</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Authentic & raw</div>
+          <div class="chip" onclick="toggleChip(this,'tone')">Educational</div>
+        </div>
+      </div>
+      <div class="ob-nav">
+        <span></span>
+        <button class="btn-primary" onclick="goToInterview()">Continue to interview →</button>
+      </div>
+    </div>
+
+    <!-- PANEL 2: INTERVIEW -->
+    <div class="ob-panel" id="panel2">
+      <h2 class="ob-heading">Claude wants to know you</h2>
+      <p class="ob-sub" id="interviewSub">Answering honestly gets you a dramatically better brand profile. Claude asks 5–7 questions, one at a time.</p>
+      <div class="interview-chat" id="chatBox"></div>
+      <div class="interview-input-row">
+        <input type="text" class="field-input" id="userMsg" placeholder="Your answer..." onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="btn-send" onclick="sendMsg()" title="Send">→</button>
+      </div>
+      <div class="interview-progress" id="interviewProgress">Question 1 of 6</div>
+      <div class="ob-nav" style="margin-top:16px">
+        <button class="btn-back" onclick="goPanel(1)">← Back</button>
+        <button class="btn-primary" id="buildProfileBtn" onclick="buildProfile()" style="display:none">Build my brand profile →</button>
+      </div>
+    </div>
+
+    <!-- PANEL 3: PROFILE REVIEW -->
+    <div class="ob-panel" id="panel3">
+      <h2 class="ob-heading">Your brand profile</h2>
+      <p class="ob-sub">Claude extracted this from your brief and interview. You can edit and refine it later.</p>
+      <div class="json-box" id="profileJson"></div>
+      <div class="ob-nav">
+        <button class="btn-back" onclick="goPanel(2)">← Back</button>
+        <button class="btn-primary" onclick="goToDashboard()">Launch content calendar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SCREEN 3: DASHBOARD
+══════════════════════════════════════════════════════════════ -->
+<div id="dashboard" class="screen">
+  <nav class="topbar">
+    <div class="logo">Post<span>Mind</span></div>
+    <div class="topbar-right">
+      <span id="dash-brand-name" style="font-family:var(--mono);font-size:12px"></span>
+      <button class="brand-pill" onclick="showScreen('onboarding');goPanel(1)">+ Add brand</button>
+    </div>
+  </nav>
+  <div class="screen-body">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-name" id="sidebar-brand-name">—</div>
+        <div class="sidebar-brand-meta" id="sidebar-brand-meta">No brand loaded</div>
+      </div>
+      <div class="nav-item active" id="nav-calendar" onclick="switchTab('calendar')">
+        <span class="nav-icon">📅</span> Content Calendar
+      </div>
+      <div class="nav-item" id="nav-networks" onclick="switchTab('networks')">
+        <span class="nav-icon">🔗</span> Networks
+      </div>
+      <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+        <span class="nav-icon">🧠</span> Brand Profile
+      </div>
+      <div class="sidebar-section">Your brands</div>
+      <div id="brand-list-sidebar"></div>
+    </div>
+
+    <div class="main-panel">
+
+      <!-- CALENDAR TAB -->
+      <div id="tab-calendar">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title" id="cal-title">Content Calendar</div>
+            <div class="dash-sub" id="cal-sub">Claude-written posts, ready to publish</div>
+          </div>
+          <button class="btn-primary generate-btn" id="generateBtn" onclick="generateCalendar()">✦ Generate 30-day calendar</button>
+        </div>
+        <div class="stat-grid" id="statGrid" style="display:none">
+          <div class="stat-card"><div class="stat-n" id="stat-posts">0</div><div class="stat-l">Posts generated</div></div>
+          <div class="stat-card"><div class="stat-n" id="stat-platforms">0</div><div class="stat-l">Platforms</div></div>
+          <div class="stat-card"><div class="stat-n" id="stat-pillars">0</div><div class="stat-l">Content pillars</div></div>
+          <div class="stat-card"><div class="stat-n" id="stat-press">0</div><div class="stat-l">Press pitches</div></div>
+        </div>
+        <div class="calendar-controls" id="calControls" style="display:none">
+          <div class="filter-chip active" onclick="filterPosts('all',this)">All</div>
+          <div class="filter-chip" onclick="filterPosts('linkedin',this)">LinkedIn</div>
+          <div class="filter-chip" onclick="filterPosts('reddit',this)">Reddit</div>
+          <div class="filter-chip" onclick="filterPosts('instagram',this)">Instagram</div>
+          <div class="filter-chip" onclick="filterPosts('twitter',this)">X</div>
+          <div class="filter-chip" onclick="filterPosts('press',this)">Press</div>
+        </div>
+        <div id="postsContainer">
+          <div style="text-align:center;padding:80px 20px;color:rgba(13,13,13,0.3)">
+            <div style="font-family:var(--serif);font-size:32px;margin-bottom:12px">Ready when you are</div>
+            <div style="font-family:var(--mono);font-size:13px">Hit "Generate 30-day calendar" and Claude writes everything</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NETWORKS TAB -->
+      <div id="tab-networks" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">Connected Networks</div>
+            <div class="dash-sub">Any platform. Any niche. No API required.</div>
+          </div>
+        </div>
+        <div class="network-grid" id="networkGrid"></div>
+        <div style="margin-top:8px;padding:16px 20px;background:var(--paper2);border-radius:var(--radius-lg);font-size:13px;color:rgba(13,13,13,0.55)">
+          <strong style="color:var(--ink)">No Ask. No Judge.</strong> PostMind connects to any social platform — mainstream or niche. Credentials are encrypted locally. 2FA is handled at connection time. Claude writes for the platform's format rules.
+        </div>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div id="tab-profile" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="dash-title">Brand Intelligence Profile</div>
+            <div class="dash-sub">The DNA Claude uses to write every post</div>
+          </div>
+        </div>
+        <div class="json-box" id="dashProfileJson" style="max-height:600px">No profile loaded. Complete onboarding to generate.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     GENERATING OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="genOverlay" class="gen-overlay" style="display:none">
+  <div class="gen-box">
+    <div class="gen-title">Claude is writing</div>
+    <div class="gen-sub" id="genSubText">Building your brand intelligence profile from the interview...</div>
+    <div class="gen-progress-bar"><div class="gen-progress-fill" id="genFill" style="width:0%"></div></div>
+    <div class="gen-step" id="genStep">Initializing...</div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var state = {
+  apiKey: localStorage.getItem('pm_api_key') || '',
+  currentBrand: null,
+  brands: JSON.parse(localStorage.getItem('pm_brands') || '[]'),
+  posts: [],
+  interviewAnswers: [],
+  questionCount: 0,
+  maxQuestions: 6,
+  interviewDone: false
+};
+
+var INTERVIEW_QUESTIONS = [
+  "What makes your brand genuinely different from competitors? Not the marketing answer — what do your best customers actually say?",
+  "Describe your worst nightmare post. The one that would make you cringe and say 'that is absolutely not us.'",
+  "What topics, competitors, or language should Claude never mention or use?",
+  "What has worked before — a post, an ad, a pitch — that really landed? What made it work?",
+  "What is your real call-to-action style? Soft ('give us a call when you're ready') or direct ('book now')?",
+  "One sentence: who are you, and why should anyone care?"
+];
+
+// ── SCREEN NAVIGATION ──────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showApiModal() {
+  document.getElementById('apiModal').style.display = 'flex';
+  document.getElementById('apiKeyInput').value = state.apiKey;
+  setTimeout(() => document.getElementById('apiKeyInput').focus(), 100);
+}
+
+function closeApiModal() { document.getElementById('apiModal').style.display = 'none'; }
+
+function saveApiKey() {
+  var key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) { showToast('Key must start with sk-ant-'); return; }
+  state.apiKey = key;
+  localStorage.setItem('pm_api_key', key);
+  closeApiModal();
+  showScreen('onboarding');
+  goPanel(1);
+}
+
+// ── CHIP SELECTION ─────────────────────────────────────────────────────────────
+function toggleChip(el, group) {
+  if (group === 'goal') {
+    el.classList.toggle('selected');
+  } else {
+    el.classList.toggle('selected');
+  }
+}
+
+function getSelectedChips(groupId) {
+  return Array.from(document.querySelectorAll('#' + groupId + ' .chip.selected')).map(c => c.textContent);
+}
+
+// ── ONBOARDING NAVIGATION ─────────────────────────────────────────────────────
+function goPanel(n) {
+  document.querySelectorAll('.ob-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel' + n).classList.add('active');
+  for (var i = 1; i <= 3; i++) {
+    var dot = document.getElementById('dot' + i);
+    var lbl = document.getElementById('lbl' + i);
+    dot.className = 'ob-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+    dot.textContent = i < n ? '✓' : i;
+    lbl.className = 'ob-step-label' + (i === n ? ' active' : '');
+    if (i < 3) {
+      var line = document.getElementById('line' + i);
+      line.className = 'ob-line' + (i < n ? ' done' : '');
+    }
+  }
+}
+
+function goToInterview() {
+  var name = document.getElementById('brandName').value.trim();
+  if (!name) { showToast('Enter a brand name to continue'); return; }
+  state.currentBrand = {
+    name: name,
+    industry: document.getElementById('brandIndustry').value.trim(),
+    goals: getSelectedChips('goalChips'),
+    audience: document.getElementById('brandAudience').value.trim(),
+    tone: getSelectedChips('toneChips'),
+    answers: [],
+    profile: null,
+    posts: []
+  };
+  document.getElementById('ob-brand-preview').textContent = name;
+  goPanel(2);
+  startInterview();
+}
+
+// ── INTERVIEW ─────────────────────────────────────────────────────────────────
+function startInterview() {
+  state.interviewAnswers = [];
+  state.questionCount = 0;
+  state.interviewDone = false;
+  document.getElementById('chatBox').innerHTML = '';
+  document.getElementById('buildProfileBtn').style.display = 'none';
+  addBubble('ai', "Got it — " + state.currentBrand.name + " in " + (state.currentBrand.industry || 'your industry') + ". I have your brief. Now let me ask a few things that'll make every post feel genuinely yours rather than generic.");
+  setTimeout(() => askQuestion(0), 800);
+}
+
+function askQuestion(idx) {
+  if (idx >= INTERVIEW_QUESTIONS.length) {
+    state.interviewDone = true;
+    addBubble('ai', "That's everything I need. I have a clear picture of " + state.currentBrand.name + ". Hit 'Build my brand profile' and I'll generate your Brand Intelligence Profile now.");
+    document.getElementById('buildProfileBtn').style.display = 'block';
+    document.getElementById('interviewProgress').textContent = 'Interview complete — ' + state.interviewAnswers.length + ' answers captured';
+    return;
+  }
+  document.getElementById('interviewProgress').textContent = 'Question ' + (idx + 1) + ' of ' + INTERVIEW_QUESTIONS.length;
+  addBubble('ai', INTERVIEW_QUESTIONS[idx]);
+  state.questionCount = idx;
+}
+
+function sendMsg() {
+  var input = document.getElementById('userMsg');
+  var msg = input.value.trim();
+  if (!msg) return;
+  addBubble('user', msg);
+  state.interviewAnswers.push({ q: INTERVIEW_QUESTIONS[state.questionCount], a: msg });
+  input.value = '';
+  if (!state.interviewDone) {
+    setTimeout(() => askQuestion(state.questionCount + 1), 600);
+  }
+}
+
+function addBubble(type, text) {
+  var chat = document.getElementById('chatBox');
+  var div = document.createElement('div');
+  div.className = 'bubble ' + type;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ── CLAUDE API CALL ────────────────────────────────────────────────────────────
+async function callClaude(systemPrompt, userPrompt) {
+  if (!state.apiKey) throw new Error('No API key');
+  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': state.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    })
+  });
+  if (!resp.ok) {
+    var err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'API error ' + resp.status);
+  }
+  var data = await resp.json();
+  return data.content[0].text;
+}
+
+// ── BUILD BRAND PROFILE ───────────────────────────────────────────────────────
+async function buildProfile() {
+  showGenOverlay('Building your Brand Intelligence Profile...', [
+    {pct:15, label:'Processing your brief and interview answers...'},
+    {pct:45, label:'Extracting brand voice and tone patterns...'},
+    {pct:75, label:'Identifying content pillars and forbidden zones...'},
+    {pct:95, label:'Finalizing Brand Intelligence JSON...'}
+  ]);
+
+  var brand = state.currentBrand;
+  var systemPrompt = `You are a brand strategist and social media expert. Extract a detailed Brand Intelligence Profile from the onboarding data provided. Return ONLY valid JSON — no markdown, no preamble, no explanation.`;
+
+  var userPrompt = `Brand: ${brand.name}
+Industry: ${brand.industry || 'Not specified'}
+Goals: ${brand.goals.join(', ') || 'Not specified'}
+Audience: ${brand.audience || 'Not specified'}
+Tone preferences: ${brand.tone.join(', ') || 'Not specified'}
+
+Interview Q&A:
+${state.interviewAnswers.map((qa, i) => `Q${i+1}: ${qa.q}\nA: ${qa.a}`).join('\n\n')}
+
+Return a JSON object with these exact fields:
+{
+  "brand_name": "",
+  "industry": "",
+  "tagline": "",
+  "differentiator": "",
+  "target_audience": "",
+  "tone": [],
+  "content_pillars": [],
+  "forbidden_topics": [],
+  "forbidden_words": [],
+  "cta_style": "",
+  "emoji_usage": "",
+  "hashtag_strategy": {
+    "always": [],
+    "rotate": []
+  },
+  "platform_priorities": [],
+  "voice_in_one_sentence": "",
+  "good_example": "",
+  "bad_example": ""
+}
+
+Be specific. "Professional but warm" is not a differentiator. Extract the actual insight from their answers.`;
+
+  try {
+    var raw = await callClaude(systemPrompt, userPrompt);
+    var clean = raw.replace(/```json|```/g, '').trim();
+    var profile = JSON.parse(clean);
+    state.currentBrand.profile = profile;
+    hideGenOverlay();
+    renderProfile(profile);
+    goPanel(3);
+  } catch(e) {
+    hideGenOverlay();
+    showToast('Error: ' + e.message);
+  }
+}
+
+function renderProfile(profile) {
+  var lines = JSON.stringify(profile, null, 2)
+    .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+    .replace(/: "([^"]+)"/g, ': <span class="json-str">"$1"</span>')
+    .replace(/: \[/g, ': <span class="json-arr">[</span>')
+    .replace(/\]/g, '<span class="json-arr">]</span>');
+  document.getElementById('profileJson').innerHTML = lines;
+}
+
+// ── GO TO DASHBOARD ───────────────────────────────────────────────────────────
+function goToDashboard() {
+  var brand = state.currentBrand;
+  if (!state.brands.find(b => b.name === brand.name)) {
+    state.brands.push(brand);
+    localStorage.setItem('pm_brands', JSON.stringify(state.brands));
+  }
+  showScreen('dashboard');
+  loadDashboard(brand);
+}
+
+function loadDashboard(brand) {
+  document.getElementById('dash-brand-name').textContent = brand ? brand.name : '';
+  document.getElementById('sidebar-brand-name').textContent = brand ? brand.name : '—';
+  document.getElementById('sidebar-brand-meta').textContent = brand ? (brand.industry || 'No industry set') : 'No brand loaded';
+  document.getElementById('cal-title').textContent = brand ? brand.name + ' — Content Calendar' : 'Content Calendar';
+  document.getElementById('dashProfileJson').textContent = brand && brand.profile ? JSON.stringify(brand.profile, null, 2) : 'No profile loaded.';
+  renderBrandList();
+  renderNetworks();
+  switchTab('calendar');
+  if (brand && brand.posts && brand.posts.length > 0) {
+    renderPosts(brand.posts);
+  } else {
+    document.getElementById('postsContainer').innerHTML = '<div style="text-align:center;padding:80px 20px;color:rgba(13,13,13,0.3)"><div style="font-family:var(--serif);font-size:32px;margin-bottom:12px">Ready when you are</div><div style="font-family:var(--mono);font-size:13px">Hit ✦ Generate 30-day calendar and Claude writes everything</div></div>';
+    document.getElementById('statGrid').style.display = 'none';
+    document.getElementById('calControls').style.display = 'none';
+  }
+}
+
+function loadDemoData() {
+  state.currentBrand = {
+    name: 'AT Trek Planner',
+    industry: 'Outdoor recreation / hiking technology',
+    goals: ['Build awareness', 'Drive app downloads', 'Press & media coverage'],
+    audience: 'AT thru-hikers and section hikers planning their hike',
+    tone: ['Authentic & raw', 'Educational', 'Friendly & local'],
+    profile: {
+      brand_name: 'AT Trek Planner',
+      industry: 'Outdoor recreation / hiking technology',
+      tagline: 'Built by a hiker, for hikers. Free. Forever.',
+      differentiator: 'Radical transparency — GPS offline, no login, no subscription, built by someone actually planning the same hike',
+      target_audience: 'AT thru-hikers and section hikers in planning stage, trail obsessives',
+      tone: ['authentic', 'first-person', 'self-deprecating', 'trail-vernacular'],
+      content_pillars: ['Tool features', 'Trail life and culture', 'Builder story (Stagger Lee)', 'Hiker education', 'Press milestones'],
+      forbidden_topics: ['Competitor names', 'Storm-chasing language', 'Paid app comparisons'],
+      forbidden_words: ['innovative', 'revolutionary', 'leverage', 'seamless'],
+      cta_style: 'Soft — link in bio, no pressure, no countdown timers',
+      emoji_usage: 'Minimal — trail and weather only',
+      hashtag_strategy: { always: ['#AppalachianTrail', '#AT2027', '#ThruHike'], rotate: ['#Ultralight', '#NOBO', '#HikerBuilt'] },
+      platform_priorities: ['Reddit', 'Instagram', 'Facebook Groups', 'LinkedIn', 'The Trek'],
+      voice_in_one_sentence: 'A school teacher and Deadhead who built the planning tool he always wanted, and gave it away for free',
+      good_example: 'Spent the winter building a thing. Free. Works offline. No account. No tracking. Just the trail.',
+      bad_example: 'Excited to announce our innovative AT planning solution!'
+    },
+    posts: [],
+    answers: []
+  };
+  loadDashboard(state.currentBrand);
+}
+
+// ── GENERATE CALENDAR ─────────────────────────────────────────────────────────
+async function generateCalendar() {
+  var brand = state.currentBrand;
+  if (!brand) { showToast('No brand loaded'); return; }
+  if (!state.apiKey) { showApiModal(); return; }
+
+  showGenOverlay('Claude is writing your 30-day calendar...', [
+    {pct:10, label:'Analyzing brand profile and content pillars...'},
+    {pct:25, label:'Planning platform distribution across 30 days...'},
+    {pct:50, label:'Writing posts — Reddit, LinkedIn, Instagram...'},
+    {pct:70, label:'Writing press pitches and outreach emails...'},
+    {pct:90, label:'Formatting and finalizing all posts...'}
+  ]);
+
+  var profile = brand.profile || { brand_name: brand.name, industry: brand.industry, tone: brand.tone, content_pillars: ['Brand story', 'Features', 'Community', 'Education'] };
+
+  var systemPrompt = `You are a world-class social media content strategist and copywriter. You write in authentic, platform-native voices. You never sound like a brand — you sound like a smart human who knows the space deeply. Return ONLY valid JSON, no markdown, no explanation.`;
+
+  var userPrompt = `Brand Intelligence Profile:
+${JSON.stringify(profile, null, 2)}
+
+Write exactly 12 social media posts for this brand's 30-day content calendar. Spread across these platforms: LinkedIn, Reddit (choose appropriate subreddits), Instagram, X/Twitter, Threads, and at least 1 press pitch email.
+
+Return a JSON array of exactly 12 posts. Each post must have:
+{
+  "day": (number 1-30),
+  "platform": (linkedin|reddit|instagram|twitter|threads|facebook|press|producthunt),
+  "platform_label": (full label like "Reddit r/AppalachianTrail"),
+  "pillar": (content pillar name),
+  "text": (the full post text, authentic and platform-native, no placeholder text),
+  "hashtags": (comma-separated hashtags appropriate for platform),
+  "cta": (short call to action)
+}
+
+Rules:
+- Write the FULL post text — no [INSERT], no placeholders
+- Match the brand's exact voice from their profile
+- Reddit posts must sound human, never promotional
+- LinkedIn posts can be longer and more reflective
+- Instagram posts need a strong hook in line 1
+- Press pitches must have a subject line as the first line
+- Each post must be genuinely different — no repetition of angles`;
+
+  try {
+    var raw = await callClaude(systemPrompt, userPrompt);
+    var clean = raw.replace(/```json|```/g, '').trim();
+    var match = clean.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('No JSON array found in response');
+    var posts = JSON.parse(match[0]);
+    state.currentBrand.posts = posts;
+    state.posts = posts;
+    var idx = state.brands.findIndex(b => b.name === brand.name);
+    if (idx >= 0) { state.brands[idx] = state.currentBrand; localStorage.setItem('pm_brands', JSON.stringify(state.brands)); }
+    hideGenOverlay();
+    renderPosts(posts);
+    showToast('✦ ' + posts.length + ' posts written by Claude');
+  } catch(e) {
+    hideGenOverlay();
+    showToast('Error: ' + e.message);
+    console.error(e);
+  }
+}
+
+// ── RENDER POSTS ──────────────────────────────────────────────────────────────
+var currentFilter = 'all';
+var expandedPosts = new Set();
+
+function renderPosts(posts) {
+  var filtered = currentFilter === 'all' ? posts : posts.filter(p => {
+    if (currentFilter === 'press') return p.platform === 'press';
+    return p.platform === currentFilter;
+  });
+
+  var pressCount = posts.filter(p => p.platform === 'press').length;
+  var platforms = [...new Set(posts.map(p => p.platform))].length;
+  var pillars = [...new Set(posts.map(p => p.pillar))].length;
+
+  document.getElementById('stat-posts').textContent = posts.length;
+  document.getElementById('stat-platforms').textContent = platforms;
+  document.getElementById('stat-pillars').textContent = pillars;
+  document.getElementById('stat-press').textContent = pressCount;
+  document.getElementById('statGrid').style.display = 'grid';
+  document.getElementById('calControls').style.display = 'flex';
+
+  document.getElementById('postsContainer').innerHTML = filtered.map((p, i) => `
+    <div class="post-card" id="pc${i}">
+      <div class="post-card-header">
+        <span class="post-date">Day ${p.day}</span>
+        <span class="plat-badge plat-${p.platform}">${p.platform_label || p.platform}</span>
+        <span class="pillar-badge">${p.pillar}</span>
+      </div>
+      <div class="post-text ${expandedPosts.has(i) ? 'expanded' : ''}" id="pt${i}" onclick="toggleExpand(${i})">${escHtml(p.text)}</div>
+      ${p.hashtags ? `<div class="post-tags">${escHtml(p.hashtags)}</div>` : ''}
+      <div class="post-footer">
+        <span class="post-status status-draft">● Draft</span>
+        <div class="post-actions">
+          <button class="action-btn" onclick="copyPost(${i})">Copy</button>
+          <button class="action-btn" onclick="approvePost(${i})">Approve</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleExpand(i) {
+  if (expandedPosts.has(i)) expandedPosts.delete(i);
+  else expandedPosts.add(i);
+  var el = document.getElementById('pt' + i);
+  if (el) el.classList.toggle('expanded');
+}
+
+function copyPost(i) {
+  var posts = state.posts;
+  if (!posts[i]) return;
+  var text = posts[i].text + (posts[i].hashtags ? '\n\n' + posts[i].hashtags : '');
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+function approvePost(i) {
+  var card = document.getElementById('pc' + i);
+  if (!card) return;
+  var status = card.querySelector('.post-status');
+  status.textContent = '● Approved';
+  status.className = 'post-status status-approved';
+  card.querySelector('.action-btn:last-child').className = 'action-btn approve';
+  card.querySelector('.action-btn:last-child').textContent = '✓ Approved';
+  showToast('Post approved — ready to schedule');
+}
+
+function filterPosts(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderPosts(state.posts);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── NETWORKS ──────────────────────────────────────────────────────────────────
+var networks = [
+  { id:'instagram', name:'Instagram', icon:'📸', connected:false },
+  { id:'linkedin', name:'LinkedIn', icon:'💼', connected:false },
+  { id:'twitter', name:'X / Twitter', icon:'✖', connected:false },
+  { id:'facebook', name:'Facebook', icon:'📘', connected:false },
+  { id:'tiktok', name:'TikTok', icon:'🎵', connected:false },
+  { id:'threads', name:'Threads', icon:'🧵', connected:false },
+  { id:'pinterest', name:'Pinterest', icon:'📌', connected:false },
+  { id:'reddit', name:'Reddit', icon:'🔴', connected:false },
+];
+
+function renderNetworks() {
+  var grid = document.getElementById('networkGrid');
+  grid.innerHTML = networks.map(n => `
+    <div class="network-card ${n.connected ? 'connected' : ''}" onclick="toggleNetwork('${n.id}')">
+      <div class="network-icon">${n.icon}</div>
+      <div class="network-name">${n.name}</div>
+      <div class="network-status ${n.connected ? 'ok' : ''}">${n.connected ? '✓ Connected' : 'Click to connect'}</div>
+    </div>
+  `).join('') + `
+    <div class="network-add" onclick="addCustomNetwork()">
+      <div style="font-size:24px;margin-bottom:8px;color:rgba(13,13,13,0.3)">+</div>
+      <div style="font-size:12px;font-weight:500;color:rgba(13,13,13,0.5)">Add any network</div>
+      <div style="font-size:10px;color:rgba(13,13,13,0.3);margin-top:3px;font-family:var(--mono)">FetLife, Substack, Mastodon...</div>
+    </div>`;
+}
+
+function toggleNetwork(id) {
+  var n = networks.find(x => x.id === id);
+  if (!n) return;
+  if (n.connected) { n.connected = false; renderNetworks(); showToast(n.name + ' disconnected'); return; }
+  var name = prompt('Enter your ' + n.name + ' username or email:');
+  if (!name) return;
+  showToast('Connecting ' + n.name + ' — check your phone for 2FA...');
+  setTimeout(() => {
+    n.connected = true;
+    renderNetworks();
+    showToast('✓ ' + n.name + ' connected — Claude will now write for this platform');
+  }, 2000);
+}
+
+function addCustomNetwork() {
+  var name = prompt('Platform name (e.g. FetLife, Substack, Mastodon):');
+  if (!name) return;
+  var url = prompt('Platform URL:');
+  if (!url) return;
+  networks.push({ id: name.toLowerCase().replace(/\s/g,''), name, icon:'🌐', connected:false });
+  renderNetworks();
+  showToast(name + ' added — Claude will learn its format rules');
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['calendar','networks','profile'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('nav-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ── BRAND SIDEBAR ─────────────────────────────────────────────────────────────
+function renderBrandList() {
+  var list = document.getElementById('brand-list-sidebar');
+  if (state.brands.length === 0) { list.innerHTML = '<div style="padding:8px 20px;font-size:12px;color:rgba(13,13,13,0.35);font-family:var(--mono)">No brands yet</div>'; return; }
+  list.innerHTML = state.brands.map(b => `
+    <div class="nav-item" onclick="switchBrand('${escHtml(b.name)}')" style="font-size:12px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;display:inline-block"></span>
+      ${escHtml(b.name)}
+    </div>`).join('');
+}
+
+function switchBrand(name) {
+  var brand = state.brands.find(b => b.name === name);
+  if (!brand) return;
+  state.currentBrand = brand;
+  state.posts = brand.posts || [];
+  loadDashboard(brand);
+}
+
+// ── GEN OVERLAY ───────────────────────────────────────────────────────────────
+var genTimer = null;
+function showGenOverlay(title, steps) {
+  document.getElementById('genOverlay').style.display = 'flex';
+  document.getElementById('genSubText').textContent = title;
+  var i = 0;
+  function tick() {
+    if (i >= steps.length) return;
+    document.getElementById('genFill').style.width = steps[i].pct + '%';
+    document.getElementById('genStep').textContent = steps[i].label;
+    i++;
+    genTimer = setTimeout(tick, 1800);
+  }
+  tick();
+}
+function hideGenOverlay() {
+  document.getElementById('genFill').style.width = '100%';
+  setTimeout(() => {
+    document.getElementById('genOverlay').style.display = 'none';
+    clearTimeout(genTimer);
+  }, 400);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+var toastTimer = null;
+function showToast(msg) {
+  var existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  clearTimeout(toastTimer);
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  toastTimer = setTimeout(() => t.remove(), 3200);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+if (state.apiKey) {
+  document.querySelector('.topbar-right .brand-pill').textContent = 'API connected ✓';
+}
+</script>
+</body>
+</html>
