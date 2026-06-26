@@ -8,9 +8,9 @@
 <title>dead_dance</title>
 <meta name="theme-color" content="#2a1b3d">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="rose.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="rose-192.png">
+<link rel="icon" href="rosebud-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="rosebud.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="rosebud-192.png">
 <style>
 :root{--purple:#2a1b3d;--purple2:#3c2a54;--paper:#f3ece0;--cream:#faf5ea;--card:#fffaf2;--ink:#241a2b;--muted:#7a6a82;
 --line:#e6dccb;--gold:#d8a24a;--rose:#b5384e;--blue:#3f6fb0;--ok:#2e7d52;
@@ -141,6 +141,7 @@ a{color:inherit}
 <script src="market-core.js"></script>
 <script src="cassette-reader.js"></script>
 <script src="ad-engine.js"></script>
+<script src="crm_seed.js"></script>
 <script src="doodles.js"></script>
 <script>
 /* ============================ demo data (honest-state: representative) ============================ */
@@ -348,6 +349,7 @@ function venuesView(){
  var g=venueRegions(),order=["santacruz","bayarea","pnw","socal","rockies","lonestar","greatlakes","southeast","midatl","northeast"];
  return '<div class="sec-h">🎪 Venues on the circuit — '+VENUES.length+' rooms</div>'+
   '<div class="muted" style="font-size:11.5px;margin:0 2px 8px">Where the Dead tribute bands play. <b>Become a dead_dance Venue</b>: feed the musicians, host a dead_dance, book through us. <i>Seed directory — candidates to vet, nothing auto-contacted.</i></div>'+
+  '<button class="btn gold" style="width:100%;margin:0 0 12px" onclick="venueConsole()">🏛️ Open the venue console — your bookings &amp; ticket sales</button>'+
   order.filter(function(r){return g[r]&&g[r].length;}).map(function(r){
    return '<div class="card"><div class="pad" style="padding-bottom:6px"><span class="chip purple">'+esc(REGION_NAMES[r]||r)+'</span> <span class="muted" style="font-size:11px">'+g[r].length+' venues</span></div>'+
     g[r].map(function(v){return '<div class="pad" style="padding:7px 13px;border-top:1px solid var(--line)"><div class="row" style="gap:8px;align-items:center"><div style="flex:1;font-size:13.5px;cursor:pointer" onclick="venueProfile('+VENUES.indexOf(v)+')"><b>'+esc(v[0])+'</b> <span style="opacity:.4;font-size:11px">›</span><div class="muted" style="font-size:11.5px">'+esc(v[1])+', '+esc(v[2])+'</div></div><button class="minib" onclick="toast(\'Become a dead_dance Venue — invite drafted (v1 mock; nothing auto-sends).\')">＋ Invite</button></div></div>';}).join("")+'</div>';
@@ -366,6 +368,7 @@ function bandProfile(id){
   '<div class="muted" style="font-size:12.5px;margin-bottom:8px">'+esc(b.note||"")+(b.hist?('<br><b>History:</b> '+esc(b.hist)):"")+(b.link?('<br><a href="'+escA(b.link)+'" target="_blank" rel="noopener nofollow">official page ↗</a>'):"")+'</div>'+
   '<button class="btn gold sm" style="width:100%;margin:0 0 8px" onclick="bandHyperPost(\''+id+'\')">🛸 HyperPost a show to dead_dance</button>'+
   '<button class="btn gold sm" style="width:100%;margin:0 0 8px;background:#2a6b46" onclick="ticketSheet(\''+id+'\',\''+escA(b.name)+'\')">🎟️ Tickets &amp; splits — see your take</button>'+
+  '<button class="btn gold sm" style="width:100%;margin:0 0 8px;background:var(--purple)" onclick="bandAvail(\''+id+'\',\''+escA(b.name)+'\')">📅 Check availability — book us</button>'+
   '<div class="row" style="gap:6px;margin:0 0 11px"><button class="btn ghost sm" style="flex:1" onclick="mexpSheet(\''+escA(b.name)+'\')">💼 Books</button><button class="btn ghost sm" style="flex:1" onclick="venueAnalysis(\''+id+'\',\''+escA(b.name)+'\')">📊 $/venue</button><button class="btn ghost sm" style="flex:1" onclick="pnlSheet(\''+escA(b.name)+'\')">📈 P&amp;L</button></div>'+
   '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Bio (editable)</div><textarea id="bpBio" style="width:100%;min-height:60px;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;font-family:inherit">'+esc(p.bio||"")+'</textarea>'+
   '<div class="muted" style="font-size:11.5px;margin:8px 0 4px">Booking contact (editable)</div><input id="bpContact" value="'+escA(p.contact||"")+'" placeholder="email / link" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px">'+
@@ -380,6 +383,7 @@ function venueProfile(idx){
  document.getElementById("sheet").innerHTML='<h3>🎪 '+esc(v[0])+'</h3>'+
   '<div class="sb">'+esc(v[1])+', '+esc(v[2])+' · '+esc(REGION_NAMES[v[3]]||v[3])+'</div>'+
   '<label class="row" style="gap:9px;align-items:flex-start;margin:2px 0 9px"><input type="checkbox" id="vpBadge" '+(p.badge?"checked":"")+' style="margin-top:2px"><span style="font-size:13px"><b>dead_dance Venue</b> — feed the musicians, host a dead_dance, book through us</span></label>'+
+  '<button class="btn gold sm" style="width:100%;margin:0 0 10px;background:var(--purple)" onclick="venueConsole(\''+escA(v[0])+'\')">🏛️ Open venue console</button>'+
   '<div class="muted" style="font-size:11.5px;margin-bottom:4px">About this room (editable)</div><textarea id="vpBio" style="width:100%;min-height:58px;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;font-family:inherit">'+esc(p.bio||"")+'</textarea>'+
   '<div class="row" style="gap:8px;margin-top:8px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Capacity</div><input id="vpCap" value="'+escA(p.cap||"")+'" placeholder="e.g., 400" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Booking contact</div><input id="vpContact" value="'+escA(p.contact||"")+'" placeholder="email / link" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px"></div></div>'+
   '<button class="btn gold" style="width:100%;margin-top:10px" onclick="saveVenueProfile('+idx+')">Save profile</button>'+
@@ -388,6 +392,36 @@ function venueProfile(idx){
  document.getElementById("ovl").classList.add("on");
 }
 function saveVenueProfile(idx){var o={badge:!!(document.getElementById("vpBadge")||{}).checked,bio:clamp((document.getElementById("vpBio")||{}).value||"",600),cap:clamp((document.getElementById("vpCap")||{}).value||"",10),contact:clamp((document.getElementById("vpContact")||{}).value||"",200)};saveP("dd.venuep."+idx,o);closeModal();toast("🎪 Venue profile saved"+(o.badge?" — dead_dance Venue ✓":"")+".");}
+/* ---- 🏛️ VENUE CONSOLE — the operator's room. Deliberately lean: we hide everything
+   but the two things a venue needs — bands booked this month + tickets sold on
+   dead_dance — plus the $99 plan. No expenses, no P&L (that's the musicians' Studio).
+   Honest-state demo numbers until accounts ship. ---- */
+var VENUE_CON={
+ name:"The Catalyst", city:"Santa Cruz, CA", cap:800, near:14200,
+ plan:{tier:"Founding", price:"$49.50", list:"$99", next:"Jul 25"},
+ month:[{band:"China Cats",date:"Jun 6",sold:612,cap:800},{band:"Cubensis",date:"Jun 13",sold:540,cap:800},{band:"Grateful Shred",date:"Jun 20",sold:744,cap:800},{band:"Cats Under the Stars (JGB)",date:"Jun 27",sold:438,cap:800}],
+ upcoming:[{band:"China Cats",date:"Fri Jul 4",sold:301,cap:800},{band:"Terrapin Flyer",date:"Sat Jul 12",sold:188,cap:800}]
+};
+function venueConsole(name){
+ var C=VENUE_CON, vn=name||C.name, B=C.month;
+ var sold=B.reduce(function(a,b){return a+b.sold;},0);
+ var fill=Math.round(B.reduce(function(a,b){return a+b.sold/b.cap;},0)/B.length*100);
+ var gross=sold*42;
+ function row(n){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:7px 0"><div><b style="font-size:13.5px">'+esc(n.band)+'</b><div class="muted" style="font-size:11.5px">'+esc(n.date)+'</div></div><div style="text-align:right"><b style="font-size:13.5px">'+n.sold+'/'+n.cap+'</b><div class="muted" style="font-size:11px">'+Math.round(n.sold/n.cap*100)+'% sold</div></div></div>';}
+ document.getElementById("sheet").innerHTML='<h3>🏛️ '+esc(vn)+' — venue console</h3>'+
+  '<div class="sb">'+esc(C.city)+' · cap '+C.cap+'. <b>Just what you need</b> — your booked nights and your dead_dance ticket sales. We hide the rest.</div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div class="row" style="justify-content:space-between;align-items:center"><div><div style="font-size:11.5px;opacity:.8">Your plan · '+esc(C.plan.tier)+'</div><b style="font-size:19px">'+C.plan.price+'</b><span style="font-size:12px">/mo</span> <span style="opacity:.65;text-decoration:line-through;font-size:12px">'+C.plan.list+'</span><div style="font-size:11px;opacity:.78">50% off founding · renews '+esc(C.plan.next)+'</div></div><button class="minib" onclick="toast(\'Manage plan — billing is counsel-gated in v1.\')">Manage</button></div></div>'+
+  '<div class="row" style="gap:10px;margin-bottom:10px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:30px;font-weight:800;color:var(--purple)">'+B.length+'</div><div class="muted" style="font-size:12px;line-height:1.3">bands booked<br>this month</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:30px;font-weight:800;color:var(--purple)">'+sold.toLocaleString()+'</div><div class="muted" style="font-size:12px;line-height:1.3">tickets sold<br>on dead_dance</div></div></div>'+
+  '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><span class="muted" style="font-size:12px">Ticket gross · this month</span><b>$'+gross.toLocaleString()+'</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">Avg room fill</span><b>'+fill+'%</b></div><div style="height:8px;border-radius:6px;background:#eee;overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:'+fill+'%;background:linear-gradient(90deg,var(--rose),var(--gold))"></i></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">This month</div><div class="card pad" style="margin-bottom:10px;padding-top:0">'+B.map(row).join("")+'</div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Up next</div><div class="card pad" style="margin-bottom:10px;padding-top:0">'+C.upcoming.map(row).join("")+'</div>'+
+  '<div class="card pad" style="margin-bottom:11px"><div class="row" style="justify-content:space-between"><span class="muted" style="font-size:12px">Heads within 50 mi</span><b>'+C.near.toLocaleString()+'</b></div></div>'+
+  '<div class="row" style="gap:8px"><button class="btn gold sm" style="flex:1" onclick="toast(\'📅 Book a band — pick a band &amp; an open night (v1 mock; you approve, nothing auto-sends).\')">📅 Book a band</button><button class="btn ghost sm" style="flex:1" onclick="toast(\'➕ Add a night to your calendar (v1 mock).\')">➕ Add night</button></div>'+
+  '<a class="btn ghost sm" href="qr_print.html" target="_blank" style="display:block;text-align:center;margin-top:8px;text-decoration:none">🪧 Promote your QR at the door</a>'+
+  '<div class="note" style="margin-top:9px">Operator console — <b>bands booked</b> and <b>tickets sold on dead_dance</b>, nothing else in your face. Honest-state: figures are illustrative until accounts ship.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
 /* ---- 🛸 BAND HYPERPOST → dead_dance (the Borg). The INBOUND side of HyperPost: a band beams its
    show IN, dead_dance ASSIMILATES it across the national calendar + its region's chapter calendar +
    the feed. One post, the whole collective sees it. (Backend: dead_dance v2 /api/hyperpost.) ---- */
@@ -620,7 +654,69 @@ function viewShakedown(){
  return '<div class="sec-h">🛍️ Shakedown Street · stalls → vendors → The Dealer</div>'+
   DEALERS.map(function(dl){return '<div class="card"><div class="pad row"><div class="ic">'+dl.em+'</div><div style="flex:1"><b>'+esc(dl.n)+'</b><div class="muted">'+esc(dl.kind)+'</div></div><span class="chip'+(dl.kind==="Chapter stall"?"":" purple")+'">'+(dl.kind==="Chapter stall"?"Chapter":dl.kind)+'</span></div>'+
    '<div class="list">'+dl.items.map(function(it){return '<div class="it"><div class="ic">📦</div><div class="nm"><b>'+esc(it[0])+'</b><div class="s">'+esc(dl.n)+'</div></div><div class="row" style="gap:8px"><b style="color:var(--purple)">'+esc(it[1])+'</b><button class="btn sm" onclick="gate(\'Buying from the seller\')">View</button></div></div>';}).join("")+'</div></div>';}).join("")+
+  '<div class="row" style="gap:8px;margin:12px 0"><button class="btn gold sm" style="flex:1" onclick="vendorConsole()">🛍️ Vendor console</button><button class="btn ghost sm" style="flex:1" onclick="chapterShakedown()">📊 Chapter rollup</button></div>'+
   '<div class="note"><b>Lot rules:</b> the deal is between buyer and seller; dead_dance just sets the table and takes the agreed cut. Tapes & art are sold by their makers. <b>No band recordings are sold without a license.</b> All money paths are counsel-gated and mocked in v1.</div>';
+}
+/* ---- 🛍️ SHAKEDOWN CONSOLES — vendor's own console, the Chancellor's chapter rollup,
+   and the national rollup all the way up to Stagger Lee. Vendors don't pay $99 — Shakedown
+   is a market, dead_dance takes a 10% share of sales. Honest-state demo numbers. ---- */
+var SHAKEDOWN={ share:0.10, vendors:[
+ {name:"Kara's Prints",chapter:"santacruz",sales:3260,orders:142,rating:4.9,top:"Greyhound Rock poster",scans:318},
+ {name:"Lot Grilled Cheese",chapter:"santacruz",sales:2110,orders:540,rating:4.8,top:"The classic melt",scans:402},
+ {name:"Tie-Dye Tessa",chapter:"bayarea",sales:4180,orders:96,rating:5.0,top:"Custom wrap",scans:210},
+ {name:"Stealie Silver",chapter:"bayarea",sales:5240,orders:120,rating:4.7,top:"Rose pendant",scans:188},
+ {name:"Terrapin Tees",chapter:"socal",sales:2890,orders:130,rating:4.6,top:"Dancing bear tee",scans:240},
+ {name:"Mountain Glass Co.",chapter:"rockies",sales:6100,orders:88,rating:4.9,top:"Hand-blown rig",scans:150},
+ {name:"Cold Brew Cart",chapter:"pnw",sales:1740,orders:380,rating:4.8,top:"Nitro cold brew",scans:300},
+ {name:"Philly Pretzel Cart",chapter:"midatl",sales:1980,orders:610,rating:4.7,top:"Soft pretzel",scans:420}
+]};
+function _sd$(n){return "$"+Math.round(n).toLocaleString();}
+function _chName(c){return (typeof REGION_NAMES!=="undefined"&&REGION_NAMES[c])||c;}
+function vendorConsole(name){
+ var V=SHAKEDOWN.vendors, v=null; for(var i=0;i<V.length;i++){if(!name||V[i].name===name){v=V[i];break;}} if(!v)v=V[0];
+ var take=Math.round(v.sales*SHAKEDOWN.share);
+ document.getElementById("sheet").innerHTML='<h3>🛍️ '+esc(v.name)+' — vendor console</h3>'+
+  '<div class="sb">Shakedown Street · '+esc(_chName(v.chapter))+'. <b>Just what you need</b> — your sales, your orders, your booth. We hide the rest.</div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div class="row" style="justify-content:space-between;align-items:center"><div><div style="font-size:11.5px;opacity:.8">Your plan · Market</div><b style="font-size:19px">Free listing</b><div style="font-size:11px;opacity:.78">dead_dance takes a 10% share of sales — no monthly fee</div></div><button class="minib" onclick="toast(\'Manage payouts — counsel-gated in v1.\')">Payouts</button></div></div>'+
+  '<div class="row" style="gap:10px;margin-bottom:10px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:30px;font-weight:800;color:var(--purple)">'+_sd$(v.sales)+'</div><div class="muted" style="font-size:12px;line-height:1.3">sales<br>this month</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:30px;font-weight:800;color:var(--purple)">'+v.orders+'</div><div class="muted" style="font-size:12px;line-height:1.3">orders<br>this month</div></div></div>'+
+  '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><span class="muted" style="font-size:12px">🔥 Top item</span><b>'+esc(v.top)+'</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">Booth QR scans · last show</span><b>'+v.scans+'</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">Rating</span><b>'+v.rating+'★</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">dead_dance share (10%)</span><b>'+_sd$(take)+'</b></div></div>'+
+  '<div class="row" style="gap:8px"><button class="btn gold sm" style="flex:1" onclick="toast(\'➕ Post a drop — reaches your chapter &amp; nearby heads (v1 mock).\')">➕ Post a drop</button><button class="btn ghost sm" style="flex:1" onclick="toast(\'📦 Orders — meet at the lot (v1 mock).\')">📦 Orders</button></div>'+
+  '<a class="btn ghost sm" href="qr_print.html" target="_blank" style="display:block;text-align:center;margin-top:8px;text-decoration:none">🪧 Print your booth QR</a>'+
+  '<div class="note" style="margin-top:9px">Operator console — your sales &amp; orders, nothing else. Honest-state: figures illustrative until accounts ship.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function chapterShakedown(ch){
+ ch=ch||((typeof ME!=="undefined"&&ME.chapter)||"santacruz");
+ var list=SHAKEDOWN.vendors.filter(function(v){return v.chapter===ch;});
+ if(!list.length){ch="santacruz";list=SHAKEDOWN.vendors.filter(function(v){return v.chapter===ch;});}
+ var sales=list.reduce(function(a,v){return a+v.sales;},0), orders=list.reduce(function(a,v){return a+v.orders;},0);
+ var take=Math.round(sales*SHAKEDOWN.share);
+ var top=list.slice().sort(function(a,b){return b.sales-a.sales;});
+ document.getElementById("sheet").innerHTML='<h3>📊 Shakedown — '+esc(_chName(ch))+' chapter</h3>'+
+  '<div class="sb">Your chapter\'s market at a glance. Rolls up to national.</div>'+
+  '<div class="row" style="gap:10px;margin-bottom:10px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--purple)">'+list.length+'</div><div class="muted" style="font-size:12px">vendors</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--purple)">'+_sd$(sales)+'</div><div class="muted" style="font-size:12px">sales · month</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:26px;font-weight:800;color:var(--purple)">'+_sd$(take)+'</div><div class="muted" style="font-size:12px">our 10%</div></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Top vendors</div><div class="card pad" style="padding-top:0;margin-bottom:10px">'+top.map(function(v){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:7px 0;cursor:pointer" onclick="vendorConsole(\''+escA(v.name)+'\')"><div><b style="font-size:13.5px">'+esc(v.name)+'</b><div class="muted" style="font-size:11.5px">'+v.orders+' orders · '+v.rating+'★</div></div><b style="color:var(--purple)">'+_sd$(v.sales)+'</b></div>';}).join("")+'</div>'+
+  '<button class="btn gold" style="width:100%" onclick="nationalShakedown()">↑ Roll up to national</button>'+
+  '<div class="note" style="margin-top:9px">Chapter rollup for the Chancellor — every vendor\'s sales gather here, then climb to the top.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function nationalShakedown(){
+ var V=SHAKEDOWN.vendors, sales=V.reduce(function(a,v){return a+v.sales;},0), orders=V.reduce(function(a,v){return a+v.orders;},0);
+ var take=Math.round(sales*SHAKEDOWN.share);
+ var byCh={}; V.forEach(function(v){byCh[v.chapter]=(byCh[v.chapter]||0)+v.sales;});
+ var rows=Object.keys(byCh).sort(function(a,b){return byCh[b]-byCh[a];});
+ var maxc=Math.max.apply(null,rows.map(function(c){return byCh[c];}));
+ var topV=V.slice().sort(function(a,b){return b.sales-a.sales;}).slice(0,4);
+ document.getElementById("sheet").innerHTML='<h3>🌌 Shakedown — national</h3>'+
+  '<div class="sb">Every chapter\'s market, rolled all the way up to you, Stagger Lee.</div>'+
+  '<div class="row" style="gap:10px;margin-bottom:10px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--purple)">'+V.length+'</div><div class="muted" style="font-size:11.5px">vendors</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--purple)">'+_sd$(sales)+'</div><div class="muted" style="font-size:11.5px">sales · month</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ok)">'+_sd$(take)+'</div><div class="muted" style="font-size:11.5px">our 10%</div></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">By chapter</div><div class="card pad" style="margin-bottom:10px">'+rows.map(function(c){return '<div style="margin-bottom:8px;cursor:pointer" onclick="chapterShakedown(\''+c+'\')"><div class="row" style="justify-content:space-between"><span style="font-size:12.5px">'+esc(_chName(c))+'</span><b style="font-size:12.5px">'+_sd$(byCh[c])+'</b></div><div style="height:7px;border-radius:6px;background:#eee;overflow:hidden;margin-top:3px"><i style="display:block;height:100%;width:'+Math.round(byCh[c]/maxc*100)+'%;background:linear-gradient(90deg,var(--rose),var(--gold))"></i></div></div>';}).join("")+'</div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Top vendors · nationwide</div><div class="card pad" style="padding-top:0;margin-bottom:10px">'+topV.map(function(v){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:7px 0"><div><b style="font-size:13.5px">'+esc(v.name)+'</b><div class="muted" style="font-size:11.5px">'+esc(_chName(v.chapter))+'</div></div><b style="color:var(--purple)">'+_sd$(v.sales)+'</b></div>';}).join("")+'</div>'+
+  '<div class="note" style="margin-top:9px">National rollup — the hidden CRM for the whole market. Honest-state demo until accounts ship.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
 }
 /* viewArchive() removed — the Archive is now an inline mounted, dead_dance-themed cassette
    that plays in-app (see buildArchive() below), plus the "I Was There" rooms. */
@@ -1062,6 +1158,212 @@ function requestBooking(slot){
  BOOKINGS.unshift({id:"bk"+Date.now(),date:iso,slot:slot,price:price,fee:fee,total:price+fee,by:PROFILE.name,status:"requested"});
  saveBookings();closeModal();toast("📅 Booking requested · "+iso+" ("+slot+") · "+money(price+fee)+" total.");
 }
+/* ---- 📅 PUBLIC BAND AVAILABILITY — the strategic loop: a fan asks "are you free Sept 21?"
+   and the band just says "check my calendar on dead_dance." Open nights are tappable;
+   a tap sends a booking request. Band keeps full rate; dead_dance adds 10%. ---- */
+var _AV={id:"",name:"",ym:"2026-09"};
+function avDefault(ym){var b=[];["05","12","13","19","26","27"].forEach(function(d){b.push(ym+"-"+d);});return b;} /* leaves the 21st open */
+function bandAvail(id,name,ym){
+ _AV={id:id,name:name||(bandById(id)||{}).name||"this band",ym:ym||"2026-09"};
+ ym=_AV.ym; var booked=avDefault(ym);
+ var p=ym.split("-"),Y=+p[0],Mo=+p[1];
+ var first=new Date(Y,Mo-1,1).getDay(), dim=new Date(Y,Mo,0).getDate();
+ var mon=["January","February","March","April","May","June","July","August","September","October","November","December"][Mo-1];
+ var t=new Date(),todayIso=t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2)+"-"+("0"+t.getDate()).slice(-2);
+ var cells="";for(var i=0;i<first;i++)cells+='<div></div>';
+ for(var d=1;d<=dim;d++){var iso=ym+"-"+("0"+d).slice(-2);var bk=booked.indexOf(iso)>=0,past=iso<todayIso,cls,click="";
+  if(bk){cls="background:#efe9f3;color:#9a8cb3";}
+  else if(past){cls="background:#f4f1ec;color:#cabfb0";}
+  else{cls="background:#e9f7ec;color:#1c7a37;cursor:pointer;font-weight:700";click=' onclick="requestDate(\''+iso+'\')"';}
+  cells+='<div style="'+cls+';border-radius:8px;text-align:center;padding:7px 0;font-size:13px"'+click+'>'+d+(bk?'<div style="font-size:8px">booked</div>':(past?'':'<div style="font-size:8px">open</div>'))+'</div>';}
+ document.getElementById("sheet").innerHTML='<h3>📅 '+esc(_AV.name)+' — availability</h3>'+
+  '<div class="sb">See an open night? Tap it to request a booking. <b>The band keeps their full rate</b>; dead_dance adds 10%. They approve — nothing auto-sends.</div>'+
+  '<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><button class="minib" onclick="avNav(-1)">‹</button><b>'+mon+' '+Y+'</b><button class="minib" onclick="avNav(1)">›</button></div>'+
+  '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:10.5px;color:var(--muted);margin-bottom:4px"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div>'+
+  '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">'+cells+'</div>'+
+  '<div class="row" style="gap:8px;margin-top:10px;font-size:11px"><span class="chip ok">open</span> <span class="chip" style="background:#efe9f3;color:#7a6b95">booked</span></div>'+
+  '<div class="note" style="margin-top:9px">The band\'s public calendar — <b>"check my calendar on dead_dance."</b> Honest-state: requests are demo; payment &amp; the 10% fee settle on the counsel-gated rail.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function avNav(dir){var p=_AV.ym.split("-"),Y=+p[0],Mo=+p[1]+dir;if(Mo<1){Mo=12;Y--;}if(Mo>12){Mo=1;Y++;}bandAvail(_AV.id,_AV.name,Y+"-"+("0"+Mo).slice(-2));}
+function requestDate(iso){
+ var evs=[["private","💍 Wedding"],["private","🎉 Private party"],["evening","🎤 Venue show"]];
+ document.getElementById("sheet").innerHTML='<h3>📅 Request '+esc(_AV.name)+'</h3><div class="sb">'+esc(iso)+' — tell the band what you\'ve got in mind. They approve every request; nothing auto-sends.</div>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Event</div><select id="rdType" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:9px">'+evs.map(function(e){var price=+BOOKING.rates[e[0]]||0,fee=Math.round(price*BOOK_FEE);return '<option value="'+e[0]+'">'+e[1]+' — '+money(price+fee)+' total</option>';}).join("")+'</select>'+
+  '<input id="rdName" placeholder="Your name" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+
+  '<input id="rdContact" placeholder="Email or phone" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+
+  '<textarea id="rdMsg" placeholder="A line about the gig — venue, vibe, set length…" style="width:100%;min-height:52px;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;font-family:inherit"></textarea>'+
+  '<button class="btn gold" style="width:100%;margin-top:10px" onclick="sendDateRequest(\''+iso+'\')">Send booking request</button>'+
+  '<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="bandAvail(_AV.id,_AV.name,_AV.ym)">‹ Back to calendar</button>'+
+  '<div class="note" style="margin-top:9px">Band keeps full rate; dead_dance adds 10%. Honest-state: no payment is taken.</div>'+
+  '<button class="close" onclick="closeModal()">Cancel</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function sendDateRequest(iso){
+ var slot=(document.getElementById("rdType")||{}).value||"private";
+ var nm=clamp((document.getElementById("rdName")||{}).value||"",60)||"A fan";
+ var price=+BOOKING.rates[slot]||0,fee=Math.round(price*BOOK_FEE);
+ BOOKINGS.unshift({id:"bk"+Date.now(),date:iso,slot:slot,price:price,fee:fee,total:price+fee,by:nm+" → "+_AV.name,status:"requested"});
+ saveBookings();closeModal();toast("📅 Request sent to "+_AV.name+" for "+iso+" — they'll confirm. Nothing auto-sends.");
+}
+/* ---- 🎀 CHAPTER CHAPERONE — the ambassadors. Tied to the Santa Cruz Chancellors, they make
+   show-day standards shine (QR, attendance scanner, musicians fed, Shakedown, daily HyperPost)
+   and bring venues aboard for 9% of regional revenue. NO legal responsibility — that stays with
+   the Chancellor & venue. Recruited for love of the scene, energy & people — open to every head. ---- */
+var CHAPERONE=(function(){try{var s=localStorage.getItem("dd.chaperone");if(s){var o=JSON.parse(s);if(o&&o.venues)return o;}}catch(e){}return {
+ region:"santacruz",regionRevenue:48200,hyperStreak:12,scansToday:184,
+ venues:[
+  {name:"The Catalyst",status:"signed",std:{qr:1,scan:1,fed:1,shake:1,post:1}},
+  {name:"Moe's Alley",status:"signed",std:{qr:1,scan:1,fed:1,shake:0,post:1}},
+  {name:"Felton Music Hall",status:"visited",std:{qr:0,scan:0,fed:1,shake:0,post:0}},
+  {name:"Rio Theatre",status:"prospect",std:{qr:0,scan:0,fed:0,shake:0,post:0}}
+ ]};})();
+function saveChaperone(){try{localStorage.setItem("dd.chaperone",JSON.stringify(CHAPERONE));}catch(e){}}
+var STD_LABELS=[["qr","🪧 QR"],["scan","🎫 Scanner"],["fed","❤️ Fed"],["shake","🛍️ Shakedown"],["post","🚀 Posted"]];
+function chaperoneConsole(){
+ var C=CHAPERONE, cut=Math.round(C.regionRevenue*0.09);
+ var signed=C.venues.filter(function(v){return v.status==="signed";}).length;
+ function stdc(v){return STD_LABELS.reduce(function(a,s){return a+(v.std&&v.std[s[0]]?1:0);},0);}
+ var tot=C.venues.reduce(function(a,v){return a+stdc(v);},0), max=C.venues.length*STD_LABELS.length, pct=Math.round(tot/max*100);
+ document.getElementById("sheet").innerHTML='<h3>🎀 Chapter Chaperone — Santa Cruz</h3>'+
+  '<div class="sb">Ambassador for the Santa Cruz Chancellors. You make show-day shine and bring venues aboard. <b>You\'re the cheerleader — no legal responsibility; that stays with the Chancellor &amp; venue.</b></div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div style="font-size:11.5px;opacity:.8">Your cut · 9% of Santa Cruz revenue</div><b style="font-size:24px">'+_sd$(cut)+'</b><span style="font-size:12px">/mo</span><div style="font-size:11px;opacity:.78">region revenue '+_sd$(C.regionRevenue)+' · '+signed+' venues signed</div></div>'+
+  '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><b style="font-size:14px">Show-day standards</b><b>'+pct+'%</b></div><div style="height:8px;border-radius:6px;background:#eee;overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--rose),var(--gold))"></i></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Your venues — tap a standard to mark it met</div>'+
+  C.venues.map(function(v,idx){var nl={prospect:"Log a visit",visited:"Set a demo",demo:"Mark signed"}[v.status];return '<div class="card pad" style="margin-bottom:8px"><div class="row" style="justify-content:space-between"><b style="font-size:13.5px">'+esc(v.name)+'</b><span class="chip '+(v.status==="signed"?"ok":(v.status==="prospect"?"rose":"gold"))+'">'+esc(v.status)+'</span></div>'+
+   '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'+STD_LABELS.map(function(s){var on=v.std&&v.std[s[0]];return '<span class="minib" style="'+(on?"background:#e9f7ec;color:#1c7a37":"")+'" onclick="chapStd('+idx+',\''+s[0]+'\')">'+(on?"✓ ":"")+esc(s[1])+'</span>';}).join("")+'</div>'+
+   (nl?'<button class="btn gold sm" style="width:100%;margin-top:8px" onclick="chapAdvance('+idx+')">'+nl+'</button>':'')+'</div>';}).join("")+
+  '<div class="row" style="gap:8px;margin-top:4px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--purple)">'+C.hyperStreak+'🔥</div><div class="muted" style="font-size:11px">day post streak</div><button class="btn gold sm" style="width:100%;margin-top:6px" onclick="chapHyper()">🚀 Post today</button></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--purple)">'+C.scansToday+'</div><div class="muted" style="font-size:11px">badges scanned today</div><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="chapScan()">🎫 Scan attendance</button></div></div>'+
+  '<button class="btn gold" style="width:100%;margin-top:10px" onclick="salesConsole()">💼 My sales CRM — subs, mileage &amp; receipts</button>'+
+  '<div class="note" style="margin-top:10px">Ambassadors are recruited for <b>love of the scene, energy &amp; people skills</b> — open to every Deadhead. They cheerlead; the Chancellor &amp; venue carry the legal weight.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function chapStd(idx,k){var v=CHAPERONE.venues[idx];if(!v.std)v.std={};v.std[k]=v.std[k]?0:1;saveChaperone();chaperoneConsole();}
+function chapAdvance(idx){var v=CHAPERONE.venues[idx];v.status=v.status==="prospect"?"visited":(v.status==="visited"?"demo":"signed");saveChaperone();chaperoneConsole();toast(v.status==="signed"?("🎉 "+v.name+" signed — your 9% just grew."):("➡️ "+v.name+" → "+v.status));}
+function chapHyper(){CHAPERONE.hyperStreak++;saveChaperone();chaperoneConsole();toast("🚀 HyperPosted — streak "+CHAPERONE.hyperStreak+" days. You post, nothing auto-sends.");}
+function chapScan(){CHAPERONE.scansToday+=Math.floor(Math.random()*8)+1;saveChaperone();chaperoneConsole();toast("🎫 Scanned — attendance lands on heads' badges.");}
+/* ---- 💼 FIELD SALES CRM — three hidden tiers. Reps paid 25% residual on the venue
+   subscriptions they sign; Regional Managers get a 2% division override; National (Stagger Lee)
+   sees the whole master. Mileage + receipts ride along for the reps. 1099 by default (CA W-2
+   per counsel). Honest-state demo. See AMBASSADOR_FIELD_SALES_PROGRAM doc. ---- */
+var SALES=(function(){try{var s=localStorage.getItem("dd.sales");if(s){var o=JSON.parse(s);if(o&&o.venues)return o;}}catch(e){}return {
+ me:"You (Stagger Lee)", repPct:0.25, overridePct:0.02, mileRate:0.70,
+ divisions:[
+  {id:"pacific",name:"Pacific",mgr:"Dawn R.",regions:["santacruz","bayarea","pnw"]},
+  {id:"southwest",name:"Southwest",mgr:"Marco T.",regions:["socal","lonestar"]},
+  {id:"mountain",name:"Mountain",mgr:"Sky B.",regions:["rockies"]},
+  {id:"south",name:"Heartland & South",mgr:"June A.",regions:["greatlakes","southeast"]},
+  {id:"atlantic",name:"Atlantic",mgr:"Pat L.",regions:["midatl","northeast"]}
+ ],
+ venues:[
+  {name:"The Catalyst",region:"santacruz",rep:"You (Stagger Lee)",status:"signed",sub:99},
+  {name:"Moe's Alley",region:"santacruz",rep:"You (Stagger Lee)",status:"signed",sub:49.5},
+  {name:"Felton Music Hall",region:"santacruz",rep:"You (Stagger Lee)",status:"demo",sub:0},
+  {name:"Rio Theatre",region:"santacruz",rep:"You (Stagger Lee)",status:"prospect",sub:0},
+  {name:"Sweetwater",region:"bayarea",rep:"Tessa K.",status:"signed",sub:99},
+  {name:"The Fillmore",region:"bayarea",rep:"Tessa K.",status:"signed",sub:99},
+  {name:"The UC Theatre",region:"bayarea",rep:"Tessa K.",status:"visited",sub:0},
+  {name:"Crystal Ballroom",region:"pnw",rep:"Sage P.",status:"signed",sub:99},
+  {name:"Belly Up",region:"socal",rep:"Luz M.",status:"signed",sub:99},
+  {name:"The Fonda",region:"socal",rep:"Luz M.",status:"signed",sub:49.5},
+  {name:"Red Rocks",region:"rockies",rep:"Sky B.",status:"signed",sub:99},
+  {name:"Cervantes'",region:"rockies",rep:"Sky B.",status:"demo",sub:0},
+  {name:"Antone's",region:"lonestar",rep:"Cody R.",status:"signed",sub:99},
+  {name:"Martyrs'",region:"greatlakes",rep:"June A.",status:"signed",sub:99},
+  {name:"The Orange Peel",region:"southeast",rep:"Della W.",status:"signed",sub:99},
+  {name:"Ardmore Music Hall",region:"midatl",rep:"Pat L.",status:"signed",sub:99},
+  {name:"The Capitol Theatre",region:"northeast",rep:"Robin S.",status:"signed",sub:99}
+ ],
+ mileage:[{who:"You (Stagger Lee)",mi:42,note:"The Catalyst"},{who:"You (Stagger Lee)",mi:28,note:"Moe's Alley"}],
+ receipts:[{who:"You (Stagger Lee)",cat:"Gas",amt:48},{who:"You (Stagger Lee)",cat:"Meal w/ venue",amt:64}]
+};})();
+function saveSales(){try{localStorage.setItem("dd.sales",JSON.stringify(SALES));}catch(e){}}
+/* Seed the CRM with ALL venues (from VENUES) enriched by crm_seed.js — priority + verified contacts. */
+(function seedCRM(){
+ if(typeof VENUES==="undefined"||typeof DD_CRM_SEED==="undefined")return;
+ if(SALES._seed===4 && SALES.venues && SALES.venues.length>=VENUES.length)return;
+ var signedSub={"The Catalyst":99,"Moe's Alley":49.5};
+ SALES.venues=VENUES.map(function(v){var name=v[0],region=v[3];
+  return {name:name,region:region,rep:(DD_CRM_SEED.reps[region]||"Unassigned"),
+   status:(signedSub[name]?"signed":"prospect"),sub:(signedSub[name]||0),
+   pri:(DD_CRM_SEED.pri[name]||2),contact:(DD_CRM_SEED.contact[name]||null),city:v[1],state:v[2]};
+ });
+ SALES._seed=4; saveSales();
+})();
+function salesDiv(region){for(var i=0;i<SALES.divisions.length;i++)if(SALES.divisions[i].regions.indexOf(region)>=0)return SALES.divisions[i];return SALES.divisions[0];}
+var _salesRep="";
+function salesConsole(rep){
+ _salesRep=rep||SALES.me;
+ var mine=SALES.venues.filter(function(v){return v.rep===_salesRep;});
+ var signed=mine.filter(function(v){return v.sub>0;});
+ var mrr=signed.reduce(function(a,v){return a+v.sub;},0), comm=mrr*SALES.repPct;
+ var counts={prospect:0,visited:0,demo:0,signed:0}; mine.forEach(function(v){counts[v.status]=(counts[v.status]||0)+1;});
+ var myMi=SALES.mileage.filter(function(m){return m.who===_salesRep;}), miTot=myMi.reduce(function(a,m){return a+(+m.mi||0);},0);
+ var myRc=SALES.receipts.filter(function(r){return r.who===_salesRep;}), rcTot=myRc.reduce(function(a,r){return a+(+r.amt||0);},0);
+ document.getElementById("sheet").innerHTML='<h3>💼 '+esc(_salesRep)+' — sales CRM</h3>'+
+  '<div class="sb">Your territory, your venues, your pay. <b>We hide the rest</b> — other reps, regions &amp; platform margin aren\'t your concern.</div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div style="font-size:11.5px;opacity:.8">Your commission · 25% residual on your venue subs</div><b style="font-size:24px">'+_sd$(comm)+'</b><span style="font-size:12px">/mo</span><div style="font-size:11px;opacity:.78">'+signed.length+' active venues · '+_sd$(mrr)+' MRR signed</div></div>'+
+  '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><b style="font-size:14px">Pipeline</b></div><div class="row" style="gap:6px;margin-top:7px;flex-wrap:wrap"><span class="chip rose">prospect '+counts.prospect+'</span><span class="chip gold">visited '+counts.visited+'</span><span class="chip gold">demo '+counts.demo+'</span><span class="chip ok">signed '+counts.signed+'</span></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Your venues — worked top-priority first · tap for contacts &amp; plan</div>'+
+  mine.slice().sort(function(a,b){return (a.pri||2)-(b.pri||2);}).map(function(v){var realIdx=SALES.venues.indexOf(v);var pc=v.pri===1?"rose":(v.pri===2?"gold":"");return '<div class="card pad" style="margin-bottom:8px;cursor:pointer" onclick="venueCard('+realIdx+')"><div class="row" style="justify-content:space-between"><div><b style="font-size:13.5px">'+esc(v.name)+'</b> <span class="chip '+pc+'" style="font-size:10px">P'+(v.pri||2)+'</span><div class="muted" style="font-size:11.5px">'+esc(_chName(v.region))+(v.contact&&v.contact.site?(' · '+esc(v.contact.site)):' · contact: research')+(v.sub>0?(' · $'+v.sub+'/mo'):'')+'</div></div><span class="chip '+(v.status==="signed"?"ok":(v.status==="prospect"?"rose":"gold"))+'">'+esc(v.status)+'</span></div></div>';}).join("")+
+  '<div class="row" style="gap:8px;margin-top:4px"><div class="card pad" style="flex:1"><div class="muted" style="font-size:11px">Mileage YTD</div><b style="font-size:18px">'+miTot.toLocaleString()+' mi</b><div class="muted" style="font-size:11px">'+_sd$(miTot*SALES.mileRate)+' deductible</div><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="salesAddMile()">＋ Add miles</button></div>'+
+  '<div class="card pad" style="flex:1"><div class="muted" style="font-size:11px">Receipts</div><b style="font-size:18px">'+_sd$(rcTot)+'</b><div class="muted" style="font-size:11px">'+myRc.length+' on file</div><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="salesAddReceipt()">📷 Add receipt</button></div></div>'+
+  '<div class="note" style="margin-top:10px">1099 contractor by default (CA may be W-2 per counsel). Mileage &amp; receipts file themselves — no P&amp;L homework. Honest-state demo.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function venueCard(idx){var v=SALES.venues[idx];if(!v)return;var c=v.contact||{};
+ var stages=[["prospect","🔎","Research & first contact"],["visited","🤝","Visit the room"],["demo","🎬","Run the demo"],["signed","✅","Sign the $99 sub"]];
+ var curi=0;for(var i=0;i<stages.length;i++)if(stages[i][0]===v.status)curi=i;
+ var nl={prospect:"Log a visit",visited:"Set a demo",demo:"Mark signed ($99)"}[v.status];
+ var contactHtml=(c.site||c.phone||c.email)?
+  ('<div class="card pad" style="margin-bottom:10px">'+
+   (c.site?'<div class="row" style="justify-content:space-between;padding:3px 0"><span class="muted" style="font-size:12px">Website</span><a href="https://'+escA(c.site)+'" target="_blank" rel="noopener nofollow">'+esc(c.site)+' ↗</a></div>':'')+
+   (c.phone?'<div class="row" style="justify-content:space-between;padding:3px 0"><span class="muted" style="font-size:12px">Phone</span><a href="tel:'+escA(c.phone.replace(/[^0-9+]/g,""))+'">'+esc(c.phone)+'</a></div>':'')+
+   (c.email?'<div class="row" style="justify-content:space-between;padding:3px 0"><span class="muted" style="font-size:12px">Booking</span><a href="mailto:'+escA(c.email)+'">'+esc(c.email)+'</a></div>':'')+
+  '</div>')
+  :'<div class="note" style="margin:0 0 10px">No verified contact yet. <b>Find the official site, confirm the booking line</b> — don\'t guess.</div>';
+ document.getElementById("sheet").innerHTML='<h3>🏛️ '+esc(v.name)+'</h3><div class="sb">'+esc((v.city||"")+(v.state?(", "+v.state):""))+' · '+esc(_chName(v.region))+' · <b>Priority '+(v.pri||2)+'</b> · '+esc(v.status)+'</div>'+
+  contactHtml+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Action plan</div><div class="card pad" style="margin-bottom:10px">'+stages.map(function(s,i){var done=i<curi,now=i===curi;return '<div class="row" style="gap:8px;padding:5px 0;'+(now?"font-weight:700":"")+'"><span>'+(done?"✅":(now?s[1]:"⬜"))+'</span><span style="font-size:13px;'+(done?"color:#9a9;text-decoration:line-through":(now?"":"color:#aaa"))+'">'+esc(s[2])+'</span></div>';}).join("")+'</div>'+
+  (nl?'<button class="btn gold" style="width:100%" onclick="salesAdvance('+idx+');venueCard('+idx+')">'+nl+'</button>':'<div class="note" style="margin:0">✅ Signed — onboard: QR · attendance scanner · first show.</div>')+
+  '<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="salesConsole(\''+escA(v.rep)+'\')">‹ Back to my CRM</button>'+
+  '<div class="note" style="margin-top:9px">Contacts shown are <b>verified public business</b> info; blanks need verified enrichment — never invented. Honest-state demo.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function salesAdvance(idx){var v=SALES.venues[idx];if(!v)return;if(v.status==="prospect")v.status="visited";else if(v.status==="visited")v.status="demo";else if(v.status==="demo"){v.status="signed";v.sub=99;}saveSales();salesConsole(_salesRep);if(v.status==="signed")toast("🎉 "+v.name+" signed — $99/mo. Your 25% just grew.");else toast("➡️ "+v.name+" → "+v.status);}
+function salesAddMile(){document.getElementById("sheet").innerHTML='<h3>🚗 Add miles</h3><div class="sb">Quick — miles &amp; where to.</div><input id="smMi" type="number" placeholder="Miles" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px"><input id="smNote" placeholder="Venue / trip" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px"><button class="btn gold" style="width:100%;margin-top:10px" onclick="salesSaveMile()">Add</button><button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="salesConsole(_salesRep)">‹ Back</button><button class="close" onclick="closeModal()">Cancel</button>';document.getElementById("ovl").classList.add("on");}
+function salesSaveMile(){var mi=Math.max(0,+((document.getElementById("smMi")||{}).value)||0);var note=clamp((document.getElementById("smNote")||{}).value||"",60)||"visit";if(mi>0){SALES.mileage.unshift({who:_salesRep,mi:mi,note:note});saveSales();}salesConsole(_salesRep);toast("🚗 "+mi+" mi logged · "+_sd$(mi*SALES.mileRate)+" deductible.");}
+function salesAddReceipt(){var cats=["Gas","Meal w/ venue","Swag","Lodging","Other"];document.getElementById("sheet").innerHTML='<h3>📷 Add receipt</h3><div class="sb">Snap it — category &amp; amount, that\'s it.</div><select id="srCat" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+cats.map(function(c){return '<option>'+c+'</option>';}).join("")+'</select><input id="srAmt" type="number" placeholder="Amount $" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px"><button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="toast(\'📎 Photo attached (mock).\')">📎 Attach photo</button><button class="btn gold" style="width:100%;margin-top:8px" onclick="salesSaveReceipt()">Add receipt</button><button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="salesConsole(_salesRep)">‹ Back</button><button class="close" onclick="closeModal()">Cancel</button>';document.getElementById("ovl").classList.add("on");}
+function salesSaveReceipt(){var cat=(document.getElementById("srCat")||{}).value||"Other";var amt=Math.max(0,+((document.getElementById("srAmt")||{}).value)||0);if(amt>0){SALES.receipts.unshift({who:_salesRep,cat:cat,amt:amt});saveSales();}salesConsole(_salesRep);toast("📷 Receipt filed · "+cat+" "+_sd$(amt)+".");}
+function mgrConsole(divId){var D=null;for(var i=0;i<SALES.divisions.length;i++)if(SALES.divisions[i].id===divId)D=SALES.divisions[i];if(!D)D=SALES.divisions[0];
+ var dv=SALES.venues.filter(function(v){return D.regions.indexOf(v.region)>=0;});
+ var signed=dv.filter(function(v){return v.sub>0;});var mrr=signed.reduce(function(a,v){return a+v.sub;},0);var over=mrr*SALES.overridePct;
+ var byRep={};dv.forEach(function(v){byRep[v.rep]=(byRep[v.rep]||0)+(v.sub||0);});var reps=Object.keys(byRep).sort(function(a,b){return byRep[b]-byRep[a];});
+ document.getElementById("sheet").innerHTML='<h3>🗺️ '+esc(D.name)+' division — manager</h3><div class="sb">Manager: <b>'+esc(D.mgr)+'</b>. Your division\'s subscription revenue &amp; your 2% override. Other divisions stay hidden.</div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div class="row" style="justify-content:space-between"><div><div style="font-size:11.5px;opacity:.8">Division MRR</div><b style="font-size:22px">'+_sd$(mrr)+'</b></div><div style="text-align:right"><div style="font-size:11.5px;opacity:.8">Your 2% override</div><b style="font-size:22px;color:#ffe08a">'+_sd$(over)+'</b></div></div><div style="font-size:11px;opacity:.78;margin-top:4px">'+signed.length+' active venues · '+reps.length+' reps</div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Reps — tap to open their CRM</div><div class="card pad" style="padding-top:0;margin-bottom:10px">'+reps.map(function(r){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:7px 0;cursor:pointer" onclick="salesConsole(\''+escA(r)+'\')"><b style="font-size:13.5px">'+esc(r)+'</b><div style="text-align:right"><b style="color:var(--purple)">'+_sd$(byRep[r])+'</b> <span class="muted" style="font-size:11px">MRR</span></div></div>';}).join("")+'</div>'+
+  '<div class="note" style="margin-top:9px">Manager view — your division only. Honest-state demo.</div><button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");}
+function nationalSalesCRM(){var V=SALES.venues,signed=V.filter(function(v){return v.sub>0;});var mrr=signed.reduce(function(a,v){return a+v.sub;},0);
+ var comms=0,overs=0,byRep={},byDiv={};
+ V.forEach(function(v){byRep[v.rep]=(byRep[v.rep]||0)+(v.sub||0);var d=salesDiv(v.region);byDiv[d.id]=(byDiv[d.id]||0)+(v.sub||0);});
+ Object.keys(byRep).forEach(function(r){comms+=byRep[r]*SALES.repPct;});
+ SALES.divisions.forEach(function(d){overs+=(byDiv[d.id]||0)*SALES.overridePct;});
+ var net=mrr-comms-overs;
+ var drows=SALES.divisions.slice().sort(function(a,b){return (byDiv[b.id]||0)-(byDiv[a.id]||0);});
+ var maxd=Math.max.apply(null,SALES.divisions.map(function(d){return byDiv[d.id]||0;}))||1;
+ var topReps=Object.keys(byRep).sort(function(a,b){return byRep[b]-byRep[a];}).slice(0,5);
+ document.getElementById("sheet").innerHTML='<h3>🌌 Field sales — national</h3><div class="sb">The master CRM — every division, rolled all the way up to you, Stagger Lee.</div>'+
+  '<div class="row" style="gap:8px;margin-bottom:10px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--purple)">'+_sd$(mrr)+'</div><div class="muted" style="font-size:11px">subscription MRR</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--purple)">'+signed.length+'</div><div class="muted" style="font-size:11px">active venues</div></div></div>'+
+  '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><span class="muted" style="font-size:12px">Rep commissions (25%)</span><b>'+_sd$(comms)+'</b></div><div class="row" style="justify-content:space-between;margin-top:6px"><span class="muted" style="font-size:12px">Manager overrides (2%)</span><b>'+_sd$(overs)+'</b></div><div class="row" style="justify-content:space-between;margin-top:6px"><span style="font-size:12px"><b>Net to platform</b></span><b style="color:var(--ok)">'+_sd$(net)+'</b></div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">By division — tap for the manager view</div><div class="card pad" style="margin-bottom:10px">'+drows.map(function(d){var s=byDiv[d.id]||0;return '<div style="margin-bottom:8px;cursor:pointer" onclick="mgrConsole(\''+d.id+'\')"><div class="row" style="justify-content:space-between"><span style="font-size:12.5px">'+esc(d.name)+' <span class="muted" style="font-size:11px">· '+esc(d.mgr)+'</span></span><b style="font-size:12.5px">'+_sd$(s)+'</b></div><div style="height:7px;border-radius:6px;background:#eee;overflow:hidden;margin-top:3px"><i style="display:block;height:100%;width:'+Math.round(s/maxd*100)+'%;background:linear-gradient(90deg,var(--rose),var(--gold))"></i></div></div>';}).join("")+'</div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Top reps — tap to open their CRM</div><div class="card pad" style="padding-top:0;margin-bottom:10px">'+topReps.map(function(r){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:7px 0;cursor:pointer" onclick="salesConsole(\''+escA(r)+'\')"><b style="font-size:13.5px">'+esc(r)+'</b><b style="color:var(--purple)">'+_sd$(byRep[r])+'</b></div>';}).join("")+'</div>'+
+  '<div class="note" style="margin-top:9px">National master — the hidden CRM, all tiers visible only here. Honest-state demo until accounts &amp; the counsel-gated payment rail ship.</div><button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");}
 /* ---- 📊 Chapter Performance Dashboard — single pane of glass; rolls up to National (founder) ---- */
 var CHAPTERS_LIST=[["santacruz","Santa Cruz · Founders",312],["bayarea","Bay Area",980],["pnw","Pacific Northwest",430],["socal","SoCal Heads",611],["rockies","Rocky Mountain",540],["lonestar","Lone Star + SW",298],["greatlakes","Great Lakes",505],["southeast","Southeast",470],["midatl","Mid-Atlantic",412],["northeast","Northeast + New England",690]];
 var VEND_NAMES=["Tie-Dye Co-op","TapeVault","Lot Grilled Cheese","BeadWorks","Show Posters","Pins & Patches","Crystal Cart","Veggie Burritos"];
@@ -1247,6 +1549,9 @@ function viewYou(){
     '<button class="minib" onclick="legalChecklist()">⚖️ Legal checklist</button>'+
     '<button class="minib rose" onclick="planEvent()">🌹 Schedule a dead_dance</button>'+
     '<button class="minib" onclick="go(\'dash\')">📊 Chapter dashboard</button>'+
+    '<button class="minib" onclick="chapterShakedown()">🛍️ Chapter Shakedown</button>'+
+    '<button class="minib" onclick="chaperoneConsole()">🎀 Chapter Chaperones</button>'+
+    '<button class="minib" onclick="nationalSalesCRM()">💼 Field sales (national)</button>'+
    '</div>'+
    '<div class="muted" style="font-size:11.5px;margin-top:10px">QR at every show · vacuum the 3–5 best FB-group posts in · seed &amp; close crowdsource requests. Full list in the Chapter Head handbook.</div>'+
   '</div>'+
