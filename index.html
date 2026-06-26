@@ -317,7 +317,7 @@ function like(i){S.liked[i]=!S.liked[i];render();}
 
 function rosebud(){return '<div class="rbud" title="Rosebud — your dead_dance mascot"><span class="star" style="left:36%;top:0">✨</span><span class="star" style="right:36%;top:7px;animation-delay:.7s">🌟</span><span class="star" style="left:50%;bottom:0;animation-delay:1.1s">💫</span><span class="rb">🌹</span></div>';}
 function viewHome(){
- return '<div id="ddHero" class="dd-hero" aria-label="dead_dance headline"></div>'+rosebud()+'<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
+ return '<div id="ddHero" class="dd-hero" aria-label="dead_dance headline"></div>'+'<div class="card"><div class="pad composer"><div class="av" style="background:var(--gold);color:var(--purple)">RG</div>'+
    '<input placeholder="What\'s the word on the lot?" onkeydown="if(event.key===\'Enter\'){toast(\'Posted (demo)\');this.value=\'\'}"><button class="btn sm" onclick="toast(\'Posted (demo)\')">Post</button></div></div>'+
    '<div class="card pad"><div class="row" style="gap:10px"><div class="ic">📥</div><div style="flex:1"><b style="font-size:14px">Bring a Facebook post in</b><div class="muted" style="font-size:12px">Share a post from any FB group into the same group here — in &amp; out.</div></div><button class="btn sm" onclick="captureShare(\'\',\'\')">Share in</button></div></div>'+
    eventsView()+
@@ -507,20 +507,29 @@ function gpsConfirmShow(band,venue){
 /* ---- 💼 MUSICIAN'S BOOKS — WIN THE MUSICIANS. Mileage tracks automatically off their gigs; they
    snap a receipt (hotel / gas / amp rental) and we file it. HIDE the bookkeeping, show the payoff:
    costs + a tax-ready mileage deduction. Net it against their ticket take so they see the real number. ---- */
-var MEXP=(function(){try{var s=localStorage.getItem("dd.mexp");if(s){var o=JSON.parse(s);if(o&&typeof o==="object")return {exp:o.exp||[],mi:o.mi||[]};}}catch(e){}return {exp:[],mi:[]};})();
-function saveMexp(){try{localStorage.setItem("dd.mexp",JSON.stringify({exp:MEXP.exp.slice(0,500),mi:MEXP.mi.slice(0,500)}));}catch(e){}}
+var MEXP=(function(){try{var s=localStorage.getItem("dd.mexp");if(s){var o=JSON.parse(s);if(o&&typeof o==="object")return {exp:o.exp||[],mi:o.mi||[],hrs:o.hrs||[],rate:(+o.rate||0)};}}catch(e){}return {exp:[],mi:[],hrs:[],rate:0};})();
+function saveMexp(){try{localStorage.setItem("dd.mexp",JSON.stringify({exp:MEXP.exp.slice(0,500),mi:MEXP.mi.slice(0,500),hrs:MEXP.hrs.slice(0,500),rate:MEXP.rate}));}catch(e){}}
 var MILE_RATE=0.70; /* standard mileage rate — confirm current tax year */
 function mexpMiles(){return MEXP.mi.reduce(function(a,m){return a+(+m.miles||0);},0);}
 function mexpCosts(){return MEXP.exp.reduce(function(a,e){return a+(+e.amount||0);},0);}
 function mexpAddMile(label,miles){MEXP.mi.unshift({label:label,miles:miles,ts:Date.now()});saveMexp();}
+/* ⏱ YOUR TIME — setup, drive, teardown, rehearsal. Hours × your rate. Honest split:
+   PAID crew hours are a deductible labor expense; YOUR OWN unpaid time is NOT deductible
+   (you can't write off your own labor) — but it's your truest cost, so we surface effective $/hr. */
+function mexpRate(){return +MEXP.rate||0;}
+function mexpSetRate(v){MEXP.rate=Math.max(0,+v||0);saveMexp();}
+function mexpHours(paid){return MEXP.hrs.reduce(function(a,h){return a+((paid==null||!!h.paid===!!paid)?(+h.hours||0):0);},0);}
+function mexpLabor(paid){return mexpHours(paid)*mexpRate();}
+function mexpAddHours(kind,hours,paid){MEXP.hrs.unshift({kind:kind,hours:+hours||0,paid:!!paid,rate:mexpRate(),ts:Date.now()});saveMexp();}
 var _mxPhoto=null;
 function mexpSheet(bandName){
  var miles=mexpMiles(),costs=mexpCosts(),deduct=miles*MILE_RATE;
  document.getElementById("sheet").innerHTML='<h3>💼 Your books'+(bandName?(' — '+esc(bandName)):'')+'</h3>'+
   '<div class="sb">We keep them for you. Snap a receipt — we file it. Your miles track as you play. You just play.</div>'+
   '<div class="card pad" style="background:linear-gradient(180deg,#3b6b4a22,#fffaf2)"><div class="row" style="gap:6px;text-align:center"><div style="flex:1"><div class="muted" style="font-size:10.5px">Costs logged</div><div style="font-size:20px;font-weight:800">'+tmoney(costs)+'</div></div><div style="flex:1"><div class="muted" style="font-size:10.5px">Miles tracked</div><div style="font-size:20px;font-weight:800">'+Math.round(miles)+'</div></div><div style="flex:1"><div class="muted" style="font-size:10.5px">Mileage deduction</div><div style="font-size:20px;font-weight:800;color:#2a6b46">'+tmoney(deduct)+'</div></div></div><div class="muted" style="font-size:10.5px;text-align:center;margin-top:6px">at the standard mileage rate — ready for tax time</div></div>'+
+  '<div class="card pad" style="background:linear-gradient(180deg,#5b3b6b22,#fffaf2);margin-top:8px"><div class="row" style="gap:6px;text-align:center"><div style="flex:1"><div class="muted" style="font-size:10.5px">Hours logged</div><div style="font-size:20px;font-weight:800">'+(Math.round(mexpHours()*10)/10)+'</div></div><div style="flex:1"><div class="muted" style="font-size:10.5px">Your rate</div><div style="font-size:20px;font-weight:800">'+(mexpRate()?(tmoney(mexpRate())+'/hr'):'—')+'</div></div><div style="flex:1"><div class="muted" style="font-size:10.5px">Time value</div><div style="font-size:20px;font-weight:800;color:#6b3b8c">'+tmoney(mexpLabor())+'</div></div></div><div class="muted" style="font-size:10.5px;text-align:center;margin-top:6px">setup · drive · teardown · rehearsal — the hours behind the gig</div></div>'+
   '<input type="file" accept="image/*" capture="environment" id="mxPhoto" onchange="mexpSnap(this)" style="display:none">'+
-  '<div class="row" style="gap:8px;margin-top:10px"><button class="btn gold" style="flex:1" onclick="document.getElementById(\'mxPhoto\').click()">📷 Snap a receipt</button><button class="btn ghost" style="flex:1" onclick="mexpForm(false)">➕ Add expense</button></div>'+
+  '<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn gold" style="flex:1;min-width:30%" onclick="document.getElementById(\'mxPhoto\').click()">📷 Snap a receipt</button><button class="btn ghost" style="flex:1;min-width:30%" onclick="mexpForm(false)">➕ Add expense</button><button class="btn ghost" style="flex:1;min-width:30%" onclick="mexpHoursForm()">⏱ Log hours</button></div>'+
   (MEXP.exp.length?('<div class="sec-h" style="margin-top:12px">Recent receipts</div>'+MEXP.exp.slice(0,6).map(function(e){return '<div class="card pad" style="padding:8px 12px"><div class="row" style="gap:8px;align-items:center"><div class="ic">'+(e.icon||'💼')+'</div><div style="flex:1;font-size:13px"><b>'+esc(e.cat)+'</b>'+(e.photo?' <span class="chip ok">📷</span>':'')+(e.note?('<div class="muted" style="font-size:11.5px">'+esc(e.note)+'</div>'):'')+'</div><b>'+tmoney(e.amount)+'</b></div></div>';}).join("")):'')+
   (MEXP.mi.length?('<div class="sec-h" style="margin-top:12px">Miles (auto)</div>'+MEXP.mi.slice(0,5).map(function(m){return '<div class="card pad" style="padding:7px 12px"><div class="row" style="gap:8px"><div class="ic">🚐</div><div style="flex:1;font-size:13px">'+esc(m.label)+'</div><b>'+Math.round(m.miles)+' mi</b></div></div>';}).join("")):'')+
   '<div class="note" style="margin-top:10px">Honest-state: receipts captured on-device (BYO-cloud like your photos — we don\'t upload them); miles auto-accrue from your gigs (estimated, editable). Not tax advice — a clean export for your accountant ships with accounts.</div>'+
@@ -545,6 +554,27 @@ function mexpSaveExpense(hasPhoto){
  if(!amount){toast("Pop in the amount.");return;}
  MEXP.exp.unshift({cat:cat.replace(/^\S+\s/,""),icon:icon,amount:amount,note:note,photo:!!hasPhoto,ts:Date.now()});
  _mxPhoto=null;saveMexp();mexpSheet("");toast("💼 Logged — we'll have it ready at tax time.");
+}
+function mexpHoursForm(){
+ var kinds=[["Setup / load-in","🔧"],["Drive","🚐"],["Teardown / load-out","📦"],["Rehearsal","🎶"],["Other","⏱"]];
+ document.getElementById("sheet").innerHTML='<h3>⏱ Log your hours</h3>'+
+  '<div class="sb">The hours behind the gig — setup, drive, teardown, rehearsal. Set your rate once; we value your time and roll it into the P&amp;L.</div>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Your rate ($/hour)</div><input id="hrRate" type="number" value="'+(mexpRate()||"")+'" placeholder="e.g. 25" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">What were you doing?</div><select id="hrKind" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+kinds.map(function(c){return '<option>'+c[1]+' '+c[0]+'</option>';}).join("")+'</select>'+
+  '<div class="muted" style="font-size:11.5px;margin-bottom:4px">Hours</div><input id="hrHours" type="number" step="0.5" placeholder="e.g. 3.5" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;margin-bottom:8px">'+
+  '<label class="row" style="gap:8px;align-items:center;font-size:13px;margin-bottom:4px"><input type="checkbox" id="hrPaid"> I paid someone else for these hours (crew)</label>'+
+  '<div class="muted" style="font-size:10.5px;margin-bottom:4px">Checked = a deductible labor expense. Unchecked = your own time — shown as true cost &amp; effective $/hr, but not tax-deductible.</div>'+
+  '<button class="btn gold" style="width:100%;margin-top:6px" onclick="mexpSaveHours()">Save</button>'+
+  '<button class="close" onclick="mexpSheet(\'\')">Back</button>';
+ document.getElementById("ovl").classList.add("on");
+}
+function mexpSaveHours(){
+ var rate=+(((document.getElementById("hrRate")||{}).value)||0);if(rate>0)mexpSetRate(rate);
+ var kind=((document.getElementById("hrKind")||{}).value||"⏱ Other").replace(/^\S+\s/,"");
+ var hours=Math.max(0,+(((document.getElementById("hrHours")||{}).value)||0));
+ var paid=!!((document.getElementById("hrPaid")||{}).checked);
+ if(!hours){toast("Pop in the hours.");return;}
+ mexpAddHours(kind,hours,paid);mexpSheet("");toast("⏱ Logged — your time counts now.");
 }
 /* ---- 📊 MUSICIAN VENUE ANALYSIS — plain information: which rooms pay, which are dogs, and where
    you're charging UNDER the room average (money left on the table). YOU set your price; we inform. ---- */
@@ -582,15 +612,17 @@ function pnlSheet(bandName){
  var gigs=Math.max((typeof BANDPOSTS!=="undefined"?BANDPOSTS.length:0),4), avgTake=1200;
  var tips=(typeof TIPS!=="undefined"&&TIPS.total)?TIPS.total:0;
  var GI=Math.round(gigs*avgTake*k), TI=Math.round(tips*k), R=GI+TI;
- var Elog=Math.round(mexpCosts()), Emile=Math.round(mexpMiles()*MILE_RATE), Eother=Math.round(650*k), E=Elog+Emile+Eother, N=R-E;
+ var Elog=Math.round(mexpCosts()), Emile=Math.round(mexpMiles()*MILE_RATE), Epaid=Math.round(mexpLabor(true)), Eother=Math.round(650*k), E=Elog+Emile+Epaid+Eother, N=R-E;
+ var ownHrs=mexpHours(false), Town=Math.round(mexpLabor(false)), Nafter=N-Town, effHr=ownHrs>0?N/ownHrs:0;
  var tab=function(p,lbl){return '<button class="btn sm'+(PNL_PERIOD===p?" gold":" ghost")+'" onclick="pnlSet(\''+p+'\',\''+escA(bandName||"")+'\')">'+lbl+'</button>';};
  var line=function(lbl,amt,bold){return '<div class="row" style="gap:8px;padding:5px 0;border-top:1px solid var(--line)"><div style="flex:1;font-size:13px'+(bold?";font-weight:800":"")+'">'+esc(lbl)+'</div><div style="font-weight:'+(bold?800:600)+'">'+tmoney(amt)+'</div></div>';};
  document.getElementById("sheet").innerHTML='<h3>📈 P&amp;L'+(bandName?(' — '+esc(bandName)):'')+'</h3>'+
   '<div class="sb">Your books, totaled. We do the accounting — you read one number.</div>'+
   '<div class="row" style="gap:6px;margin-bottom:9px">'+tab("month","Month")+tab("quarter","Quarter")+tab("year","Year")+'</div>'+
   '<div class="sec-h">Revenue · '+esc(plabel.toLowerCase())+'</div><div class="card pad" style="padding:4px 12px">'+line("Gig income",GI)+line("Tips",TI)+line("Total revenue",R,true)+'</div>'+
-  '<div class="sec-h" style="margin-top:10px">Expenses</div><div class="card pad" style="padding:4px 12px">'+line("Logged receipts",Elog)+line("Mileage deduction ("+Math.round(mexpMiles())+" mi)",Emile)+line("Other touring costs",Eother)+line("Total expenses",E,true)+'</div>'+
+  '<div class="sec-h" style="margin-top:10px">Expenses</div><div class="card pad" style="padding:4px 12px">'+line("Logged receipts",Elog)+line("Mileage deduction ("+Math.round(mexpMiles())+" mi)",Emile)+(Epaid>0?line("Crew / labor paid ("+Math.round(mexpHours(true)*10)/10+" hrs)",Epaid):"")+line("Other touring costs",Eother)+line("Total expenses",E,true)+'</div>'+
   '<div class="card pad" style="margin-top:10px;background:linear-gradient(180deg,'+(N>=0?"#3b6b4a22":"#b02a4822")+',#fffaf2);text-align:center"><div class="muted" style="font-size:11px">Net profit · '+esc(plabel.toLowerCase())+'</div><div style="font-size:28px;font-weight:800;color:'+(N>=0?"#2a6b46":"#b02a48")+'">'+tmoney(N)+'</div></div>'+
+  (ownHrs>0?('<div class="card pad" style="margin-top:10px;background:linear-gradient(180deg,#5b3b6b18,#fffaf2)"><div class="sec-h" style="margin-top:0">⏱ Your own time</div>'+line((Math.round(ownHrs*10)/10)+" hrs @ "+(mexpRate()?tmoney(mexpRate()):"set a rate"),Town)+line("Net after your time",Nafter,true)+'<div class="row" style="gap:8px;padding:5px 0;border-top:1px solid var(--line)"><div style="flex:1;font-size:13px">Effective pay</div><div style="font-weight:700">'+(effHr?(tmoney(effHr)+"/hr"):"—")+'</div></div><div class="muted" style="font-size:10.5px;padding-top:4px">Your own unpaid time isn\'t tax-deductible — but it\'s your truest cost, so we show what you really make per hour. Paid crew above IS deductible.</div></div>'):'')+
   '<div class="note" style="margin-top:10px">Honest-state: representative figures that fill in from your real takes, tips, receipts &amp; miles as they accrue. A clean export for your accountant ships with accounts. Not tax advice.</div>'+
   '<button class="close" onclick="closeModal()">Done</button>';
  document.getElementById("ovl").classList.add("on");
@@ -793,7 +825,7 @@ function captureShare(url,text){
   '<div style="margin-bottom:10px"><div class="muted" style="font-size:11.5px;margin-bottom:5px">Facebook post link</div><input id="shUrl" placeholder="paste the post link" value="'+escA(url||"")+'" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px"></div>'+
   '<div style="margin-bottom:10px"><div class="muted" style="font-size:11.5px;margin-bottom:5px">Your note</div><textarea id="shNote" placeholder="why the family should see this…" style="width:100%;min-height:58px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:inherit">'+esc(text||"")+'</textarea></div>'+
   '<button class="btn gold" style="width:100%" onclick="dropShare()">📥 Drop it in the group</button>'+
-  '<div class="note" style="margin-top:10px">Honest-state: we store your <b>link + note + attribution</b> — not a copy of anyone else\'s post. Facebook\'s Groups API was shut down in 2024; this user-initiated share is the compliant way in.</div>'+
+  '<div class="note" style="margin-top:10px">We store your <b>link + note + attribution</b> — never a copy of anyone else\'s post. Your link sends people <b>back to Facebook</b>, so the engagement goes home. <b>We love FB</b> — we just help you not lose the good stuff in the clickbait ocean. (This user-initiated share is the only way in; we never scrape.)</div>'+
   '<button class="close" onclick="closeModal()">Cancel</button>';
  document.getElementById("ovl").classList.add("on");
 }
@@ -1222,20 +1254,33 @@ var CHAPERONE=(function(){try{var s=localStorage.getItem("dd.chaperone");if(s){v
 function saveChaperone(){try{localStorage.setItem("dd.chaperone",JSON.stringify(CHAPERONE));}catch(e){}}
 var STD_LABELS=[["qr","🪧 QR"],["scan","🎫 Scanner"],["fed","❤️ Fed"],["shake","🛍️ Shakedown"],["post","🚀 Posted"]];
 function chaperoneConsole(){
- var C=CHAPERONE, cut=Math.round(C.regionRevenue*0.09);
- var signed=C.venues.filter(function(v){return v.status==="signed";}).length;
+ var C=CHAPERONE;
+ var myV=(typeof SALES!=="undefined"&&SALES.venues)?SALES.venues.filter(function(x){return x.rep===SALES.me;}):[];
+ var mySigned=myV.filter(function(x){return x.sub>0;});
+ var myMRR=mySigned.reduce(function(a,x){return a+(x.sub||0);},0);
+ var myComm=Math.round(myMRR*((typeof SALES!=="undefined"&&SALES.repPct)||0.25));
+ var inFlight=myV.filter(function(x){return x.status==="visited"||x.status==="demo";}).length;
+ var signed=mySigned.length;
  function stdc(v){return STD_LABELS.reduce(function(a,s){return a+(v.std&&v.std[s[0]]?1:0);},0);}
  var tot=C.venues.reduce(function(a,v){return a+stdc(v);},0), max=C.venues.length*STD_LABELS.length, pct=Math.round(tot/max*100);
+ function scRow(label,val,ok,hint){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:6px 0"><div><b style="font-size:13px">'+label+'</b> <span class="muted" style="font-size:11px">'+hint+'</span></div><div class="row" style="gap:7px"><b style="font-size:13px">'+val+'</b><span class="chip '+(ok?"ok":"rose")+'">'+(ok?"✓":"✗")+'</span></div></div>';}
  document.getElementById("sheet").innerHTML='<h3>🎀 Chapter Chaperone — Santa Cruz</h3>'+
   '<div class="sb">Ambassador for the Santa Cruz Chancellors. You make show-day shine and bring venues aboard. <b>You\'re the cheerleader — no legal responsibility; that stays with the Chancellor &amp; venue.</b></div>'+
-  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div style="font-size:11.5px;opacity:.8">Your cut · 9% of Santa Cruz revenue</div><b style="font-size:24px">'+_sd$(cut)+'</b><span style="font-size:12px">/mo</span><div style="font-size:11px;opacity:.78">region revenue '+_sd$(C.regionRevenue)+' · '+signed+' venues signed</div></div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div style="font-size:11.5px;opacity:.8">Your commission · 25% of the subscriptions you\'ve signed</div><b style="font-size:24px">'+_sd$(myComm)+'</b><span style="font-size:12px">/mo</span><div style="font-size:11px;opacity:.78">'+signed+' venues signed · '+_sd$(myMRR)+' MRR · paid while they stay active</div></div>'+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">📋 Your scorecard — never guess if you\'re on track</div>'+
+  '<div class="card pad" style="padding-top:0;margin-bottom:10px">'+
+   scRow("Show-day standards",pct+"%",pct>=90,"target 90%+")+
+   scRow("Daily HyperPost",C.hyperStreak+"d streak",C.hyperStreak>=1,"post every day")+
+   scRow("Demos in flight",String(inFlight),inFlight>=3,"target 3+")+
+   scRow("Venues signed",String(signed),signed>=2,"target 2 / mo")+
+  '</div>'+
   '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><b style="font-size:14px">Show-day standards</b><b>'+pct+'%</b></div><div style="height:8px;border-radius:6px;background:#eee;overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--rose),var(--gold))"></i></div></div>'+
   '<div class="muted" style="font-size:11.5px;margin:4px 2px">Your venues — tap a standard to mark it met</div>'+
   C.venues.map(function(v,idx){var nl={prospect:"Log a visit",visited:"Set a demo",demo:"Mark signed"}[v.status];return '<div class="card pad" style="margin-bottom:8px"><div class="row" style="justify-content:space-between"><b style="font-size:13.5px">'+esc(v.name)+'</b><span class="chip '+(v.status==="signed"?"ok":(v.status==="prospect"?"rose":"gold"))+'">'+esc(v.status)+'</span></div>'+
    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'+STD_LABELS.map(function(s){var on=v.std&&v.std[s[0]];return '<span class="minib" style="'+(on?"background:#e9f7ec;color:#1c7a37":"")+'" onclick="chapStd('+idx+',\''+s[0]+'\')">'+(on?"✓ ":"")+esc(s[1])+'</span>';}).join("")+'</div>'+
    (nl?'<button class="btn gold sm" style="width:100%;margin-top:8px" onclick="chapAdvance('+idx+')">'+nl+'</button>':'')+'</div>';}).join("")+
   '<div class="row" style="gap:8px;margin-top:4px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--purple)">'+C.hyperStreak+'🔥</div><div class="muted" style="font-size:11px">day post streak</div><button class="btn gold sm" style="width:100%;margin-top:6px" onclick="chapHyper()">🚀 Post today</button></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--purple)">'+C.scansToday+'</div><div class="muted" style="font-size:11px">badges scanned today</div><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="chapScan()">🎫 Scan attendance</button></div></div>'+
-  '<button class="btn gold" style="width:100%;margin-top:10px" onclick="salesConsole()">💼 My sales CRM — subs, mileage &amp; receipts</button>'+
+  '<div class="row" style="gap:8px;margin-top:10px"><button class="btn gold sm" style="flex:1" onclick="salesConsole()">💼 My sales CRM</button><button class="btn gold sm" style="flex:1;background:var(--purple)" onclick="chaperonePlaybook()">📕 The Sell Book</button></div>'+
   '<div class="note" style="margin-top:10px">Ambassadors are recruited for <b>love of the scene, energy &amp; people skills</b> — open to every Deadhead. They cheerlead; the Chancellor &amp; venue carry the legal weight.</div>'+
   '<button class="close" onclick="closeModal()">Done</button>';
  document.getElementById("ovl").classList.add("on");
@@ -1244,6 +1289,27 @@ function chapStd(idx,k){var v=CHAPERONE.venues[idx];if(!v.std)v.std={};v.std[k]=
 function chapAdvance(idx){var v=CHAPERONE.venues[idx];v.status=v.status==="prospect"?"visited":(v.status==="visited"?"demo":"signed");saveChaperone();chaperoneConsole();toast(v.status==="signed"?("🎉 "+v.name+" signed — your 9% just grew."):("➡️ "+v.name+" → "+v.status));}
 function chapHyper(){CHAPERONE.hyperStreak++;saveChaperone();chaperoneConsole();toast("🚀 HyperPosted — streak "+CHAPERONE.hyperStreak+" days. You post, nothing auto-sends.");}
 function chapScan(){CHAPERONE.scansToday+=Math.floor(Math.random()*8)+1;saveChaperone();chaperoneConsole();toast("🎫 Scanned — attendance lands on heads' badges.");}
+function chaperonePlaybook(){
+ function sec(t){return '<div class="muted" style="font-size:11.5px;margin:11px 2px 4px;text-transform:uppercase;letter-spacing:.04em">'+t+'</div>';}
+ document.getElementById("sheet").innerHTML='<h3>📕 The Sell Book — private</h3>'+
+  '<div class="sb">Everything you need to sell dead_dance to a venue. Keep it simple: <b>feed the musicians, fill the room, do the work for them.</b></div>'+
+  sec("The pitch · 30 seconds")+
+  '<div class="card pad"><div style="font-size:13.5px">"You already book great nights. dead_dance brings the local Deadhead family to your door, sells the tickets, and keeps the band happy — and we do the promoting for you. It\'s $99 a month, half off while we\'re getting started, cancel anytime."</div><div class="muted" style="font-size:12px;margin-top:7px">Why they say yes: <b>more heads in seats</b> · <b>we promote it</b> · <b>booking + ticketing handled</b>.</div></div>'+
+  sec("Scripts")+
+  '<div class="card pad"><b style="font-size:13px">① Opener (walk-in or call)</b><div style="font-size:13px;margin-top:3px">"Hi — I\'m the local dead_dance ambassador. Got two minutes? I help rooms like yours fill Dead nights and keep the bands fed. Can I show you on my phone?"</div></div>'+
+  '<div class="card pad"><b style="font-size:13px">② The demo (open the app)</b><div style="font-size:13px;margin-top:3px">Show the venue console: <b>bands booked, tickets sold, heads within 50 miles.</b> Then a band\'s calendar — "this is how a band books you in one tap." Hand them the phone.</div></div>'+
+  '<div class="card pad"><b style="font-size:13px">③ The close</b><div style="font-size:13px;margin-top:3px">"Want me to set you up as a founding venue — half off at $49.50, first month free if you host one dead_dance night?" Then <b>stop talking.</b> If "I\'ll think about it": "Totally — can I pencil one night so you see it work, no commitment?"</div></div>'+
+  sec("Use the CRM — it does the work")+
+  '<div class="card pad"><ol style="margin:0;padding-left:18px;font-size:13px;line-height:1.6"><li>Open <b>My sales CRM</b> — venues sorted by <b>Dead-Scene score</b>. Work the top first.</li><li>Tap a venue → its <b>website, phone, booking email</b> + action plan.</li><li>Call/email; tap <b>Advance</b> as you go: visit → demo → signed.</li><li>Log <b>miles</b> &amp; snap <b>receipts</b> right there — taxes do themselves.</li><li>A <b>★</b> means the Dead actually played there — <b>lead with it.</b></li></ol></div>'+
+  sec("Your pay")+
+  '<div class="card pad"><div style="font-size:13px"><b>25% of every subscription you sign</b>, every month it stays active (~$25/venue at $99; ~$12 during founding half-off), plus a <b>$50 bonus</b> per new venue. 12 rooms ≈ <b>$300/mo</b> that keeps paying.</div></div>'+
+  sec("How we measure you")+
+  '<div class="card pad"><div style="font-size:13px">Your <b>scorecard</b> is right on your Chaperone screen — never guess. Hit these weekly:</div><div style="font-size:13px;margin-top:6px">✓ Show-day standards <b>90%+</b> · ✓ HyperPost <b>daily</b> · ✓ <b>3+</b> demos in flight · ✓ <b>2</b> venues signed / month.</div></div>'+
+  '<div class="note" style="margin-top:10px">Private — Chaperone field sales only. You\'re the cheerleader; the Chancellor &amp; venue carry the legal weight. Nothing auto-sends — you press post.</div>'+
+  '<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="chaperoneConsole()">‹ Back to my console</button>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");
+}
 /* ---- 💼 FIELD SALES CRM — three hidden tiers. Reps paid 25% residual on the venue
    subscriptions they sign; Regional Managers get a 2% division override; National (Stagger Lee)
    sees the whole master. Mileage + receipts ride along for the reps. 1099 by default (CA W-2
@@ -1283,14 +1349,16 @@ function saveSales(){try{localStorage.setItem("dd.sales",JSON.stringify(SALES));
 /* Seed the CRM with ALL venues (from VENUES) enriched by crm_seed.js — priority + verified contacts. */
 (function seedCRM(){
  if(typeof VENUES==="undefined"||typeof DD_CRM_SEED==="undefined")return;
- if(SALES._seed===4 && SALES.venues && SALES.venues.length>=VENUES.length)return;
+ if(SALES._seed===5 && SALES.venues && SALES.venues.length>=VENUES.length)return;
  var signedSub={"The Catalyst":99,"Moe's Alley":49.5};
  SALES.venues=VENUES.map(function(v){var name=v[0],region=v[3];
   return {name:name,region:region,rep:(DD_CRM_SEED.reps[region]||"Unassigned"),
    status:(signedSub[name]?"signed":"prospect"),sub:(signedSub[name]||0),
-   pri:(DD_CRM_SEED.pri[name]||2),contact:(DD_CRM_SEED.contact[name]||null),city:v[1],state:v[2]};
+   pri:(DD_CRM_SEED.pri[name]||2),score:((DD_CRM_SEED.score&&DD_CRM_SEED.score[name])||0),
+   gd:((DD_CRM_SEED.gd&&DD_CRM_SEED.gd[name])||0),cap:((DD_CRM_SEED.cap&&DD_CRM_SEED.cap[name])||"M"),
+   contact:(DD_CRM_SEED.contact[name]||null),city:v[1],state:v[2]};
  });
- SALES._seed=4; saveSales();
+ SALES._seed=5; saveSales();
 })();
 function salesDiv(region){for(var i=0;i<SALES.divisions.length;i++)if(SALES.divisions[i].regions.indexOf(region)>=0)return SALES.divisions[i];return SALES.divisions[0];}
 var _salesRep="";
@@ -1306,8 +1374,8 @@ function salesConsole(rep){
   '<div class="sb">Your territory, your venues, your pay. <b>We hide the rest</b> — other reps, regions &amp; platform margin aren\'t your concern.</div>'+
   '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div style="font-size:11.5px;opacity:.8">Your commission · 25% residual on your venue subs</div><b style="font-size:24px">'+_sd$(comm)+'</b><span style="font-size:12px">/mo</span><div style="font-size:11px;opacity:.78">'+signed.length+' active venues · '+_sd$(mrr)+' MRR signed</div></div>'+
   '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><b style="font-size:14px">Pipeline</b></div><div class="row" style="gap:6px;margin-top:7px;flex-wrap:wrap"><span class="chip rose">prospect '+counts.prospect+'</span><span class="chip gold">visited '+counts.visited+'</span><span class="chip gold">demo '+counts.demo+'</span><span class="chip ok">signed '+counts.signed+'</span></div></div>'+
-  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Your venues — worked top-priority first · tap for contacts &amp; plan</div>'+
-  mine.slice().sort(function(a,b){return (a.pri||2)-(b.pri||2);}).map(function(v){var realIdx=SALES.venues.indexOf(v);var pc=v.pri===1?"rose":(v.pri===2?"gold":"");return '<div class="card pad" style="margin-bottom:8px;cursor:pointer" onclick="venueCard('+realIdx+')"><div class="row" style="justify-content:space-between"><div><b style="font-size:13.5px">'+esc(v.name)+'</b> <span class="chip '+pc+'" style="font-size:10px">P'+(v.pri||2)+'</span><div class="muted" style="font-size:11.5px">'+esc(_chName(v.region))+(v.contact&&v.contact.site?(' · '+esc(v.contact.site)):' · contact: research')+(v.sub>0?(' · $'+v.sub+'/mo'):'')+'</div></div><span class="chip '+(v.status==="signed"?"ok":(v.status==="prospect"?"rose":"gold"))+'">'+esc(v.status)+'</span></div></div>';}).join("")+
+  '<div class="muted" style="font-size:11.5px;margin:4px 2px">Your venues — worked by <b>Dead-Scene score</b> (real GD history + size + prominence) · tap for contacts &amp; plan</div>'+
+  mine.slice().sort(function(a,b){return (b.score||0)-(a.score||0);}).map(function(v){var realIdx=SALES.venues.indexOf(v);return '<div class="card pad" style="margin-bottom:8px;cursor:pointer" onclick="venueCard('+realIdx+')"><div class="row" style="justify-content:space-between"><div><b style="font-size:13.5px">'+esc(v.name)+'</b> <span class="chip gold" style="font-size:10px" title="Dead-Scene score">'+(v.score||0)+'</span>'+(v.gd>0?(' <span class="chip rose" style="font-size:10px">★'+v.gd+' GD shows</span>'):'')+'<div class="muted" style="font-size:11.5px">'+esc(_chName(v.region))+(v.contact&&v.contact.site?(' · '+esc(v.contact.site)):' · contact: research')+(v.sub>0?(' · $'+v.sub+'/mo'):'')+'</div></div><span class="chip '+(v.status==="signed"?"ok":(v.status==="prospect"?"rose":"gold"))+'">'+esc(v.status)+'</span></div></div>';}).join("")+
   '<div class="row" style="gap:8px;margin-top:4px"><div class="card pad" style="flex:1"><div class="muted" style="font-size:11px">Mileage YTD</div><b style="font-size:18px">'+miTot.toLocaleString()+' mi</b><div class="muted" style="font-size:11px">'+_sd$(miTot*SALES.mileRate)+' deductible</div><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="salesAddMile()">＋ Add miles</button></div>'+
   '<div class="card pad" style="flex:1"><div class="muted" style="font-size:11px">Receipts</div><b style="font-size:18px">'+_sd$(rcTot)+'</b><div class="muted" style="font-size:11px">'+myRc.length+' on file</div><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="salesAddReceipt()">📷 Add receipt</button></div></div>'+
   '<div class="note" style="margin-top:10px">1099 contractor by default (CA may be W-2 per counsel). Mileage &amp; receipts file themselves — no P&amp;L homework. Honest-state demo.</div>'+
@@ -1325,7 +1393,8 @@ function venueCard(idx){var v=SALES.venues[idx];if(!v)return;var c=v.contact||{}
    (c.email?'<div class="row" style="justify-content:space-between;padding:3px 0"><span class="muted" style="font-size:12px">Booking</span><a href="mailto:'+escA(c.email)+'">'+esc(c.email)+'</a></div>':'')+
   '</div>')
   :'<div class="note" style="margin:0 0 10px">No verified contact yet. <b>Find the official site, confirm the booking line</b> — don\'t guess.</div>';
- document.getElementById("sheet").innerHTML='<h3>🏛️ '+esc(v.name)+'</h3><div class="sb">'+esc((v.city||"")+(v.state?(", "+v.state):""))+' · '+esc(_chName(v.region))+' · <b>Priority '+(v.pri||2)+'</b> · '+esc(v.status)+'</div>'+
+ document.getElementById("sheet").innerHTML='<h3>🏛️ '+esc(v.name)+'</h3><div class="sb">'+esc((v.city||"")+(v.state?(", "+v.state):""))+' · '+esc(_chName(v.region))+' · <b>Dead-Scene '+(v.score||0)+'</b>'+(v.gd>0?(' · ★ '+v.gd+' GD shows'):'')+' · cap '+(v.cap||"M")+'(est) · '+esc(v.status)+'</div>'+
+  (v.gd>0?'<div class="note" style="margin:0 0 10px;border-left-color:var(--gold)">★ The Grateful Dead played here <b>'+v.gd+'</b> times — real history, real Deadhead pull. Lead with it.</div>':'')+
   contactHtml+
   '<div class="muted" style="font-size:11.5px;margin:4px 2px">Action plan</div><div class="card pad" style="margin-bottom:10px">'+stages.map(function(s,i){var done=i<curi,now=i===curi;return '<div class="row" style="gap:8px;padding:5px 0;'+(now?"font-weight:700":"")+'"><span>'+(done?"✅":(now?s[1]:"⬜"))+'</span><span style="font-size:13px;'+(done?"color:#9a9;text-decoration:line-through":(now?"":"color:#aaa"))+'">'+esc(s[2])+'</span></div>';}).join("")+'</div>'+
   (nl?'<button class="btn gold" style="width:100%" onclick="salesAdvance('+idx+');venueCard('+idx+')">'+nl+'</button>':'<div class="note" style="margin:0">✅ Signed — onboard: QR · attendance scanner · first show.</div>')+
@@ -1363,6 +1432,36 @@ function nationalSalesCRM(){var V=SALES.venues,signed=V.filter(function(v){retur
   '<div class="muted" style="font-size:11.5px;margin:4px 2px">By division — tap for the manager view</div><div class="card pad" style="margin-bottom:10px">'+drows.map(function(d){var s=byDiv[d.id]||0;return '<div style="margin-bottom:8px;cursor:pointer" onclick="mgrConsole(\''+d.id+'\')"><div class="row" style="justify-content:space-between"><span style="font-size:12.5px">'+esc(d.name)+' <span class="muted" style="font-size:11px">· '+esc(d.mgr)+'</span></span><b style="font-size:12.5px">'+_sd$(s)+'</b></div><div style="height:7px;border-radius:6px;background:#eee;overflow:hidden;margin-top:3px"><i style="display:block;height:100%;width:'+Math.round(s/maxd*100)+'%;background:linear-gradient(90deg,var(--rose),var(--gold))"></i></div></div>';}).join("")+'</div>'+
   '<div class="muted" style="font-size:11.5px;margin:4px 2px">Top reps — tap to open their CRM</div><div class="card pad" style="padding-top:0;margin-bottom:10px">'+topReps.map(function(r){return '<div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding:7px 0;cursor:pointer" onclick="salesConsole(\''+escA(r)+'\')"><b style="font-size:13.5px">'+esc(r)+'</b><b style="color:var(--purple)">'+_sd$(byRep[r])+'</b></div>';}).join("")+'</div>'+
   '<div class="note" style="margin-top:9px">National master — the hidden CRM, all tiers visible only here. Honest-state demo until accounts &amp; the counsel-gated payment rail ship.</div><button class="close" onclick="closeModal()">Done</button>';
+ document.getElementById("ovl").classList.add("on");}
+/* ---- 💰 LIVE REVENUE ROLLUP — one pane of every stream. Subscriptions + booking fees are
+   WIRED LIVE: sign a venue in the sales CRM or accept a booking and these numbers move.
+   Shakedown share + ticket take are modeled. Rolls all the way up to Stagger Lee. ---- */
+function revenueRollup(){
+ var V=SALES.venues, signed=V.filter(function(x){return x.sub>0;});
+ var mrr=signed.reduce(function(a,x){return a+(x.sub||0);},0);
+ var byRep={},byDiv={}; V.forEach(function(x){byRep[x.rep]=(byRep[x.rep]||0)+(x.sub||0);var d=salesDiv(x.region);byDiv[d.id]=(byDiv[d.id]||0)+(x.sub||0);});
+ var comms=0,overs=0; Object.keys(byRep).forEach(function(r){comms+=byRep[r]*SALES.repPct;}); SALES.divisions.forEach(function(d){overs+=(byDiv[d.id]||0)*SALES.overridePct;});
+ var subsNet=mrr-comms-overs;
+ var bk=(typeof BOOKINGS!=="undefined")?BOOKINGS.filter(function(b){return b.status==="accepted"||b.status==="paid";}):[];
+ var bookingFees=bk.reduce(function(a,b){return a+(+b.fee||0);},0);
+ var shakeSales=(typeof SHAKEDOWN!=="undefined")?SHAKEDOWN.vendors.reduce(function(a,v){return a+(v.sales||0);},0):0;
+ var shakeTake=Math.round(shakeSales*((typeof SHAKEDOWN!=="undefined"&&SHAKEDOWN.share)||0.10));
+ var ticketsTake=signed.length*480;
+ var total=Math.round(subsNet+bookingFees+shakeTake+ticketsTake);
+ function stream(ic,name,val,sub,live){return '<div class="card pad" style="margin-bottom:9px"><div class="row" style="justify-content:space-between;align-items:center"><div><b style="font-size:14px">'+ic+' '+esc(name)+'</b> '+(live?'<span class="chip ok" style="font-size:10px">LIVE</span>':'<span class="chip gold" style="font-size:10px">modeled</span>')+'<div class="muted" style="font-size:11.5px">'+esc(sub)+'</div></div><b style="font-size:18px;color:var(--purple)">'+_sd$(val)+'</b></div></div>';}
+ document.getElementById("sheet").innerHTML='<h3>💰 Revenue — national rollup</h3><div class="sb">Every stream in one pane. <b>Subscriptions &amp; booking fees are live</b> — sign a venue or accept a booking and these move.</div>'+
+  '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:11px;text-align:center"><div style="font-size:11.5px;opacity:.8">Platform revenue · this month</div><div style="font-size:32px;font-weight:800;color:#ffe08a">'+_sd$(total)+'</div><div style="font-size:11px;opacity:.78">'+signed.length+' subscriptions · '+bk.length+' booked gigs · '+(typeof SHAKEDOWN!=="undefined"?SHAKEDOWN.vendors.length:0)+' vendors</div></div>'+
+  stream("🏛️","Subscriptions (net)",subsNet,signed.length+" venues · "+_sd$(mrr)+" MRR − rep/mgr comp",true)+
+  stream("📅","Booking fees",bookingFees,bk.length+" accepted bookings · 10% fee",true)+
+  stream("🛍️","Shakedown share",shakeTake,"10% of "+_sd$(shakeSales)+" vendor sales",false)+
+  stream("🎟️","Ticketing take",ticketsTake,"platform take across "+signed.length+" active venues",false)+
+  '<div class="card pad" style="margin-bottom:10px"><div class="muted" style="font-size:11.5px;margin-bottom:5px">Where the subscription dollar goes</div>'+
+   '<div class="row" style="justify-content:space-between"><span style="font-size:12.5px">Rep commissions (25%)</span><b>'+_sd$(comms)+'</b></div>'+
+   '<div class="row" style="justify-content:space-between;margin-top:5px"><span style="font-size:12.5px">Manager overrides (2%)</span><b>'+_sd$(overs)+'</b></div>'+
+   '<div class="row" style="justify-content:space-between;margin-top:5px"><span style="font-size:12.5px"><b>Net to platform</b></span><b style="color:var(--ok)">'+_sd$(subsNet)+'</b></div></div>'+
+  '<div class="row" style="gap:8px"><button class="btn ghost sm" style="flex:1" onclick="nationalSalesCRM()">💼 Sales CRM</button><button class="btn ghost sm" style="flex:1" onclick="bookingCalendar()">📅 Bookings</button></div>'+
+  '<div class="note" style="margin-top:10px">Subscriptions &amp; booking fees compute live from your CRM &amp; booking queue. Shakedown &amp; ticketing are modeled until those rails settle (counsel-gated). Honest-state.</div>'+
+  '<button class="close" onclick="closeModal()">Done</button>';
  document.getElementById("ovl").classList.add("on");}
 /* ---- 📊 Chapter Performance Dashboard — single pane of glass; rolls up to National (founder) ---- */
 var CHAPTERS_LIST=[["santacruz","Santa Cruz · Founders",312],["bayarea","Bay Area",980],["pnw","Pacific Northwest",430],["socal","SoCal Heads",611],["rockies","Rocky Mountain",540],["lonestar","Lone Star + SW",298],["greatlakes","Great Lakes",505],["southeast","Southeast",470],["midatl","Mid-Atlantic",412],["northeast","Northeast + New England",690]];
@@ -1552,6 +1651,7 @@ function viewYou(){
     '<button class="minib" onclick="chapterShakedown()">🛍️ Chapter Shakedown</button>'+
     '<button class="minib" onclick="chaperoneConsole()">🎀 Chapter Chaperones</button>'+
     '<button class="minib" onclick="nationalSalesCRM()">💼 Field sales (national)</button>'+
+    '<button class="minib" onclick="revenueRollup()">💰 Revenue rollup</button>'+
    '</div>'+
    '<div class="muted" style="font-size:11.5px;margin-top:10px">QR at every show · vacuum the 3–5 best FB-group posts in · seed &amp; close crowdsource requests. Full list in the Chapter Head handbook.</div>'+
   '</div>'+
@@ -1711,6 +1811,17 @@ setInterval(tickCountdowns,1000);   /* live location-reveal countdowns */
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lukas_chat.js"></script>
 <script src="lukas_badge.js"></script>
+<!-- The Gateway — licensed white-label SURFACE (additive, namespaced, honest-state; nothing auto-sends) -->
+<script src="lukas_gateway.js"></script>
+<script>
+  try{ if(window.LukasGateway && LukasGateway.launcher) LukasGateway.launcher({
+    brand:{ key:"deaddance", name:"⌁ Broadcast", accent:"#7a3cc0" },
+    sig:"— dead_dance", tone:"warm",
+    fab:{ pos:{ bottom:"84px", left:"16px" } },
+    tags:{ fb:["livemusic","porchsessions"], ig:["livemusic","smallrooms","bignights"], tt:["fyp","livemusic"] },
+    placeholder:"Say it once — we'll write every voice…"
+  }); }catch(e){}
+</script>
 <script>
   LukasChat.init({
     app: "dead_dance",
