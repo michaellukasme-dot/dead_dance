@@ -1663,7 +1663,8 @@ function viewYou(){
    if(!ids.length)return '<div class="note">No rooms yet — open the <b>Archive</b> and tap “I was there” on a show you caught.</div>';
    return '<div class="card">'+ids.map(function(id){var s=showById(id);if(!s)return"";return '<div class="show"><div class="ic">✓</div><div class="nm"><b>'+esc(s.venue)+'</b><div class="s">'+esc(s.date)+" · "+esc(s.city)+", "+esc(s.state||s.country)+'</div></div><button class="minib" onclick="room(\''+id+'\')">👥 who else</button></div>';}).join("")+'</div>';})()+
   '<div class="card list"><div class="it" onclick="farrah()"><div class="ic">🎙️</div><div class="nm"><b>Farrah</b><div class="s">Voice — route me to the show, hands-free</div></div></div>'+
-   '<div class="it" onclick="toast(\'Settings (demo)\')"><div class="ic">⚙️</div><div class="nm"><b>Settings</b><div class="s">Notifications · privacy · install</div></div></div></div>';
+   '<div class="it" onclick="if(window.lukasA2HS)lukasA2HS.show();else toast(\'Install: tap Share, then Add to Home Screen.\')"><div class="ic">📲</div><div class="nm"><b>Add to Home Screen</b><div class="s">Install dead_dance — full-screen, works offline</div></div></div>'+
+   '<div class="it" onclick="toast(\'Settings (demo)\')"><div class="ic">⚙️</div><div class="nm"><b>Settings</b><div class="s">Notifications · privacy</div></div></div></div>';
 }
 function farrah(){
  var line="Saturday's tribute is at the Ardmore Music Hall — Kristen's got grilled cheese on the lot. Want me to route you there?";
