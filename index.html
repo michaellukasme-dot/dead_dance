@@ -78,15 +78,18 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .radiate svg{width:24px;height:24px}
 .radiate:hover{transform:scale(1.06)}
 .evt .go{display:flex;gap:8px;margin-top:9px}
-/* bottom dock */
-.dock{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:45;display:flex;gap:26px;background:#ffffffee;border:1px solid var(--line);border-radius:18px;padding:10px 22px;box-shadow:0 10px 30px #0003;backdrop-filter:blur(6px)}
-.dock .di{position:relative;width:50px;height:50px;border-radius:13px;display:grid;place-items:center;font-size:26px;cursor:pointer;background:var(--cream);transition:transform .1s}
-.dock .di:hover{transform:translateY(-3px);background:#efe7f6}
-.dock .tip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%) scale(.96);width:200px;background:#241634;color:#fff;border-radius:11px;padding:9px 12px;font-size:11.5px;line-height:1.4;opacity:0;pointer-events:none;transition:.15s;text-align:center;box-shadow:0 10px 26px #0005}
-.dock .di:hover .tip{opacity:1;transform:translateX(-50%) scale(1)}
-.dock .tip b{color:var(--gold)}
+/* bottom footer nav — the family's tabs (guitar-character icons) */
+body{padding-bottom:64px}
+.footnav{position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;justify-content:space-around;align-items:flex-end;background:#241634f2;backdrop-filter:blur(8px);border-top:1px solid #ffffff20;padding:7px 2px;box-shadow:0 -6px 20px #0004}
+.footnav .fn{flex:1;background:none;border:0;color:#e9def7;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 1px;cursor:pointer;font-family:inherit}
+.footnav .fn .ic{font-size:22px;line-height:1}
+.footnav .fn .lb{font-size:9.5px;font-weight:800;letter-spacing:.01em;color:#b6a9c9}
+.footnav .fn:hover .lb,.footnav .fn:active .lb{color:var(--gold)}
+.footnav .fn:active{transform:scale(.92)}
+.findshow{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;background:linear-gradient(90deg,#5a2e86,#b8002e);color:#fff;border-radius:11px;padding:8px 12px;margin:0 0 10px;font-size:14px}
+.findshow b{font-weight:800}.findshow span{font-size:11.5px;color:#f3d8e2}
 /* 🍀 Miracle Ticket — bottom-right bouncing/blinking FREE-ticket FAB */
-.mfab{position:fixed;right:16px;bottom:22px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
+.mfab{position:fixed;right:16px;bottom:80px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
 .mfab .tkt{position:relative;width:74px;height:48px;border-radius:9px;background:linear-gradient(135deg,#2a8a4a,#c79a3a);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:.04em;text-align:center;line-height:1.05;box-shadow:0 0 0 3px #fff, 0 0 0 5px #2a8a4a55}
 .mfab .tkt::before,.mfab .tkt::after{content:"";position:absolute;width:12px;height:12px;background:var(--cream);border-radius:50%;top:50%;transform:translateY(-50%)}
 .mfab .tkt::before{left:-7px}.mfab .tkt::after{right:-7px}
@@ -281,7 +284,6 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 <div class="top">
   <div class="logo">🌹 dead_dance</div>
   <input class="search" placeholder="Search heads, shows, tapes, art…">
-  <a href="app.html" style="color:#e0cdf5;text-decoration:none;font-weight:700;font-size:13px;white-space:nowrap;align-self:center" title="Chapters · Studio · Archive · everything else">⋯ Full app</a>
   <button class="chatbtn" onclick="if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')" title="Family chat" aria-label="Family chat">💬</button>
   <div class="qr" title="My profile QR" onclick="profile('me')" style="cursor:pointer">▦</div>
 </div>
@@ -290,6 +292,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
   <!-- ===================== LEFT RAIL ===================== -->
   <div class="left">
     <div class="cal">
+      <div class="findshow">🎟️ <b>Find a Tribute Dead Show</b><span>near you — tap a date, or roam the map. The bus is always rolling.</span></div>
       <div class="ch"><span class="mo">📅 June</span>
         <span style="background:var(--gold);color:#23202a;border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:800">2 shows</span>
         <span class="seg"><button class="on" onclick="calScope(this,'nat')">National</button><button onclick="calScope(this,'mine')">My chapter</button></span>
@@ -305,6 +308,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
     <div class="card">
       <svg class="qrbig" id="qr" viewBox="0 0 100 100" aria-label="My profile QR" onclick="profile('me')" style="cursor:pointer"></svg>
       <div style="text-align:center;font-size:11px;color:var(--accent);font-weight:700;margin-top:5px;cursor:pointer" onclick="profile('me')">tap your QR — it's your whole profile ›</div>
+      <button class="btn gold" style="width:100%;margin-top:9px" onclick="inviteFamily()">🌹 Invite the family</button>
       <div style="text-align:center;font-weight:800;margin-top:8px">My Purchased Tickets</div>
       <div class="tix" id="myTix"><span class="when">Tomorrow</span><div class="nm"><b>Splintered Sunlight</b><span>Sellersville Theater · 8:00 PM · 11 mi</span></div></div>
       <button class="btn ghost sm" style="width:100%" onclick="toast('🎙️ Farrah: routing you to Felton Music Hall — hands-free.')">🎙️ Farrah, guide me there</button>
@@ -396,19 +400,16 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
   </div>
 </div>
 
-<!-- ===================== BOTTOM DOCK ===================== -->
-<div class="dock">
-  <div class="di" id="dEasel" onclick="dockClick('easel')"><span>🎨</span><div class="tip"><b>Easel</b> — community-uploaded Dead &amp; show art. Opens the Reader (Art).</div></div>
-  <div class="di" id="dShake" onclick="dockClick('shake')">
-    <svg width="32" height="32" viewBox="0 0 40 40" aria-label="Shakedown Street">
-      <circle cx="20" cy="20" r="19" fill="#b8002e"/><circle cx="20" cy="20" r="16" fill="#e8932e"/><circle cx="20" cy="20" r="13" fill="#cdb43a"/><circle cx="20" cy="20" r="10" fill="#2a8a4a"/><circle cx="20" cy="20" r="7" fill="#2f6fd6"/><circle cx="20" cy="20" r="4" fill="#7a3cc0"/><circle cx="20" cy="20" r="1.7" fill="#d6326b"/>
-      <g stroke="#fff" stroke-width="0.7" opacity="0.5"><line x1="20" y1="1.5" x2="20" y2="38.5"/><line x1="1.5" y1="20" x2="38.5" y2="20"/><line x1="7" y1="7" x2="33" y2="33"/><line x1="33" y1="7" x2="7" y2="33"/></g>
-    </svg>
-    <div class="tip"><b>Shakedown Street</b> — the lot. <b>2 clicks</b> opens it.</div>
-  </div>
-  <div class="di" id="dArch" onclick="dockClick('arch')"><span>🎵</span><div class="tip"><b>GD Archive</b> — <b>1 click</b> plays a random track (no page change); <b>2 clicks</b> opens the Reader (Archive).</div></div>
-  <div class="di" id="dGame" onclick="openGame()"><span>🎧</span><div class="tip"><b>Name That Tune</b> — today's Archive teaser. Name it in the fewest notes; points buy Shakedown discounts.</div></div>
-</div>
+<!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
+<nav class="footnav" id="footnav" aria-label="dead.dance navigation">
+  <button class="fn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
+  <button class="fn" onclick="openReader('groups')"><span class="ic">🐺</span><span class="lb">Chapters</span></button>
+  <button class="fn" onclick="openMap()"><span class="ic">🐯</span><span class="lb">Shows</span></button>
+  <button class="fn" onclick="openReader('shakedown')"><span class="ic">🐊</span><span class="lb">Shakedown</span></button>
+  <button class="fn" onclick="openReader('archive')"><span class="ic">📼</span><span class="lb">Archive</span></button>
+  <button class="fn" onclick="openGame()"><span class="ic">🎧</span><span class="lb">Play</span></button>
+  <button class="fn" onclick="profile('me')"><span class="ic">🪪</span><span class="lb">You</span></button>
+</nav>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
 
 <!-- buy bubble -->
@@ -918,6 +919,19 @@ function gBoard(){ var el=document.getElementById('gBoard'); if(!el)return; var 
  if(c){ try{ c.rpc('chat_game_leaderboard',{p_date:gToday()}).then(function(r){ var rows=r&&r.data&&r.data.length?r.data.map(function(x){return [x.display_name,x.score,x.seconds];}):SAMPLE_BOARD; paint(rows); }).catch(function(){ paint(SAMPLE_BOARD); }); }catch(e){ paint(SAMPLE_BOARD); } }
  else paint(SAMPLE_BOARD);
 }
+
+/* ---- Invite the family — compliant native share (YOU pick who; we never touch FB's API) ---- */
+function inviteLink(){ var who=(ddId&&ddId()&&ddId().id)?String(ddId().id).slice(0,8):'family';
+ return 'https://deaddance.app/?utm_source=invite&utm_medium=friend&utm_campaign=family_invite&utm_content='+who; }
+function inviteText(){ return "Hey — I want to invite you to dead.dance: a Facebook-enhanced community for Deadheads, tribute bands, and the venues that host them. "+
+ "We synthesize the Dead groups on Facebook, strip out all the ads, and let you engage with the content, the community, and the music. "+
+ "It's brand new — so tell us if you spot anomalies or ways to improve it. 🌹"; }
+function inviteFamily(){ var link=inviteLink(), txt=inviteText();
+ if(navigator.share){ navigator.share({ title:"dead.dance", text:txt, url:link })
+   .then(function(){ toast('🌹 Thanks for spreading it — you pick who, it never touches Facebook\'s API.'); })
+   .catch(function(){}); return; }
+ try{ navigator.clipboard.writeText(txt+'\n\n'+link); toast('🌹 Invite copied — paste it to a friend in Messenger, texts, anywhere. You choose who.'); }
+ catch(e){ toast(txt+' '+link); } }
 
 /* ================= 🍀 THE MIRACLE TICKET =================
    Can't make it? Miracle your ticket into the chapter bucket — free. First tap grabs it.
