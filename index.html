@@ -15,6 +15,8 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .top .logo{font-weight:800;font-size:18px;letter-spacing:.3px;display:flex;align-items:center;gap:7px}
 .top .search{flex:1;max-width:560px;margin:0 auto;background:#ffffff;border:0;border-radius:999px;padding:9px 16px;font-size:13.5px;color:#333}
 .top .qr{width:34px;height:34px;border-radius:7px;background:#fff;display:grid;place-items:center;font-size:9px;color:#444;overflow:hidden}
+.top .hpbtn{background:var(--gold);color:#23202a;border:0;border-radius:999px;padding:8px 14px;font-weight:800;font-size:13px;white-space:nowrap;cursor:pointer;display:flex;align-items:center;gap:5px}
+.top .hpbtn:hover{filter:brightness(1.06)}.top .hpbtn:active{transform:scale(.96)}
 .top .chatbtn{width:36px;height:36px;border-radius:50%;border:0;background:#b8002e;color:#fff;font-size:17px;cursor:pointer;flex:none;box-shadow:0 2px 8px #b8002e55;align-self:center}
 .top .chatbtn:hover{transform:scale(1.06)}
 /* layout */
@@ -285,7 +287,7 @@ body{padding-bottom:64px}
   <div class="logo">🌹 dead_dance</div>
   <input class="search" placeholder="Search heads, shows, tapes, art…">
   <button class="chatbtn" onclick="if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')" title="Family chat" aria-label="Family chat">💬</button>
-  <div class="qr" title="My profile QR" onclick="profile('me')" style="cursor:pointer">▦</div>
+  <button class="hpbtn" onclick="hyperConsole('dead.dance')" title="HyperPost — reply, radiate, share">📡 HyperPost</button>
 </div>
 
 <div class="wrap">
