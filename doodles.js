@@ -7,14 +7,14 @@
    Use ONLY words you have the right to publish (your own lines, or licensed text).
    To honor a date, set when:"MM-DD" (e.g. "08-09") and that scene shows that day. */
 var DD_DOODLES = [
-  { id:"chancellor", file:"doodles/chancellor.svg",
-    headline:"",                              /* <-- set your headline here */
-    caption:"the family · the Chancellor",
-    when:null },
+  /* Greyhound Rock sunset — the family dancing the sun down. THE hero. */
   { id:"sunset", file:"doodles/sunset.svg",
     headline:"",                              /* <-- set your headline here */
     caption:"sunset over Greyhound Rock",
     when:null }
+  /* "chancellor" (doodles/chancellor.svg) is PARKED — kept on disk, out of the hero
+     rotation by request. To bring it back (or honor a date), re-add it here with a
+     when:"MM-DD" tag or as another everyday entry. */
 ];
 
 function ddHeroEsc(t){ return String(t==null?"":t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }

@@ -48,15 +48,32 @@ var DD_BANDS = [
 ];
 DD_BANDS.forEach(function(b){ if(!b.region) b.region = ddBandRegion(b); });
 
-/* shows: real (tonight, via Compass Rose, credited) + representative upcoming (clearly labeled). near=true → "near you" */
+/* shows — TOP-TIER (Headliner) dates are VERIFIED from each band's published 2026 schedule,
+   a hand-checked snapshot as of DD_SHOWS_ASOF (sources: JamBase + the bands' official tour pages).
+   Regional/local rows are representative residencies, clearly labeled (real:false). Live auto-sync
+   to the bands' feeds is the gated milestone; until then this is a manual snapshot — tap a band for
+   their official page to confirm. near=true → "near you". */
+var DD_SHOWS_ASOF = "Jun 27, 2026";
 var DD_SHOWS = [
-  { bandId: "dso",        date: "Wed Jun 24", venue: "ESL Ballpark",        city: "Rochester",    state: "NY", real: true,  near: false },
-  { bandId: "playingdead",date: "Wed Jun 24", venue: "Soundcheck Studios",  city: "Pembroke",     state: "MA", real: true,  near: false },
-  { bandId: "masons",     date: "Wed Jun 24", venue: "Ludlow Garage",       city: "Cincinnati",   state: "OH", real: true,  near: false },
-  { bandId: "deadmeat",   date: "Wed Jun 24", venue: "Colony",              city: "Woodstock",    state: "NY", real: true,  near: false },
-  { bandId: "diamondblues",date:"Wed Jun 24", venue: "Midway Cafe",         city: "Jamaica Plain",state: "MA", real: true,  near: false },
-  /* representative upcoming near the owner (Lehigh Valley / Philly) — populate live from the bands' schedules once the feed clears */
-  { bandId: "jrad",       date: "Fri Jul 11", venue: "The Met (representative)",   city: "Philadelphia", state: "PA", real: false, near: true },
-  { bandId: "dso",        date: "Sat Jul 19", venue: "Ardmore Music Hall (representative)", city: "Ardmore", state: "PA", real: false, near: true },
-  { bandId: "msjgb",      date: "Thu Aug 7",  venue: "Sherman Theater (representative)",    city: "Stroudsburg", state: "PA", real: false, near: true }
+  /* ── Dark Star Orchestra · darkstarorchestra.net/tour ── */
+  { bandId:"dso",   date:"Sat Jul 11", venue:"Rock the Dock Fest",                     city:"Lake George",   state:"NY", real:true,  near:false },
+  { bandId:"dso",   date:"Tue Jul 28", venue:"Humphreys Concerts by the Bay",          city:"San Diego",     state:"CA", real:true,  near:false },
+  { bandId:"dso",   date:"Fri Jul 31", venue:"Greek Theatre · Rex Foundation benefit", city:"Berkeley",      state:"CA", real:true,  near:false },
+  { bandId:"dso",   date:"Fri Aug 7",  venue:"Chateau Ste. Michelle Winery",           city:"Woodinville",   state:"WA", real:true,  near:false },
+  { bandId:"dso",   date:"Sat Sep 12", venue:"Ovation Hall · Ocean Casino Resort",     city:"Atlantic City", state:"NJ", real:true,  near:false },
+  /* ── Joe Russo's Almost Dead · jrad.com ── */
+  { bandId:"jrad",  date:"Sun Jul 19", venue:"see jrad.com for venue",                 city:"Harrisburg",    state:"PA", real:true,  near:false },
+  { bandId:"jrad",  date:"Thu Jul 30", venue:"Brooklyn Bowl",                          city:"Las Vegas",     state:"NV", real:true,  near:false },
+  { bandId:"jrad",  date:"Thu Aug 20", venue:"Mission Ballroom",                       city:"Denver",        state:"CO", real:true,  near:false },
+  { bandId:"jrad",  date:"Fri Sep 25", venue:"The Rooftop at Pier 17",                 city:"New York",      state:"NY", real:true,  near:false },
+  /* ── Melvin Seals & JGB · melvinsealsandjgb.com/tour-dates ── */
+  { bandId:"msjgb", date:"Fri Jul 3",  venue:"McDonald Theatre",                       city:"Eugene",        state:"OR", real:true,  near:false },
+  { bandId:"msjgb", date:"Sun Jul 12", venue:"The Caverns",                            city:"Pelham",        state:"TN", real:true,  near:false },
+  { bandId:"msjgb", date:"Wed Aug 12", venue:"Lewes Ferry Grounds",                    city:"Lewes",         state:"DE", real:true,  near:false },
+  { bandId:"msjgb", date:"Sat Aug 15", venue:"Tropicana Showroom · Caesars",           city:"Atlantic City", state:"NJ", real:true,  near:false },
+  /* ── Steve Kimock · stevekimock.com ── */
+  { bandId:"kimock",date:"Sun Aug 9",  venue:"Lincoln Hill Farms",                     city:"Canandaigua",   state:"NY", real:true,  near:false },
+  /* ── Representative regional residencies (clearly labeled; not date-verified) ── */
+  { bandId:"deal",        date:"upcoming",   venue:"Sun Inn · residency (representative)",          city:"Bethlehem", state:"PA", real:false, near:true },
+  { bandId:"playingdead", date:"Wednesdays", venue:"Soundcheck Studios · residency (representative)", city:"Pembroke", state:"MA", real:false, near:false }
 ];

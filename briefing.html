@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dead_dance — Chris's Initial Briefing</title>
+<style>
+:root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#23202a;--muted:#6c6878;--cream:#fbf7ef;--card:#fff;--line:#e7e0d2;--green:#2a6b46}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--purple2)}
+.nav{position:sticky;top:0;z-index:50;background:#2a1b3dF2;backdrop-filter:blur(8px);background:rgba(42,27,61,.94);color:#fff;display:flex;gap:4px;overflow-x:auto;padding:9px 12px;font-size:13px;font-weight:700}
+.nav a{color:#e0cdf5;text-decoration:none;white-space:nowrap;padding:5px 9px;border-radius:8px}
+.nav a:hover{background:#ffffff1f;color:#fff}
+.wrap{max-width:860px;margin:0 auto;padding:0 18px 90px}
+.hero{background:linear-gradient(125deg,#2a1b3d,#5a2e86 60%,#7a3cc0);color:#fff;border-radius:0 0 22px 22px;padding:34px 26px 30px;box-shadow:0 16px 44px rgba(50,30,90,.3);position:relative;overflow:hidden}
+.hero .rose{position:absolute;font-size:120px;opacity:.13;right:-10px;top:-20px}
+.hero .k{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#e6d4ff;font-weight:800}
+.hero h1{margin:8px 0 6px;font-size:34px;line-height:1.12}
+.hero p{margin:6px 0 0;font-size:17px;opacity:.95;max-width:620px}
+.hero .tag{display:inline-block;background:#ffffff22;border-radius:99px;padding:4px 13px;font-size:12.5px;font-weight:700;margin:12px 8px 0 0}
+h2{font-size:23px;margin:40px 0 6px;letter-spacing:-.2px;padding-top:12px;border-top:2px solid var(--line)}
+h2 .e{margin-right:8px}
+h3{font-size:17px;margin:20px 0 4px;color:var(--purple)}
+.lede{font-size:17px;color:#3a3744}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 17px}
+.card h4{margin:0 0 4px;font-size:15.5px}
+.card .who{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gold);margin-bottom:6px}
+.card ul{margin:6px 0 0;padding-left:18px;font-size:14px;color:#3d3a47;line-height:1.5}
+.feat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin:9px 0}
+.feat b{color:var(--purple)}
+.feat .t{font-weight:800;font-size:15px}
+.feat .d{font-size:14px;color:#43404e;margin-top:2px}
+.pill{display:inline-block;background:#efe5f7;color:#5a3fd0;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;margin:0 5px 5px 0}
+.honest{background:#fff7e6;border:1px solid #f0d9a8;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;margin:14px 0;font-size:14.5px;color:#6b5417}
+.honest b{color:#8a5a10}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.good{color:var(--green);font-weight:700}
+.demo{color:var(--gold);font-weight:700}
+/* cockpit mock */
+.cockpit{background:linear-gradient(160deg,#2a1b3d,#3c2a54);border-radius:18px;padding:16px;color:#f3ecf9;box-shadow:0 14px 38px rgba(40,20,70,.35);margin:14px 0}
+.cockpit .ch{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.cockpit .ch .av{width:38px;height:38px;border-radius:50%;background:var(--gold);color:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800}
+.cockpit .ch b{font-size:15px}.cockpit .ch .s{font-size:11.5px;opacity:.7}
+.score{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.score .t{background:#ffffff14;border:1px solid #ffffff22;border-radius:11px;padding:9px 8px;text-align:center}
+.score .t .n{font-size:20px;font-weight:800}
+.score .t .l{font-size:10px;opacity:.72;text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.crm .row{display:flex;align-items:center;gap:9px;background:#ffffff10;border-radius:10px;padding:8px 11px;margin-bottom:6px;font-size:13px}
+.crm .ds{flex:0 0 auto;background:var(--rose);color:#fff;border-radius:7px;padding:2px 7px;font-weight:800;font-size:11px}
+.crm .nm{flex:1;min-width:0}.crm .nm b{display:block}.crm .nm span{font-size:11px;opacity:.65}
+.crm .st{flex:0 0 auto;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;border-radius:6px;padding:3px 7px}
+.st.signed{background:#2a6b46;color:#fff}.st.hot{background:var(--gold);color:#23202a}.st.new{background:#ffffff22;color:#fff}
+.cockpit .target{background:#ffffff14;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:4px}
+.cockpit .target b{color:#ffd98a}
+.rev{background:linear-gradient(160deg,#1d3a28,#2a6b46);color:#eafff2;border-radius:14px;padding:16px 18px;margin:14px 0}
+.rev .big{font-size:30px;font-weight:800}
+.testsec{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:9px 0}
+.testsec h4{margin:6px 0 4px;font-size:15px;color:var(--purple)}
+.testsec label{display:flex;gap:9px;align-items:flex-start;padding:6px 0;font-size:14px;border-top:1px solid #f1ece2;cursor:pointer}
+.testsec label:first-of-type{border-top:none}
+.testsec input{margin-top:3px;width:18px;height:18px;accent-color:var(--green)}
+.cta{background:var(--purple);color:#fff;border-radius:14px;padding:18px 20px;text-align:center;margin:24px 0}
+.cta a{display:inline-block;background:var(--gold);color:var(--purple);text-decoration:none;font-weight:800;border-radius:10px;padding:11px 20px;margin-top:8px}
+.foot{margin-top:34px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+@media(max-width:600px){.grid,.score{grid-template-columns:1fr}.score{grid-template-columns:1fr 1fr}.hero h1{font-size:27px}}
+</style></head>
+<body>
+
+<div class="nav">
+  <a href="#top">🌹 Top</a><a href="#what">What it is</a><a href="#family">The Family</a><a href="#musicians">Musicians</a>
+  <a href="#venues">Venues</a><a href="#chaperones">Chaperones</a><a href="#strategy">Strategy</a><a href="#revenue">Revenue</a><a href="#test">The Test</a>
+</div>
+
+<div id="top" class="hero">
+  <span class="rose">🌹</span>
+  <div class="k">dead_dance · initial briefing · for Chris</div>
+  <h1>The whole machine, before you walk in.</h1>
+  <p>Brother — you already loved the cassette. This is everything around it: a social network for the Dead family, the bands, the rooms, and the people on the ground who hold it together. Read this, and you arrive briefed. Then we break it together.</p>
+  <div>
+    <span class="tag">A social network, not another app</span>
+    <span class="tag">Built for the family</span>
+    <span class="tag">Honest-state — nothing fake-charges or auto-posts</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<h2 id="what"><span class="e">🧭</span>What dead_dance actually is</h2>
+<p class="lede">The Grateful Dead world is <b>enormous and scattered</b> — hundreds of tribute-band pages, regional chapters, taping circles, and lot crews, all spread across Facebook groups where the good stuff scrolls by once and is gone forever.</p>
+<p>dead_dance <b>gathers the signal</b>. The shows, the people, the chapters, the archive — pulled into one home that feels like the lot, not like an algorithm. Behind the scenes, the noise and the ads get stripped out and the family's own content is handed back, clean. You see <i>more</i> of what you came for, and none of the ocean of distraction.</p>
+<p>It serves <b>four kinds of people at once</b> — and that's the whole design:</p>
+<div class="grid">
+  <div class="card"><div class="who">🌹 Deadheads</div><h4>The Family</h4><ul><li>Find your chapter &amp; your people</li><li>The Every Show archive, in your pocket</li><li>"I was there" — log it, find who else was</li><li>Shows near you, tonight</li></ul></div>
+  <div class="card"><div class="who">🎸 Musicians</div><h4>Tribute bands</h4><ul><li>A free back-office (books, P&amp;L, taxes)</li><li>One-tap booking calendar</li><li>Your promo, in front of nearby heads</li><li>Tips &amp; followers who get pinged</li></ul></div>
+  <div class="card"><div class="who">🏛️ Venues</div><h4>The rooms</h4><ul><li>Fill the room with the right heads</li><li>Book a band in one tap</li><li>Tickets + Shakedown marketplace</li><li>A simple monthly console</li></ul></div>
+  <div class="card"><div class="who">🎟️ Chaperones</div><h4>The field</h4><ul><li>Sign venues, support the family</li><li>A cockpit that tells them the score</li><li>Recurring earnings on every sub</li><li>Recruited by spirit, not a résumé</li></ul></div>
+</div>
+
+<h2 id="family"><span class="e">🌹</span>The Family — user &amp; community functions</h2>
+<div class="feat"><div class="t">Chapters &amp; Chancellors</div><div class="d">Regional homes — Santa Cruz (the Founders), the Bay Area, and on out. <b>Chancellors</b> are the heart: the people already doing the work in the scene, recruited to lead their chapter. You find your people, not a feed.</div></div>
+<div class="feat"><div class="t">The "Every Show" cassette + "I Was There"</div><div class="d">The archive you already loved — now it <b>plays inside the app</b>. Tap a show you actually caught and mark <b>"I was there"</b>; it joins your personal cassette and opens a room of <b>everyone else who was there</b> that night. Your life in shows, on one tape.</div></div>
+<div class="feat"><div class="t">Real-time chat rooms</div><div class="d">Magic-link sign-in (your email, no password), an 18+ gate, then chapter rooms and per-show rooms. It's live — post and the family sees it. <span class="pill">we'll test this together</span></div></div>
+<div class="feat"><div class="t">Near You + Farrah</div><div class="d">The app knows where you are and surfaces shows <b>within 50 miles tonight</b>. <b>Farrah</b> — the voice — routes you in, hands-free. (This is the piece you first hit, Chris — it now asks your location, and you can set your area by hand if it doesn't. We fixed exactly that.)</div></div>
+<div class="feat"><div class="t">Badges + the living hero</div><div class="d">Shows attended become badges. The hero art up top rotates to honor dates and moments — it changes because <i>it is us</i>.</div></div>
+
+<h2 id="musicians"><span class="e">🎸</span>Musicians — the Studio</h2>
+<p>For the tribute bands, dead_dance is a <b>free back office</b> bolted onto the social network. They play; the app keeps the books.</p>
+<div class="feat"><div class="t">The Books &amp; P&amp;L</div><div class="d">Snap a receipt, miles auto-track off the gigs, and the <b>P&amp;L</b> totals month / quarter / year into one number. Tax-ready export rides along.</div></div>
+<div class="feat"><div class="t">Your Time — the hourly engine</div><div class="d">Log the hours behind the gig (setup, drive, teardown) at your own rate. <b>Paid crew is a deductible expense; your own unpaid time isn't</b> — but the app shows your <b>true effective $/hour</b> so you know what you're really making. Honest, not flattering.</div></div>
+<div class="feat"><div class="t">$/Venue analysis</div><div class="d">Which rooms pay, which are dogs, and where you're <b>charging under the room average</b> — money left on the table, surfaced plainly.</div></div>
+<div class="feat"><div class="t">Booking calendar + the Ad Engine</div><div class="d">"Check my calendar" — fans and venues request dates in one tap. And your <b>own promo</b> for a show surfaces to heads within 50 miles (editorial placement — your copy, your ticket link, no paid auction).</div></div>
+
+<h2 id="venues"><span class="e">🏛️</span>Venues — the console</h2>
+<div class="feat"><div class="t">The Venue Console <span class="pill">$99 / month</span></div><div class="d">The room's dashboard: <b>bands booked, tickets sold, and heads within 50 miles</b> of the door. The whole pitch in one glance — we fill your room with the right crowd on the right night.</div></div>
+<div class="feat"><div class="t">One-tap booking + Shakedown</div><div class="d">Open a band's calendar, book them in a tap. <b>Shakedown</b> is the vendor marketplace (the lot, formalized) with chapter and national roll-ups.</div></div>
+
+<h2 id="chaperones"><span class="e">🎟️</span>Chaperones — the role &amp; the cockpit</h2>
+<p>Chaperones are the <b>field</b> — the ambassadors who sign venues onto the console and support the family on the ground. Recruited <b>by spirit</b>, not by age or résumé. They sell and support; they carry <b>no legal responsibility</b> for the rooms.</p>
+<p>The promise we made: <i>field sales should never have to guess whether they're doing the things that work.</i> So the score is right in front of them — the <b>Cockpit</b>:</p>
+
+<div class="cockpit">
+  <div class="ch"><div class="av">RG</div><div><b>Robbie G. — Chaperone</b><div class="s">Santa Cruz · Founders' Chapter</div></div></div>
+  <div class="score">
+    <div class="t"><div class="n">7</div><div class="l">In pipeline</div></div>
+    <div class="t"><div class="n">3</div><div class="l">Signed · mo</div></div>
+    <div class="t"><div class="n">$742</div><div class="l">Monthly residual</div></div>
+    <div class="t"><div class="n">#2</div><div class="l">Region rank</div></div>
+  </div>
+  <div class="crm">
+    <div class="row"><span class="ds">DS 96</span><div class="nm"><b>The Catalyst</b><span>Santa Cruz, CA · ~9 mi</span></div><span class="st signed">Signed</span></div>
+    <div class="row"><span class="ds">DS 88</span><div class="nm"><b>Moe's Alley</b><span>Santa Cruz, CA · ~23 mi</span></div><span class="st hot">Hot · call back</span></div>
+    <div class="row"><span class="ds">DS 81</span><div class="nm"><b>Felton Music Hall</b><span>Felton, CA · ~37 mi</span></div><span class="st new">New lead</span></div>
+  </div>
+  <div class="target">🎯 <b>This week:</b> 5 calls · 2 demos · close Moe's Alley. <span style="opacity:.75">Hit it and you keep #2 in the region.</span></div>
+</div>
+<p style="font-size:14px;color:#43404e"><b>What's in the cockpit:</b> a <b>Scorecard</b> (pipeline, signed, residual, rank — no guessing), a private <b>Sell Book</b> (scripts + the CRM), and the <b>Playbook</b>. The CRM ships <b>pre-loaded with the priority venues</b>, each scored by a <b>Dead-Scene</b> rating built from real Grateful Dead history — so a Chaperone works the rooms most likely to say yes, first.</p>
+<div class="honest"><b>Honest-state:</b> contacts in the CRM are <b>verified public business listings only</b> — nothing fabricated. Earnings and "signed" states shown in the app are representative until real accounts &amp; payments (counsel-gated) go live. The <b>model</b> is real; the live dollars are wired in at the payments milestone.</div>
+
+<h2 id="strategy"><span class="e">♟️</span>Strategy &amp; the moat</h2>
+<div class="feat"><div class="t">The construct is the product</div><div class="d">dead_dance is <b>instance #1</b> of a repeatable machine. The same engine runs <b>Ford-Falcon Friends</b> (classic cars) and <b>TrailGummy</b> (hikers) — and any passion world big enough to fragment on Facebook. We don't build one app; we built a <b>factory</b>. There are effectively unlimited 10-million-strong communities to point it at.</div></div>
+<div class="feat"><div class="t">Ad-free, community-first</div><div class="d">The incumbents monetize attention with ads and a subscription wall. We <b>strip the ads and noise</b> out of what the family brings in and put <b>our people</b> front and center. The thing their users are fleeing is the thing they're built on.</div></div>
+<div class="feat"><div class="t">Facebook-friendly, by design</div><div class="d">We don't fight Facebook — we help the family see <b>more</b> of the group content they care about without drowning, and link back. No violations, nowhere near the line.</div></div>
+<div class="feat"><div class="t">Honest-state / the Jarvis rule</div><div class="d">Nothing auto-posts, auto-charges, or auto-contacts anyone. <b>The human always chooses.</b> That trust posture is the brand.</div></div>
+<div class="feat"><div class="t">It grows itself</div><div class="d">Chancellors bring their groups; Chaperones bring the rooms; the bands bring the fans. The network's growth engine is the <b>community itself</b> — not a paid-acquisition budget.</div></div>
+
+<h2 id="revenue"><span class="e">💵</span>Where the revenue is</h2>
+<p class="lede">The spine is simple: <b>venues pay a small monthly console fee, and the field earns a recurring cut for signing &amp; supporting them.</b> Everything else stacks on top.</p>
+<table>
+  <tr><th>Stream</th><th>Who pays</th><th>Model</th><th>Status</th></tr>
+  <tr><td><b>Venue console</b></td><td>Venues</td><td>$99 / month subscription — recurring</td><td class="demo">model live · payments gated</td></tr>
+  <tr><td><b>Field sales</b></td><td>(house pays Chaperones)</td><td>Chaperone keeps <b>25%</b> of each sub, residual; manager gets a <b>2%</b> regional override</td><td class="demo">model live</td></tr>
+  <tr><td><b>Shakedown</b></td><td>Vendors</td><td>Marketplace fees · chapter + national roll-ups</td><td class="demo">representative</td></tr>
+  <tr><td><b>Band promos</b></td><td>Bands</td><td>Editorial ad placement to nearby heads (paid = disclosed, gated)</td><td class="demo">representative</td></tr>
+  <tr><td><b>Tickets</b></td><td>Fans</td><td>Small per-ticket fee</td><td class="demo">representative</td></tr>
+  <tr><td><b>Pro tools</b></td><td>Power users</td><td>Premium upgrades (e.g. bigger broadcast lists)</td><td class="good">built</td></tr>
+</table>
+<div class="rev">
+  <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.85">The live rollup</div>
+  <div class="big">One number, always on</div>
+  <p style="margin:4px 0 0;opacity:.95;font-size:14.5px">The app already totals <b>signed subs + bookings + Shakedown + tickets</b> into a single revenue figure — chapter level and national. The house sees the machine's pulse in real time.</p>
+</div>
+<h3>The shape of it (illustrative)</h3>
+<p style="font-size:14.5px">A single Chaperone who signs <b>20 rooms at $99/mo</b> drives roughly <b>$1,980/mo</b> recurring to the house and earns about <b>$495/mo</b> for themselves — and it <i>recurs</i>, month after month, because subscriptions don't reset. Stack Chaperones across regions, then stack the whole construct across verticals (cars, hikers, and the next ten communities), and the math is no longer about one app. <span class="demo">Figures illustrative; the model is what's real today.</span></p>
+
+<div class="honest"><b>Read this before you test, Chris:</b> dead_dance is in <b>honest-state</b>. The <i>experience</i> and the <i>flows</i> are real — the cassette plays, chat is live, location works, the cockpit is real. But <b>money, accounts, and "shows near you" listings are still representative/demo</b> until the payments and live-data milestones (counsel-gated) land. If something is labeled "demo" or "honest-state," that's by design — you're testing the machine, not the bank.</div>
+
+<h2 id="test"><span class="e">✅</span>What we'll do together — the test run</h2>
+<p>Here's the plan for when you get here. We'll go one at a time; you tell me the truth.</p>
+
+<div class="testsec"><h4>1 · Install to Home Screen <span class="pill">the one you hit</span></h4>
+<label><input type="checkbox">Open dead_dance in Safari on your iPhone → the "📲 Add to Home Screen" banner slides up on its own.</label>
+<label><input type="checkbox">Tap Add → follow Share → Add to Home Screen → it launches full-screen like a real app.</label></div>
+
+<div class="testsec"><h4>2 · Location &amp; "Near You" <span class="pill">the bug we fixed</span></h4>
+<label><input type="checkbox">Allow location → shows surface near Doylestown / Philly, not California.</label>
+<label><input type="checkbox">Tap the 📍 chip → if it says "Santa Cruz (default)," there's a "Find shows near me" button right there.</label>
+<label><input type="checkbox">Open the picker, type "Phila," choose Philadelphia → it reads "Within 50 mi of Philadelphia."</label>
+<label><input type="checkbox">Close &amp; reopen → it remembers Philadelphia. Never snaps back to California.</label></div>
+
+<div class="testsec"><h4>3 · The Archive — Every Show cassette</h4>
+<label><input type="checkbox">Open Archive → play a show (streams a few seconds in).</label>
+<label><input type="checkbox">On a show you caught, tap "I was there" → it logs + opens the room of who else was there.</label></div>
+
+<div class="testsec"><h4>4 · Chat — the two of us, live 🎉</h4>
+<label><input type="checkbox">Both sign in with the magic link (your email) on your own phones.</label>
+<label><input type="checkbox">Join the same room. Michael posts → you see it appear live. You reply → he sees it live.</label></div>
+
+<div class="testsec"><h4>5 · Badges, Chapters, Broadcast, Farrah</h4>
+<label><input type="checkbox">You tab → your attended shows/badges show up; "who else" opens a room.</label>
+<label><input type="checkbox">Chapters → Founders / Bay Area load with members.</label>
+<label><input type="checkbox">Tap "⌁ Broadcast" → type a thought → see it written different per channel; tone pills change the voice; a Send opens YOUR app — nothing posts itself.</label>
+<label><input type="checkbox">Tap 🎙️ Farrah → the voice panel opens.</label></div>
+
+<div class="testsec"><h4>6 · Feel &amp; offline</h4>
+<label><input type="checkbox">Tab through everything — no blank screens, no freezes, thumb-reachable.</label>
+<label><input type="checkbox">Airplane mode, reopen the installed app → it still opens (cached). Back online → catches up.</label>
+<label><input type="checkbox"><b>Gut check:</b> would you keep this on your phone? Tell me straight.</label></div>
+
+<div class="cta">
+  <div style="font-size:18px;font-weight:800">See you tomorrow, brother. 🌹</div>
+  <div style="opacity:.9;font-size:14px;margin-top:4px">Open the app on your phone whenever you want a head start.</div>
+</div>
+
+<div class="foot">
+dead_dance — initial briefing prepared for Chris · 2026. Honest-state throughout: the experience is real; money, accounts, and live listings are representative until the counsel-gated payments &amp; data milestones. No third-party logos or lyrics reproduced; all art original. This page is an internal overview — share the link only with people you trust.
+</div>
+
+</div></body></html>

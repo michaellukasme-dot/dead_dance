@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!-- dead.dance — FIELD CRM ROLL-UP. Clickless cockpit for the leadership tiers.
+     Chaperone/Ambassador quota: (1) SELL venue subscriptions in their patch,
+     (2) SIGN UP every band in their patch. Chancellor/Founder roll it up.
+     Seeded from real house data (54 venues · 959 GD tribute bands · Compass Rose).
+     Outreach is DRAFTED — the rep sends. NOTHING auto-sends. -->
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>dead.dance — Field CRM</title>
+<style>
+:root{--navy:#15366e;--ink:#0f1b2d;--muted:#5b6b80;--line:#dde5ef;--paper:#f6f8fb;--card:#fff;--ok:#1d7a4d;--warn:#c2410c;--gold:#c79a3a;--rose:#b8002e}
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);font-family:'Inter','Helvetica Neue',Arial,sans-serif;color:var(--ink)}
+#app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.h{background:var(--navy);color:#fff;padding:13px 16px}
+.h .nm{font-size:18px;font-weight:800}.h .sb{font-size:11px;opacity:.85;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.farrah{background:#23304d;color:#eaf1ff;border-left:3px solid var(--gold);padding:9px 16px;font-size:12.5px;line-height:1.45}
+.farrah b{color:var(--gold)}
+/* tier roll-up */
+.tiers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.tier{border:1px solid var(--line);border-radius:12px;padding:10px;position:relative;overflow:hidden}
+.tier .tn{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--navy)}
+.tier .big{font-size:22px;font-weight:800;margin:3px 0 1px}
+.tier .sm{font-size:11px;color:var(--muted)}
+.tier .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--gold)}
+.tier.founder{grid-column:1/3;background:linear-gradient(135deg,#15366e,#1f4a93);color:#fff}
+.tier.founder .tn,.tier.founder .sm{color:#cfe0ff}
+.repbar{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.repbar::-webkit-scrollbar{display:none}
+.rep{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.rep.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rep .t{font-size:9px;display:block;opacity:.8;font-weight:600}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;background:none;border:0;padding:12px;font-weight:800;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+.tabs button.on{color:var(--navy);border-bottom-color:var(--navy)}
+.tabs button b{color:var(--gold)}
+.tools{display:flex;gap:8px;padding:10px 16px 4px}
+.tools input{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:13px;font-family:inherit}
+.stage{flex:1;padding:8px 16px 40px}
+.cnt{font-size:11px;color:var(--muted);font-weight:700;margin:6px 2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 13px;margin-bottom:9px}
+.card .top{display:flex;align-items:flex-start;gap:9px}
+.card .score{flex:none;width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:14px;background:var(--navy)}
+.card .score.hot{background:linear-gradient(135deg,var(--rose),var(--gold))}
+.card .info{flex:1;min-width:0}.card .info b{font-size:15px}
+.card .info .meta{font-size:12px;color:var(--muted);margin-top:1px}
+.pill{font-size:10px;font-weight:800;border-radius:999px;padding:3px 8px;text-transform:uppercase;letter-spacing:.03em}
+.pill.target{background:#eef4ff;color:var(--navy)}.pill.won{background:#e7f6ee;color:var(--ok)}
+.price{font-size:13px;font-weight:800;color:var(--ok)}
+.lnks{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.lnks a{font-size:11.5px;font-weight:700;color:var(--navy);text-decoration:none;background:#eef4ff;border-radius:7px;padding:5px 9px}
+.draftbtn{background:var(--gold);color:#23202a;border:0;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;margin-top:9px}
+.draft{display:none;margin-top:9px;background:#0f1b2d;color:#eaf1ff;border-radius:10px;padding:11px;font-size:12px;line-height:1.5;white-space:pre-wrap}
+.draft.on{display:block}
+.copy{background:#ffffff22;border:1px solid #ffffff44;color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-top:8px}
+.foot{font-size:11px;color:var(--muted);text-align:center;padding:14px;line-height:1.5}
+.foot b{color:var(--navy)}
+.showmore{width:100%;background:#eef4ff;color:var(--navy);border:0;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="h"><div class="nm">🌹 dead.dance — Field CRM</div>
+    <div class="sb">Sell venue subs · sign up every band · fill local craft vendors · copy, never auto-send</div></div>
+  <div class="farrah" id="farrah"></div>
+  <div class="tiers" id="tiers"></div>
+  <div class="repbar" id="repbar"></div>
+  <div class="tabs">
+    <button id="tab-venues" class="on" onclick="setTab('venues')">🏛 Venues <b id="vcount"></b></button>
+    <button id="tab-bands" onclick="setTab('bands')">🎸 Bands <b id="bcount"></b></button>
+    <button id="tab-craft" onclick="setTab('craft')">🎪 Craft <b id="ccount"></b></button>
+    <button id="tab-fest" onclick="setTab('fest')">🎆 Fests <b id="fcount"></b></button>
+  </div>
+  <div class="tools"><input id="search" placeholder="Search…" oninput="render()"></div>
+  <div class="stage" id="stage"></div>
+  <div class="foot">Seeded targets from the house: <b>54 venues</b> (Dead-Scene Score) · <b id="bandtot">959</b> GD tribute bands
+    (source: <b>Compass Rose · gratefuldeadtributebands.com</b>). Live "won" status lights up in-app once reps enroll.
+    All outreach is <b>drafted, the rep sends</b> — nothing auto-sends.</div>
+</div>
+
+<script src="bands.js"></script>
+<script src="crm_seed.js"></script>
+<script src="target_bands.js"></script>
+<script src="festivals_seed.js"></script>
+<script>
+/* ---- venue → region (collapse CA → bayarea, matching the band state map) ---- */
+var VENUE_REGION={};
+(function(){ var R={
+ bayarea:["The Catalyst","Moe's Alley","Felton Music Hall","Rio Theatre","Sweetwater Music Hall","The Fillmore","The Chapel","The UC Theatre","Cornerstone","HopMonk Tavern","Belly Up","The Mint","The Fonda Theatre","Lodge Room","The Coach House","Saint Rocke"],
+ pnw:["Crystal Ballroom","Revolution Hall","The Showbox","Nectar Lounge","The District Bar"],
+ rockies:["Red Rocks Amphitheatre","Cervantes' Masterpiece Ballroom","Ophelia's Electric Soapbox","Boulder Theater","Mishawaka Amphitheatre"],
+ lonestar:["Antone's","Gruene Hall","The Kessler Theater","Sam's Burger Joint","Last Concert Cafe"],
+ greatlakes:["Martyrs'","The Cubby Bear","The Vogue","The Magic Bag","Wing Warehouse"],
+ southeast:["The Orange Peel","The Grey Eagle","Variety Playhouse","Brooklyn Bowl Nashville","Sharkey's Bar & Grill"],
+ midatl:["Ardmore Music Hall","9:30 Club","Sun Inn Tavern","Cooper's Riverview","Rams Head On Stage","Lost Rhino Brewing"],
+ northeast:["The Capitol Theatre","Brooklyn Bowl","The Rooftop at Pier 17","Higher Ground","Strange Brew Pub","The Sinclair","Port City Music Hall"]
+}; Object.keys(R).forEach(function(rg){R[rg].forEach(function(v){VENUE_REGION[v]=rg;});}); })();
+
+/* ---- the field force: one rep per patch, rolled up through the tiers ---- */
+var RLABEL={bayarea:"Bay Area / CA",pnw:"Pacific NW",rockies:"Rockies",lonestar:"Lone Star (TX)",greatlakes:"Great Lakes",southeast:"Southeast",midatl:"Mid-Atlantic",northeast:"Northeast"};
+var REPS=[
+ {key:"bayarea",  name:"You (Stagger Lee)",tier:"founder",   sponsor:null},
+ {key:"midatl",   name:"Pat L.",           tier:"chancellor",sponsor:"bayarea"},
+ {key:"northeast",name:"Robin S.",         tier:"chancellor",sponsor:"bayarea"},
+ {key:"greatlakes",name:"June A.",          tier:"ambassador",sponsor:"midatl"},
+ {key:"southeast",name:"Della W.",         tier:"ambassador",sponsor:"northeast"},
+ {key:"pnw",      name:"Sage P.",          tier:"chaperone", sponsor:"bayarea"},
+ {key:"rockies",  name:"Sky B.",           tier:"chaperone", sponsor:"greatlakes"},
+ {key:"lonestar", name:"Cody R.",          tier:"chaperone", sponsor:"southeast"}
+];
+var TIERS=[["founder","Founder"],["chancellor","Chancellor"],["ambassador","Ambassador"],["chaperone","Chaperone"]];
+var SUBPRICE={L:299,M:149,S:79};  // venue-console monthly, by capacity tier (planning figures)
+
+function bandRegion(b){ return (typeof DD_STATE_REGION!=='undefined' && DD_STATE_REGION[b.s]) || "national"; }
+function venuesIn(region){ return Object.keys(DD_CRM_SEED.score).filter(function(v){ return VENUE_REGION[v]===region; }); }
+function bandsIn(region){ return (DD_TARGET_BANDS||[]).filter(function(b){ return bandRegion(b)===region; }); }
+function venueMRR(region){ var s=0; venuesIn(region).forEach(function(v){ s+=SUBPRICE[DD_CRM_SEED.cap[v]]||0; }); return s; }
+function downline(key){ // region keys rolled up under a rep (self + recursive sponsees)
+ var kids=REPS.filter(function(r){return r.sponsor===key;}).map(function(r){return r.key;});
+ var all=[key]; kids.forEach(function(k){ all=all.concat(downline(k)); }); return all;
+}
+
+var CURREP="bayarea", TAB="venues", SHOW=120;
+function fmt$(n){ return "$"+n.toLocaleString(); }
+
+/* ---- TYPE: local_craft_vendor — the Chaperone fills this DATA LOCALLY ----
+   Lot artisans: tie-dye, jewelry, glass, leather, prints, candles, food.
+   A light seed primes the patch; the Chaperone adds the rest (stored locally). */
+var CRAFT_SEED={
+ bayarea:[{n:"Tie-Dye Tessa",k:"Tie-Dye"},{n:"Stealie Silver",k:"Jewelry"},{n:"Mountain Glass Co.",k:"Glass"}],
+ midatl:[{n:"Kara's Prints",k:"Art / Prints"},{n:"Terrapin Tees",k:"Apparel"}],
+ northeast:[{n:"Catskill Candles",k:"Candles"},{n:"Hudson Leather",k:"Leather"}],
+ greatlakes:[{n:"Lake Effect Dyes",k:"Tie-Dye"}], southeast:[{n:"Blue Ridge Beadwork",k:"Jewelry"}],
+ pnw:[{n:"Cascadia Glass",k:"Glass"}], rockies:[{n:"High Country Hides",k:"Leather"}], lonestar:[{n:"Lone Star Lots Prints",k:"Art / Prints"}]
+};
+var CRAFT_ADDED=(function(){ try{ return JSON.parse(localStorage.getItem('dd.craft')||'[]'); }catch(e){ return []; } })();
+function craftSave(){ try{ localStorage.setItem('dd.craft',JSON.stringify(CRAFT_ADDED)); }catch(e){} }
+function craftIn(region){ var seed=(CRAFT_SEED[region]||[]).map(function(c){return {n:c.n,k:c.k,region:region,seed:true};});
+ var added=CRAFT_ADDED.filter(function(c){return c.region===region;}); return seed.concat(added); }
+function festIn(regions){ var L=(window.DD_FESTIVALS||[]); return L.filter(function(f){ return regions.indexOf(f.region)>=0 || f.region===''; }); }
+function addCraft(){ var n=(document.getElementById('cf_name').value||'').trim(); if(!n){ alert('Vendor name?'); return; }
+ CRAFT_ADDED.push({n:n,k:(document.getElementById('cf_kind').value||'Craft'),region:CURREP,
+   contact:(document.getElementById('cf_contact').value||'').trim()}); craftSave(); render(); }
+
+function renderTiers(){
+ var el=document.getElementById('tiers'); var html="";
+ TIERS.forEach(function(t){ var key=t[0];
+  var reps=REPS.filter(function(r){return r.tier===key;});
+  var regions=reps.map(function(r){return r.key;});
+  var v=0,b=0,cv=0,mrr=0;
+  regions.forEach(function(rg){ v+=venuesIn(rg).length; b+=bandsIn(rg).length; cv+=craftIn(rg).length; mrr+=venueMRR(rg); });
+  var pct=Math.min(100,Math.round(mrr/ (key==='founder'?1:1) /120)); // visual only
+  html+='<div class="tier '+(key==='founder'?'founder':'')+'"><div class="tn">'+t[1]+(reps.length>1?'s':'')+'</div>'+
+   '<div class="big">'+fmt$(mrr)+'<span style="font-size:12px;font-weight:600">/mo</span></div>'+
+   '<div class="sm">'+reps.length+' rep'+(reps.length>1?'s':'')+' · '+v+' venues · '+b+' bands · '+cv+' craft</div>'+
+   '<div class="bar" style="width:'+Math.min(100,pct)+'%"></div></div>';
+ });
+ el.innerHTML=html;
+}
+function renderReps(){
+ var el=document.getElementById('repbar');
+ el.innerHTML=REPS.map(function(r){ return '<div class="rep'+(r.key===CURREP?' on':'')+'" onclick="pickRep(\''+r.key+'\')">'+
+   r.name.split(' ')[0]+'<span class="t">'+r.tier+' · '+RLABEL[r.key]+'</span></div>'; }).join("");
+}
+function pickRep(k){ CURREP=k; SHOW=120; render(); renderReps(); }
+function setTab(t){ TAB=t; SHOW=120; document.getElementById('tab-venues').classList.toggle('on',t==='venues');
+ document.getElementById('tab-bands').classList.toggle('on',t==='bands');
+ document.getElementById('tab-craft').classList.toggle('on',t==='craft');
+ document.getElementById('tab-fest').classList.toggle('on',t==='fest'); render(); }
+
+function curRegions(){ var r=REPS.find(function(x){return x.key===CURREP;}); return r&&r.tier!=='chaperone'?downline(CURREP):[CURREP]; }
+
+function render(){
+ var rep=REPS.find(function(x){return x.key===CURREP;}); var regions=curRegions();
+ var q=(document.getElementById('search').value||"").toLowerCase();
+ var stage=document.getElementById('stage');
+ // counts for tabs
+ var vAll=[], bAll=[], cAll=[]; regions.forEach(function(rg){ vAll=vAll.concat(venuesIn(rg)); bAll=bAll.concat(bandsIn(rg)); cAll=cAll.concat(craftIn(rg)); });
+ var fAll=festIn(regions);
+ document.getElementById('vcount').textContent=vAll.length; document.getElementById('bcount').textContent=bAll.length; document.getElementById('ccount').textContent=cAll.length; document.getElementById('fcount').textContent=fAll.length;
+ var patch = rep.tier==='chaperone' ? RLABEL[CURREP] : (CURREP==='bayarea'?'the whole bus':RLABEL[CURREP]+' + downline');
+ document.getElementById('farrah').innerHTML='🎙️ <b>'+rep.name+'</b> — '+rep.tier.toUpperCase()+', '+patch+'. '+
+   'Your patch: <b>'+vAll.length+' venues</b> to subscribe ('+fmt$(vAll.reduce(function(s,v){return s+(SUBPRICE[DD_CRM_SEED.cap[v]]||0);},0))+'/mo), <b>'+bAll.length+' bands</b> to sign up, and <b>'+cAll.length+' local craft vendors</b> to gather, and <b>'+fAll.length+' summer festivals</b> to land. Work the top of each list first.';
+
+ if(TAB==='venues'){
+  var list=vAll.filter(function(v){return !q||v.toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return (DD_CRM_SEED.score[b]||0)-(DD_CRM_SEED.score[a]||0);});
+  var html='<div class="cnt">'+list.length+' venue subscription targets · highest Dead-Scene Score first</div>';
+  list.slice(0,SHOW).forEach(function(v,i){ var sc=DD_CRM_SEED.score[v]||0, cap=DD_CRM_SEED.cap[v]||'M',
+    c=DD_CRM_SEED.contact[v]||{}, price=SUBPRICE[cap]||149, gd=DD_CRM_SEED.gd[v]||0;
+   html+='<div class="card"><div class="top">'+
+     '<div class="score'+(sc>=60?' hot':'')+'">'+sc+'</div>'+
+     '<div class="info"><b>'+v+'</b><div class="meta">'+RLABEL[VENUE_REGION[v]]+' · cap '+cap+(gd?(' · '+gd+' real GD shows here'):'')+'</div></div>'+
+     '<div style="text-align:right"><span class="pill target">Prospect</span><div class="price" style="margin-top:5px">'+fmt$(price)+'/mo</div></div></div>'+
+     '<div class="lnks">'+(c.site?'<a href="https://'+c.site+'" target="_blank" rel="noopener">🌐 '+c.site+'</a>':'')+
+       (c.phone?'<a href="tel:'+c.phone.replace(/[^0-9]/g,'')+'">📞 '+c.phone+'</a>':'')+
+       (c.email?'<a href="mailto:'+c.email+'">✉️ '+c.email+'</a>':'')+'</div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ Draft the sub pitch</button>'+
+     '<div class="draft">'+venuePitch(v,price,sc,gd).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
+  });
+  if(list.length>SHOW)html+='<button class="showmore" onclick="SHOW+=200;render()">Show more ('+(list.length-SHOW)+' left)</button>';
+  stage.innerHTML=html;
+ } else if(TAB==='bands'){
+  var bl=bAll.filter(function(b){return !q||b.n.toLowerCase().indexOf(q)>=0||(b.c||'').toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return a.n.localeCompare(b.n);});
+  var h='<div class="cnt">'+bl.length+' bands to sign up in this patch</div>';
+  bl.slice(0,SHOW).forEach(function(b){
+   h+='<div class="card"><div class="top">'+
+     '<div class="score" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">🎸</div>'+
+     '<div class="info"><b>'+b.n+'</b><div class="meta">'+(b.c?b.c+', ':'')+b.s+(b.cn?(' · '+b.cn):'')+'</div></div>'+
+     '<span class="pill target">Target</span></div>'+
+     '<div class="lnks">'+(b.l?'<a href="'+b.l+'" target="_blank" rel="noopener">🌐 Page</a>':'')+
+       (b.sc?'<a href="'+b.sc+'" target="_blank" rel="noopener">📅 Schedule</a>':'')+
+       (b.e?'<a href="mailto:'+b.e+'">✉️ '+b.e+'</a>':'')+'</div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ Draft the sign-up invite</button>'+
+     '<div class="draft">'+bandInvite(b).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
+  });
+  if(bl.length>SHOW)h+='<button class="showmore" onclick="SHOW+=200;render()">Show more ('+(bl.length-SHOW)+' left)</button>';
+  stage.innerHTML=h;
+ } else if(TAB==='craft'){
+  // local_craft_vendor — the Chaperone fills this DATA LOCALLY
+  var cl=cAll.filter(function(c){return !q||c.n.toLowerCase().indexOf(q)>=0||(c.k||'').toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return a.n.localeCompare(b.n);});
+  var addable = rep.tier==='chaperone' || regions.length===1;  // add into a single, concrete patch
+  var ch='<div class="card" style="border-style:dashed"><div class="cnt" style="margin-top:0">🎪 The Chaperone\'s job — gather every local craft vendor in '+RLABEL[CURREP]+' (filled locally)</div>'+
+    (addable ? ('<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px">'+
+      '<input id="cf_name" placeholder="Vendor / artisan name" style="flex:2;min-width:140px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:13px">'+
+      '<input id="cf_kind" placeholder="Craft (tie-dye, glass…)" style="flex:1;min-width:120px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:13px">'+
+      '<input id="cf_contact" placeholder="Contact (optional)" style="flex:1;min-width:120px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:13px">'+
+      '<button class="draftbtn" style="margin-top:0" onclick="addCraft()">➕ Add to '+RLABEL[CURREP]+'</button></div>')
+     : '<div class="muted" style="font-size:12px">Pick a single chapter (a Chaperone) above to add vendors into that patch.</div>')+'</div>';
+  ch+='<div class="cnt">'+cl.length+' local craft vendors in this patch</div>';
+  cl.slice(0,SHOW).forEach(function(c){
+   ch+='<div class="card"><div class="top">'+
+     '<div class="score" style="background:linear-gradient(135deg,#2a6b46,#c79a3a)">🎪</div>'+
+     '<div class="info"><b>'+c.n+'</b><div class="meta">'+(c.k||'Craft')+' · '+RLABEL[c.region]+(c.contact?(' · '+c.contact):'')+'</div></div>'+
+     '<span class="pill '+(c.seed?'target':'won')+'">'+(c.seed?'Lead':'Signed')+'</span></div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ Draft the vendor invite</button>'+
+     '<div class="draft">'+craftInvite(c).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
+  });
+  stage.innerHTML=ch;
+ } else {
+  // FESTIVALS — Ambassadors/Chaperones sell festival packages through our software
+  var fl=fAll.filter(function(f){return !q||f.name.toLowerCase().indexOf(q)>=0||(f.city||'').toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return (a.start||'9').localeCompare(b.start||'9');});
+  var fh='<div class="cnt">'+fl.length+' summer festivals in this patch — sell passes, band slots &amp; sponsorships on dead.dance</div>';
+  fl.forEach(function(f){ var when=f.start?(f.start+(f.end&&f.end!==f.start?(' → '+f.end):'')):'Summer 2026 (TBA)';
+   fh+='<div class="card"><div class="top">'+
+     '<div class="score" style="background:linear-gradient(135deg,#b8002e,#7a3cc0)">🎆</div>'+
+     '<div class="info"><b>'+f.name+'</b><div class="meta">'+(f.city||'')+' · '+when+' · '+f.days+'-day'+(f.region?(' · '+(RLABEL[f.region]||f.region)):' · national')+'</div></div>'+
+     '<span class="pill target">Prospect</span></div>'+
+     (f.bands&&f.bands.length?'<div class="meta" style="margin-top:6px;font-size:12px;color:var(--muted)">Lineup: '+f.bands.slice(0,5).join(' · ')+(f.bands.length>5?' …':'')+'</div>':'')+
+     '<div class="lnks">'+(f.link?'<a href="'+f.link+'" target="_blank" rel="noopener">🌐 Festival</a>':'')+'<span style="font-size:11px;color:var(--muted);align-self:center">src: '+f.source+'</span></div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ Draft the festival pitch</button>'+
+     '<div class="draft">'+festPitch(f).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
+  });
+  stage.innerHTML=fh;
+ }
+}
+function festPitch(f){
+ return "Hi — dead.dance here, the network the whole Grateful Dead family already lives on.\n\n"+
+ f.name+" is exactly our crowd. Run it on dead.dance and you get: a private band-coordination group, the daily schedule on every local chapter calendar (rolled up to the national calendar), in-app multi-day pass sales, and Shakedown + art vendor tables lined up by our Chaperones — all in one place.\n\n"+
+ "Our Ambassadors handle the sell; you keep control and the gate. Worth a 15-minute call before the summer run?\n\n— dead.dance";
+}
+function craftInvite(c){
+ return "Hey "+c.n+" — dead.dance here, the home for the Dead family in "+RLABEL[c.region]+".\n\n"+
+ "Your Chaperone is putting together the local craft scene for our shows. A free vendor listing gets you a 4×4 table at chapter events, "+
+ "your booth on Shakedown Street in-app, and a payment-ready storefront when you want it.\n\n"+
+ "Want me to add "+c.n+" to the "+RLABEL[c.region]+" lot?\n\n— dead.dance";
+}
+function tog(btn){ var d=btn.nextElementSibling; d.classList.toggle('on'); }
+function cp(btn){ var t=btn.parentNode.textContent.replace('📋 Copy','').trim();
+ try{ navigator.clipboard.writeText(t); btn.textContent='✓ Copied'; }catch(e){ btn.textContent='Select & copy'; } }
+
+function venuePitch(v,price,sc,gd){
+ return "Hi — I run the dead.dance chapter for "+RLABEL[VENUE_REGION[v]]+".\n\n"+
+ "We're the network the Dead family already lives on — every local head, every tribute band, every Shakedown vendor in one place. "+
+ (gd?("Your room has real history: "+gd+" Grateful Dead shows played here. "):"")+
+ v+" scores "+sc+" on our Dead-Scene index — your crowd is already ours.\n\n"+
+ "A venue subscription ("+("$"+price)+"/mo) puts your calendar in front of the whole chapter, sells tickets in-app, "+
+ "and we line up Shakedown + art vendors for your shows. First month free to prove the lift.\n\n"+
+ "Worth 15 minutes? — dead.dance";
+}
+function bandInvite(b){
+ return "Hey "+(b.cn||b.n)+" — dead.dance here, the home for the Grateful Dead family.\n\n"+
+ "We're signing up every GD band in "+RLABEL[bandRegion(b)]+", and "+b.n+" is on the list. It's free: you get your own band page + QR, "+
+ "your dates land on the chapter calendar and map automatically, and ticket holders drop into your show's group chat.\n\n"+
+ "Claim "+b.n+" in two taps — no captcha, posts as your identity. Want the link?\n\n— dead.dance";
+}
+
+document.getElementById('bandtot').textContent=(DD_TARGET_BANDS||[]).length;
+renderTiers(); renderReps(); render();
+</script>
+</body></html>
