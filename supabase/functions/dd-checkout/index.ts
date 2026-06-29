@@ -7,7 +7,7 @@
 // DEPLOY (you run these once):
 //   supabase functions deploy dd-checkout --no-verify-jwt=false
 //   supabase secrets set STRIPE_SECRET_KEY=sk_live_xxx \
-//        APP_URL=https://staggerlee011.github.io/lukas_apps_site/gd_project/02_Development/dead_dance_v1
+//        APP_URL=https://michaellukasme-dot.github.io/dead_dance
 //   (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 //
 // The function REQUIRES the caller's Supabase JWT (the magic-link session), so
