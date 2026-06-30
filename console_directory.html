@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dead.dance — Console & Widget Directory (the map)</title>
+<style>
+:root{--ink:#16181d;--paper:#faf7f2;--card:#fff;--line:#e6ddcb;--muted:#6b6457;--rose:#b8002e;--navy:#1c2540;--gold:#caa53d;--ok:#1f7a4d}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 48px}
+header{background:linear-gradient(120deg,#141b30,#3a1d5e);color:#fff;padding:24px 0}
+header .wrap{padding-top:0;padding-bottom:0}
+header h1{margin:0 0 4px;font-size:24px}
+header p{margin:0;color:#d7ddee;font-size:13.5px}
+.search{position:sticky;top:0;background:var(--paper);padding:12px 0;border-bottom:1px solid var(--line);z-index:5}
+.search input{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:#fff}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;font-size:11.5px;color:var(--muted)}
+.legend span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+h2{font-size:15px;margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+.con{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:11px}
+.con .top{display:flex;align-items:flex-start;gap:11px}
+.con .ic{font-size:24px;flex:none}
+.con .nm{font-size:16px;font-weight:800}
+.con .meta{font-size:12px;color:var(--muted);margin-top:1px}
+.con .open{margin-left:auto;flex:none;background:var(--navy);color:#fff;text-decoration:none;font-weight:800;font-size:12px;border-radius:999px;padding:7px 13px;white-space:nowrap}
+.con .open.dim{background:#eee;color:#999;pointer-events:none}
+.row{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;margin-top:10px;font-size:13px}
+.row .k{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em}
+.find{background:#fbf3da;border-left:3px solid var(--gold);padding:7px 10px;border-radius:0 8px 8px 0;margin-top:9px;font-size:12.5px}
+.find b{color:#8a6a12}
+.tables{font-size:11px;color:var(--muted);margin-top:7px}
+.tables code{background:#f1ece0;border-radius:5px;padding:1px 5px}
+.demo{font-size:12px;color:var(--ok);font-weight:700;margin-top:7px}
+.hide{display:none}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>🗺 dead.dance — Console & Widget Directory</h1>
+<p>Every console and widget, where it lives, and how to find it. Built for the family + the sales team. (The map, so nobody's lost. 😄)</p></div></header>
+
+<div class="wrap">
+<div class="search">
+  <input id="q" placeholder="Search consoles… (try “venue”, “zoom”, “tickets”, “share”)" oninput="filt()">
+  <div class="legend"><span>🌹 Fan / Community</span><span>🎸 Musician</span><span>🗂 CRM</span><span>🏛 Venue / Host</span><span>🎓 Training & Tools</span><span>🗄 Backend</span></div>
+</div>
+<div id="list"></div>
+<footer>dead.dance console map · keep this updated as widgets ship · the calendar is the market.</footer>
+</div>
+
+<script>
+var DIR=[
+ {grp:'🌹 Fan / Community — the dead.dance app', open:'./index.html', items:[
+  {ic:'📅',nm:'Calendar Console (the Market)',where:'index.html · top-left of home',who:'Everyone',what:'Upcoming list + Month grid; tap a date → Tickets. Type filter (Dead/Phish/Comedy/DJ). This is the storefront — the market itself.',find:'Top-left corner of the home screen. Defaults to “Upcoming”.',tables:'12_venues · 23_scenes (chat_shows_for_scene)',demo:'Demo: tap a show → Tickets'},
+  {ic:'📰',nm:'Tune-In Blog (feed)',where:'index.html · center column',who:'Everyone',what:'Local/National toggle + the flow from groups you tuned into. Facebook-style posts (avatar · name · group · time).',find:'Center of home — “📖 The Blog”. Toggle 📍 Local / 🌎 National.',tables:'25_feed (chat_post / chat_feed)'},
+  {ic:'📡',nm:'HyperPost + Composer',where:'index.html · “What’s on your mind” box',who:'Everyone',what:'The ONE new thing. Type → 📡 HyperPost radiates to your default networks (⚙ Networks to set them).',find:'In the feed: the composer box, and the 📡 on any post.',tables:'25_feed'},
+  {ic:'📚',nm:'Reader (6 tabs)',where:'index.html · top-bar 👥 / footer',who:'Everyone',what:'👥 Friends · 🎸 Bands · 📡 Groups · 🛍 Shakedown · 🎵 Archive · 🎨 Art.',find:'👥 icon (top bar, next to chat) opens Friends; footer tabs open the rest.'},
+  {ic:'🪪',nm:'QR Profile + Role Desks',where:'index.html · right column',who:'Everyone',what:'Your portable QR profile (tickets, stubs, story). Your role desks live inside your own profile.',find:'Tap your QR at the top of the right column.',tables:'09_profiles'},
+  {ic:'🍀',nm:'Miracle Ticket',where:'index.html · bottom-right FAB',who:'Everyone',what:'Donate / grab a free ticket from the chapter bucket; karma rules.',find:'The blinking 🍀 MIRACLE button, bottom-right.',tables:'22_miracle'},
+  {ic:'🎧',nm:'Name That Tune (game)',where:'index.html · footer 🎧 Play',who:'Everyone',what:'Daily clip-guess; points → Shakedown coupons.',find:'Footer → 🎧 Play.',tables:'20_game'},
+  {ic:'💬',nm:'Family Chat',where:'index.html · top-bar 💬',who:'Everyone',what:'The real backend chat (rooms, show groups).',find:'💬 button, top bar.',tables:'01–10 (rooms/groups)'},
+  {ic:'🧪',nm:'QA Assist widget',where:'index.html · bottom-left',who:'Testers + sharers',what:'Grab a SHARE task (forward an FB post to our page) or a TEST task (try a feature, leave feedback). Crosses off when done.',find:'🧪 “Help test” button, bottom-left.',tables:'32_fb_groups · 33_qa'} ]},
+
+ {grp:'🎸 Musician Console — where the bands live', open:'./index.html', items:[
+  {ic:'📅',nm:'Add a Date (HyperPost)',where:'index.html · calendar → “📅 Add a Date”',who:'Musicians',what:'One-click post a show; radiates to the calendar + everywhere.',find:'Calendar console → 📅 ADD A DATE.',tables:'15_band_submit'},
+  {ic:'🎸',nm:'Register Band + Invite a Band',where:'index.html · gig modal → 🎸 Register band',who:'Musicians',what:'Claim your band page; then the peer-to-peer “🤝 Invite another band”.',find:'📅 Add a Date → 🎸 Register band tab.',tables:'11_bands · 15_band_submit'},
+  {ic:'🎭',nm:'List Your Act (Talent profile)',where:'index.html gig modal 🎭 + hostaband',who:'Any act',what:'Build a bookable profile (fee, artwork, EPK) venues can choose from.',find:'Gig modal → 🎭 Talent tab; or hostaband “List your act”.',tables:'24_talent'},
+  {ic:'🎟️',nm:'Bands directory',where:'index.html · Reader → 🎸 Bands',who:'Everyone',what:'Every act’s page + QR; follow / tickets.',find:'👥 → Reader → 🎸 Bands tab.',tables:'11_bands'} ]},
+
+ {grp:'🗂 CRM Console — the field cockpit (sales)', open:'./sales_crm.html', items:[
+  {ic:'🏛',nm:'Venues',where:'sales_crm.html · Venues tab',who:'Ambassadors / Chaperones',what:'Subscription targets by Dead-Scene score; inbound hostaband prospects land here.',find:'Open the CRM → 🏛 Venues.',tables:'16_sales_crm · 28_host_billing (prospects)',demo:'Show the hostaband “inbound prospect” cards'},
+  {ic:'🎸',nm:'Bands',where:'sales_crm.html · Bands tab',who:'Reps',what:'Sign up the tribute bands in the patch.',find:'CRM → 🎸 Bands.',tables:'16_sales_crm'},
+  {ic:'🎪',nm:'Craft + 🎆 Fests',where:'sales_crm.html · Craft / Fests tabs',who:'Reps',what:'Local craft vendors + summer festival packages.',find:'CRM → 🎪 Craft / 🎆 Fests.',tables:'17_vendor_slots · 21_festivals'},
+  {ic:'🎭',nm:'Talent (sell the network)',where:'sales_crm.html · Talent tab',who:'Reps',what:'Place any act into open nights; the “sell the NETWORK” pitch.',find:'CRM → 🎭 Talent.',tables:'24_talent'},
+  {ic:'📅',nm:'Meetings (capacity + Zoom)',where:'sales_crm.html · Meetings tab',who:'Reps',what:'Calendar-capacity outreach: recommended send volume, auto-throttle, differentiated intro emails, 3-tier calendars, ⚙ Zoom/scheduling, “next Zoom meeting”.',find:'CRM → 📅 Meetings.',tables:'29_meetings · 30_capacity · 31_rep_settings',demo:'Send today’s routine → Simulate ACCEPT → calendar fills'},
+  {ic:'📊',nm:'Liquidity (the exchange floor)',where:'sales_crm.html · Liquidity tab',who:'Reps / managers',what:'Fill rate + weekly density per market; Hot/Building/Thin. The calendar-is-the-market view.',find:'CRM → 📊 Liquidity.'},
+  {ic:'🗺',nm:'Roadmap',where:'sales_crm.html · Roadmap tab',who:'Whole team',what:'Every app/surface + status. The “one app, vertically integrated” board.',find:'CRM → 🗺 Roadmap.'} ]},
+
+ {grp:'🏛 Venue / Host Console — booking', open:'./hostaband.html', items:[
+  {ic:'💡',nm:'hostaband.com (the side-door)',where:'hostaband.html',who:'Venues + private-party hosts',what:'Pick genre + date → see who’s free → BOOK NOW. Host accounts: home = free, business = 3 free then subscribe. Off dead.dance.',find:'hostaband.com (separate front door).',tables:'24_talent · 26_hostaband · 27_availability · 28_host_billing',demo:'Pick Friday → BOOK NOW a KISS tribute'},
+  {ic:'🏛',nm:'Venue app surface',where:'app.html',who:'Venues',what:'Venue-facing dead_dance surface (subscription, console).',find:'app.html.',tables:'12_venues · 14_subscriptions'},
+  {ic:'🍴',nm:'Vendor-slot booking',where:'in venue/CRM flows',who:'Venues / Chaperones',what:'Venue sets 4×4 tables; Chaperone fills Shakedown + art vendors.',find:'Venue console / CRM Craft.',tables:'17_vendor_slots'} ]},
+
+ {grp:'🎓 Training & Tools', open:'./operator_academy.html', items:[
+  {ic:'🎓',nm:'Operator Academy',where:'operator_academy.html',who:'Chancellor/Ambassador/Chaperone',what:'Trains the org + tools; “Sell the Network” lesson.',find:'operator_academy.html.'},
+  {ic:'🧮',nm:'Utility pages',where:'studio_calculator · post_scale · qr_print · welcome · briefing',who:'Internal',what:'Calculators, scale notes, QR printing, onboarding/briefing.',find:'The matching .html files.'} ]},
+
+ {grp:'🗄 Backend — Supabase (the engine)', open:'#', items:[
+  {ic:'🗄',nm:'Chat / social spine',where:'migrations 01–11',who:'System',what:'Identities, rooms, friends, badges, profiles, show groups, bands.',find:'00_House_Admin/social_surface/chat/.',tables:'01–11'},
+  {ic:'💳',nm:'Commerce',where:'migrations 12–14',who:'System',what:'Venues, orders/tickets, subscriptions. (Stripe gated until LLC.)',find:'same folder.',tables:'12·13·14'},
+  {ic:'📣',nm:'Growth + content',where:'migrations 18–22, 25, 32, 33',who:'System',what:'Synthesis, ads, game, festivals, Miracle, feed, FB share-army, QA.',find:'same folder.',tables:'18·19·20·21·22·25·32·33'},
+  {ic:'🎭',nm:'Marketplace + sales',where:'migrations 16, 23, 24, 26–31',who:'System',what:'CRM, scenes, talent, hostaband, availability, host billing, meetings, capacity, rep settings.',find:'same folder.',tables:'16·23·24·26·27·28·29·30·31'} ]}
+];
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function render(q){
+ q=(q||'').toLowerCase();
+ var html='';
+ DIR.forEach(function(g){
+  var rows=g.items.filter(function(it){ if(!q)return true;
+    return (g.grp+' '+it.nm+' '+it.what+' '+it.where+' '+(it.who||'')+' '+(it.tables||'')+' '+(it.find||'')).toLowerCase().indexOf(q)>=0; });
+  if(!rows.length)return;
+  html+='<h2>'+g.grp+'</h2>';
+  rows.forEach(function(it){
+   html+='<div class="con"><div class="top"><div class="ic">'+it.ic+'</div>'+
+     '<div><div class="nm">'+it.nm+'</div><div class="meta">'+esc(it.where)+'</div></div>'+
+     (g.open&&g.open!=='#'?'<a class="open" href="'+g.open+'">Open ▸</a>':'<span class="open dim">backend</span>')+'</div>'+
+     '<div class="row"><div class="k">Who</div><div>'+(it.who||'—')+'</div><div class="k">What</div><div>'+esc(it.what)+'</div></div>'+
+     (it.find?'<div class="find">🔎 <b>Find it:</b> '+esc(it.find)+'</div>':'')+
+     (it.demo?'<div class="demo">▶ '+esc(it.demo)+'</div>':'')+
+     (it.tables?'<div class="tables">tables: <code>'+esc(it.tables)+'</code></div>':'')+
+     '</div>';
+  });
+ });
+ document.getElementById('list').innerHTML=html||'<p style="color:#888;text-align:center;padding:30px">No match — try another word.</p>';
+}
+function filt(){ render(document.getElementById('q').value); }
+render('');
+</script>
+</body>
+</html>

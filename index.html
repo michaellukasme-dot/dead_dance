@@ -19,6 +19,43 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .top .hpbtn:hover{filter:brightness(1.06)}.top .hpbtn:active{transform:scale(.96)}
 .top .chatbtn{width:36px;height:36px;border-radius:50%;border:0;background:#b8002e;color:#fff;font-size:17px;cursor:pointer;flex:none;box-shadow:0 2px 8px #b8002e55;align-self:center}
 .top .chatbtn:hover{transform:scale(1.06)}
+.top .friendsbtn{width:36px;height:36px;border-radius:50%;border:0;background:#5a2e86;color:#fff;font-size:16px;cursor:pointer;flex:none;box-shadow:0 2px 8px #5a2e8655;align-self:center}
+.qafab{position:fixed;left:14px;bottom:80px;z-index:55;border:0;border-radius:999px;background:#1f7a4d;color:#fff;font-weight:800;font-size:13px;padding:11px 15px;display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px #1f7a4d66;cursor:pointer}
+.qafab span{white-space:nowrap}.qafab:active{transform:scale(.96)}
+.qa-badge{background:#fff;color:#1f7a4d;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:800}
+.qaov{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:80}
+.qaov.on{display:flex}
+.qapanel{background:var(--bg,#faf7f2);width:100%;max-width:460px;max-height:86vh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.qahead{background:#1f7a4d;color:#fff;padding:13px 16px;position:relative}
+.qahead b{font-size:16px;display:block}.qahead span#qaSub{font-size:11.5px;color:#cdedd9}
+.qahead .rx{position:absolute;right:10px;top:10px;background:none;border:0;color:#fff;font-size:22px;cursor:pointer}
+.qabody{padding:12px 14px;overflow:auto}
+.qarow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;cursor:pointer}
+.qarow .qic{font-size:22px;flex:none}
+.qarow .qt{flex:1}.qarow .qt b{font-size:14px;display:block}.qarow .qt span{font-size:11.5px;color:var(--muted)}
+.qarow .qchev{color:var(--muted);font-size:18px}
+.qarow.done{opacity:.55}.qarow.done .qt b{text-decoration:line-through}
+.qarow.done .qchev::before{content:"✓";color:var(--green,#1f7a4d);font-weight:800}
+.qastep{display:flex;gap:9px;margin:8px 0;font-size:13.5px;line-height:1.4}
+.qastep .n{flex:0 0 22px;height:22px;border-radius:50%;background:#1f7a4d;color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+.qastep.fb .n{background:#1877f2}
+.qafb{font-size:11px;font-weight:800;color:#1877f2}
+.qaq{font-weight:800;font-size:13.5px;margin:12px 0 6px}
+.qaopt{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:6px;background:#fff;font:inherit;font-size:13px;cursor:pointer}
+.qaopt.sel{border-color:#1f7a4d;background:#e7f6ee;font-weight:700}
+.qaworks{display:flex;gap:8px;margin:8px 0}
+.qaworks button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px;font:inherit;font-weight:700;cursor:pointer}
+.qaworks button.sel{border-color:#1f7a4d;background:#e7f6ee}
+.qanote{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:13px;min-height:48px;resize:vertical;margin-top:6px}
+.qasend{width:100%;border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:12px;margin-top:10px;cursor:pointer}
+.qaback{background:none;border:0;color:#1f7a4d;font-weight:700;font-size:13px;cursor:pointer;padding:0 0 8px}
+.qaask{background:linear-gradient(135deg,#1f7a4d,#2f9d63);color:#fff;border-radius:13px;padding:13px 14px;margin-bottom:12px}
+.qaask b{font-size:15px}.qaask p{margin:6px 0 0;font-size:12.5px;color:#e6f6ec;line-height:1.45}
+.qaask.done{background:#e7f6ee;color:#15502f}.qaask.done b{color:#15502f}
+.qaaskbtns{display:flex;gap:8px;margin-top:10px}
+.qaaskbtns button{flex:1;border:0;border-radius:10px;padding:9px;font:inherit;font-weight:800;font-size:12.5px;cursor:pointer;background:#ffffff22;color:#fff}
+.qaaskbtns .yes{background:#fff;color:#1f7a4d}.qaaskbtns .no{background:#ffffff14}
+.top .friendsbtn:hover{transform:scale(1.06)}
 /* layout */
 .wrap{display:grid;grid-template-columns:288px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:start}
 .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:14px;box-shadow:0 1px 3px #0000000a}
@@ -57,6 +94,16 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .tix .nm b{display:block}.tix .nm span{font-size:11.5px;color:var(--muted)}
 .roles{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
 .roles a{color:var(--accent);font-weight:700;text-decoration:none}
+/* composer */
+.cmp-av{width:38px;height:38px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
+.cmp-text{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical;min-height:44px;background:var(--bg)}
+.cmp-text:focus{outline:none;border-color:var(--rose)}
+.cmp-gear{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12px;color:var(--muted);cursor:pointer}
+.cmp-nets{display:none;flex-wrap:wrap;gap:7px;margin-top:9px}
+.cmp-nets.show{display:flex}
+.cmp-net{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer;background:var(--bg);user-select:none}
+.cmp-net.on{background:var(--rose);color:#fff;border-color:var(--rose)}
+.cmp-net.lock{opacity:.85;cursor:default}
 /* groups mirror */
 .gm-h{display:flex;align-items:center;gap:9px;margin-bottom:9px}
 .gm-h .fb{background:var(--fb);color:#fff;font-weight:800;border-radius:6px;padding:3px 9px;font-size:13px}
@@ -72,6 +119,14 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .chip{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;margin:0 5px 5px 0}
 .chip.grp{background:#eef0ff;color:#3b5bbf}.chip.loc{background:#e9f7ec;color:var(--green)}.chip.gear{background:#fdeef0;color:var(--rose)}.chip.rev{background:#e9f7ec;color:var(--green)}
 .post .txt{margin:4px 0}
+.posthead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.posthead .pav{width:40px;height:40px;border-radius:50%;flex:0 0 auto;background:linear-gradient(135deg,#5a2e86,#b8002e);display:grid;place-items:center;font-size:20px;overflow:hidden}
+.posthead .pav img{width:100%;height:100%;object-fit:cover}
+.posthead .pwho{flex:1;min-width:0;line-height:1.25}
+.posthead .pwho b{font-size:14px;display:block}
+.posthead .pwho span{font-size:11.5px;color:var(--muted)}
+.posthead .pwho .grp{color:var(--fb);font-weight:700}
+.posthead .pmore{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;align-self:flex-start}
 .post .by{font-size:12px;color:var(--muted)}
 .post .by a{color:var(--fb);text-decoration:none}
 .post .acts{display:flex;align-items:center;gap:16px;margin-top:10px;color:var(--muted);font-size:13px;font-weight:600}
@@ -90,6 +145,39 @@ body{padding-bottom:64px}
 .footnav .fn:active{transform:scale(.92)}
 .findshow{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;background:linear-gradient(90deg,#5a2e86,#b8002e);color:#fff;border-radius:11px;padding:8px 12px;margin:0 0 10px;font-size:14px}
 .findshow b{font-weight:800}.findshow span{font-size:11.5px;color:#f3d8e2}
+.caltype{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:3px 9px;background:#fff;color:var(--ink);cursor:pointer}
+.viewseg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.viewseg button{border:0;background:#fff;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:5px 11px;cursor:pointer}
+.viewseg button.on{background:var(--rose);color:#fff}
+#calNavRow{align-items:center;gap:8px}
+.cnav{border:1px solid var(--line);background:#fff;border-radius:50%;width:28px;height:28px;font-size:16px;line-height:1;cursor:pointer;color:var(--ink)}
+.cnav:active{transform:scale(.92)}
+.d.has{position:relative;cursor:pointer;font-weight:700}
+.d.has i{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--rose)}
+.d.sel{outline:2px solid var(--rose);outline-offset:-2px;border-radius:8px}
+.calnear{font-size:12px;color:var(--accent);font-weight:700;margin:2px 2px 8px}.calnear b{color:var(--rose)}
+.bsrow{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px}
+.bstile{flex:0 0 130px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:11px;cursor:pointer;text-align:center}
+.bstile .bsic{font-size:26px}.bstile .bsnm{font-weight:800;font-size:12.5px;margin-top:3px;line-height:1.2}
+.bstile .bsmeta{font-size:10.5px;color:var(--muted);margin-top:3px}
+.bsgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.bsphoto{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+.bsphoto .bsimg{height:90px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,#23104a,#b8002e)}
+.bsphoto .bscap{font-size:11.5px;padding:6px 8px 2px}.bsphoto .bscap span{color:var(--muted)}
+.bspacts{display:flex;gap:6px;padding:4px 8px 8px}
+.bspacts .act{background:none;border:0;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px}
+.cdh{font-weight:800;font-size:12.5px;margin:10px 2px 4px;color:var(--accent)}
+.chint,.cempty{font-size:12px;color:var(--muted);padding:10px 4px;text-align:center}
+.crow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.cdate{flex:0 0 42px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:5px 0}
+.cdate b{display:block;font-size:10.5px;color:var(--rose);text-transform:uppercase}
+.cdate span{font-size:13px;font-weight:800}
+.cinfo{flex:1;min-width:0}.cinfo b{display:block;font-size:14px}
+.cinfo span{font-size:11.5px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cact{flex:0 0 auto;text-align:right}
+.cprice{display:block;font-size:12px;font-weight:800;color:var(--accent)}
+.cact button{margin-top:3px;border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
 /* 🍀 Miracle Ticket — bottom-right bouncing/blinking FREE-ticket FAB */
 .mfab{position:fixed;right:16px;bottom:80px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
 .mfab .tkt{position:relative;width:74px;height:48px;border-radius:9px;background:linear-gradient(135deg,#2a8a4a,#c79a3a);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:.04em;text-align:center;line-height:1.05;box-shadow:0 0 0 3px #fff, 0 0 0 5px #2a8a4a55}
@@ -199,6 +287,7 @@ body{padding-bottom:64px}
 .gigf input,.gigf select{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:14px;font-family:inherit;background:#fffdf8}
 .gigf input:focus,.gigf select:focus{outline:2px solid var(--accent);border-color:var(--accent)}
 .gigsend{width:100%;background:#111;color:#fff;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;margin-top:4px}
+.giginvite{width:100%;background:#fff;color:var(--rose);border:1.5px solid var(--rose);border-radius:14px;padding:12px;font-size:14.5px;font-weight:800;cursor:pointer;margin-top:8px}
 .gigsend:active{opacity:.85}.gigsend:disabled{opacity:.6}
 .gigfoot{font-size:11.5px;color:var(--muted);margin-top:11px;line-height:1.5;text-align:center}
 .gigfoot b{color:var(--green)}
@@ -287,6 +376,7 @@ body{padding-bottom:64px}
   <div class="logo">🌹 dead_dance</div>
   <input class="search" placeholder="Search heads, shows, tapes, art…">
   <button class="chatbtn" onclick="if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')" title="Family chat" aria-label="Family chat">💬</button>
+  <button class="friendsbtn" onclick="openReader('friends')" title="Your friends" aria-label="Your friends">👥</button>
   <button class="hpbtn" onclick="hyperConsole('dead.dance')" title="HyperPost — reply, radiate, share">📡 HyperPost</button>
 </div>
 
@@ -294,12 +384,26 @@ body{padding-bottom:64px}
   <!-- ===================== LEFT RAIL ===================== -->
   <div class="left">
     <div class="cal">
-      <div class="findshow">🎟️ <b>Find a Tribute Dead Show</b><span>near you — tap a date, or roam the map. The bus is always rolling.</span></div>
-      <div class="ch"><span class="mo">📅 June</span>
-        <span style="background:var(--gold);color:#23202a;border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:800">2 shows</span>
+      <div class="findshow">🎟️ <b>Find a Show</b><span>tap a date or scan what's coming up — always current. The bus is always rolling.</span></div>
+      <div class="ch">
+        <span class="viewseg"><button id="vwList" class="on" onclick="calView('list')">📋 Upcoming</button><button id="vwGrid" onclick="calView('grid')">▦ Month</button></span>
+        <select id="calType" class="caltype" onchange="calType(this.value)" title="Filter by type (calendar only — the family feed stays Dead)">
+          <option value="all">🎟️ All</option>
+          <option value="grateful_dead">🌹 Grateful Dead</option>
+          <option value="phish">🐟 Phish</option>
+          <option value="comedy">🎤 Comedy</option>
+          <option value="dj">🎧 DJ</option>
+          <option value="original">🎸 Originals</option>
+        </select>
+      </div>
+      <div class="ch" id="calNavRow">
+        <button class="cnav" onclick="calNav(-1)" aria-label="Previous month">‹</button>
+        <span class="mo" id="calMo"></span>
+        <button class="cnav" onclick="calNav(1)" aria-label="Next month">›</button>
         <span class="seg"><button class="on" onclick="calScope(this,'nat')">National</button><button onclick="calScope(this,'mine')">My chapter</button></span>
       </div>
-      <div class="grid" id="calGrid"></div>
+      <div class="grid" id="calGrid" style="display:none"></div>
+      <div id="calList"></div>
       <div style="display:flex;gap:8px">
         <button class="openmap" style="flex:1" onclick="openMap()">📍 OPEN MAP</button>
         <button class="openmap" style="flex:1;background:var(--gold);color:#23202a;border-color:var(--gold)" onclick="openGig('date')">📅 ADD A DATE</button>
@@ -326,20 +430,7 @@ body{padding-bottom:64px}
       <div class="qrnote" id="qrnote2">One QR = <b>your paid tickets</b> · <b>shows you attended</b> (log) · <b>uploaded stubs</b> · and <b>Archive shows you've listened to</b> — all in the one code.</div>
     </div>
 
-    <div class="card">
-      <div style="font-size:12px;color:var(--muted);line-height:1.5">Role desks — your level links straight to its management system:</div>
-      <div class="roles">🎸 <a href="#" onclick="toast('Musician studio (demo)');return false">Musician</a> · 👑 <a href="#" onclick="toast('Chancellor desk (demo)');return false">Chancellor</a> · 🤝 <a href="#" onclick="toast('Ambassador desk (demo)');return false">Ambassador</a> · 🎟️ <a href="#" onclick="toast('Chaperone cockpit (demo)');return false">Chaperone</a></div>
-    </div>
 
-    <div class="card">
-      <div style="font-weight:800;font-size:12.5px;margin-bottom:8px">👥 Your Friends <span style="color:var(--muted);font-weight:500">· tap a QR to see their shows</span></div>
-      <div id="friendsRow" class="frow"></div>
-    </div>
-
-    <div class="card">
-      <div style="font-weight:800;font-size:12.5px;margin-bottom:8px">🎸 Bands <span style="color:var(--muted);font-weight:500">· each has its own QR</span></div>
-      <div id="bandsRow" class="frow"></div>
-    </div>
   </div>
 
   <!-- ===================== CENTER FEED ===================== -->
@@ -358,22 +449,36 @@ body{padding-bottom:64px}
       <div style="font-size:11px;color:var(--muted);margin-top:6px">Pick a group → opens the Reader with the full mirrored list; <b>TUNE IN</b> to follow it here. (We mirror what the family shares — nothing scraped; links go back to Facebook.)</div>
     </div>
 
+    <!-- ===== What's on your mind — composer + default HyperPost ===== -->
+    <div class="card" id="composer">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div class="cmp-av">🌹</div>
+        <textarea id="cmpText" class="cmp-text" placeholder="What's on your mind, Stagger Lee?"></textarea>
+      </div>
+      <div id="cmpNets" class="cmp-nets"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
+        <button class="cmp-gear" onclick="cmpToggleNets()" title="Set your default networks">⚙ Networks</button>
+        <span id="cmpNote" style="font-size:11px;color:var(--muted);flex:1"></span>
+        <button class="hpbtn" style="background:var(--rose);color:#fff" onclick="hpComposer()">📡 HyperPost</button>
+      </div>
+    </div>
+
     <div class="sec">📚 FROM YOUR GROUPS — SHARED IN</div>
     <div class="post">
-      <span class="chip grp">Bay Area Deadheads</span>
+      <div class="posthead"><div class="pav">🎸</div><div class="pwho"><b>Matt Hartle</b><span><span class="grp">Bay Area Deadheads</span> · 2h · shared</span></div><button class="pmore" onclick="toast('Post options')">⋯</button></div>
       <div class="txt">Hey y'all — anybody got a Hurdy Gurdy to loan out for a while, or maybe one to sell?</div>
-      <div class="by">shared by Matt Hartle · <a href="#" onclick="toast('Opens the original on Facebook ↗');return false">view on Facebook ↗</a></div>
+      <div class="by"><a href="#" onclick="toast('Opens the original on Facebook ↗');return false">view on Facebook ↗</a></div>
       <div style="margin-top:7px"><span class="chip loc">elevated → Local</span></div>
-      <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" onclick="toast('↗ Shared to your family')">↗ Share</button><button class="act reply" onclick="hyperConsole('Bay Area Deadheads · Matt\'s Hurdy Gurdy ask')">💬 Reply</button></div>
+      <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" onclick="toast('↗ Shared to your family')">↗ Share</button><button class="act reply" onclick="hyperConsole('Bay Area Deadheads · Matt\'s Hurdy Gurdy ask')">💬 Comment</button></div>
       <button class="radiate" title="HyperPost — radiate this everywhere" onclick="hyperConsole('Bay Area Deadheads · Hurdy Gurdy ask')">📡</button>
     </div>
 
     <div class="sec" data-scope="local">📣 CROWDSOURCE — THE FAMILY'S ON IT</div>
     <div class="post" id="cs" data-scope="local">
-      <span class="chip gear">🪕 Gear/Loan</span><span class="chip loc">📍 Local</span>
+      <div class="posthead"><div class="pav">🎸</div><div class="pwho"><b>Matt Hartle</b><span><span class="grp">Crowdsource</span> · 📍 Local · 1h</span></div><button class="pmore" onclick="toast('Post options')">⋯</button></div>
+      <span class="chip gear">🪕 Gear/Loan</span>
       <div class="txt">Matt needs a Hurdy Gurdy — loan or sell? <span style="color:var(--muted)">(elevated from Bay Area Deadheads)</span></div>
-      <div class="by">asked by Matt Hartle</div>
-      <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act reply" onclick="hyperConsole('Crowdsource · Hurdy Gurdy — loan or sell?')">💬 Reply</button><button class="btn ghost sm" style="margin-left:auto" onclick="this.textContent='✓ Answered';this.disabled=true">Mark answered</button></div>
+      <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act reply" onclick="hyperConsole('Crowdsource · Hurdy Gurdy — loan or sell?')">💬 Comment</button><button class="btn ghost sm" style="margin-left:auto" onclick="this.textContent='✓ Answered';this.disabled=true">Mark answered</button></div>
       <button class="radiate" onclick="hyperConsole('Crowdsource · Hurdy Gurdy')">📡</button>
     </div>
 
@@ -393,10 +498,9 @@ body{padding-bottom:64px}
 
     <div class="sec" data-scope="national" style="display:none">🎸 ON TOUR — NATIONAL</div>
     <div class="post" data-scope="national" style="display:none">
-      <span class="chip grp">National</span><span class="chip loc" style="background:#fdf0e0;color:#a4661a">verified date</span>
+      <div class="posthead"><div class="pav">🌌</div><div class="pwho"><b>Dark Star Orchestra</b><span><span class="grp">National tour feed</span> · verified date</span></div><button class="pmore" onclick="toast('Post options')">⋯</button></div>
       <div class="txt"><b>Dark Star Orchestra</b> — Fri Jul 31, Greek Theatre, Berkeley CA · the Rex Foundation benefit. Who's making the run?</div>
-      <div class="by">from the national tour feed</div>
-      <div class="acts"><button class="act" onclick="like(this)">👍 <span>240</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" style="background:var(--gold);color:#23202a" onclick="CURBUY={band:'Dark Star Orchestra',venue:'Greek Theatre · Berkeley',price:'$59'};buy('ticket')">🎟️ Tickets</button><button class="act reply" onclick="hyperConsole('DSO · Berkeley Greek 7/31')">💬 Reply</button></div>
+      <div class="acts"><button class="act" onclick="like(this)">👍 <span>240</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" style="background:var(--gold);color:#23202a" onclick="CURBUY={band:'Dark Star Orchestra',venue:'Greek Theatre · Berkeley',price:'$59'};buy('ticket')">🎟️ Tickets</button><button class="act reply" onclick="hyperConsole('DSO · Berkeley Greek 7/31')">💬 Comment</button></div>
       <button class="radiate" onclick="hyperConsole('DSO national run')">📡</button>
     </div>
   </div>
@@ -421,6 +525,8 @@ body{padding-bottom:64px}
 <div class="reader" id="reader" onclick="if(event.target===this)closeReader()">
   <div class="rpanel">
     <div class="rhead">
+      <button class="rtab" data-t="friends" onclick="readerTab('friends')">👥 Friends</button>
+      <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
       <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
       <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
       <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 Archive</button>
@@ -485,6 +591,15 @@ body{padding-bottom:64px}
   <span class="tkt"><span class="clover">🍀</span>MIRACLE</span>
   <span class="mb-badge" id="mfabBadge" style="display:none">0</span>
 </button>
+<!-- ===== Built-in User QA Assist (a chat-style widget) ===== -->
+<button class="qafab" id="qafab" title="Help us test dead.dance" onclick="qaOpen()">🧪 <span>Help test</span><span class="qa-badge" id="qaBadge" style="display:none">0</span></button>
+<div class="qaov" id="qaov" onclick="if(event.target===this)qaClose()">
+  <div class="qapanel">
+    <div class="qahead"><b>🧪 QA Assist</b><span id="qaSub">Grab a task, try it, tell us how it went.</span><button class="rx" onclick="qaClose()">×</button></div>
+    <div class="qabody" id="qaBody"></div>
+  </div>
+</div>
+
 <div class="mapov" id="miracle" onclick="if(event.target===this)closeMiracle()">
   <div class="mpanel" style="max-width:480px">
     <div class="mh">🍀 <b>The Miracle Bucket — <span id="mRegion">your chapter</span></b><button class="rx" onclick="closeMiracle()">×</button></div>
@@ -532,6 +647,7 @@ body{padding-bottom:64px}
       <button id="gtab-date" class="on" onclick="gigTab('date')">📅 Add a date</button>
       <button id="gtab-band" onclick="gigTab('band')">🎸 Register band</button>
       <button id="gtab-fest" onclick="gigTab('festival')">🎪 Festival</button>
+      <button id="gtab-act" onclick="gigTab('act')">🎭 Talent</button>
     </div>
     <div class="gigbody" id="gigbody"></div>
   </div>
@@ -540,20 +656,32 @@ body{padding-bottom:64px}
 <script>
 /* ---------------- data (representative / honest-state) ---------------- */
 /* shows are LOCAL — keyed to your GPS Local Family, never hard-pinned to one coast */
+/* shows are stored as OFFSETS from today (days ahead) so the calendar is always
+   current and forward-looking — never stuck on a past month. */
 var REGIONS = {
- "Mid-Atlantic": { ticket:{band:"Splintered Sunlight", line:"Sellersville Theater · 8:00 PM · 11 mi"},
-   shows:{ 6:{band:"Splintered Sunlight",venue:"Ardmore Music Hall · 8:00 PM",price:"$30"}, 11:{band:"Dark Star Orchestra",venue:"Ardmore Music Hall · 8:00 PM",price:"$42"}, 16:{band:"DEAL",venue:"Sun Inn, Bethlehem · 8:00 PM",price:"$20"}, 21:{band:"Melvin Seals & JGB",venue:"Sellersville Theater · 8:00 PM",price:"$45"}, 28:{band:"Joe Russo's Almost Dead",venue:"The Met, Philadelphia · 7:30 PM",price:"$59"} } },
- "Northeast + New England": { ticket:{band:"Max Creek", line:"The Cabot, Beverly MA · 8:00 PM · 14 mi"},
-   shows:{ 6:{band:"Max Creek",venue:"The Cabot, Beverly · 8:00 PM",price:"$32"}, 11:{band:"Dark Star Orchestra",venue:"Capitol Theatre, Port Chester · 8:00 PM",price:"$48"}, 16:{band:"Playing Dead",venue:"Soundcheck Studios, Pembroke · 8:00 PM",price:"$18"}, 21:{band:"JRAD",venue:"The Rooftop at Pier 17, NYC · 7:30 PM",price:"$65"}, 28:{band:"Melvin Seals & JGB",venue:"Brooklyn Bowl · 9:00 PM",price:"$45"} } },
- "Bay Area": { ticket:{band:"The China Cats", line:"Felton Music Hall · 8:30 PM · 37 mi"},
-   shows:{ 6:{band:"Dark Star Orchestra",venue:"The Catalyst · 8:00 PM",price:"$38"}, 11:{band:"Melvin Seals & JGB",venue:"Moe's Alley · 9:00 PM",price:"$45"}, 16:{band:"The China Cats",venue:"Felton Music Hall · 8:30 PM",price:"$28"}, 21:{band:"JRAD",venue:"Greek Theatre · 7:30 PM",price:"$59"}, 28:{band:"Grateful Shred",venue:"Sweetwater, Mill Valley · 8:00 PM",price:"$30"} } }
+ "Mid-Atlantic": { shows:[
+   {off:2,band:"Splintered Sunlight",venue:"Ardmore Music Hall · 8:00 PM",price:"$30",type:"grateful_dead"},
+   {off:5,band:"Strange Design (Phish tribute)",venue:"Ardmore Music Hall · 8:00 PM",price:"$28",type:"phish"},
+   {off:8,band:"Dark Star Orchestra",venue:"Ardmore Music Hall · 8:00 PM",price:"$42",type:"grateful_dead"},
+   {off:11,band:"DEAL",venue:"Sun Inn, Bethlehem · 8:00 PM",price:"$20",type:"grateful_dead"},
+   {off:14,band:"Laffs McGee (comedy night)",venue:"Sellersville Theater · 8:00 PM",price:"$22",type:"comedy"},
+   {off:18,band:"Melvin Seals & JGB",venue:"Sellersville Theater · 8:00 PM",price:"$45",type:"grateful_dead"},
+   {off:22,band:"DJ Terrapin (late dance set)",venue:"The Met, Philadelphia · 10:00 PM",price:"$15",type:"dj"},
+   {off:27,band:"Joe Russo's Almost Dead",venue:"The Met, Philadelphia · 7:30 PM",price:"$59",type:"grateful_dead"},
+   {off:33,band:"Cris Jacobs Band",venue:"Ardmore Music Hall · 8:00 PM",price:"$26",type:"original"} ] },
+ "Northeast + New England": { shows:[
+   {off:3,band:"Max Creek",venue:"The Cabot, Beverly · 8:00 PM",price:"$32",type:"grateful_dead"},
+   {off:9,band:"Dark Star Orchestra",venue:"Capitol Theatre, Port Chester · 8:00 PM",price:"$48",type:"grateful_dead"},
+   {off:15,band:"Playing Dead",venue:"Soundcheck Studios, Pembroke · 8:00 PM",price:"$18",type:"grateful_dead"},
+   {off:21,band:"JRAD",venue:"The Rooftop at Pier 17, NYC · 7:30 PM",price:"$65",type:"grateful_dead"},
+   {off:30,band:"Melvin Seals & JGB",venue:"Brooklyn Bowl · 9:00 PM",price:"$45",type:"grateful_dead"} ] },
+ "Bay Area": { shows:[
+   {off:4,band:"Dark Star Orchestra",venue:"The Catalyst · 8:00 PM",price:"$38",type:"grateful_dead"},
+   {off:10,band:"Melvin Seals & JGB",venue:"Moe's Alley · 9:00 PM",price:"$45",type:"grateful_dead"},
+   {off:14,band:"The China Cats",venue:"Felton Music Hall · 8:30 PM",price:"$28",type:"grateful_dead"},
+   {off:20,band:"JRAD",venue:"Greek Theatre, Berkeley · 7:30 PM",price:"$59",type:"grateful_dead"},
+   {off:29,band:"Grateful Shred",venue:"Sweetwater, Mill Valley · 8:00 PM",price:"$30",type:"grateful_dead"} ] }
 };
-var SHOWDAYS = REGIONS["Mid-Atlantic"].shows;   /* default to a real region — never Santa Cruz */
-function setLocalShows(region){
- var r=REGIONS[region]||REGIONS["Mid-Atlantic"]; SHOWDAYS=r.shows;
- if(typeof calBuild==="function")calBuild();
- var mt=document.getElementById('myTix'); if(mt)mt.innerHTML='<span class="when">Tomorrow</span><div class="nm"><b>'+r.ticket.band+'</b><span>'+r.ticket.line+'</span></div>';
-}
 var GROUPS = [
  {n:"Dark Star Orchestra",ic:"🌌",tuned:true,seen:"a year ago"},
  {n:"Pennsylvania Deadheads",ic:"🔔",tuned:true,seen:"30 weeks ago"},
@@ -602,23 +730,67 @@ var MYFRIENDS=[
 function toast(m){var t=document.createElement('div');t.textContent=m;t.style.cssText="position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#241634;color:#fff;padding:11px 17px;border-radius:11px;z-index:90;font-size:13px;box-shadow:0 8px 24px #0006;max-width:88%;text-align:center";document.body.appendChild(t);setTimeout(function(){t.style.opacity=0;t.style.transition=".4s";},1800);setTimeout(function(){t.remove();},2300);}
 
 /* ---------------- calendar ---------------- */
-function calBuild(){
- var g=document.getElementById('calGrid'); var dows=["S","M","T","W","T","F","S"];
- var h=dows.map(function(d){return '<div class="dow">'+d+'</div>';}).join("");
- // June 2026 starts on a Monday (Jun 1 = Mon); 30 days
- var startDow=1;
- for(var i=0;i<startDow;i++)h+='<div></div>';
- for(var d=1;d<=30;d++){var has=SHOWDAYS[d];
-  h+='<div class="d'+(has?' has':'')+(d===28?' today':'')+'" '+(has?'data-d="'+d+'" onmouseenter="buyShow(event,'+d+')" onmouseleave="hideBuy()" onclick="buyShow(event,'+d+')"':'')+'>'+d+'</div>';
+/* ===== Calendar — dynamic, forward-looking, list-first (the front door) ===== */
+var CMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var CDOW=['S','M','T','W','T','F','S'], CDOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='list', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all';
+function cpad(n){return (n<10?'0':'')+n;}
+function cMid(){var d=new Date();d.setHours(0,0,0,0);return d;}
+function cIso(d){return d.getFullYear()+'-'+cpad(d.getMonth()+1)+'-'+cpad(d.getDate());}
+function buildShowlist(){ var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; var t0=cMid();
+ SHOWLIST=(r.shows||[]).map(function(s){ var d=new Date(t0); d.setDate(d.getDate()+s.off);
+   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead'}; })
+   .sort(function(a,b){return a.iso<b.iso?-1:(a.iso>b.iso?1:0);}); }
+function setLocalShows(region){ REG=region||"Mid-Atlantic"; buildShowlist(); renderCal();
+ var mt=document.getElementById('myTix'), nx=SHOWLIST[0];
+ if(mt&&nx) mt.innerHTML='<span class="when">'+relDay(nx.d)+'</span><div class="nm"><b>'+nx.band+'</b><span>'+nx.venue+'</span></div>'; }
+function relDay(d){ var diff=Math.round((d-cMid())/86400000); return diff===0?'Today':(diff===1?'Tomorrow':CDOW3[d.getDay()]+' '+(d.getMonth()+1)+'/'+d.getDate()); }
+function calMatch(s){ return CALTYPE==='all'||s.type===CALTYPE; }
+function calType(v){ CALTYPE=v||'all'; renderCal(); }
+function calView(v){ CAL_VIEW=v; CAL_SEL=null;
+ document.getElementById('vwList').classList.toggle('on',v==='list');
+ document.getElementById('vwGrid').classList.toggle('on',v==='grid'); renderCal(); }
+function calNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); var m=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); CAL_MONTH=m; CAL_SEL=null; renderCal(); }
+function dayClick(iso){ CAL_SEL=(CAL_SEL===iso?null:iso); renderCal(); }
+function buyTix(i){ var s=SHOWLIST[i]; if(!s)return; CURBUY={band:s.band,venue:s.venue,price:s.price}; if(typeof buy==='function')buy('ticket'); }
+function calRow(s){ var i=SHOWLIST.indexOf(s);
+ return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
+  '<div class="cinfo"><b>'+s.band+'</b><span>'+s.venue+'</span></div>'+
+  '<div class="cact"><span class="cprice">'+s.price+'</span><button onclick="buyTix('+i+')">Tickets</button></div></div>'; }
+function renderCal(){
+ if(!SHOWLIST.length) buildShowlist(); if(!CAL_MONTH) CAL_MONTH=cMid();
+ var grid=document.getElementById('calGrid'), list=document.getElementById('calList'),
+     navRow=document.getElementById('calNavRow'), mo=document.getElementById('calMo');
+ if(!grid||!list)return;
+ var isGrid=(CAL_VIEW==='grid'); grid.style.display=isGrid?'grid':'none';
+ if(isGrid){
+  mo.textContent=CMONTHS[CAL_MONTH.getMonth()]+' '+CAL_MONTH.getFullYear();
+  var y=CAL_MONTH.getFullYear(), mth=CAL_MONTH.getMonth(),
+      startDow=new Date(y,mth,1).getDay(), days=new Date(y,mth+1,0).getDate(), tIso=cIso(cMid());
+  var byDay={}; SHOWLIST.forEach(function(s){ if(calMatch(s))(byDay[s.iso]=byDay[s.iso]||[]).push(s); });
+  var h=CDOW.map(function(x){return '<div class="dow">'+x+'</div>';}).join('');
+  for(var i=0;i<startDow;i++)h+='<div></div>';
+  for(var dd=1;dd<=days;dd++){ var iso=y+'-'+cpad(mth+1)+'-'+cpad(dd); var has=byDay[iso];
+   h+='<div class="d'+(has?' has':'')+(iso===tIso?' today':'')+(iso===CAL_SEL?' sel':'')+'" '+(has?'onclick="dayClick(\''+iso+'\')"':'')+'>'+dd+(has?'<i></i>':'')+'</div>'; }
+  grid.innerHTML=h;
+  list.innerHTML = (CAL_SEL&&byDay[CAL_SEL]) ? ('<div class="cdh">'+CDOW3[new Date(CAL_SEL+'T12:00:00').getDay()]+' · '+CMONTHS[mth]+' '+(new Date(CAL_SEL+'T12:00:00').getDate())+'</div>'+byDay[CAL_SEL].map(calRow).join('')) : '<div class="chint">Tap a highlighted date to see that night\'s shows.</div>';
+ } else {
+  mo.textContent='Upcoming';
+  var up=SHOWLIST.filter(function(s){ return s.iso>=cIso(cMid()) && calMatch(s); });
+  var mEnd=new Date(cMid().getFullYear(),cMid().getMonth()+1,0); var nearN=up.filter(function(s){return s.d<=mEnd;}).length;
+  var near='<div class="calnear">📍 <b>'+nearN+' show'+(nearN===1?'':'s')+'</b> near you the rest of '+CMONTHS[cMid().getMonth()]+(REG?(' · '+REG):'')+'</div>';
+  list.innerHTML = up.length ? (near + up.slice(0,14).map(calRow).join('')) : '<div class="cempty">No shows match — try “All”, or roam the map. Bands: add yours with “Add a date”.</div>';
  }
- g.innerHTML=h;
 }
-function calScope(btn,which){document.querySelectorAll('.cal .seg button').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');toast(which==='nat'?'Calendar: National — every chapter\'s shows':('Calendar: your Local Family — '+(LOCALFAM||'Mid-Atlantic')));}
-function buyShow(e,d){var s=SHOWDAYS[d];if(!s)return;var b=document.getElementById('buy');
- document.getElementById('buyBand').textContent=s.band;document.getElementById('buyVenue').textContent=s.venue;document.getElementById('buyPrice').textContent=s.price;
- CURBUY={band:s.band,venue:s.venue,price:s.price};
- var r=e.target.getBoundingClientRect();b.style.left=Math.min(window.innerWidth-260,r.right+8)+'px';b.style.top=(r.top-10)+'px';b.classList.add('on');}
-function hideBuy(){setTimeout(function(){if(!document.getElementById('buy').matches(':hover'))document.getElementById('buy').classList.remove('on');},180);}
+function calBuild(){ renderCal(); }   /* back-compat alias */
+function calScope(btn,which){document.querySelectorAll('.cal .seg button').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');toast(which==='nat'?'Calendar: National — every chapter\'s shows':('Calendar: your Local Family — '+(LOCALFAM||REG)));}
+/* best-effort live wiring: pull real shows when signed in; else keep the demo list */
+function calSync(){ try{ var c=ddClient&&ddClient(); if(!c)return;
+ c.rpc('chat_shows_for_scene',{p_scene:(CALTYPE==='all'?null:CALTYPE),p_region:null}).then(function(r){
+   if(r&&r.data&&r.data.length){ SHOWLIST=r.data.map(function(x){ var d=new Date((x.show_date||'')+'T20:00:00');
+     return {iso:cIso(d),d:d,band:x.band,venue:(x.venue||'')+(x.city?(' · '+x.city):''),price:(x.price_cents?('$'+Math.round(x.price_cents/100)):'tickets'),type:x.scene||'grateful_dead'}; })
+     .sort(function(a,b){return a.iso<b.iso?-1:1;}); renderCal(); }
+ }).catch(function(){}); }catch(e){} }
 
 /* ---------------- QR with the user's profile image in the center ---------------- */
 function drawQR(svg,img){
@@ -658,6 +830,7 @@ function profile(who){
   '</div>'+
   '<div class="ptotal">'+total+' shows on the bus</div>'+
   actions+
+  (me?('<div class="psec">🎛️ Your role desks</div><div class="roles" style="margin:2px 0 4px">🎸 <a href="#" onclick="toast(\'Musician studio (demo)\');return false">Musician</a> · 👑 <a href="#" onclick="toast(\'Chancellor desk (demo)\');return false">Chancellor</a> · 🤝 <a href="#" onclick="toast(\'Ambassador desk (demo)\');return false">Ambassador</a> · 🎟️ <a href="#" onclick="toast(\'Chaperone cockpit (demo)\');return false">Chaperone</a> · 🗺 <a href="console_directory.html">Map of consoles</a></div>'):'')+
   '<div class="psec">📖 Dead Family Story</div><div class="pstory">'+f.story+'</div>'+
   '<div class="psec">📝 Posts</div>'+(f.posts||[]).map(function(pp){return '<div class="ppost">'+pp+'</div>';}).join("")+
   '<div class="psec">📷 Photos</div><div class="pphotos">'+(f.photos||[]).map(function(ph){return '<div class="pph">'+ph+'</div>';}).join("")+'</div>'+
@@ -740,7 +913,13 @@ var BANDS=[
  {name:"Splintered Sunlight",ic:"🌅",region:"Mid-Atlantic",img:null,shows:6,
   story:"Philadelphia's own — carrying the flame up and down the Delaware Valley for decades.",members:["the Philly family"]},
  {name:"The China Cats",ic:"🐈",region:"Bay Area",img:null,shows:9,
-  story:"NorCal Jerry tone — Matt Hartle on the lead.",members:["Matt Hartle · lead"]}
+  story:"NorCal Jerry tone — Matt Hartle on the lead.",members:["Matt Hartle · lead"]},
+ {name:"Jen Rund",ic:"🎵",region:"Marin",img:null,shows:0,
+  story:"Bay Area bassist — studied with Victor Wooten & Kai Eckhardt; has held it down with Barry Sless, Mark Karan, Stu Allen, Pete Lavezzoli, Jay Lane. Marin's keeper of the flame.",
+  members:["Jen Rund · bass"]},
+ {name:"Stu Allen",ic:"🌹",region:"East Bay",img:null,shows:0,
+  story:"Keeps Jerry's sound alive in the East Bay — Phil Lesh & Friends, Stu Allen & Mars Hotel (Ashkenaz), and years fronting Melvin Seals' JGB.",
+  members:["Stu Allen · guitar · vocals"]}
 ];
 function bandsBuild(){var el=document.getElementById('bandsRow');if(!el)return;
  el.innerHTML=BANDS.map(function(b,i){return '<div class="fchip" onclick="bandProfile('+i+')"><div class="fav" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">'+b.ic+'</div><div class="fnm">'+b.name.split(' ')[0]+'</div></div>';}).join("");}
@@ -786,14 +965,52 @@ function synthCard(s,master){ var clips=(s.clippings||[]).map(function(c){return
   '<div style="font-size:'+(master?'18px':'15px')+';font-weight:800;margin:4px 0 4px">'+(s.title||'')+'</div>'+
   '<div style="font-size:13.5px;color:#3a3346;line-height:1.5">'+(s.body||'')+'</div>'+clips+'</div>';
 }
-function renderSynth(){ var b=document.getElementById('synthBody'); if(!b)return;
+/* per-headliner synthesis groups — written recap + the family's photos (community-contributed, credited; nothing scraped) */
+var SYNTH_BANDS=[
+ {band:"Dark Star Orchestra",ic:"🌌",groups:247,headline:"DSO recreates 5/8/77 — Barton Hall, note for note",
+  body:"The family lit up over last night's DSO set — a full 5/8/77 recreation, a Scarlet→Fire that never ends, and Jeff Mattson's Jerry tone dialed in. Heads are calling it the run of the tour; Mid-Atlantic carpools are forming for Ardmore.",
+  photos:[{ic:"📸",cap:"Scarlet jam, second set",by:"Kara"},{ic:"🌹",cap:"Lot before doors",by:"Pat"},{ic:"🎸",cap:"Mattson on the lead",by:"Gus"},{ic:"🪩",cap:"Crowd during Fire",by:"Robin"}]},
+ {band:"Joe Russo's Almost Dead",ic:"🔥",groups:180,headline:"JRAD melts the Cap — Shakedown→Bertha opener",
+  body:"JRAD's Port Chester run had everyone buzzing: an explosive Shakedown opener, Russo pushing the tempo, a Bertha that brought the house down. The high-velocity take is exactly why the Cap sells out.",
+  photos:[{ic:"📸",cap:"Russo behind the kit",by:"Sage"},{ic:"⚡",cap:"Lights, Bertha",by:"Della"},{ic:"🎟️",cap:"Marquee, sold out",by:"June"}]},
+ {band:"Melvin Seals & JGB",ic:"🎹",groups:130,headline:"Melvin's B-3 brings church to Moe's Alley",
+  body:"A warm, soulful JGB night — Melvin's organ front and center, a Cats-Under-the-Stars singalong, the whole room glowing. The JGB faithful are trading memories all day.",
+  photos:[{ic:"🎹",cap:"Melvin on the B-3",by:"Sky"},{ic:"🌅",cap:"Encore glow",by:"Cody"}]},
+ {band:"Steve Kimock",ic:"🎸",groups:60,headline:"Kimock's tone — a language of its own",
+  body:"Heads deep on Kimock's phrasing from the latest run — that singing sustain, the patient builds. Reverent threads all around.",
+  photos:[{ic:"🎸",cap:"Kimock mid-solo",by:"Robin"},{ic:"🎶",cap:"The board mix",by:"Gus"}]}
+];
+function renderSynth(){ var b=document.getElementById('synthBody'); if(!b)return; SYNTH_BAND_OPEN=null;
  var h='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">🎙️ <b>Claude</b> synthesizes every group, every day — refreshing as new posts come in. Updated '+((SYNTH.master&&SYNTH.master.updated)||'today')+'.</div>';
  h+='<button class="btn gold" style="width:100%;margin-bottom:10px" onclick="hpAmplify()">📣 HyperPost today\'s synthesis — carry it home ▸</button>';
  if(SYNTH.master)h+=synthCard(SYNTH.master,true);
+ h+='<div style="font-size:12px;font-weight:800;color:var(--muted);margin:14px 2px 2px">🎸 HEADLINER SYNTHESIS · tap a band</div>';
+ h+='<div style="font-size:11px;color:var(--muted);margin:0 2px 7px">Hundreds of scattered Facebook groups per band → <b>one clean synthesis</b>. That\'s the noise, cut.</div>';
+ h+='<div class="bsrow">'+SYNTH_BANDS.map(function(s,i){return '<div class="bstile" onclick="openBandSynth('+i+')"><div class="bsic">'+s.ic+'</div><div class="bsnm">'+s.band+'</div><div class="bsmeta">from '+s.groups+' groups · '+s.photos.length+' 📷</div></div>';}).join("")+'</div>';
  h+='<div style="font-size:12px;font-weight:800;color:var(--muted);margin:12px 2px 6px">CLIPPINGS FOR THE DAY · by group</div>';
  h+=(SYNTH.groups||[]).map(function(g){return synthCard(g,false);}).join("");
  b.innerHTML=h;
 }
+var SYNTH_BAND_OPEN=null;
+function openBandSynth(i){ var s=SYNTH_BANDS[i]; if(!s)return; SYNTH_BAND_OPEN=i;
+ var b=document.getElementById('synthBody'); var safe=s.band.replace(/'/g,"");
+ var h='<button class="qaback" style="background:none;border:0;color:var(--accent);font-weight:700;cursor:pointer;padding:0 0 8px" onclick="renderSynth()">‹ all synthesis</button>'+
+   '<div class="card" style="border:1px solid var(--gold);background:#fffdf6">'+
+   '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gold)">'+s.ic+' '+s.band+' · Synthesis · from '+s.groups+' groups today</div>'+
+   '<div style="font-size:17px;font-weight:800;margin:5px 0">'+s.headline+'</div>'+
+   '<div style="font-size:13.5px;color:#3a3346;line-height:1.5">'+s.body+'</div>'+
+   '<div class="acts" style="display:flex;gap:16px;margin-top:10px;color:var(--muted);font-size:13px;font-weight:600">'+
+     '<button class="act" onclick="like(this)">👍 <span>'+(40+i*7)+'</span></button>'+
+     '<button class="act reply" onclick="bsHyper(\''+safe+' synthesis\')">📡 HyperPost</button></div></div>';
+ h+='<div style="font-size:12px;font-weight:800;color:var(--muted);margin:12px 2px 6px">📷 FROM THE FAMILY · tap 📡 to HyperPost a photo</div>';
+ h+='<div class="bsgrid">'+s.photos.map(function(p,pi){return '<div class="bsphoto"><div class="bsimg">'+p.ic+'</div>'+
+     '<div class="bscap">'+p.cap+' <span>· 📷 '+p.by+'</span></div>'+
+     '<div class="bspacts"><button class="act" onclick="like(this)">👍 <span>'+(8+pi*3)+'</span></button>'+
+     '<button class="act" onclick="bsHyper(\''+safe+' photo — '+p.cap.replace(/'/g,"")+'\')">📡</button></div></div>';}).join("")+'</div>';
+ h+='<div style="font-size:11px;color:var(--muted);margin-top:8px">Photos are shared by the family and credited — nothing scraped. Add yours from a show with “📷 Share a photo.”</div>';
+ b.innerHTML=h;
+}
+function bsHyper(ctx){ if(typeof hyperConsole==='function'){ closeSynth(); hyperConsole(ctx); } }
 function openSynth(){ renderSynth(); document.getElementById('synth').classList.add('on'); syncSynth(); }
 function closeSynth(){ document.getElementById('synth').classList.remove('on'); }
 /* ---- Amplify: a REAL member chooses to HyperPost the synthesis; we equip + track (nothing auto-sends) ----
@@ -935,6 +1152,20 @@ function inviteFamily(){ var link=inviteLink(), txt=inviteText();
  try{ navigator.clipboard.writeText(txt+'\n\n'+link); toast('🌹 Invite copied — paste it to a friend in Messenger, texts, anywhere. You choose who.'); }
  catch(e){ toast(txt+' '+link); } }
 
+/* ---- 🎸 Musician-to-musician invite — pre-written, peer voice. Share the love, band to band. ---- */
+function bandLink(){ var who=(ddId&&ddId()&&ddId().id)?String(ddId().id).slice(0,8):'band';
+ return 'https://deaddance.app/?utm_source=invite&utm_medium=musician&utm_campaign=band_to_band&utm_content='+who; }
+function bandInviteText(){ var me=(ME&&ME.name&&ME.name!=='You')?ME.name:''; var sign=me?(' — '+me):'';
+ return "Hey, it's "+(me||"a fellow head")+". Putting my dates on dead.dance and figured you should too.\n\n"+
+ "It's the easy, no-nonsense ticket system built for us — NOT Ticketmaster. Free to set up your band page and post a show, you keep your gate, no junk fees, no lock-in. The Dead family's already on it, so your shows land in front of the right crowd.\n\n"+
+ "Takes a few minutes. Throw your next gig up and see — I'll come play. 🌹🎸"+sign; }
+function bandInvite(){ var link=bandLink(), txt=bandInviteText();
+ if(navigator.share){ navigator.share({ title:"dead.dance — for bands", text:txt, url:link })
+   .then(function(){ toast('🎸 Right on — band to band. You pick who; it never touches Facebook\'s API.'); })
+   .catch(function(){}); return; }
+ try{ navigator.clipboard.writeText(txt+'\n\n'+link); toast('🎸 Band invite copied — send it to a bandmate or another act. You choose who.'); }
+ catch(e){ toast(txt+' '+link); } }
+
 /* ================= 🍀 THE MIRACLE TICKET =================
    Can't make it? Miracle your ticket into the chapter bucket — free. First tap grabs it.
    Karma rule: grab one and neither go nor return it by showtime → you sit out Miracle. */
@@ -986,7 +1217,17 @@ function closeReader(){document.getElementById('reader').classList.remove('on');
 function readerTab(tab){
  document.querySelectorAll('.rtab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-t')===tab);});
  var b=document.getElementById('rbody');
- if(tab==='groups'){
+ if(tab==='friends'){
+  b.innerHTML='<p class="rsub"><span class="ff free">FREE</span> 👥 <b>Your Friends</b> — tap a QR to see their shows, stubs, and what they\'ve listened to.</p>'+
+   '<div class="frow" style="flex-wrap:wrap">'+
+   MYFRIENDS.map(function(fr,i){return '<div class="fchip" onclick="profile('+i+')"><div class="fav">'+fr.ic+'</div><div class="fnm">'+fr.name.split(' ')[0]+'</div></div>';}).join("")+
+   '</div><div class="note">Every head carries one QR — their whole profile in a single code. Tap a friend to open it; meet someone new, tap to add them.</div>';
+ } else if(tab==='bands'){
+  b.innerHTML='<p class="rsub"><span class="ff free">FREE</span> 🎸 <b>Bands</b> — each act has its own QR and page. Tap to follow, see dates, and grab tickets.</p>'+
+   '<div class="frow" style="flex-wrap:wrap">'+
+   BANDS.map(function(bn,i){return '<div class="fchip" onclick="bandProfile('+i+')"><div class="fav" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">'+bn.ic+'</div><div class="fnm">'+bn.name.split(' ')[0]+'</div></div>';}).join("")+
+   '</div><div class="note">Bands claim their page once, then add dates in one tap. Follow a band to get a heads-up when they play near you.</div>';
+ } else if(tab==='groups'){
   b.innerHTML='<p class="rsub"><span class="ff free">FREE</span> All mirrored Dead groups. <b>TUNE IN</b> to follow one — its posts flow into your feed.</p><div class="glist">'+
    GROUPS.map(function(g,i){return '<div class="gc"><div class="top"><div class="ico">'+g.ic+'</div><div style="flex:1"><div class="nm">'+g.n+'</div><div class="lv">you last visited '+g.seen+'</div></div><label class="tune'+(g.tuned?' in':'')+'"><input type="checkbox" '+(g.tuned?'checked':'')+' onchange="tuneIn('+i+',this.checked)"> <span>'+(g.tuned?'TUNED IN':'TUNE IN')+'</span></label></div><button class="vg" onclick="viewGroup('+i+')">View group</button></div>';}).join("")+
    '</div><div class="note">We mirror what the family shares — TUNE IN just filters those groups into your feed. Nothing is scraped; <b>View group</b> links back to Facebook.</div>';
@@ -1051,13 +1292,34 @@ function regionOpts(sel){ var live=Object.keys(REGIONS);
  var all=live.concat(more.filter(function(m){return live.indexOf(m)<0;}));
  return all.map(function(r){return '<option'+(r===sel?' selected':'')+'>'+r+'</option>';}).join("")+'<option>Elsewhere — start a new chapter</option>'; }
 function stateOpts(sel){ return '<option value="">—</option>'+US_STATES.map(function(s){return '<option'+(s===sel?' selected':'')+'>'+s+'</option>';}).join(""); }
+var SCENES=[["grateful_dead","Grateful Dead"],["phish","Phish"],["allman_brothers","Allman Brothers"],["widespread_panic","Widespread Panic"],["billy_strings","Billy Strings"],["dave_matthews","Dave Matthews"],["other","Other / jam"]];
+function sceneOpts(){ return SCENES.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>';}).join(""); }
+var ACT_TYPES=[["band","Band"],["tribute","Tribute band"],["original","Original act"],["comedian","Comedian"],["dj","DJ"],["duo","Duo"],["solo","Solo"],["variety","Variety"],["other","Other"]];
+function actTypeOpts(){ return ACT_TYPES.map(function(a){return '<option value="'+a[0]+'">'+a[1]+'</option>';}).join(""); }
 function openGig(tab,region){ GIGREGION=region||ME.chapter||(typeof LOCALFAM!=='undefined'?LOCALFAM:null)||"Mid-Atlantic"; gigTab(tab||'date'); document.getElementById('gig').classList.add('on'); }
 function closeGig(){ document.getElementById('gig').classList.remove('on'); }
 function gigTab(t){ GIGTAB=t;
  document.getElementById('gtab-date').classList.toggle('on',t==='date');
  document.getElementById('gtab-band').classList.toggle('on',t==='band');
  var ft=document.getElementById('gtab-fest'); if(ft)ft.classList.toggle('on',t==='festival');
+ var at=document.getElementById('gtab-act'); if(at)at.classList.toggle('on',t==='act');
  var b=document.getElementById('gigbody');
+ if(t==='act'){
+  b.innerHTML=
+   '<div class="gigrow"><div class="gigf"><label>Act / stage name <span class="req">*</span></label><input id="ga_name" placeholder="Your name or act"></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Type</label><select id="ga_type">'+actTypeOpts()+'</select></div>'+
+     '<div class="gigf"><label>Genre / scene</label><select id="ga_scene">'+sceneOpts()+'</select></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Your fee ($/night)</label><input id="ga_price" type="number" min="0" placeholder="e.g. 500"></div>'+
+     '<div class="gigf"><label>Fee note</label><input id="ga_note" placeholder="per night · + door · negotiable"></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Home region</label><select id="ga_region">'+regionOpts(GIGREGION)+'</select></div>'+
+     '<div class="gigf" style="max-width:110px"><label>State</label><select id="ga_state">'+stateOpts("")+'</select></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Artwork / poster link</label><input id="ga_art" placeholder="https://… (image URL)"></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>EPK / video / site</label><input id="ga_epk" placeholder="https://…"></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Short bio</label><input id="ga_bio" placeholder="One line venues will see"></div></div>'+
+   '<button class="gigsend" onclick="gigCreateAct()">🎭 List me for venues ▸</button>'+
+   '<div class="gigfoot">Builds a <b>bookable profile</b> venues can choose from to fill a night (Tue comedy, a Friday DJ, a tribute Saturday). Off the Dead feed — pure booking. You set the fee; you accept or decline.</div>';
+  return;
+ }
  if(t==='festival'){
   b.innerHTML=
    '<div class="gigrow"><div class="gigf"><label>Festival name <span class="req">*</span></label><input id="gf_name" placeholder="Your festival"></div></div>'+
@@ -1075,12 +1337,14 @@ function gigTab(t){ GIGTAB=t;
    '<div class="gigrow"><div class="gigf"><label>Band name <span class="req">*</span></label><input id="gb_name" placeholder="Your band" value="'+(GIGBAND?GIGBAND.replace(/"/g,"&quot;"):'')+'"></div></div>'+
    '<div class="gigrow"><div class="gigf"><label>City <span class="req">*</span></label><input id="gb_city" placeholder="Home city"></div>'+
      '<div class="gigf" style="max-width:120px"><label>State <span class="req">*</span></label><select id="gb_state">'+stateOpts("")+'</select></div></div>'+
-   '<div class="gigrow"><div class="gigf"><label>Home chapter</label><select id="gb_region">'+regionOpts(GIGREGION)+'</select></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Home chapter</label><select id="gb_region">'+regionOpts(GIGREGION)+'</select></div>'+
+     '<div class="gigf"><label>Scene / genre</label><select id="gb_scene">'+sceneOpts()+'</select></div></div>'+
    '<div class="gigrow"><div class="gigf"><label>Band site <span class="req">*</span></label><input id="gb_site" placeholder="https://www.yourband.com"></div></div>'+
    '<div class="gigrow"><div class="gigf"><label>Contact name</label><input id="gb_cname" placeholder="Booking contact"></div>'+
      '<div class="gigf"><label>Contact email</label><input id="gb_cemail" placeholder="booking@…"></div></div>'+
    '<button class="gigsend" onclick="gigRegisterBand()">🎸 Register &amp; radiate ▸</button>'+
-   '<div class="gigfoot">Posting as <b>your dead.dance identity</b> — no email retype, no captcha. Claim your band once; then add dates in one tap.</div>';
+   '<button class="giginvite" onclick="bandInvite()">🤝 Invite another band — share the love ▸</button>'+
+   '<div class="gigfoot">Posting as <b>your dead.dance identity</b> — no email retype, no captcha. Claim your band once; then add dates in one tap.<br><b>Know another act?</b> Send them the pre-written band-to-band invite — you pick who, it never touches Facebook\'s API.</div>';
  } else {
   b.innerHTML=
    '<div class="gigrow"><div class="gigf"><label>Band <span class="req">*</span></label><input id="gd_band" placeholder="Who\'s playing" value="'+(GIGBAND?GIGBAND.replace(/"/g,"&quot;"):'')+'"></div></div>'+
@@ -1089,7 +1353,8 @@ function gigTab(t){ GIGTAB=t;
      '<div class="gigf" style="max-width:110px"><label>State</label><select id="gd_state">'+stateOpts("")+'</select></div></div>'+
    '<div class="gigrow"><div class="gigf"><label>Date <span class="req">*</span></label><input id="gd_date" type="date"></div>'+
      '<div class="gigf" style="max-width:130px"><label>Time</label><input id="gd_time" placeholder="8:00 PM"></div></div>'+
-   '<div class="gigrow"><div class="gigf"><label>Chapter region</label><select id="gd_region">'+regionOpts(GIGREGION)+'</select></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>Chapter region</label><select id="gd_region">'+regionOpts(GIGREGION)+'</select></div>'+
+     '<div class="gigf"><label>Scene / genre</label><select id="gd_scene">'+sceneOpts()+'</select></div></div>'+
    '<div class="gigrow"><div class="gigf"><label>Gig info / tickets link</label><input id="gd_info" placeholder="https://www.…"></div></div>'+
    '<button class="gigsend" onclick="gigAddDate()">📡 Post the date ▸</button>'+
    '<div class="gigfoot">One click. It lands on the <b>map &amp; calendar</b> for the whole chapter — posted as your identity, nothing auto-sends.</div>';
@@ -1101,7 +1366,7 @@ function gigAddDate(){
  if(!band||!venue||!date){ toast('Add at least band, venue, and a date.'); return; }
  var payload={p_band_id:GIGBANDID||null,p_band_name:band,p_venue:venue,p_address:null,
    p_city:gv('gd_city')||null,p_state:gv('gd_state')||null,p_region:gv('gd_region')||null,
-   p_date:date,p_time:gv('gd_time')||null,p_gig_info:gv('gd_info')||null};
+   p_date:date,p_time:gv('gd_time')||null,p_gig_info:gv('gd_info')||null,p_scene:gv('gd_scene')||'grateful_dead'};
  var c=ddClient(),id=ddId(); closeGig();
  var done=function(showId){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); promptVendorSlots(showId||null,venue); };
  if(c&&id){ try{ c.rpc('chat_show_submit',payload).then(function(r){ if(r&&r.error){ toast('Saved locally — sign in to radiate to the chapter.'); done(null); } else done(r&&r.data); }).catch(function(){ done(null); }); }catch(e){ done(null); } }
@@ -1122,6 +1387,27 @@ function vendSave(){ var c=ddClient(),id=ddId(); closeVend();
  if(c&&id&&VENDSHOW){ try{ c.rpc('chat_show_set_vendor_slots',{p_show:VENDSHOW,p_shakedown:VENDSD,p_arts:VENDAR})
    .then(function(r){ toast(r&&r.error?'Saved locally — sign in to dispatch Chaperones.':msg); }).catch(function(){ toast(msg); }); }catch(e){ toast(msg); } }
  else { toast(msg); } }
+function gigCreateAct(){
+ var name=gv('ga_name'); if(!name){ toast('Add your act / stage name.'); return; }
+ var payload={p_id:null,p_name:name,p_act_type:gv('ga_type')||'band',p_scene:gv('ga_scene')||'other',
+   p_bio:gv('ga_bio')||null,p_price_cents:Math.round((parseFloat(gv('ga_price')||'0')||0)*100)||null,
+   p_price_note:gv('ga_note')||null,p_artwork:gv('ga_art')||null,p_epk:gv('ga_epk')||null,
+   p_city:null,p_state:gv('ga_state')||null,p_region:gv('ga_region')||null};
+ var c=ddClient(),id=ddId(); closeGig();
+ var done=function(){ toast('🎭 "'+name+'" is listed — venues can now find you and request a date.'); };
+ if(c&&id){ try{ c.rpc('chat_act_upsert',payload).then(function(r){ if(r&&r.error) toast('Saved locally — sign in to publish your profile.'); else done(); }).catch(function(){ done(); }); }catch(e){ done(); } }
+ else done();
+}
+/* venue-side booking rail — a room requests an act for a night (chat_act_book_request).
+   Real RPC when signed in; graceful, honest fallback otherwise. */
+function actBookRequest(actId, venueId, dateISO, offerCents, note, onDone){
+ var c=ddClient(), id=ddId();
+ var done=onDone||function(){ toast('📅 Booking request sent — the act accepts or declines on their end.'); };
+ if(c&&id&&actId){ try{ c.rpc('chat_act_book_request',{p_act:actId,p_venue:venueId||null,p_date:dateISO||null,p_offer_cents:offerCents||null,p_note:note||null})
+   .then(function(r){ if(r&&r.error) toast('Sign in to send this booking request for real.'); else done(); })
+   .catch(function(){ done(); }); }catch(e){ done(); } }
+ else toast('📅 Booking drafted — sign in (💬) to send it to the act for real.');
+}
 function gigCreateFestival(){
  var name=gv('gf_name'); if(!name){ toast('Name your festival.'); return; }
  var days=Math.max(1,Math.min(14,parseInt(gv('gf_days')||'3',10)||3));
@@ -1136,7 +1422,7 @@ function gigRegisterBand(){
  var name=gv('gb_name'),city=gv('gb_city'),state=gv('gb_state'),site=gv('gb_site');
  if(!name||!city||!state||!site){ toast('Band name, city, state, and site are required.'); return; }
  var payload={p_name:name,p_city:city,p_state:state,p_region:gv('gb_region')||null,
-   p_site:site,p_contact_name:gv('gb_cname')||null,p_contact_email:gv('gb_cemail')||null};
+   p_site:site,p_contact_name:gv('gb_cname')||null,p_contact_email:gv('gb_cemail')||null,p_scene:gv('gb_scene')||'grateful_dead'};
  var c=ddClient(),id=ddId();
  var done=function(bid){ GIGBAND=name; GIGBANDID=bid||null;
    toast('🎸 '+name+' is registered. Now add your first date.'); gigTab('date'); };
@@ -1242,6 +1528,41 @@ function hpEmoji(e){var t=document.getElementById('hptext');t.value+=e;t.focus()
 function hpPost(){var n=HPCH.filter(function(c){return c.on;}).length;document.getElementById('hp').classList.remove('on');toast('📡 Posted — your reply radiated to '+n+' voice'+(n>1?'s':'')+'. You posted it; nothing auto-sent.');}
 function closeHP(){document.getElementById('hp').classList.remove('on');}
 
+/* ---------------- "What's on your mind" composer + DEFAULT HyperPost ----------------
+   The user sets their default networks ONCE; then a single tap radiates to all of them.
+   Honest-state: dead.dance posts in-app instantly; your other networks open to confirm
+   (one human tap fans out — nothing auto-sends silently, nothing scraped). */
+var CMP_NETS=[{id:'dd',n:'🌹 dead.dance',lock:true},{id:'fb',n:'f Facebook'},{id:'ig',n:'Instagram'},
+  {id:'th',n:'Threads'},{id:'x',n:'X'},{id:'rd',n:'Reddit'}];
+function cmpDefaults(){ var d; try{d=JSON.parse(localStorage.getItem('dd.hpdef')||'null');}catch(e){d=null;}
+  if(!d||!d.length){ d=['dd']; } if(d.indexOf('dd')<0) d.unshift('dd'); return d; }
+function cmpSaveDefaults(arr){ try{localStorage.setItem('dd.hpdef',JSON.stringify(arr));}catch(e){} }
+function cmpInit(){ var t=document.getElementById('cmpText'); if(t){ var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:'Stagger Lee';
+    t.placeholder="What's on your mind, "+nm+"?"; }
+  cmpRenderNets(); cmpNote(); }
+function cmpRenderNets(){ var box=document.getElementById('cmpNets'); if(!box)return; var def=cmpDefaults();
+  box.innerHTML=CMP_NETS.map(function(c){ var on=def.indexOf(c.id)>=0;
+    return '<span class="cmp-net'+(on?' on':'')+(c.lock?' lock':'')+'" '+(c.lock?'':'onclick="cmpNetTog(\''+c.id+'\')"')+'>'+(on?'✓ ':'')+c.n+'</span>'; }).join(''); }
+function cmpNetTog(id){ var def=cmpDefaults(); var i=def.indexOf(id);
+  if(i>=0){ if(id==='dd')return; def.splice(i,1);} else def.push(id); cmpSaveDefaults(def); cmpRenderNets(); cmpNote(); }
+function cmpToggleNets(){ document.getElementById('cmpNets').classList.toggle('show'); }
+function cmpNote(){ var n=document.getElementById('cmpNote'); if(!n)return; var def=cmpDefaults();
+  var names=def.map(function(id){var f=CMP_NETS.filter(function(c){return c.id===id;})[0];return f?f.n.replace(/^\S+\s/,''):id;});
+  n.textContent='One tap → '+names.join(', ')+'. ⚙ to change.'; }
+function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.value||'').trim();
+  if(!txt){ toast('Say something first 🌹'); return; }
+  var def=cmpDefaults(); var ext=def.filter(function(id){return id!=='dd';});
+  var extNames=ext.map(function(id){var f=CMP_NETS.filter(function(c){return c.id===id;})[0];return f?f.n.replace(/^\S+\s/,''):id;});
+  // 1) dead.dance feed — our platform, posts for real (wires to feed RPC on deploy)
+  try{ var c=ddClient&&ddClient(), id=ddId&&ddId();
+    if(c&&id){ c.rpc('chat_post_create',{p_body:txt,p_scene:'grateful_dead'}).catch(function(){}); } }catch(e){}
+  // 2) external networks — one human handoff (share sheet); nothing silent
+  if(ext.length && navigator.share){
+    navigator.share({ title:'dead.dance', text:txt, url:(typeof inviteLink==='function'?inviteLink():DD_HOME) }).catch(function(){}); }
+  toast('📡 HyperPosted to dead.dance'+(ext.length?(' — and opened '+extNames.join(', ')+' to confirm'):'')+'.');
+  if(t) t.value='';
+}
+
 /* ---------------- blog Local / National toggle ---------------- */
 function feedScope(which){
  document.getElementById('sgLocal').classList.toggle('on',which==='local');
@@ -1308,7 +1629,143 @@ function upAdd(files){
  z.addEventListener('drop',function(e){ e.preventDefault(); z.classList.remove('over'); if(e.dataTransfer&&e.dataTransfer.files)upAdd(e.dataTransfer.files); });
 })();
 
-calBuild();qrBuild();mirrorBuild();friendsBuild();bandsBuild();gpsFamily();
+/* ============ Built-in QA Assist — Claude manages it: SHARES + test tasks ============ */
+var QA_DEMO_GROUPS=[{id:null,name:'DEADHEADS',url:'https://www.facebook.com/groups/180412138792814/'},
+ {id:null,name:'Bay Area Deadheads',url:'https://www.facebook.com/groups/78454602418/'},
+ {id:null,name:'Dead and Company Tour Family',url:'https://www.facebook.com/groups/576564942675260/'},
+ {id:null,name:'Jerry Garcia Band - JGB',url:'https://www.facebook.com/groups/1155671899121023/'}];
+var QA_TASKS=[
+ // ---- SHARES (recurring; the FB → our-page round trip; this is the share-army) ----
+ {key:'share_forward',kind:'share',ic:'📤',title:'Forward a great post to our page',
+  steps:[{fb:1,t:'open your assigned group and find a post the family would love.'},
+         {t:'Share it to the <b>dead.dance Facebook page</b> (your choice — human click).'},
+         {t:'Come back here and tap “I shared it”.'}],
+  q:{prompt:'How did forwarding feel?',opts:['Easy','OK','Clunky']}},
+ {key:'share_invite_group',kind:'share',ic:'🔵',title:'Drop our page in your group',
+  steps:[{fb:1,t:'in your assigned group, where it fits the rules, mention dead.dance and link our page.'},
+         {t:'Respect the group — only if cross-posting is allowed. Then come back.'}],
+  q:{prompt:'Did the group allow it?',opts:['Yes, posted','Rules said no','Wasn’t sure']}},
+ // ---- TEST TASKS (one-time; cross off when done) ----
+ {key:'qa_find_show',kind:'qa',ic:'🎟️',title:'Find a show & open Tickets',
+  steps:[{t:'Open the calendar (top-left) — it lands on “Upcoming”.'},{t:'Tap a show, then tap <b>Tickets</b>.'}],
+  q:{prompt:'How easy was it to find a show near you?',opts:['Very easy','OK','Confusing']}},
+ {key:'qa_month',kind:'qa',ic:'📅',title:'Check the Month view',
+  steps:[{t:'Tap <b>▦ Month</b>.'},{t:'Use ‹ › to jump to next month; tap a highlighted date.'}],
+  q:{prompt:'Did the dates look correct & current?',opts:['Yes, spot on','Mostly','Something’s off']}},
+ {key:'qa_hyperpost',kind:'qa',ic:'📡',title:'Try HyperPost (the one new thing)',
+  steps:[{t:'Find “What’s on your mind, Stagger Lee?” in the feed.'},{t:'Type a hello and tap <b>📡 HyperPost</b>.'}],
+  q:{prompt:'Did you understand what HyperPost did?',opts:['Totally','Sort of','Not really']}},
+ {key:'qa_default_nets',kind:'qa',ic:'⚙',title:'Set your default networks',
+  steps:[{t:'In the composer, tap <b>⚙ Networks</b>.'},{t:'Turn Facebook on; HyperPost again.'}],
+  q:{prompt:'Was setting defaults clear?',opts:['Clear','Meh','Confusing']}},
+ {key:'qa_fb_roundtrip',kind:'qa',ic:'🔁',title:'Facebook → dead.dance round trip',
+  steps:[{fb:1,t:'open any Dead group and copy the gist of a great post.'},{t:'Back here, HyperPost that gist with the band/venue.'}],
+  q:{prompt:'Did the round trip feel natural?',opts:['Yes','A little clunky','Didn’t get it']}},
+ {key:'qa_tunein',kind:'qa',ic:'🐺',title:'Tune into a group',
+  steps:[{t:'Open the Reader → 🐺 Chapters/Groups.'},{t:'Tap <b>TUNE IN</b> on one.'}],
+  q:{prompt:'Did the feed feel like Facebook?',opts:['Just like it','Close','Not really']}},
+ {key:'qa_qr',kind:'qa',ic:'🪪',title:'Open your QR profile',
+  steps:[{t:'Tap your QR (top of the right column).'}],
+  q:{prompt:'Would you share your QR with a friend?',opts:['Yes','Maybe','No']}},
+ {key:'qa_invite',kind:'qa',ic:'🌹',title:'Invite the family',
+  steps:[{t:'Tap <b>🌹 Invite the family</b> and pick someone (you don’t have to send).'}],
+  q:{prompt:'Would you actually invite someone?',opts:['Definitely','Maybe','No']}},
+ {key:'qa_miracle',kind:'qa',ic:'🍀',title:'Grab a Miracle ticket',
+  steps:[{t:'Tap the blinking 🍀 (bottom-right). Read the karma rule.'}],
+  q:{prompt:'Did the Miracle ticket make sense?',opts:['Yes, love it','Sort of','Confusing']}},
+ {key:'qa_game',kind:'qa',ic:'🎧',title:'Play Name That Tune',
+  steps:[{t:'Footer → 🎧 Play. Take a guess.'}],
+  q:{prompt:'Was it fun?',opts:['Fun','Meh','Nope']}},
+ {key:'qa_hostaband',kind:'qa',ic:'💡',title:'Book an act on hostaband',
+  steps:[{fb:0,t:'Open hostaband (the side-door booking site).'},{t:'Pick a genre + date, hit <b>BOOK NOW</b> on an act, then come tell us.'}],
+  q:{prompt:'Would a venue/host find this easy?',opts:['Very','OK','Hard']}},
+ // ——— 📅 CALENDAR STUDY (the focus-group track — calendar alone) ———
+ {key:'cal_find',kind:'qa',ic:'📅',title:'Calendar study: find a show this month',
+  steps:[{t:'Open the calendar (top-left). It lands on “Upcoming”.'},{t:'Find a show you’d actually go to — no help.'}],
+  q:{prompt:'How easy was it to find a show near you?',opts:['Very easy','OK','Confusing']}},
+ {key:'cal_month',kind:'qa',ic:'📅',title:'Calendar study: month view & navigate',
+  steps:[{t:'Tap <b>▦ Month</b>; use ‹ › to next month; tap a highlighted date.'}],
+  q:{prompt:'Did the dates look correct & current?',opts:['Spot on','Mostly','Something’s off']}},
+ {key:'cal_filter',kind:'qa',ic:'📅',title:'Calendar study: filter by Type',
+  steps:[{t:'Use the Type filter (Dead / Phish / Comedy / DJ …).'}],
+  q:{prompt:'Did filtering help or confuse?',opts:['Helped','Neutral','Confused']}},
+ {key:'cal_ticket',kind:'qa',ic:'📅',title:'Calendar study: get a ticket',
+  steps:[{t:'Tap a show, then tap <b>Tickets</b>.'}],
+  q:{prompt:'Was buying obvious?',opts:['Obvious','OK','Hard to find']}},
+ {key:'cal_vs_fb',kind:'qa',ic:'📅',title:'Calendar study: vs Facebook',
+  steps:[{t:'Think about how you find shows on Facebook today.'},{t:'Compare it to this calendar.'}],
+  q:{prompt:'Would you check this instead of scrolling Facebook for shows?',opts:['Yes','Sometimes','No']}}
+];
+var QA_SEL=null,QA_PICK=null,QA_WORKS=null,QA_CLAIM=null;
+function qaDoneList(){ try{return JSON.parse(localStorage.getItem('dd.qa.done')||'[]');}catch(e){return [];} }
+function qaMarkDone(k){ var d=qaDoneList(); if(d.indexOf(k)<0){d.push(k);try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){}} }
+function qaOpen(){ document.getElementById('qaov').classList.add('on'); qaRender(); qaSync(); }
+function qaClose(){ document.getElementById('qaov').classList.remove('on'); }
+function qaSync(){ var c=ddClient&&ddClient(),id=ddId&&ddId(); if(!c||!id)return;
+ try{ c.rpc('chat_qa_mine').then(function(r){ if(r&&r.data){ var d=qaDoneList(); r.data.forEach(function(x){ if(d.indexOf(x.task_key)<0)d.push(x.task_key); }); try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){} qaRender(); } }).catch(function(){}); }catch(e){} }
+function qaRowHTML(t,idx,isdone){ return '<div class="qarow'+(isdone?' done':'')+'" onclick="qaOpenTask('+idx+')"><div class="qic">'+t.ic+'</div><div class="qt"><b>'+t.title+'</b><span>'+(t.kind==='share'?'recurring · forward to our page':(isdone?'done — thank you!':'tap to try'))+'</span></div><div class="qchev">'+(isdone?'':'›')+'</div></div>'; }
+function qaRender(){ var done=qaDoneList(), b=document.getElementById('qaBody'); if(!b)return;
+ var remaining=QA_TASKS.filter(function(t){return t.kind==='qa' && done.indexOf(t.key)<0;}).length;
+ var badge=document.getElementById('qaBadge'); if(badge){ badge.style.display=remaining?'inline-block':'none'; badge.textContent=remaining; }
+ var h=shareAskCard()+'<div class="qaq" style="margin-top:0">📤 Keep the family fed — shares</div>';
+ QA_TASKS.forEach(function(t){ if(t.kind==='share') h+=qaRowHTML(t,QA_TASKS.indexOf(t),false); });
+ h+='<div class="qaq">🧪 Test tasks — '+remaining+' left</div>';
+ QA_TASKS.forEach(function(t){ if(t.kind==='qa') h+=qaRowHTML(t,QA_TASKS.indexOf(t),done.indexOf(t.key)>=0); });
+ b.innerHTML=h;
+}
+function qaOpenTask(idx){ var t=QA_TASKS[idx]; if(!t)return; QA_SEL=t; QA_PICK=null; QA_WORKS=null; QA_CLAIM=null;
+ if(t.kind==='share'){ qaClaimGroup(function(g){ QA_CLAIM=g; qaDetail(t); }); } else qaDetail(t); }
+function qaClaimGroup(cb){ var c=ddClient&&ddClient(),id=ddId&&ddId(), fb=function(){ return QA_DEMO_GROUPS[Math.floor(Math.random()*QA_DEMO_GROUPS.length)]; };
+ if(c&&id){ try{ c.rpc('chat_group_claim').then(function(r){ var g=r&&r.data&&r.data[0]; cb(g?{id:g.group_id,name:g.name,url:g.url}:fb()); }).catch(function(){ cb(fb()); }); }catch(e){ cb(fb()); } }
+ else cb(fb()); }
+function qaDetail(t){ var b=document.getElementById('qaBody');
+ var steps=t.steps.map(function(s,i){ var txt=s.t;
+   if(t.kind==='share'&&i===0&&QA_CLAIM){ txt='open <b>'+QA_CLAIM.name+'</b>'+(QA_CLAIM.url?(' (<a href="'+QA_CLAIM.url+'" target="_blank" rel="noopener">open ↗</a>)'):'')+' — '+txt; }
+   return '<div class="qastep'+(s.fb?' fb':'')+'"><div class="n">'+(i+1)+'</div><div>'+(s.fb?'<span class="qafb">📘 ON FACEBOOK:</span> ':'')+txt+'</div></div>'; }).join('');
+ var opts=t.q.opts.map(function(o){return '<button class="qaopt" onclick="qaPick(this)" data-v="'+o.replace(/"/g,'')+'">'+o+'</button>';}).join('');
+ b.innerHTML='<button class="qaback" onclick="qaRender()">‹ all tasks</button>'+
+   '<div style="font-size:26px">'+t.ic+'</div><div class="qaq" style="margin-top:2px">'+t.title+'</div>'+steps+
+   '<div class="qaq">Did it work?</div><div class="qaworks"><button onclick="qaSetWorks(this,true)">👍 Worked</button><button onclick="qaSetWorks(this,false)">👎 Broke</button></div>'+
+   '<div class="qaq">'+t.q.prompt+'</div>'+opts+
+   '<textarea class="qanote" id="qaNote" placeholder="Anything to add? (optional)"></textarea>'+
+   '<button class="qasend" onclick="qaSubmit()">'+(t.kind==='share'?'✅ I shared it':'Submit feedback')+'</button>';
+}
+function qaPick(el){ QA_PICK=el.getAttribute('data-v'); [].forEach.call(document.querySelectorAll('.qaopt'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
+function qaSetWorks(el,v){ QA_WORKS=v; [].forEach.call(el.parentNode.querySelectorAll('button'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
+function qaSubmit(){ var t=QA_SEL; if(!t)return; var note=(document.getElementById('qaNote')||{}).value||'';
+ var c=ddClient&&ddClient(),id=ddId&&ddId();
+ if(c&&id){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:QA_WORKS,p_choice:QA_PICK,p_note:note}).catch(function(){}); }catch(e){} }
+ if(t.kind==='share'){ if(c&&id&&QA_CLAIM&&QA_CLAIM.id){ try{ c.rpc('chat_group_mark_shared',{p_group:QA_CLAIM.id}).catch(function(){}); }catch(e){} }
+   toast('📤 Thank you — that’s how the family stays fed. Grab another anytime.'); }
+ else { qaMarkDone(t.key); toast('🙏 Logged — thank you for testing dead.dance!'); }
+ qaRender();
+}
+
+/* polite auto-request: "force-crowdsource, nicely." dead.dance reduces the noise;
+   the ask is light family chores. opt-in, easy out, never a nag. (34_share_requests.sql) */
+function shareState(){ try{return JSON.parse(localStorage.getItem('dd.share')||'{}');}catch(e){return {};} }
+function shareSave(s){ try{localStorage.setItem('dd.share',JSON.stringify(s));}catch(e){} }
+function shareCandidate(){ return QA_DEMO_GROUPS[Math.floor(Math.random()*QA_DEMO_GROUPS.length)]; }
+var CHORES=['weed the tomatoes 🍅','mow the lawn 🌱','trim the hedges 🌳','water the garden 🪴','rake the leaves 🍂','sweep the porch 🧹'];
+function shareChore(){ return CHORES[Math.floor(Math.random()*CHORES.length)]; }
+function shareAskCard(){ var s=shareState();
+ if(s.status==='accepted') return '<div class="qaask done">🌹 You’re watching <b>'+(s.group||'a group')+'</b> for the family — thank you. Forward its best to our page anytime.</div>';
+ if(s.status==='snoozed' && s.until && Date.now()<s.until) return '';
+ if(s.status==='declined') return '';
+ var c=s.cand || shareCandidate(); if(!s.cand){ s.cand=c; shareSave(s); }
+ if(!s.chore){ s.chore=shareChore(); shareSave(s); }
+ return '<div class="qaask"><b>Pitch in — '+s.chore+'</b>'+
+   '<p>dead.dance keeps the noise down: the family’s posts, none of Facebook’s clutter. It’s free, it’s ours. Would you watch <b>ONE</b> group — '+c.name+' — and forward its best posts to our page? One group, that’s all.</p>'+
+   '<div class="qaaskbtns"><button class="yes" onclick="shareAccept()">✅ I’m in</button><button onclick="shareSnooze(14)">Later</button><button class="no" onclick="shareSnooze(0)">No thanks</button></div></div>';
+}
+function shareAccept(){ var s=shareState(); var c=s.cand||shareCandidate(); s.status='accepted'; s.group=c.name; shareSave(s);
+ var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id){ try{ cl.rpc('chat_share_accept').catch(function(){}); }catch(e){} }
+ qaRender(); toast('🌹 You’re in — watching '+c.name+'. Forward its gems to our page; that’s the whole job.'); }
+function shareSnooze(days){ var s=shareState(); s.status=days>0?'snoozed':'declined'; if(days>0)s.until=Date.now()+days*864e5; shareSave(s);
+ var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id){ try{ cl.rpc('chat_share_decline',{p_snooze_days:days}).catch(function(){}); }catch(e){} }
+ qaRender(); toast(days>0?'👍 No rush — we’ll check back later.':'👍 All good — no nags.'); }
+
+buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();gpsFamily();cmpInit();calSync();qaRender();qaSync();
 </script>
 
 <!-- ===== live spine: install + family chat (the real backend) ===== -->

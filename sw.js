@@ -3,9 +3,9 @@
    • install is BEST-EFFORT (one missing asset can't abort the whole install)
    • HTML navigations are NETWORK-FIRST (no more stale index.html), cache as fallback
    • runtime cache is SAME-ORIGIN ONLY — never caches cross-origin archive.org audio (no quota blowout) */
-var CACHE = "deaddance-v60-2026-06-29";
+var CACHE = "deaddance-v86-2026-06-29";
 var ASSETS = ["./", "./index.html", "./app.html", "./welcome.html", "./studio_calculator.html", "./post_scale.html", "./qr_print.html",
-  "./sales_crm.html", "./operator_academy.html", "./target_bands.js", "./audio_manifest.js", "./festivals_seed.js",
+  "./sales_crm.html", "./operator_academy.html", "./hostaband.html", "./console_directory.html", "./target_bands.js", "./audio_manifest.js", "./festivals_seed.js",
   "./manifest.webmanifest", "./bands.js", "./market-core.js", "./cassette-reader.js", "./ad-engine.js", "./syf.png", "./lukas_a2hs.js",
   "./crm_seed.js", "./lukas_chat.js", "./lukas_badge.js", "./doodles.js", "./doodles/chancellor.svg", "./doodles/sunset.svg",
   "./rosebud.svg", "./rosebud-192.png", "./rosebud-512.png", "./rosebud-32.png",

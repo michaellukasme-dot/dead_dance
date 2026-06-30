@@ -37,6 +37,71 @@
 .tools input{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:13px;font-family:inherit}
 .stage{flex:1;padding:8px 16px 40px}
 .cnt{font-size:11px;color:var(--muted);font-weight:700;margin:6px 2px}
+.netbanner{background:linear-gradient(135deg,#23104a,#3a1d5e);color:#f3ecff;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.5;margin:4px 2px 10px}
+.cals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 2px}
+.calcol{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.calh{background:#eef4ff;color:var(--navy);font-weight:800;font-size:12.5px;padding:8px 10px}
+.calev{padding:8px 10px;border-top:1px solid var(--line);font-size:12px}
+.calev b{display:block;color:var(--ink)}.calev span{color:var(--muted)}
+.calempty{padding:12px 10px;font-size:11.5px;color:var(--muted)}
+@media(max-width:640px){.cals{grid-template-columns:1fr}}
+.nextmtg{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#15366e,#0f1b2d);color:#fff;border-radius:14px;padding:13px 15px;margin:4px 2px 12px}
+.nextmtg .nm-l{font-size:11px;color:#aac2ee;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.nextmtg .nm-v{font-size:15px;font-weight:800;margin-top:2px}
+.nextmtg button{margin-left:auto;background:var(--gold);color:#231f0e;border:0;border-radius:999px;padding:10px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.capgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:2px 2px 12px}
+.capc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.capc .k{font-size:19px;font-weight:800;color:var(--navy)}
+.capc .l{font-size:10px;color:var(--muted);margin-top:2px}
+@media(max-width:640px){.capgrid{grid-template-columns:repeat(2,1fr)}}
+.sched{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:2px 2px 12px}
+.sched summary{font-weight:800;font-size:13px;color:var(--navy);cursor:pointer}
+.schedrow{margin-top:8px}.schedrow.two{display:flex;gap:10px}
+.schedrow label{display:block;font-size:11px;color:var(--muted);font-weight:700;flex:1}
+.schedrow input{width:100%;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:3px}
+.rm{display:flex;flex-direction:column;gap:9px}
+.rmcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;gap:11px;align-items:flex-start}
+.rmcard .ic{font-size:22px;flex:none}
+.rmcard .b{font-size:14px}.rmcard .m{font-size:12px;color:var(--muted);margin-top:2px}
+.rmpill{font-size:9.5px;font-weight:800;border-radius:999px;padding:3px 8px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;margin-left:auto}
+.rmpill.ship{background:#e7f6ee;color:var(--ok)}.rmpill.prog{background:#fff3d6;color:#9a6a00}
+.rmpill.gate{background:#fde3e3;color:#b8002e}.rmpill.plan{background:#eef4ff;color:var(--navy)}
+.pill.liqhot{background:#e7f6ee;color:var(--ok)}.pill.liqbuild{background:#fff3d6;color:#9a6a00}.pill.liqthin{background:#fde3e3;color:#b8002e}
+.liqbar{height:9px;background:#eef2f8;border-radius:999px;overflow:hidden;margin:9px 0 8px}
+.liqbar span{display:block;height:100%;background:linear-gradient(90deg,#1f7a4d,#caa53d);border-radius:999px}
+.liqweeks{display:flex;gap:8px;align-items:flex-end;height:54px}
+.lw{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.lwbar{width:70%;min-height:3px;background:var(--navy);border-radius:4px 4px 0 0}
+.lw span{font-size:9.5px;color:var(--muted);margin-top:3px}
+.todos{background:#fff;border:1px solid var(--gold);border-radius:13px;padding:12px 14px;margin:2px 2px 12px}
+.todoh{font-weight:800;font-size:13.5px;color:var(--navy);margin-bottom:8px}
+.todoh span{float:right;font-size:11px;color:var(--gold);font-weight:800}
+.todofrom{font-size:11px;color:var(--muted);margin:-3px 0 6px}
+.sccard{background:linear-gradient(135deg,#0f1b2d,#15366e);color:#fff;border-radius:13px;padding:13px 15px;margin:2px 2px 12px}
+.sch{font-weight:800;font-size:14px}.sch .pill{float:right;font-size:10px}
+.scnote{font-size:11.5px;color:#bcd0ee;margin:4px 0 10px;line-height:1.4}
+.scrow{display:grid;grid-template-columns:1fr 90px 96px;gap:9px;align-items:center;margin:7px 0}
+.scm{font-size:12px}.scm b{color:var(--gold);font-size:11px}
+.scbar{height:8px;background:#ffffff22;border-radius:999px;overflow:hidden}
+.scbar span{display:block;height:100%;background:linear-gradient(90deg,#caa53d,#1f7a4d);border-radius:999px}
+.scv{font-size:11.5px;font-weight:800;text-align:right}.scv span{color:#9fb6dc;font-weight:600}
+.sccreed{margin-top:11px;padding-top:9px;border-top:1px solid #ffffff22;font-size:11px;color:#cdddf2;line-height:1.5}.sccreed b{color:#fff}
+.ovcard{background:#1a1410;border:1px solid #3a2e22;border-radius:13px;padding:13px 14px;margin:2px 2px 12px;color:#f3e9da}
+.ovh{font-weight:800;font-size:13.5px}.ovh span{float:right;font-size:11px;color:#e0a23d;font-weight:800}
+.ovnote{font-size:11px;color:#b9a892;margin:4px 0 9px;line-height:1.4}
+.ovok{font-size:12.5px;color:#7fd0a0;padding:4px 0}
+.ovrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid #332a20;flex-wrap:wrap}
+.ovr-n{font-size:13px;font-weight:700;flex:1;min-width:120px}.ovr-n span{color:#b9a892;font-weight:400;font-size:11px}
+.ovr-c{display:flex;gap:5px;flex-wrap:wrap}
+.ovr-c span{font-size:10.5px;background:#3a2e22;color:#f0d9bf;border-radius:999px;padding:2px 8px}
+.ovr-c .clean{background:#1f3a2a;color:#7fd0a0}
+.ovpill{font-size:10px;font-weight:800;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.ovpill.ov-high{background:#4a1414;color:#ff9b9b}.ovpill.ov-watch{background:#4a3a14;color:#ffd27f}.ovpill.ov-ok{background:#1f3a2a;color:#7fd0a0}
+@media(max-width:560px){.scrow{grid-template-columns:1fr 60px 84px}}
+.todo{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);font-size:13px;cursor:pointer}
+.todo input{margin-top:3px;flex:none}
+.todo.done span{text-decoration:line-through;color:var(--muted)}
+.netbanner b{color:var(--gold)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 13px;margin-bottom:9px}
 .card .top{display:flex;align-items:flex-start;gap:9px}
 .card .score{flex:none;width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:14px;background:var(--navy)}
@@ -55,11 +120,12 @@
 .foot{font-size:11px;color:var(--muted);text-align:center;padding:14px;line-height:1.5}
 .foot b{color:var(--navy)}
 .showmore{width:100%;background:#eef4ff;color:var(--navy);border:0;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;margin-top:4px}
+.maplink{font-size:11.5px;font-weight:800;background:#ffffff22;color:#fff;border:1px solid #ffffff3a;border-radius:999px;padding:3px 9px;text-decoration:none;margin-left:8px;vertical-align:middle}
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="h"><div class="nm">🌹 dead.dance — Field CRM</div>
+  <div class="h"><div class="nm">🌹 dead.dance — Field CRM <a href="./console_directory.html" class="maplink" title="Find any console">🗺 Map</a></div>
     <div class="sb">Sell venue subs · sign up every band · fill local craft vendors · copy, never auto-send</div></div>
   <div class="farrah" id="farrah"></div>
   <div class="tiers" id="tiers"></div>
@@ -69,6 +135,11 @@
     <button id="tab-bands" onclick="setTab('bands')">🎸 Bands <b id="bcount"></b></button>
     <button id="tab-craft" onclick="setTab('craft')">🎪 Craft <b id="ccount"></b></button>
     <button id="tab-fest" onclick="setTab('fest')">🎆 Fests <b id="fcount"></b></button>
+    <button id="tab-talent" onclick="setTab('talent')">🎭 Talent <b id="zcount"></b></button>
+    <button id="tab-meet" onclick="setTab('meet')">📅 Meetings <b id="mcount"></b></button>
+    <button id="tab-liq" onclick="setTab('liq')">📊 Liquidity</button>
+    <button id="tab-qa" onclick="setTab('qa')">🧪 QA</button>
+    <button id="tab-road" onclick="setTab('road')">🗺 Roadmap</button>
   </div>
   <div class="tools"><input id="search" placeholder="Search…" oninput="render()"></div>
   <div class="stage" id="stage"></div>
@@ -99,6 +170,7 @@ var VENUE_REGION={};
 var RLABEL={bayarea:"Bay Area / CA",pnw:"Pacific NW",rockies:"Rockies",lonestar:"Lone Star (TX)",greatlakes:"Great Lakes",southeast:"Southeast",midatl:"Mid-Atlantic",northeast:"Northeast"};
 var REPS=[
  {key:"bayarea",  name:"You (Stagger Lee)",tier:"founder",   sponsor:null},
+ {key:"business", name:"Michele 🐝 (Biz)", tier:"founder",   sponsor:null},
  {key:"midatl",   name:"Pat L.",           tier:"chancellor",sponsor:"bayarea"},
  {key:"northeast",name:"Robin S.",         tier:"chancellor",sponsor:"bayarea"},
  {key:"greatlakes",name:"June A.",          tier:"ambassador",sponsor:"midatl"},
@@ -161,11 +233,16 @@ function renderReps(){
  el.innerHTML=REPS.map(function(r){ return '<div class="rep'+(r.key===CURREP?' on':'')+'" onclick="pickRep(\''+r.key+'\')">'+
    r.name.split(' ')[0]+'<span class="t">'+r.tier+' · '+RLABEL[r.key]+'</span></div>'; }).join("");
 }
-function pickRep(k){ CURREP=k; SHOW=120; render(); renderReps(); }
+function pickRep(k){ CURREP=k; SHOW=120; POOL=null; SLOTS=null; MEET_CAL={chaperone:[],ambassador:[],chancellor:[]}; render(); renderReps(); }
 function setTab(t){ TAB=t; SHOW=120; document.getElementById('tab-venues').classList.toggle('on',t==='venues');
  document.getElementById('tab-bands').classList.toggle('on',t==='bands');
  document.getElementById('tab-craft').classList.toggle('on',t==='craft');
- document.getElementById('tab-fest').classList.toggle('on',t==='fest'); render(); }
+ document.getElementById('tab-fest').classList.toggle('on',t==='fest');
+ document.getElementById('tab-talent').classList.toggle('on',t==='talent');
+ document.getElementById('tab-meet').classList.toggle('on',t==='meet');
+ document.getElementById('tab-liq').classList.toggle('on',t==='liq');
+ document.getElementById('tab-qa').classList.toggle('on',t==='qa');
+ document.getElementById('tab-road').classList.toggle('on',t==='road'); render(); }
 
 function curRegions(){ var r=REPS.find(function(x){return x.key===CURREP;}); return r&&r.tier!=='chaperone'?downline(CURREP):[CURREP]; }
 
@@ -176,7 +253,7 @@ function render(){
  // counts for tabs
  var vAll=[], bAll=[], cAll=[]; regions.forEach(function(rg){ vAll=vAll.concat(venuesIn(rg)); bAll=bAll.concat(bandsIn(rg)); cAll=cAll.concat(craftIn(rg)); });
  var fAll=festIn(regions);
- document.getElementById('vcount').textContent=vAll.length; document.getElementById('bcount').textContent=bAll.length; document.getElementById('ccount').textContent=cAll.length; document.getElementById('fcount').textContent=fAll.length;
+ document.getElementById('vcount').textContent=vAll.length; document.getElementById('bcount').textContent=bAll.length; document.getElementById('ccount').textContent=cAll.length; document.getElementById('fcount').textContent=fAll.length; document.getElementById('zcount').textContent=(window.DD_TALENT||TALENT_SEED).length; document.getElementById('mcount').textContent=(typeof POOL!=='undefined'&&POOL?POOL.filter(function(p){return p.status==='proposed';}).length:'');
  var patch = rep.tier==='chaperone' ? RLABEL[CURREP] : (CURREP==='bayarea'?'the whole bus':RLABEL[CURREP]+' + downline');
  document.getElementById('farrah').innerHTML='🎙️ <b>'+rep.name+'</b> — '+rep.tier.toUpperCase()+', '+patch+'. '+
    'Your patch: <b>'+vAll.length+' venues</b> to subscribe ('+fmt$(vAll.reduce(function(s,v){return s+(SUBPRICE[DD_CRM_SEED.cap[v]]||0);},0))+'/mo), <b>'+bAll.length+' bands</b> to sign up, and <b>'+cAll.length+' local craft vendors</b> to gather, and <b>'+fAll.length+' summer festivals</b> to land. Work the top of each list first.';
@@ -184,7 +261,19 @@ function render(){
  if(TAB==='venues'){
   var list=vAll.filter(function(v){return !q||v.toLowerCase().indexOf(q)>=0;})
     .sort(function(a,b){return (DD_CRM_SEED.score[b]||0)-(DD_CRM_SEED.score[a]||0);});
-  var html='<div class="cnt">'+list.length+' venue subscription targets · highest Dead-Scene Score first</div>';
+  var html='';
+  // inbound hostaband prospects — businesses that booked an act auto-land here as warm leads
+  var hb=(window.HB_PROSPECTS||HB_PROSPECTS_SEED).filter(function(p){return regions.indexOf(p.region)>=0;});
+  if(hb.length){
+   html+='<div class="netbanner" style="background:linear-gradient(135deg,#143a2c,#1f7a4d)">📥 <b>'+hb.length+' inbound from hostaband</b> — businesses that just booked an act. They\'re paying for talent already; warm leads for a dead.dance venue subscription. <b>Work these first.</b></div>';
+   hb.forEach(function(p){ html+='<div class="card" style="border:1px solid var(--ok,#1f7a4d)"><div class="top">'+
+     '<div class="score hot">NEW</div>'+
+     '<div class="info"><b>'+p.name+'</b><div class="meta">'+(RLABEL[p.region]||p.region)+' · booked '+p.booked+' · via hostaband</div></div>'+
+     '<span class="pill target">Prospect</span></div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ Draft the welcome + sub pitch</button>'+
+     '<div class="draft">Hi '+p.name+' — saw you booked '+p.booked+' on hostaband, nice. Since you\'re already filling nights, a dead.dance venue subscription gets you the whole network + our audience in '+(RLABEL[p.region]||p.region)+'. 15 minutes this week?<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>'; });
+  }
+  html+='<div class="cnt">'+list.length+' venue subscription targets · highest Dead-Scene Score first</div>';
   list.slice(0,SHOW).forEach(function(v,i){ var sc=DD_CRM_SEED.score[v]||0, cap=DD_CRM_SEED.cap[v]||'M',
     c=DD_CRM_SEED.contact[v]||{}, price=SUBPRICE[cap]||149, gd=DD_CRM_SEED.gd[v]||0;
    html+='<div class="card"><div class="top">'+
@@ -238,7 +327,7 @@ function render(){
      '<div class="draft">'+craftInvite(c).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
   });
   stage.innerHTML=ch;
- } else {
+ } else if(TAB==='fest'){
   // FESTIVALS — Ambassadors/Chaperones sell festival packages through our software
   var fl=fAll.filter(function(f){return !q||f.name.toLowerCase().indexOf(q)>=0||(f.city||'').toLowerCase().indexOf(q)>=0;})
     .sort(function(a,b){return (a.start||'9').localeCompare(b.start||'9');});
@@ -254,8 +343,249 @@ function render(){
      '<div class="draft">'+festPitch(f).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
   });
   stage.innerHTML=fh;
+ } else if(TAB==='talent'){
+  // TALENT — you're not selling one band. You're selling THE NETWORK: the whole
+  // catalog (every scene + every act type) + our audience, so a venue never goes dark.
+  var tl=(window.DD_TALENT||TALENT_SEED).filter(function(a){return !q||a.name.toLowerCase().indexOf(q)>=0||a.type.toLowerCase().indexOf(q)>=0;});
+  var th='<div class="netbanner">📡 <b>You\'re selling the NETWORK</b> — one subscription, the whole catalog (Dead, Phish, %ANYBAND%, comedians, DJs, originals) <b>+ our audience</b>. The pitch: <i>never have a dark night again.</i></div>'+
+   '<div class="card" style="border:1px solid var(--gold)"><div class="top">'+
+     '<div class="score" style="background:linear-gradient(135deg,#23104a,#c79a3a)">📡</div>'+
+     '<div class="info"><b>Sell the network to a venue</b><div class="meta">One relationship → fill every open night, year-round</div></div></div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ Draft the network pitch</button>'+
+     '<div class="draft">'+networkPitch().replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div></div>';
+  th+='<div class="cnt">'+tl.length+' acts in the catalog you can place — Tue comedy, Friday DJ, tribute Saturday. Off the Dead feed; booking + subscription revenue.</div>';
+  tl.forEach(function(a,i){
+   th+='<div class="card"><div class="top">'+
+     '<div class="score" style="background:linear-gradient(135deg,#5a2e86,#3aa6b0)">'+(a.emoji||'🎭')+'</div>'+
+     '<div class="info"><b>'+a.name+'</b><div class="meta">'+a.typeLabel+(a.region?(' · '+(RLABEL[a.region]||a.region)):'')+(a.bio?(' · '+a.bio):'')+'</div></div>'+
+     '<div style="text-align:right"><span class="pill target">'+a.type+'</span><div class="price" style="margin-top:5px">'+(a.fee||'ask')+'</div></div></div>'+
+     '<button class="draftbtn" onclick="talentBook('+i+')">📅 Request a booking</button></div>';
+  });
+  stage.innerHTML=th;
+ } else if(TAB==='meet'){
+  stage.innerHTML=renderMeetings();
+ } else if(TAB==='liq'){
+  stage.innerHTML=renderLiquidity();
+ } else if(TAB==='qa'){
+  stage.innerHTML=renderQA();
+ } else {
+  stage.innerHTML=renderRoadmap();
  }
+ var _sc=scorecardCard(); var _tc=todosCard(); var _ov=oversightCard();
+ stage.innerHTML = (_sc||'') + (_ov||'') + (_tc||'') + stage.innerHTML;
 }
+/* ===== Oversight — "trust, but verify." HIDDEN from the watched rep; rolls up to
+   managers + founder only. Flags trends off-strategy (cancelled Zooms, no-shows,
+   missed events, stalled pipeline). Demo data; live = chat_rep_alerts (house-only). ===== */
+var REP_ALERTS={  // bottom-up activity, per rep (last 14d) — seeded for the demo
+  midatl:{zc:1,ns:0,ms:1,dsm:9},      // Pat L. — a cancel + a missed event + stalling
+  northeast:{zc:0,ns:0,ms:0,dsm:2},   // Robin S. — clean
+  greatlakes:{zc:3,ns:1,ms:0,dsm:11}, // June A. — high risk: cancels + a no-show
+  southeast:{zc:0,ns:0,ms:0,dsm:3},
+  pnw:{zc:2,ns:0,ms:0,dsm:8},         // Sage P. — watch
+  rockies:{zc:0,ns:0,ms:1,dsm:5},
+  lonestar:{zc:0,ns:0,ms:0,dsm:1},
+  business:{zc:0,ns:0,ms:0,dsm:1}
+};
+function repRisk(a){ if(!a)return 'ok';
+  if(a.ns>0||a.zc>=3||a.ms>=2) return 'high';
+  if(a.zc>=1||a.ms>=1||a.dsm>=7) return 'watch';
+  return 'ok'; }
+function oversightCard(){
+ var me=REPS.find(function(x){return x.key===CURREP;})||{};
+ // only managers + founder see it; chaperones (leaf) get nothing. Never shows the viewer's own surveillance.
+ if(me.tier==='chaperone') return '';
+ var team=downlineReps(CURREP).filter(function(k){return k!==CURREP;});
+ if(!team.length) return '';
+ var rows=team.map(function(k){ var rep=REPS.find(function(x){return x.key===k;})||{}; var a=REP_ALERTS[k]||{zc:0,ns:0,ms:0,dsm:2}; return {k:k,name:rep.name||k,a:a,risk:repRisk(a)}; });
+ var flagged=rows.filter(function(r){return r.risk!=='ok';});
+ var hi=rows.filter(function(r){return r.risk==='high';}).length;
+ var h='<div class="ovcard"><div class="ovh">🛰️ Oversight roll-up <span>'+flagged.length+' of '+rows.length+' need a look'+(hi?(' · '+hi+' high'):'')+'</span></div>'+
+   '<div class="ovnote">Trust, but verify. Private to managers + founder — reps don’t see this about themselves. Flags trends that drift from the plan.</div>';
+ if(!flagged.length){ h+='<div class="ovok">✅ Whole team on-strategy. Nothing to chase.</div>'; }
+ rows.sort(function(a,b){return ({high:0,watch:1,ok:2}[a.risk])-({high:0,watch:1,ok:2}[b.risk]);}).forEach(function(r){
+   var chips=[]; if(r.a.zc)chips.push((r.a.zc)+'× Zoom cancels'); if(r.a.ns)chips.push(r.a.ns+'× no-show'); if(r.a.ms)chips.push(r.a.ms+'× missed event'); if(r.a.dsm>=7)chips.push(r.a.dsm+'d since a booking');
+   h+='<div class="ovrow ov-'+r.risk+'"><div class="ovr-n">'+r.name+'<span> · '+RLABEL[r.k]+'</span></div>'+
+     '<div class="ovr-c">'+(chips.length?chips.map(function(c){return '<span>'+c+'</span>';}).join(''):'<span class="clean">clean</span>')+'</div>'+
+     '<span class="ovpill ov-'+r.risk+'">'+(r.risk==='high'?'🟥 High':(r.risk==='watch'?'🟧 Watch':'🟩 OK'))+'</span></div>';
+ });
+ return h+'</div>';
+}
+function downlineReps(key){ var kids=REPS.filter(function(r){return r.sponsor===key;}).map(function(r){return r.key;});
+ var all=[key]; kids.forEach(function(k){ all=all.concat(downlineReps(k)); }); return all; }
+/* ===== QA results — read what testers are finding (live: chat_qa_summary) ===== */
+var QA_SUMMARY_SEED=[
+ {task:'qa_find_show',label:'🎟️ Find a show & Tickets',n:38,works:92,note:'“Loved it — found my Friday show instantly.”'},
+ {task:'qa_hyperpost',label:'📡 Try HyperPost',n:41,works:78,note:'“Took me a sec to get what HyperPost meant — a tooltip would help.”'},
+ {task:'qa_month',label:'📅 Month view',n:29,works:97,note:'“Dates finally correct. 👍”'},
+ {task:'qa_fb_roundtrip',label:'🔁 FB → dead.dance round trip',n:33,works:71,note:'“Copy/paste from FB felt manual.”'},
+ {task:'qa_tunein',label:'🐺 Tune into a group',n:26,works:88,note:'“Felt just like Facebook.”'},
+ {task:'qa_miracle',label:'🍀 Miracle ticket',n:22,works:64,note:'“Karma rules confused me at first.”'},
+ {task:'qa_hostaband',label:'💡 Book on hostaband',n:18,works:83,note:'“A bar owner could do this, easy.”'},
+ {task:'share_forward',label:'📤 Forward a post (share)',n:57,works:90,note:'“Happy to weed a row for the family.”'}
+];
+function renderQA(){
+ var rows=(window.QA_SUMMARY||QA_SUMMARY_SEED).slice().sort(function(a,b){return a.works-b.works;});
+ var tot=rows.reduce(function(s,r){return s+r.n;},0), avg=Math.round(rows.reduce(function(s,r){return s+r.works*r.n;},0)/Math.max(1,tot));
+ var h='<div class="netbanner" style="background:linear-gradient(135deg,#143a2c,#1f7a4d)">🧪 <b>QA results — what testers are finding.</b> '+tot+' responses · '+avg+'% “works.” Lowest-scoring first — that’s your fix list. Trust, but verify (the build’s green; humans find the rest).</div>';
+ rows.forEach(function(r){ var cls=r.works>=85?'liqhot':(r.works>=70?'liqbuild':'liqthin');
+  h+='<div class="card"><div class="top">'+
+    '<div class="score'+(r.works<70?' hot':'')+'">'+r.works+'%</div>'+
+    '<div class="info"><b>'+r.label+'</b><div class="meta">'+r.n+' responses · '+r.works+'% say it works</div></div>'+
+    '<span class="pill '+cls+'">'+(r.works>=85?'Solid':(r.works>=70?'Watch':'Fix'))+'</span></div>'+
+    '<div class="liqbar"><span style="width:'+r.works+'%"></span></div>'+
+    (r.note?'<div class="meta" style="margin-top:7px">🗣 '+r.note+'</div>':'')+'</div>';
+ });
+ h+='<div class="cnt">Pulled from the in-app QA Assist widget (works 👍/👎 · multiple-choice · short notes). Live: chat_qa_summary + comments.</div>';
+ return h;
+}
+/* ===== Scorecards — how each leader is evaluated, in front of them (Welch playbook:
+   a few VITAL metrics, clear targets, ranked honestly, no surprises). Demo numbers;
+   live wires to subscriber/band/revenue/liquidity feeds. ===== */
+function scFmt(r,v){ return r.fmt==='money'?('$'+v.toLocaleString()):(r.fmt==='pct'?(v+'%'):(v.toLocaleString()+(r.u||''))); }
+function scoreRows(){
+ if(CURREP==='bayarea') return {title:'🐺 Founder Scorecard — Stagger Lee (the big dog)',
+   note:'The whole bus, a few vital signs. This is how the founder is measured — same transparency as everyone.',
+   rows:[
+    {m:'Subscriber growth (MoM)',a:18,t:15,fmt:'pct',up:1},
+    {m:'Total subscribers',a:42000,t:50000,fmt:'num',up:1},
+    {m:'Band adoption (active/posting)',a:610,t:800,fmt:'num',u:' bands',up:1},
+    {m:'Calendar liquidity (fill rate)',a:54,t:70,fmt:'pct',up:1},
+    {m:'MRR — venue subscriptions',a:11200,t:25000,fmt:'money',up:1},
+    {m:'GMV — tickets + bookings (30d)',a:38000,t:75000,fmt:'money',up:1},
+    {m:'Share-army coverage (avg/250)',a:22,t:60,fmt:'num',u:'×',up:1} ]};
+ if(CURREP==='business') return {title:'🐝 Exec Scorecard — Michele (second dog, runs the business)',
+   note:'How you’re evaluated — same scorecard discipline as the reps, at the exec level. Defined by Michael + Michele; reviewed openly.',
+   rows:[
+    {m:'Subscriber growth (MoM)',a:18,t:15,fmt:'pct',up:1},
+    {m:'Band use (active bands)',a:610,t:800,fmt:'num',u:' bands',up:1},
+    {m:'MRR — venue subscriptions',a:11200,t:20000,fmt:'money',up:1},
+    {m:'Talent bookings (30d)',a:9000,t:20000,fmt:'money',up:1},
+    {m:'Ambassador productivity (meetings/30d)',a:64,t:100,fmt:'num',up:1},
+    {m:'Calendar fill rate',a:54,t:70,fmt:'pct',up:1} ]};
+ // every rep gets one too — "just like the sales reps"
+ var rep=REPS.find(function(x){return x.key===CURREP;})||{}; var v=0; curRegions().forEach(function(rg){v+=venuesIn(rg).length;});
+ return {title:(rep.name||'Rep')+' — Scorecard', note:'Your patch, your numbers — clear targets, no surprises.',
+   rows:[
+    {m:'Venue subs (your patch)',a:Math.round(v*0.18),t:Math.round(v*0.4)||5,fmt:'num',u:' subs',up:1},
+    {m:'Bands signed',a:Math.round(v*0.5),t:v||10,fmt:'num',u:' bands',up:1},
+    {m:'Calendar fill rate',a:48,t:70,fmt:'pct',up:1} ]};
+}
+function scorecardCard(){ var s=scoreRows(); if(!s)return '';
+ var pcts=s.rows.map(function(r){return Math.min(150,Math.round(r.a/Math.max(1,r.t)*100));});
+ var avg=Math.round(pcts.reduce(function(a,b){return a+b;},0)/pcts.length);
+ var st=avg>=100?['Exceeding','liqhot']:(avg>=80?['On track','liqbuild']:['Needs a push','liqthin']);
+ var h='<div class="sccard"><div class="sch">'+s.title+' <span class="pill '+st[1]+'">'+st[0]+' · '+avg+'% to goal</span></div>'+
+   '<div class="scnote">'+s.note+'</div>';
+ s.rows.forEach(function(r){ var p=Math.min(100,Math.round(r.a/Math.max(1,r.t)*100));
+   h+='<div class="scrow"><div class="scm">'+r.m+' <b>'+(r.up>0?'▲':(r.up<0?'▼':'▬'))+'</b></div>'+
+     '<div class="scbar"><span style="width:'+p+'%"></span></div>'+
+     '<div class="scv">'+scFmt(r,r.a)+' <span>/ '+scFmt(r,r.t)+'</span></div></div>';
+ });
+ h+='<div class="sccreed">The standard — held both ways, top to bottom: <b>Integrity · Honesty · Partnership · Friendship · Profit (first) · Value to every interface · Excellence.</b></div>';
+ return h+'</div>';
+}
+/* ===== Per-rep To-Dos (Michele's business list, etc.) ===== */
+var TODOS={ business:[
+  {k:'share_campaign', t:'📣 <b>Post the “weed the tomatoes” share campaign</b> — ask the family to each watch ONE Facebook group and forward its best posts to our page (free, for the family, cuts the noise). <b>Then the Chancellors echo it</b> to their chapters.'},
+  {k:'ambassador_welcomes', t:'Send Ambassador welcomes — only after Michael + Michele review every percentage (still gated).'},
+  {k:'headliner_calls', t:'Work the headliner permission replies (DSO/JRAD/Kimock) → book the 15-min calls in the Meetings tab.'}
+]};
+function todosDone(){ try{return JSON.parse(localStorage.getItem('dd.todos.done')||'[]');}catch(e){return [];} }
+function todoToggle(k){ var d=todosDone(), i=d.indexOf(k); if(i>=0)d.splice(i,1); else d.push(k);
+ try{localStorage.setItem('dd.todos.done',JSON.stringify(d));}catch(e){} render(); }
+function todosCard(){ var list=TODOS[CURREP]; if(!list||!list.length)return '';
+ var rep=REPS.find(function(x){return x.key===CURREP;})||{}; var done=todosDone();
+ var open=list.filter(function(t){return done.indexOf(t.k)<0;}).length;
+ var fromMichael = (CURREP==='business');
+ return '<div class="todos"><div class="todoh">📋 '+(rep.name||'')+' — To-Dos <span>'+open+' open</span></div>'+
+   (fromMichael?'<div class="todofrom">Assigned by Michael 🐺 (Founder) → Michele 🐝 (second dog, runs the business)</div>':'')+
+   list.map(function(t){ var d=done.indexOf(t.k)>=0;
+     return '<label class="todo'+(d?' done':'')+'"><input type="checkbox" '+(d?'checked':'')+' onchange="todoToggle(\''+t.k+'\')"><span>'+t.t+'</span></label>'; }).join('')+
+   '</div>'; }
+/* ===== Liquidity — the calendar is the market; this is the exchange floor =====
+   Liquidity = supply (dates posted) × demand (eyes). We track FILL RATE (booked vs
+   open) and DENSITY (shows/region/week). Demo math from the seed; live wires to
+   chat_shows_for_scene counts + venue counts. */
+function liqRegion(rg){ var v=Math.max(1,venuesIn(rg).length); var seed=0; for(var i=0;i<rg.length;i++)seed+=rg.charCodeAt(i);
+ var base=Math.max(2,Math.round(v*0.55)), w=[]; for(var k=0;k<4;k++){ w.push(Math.max(0,base+(((seed+k*7)%5)-2))); }
+ var shows=w.reduce(function(a,b){return a+b;},0), cap=Math.max(shows,Math.round(v*4*0.7));
+ return {region:rg, venues:v, weeks:w, shows:shows, cap:cap, density:Math.round(shows/4*10)/10, fill:Math.round(shows/cap*100)}; }
+function liqStatus(f){ return f>=70?['Hot','liqhot']:(f>=40?['Building','liqbuild']:['Thin','liqthin']); }
+function renderLiquidity(){
+ var rows=curRegions().map(liqRegion);
+ var totShows=rows.reduce(function(s,r){return s+r.shows;},0),
+     totCap=rows.reduce(function(s,r){return s+r.cap;},0),
+     totVen=rows.reduce(function(s,r){return s+r.venues;},0),
+     fill=totCap?Math.round(totShows/totCap*100):0,
+     dens=Math.round(totShows/4*10)/10;
+ var h='<div class="netbanner" style="background:linear-gradient(135deg,#0f1b2d,#15366e)">📊 <b>The calendar IS the market.</b> Liquidity = <b>dates filling</b> (supply) × <b>eyes watching</b> (demand). Open squares are inventory; full squares are revenue. Keep the squares filling.</div>';
+ h+='<div class="capgrid">'+
+   '<div class="capc"><div class="k">'+totShows+'</div><div class="l">shows / 30d</div></div>'+
+   '<div class="capc"><div class="k">'+fill+'%</div><div class="l">fill rate</div></div>'+
+   '<div class="capc"><div class="k">'+dens+'</div><div class="l">shows / week</div></div>'+
+   '<div class="capc"><div class="k">'+totVen+'</div><div class="l">venues (supply)</div></div>'+
+   '<div class="capc"><div class="k">'+rows.length+'</div><div class="l">markets</div></div>'+
+   '</div>';
+ h+='<div class="cnt">Liquidity by market — fill rate &amp; weekly density</div>';
+ var mx=Math.max.apply(null,rows.map(function(r){return Math.max.apply(null,r.weeks);}).concat([1]));
+ rows.sort(function(a,b){return b.fill-a.fill;}).forEach(function(r){ var st=liqStatus(r.fill);
+  h+='<div class="card"><div class="top">'+
+    '<div class="info"><b>'+(RLABEL[r.region]||r.region)+'</b><div class="meta">'+r.venues+' venues · '+r.density+' shows/wk · '+r.shows+' in 30d</div></div>'+
+    '<span class="pill '+st[1]+'">'+st[0]+' · '+r.fill+'%</span></div>'+
+    '<div class="liqbar"><span style="width:'+r.fill+'%"></span></div>'+
+    '<div class="liqweeks">'+r.weeks.map(function(n,i){return '<div class="lw"><div class="lwbar" style="height:'+Math.round(n/mx*100)+'%"></div><span>W'+(i+1)+'</span></div>';}).join('')+'</div>'+
+    '</div>';
+ });
+ h+='<div class="cnt" style="margin-top:12px">Liquidity is the metric of a marketplace — supply × demand clearing on the calendar. Grow density and fill, and the market deepens.</div>';
+ return h;
+}
+var ROADMAP=[
+ {ic:'🌹',b:'dead.dance app (PWA)',s:'ship',m:'Home feed, calendar w/ Type filter, Reader (Friends · Bands · Groups · Shakedown · Archive · Art), composer + HyperPost, Miracle Ticket, Name-That-Tune game.'},
+ {ic:'🎭',b:'Talent Marketplace',s:'ship',m:'Any act builds a bookable profile; venues browse + request. Off the Dead feed.'},
+ {ic:'💡',b:'hostaband.com (side-door)',s:'ship',m:'Genre + date browse, BOOK NOW, host accounts (home free / business 3-then-sub), auto-prospect to the CRM.'},
+ {ic:'🗂',b:'Field CRM (this app)',s:'ship',m:'Venues · Bands · Craft · Fests · Talent · Meetings · Roadmap. Tiered rollup, hostaband prospects.'},
+ {ic:'📅',b:'Capacity outreach engine',s:'ship',m:'20-min non-competing slots, fill-30-days routine, auto-throttle, trend-driven send volume, 3-tier calendars, one-click Zoom.'},
+ {ic:'🎓',b:'Operator Academy',s:'ship',m:'Trains Chancellor/Ambassador/Chaperone — the org, the tools, "sell the network."'},
+ {ic:'🗄',b:'Backend (Supabase)',s:'ship',m:'Migrations 12–31 validated: venues, tickets, subs, scenes, talent, availability, host billing, meetings, capacity, rep settings.'},
+ {ic:'💳',b:'Payments (Stripe)',s:'gate',m:'Hosted checkout + Connect built; GATED until the LLC + counsel clear. Bookings hold/confirm; no money moves yet.'},
+ {ic:'✉️',b:'Email system (org + transactional)',s:'plan',m:'Plan + address registry done. Blocked on confirming the front-door domain; then Workspace + Resend on send.<domain>.'},
+ {ic:'🧑‍🤝‍🧑',b:'Org, roles & invitations',s:'gate',m:'Two-pillar org, musician/ambassador tracks, intro emails, cancellation policy — drafted. Percentages reviewed before any invite goes out.'},
+ {ic:'🎟',b:'Miracle Ticket + ad ladder',s:'ship',m:'Free-ticket karma flow; Shakedown vote-up + Sponsored boost.'},
+ {ic:'🚀',b:'Production & scale',s:'plan',m:'1mm-user plan + 3mm-simulated load-test kit written; execute after first $.'}
+];
+function renderRoadmap(){
+ var pl={ship:'Shipped',prog:'In progress',gate:'Gated',plan:'Planned'};
+ var n={ship:0,prog:0,gate:0,plan:0}; ROADMAP.forEach(function(r){n[r.s]++;});
+ var h='<div class="netbanner" style="background:linear-gradient(135deg,#15366e,#0f1b2d)">🏛 <b>One app, vertically integrated.</b> Our employees never leave the app — it\'s the same app our customers use. Sales, scheduling, booking, support: all one surface. '+
+   n.ship+' shipped · '+n.gate+' gated · '+n.plan+' planned.</div>';
+ h+='<div class="cnt">Apps &amp; surfaces — current status (bring the team up to date)</div>';
+ h+='<div class="rm">'+ROADMAP.map(function(r){
+   return '<div class="rmcard"><div class="ic">'+r.ic+'</div><div><div class="b"><b>'+r.b+'</b></div><div class="m">'+r.m+'</div></div><span class="rmpill '+r.s+'">'+pl[r.s]+'</span></div>';
+ }).join('')+'</div>';
+ h+='<div class="cnt" style="margin-top:14px">Why one app</div>';
+ h+='<div class="rmcard"><div class="ic">🔁</div><div><div class="b"><b>Built-in customer support</b></div><div class="m">Because reps and customers share the same surface, support isn\'t a separate tool — a rep sees exactly what the customer sees, in context. Less software, less leakage, one source of truth.</div></div></div>';
+ return h;
+}
+function networkPitch(){
+ return "Hi — dead.dance here. I'm not pitching you one band. I'm offering you the whole network.\n\n"+
+ "One subscription puts your room on the platform the live-music family already lives on — and gives you the entire catalog to fill your calendar: Grateful Dead and Phish tributes, original acts, comedians for a quiet Tuesday, DJs for a Friday, whatever the night needs. Plus our audience, already in your market, who get told about your shows.\n\n"+
+ "One relationship instead of fifty. The acts come to you. The crowd comes with them. The promise is simple: never have a dark night again.\n\n"+
+ "Your Ambassador handles the whole thing — you keep your gate, your room, your control. 15 minutes this week?\n\n— dead.dance";
+}
+/* inbound hostaband prospects (demo). Live: chat_crm_prospects(region) feeds this. */
+var HB_PROSPECTS_SEED=[
+ {name:"The Bar, Hellertown",region:"midatl",booked:"Detroit Rock Knights (KISS) — Fri"},
+ {name:"Riverside Tavern",region:"midatl",booked:"Laffs McGee (comedy) — Mon"}
+];
+var TALENT_SEED=[
+ {name:"Laffs McGee",type:"comedian",typeLabel:"Comedian",emoji:"🎤",region:"midatl",fee:"$400/night",bio:"clean-ish standup, 60 min"},
+ {name:"DJ Terrapin",type:"dj",typeLabel:"DJ",emoji:"🎧",region:"midatl",fee:"$300/night",bio:"jam + dance sets"},
+ {name:"Splintered Sunlight",type:"tribute",typeLabel:"Tribute band",emoji:"🌅",region:"midatl",fee:"$1,200/night",bio:"GD tribute, Delaware Valley"},
+ {name:"The Hollow Bones",type:"original",typeLabel:"Original act",emoji:"🎸",region:"northeast",fee:"$700/night",bio:"original Americana"}
+];
+function talentBook(i){ var a=(window.DD_TALENT||TALENT_SEED)[i]; if(!a)return;
+ toast('📅 Booking request drafted for '+a.name+' — pick the venue + date, and they accept or decline. (Wires to chat_act_book_request on deploy.)'); }
 function festPitch(f){
  return "Hi — dead.dance here, the network the whole Grateful Dead family already lives on.\n\n"+
  f.name+" is exactly our crowd. Run it on dead.dance and you get: a private band-coordination group, the daily schedule on every local chapter calendar (rolled up to the national calendar), in-app multi-day pass sales, and Shakedown + art vendor tables lined up by our Chaperones — all in one place.\n\n"+
@@ -267,6 +597,131 @@ function craftInvite(c){
  "your booth on Shakedown Street in-app, and a payment-ready storefront when you want it.\n\n"+
  "Want me to add "+c.n+" to the "+RLABEL[c.region]+" lot?\n\n— dead.dance";
 }
+/* ===== Outreach as a CALENDAR-CAPACITY routine ==============================
+   Don't send a fixed 10 — send enough to keep the calendar full 30 days out.
+   20-min non-competing slots; throttle when booked ~2 weeks ahead; acceptance
+   TRENDS drive the send volume. The rep just clicks their next Zoom meeting.
+   Live: chat_meeting_capacity / chat_outreach_recommend / chat_meeting_accept. */
+var DOWM=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var SLOT_MIN=20, WINDOW_DAYS=30, START_HOUR=10;
+var MEET_CAL={chaperone:[],ambassador:[],chancellor:[]}, POOL=null, SLOTS=null;
+/* per-rep scheduling: Zoom link + slots/day + target/day (a Chancellor takes fewer than a full-time Chaperone) */
+var REP_CFG_DEF={chaperone:{spd:8,tpd:2},ambassador:{spd:5,tpd:2},chancellor:{spd:3,tpd:1}};
+function repCfg(){ var c=null; try{c=JSON.parse(localStorage.getItem('dd.repcfg.'+CURREP)||'null');}catch(e){}
+ if(!c){ var rep=REPS.find(function(x){return x.key===CURREP;})||{}; var d=REP_CFG_DEF[rep.tier]||{spd:8,tpd:2};
+   c={zoom:'https://us06web.zoom.us/j/dd-'+CURREP, spd:d.spd, tpd:d.tpd}; }
+ return c; }
+function repCfgSave(c){ try{localStorage.setItem('dd.repcfg.'+CURREP,JSON.stringify(c));}catch(e){} }
+function saveSchedule(){ var c=repCfg();
+ var z=document.getElementById('cfg_zoom'); if(z&&z.value)c.zoom=z.value.trim();
+ var sp=document.getElementById('cfg_spd'); if(sp)c.spd=Math.max(1,Math.min(20,parseInt(sp.value,10)||c.spd));
+ var tp=document.getElementById('cfg_tpd'); if(tp)c.tpd=Math.max(1,Math.min(20,parseInt(tp.value,10)||c.tpd));
+ repCfgSave(c); SLOTS=null; render();
+ ctoast('⚙ Saved — Zoom + capacity updated; outreach recalculated. (Live: chat_rep_set + chat_rep_schedule.)'); }
+function ctoast(m){var t=document.createElement('div');t.textContent=m;t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f1b2d;color:#fff;padding:11px 16px;border-radius:11px;z-index:90;font-size:13px;max-width:88%;text-align:center;box-shadow:0 10px 28px #0005';document.body.appendChild(t);setTimeout(function(){t.style.transition='.4s';t.style.opacity=0;},2300);setTimeout(function(){t.remove();},2800);}
+function pad2(n){return (n<10?'0':'')+n;}
+function zoomFor(){ return repCfg().zoom; }
+function genSlots(){ var out=[], d=new Date(); d.setHours(0,0,0,0); var spd=repCfg().spd;
+ for(var i=1;i<=WINDOW_DAYS;i++){ d.setDate(d.getDate()+1); var wd=d.getDay(); if(wd===0||wd===6)continue;
+  for(var s=0;s<spd;s++){ var mins=START_HOUR*60+s*SLOT_MIN, hh=Math.floor(mins/60), mm=mins%60;
+   out.push({iso:d.toISOString().slice(0,10)+'T'+pad2(hh)+':'+pad2(mm), days:i,
+     label:DOWM[wd]+' '+(d.getMonth()+1)+'/'+d.getDate()+' · '+pad2(hh)+':'+pad2(mm)}); } }
+ return out; }
+function buildPool(){ var regions=curRegions(); var vs=[]; regions.forEach(function(rg){ vs=vs.concat(venuesIn(rg)); });
+ var hb=(window.HB_PROSPECTS||HB_PROSPECTS_SEED).filter(function(p){return regions.indexOf(p.region)>=0;})
+   .map(function(p){return {venue:p.name,region:p.region,gd:0,hot:true,booked:p.booked};});
+ vs.sort(function(a,b){return (DD_CRM_SEED.score[b]||0)-(DD_CRM_SEED.score[a]||0);});
+ var seeded=vs.map(function(v){return {venue:v,region:VENUE_REGION[v],gd:DD_CRM_SEED.gd[v]||0};});
+ POOL=hb.concat(seeded).map(function(p,i){ return Object.assign({status:'new',slotISO:null,slotLabel:null,
+   token:Math.random().toString(36).slice(2,14)}, p); });
+ SLOTS=genSlots(); }
+function takenSlots(){ var t={}; POOL.forEach(function(p){ if(p.slotISO&&(p.status==='proposed'||p.status==='accepted')) t[p.slotISO]=1; }); return t; }
+function nextOpenSlots(n){ var taken=takenSlots(), out=[]; for(var i=0;i<SLOTS.length&&out.length<n;i++){ if(!taken[SLOTS[i].iso]) out.push(SLOTS[i]); } return out; }
+function acceptRate(){ var a=0,d=0; POOL.forEach(function(p){ if(p.status==='accepted')a++; else if(p.status==='declined')d++; });
+ return (a+d)>=4 ? Math.max(0.1, a/(a+d)) : 0.35; }   // seed 35% until we have data
+function capacity(){ var biz=SLOTS.length/repCfg().spd, cap=SLOTS.length;
+ var booked=0,prop=0,b14=0,through=null;
+ POOL.forEach(function(p){ if(p.status==='accepted'){booked++; if(p.slotISO){ if(!through||p.slotISO>through)through=p.slotISO; } var sl=SLOTS.filter(function(s){return s.iso===p.slotISO;})[0]; if(sl&&sl.days<=14)b14++; }
+   else if(p.status==='proposed')prop++; });
+ return {cap:cap, biz:biz, booked:booked, prop:prop, open:Math.max(0,cap-booked-prop), b14:b14, through:through}; }
+function recommend(){ var c=capacity(), rate=acceptRate(), tpd=repCfg().tpd, desired=tpd*Math.round(c.biz);
+ var throttle=(c.b14>=tpd*10), rec;
+ if(throttle){ rec=Math.min(c.open, tpd*2); }
+ else { var need=Math.max(0, desired - c.booked - Math.round(c.prop*rate)); rec=Math.min(c.open, Math.ceil(need/rate)); }
+ return {rec:rec, throttle:throttle, rate:rate, desired:desired, cap:c}; }
+function introEmail(m){
+ var hook = m.hot ? ('I saw you booked '+m.booked+' on hostaband — you clearly fill nights, and we can help you fill more.')
+   : (m.gd ? ('I know '+m.venue+' has hosted '+m.gd+' Grateful Dead shows — you already draw this crowd.')
+            : ('I run the dead.dance chapter for '+(RLABEL[m.region]||m.region)+', and '+m.venue+' looks like a perfect fit.'));
+ return "Subject: 15 minutes — filling "+m.venue+"'s calendar with dead.dance\n\n"+
+  "Hi "+m.venue+" — "+hook+"\n\n"+
+  "dead.dance puts your room on the network the whole live-music family already lives on: tribute acts across every scene, plus our local audience who hear about your shows. One relationship, never a dark night.\n\n"+
+  "I've held a 20-minute time for us — "+m.slotLabel+" — on Zoom: "+zoomFor()+"\n"+
+  "ACCEPT to lock it in: https://deaddance.app/m/"+m.token+"   (or reply with a better time)\n\n"+
+  "— your dead.dance chapter, "+(RLABEL[m.region]||m.region);
+}
+function sendRoutine(){ if(!POOL)buildPool(); var r=recommend(); if(r.rec<=0){ ctoast('Calendar full enough — nothing to send right now.'); return; }
+ var slots=nextOpenSlots(r.rec), n=0;
+ for(var i=0;i<POOL.length && n<slots.length;i++){ if(POOL[i].status==='new'){ POOL[i].status='proposed'; POOL[i].slotISO=slots[n].iso; POOL[i].slotLabel=slots[n].label; n++; } }
+ render(); ctoast('📤 Sent '+n+' intro emails — each with a unique 20-min slot. The calendar does the rest.'); }
+function nextMeeting(){ var up=MEET_CAL.chaperone.slice().sort(function(a,b){return a.slotISO.localeCompare(b.slotISO);})[0]; return up; }
+function joinNext(){ var m=nextMeeting(); if(!m){ ctoast('No meetings booked yet — send today\'s routine.'); return; } ctoast('▶️ Opening Zoom for '+m.venue+' ('+m.slotLabel+')…'); }
+function renderMeetings(){
+ if(!POOL) buildPool();
+ var r=recommend(), c=r.cap, rate=Math.round(r.rate*100), fill=c.cap?Math.round(c.booked/c.cap*100):0;
+ var nm=nextMeeting();
+ var h='';
+ // Next Zoom meeting — the rep just clicks this
+ h+='<div class="nextmtg">'+(nm
+   ? '<div><div class="nm-l">▶️ Your next Zoom meeting</div><div class="nm-v">'+nm.venue+' · '+nm.slotLabel+'</div></div><button onclick="joinNext()">Join Zoom</button>'
+   : '<div><div class="nm-l">▶️ Your next Zoom meeting</div><div class="nm-v">none yet — run today\'s outreach routine</div></div><button onclick="sendRoutine()">Send routine</button>')+'</div>';
+ // per-rep scheduling — real Zoom + daily capacity
+ var cfg=repCfg();
+ h+='<details class="sched"><summary>⚙ Your scheduling — Zoom &amp; daily capacity</summary>'+
+   '<div class="schedrow"><label>Your Zoom room<input id="cfg_zoom" value="'+cfg.zoom.replace(/"/g,"&quot;")+'" placeholder="https://…zoom.us/j/…"></label></div>'+
+   '<div class="schedrow two"><label>20-min slots / day<input id="cfg_spd" type="number" min="1" max="20" value="'+cfg.spd+'"></label>'+
+     '<label>Target booked / day<input id="cfg_tpd" type="number" min="1" max="20" value="'+cfg.tpd+'"></label></div>'+
+   '<button class="draftbtn" style="background:var(--navy);color:#fff;border:0" onclick="saveSchedule()">Save scheduling</button>'+
+   '<div style="font-size:11px;color:var(--muted);margin-top:6px">Your Zoom link goes in every intro email. Fewer slots/day = a lighter calendar (e.g. a Chancellor takes fewer than a full-time Chaperone).</div></details>';
+ // capacity dashboard
+ h+='<div class="capgrid">'+
+   '<div class="capc"><div class="k">'+c.booked+'</div><div class="l">booked (30d)</div></div>'+
+   '<div class="capc"><div class="k">'+c.open+'</div><div class="l">open slots</div></div>'+
+   '<div class="capc"><div class="k">'+fill+'%</div><div class="l">calendar full</div></div>'+
+   '<div class="capc"><div class="k">'+rate+'%</div><div class="l">accept rate</div></div>'+
+   '<div class="capc"><div class="k">'+(c.through?c.through.slice(5).replace('-','/'):'—')+'</div><div class="l">booked through</div></div>'+
+   '</div>';
+ // the routine recommendation + send button (throttles automatically)
+ h+='<div class="netbanner" style="background:'+(r.throttle?'linear-gradient(135deg,#143a2c,#1f7a4d)':'linear-gradient(135deg,#23104a,#3a1d5e)')+'">'+
+   (r.throttle
+    ? '🟢 <b>Booked ~2 weeks out — throttle on.</b> The calendar\'s healthy; send just <b>'+r.rec+'</b> to top it up. Outreach slows as the calendar fills.'
+    : '🟡 <b>Keep the calendar full.</b> To stay ~'+repCfg().tpd+'/business-day booked over 30 days at a '+rate+'% accept rate, send <b>'+r.rec+'</b> intro emails now. Each gets a unique non-competing 20-min slot.')+
+   '<div style="margin-top:9px"><button class="draftbtn" style="background:var(--gold);color:#231f0e;border:0;font-weight:800" onclick="sendRoutine()">📤 Send today\'s routine ('+r.rec+')</button></div></div>';
+ // sent (proposed) queue
+ var sent=POOL.filter(function(p){return p.status==='proposed';});
+ if(sent.length){ h+='<div class="cnt">'+sent.length+' awaiting reply — each holds a 20-min slot</div>';
+  sent.forEach(function(m){ var idx=POOL.indexOf(m);
+   h+='<div class="card"><div class="top">'+
+     '<div class="score'+(m.hot?' hot':'')+'">'+(m.hot?'🔥':(m.gd||'•'))+'</div>'+
+     '<div class="info"><b>'+m.venue+'</b><div class="meta">'+(RLABEL[m.region]||m.region)+' · proposed '+m.slotLabel+'</div></div>'+
+     '<span class="pill target">Proposed</span></div>'+
+     '<button class="draftbtn" onclick="tog(this)">✍️ View the differentiated email</button>'+
+     '<div class="draft">'+introEmail(m).replace(/</g,"&lt;")+'<br><button class="copy" onclick="cp(this)">📋 Copy</button></div>'+
+     '<div style="display:flex;gap:8px;margin-top:8px"><button class="draftbtn" style="background:var(--ok);color:#fff" onclick="meetAccept('+idx+')">▶️ Simulate ACCEPT</button><button class="draftbtn" onclick="meetDecline('+idx+')">Decline</button></div>'+
+     '</div>'; });
+ } else { h+='<div class="cnt">No emails out yet — hit “Send today\'s routine”.</div>'; }
+ // the three calendars
+ h+='<div class="cnt" style="margin-top:16px">📅 Booking calendars — bookable at every level</div>';
+ h+='<div class="cals">'+['chaperone','ambassador','chancellor'].map(function(role){ var items=MEET_CAL[role].slice().sort(function(a,b){return a.slotISO.localeCompare(b.slotISO);});
+   return '<div class="calcol"><div class="calh">'+({chaperone:'🤝 Chaperone',ambassador:'🎙️ Ambassador',chancellor:'👑 Chancellor'})[role]+'</div>'+
+     (items.length?items.map(function(it){return '<div class="calev"><b>'+it.slotLabel+'</b><span>'+it.venue+'</span></div>';}).join(''):'<div class="calempty">open — no meetings booked</div>')+'</div>';
+ }).join('')+'</div>';
+ return h;
+}
+function meetAccept(i){ var m=POOL[i]; if(!m||m.status!=='proposed')return;
+ m.status='accepted'; MEET_CAL.chaperone.push({slotISO:m.slotISO,slotLabel:m.slotLabel,venue:m.venue}); render();
+ ctoast('✅ '+m.venue+' accepted — booked on your Chaperone calendar ('+m.slotLabel+'). You\'ve been notified.'); }
+function meetDecline(i){ var m=POOL[i]; if(!m)return; m.status='declined'; render(); ctoast(m.venue+' passed — its slot reopens for the next send.'); }
 function tog(btn){ var d=btn.nextElementSibling; d.classList.toggle('on'); }
 function cp(btn){ var t=btn.parentNode.textContent.replace('📋 Copy','').trim();
  try{ navigator.clipboard.writeText(t); btn.textContent='✓ Copied'; }catch(e){ btn.textContent='Select & copy'; } }

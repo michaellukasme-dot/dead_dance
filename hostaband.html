@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>hostaband — book a band for any room or any party</title>
+<!--
+  ===== H&Z DESIGN NOTES (the side-door) =====
+  hostaband.com is the public front door to the booking database. It is NOT dead.dance.
+  Dead acts (and every other act) are welcome here; nothing about the Dead family/feed
+  shows up. The whole job of this page: make booking dead-simple for ANYONE who needs a
+  band — a 40-seat bar, a winery, a backyard 50th birthday, a town festival.
+  Three doors, one database:
+    1) FIND  — browse acts by REGION + GENRE (+ search). Big friendly cards.
+    2) BOOK  — one form: who you are (venue / private party / festival), date, offer, note.
+               (Backend: chat_act_book_request — venue_id may be NULL, so a private host books too.)
+    3) LIST  — any act builds a profile in 60 seconds (chat_act_upsert).
+  Honest-state: live demo catalog renders offline; real RPCs fire when the anon client is
+  wired on deploy. Nothing auto-sends; the host sends the request by hand.
+-->
+<style>
+:root{--ink:#16181d;--paper:#fbf7ef;--card:#fff;--line:#e7e0d2;--muted:#6b6457;
+  --navy:#1c2540;--gold:#caa53d;--rose:#b8002e;--ok:#1f7a4d}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+a{color:var(--navy)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+/* marquee header */
+.top{background:linear-gradient(120deg,#141b30,#26325a);color:#fff;padding:10px 0;position:sticky;top:0;z-index:30;box-shadow:0 2px 14px #0003}
+.top .wrap{display:flex;align-items:center;gap:12px}
+.brand{font-weight:900;font-size:20px;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.brand .bulb{color:var(--gold)}
+.brand small{font-weight:600;color:#c9d2ea;font-size:11.5px;margin-left:2px}
+.top nav{margin-left:auto;display:flex;gap:8px}
+.top nav button{background:#ffffff1a;color:#fff;border:1px solid #ffffff33;border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.top nav button.gold{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+.top nav button:hover{filter:brightness(1.08)}
+/* hero */
+.hero{background:radial-gradient(1200px 300px at 50% -40px,#2c3a68,#141b30);color:#fff;text-align:center;padding:38px 16px 30px}
+.hero h1{font-size:30px;margin:0 0 8px;font-weight:900;line-height:1.15}
+.hero p{margin:0 auto;max-width:620px;color:#d7ddee;font-size:15px}
+.hero .pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.hero .pills span{background:#ffffff14;border:1px solid #ffffff2e;border-radius:999px;padding:6px 12px;font-size:12.5px}
+/* filter bar */
+.filters{position:sticky;top:54px;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);padding:12px 0}
+.filters .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;color:var(--ink)}
+.filters input{flex:1;min-width:140px}
+.filters .cnt{font-size:12px;color:var(--muted);font-weight:700;margin-left:auto}
+/* act grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;padding:18px 0 40px}
+.act{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.act .ph{height:104px;background:linear-gradient(135deg,#26325a,#caa53d);display:grid;place-items:center;font-size:42px}
+.act .bd{padding:13px 14px;display:flex;flex-direction:column;gap:5px;flex:1}
+.act .nm{font-weight:800;font-size:16px}
+.act .tags{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0}
+.act .tag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;background:#f1ece0;color:#5a5340;border-radius:999px;padding:3px 8px}
+.act .tag.gen{background:#e9eefb;color:#26325a}
+.act .bio{font-size:12.5px;color:var(--muted)}
+.act .fee{font-weight:800;color:var(--navy);margin-top:2px}
+.act .book{margin-top:auto;border:0;background:var(--navy);color:#fff;font-weight:800;font-size:14px;padding:11px;border-radius:0 0 0 0;cursor:pointer}
+.act .book:hover{filter:brightness(1.12)}
+.act .book.buy{background:var(--gold);color:#1a1a1a}
+.act .tag.now{background:#fdf2d6;color:#8a6a12}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+/* modal */
+.ov{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.ov.on{display:flex}
+.box{background:#fff;border-radius:18px;max-width:460px;width:100%;max-height:90vh;overflow:auto;padding:20px}
+.box h3{margin:0 0 3px;font-size:19px}
+.box .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+.row{margin-bottom:10px}
+.row label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.row input,.row select,.row textarea{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+.row textarea{min-height:60px;resize:vertical}
+.two{display:flex;gap:10px}.two>div{flex:1}
+.go{width:100%;border:0;background:var(--gold);color:#1a1a1a;font-weight:900;font-size:16px;padding:13px;border-radius:12px;cursor:pointer;margin-top:6px}
+.go.navy{background:var(--navy);color:#fff}
+.foot{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+.x{float:right;border:0;background:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#16181d;color:#fff;padding:12px 18px;border-radius:12px;z-index:90;font-size:13.5px;max-width:90%;text-align:center;box-shadow:0 10px 30px #0005}
+.note{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin:16px 0;font-size:13px;color:var(--muted)}
+.note b{color:var(--ink)}
+footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <div class="brand"><span class="bulb">💡</span>hostaband<small>book any act for any room or party</small></div>
+  <nav>
+    <button id="acctBtn" onclick="openSignup()">Sign in</button>
+    <button class="gold" onclick="openList()">List your act</button>
+  </nav>
+</div></header>
+
+<section class="hero">
+  <h1>Book a band for any room — or any party.</h1>
+  <p>From a 40-seat bar to a backyard 50th. Pick a <b>genre</b> and a <b>date</b>, see exactly who's free that night with the price up front — and <b>BOOK NOW</b>. Dead bands, Phish, Beatles, KISS, Buffett, comedians, DJs… all here.</p>
+  <div class="pills"><span>🎸 Tribute bands</span><span>🎤 Comedians</span><span>🎧 DJs</span><span>🎻 Originals</span><span>🎙️ Crooners</span><span>🏠 Private parties welcome</span></div>
+</section>
+
+<div class="filters"><div class="wrap">
+  <select id="fGenre" onchange="render()"></select>
+  <input id="fDate" type="date" onchange="render()" title="Pick a date to see who's free that night">
+  <select id="fRegion" onchange="render()"></select>
+  <input id="fSearch" placeholder="Search acts…" oninput="render()">
+  <span class="cnt" id="cnt"></span>
+</div></div>
+<div class="wrap"><div id="dateHint" style="font-size:12.5px;color:var(--muted);margin-top:12px"></div></div>
+
+<div class="wrap">
+  <div class="grid" id="grid"></div>
+  <div class="note">
+    <b>Not on dead.dance.</b> hostaband is the open side-door to the same booking database — every act is welcome here, and nothing about anyone's other communities shows up. <b>Hosts of all kinds book here:</b> venues, wineries, breweries, festivals, and private parties (no venue required). The deal is host-to-act; we just set the table. Payments and contracts run through the cleared system once it's live.
+  </div>
+</div>
+
+<!-- BOOK modal -->
+<div class="ov" id="bookOv" onclick="if(event.target===this)close_('bookOv')"><div class="box">
+  <button class="x" onclick="close_('bookOv')">×</button>
+  <h3 id="bkName">Request a booking</h3>
+  <div class="sub" id="bkSub"></div>
+  <div class="row"><label>Your name</label><input id="bk_name" placeholder="Who's booking"></div>
+  <div class="two"><div class="row"><label>Email or phone</label><input id="bk_contact" placeholder="how the act reaches you"></div>
+    <div class="row"><label>Booking type</label><select id="bk_type"><option value="venue">Venue / bar</option><option value="private">Private party</option><option value="festival">Festival</option><option value="winery">Winery / brewery</option></select></div></div>
+  <div class="two"><div class="row"><label>Venue / event name</label><input id="bk_where" placeholder="The room or the party"></div>
+    <div class="row"><label>Date</label><input id="bk_date" type="date"></div></div>
+  <div class="two"><div class="row"><label>Your offer ($)</label><input id="bk_offer" type="number" min="0" placeholder="optional"></div>
+    <div class="row"><label>City / region</label><input id="bk_city" placeholder="where it is"></div></div>
+  <div class="row"><label>Note to the act</label><textarea id="bk_note" placeholder="Set length, vibe, backline, parking — anything they should know"></textarea></div>
+  <button class="go navy" onclick="sendBooking()">📅 Send booking request</button>
+  <div class="foot">The act gets your request and accepts or declines — you'll hear back. Nothing is charged now; nothing auto-sends. Private-party hosts welcome (no venue needed).</div>
+</div></div>
+
+<!-- SIGN UP / account modal (first-time host) -->
+<div class="ov" id="suOv" onclick="if(event.target===this)close_('suOv')"><div class="box">
+  <button class="x" onclick="close_('suOv')">×</button>
+  <h3>Create your host account</h3>
+  <div class="sub">First time? Make an account to book. Takes a few seconds.</div>
+  <div class="row"><label>Your name</label><input id="su_name" placeholder="Your name"></div>
+  <div class="row"><label>Email</label><input id="su_email" type="email" placeholder="you@email.com"></div>
+  <div class="row"><label>You're booking as…</label>
+    <select id="su_type" onchange="suTypeChange()">
+      <option value="home">🏠 A home / private party (free to book)</option>
+      <option value="business">🏢 A business / venue (3 free, then subscribe)</option>
+    </select></div>
+  <div id="su_biz" style="display:none">
+    <div class="two"><div class="row"><label>Venue / business name</label><input id="su_org" placeholder="e.g. The Bar, Hellertown"></div>
+      <div class="row"><label>Region</label><select id="su_region"></select></div></div>
+  </div>
+  <label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:6px 0 2px">
+    <input type="checkbox" id="su_agree" style="width:auto;margin-top:3px">
+    <span>I've read and agree to the <a href="#" onclick="openPolicy();return false">booking &amp; cancellation policy</a> — including how the act gets paid and what happens if a date is cancelled.</span></label>
+  <button class="go" onclick="signUp()">Create account &amp; continue</button>
+  <div class="foot">We never charge to create an account. A business gets 3 free bookings, then a subscription. Homes book free, always. (You still pay the act their fee.)</div>
+</div></div>
+
+<!-- POLICY modal -->
+<div class="ov" id="polOv" onclick="if(event.target===this)close_('polOv')"><div class="box">
+  <button class="x" onclick="close_('polOv')">×</button>
+  <h3>Booking &amp; cancellation policy</h3>
+  <div class="sub">Agreed by all three parties — host, act, and hostaband.</div>
+  <div style="font-size:13px;line-height:1.55;color:var(--ink)">
+    <p><b>Musicians get paid.</b> The price you see is the act's money (minus a small, disclosed platform fee). Payouts run through secure checkout once the system is live; a booking is held &amp; confirmed the moment you tap.</p>
+    <p><b>If the host cancels:</b> 14+ days out → deposit refundable minus a small admin fee · 7–13 days → ~50% of the fee · under 7 days / no-show → full fee. The act keeps what's owed.</p>
+    <p><b>If the act cancels:</b> 14+ days → full refund of any deposit, we help you rebook · under 14 days / no-show → full refund + priority rebooking, and it counts against the act.</p>
+    <p><b>Force majeure</b> (weather, illness, closures): no penalty either way — reschedule in good faith or refund.</p>
+    <p><b>Home = free to book.</b> <b>Business = 3 free, then a subscription.</b> Either way, the act's fee &amp; deposit terms apply.</p>
+    <p style="color:var(--muted);font-size:11.5px">Plain-language summary; the binding Terms are finalized with counsel before payments go live.</p>
+  </div>
+  <button class="go navy" onclick="close_('polOv')">Got it</button>
+</div></div>
+
+<!-- BOOK NOW modal (instant confirm) -->
+<div class="ov" id="nowOv" onclick="if(event.target===this)close_('nowOv')"><div class="box">
+  <button class="x" onclick="close_('nowOv')">×</button>
+  <h3 id="nwTitle">Book now</h3>
+  <div class="sub" id="nwSub"></div>
+  <div class="row"><label>Your name</label><input id="nw_name" placeholder="Who's booking"></div>
+  <div class="two"><div class="row"><label>Email or phone</label><input id="nw_contact" placeholder="how the act reaches you"></div>
+    <div class="row"><label>Your room / event</label><input id="nw_where" placeholder="e.g. The Bar, Hellertown"></div></div>
+  <div class="row"><label>Note to the act (optional)</label><textarea id="nw_note" placeholder="Load-in, set length, parking…"></textarea></div>
+  <button class="go" id="nwBtn" onclick="confirmNow()">🎟️ BOOK NOW</button>
+  <div class="foot" id="nwFoot"></div>
+</div></div>
+
+<!-- LIST modal -->
+<div class="ov" id="listOv" onclick="if(event.target===this)close_('listOv')"><div class="box">
+  <button class="x" onclick="close_('listOv')">×</button>
+  <h3>List your act</h3>
+  <div class="sub">60 seconds. Then any host can find and book you.</div>
+  <div class="row"><label>Act / stage name</label><input id="la_name" placeholder="Your name or act"></div>
+  <div class="two"><div class="row"><label>Type</label><select id="la_type"></select></div>
+    <div class="row"><label>Genre</label><select id="la_genre"></select></div></div>
+  <div class="two"><div class="row"><label>Home region</label><select id="la_region"></select></div>
+    <div class="row"><label>Fee ($/night)</label><input id="la_fee" type="number" min="0" placeholder="e.g. 500"></div></div>
+  <div class="row"><label>Fee note</label><input id="la_feenote" placeholder="per night · + door · negotiable"></div>
+  <div class="row"><label>Short bio (one line hosts see)</label><input id="la_bio" placeholder="What you bring to a room"></div>
+  <div class="two"><div class="row"><label>Artwork / photo link</label><input id="la_art" placeholder="https://…"></div>
+    <div class="row"><label>EPK / video / site</label><input id="la_epk" placeholder="https://…"></div></div>
+  <button class="go" onclick="listAct()">🎭 List me for hosts</button>
+  <div class="foot">Builds a bookable profile in the database. Free to list. You set the fee; you accept or decline every request.</div>
+</div></div>
+
+<footer><div class="wrap">hostaband.com — the open booking side-door. Acts of every genre welcome; nothing here touches anyone's private community. © 2026</div></footer>
+
+<script>
+/* ---- taxonomy (H&Z dreamed it up; matches chat_scene catalog in 26_hostaband.sql) ---- */
+var REGIONS=[["","All regions"],["national","National / will travel"],["northeast","Northeast + New England"],
+ ["midatl","Mid-Atlantic"],["southeast","Southeast"],["greatlakes","Great Lakes"],["rockies","Rockies"],
+ ["lonestar","Lone Star (TX)"],["pnw","Pacific Northwest"],["socal","SoCal"],["norcal","NorCal / Bay Area"]];
+var GENRES=[["","All genres"],
+ ["grateful_dead","Grateful Dead tribute"],["phish","Phish tribute"],["beatles","Beatles tribute"],
+ ["allman_brothers","Allman Brothers tribute"],["pink_floyd","Pink Floyd tribute"],["led_zeppelin","Led Zeppelin tribute"],
+ ["tom_petty","Tom Petty tribute"],["eagles","Eagles tribute"],["fleetwood_mac","Fleetwood Mac tribute"],
+ ["rolling_stones","Rolling Stones tribute"],["queen","Queen tribute"],["kiss","KISS tribute"],
+ ["jimmy_buffett","Jimmy Buffett / Trop Rock"],["billy_joel","Billy Joel tribute"],["neil_diamond","Neil Diamond tribute"],
+ ["sinatra","Sinatra / Rat Pack"],["motown","Motown Revue"],["big_band","Big Band / Swing"],
+ ["original_americana","Original — Americana"],["original_rock","Original — Rock"],["jam","Jam / Improv"],
+ ["singer_songwriter","Singer-Songwriter"],["jazz_combo","Jazz Combo"],["bluegrass","Bluegrass"],
+ ["comedy","Comedy"],["dj_set","DJ / Dance"],["variety_cover","Variety / Cover Band"],["duo_solo","Duo / Solo"]];
+var TYPES=[["band","Band"],["tribute","Tribute band"],["original","Original act"],["comedian","Comedian"],
+ ["dj","DJ"],["duo","Duo"],["solo","Solo"],["variety","Variety"],["other","Other"]];
+function rlabel(s){for(var i=0;i<REGIONS.length;i++)if(REGIONS[i][0]===s)return REGIONS[i][1];return s||'';}
+function glabel(s){for(var i=0;i<GENRES.length;i++)if(GENRES[i][0]===s)return GENRES[i][1];return s||'';}
+function gemoji(g){var m={grateful_dead:'🌹',phish:'🐟',beatles:'🪲',pink_floyd:'🌈',led_zeppelin:'⚡',sinatra:'🎙️',motown:'🎵',comedy:'🎤',dj_set:'🎧',jam:'🌀',jazz_combo:'🎷',bluegrass:'🪕',queen:'👑',eagles:'🦅',big_band:'🎺',kiss:'🤘',jimmy_buffett:'🌴',billy_joel:'🎹',neil_diamond:'💎'};return m[g]||'🎸';}
+var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+/* ---- demo catalog (honest-state: live offline; real browse wires to chat_act_browse on deploy) ---- */
+/* avail = weekdays the act plays (0=Sun..6=Sat); instant=true → BOOK NOW; priceN=$ for instant */
+var DEMO=[
+ // ——— the Hellertown bar's week (Mon comedy · Wed Americana duo · Fri KISS · Sat Buffett) ———
+ {name:"Laffs McGee",type:"comedian",genre:"comedy",region:"midatl",fee:"$400/night",priceN:400,instant:true,avail:[1,2,3],bio:"Clean-ish standup, 60 min. Perfect Monday."},
+ {name:"The Porch Lights",type:"duo",genre:"original_americana",region:"midatl",fee:"$350/night",priceN:350,instant:true,avail:[2,3,4],bio:"Americana duet — guitar & harmony. Easy midweek."},
+ {name:"Detroit Rock Knights",type:"tribute",genre:"kiss",region:"midatl",fee:"$1,400/night",priceN:1400,instant:true,avail:[5,6],bio:"Full KISS spectacle — makeup, fire, the hits."},
+ {name:"Margaritaville Mondays",type:"tribute",genre:"jimmy_buffett",region:"midatl",fee:"$1,100/night",priceN:1100,instant:true,avail:[5,6],bio:"Jimmy Buffett trop-rock party. Saturday-night crowd-pleaser."},
+ // ——— the wider catalog ———
+ {name:"Splintered Sunlight",type:"tribute",genre:"grateful_dead",region:"midatl",fee:"$1,200/night",priceN:1200,instant:true,avail:[4,5,6],bio:"Delaware Valley's Dead, decades deep."},
+ {name:"Strange Design",type:"tribute",genre:"phish",region:"northeast",fee:"$900/night",priceN:900,instant:false,avail:[4,5],bio:"Phish, note for note."},
+ {name:"Hey Jude & the Mop Tops",type:"tribute",genre:"beatles",region:"socal",fee:"$1,500/night",priceN:1500,instant:true,avail:[5,6],bio:"Full Beatles era show, costumes and all."},
+ {name:"Old Blue Eyes Revue",type:"variety",genre:"sinatra",region:"national",fee:"$1,800/night",priceN:1800,instant:false,avail:[4,5,6],bio:"Rat Pack crooning + an 8-piece band. Weddings & galas."},
+ {name:"DJ Terrapin",type:"dj",genre:"dj_set",region:"midatl",fee:"$300/night",priceN:300,instant:true,avail:[5,6],bio:"Jam-to-dance late sets."},
+ {name:"The Hollow Bones",type:"original",genre:"original_americana",region:"northeast",fee:"$700/night",priceN:700,instant:false,avail:[3,4,5],bio:"Original Americana with teeth."},
+ {name:"Jen Rund",type:"solo",genre:"jam",region:"norcal",fee:"ask",instant:false,avail:[4,5,6],bio:"Marin bassist — Wooten/Kai-trained; deep Bay Area roots."},
+ {name:"Stu Allen",type:"band",genre:"grateful_dead",region:"norcal",fee:"ask",instant:false,avail:[4,5,6],bio:"East Bay — keeps Jerry's sound alive (Phil Lesh & Friends, Mars Hotel)."},
+ {name:"Moondance Trio",type:"band",genre:"jazz_combo",region:"pnw",fee:"$650/night",priceN:650,instant:true,avail:[3,4,5],bio:"Cocktail jazz for a quiet room or a wedding."},
+ {name:"Rumours & Gold",type:"tribute",genre:"fleetwood_mac",region:"lonestar",fee:"$1,100/night",priceN:1100,instant:true,avail:[5,6],bio:"Fleetwood Mac, the hits and the deep cuts."},
+ {name:"The Bramble Pickers",type:"band",genre:"bluegrass",region:"southeast",fee:"$550/night",priceN:550,instant:true,avail:[0,5,6],bio:"High-lonesome bluegrass for porches and breweries."}
+];
+var ACTS=DEMO.slice();
+var BOOKING=null;
+
+function opt(arr){return arr.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join('');}
+function fillSelects(){
+ document.getElementById('fRegion').innerHTML=opt(REGIONS);
+ document.getElementById('fGenre').innerHTML=opt(GENRES);
+ document.getElementById('la_region').innerHTML=opt(REGIONS.slice(1));
+ document.getElementById('la_genre').innerHTML=opt(GENRES.slice(1));
+ document.getElementById('la_type').innerHTML=opt(TYPES);
+}
+function prettyDate(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); return DOW[d.getDay()]+' '+(d.getMonth()+1)+'/'+d.getDate(); }
+function render(){
+ var r=document.getElementById('fRegion').value, g=document.getElementById('fGenre').value,
+     q=(document.getElementById('fSearch').value||'').toLowerCase(),
+     date=document.getElementById('fDate').value, dow=date?new Date(date+'T12:00:00').getDay():null;
+ var list=ACTS.filter(function(a){
+   var dateOK = dow===null || (a.avail&&a.avail.indexOf(dow)>=0);
+   return dateOK && (!r||a.region===r||a.region==='national') && (!g||a.genre===g) &&
+          (!q||a.name.toLowerCase().indexOf(q)>=0||glabel(a.genre).toLowerCase().indexOf(q)>=0);
+ });
+ var hint=document.getElementById('dateHint');
+ hint.innerHTML = date
+   ? '🗓️ Showing acts <b>available '+prettyDate(date)+'</b>'+(g?(' · '+glabel(g)):'')+'. <b>BOOK NOW</b> confirms the night on the spot.'
+   : 'Pick a <b>date</b> to see exactly who is free that night — then <b>BOOK NOW</b>.';
+ document.getElementById('cnt').textContent=list.length+(date?' available':'')+' act'+(list.length===1?'':'s');
+ var grid=document.getElementById('grid');
+ if(!list.length){ grid.innerHTML='<div class="empty">No acts '+(date?('free '+prettyDate(date)):'match')+' yet — try another date or genre, or <a href="#" onclick="openList();return false">list one</a>.</div>'; return; }
+ grid.innerHTML=list.map(function(a){var idx=ACTS.indexOf(a);
+  var canBook = date && a.instant && a.priceN;
+  var btn = canBook
+   ? '<button class="book buy" onclick="bookNow('+idx+')">🎟️ BOOK NOW · $'+a.priceN.toLocaleString()+'</button>'
+   : '<button class="book" onclick="openBook('+idx+')">📅 Request booking</button>';
+  var feeLine = (date && a.priceN) ? ('$'+a.priceN.toLocaleString()+' · '+prettyDate(date)) : a.fee;
+  return '<div class="act"><div class="ph">'+gemoji(a.genre)+'</div><div class="bd">'+
+   '<div class="nm">'+a.name+'</div>'+
+   '<div class="tags"><span class="tag gen">'+glabel(a.genre)+'</span><span class="tag">'+rlabel(a.region)+'</span>'+(canBook?'<span class="tag now">⚡ Book now</span>':'')+'</div>'+
+   '<div class="bio">'+a.bio+'</div><div class="fee">'+feeLine+'</div></div>'+
+   btn+'</div>';
+ }).join('');
+}
+function openBook(i){ requireHost(function(){ if(!gateOK())return; openBook_(i); }); }
+function openBook_(i){ BOOKING=ACTS[i]; if(!BOOKING)return;
+ document.getElementById('bkName').textContent='Book '+BOOKING.name;
+ document.getElementById('bkSub').textContent=glabel(BOOKING.genre)+' · '+rlabel(BOOKING.region)+' · '+BOOKING.fee;
+ document.getElementById('bookOv').classList.add('on');
+}
+var BOOKNOW=null;
+function bookNow(i){ requireHost(function(){ if(!gateOK())return; bookNow_(i); }); }
+function bookNow_(i){ BOOKNOW=ACTS[i]; if(!BOOKNOW)return;
+ var date=document.getElementById('fDate').value;
+ document.getElementById('nwTitle').textContent='Book '+BOOKNOW.name+' — '+prettyDate(date);
+ document.getElementById('nwSub').textContent=glabel(BOOKNOW.genre)+' · '+rlabel(BOOKNOW.region);
+ document.getElementById('nwBtn').textContent='🎟️ BOOK NOW · $'+BOOKNOW.priceN.toLocaleString();
+ document.getElementById('nwFoot').textContent='Confirms '+BOOKNOW.name+' for '+prettyDate(date)+' on the spot. The night is held the moment you tap. Payment runs through secure checkout once the system is live under the LLC — no card is charged yet.';
+ document.getElementById('nowOv').classList.add('on');
+}
+function confirmNow(){ if(!BOOKNOW)return;
+ if(!val('nw_name')){toast('Add your name to confirm.');return;}
+ var date=document.getElementById('fDate').value, name=BOOKNOW.name;
+ var where=val('nw_where'); var note='[BOOK NOW · '+(where||'host')+'] '+val('nw_note')+' — contact: '+(val('nw_contact')||'(none)');
+ var c=hbClient();
+ var booked=function(){ close_('nowOv'); afterBooked();
+   toast('🎉 '+name+' is BOOKED for '+prettyDate(date)+'! Held & confirmed; the act gets paid the fee. Secure checkout opens when payments go live.'); };
+ var args=Object.assign({p_act:BOOKNOW.id,p_date:date||null,p_venue:null,p_note:note},hostParams(where));
+ if(c&&BOOKNOW.id){ try{ c.rpc('chat_act_book_instant',args)
+   .then(function(r){ if(r&&r.error) toast(/available/.test(r.error.message||'')?'Just got booked by someone else — pick another act or date.':(/subscription/.test(r.error.message||'')?'Your 3 free bookings are used — subscribe to keep booking.':'Could not book — try again.')); else booked(); }).catch(booked); }catch(e){ booked(); } }
+ else booked();
+}
+function openList(){ document.getElementById('listOv').classList.add('on'); }
+function close_(id){ document.getElementById(id).classList.remove('on'); }
+function val(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
+function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);
+ setTimeout(function(){t.style.transition='.4s';t.style.opacity=0;},2200);setTimeout(function(){t.remove();},2700);}
+
+/* optional live backend: set window.HB_CLIENT (a supabase client) + window.HB_SESSION on deploy.
+   Until then, runs in honest demo mode. anon key is public-safe and wired at deploy. */
+function hbClient(){ return (window.HB_CLIENT&&window.HB_SESSION)?window.HB_CLIENT:null; }
+
+/* ---- host account + the free/paid gate (home=free; business=3 free then subscribe) ---- */
+var HOST=null, PENDING=null, FREE_LIMIT=3;
+function openSignup(){ if(!document.getElementById('su_region').options.length) document.getElementById('su_region').innerHTML=opt(REGIONS.slice(1)); document.getElementById('suOv').classList.add('on'); }
+function openPolicy(){ document.getElementById('polOv').classList.add('on'); }
+function suTypeChange(){ document.getElementById('su_biz').style.display = document.getElementById('su_type').value==='business'?'block':'none'; }
+function signUp(){
+ var name=val('su_name'); if(!name){toast('Add your name.');return;}
+ if(!document.getElementById('su_agree').checked){toast('Please agree to the booking & cancellation policy to continue.');return;}
+ var type=document.getElementById('su_type').value;
+ if(type==='business' && !val('su_org')){toast('Add your venue / business name.');return;}
+ HOST={name:name,email:val('su_email'),type:type,org:val('su_org'),region:val('su_region'),free_used:0,subscribed:false};
+ var c=hbClient();
+ if(c){ try{ c.rpc('chat_host_set',{p_host_type:type,p_org_name:HOST.org||null,p_region:HOST.region||null,p_agreed:true}).catch(function(){}); }catch(e){} }
+ document.getElementById('acctBtn').textContent='👤 '+name.split(' ')[0];
+ close_('suOv');
+ toast(type==='home'?('🏠 Welcome, '+name.split(' ')[0]+' — homes book free, always.'):('🏢 Welcome, '+name.split(' ')[0]+' — '+FREE_LIMIT+' free bookings to start.'));
+ if(PENDING){ var p=PENDING; PENDING=null; p(); }
+}
+function requireHost(then){ if(HOST){ then(); } else { PENDING=then; openSignup(); } }
+function gateOK(){ // business: blocked after 3 free unless subscribed
+ if(!HOST||HOST.type!=='business') return true;
+ if(HOST.subscribed||HOST.free_used<FREE_LIMIT) return true;
+ toast('🏢 You\'ve used your '+FREE_LIMIT+' free bookings — a venue subscription unlocks unlimited booking (coming when payments go live under the LLC).');
+ return false;
+}
+function afterBooked(){ if(HOST&&HOST.type==='business'){ HOST.free_used++;
+   var left=Math.max(0,FREE_LIMIT-HOST.free_used);
+   toast('📇 '+(HOST.org||'Your venue')+' added to the '+(rlabel(HOST.region)||'your')+' Chapter CRM as a prospect.'+(HOST.subscribed?'':(' '+left+' free booking'+(left===1?'':'s')+' left.'))); } }
+function hostParams(where){ return HOST?{p_host_type:HOST.type,p_venue_name:(HOST.type==='business'?(HOST.org||where||null):(where||null)),p_region:HOST.region||null}:{}; }
+
+function sendBooking(){
+ if(!BOOKING){return;}
+ if(!val('bk_name')){toast('Add your name so the act knows who is asking.');return;}
+ var type=val('bk_type'), where=val('bk_where'), note='['+type+(where?(' · '+where):'')+'] '+val('bk_note')+
+   ' — contact: '+(val('bk_contact')||'(none given)');
+ var offer=Math.round((parseFloat(val('bk_offer')||'0')||0)*100)||null;
+ var c=hbClient(), done=function(){ close_('bookOv'); afterBooked(); toast('📅 Request sent to '+BOOKING.name+' — they accept or decline (and get paid the fee). Thanks for booking on hostaband!'); };
+ var args=Object.assign({p_act:BOOKING.id,p_venue:null,p_date:val('bk_date')||null,p_offer_cents:offer,p_note:note},hostParams(where));
+ if(c&&BOOKING.id){ try{ c.rpc('chat_act_book_request',args)
+   .then(function(r){ if(r&&r.error) toast(/subscription/.test(r.error.message||'')?'Your 3 free bookings are used — subscribe to keep booking.':'Could not send just now — try again.'); else done(); }).catch(done); }catch(e){ done(); } }
+ else done();
+}
+function listAct(){
+ if(!val('la_name')){toast('Add your act name.');return;}
+ var payload={p_id:null,p_name:val('la_name'),p_act_type:val('la_type')||'band',p_scene:val('la_genre')||'other',
+   p_bio:val('la_bio')||null,p_price_cents:Math.round((parseFloat(val('la_fee')||'0')||0)*100)||null,
+   p_price_note:val('la_feenote')||null,p_artwork:val('la_art')||null,p_epk:val('la_epk')||null,
+   p_city:null,p_state:null,p_region:val('la_region')||null};
+ var c=hbClient(), name=val('la_name');
+ var added=function(){ // reflect in the live grid immediately (honest: it's your session)
+   ACTS.unshift({name:name,type:payload.p_act_type,genre:payload.p_scene,region:payload.p_region,
+     fee:val('la_fee')?('$'+val('la_fee')+'/night'):'ask',bio:val('la_bio')||'New on hostaband'});
+   close_('listOv'); render(); toast('🎭 "'+name+'" is listed — hosts can find and book you now.'); };
+ if(c){ try{ c.rpc('chat_act_upsert',payload).then(function(r){ if(r&&r.error) toast('Saved locally — sign in to publish.'); else added(); }).catch(added); }catch(e){ added(); } }
+ else added();
+}
+fillSelects(); render();
+</script>
+</body>
+</html>
