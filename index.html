@@ -519,7 +519,7 @@ body{padding-bottom:64px}
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
 
 <!-- buy bubble -->
-<div class="buy" id="buy"><div class="r"><div style="flex:1"><b id="buyBand"></b><div class="m" id="buyVenue"></div></div><div class="price" id="buyPrice"></div></div><button class="btn gold sm" style="width:100%;margin-top:9px" onclick="buy('ticket')">🎟️ Buy Now · one tap</button></div>
+<div class="buy" id="buy" onmouseleave="this.classList.remove('on')"><div class="r"><div style="flex:1"><b id="buyBand"></b><div class="m" id="buyVenue"></div></div><div class="price" id="buyPrice"></div></div><button class="btn gold sm" style="width:100%;margin-top:9px" onclick="buy('ticket')">🎟️ Buy Now · one tap</button></div>
 
 <!-- ===================== READER MODAL ===================== -->
 <div class="reader" id="reader" onclick="if(event.target===this)closeReader()">
@@ -648,6 +648,7 @@ body{padding-bottom:64px}
       <button id="gtab-band" onclick="gigTab('band')">🎸 Register band</button>
       <button id="gtab-fest" onclick="gigTab('festival')">🎪 Festival</button>
       <button id="gtab-act" onclick="gigTab('act')">🎭 Talent</button>
+      <button id="gtab-feature" onclick="gigTab('feature')">💡 Add a feature</button>
     </div>
     <div class="gigbody" id="gigbody"></div>
   </div>
@@ -771,7 +772,7 @@ function renderCal(){
   var h=CDOW.map(function(x){return '<div class="dow">'+x+'</div>';}).join('');
   for(var i=0;i<startDow;i++)h+='<div></div>';
   for(var dd=1;dd<=days;dd++){ var iso=y+'-'+cpad(mth+1)+'-'+cpad(dd); var has=byDay[iso];
-   h+='<div class="d'+(has?' has':'')+(iso===tIso?' today':'')+(iso===CAL_SEL?' sel':'')+'" '+(has?'onclick="dayClick(\''+iso+'\')"':'')+'>'+dd+(has?'<i></i>':'')+'</div>'; }
+   h+='<div class="d'+(has?' has':'')+(iso===tIso?' today':'')+(iso===CAL_SEL?' sel':'')+'" '+(has?'onclick="dayClick(\''+iso+'\')" onmouseenter="calHover(event,\''+iso+'\')" onmouseleave="calHoverOut()"':'')+'>'+dd+(has?'<i></i>':'')+'</div>'; }
   grid.innerHTML=h;
   list.innerHTML = (CAL_SEL&&byDay[CAL_SEL]) ? ('<div class="cdh">'+CDOW3[new Date(CAL_SEL+'T12:00:00').getDay()]+' · '+CMONTHS[mth]+' '+(new Date(CAL_SEL+'T12:00:00').getDate())+'</div>'+byDay[CAL_SEL].map(calRow).join('')) : '<div class="chint">Tap a highlighted date to see that night\'s shows.</div>';
  } else {
@@ -782,6 +783,20 @@ function renderCal(){
   list.innerHTML = up.length ? (near + up.slice(0,14).map(calRow).join('')) : '<div class="cempty">No shows match — try “All”, or roam the map. Bands: add yours with “Add a date”.</div>';
  }
 }
+/* hover a Month-grid date → band · venue · price · Buy Now (tap still opens the day list) */
+function calHover(ev,iso){ var list=SHOWLIST.filter(function(s){return s.iso===iso && calMatch(s);}); if(!list.length)return;
+ var s=list[0], b=document.getElementById('buy'); if(!b)return;
+ var bb=document.getElementById('buyBand'), bv=document.getElementById('buyVenue'), bp=document.getElementById('buyPrice');
+ if(bb)bb.textContent=s.band+(list.length>1?(' +'+(list.length-1)+' more'):'');
+ if(bv)bv.textContent=s.venue+' · '+relDay(s.d);
+ if(bp)bp.textContent=s.price;
+ CURBUY={band:s.band,venue:s.venue,price:s.price};
+ var r=ev.currentTarget.getBoundingClientRect();
+ b.style.left=Math.min((window.innerWidth||360)-250, r.right+8)+'px';
+ b.style.top=Math.max(8, r.top-10)+'px';
+ b.classList.add('on');
+}
+function calHoverOut(){ setTimeout(function(){ var b=document.getElementById('buy'); if(b && !b.matches(':hover')) b.classList.remove('on'); },160); }
 function calBuild(){ renderCal(); }   /* back-compat alias */
 function calScope(btn,which){document.querySelectorAll('.cal .seg button').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');toast(which==='nat'?'Calendar: National — every chapter\'s shows':('Calendar: your Local Family — '+(LOCALFAM||REG)));}
 /* best-effort live wiring: pull real shows when signed in; else keep the demo list */
@@ -1303,7 +1318,16 @@ function gigTab(t){ GIGTAB=t;
  document.getElementById('gtab-band').classList.toggle('on',t==='band');
  var ft=document.getElementById('gtab-fest'); if(ft)ft.classList.toggle('on',t==='festival');
  var at=document.getElementById('gtab-act'); if(at)at.classList.toggle('on',t==='act');
+ var fe=document.getElementById('gtab-feature'); if(fe)fe.classList.toggle('on',t==='feature');
  var b=document.getElementById('gigbody');
+ if(t==='feature'){
+  b.innerHTML=
+   '<div class="gigrow"><div class="gigf"><label>What would make dead.dance better for you? <span class="req">*</span></label>'+
+   '<textarea id="gf_feat" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;resize:vertical" placeholder="Describe the feature you want — anything. The musicians get whatever they want. We read every one."></textarea></div></div>'+
+   '<button class="gigsend" onclick="gigSubmitFeature()">💡 Send it to Michael ▸</button>'+
+   '<div class="gigfoot">Goes straight up to the Founder. <b>Musician-First:</b> your idea is the work, not a "maybe later." We read every one.</div>';
+  return;
+ }
  if(t==='act'){
   b.innerHTML=
    '<div class="gigrow"><div class="gigf"><label>Act / stage name <span class="req">*</span></label><input id="ga_name" placeholder="Your name or act"></div></div>'+
@@ -1396,6 +1420,12 @@ function gigCreateAct(){
  var c=ddClient(),id=ddId(); closeGig();
  var done=function(){ toast('🎭 "'+name+'" is listed — venues can now find you and request a date.'); };
  if(c&&id){ try{ c.rpc('chat_act_upsert',payload).then(function(r){ if(r&&r.error) toast('Saved locally — sign in to publish your profile.'); else done(); }).catch(function(){ done(); }); }catch(e){ done(); } }
+ else done();
+}
+function gigSubmitFeature(){ var t=gv('gf_feat'); if(!t||t.length<3){ toast('Tell us the feature — even a sentence.'); return; }
+ var c=ddClient(),id=ddId(); closeGig();
+ var done=function(){ toast('💡 Sent to Michael — thank you. Your idea is the work, not a “maybe later.”'); };
+ if(c&&id){ try{ c.rpc('chat_feature_submit',{p_area:'musician',p_body:t}).then(function(r){ if(r&&r.error) toast('Saved — sign in to send it up.'); else done(); }).catch(function(){ done(); }); }catch(e){ done(); } }
  else done();
 }
 /* venue-side booking rail — a room requests an act for a night (chat_act_book_request).
@@ -1694,7 +1724,23 @@ var QA_TASKS=[
   q:{prompt:'Was buying obvious?',opts:['Obvious','OK','Hard to find']}},
  {key:'cal_vs_fb',kind:'qa',ic:'📅',title:'Calendar study: vs Facebook',
   steps:[{t:'Think about how you find shows on Facebook today.'},{t:'Compare it to this calendar.'}],
-  q:{prompt:'Would you check this instead of scrolling Facebook for shows?',opts:['Yes','Sometimes','No']}}
+  q:{prompt:'Would you check this instead of scrolling Facebook for shows?',opts:['Yes','Sometimes','No']}},
+ // ——— 🎸 MUSICIAN HELP TEST (Michele owns; Mike & Matt run it) ———
+ {key:'mt_register',kind:'qa',ic:'🎸',title:'Musician test: register your band',
+  steps:[{t:'📅 Add a Date → 🎸 Register band. Claim your band page.'}],
+  q:{prompt:'Was claiming your band easy?',opts:['Easy','OK','Confusing']}},
+ {key:'mt_adddate',kind:'qa',ic:'🎸',title:'Musician test: post a date (HyperPost)',
+  steps:[{t:'📅 Add a Date → fill a show → HyperPost it.'},{t:'Then check the calendar for it.'}],
+  q:{prompt:'Did posting a date feel quick (no captcha gauntlet)?',opts:['Yes, instant','OK','Too clunky']}},
+ {key:'mt_listact',kind:'qa',ic:'🎸',title:'Musician test: list your act for venues',
+  steps:[{t:'📅 Add a Date → 🎭 Talent → set fee/artwork → List me.'}],
+  q:{prompt:'Would venues find your profile useful?',opts:['Definitely','Maybe','Not yet']}},
+ {key:'mt_inviteband',kind:'qa',ic:'🎸',title:'Musician test: invite another band',
+  steps:[{t:'In Register band, tap “🤝 Invite another band” and read the message.'}],
+  q:{prompt:'Would you actually send that to a band friend?',opts:['Yes','Maybe','No']}},
+ {key:'mt_feature',kind:'qa',ic:'💡',title:'Musician test: ask for a feature',
+  steps:[{t:'📅 Add a Date → 💡 Add a feature. Describe something you want and send it.'}],
+  q:{prompt:'Did it feel like we actually want your ideas?',opts:['Yes','Sort of','No']}}
 ];
 var QA_SEL=null,QA_PICK=null,QA_WORKS=null,QA_CLAIM=null;
 function qaDoneList(){ try{return JSON.parse(localStorage.getItem('dd.qa.done')||'[]');}catch(e){return [];} }

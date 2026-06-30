@@ -437,8 +437,23 @@ function renderQA(){
     (r.note?'<div class="meta" style="margin-top:7px">🗣 '+r.note+'</div>':'')+'</div>';
  });
  h+='<div class="cnt">Pulled from the in-app QA Assist widget (works 👍/👎 · multiple-choice · short notes). Live: chat_qa_summary + comments.</div>';
+ // 💡 Feature requests — rolls up to the Founder (and Michele)
+ if(CURREP==='bayarea' || CURREP==='business'){
+  var fr=(window.FEATURE_REQS||FEATURE_SEED);
+  h+='<div class="cnt" style="margin-top:16px">💡 Feature requests — from musicians, rolled up to Michael</div>';
+  fr.forEach(function(f){ h+='<div class="card"><div class="top"><div class="score" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">💡</div>'+
+    '<div class="info"><b>'+f.by+' · '+f.area+'</b><div class="meta">'+f.when+'</div></div>'+
+    '<span class="pill target">'+(f.status||'new')+'</span></div>'+
+    '<div style="font-size:13px;margin-top:7px">“'+f.body+'”</div></div>'; });
+  h+='<div class="cnt">Live: chat_feature_rollup (house-only). Musicians submit via 📅 Add a Date → 💡 Add a feature.</div>';
+ }
  return h;
 }
+var FEATURE_SEED=[
+ {by:'Matt Hartle',area:'musician',when:'2h ago',status:'new',body:'Let me set a per-show guarantee vs. door split and have the app do the math on payout night.'},
+ {by:'Splintered Sunlight',area:'musician',when:'yesterday',status:'triaged',body:'Bulk-add a whole tour of dates from a CSV instead of one at a time.'},
+ {by:'DJ Terrapin',area:'musician',when:'2 days ago',status:'new',body:'A “book me for a residency” option — recurring weekly slot at one venue.'}
+];
 /* ===== Scorecards — how each leader is evaluated, in front of them (Welch playbook:
    a few VITAL metrics, clear targets, ranked honestly, no surprises). Demo numbers;
    live wires to subscriber/band/revenue/liquidity feeds. ===== */
@@ -489,7 +504,8 @@ function scorecardCard(){ var s=scoreRows(); if(!s)return '';
 var TODOS={ business:[
   {k:'share_campaign', t:'📣 <b>Post the “weed the tomatoes” share campaign</b> — ask the family to each watch ONE Facebook group and forward its best posts to our page (free, for the family, cuts the noise). <b>Then the Chancellors echo it</b> to their chapters.'},
   {k:'ambassador_welcomes', t:'Send Ambassador welcomes — only after Michael + Michele review every percentage (still gated).'},
-  {k:'headliner_calls', t:'Work the headliner permission replies (DSO/JRAD/Kimock) → book the 15-min calls in the Meetings tab.'}
+  {k:'headliner_calls', t:'Work the headliner permission replies (DSO/JRAD/Kimock) → book the 15-min calls in the Meetings tab.'},
+  {k:'musician_help_test', t:'<b>Own the Musician Help Test</b> — you + Mike run most of it; ask Matt to do his. (Tasks live in the app’s 🧪 Help test widget; results in the 🧪 QA tab.)'}
 ]};
 function todosDone(){ try{return JSON.parse(localStorage.getItem('dd.todos.done')||'[]');}catch(e){return [];} }
 function todoToggle(k){ var d=todosDone(), i=d.indexOf(k); if(i>=0)d.splice(i,1); else d.push(k);
