@@ -55,6 +55,8 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .qaaskbtns{display:flex;gap:8px;margin-top:10px}
 .qaaskbtns button{flex:1;border:0;border-radius:10px;padding:9px;font:inherit;font-weight:800;font-size:12.5px;cursor:pointer;background:#ffffff22;color:#fff}
 .qaaskbtns .yes{background:#fff;color:#1f7a4d}.qaaskbtns .no{background:#ffffff14}
+.sharebar{height:8px;background:#ffffff2e;border-radius:999px;overflow:hidden;margin:8px 0 2px}
+.sharebar span{display:block;height:100%;background:#fff;border-radius:999px}
 .top .friendsbtn:hover{transform:scale(1.06)}
 /* layout */
 .wrap{display:grid;grid-template-columns:288px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:start}
@@ -74,6 +76,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:11.5px}
 .cal .dow{opacity:.6;text-align:center;font-weight:700;padding:2px 0}
 .cal .d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:default;position:relative}
+.cal .d.pad{visibility:hidden}
 .cal .d.has{background:#ffffff18;cursor:pointer;font-weight:700}
 .cal .d.has:hover{background:var(--gold);color:#23202a}
 .cal .d.has::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--gold)}
@@ -94,6 +97,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .tix .nm b{display:block}.tix .nm span{font-size:11.5px;color:var(--muted)}
 .roles{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
 .roles a{color:var(--accent);font-weight:700;text-decoration:none}
+.wedo{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.5}.wedo b{color:var(--rose)}
 /* composer */
 .cmp-av{width:38px;height:38px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
 .cmp-text{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical;min-height:44px;background:var(--bg)}
@@ -177,7 +181,9 @@ body{padding-bottom:64px}
 .cinfo span{font-size:11.5px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cact{flex:0 0 auto;text-align:right}
 .cprice{display:block;font-size:12px;font-weight:800;color:var(--accent)}
-.cact button{margin-top:3px;border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
+.cbtns{display:flex;gap:5px;justify-content:flex-end;margin-top:3px}
+.cact button{border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
+.cact .cadd{background:#fff;border:1px solid var(--line);color:var(--accent);padding:6px 9px}
 /* 🍀 Miracle Ticket — bottom-right bouncing/blinking FREE-ticket FAB */
 .mfab{position:fixed;right:16px;bottom:80px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
 .mfab .tkt{position:relative;width:74px;height:48px;border-radius:9px;background:linear-gradient(135deg,#2a8a4a,#c79a3a);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:.04em;text-align:center;line-height:1.05;box-shadow:0 0 0 3px #fff, 0 0 0 5px #2a8a4a55}
@@ -195,12 +201,12 @@ body{padding-bottom:64px}
 /* reader modal */
 .reader{position:fixed;inset:0;z-index:70;background:rgba(20,12,34,.55);display:none;align-items:flex-start;justify-content:center;padding:34px 14px}
 .reader.on{display:flex}
-.rpanel{background:var(--paper);width:100%;max-width:920px;max-height:88vh;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px #0007}
+.rpanel{background:var(--paper);width:100%;max-width:920px;height:86vh;max-height:86vh;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px #0007}
 .rhead{display:flex;align-items:center;gap:6px;background:linear-gradient(90deg,#2a1b3d,#3a1f57);color:#fff;padding:9px 12px}
 .rtab{background:#ffffff1a;border:0;color:#fff;border-radius:9px 9px 0 0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;opacity:.8}
 .rtab.on{background:var(--paper);color:var(--purple2);opacity:1}
 .rx{margin-left:auto;background:#ffffff22;border:0;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px}
-.rbody{padding:14px;overflow:auto}
+.rbody{padding:14px;overflow:auto;flex:1;min-height:0}
 .rsub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .glist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .gc{border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px;display:flex;flex-direction:column}
@@ -461,6 +467,7 @@ body{padding-bottom:64px}
         <span id="cmpNote" style="font-size:11px;color:var(--muted);flex:1"></span>
         <button class="hpbtn" style="background:var(--rose);color:#fff" onclick="hpComposer()">📡 HyperPost</button>
       </div>
+      <div class="wedo">🌹 dead.dance runs on the family — <b>this only works if we all do our share.</b> Post a show, forward a gem, weed a row.</div>
     </div>
 
     <div class="sec">📚 FROM YOUR GROUPS — SHARED IN</div>
@@ -509,17 +516,17 @@ body{padding-bottom:64px}
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
-  <button class="fn" onclick="openReader('groups')"><span class="ic">🐺</span><span class="lb">Chapters</span></button>
-  <button class="fn" onclick="openMap()"><span class="ic">🐯</span><span class="lb">Shows</span></button>
-  <button class="fn" onclick="openReader('shakedown')"><span class="ic">🐊</span><span class="lb">Shakedown</span></button>
-  <button class="fn" onclick="openReader('archive')"><span class="ic">📼</span><span class="lb">Archive</span></button>
-  <button class="fn" onclick="openGame()"><span class="ic">🎧</span><span class="lb">Play</span></button>
-  <button class="fn" onclick="profile('me')"><span class="ic">🪪</span><span class="lb">You</span></button>
+  <button class="fn" onclick="openReader('groups')"><span class="ic">🚉</span><span class="lb">Chapters</span></button>
+  <button class="fn" onclick="openMap()"><span class="ic">🗺️</span><span class="lb">Shows</span></button>
+  <button class="fn" onclick="openReader('shakedown')"><span class="ic">🛍️</span><span class="lb">Shakedown</span></button>
+  <button class="fn" onclick="openReader('archive')"><span class="ic">🎵</span><span class="lb">GD Archive</span></button>
+  <button class="fn" onclick="openGame()"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn" onclick="profile('me')"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
 </nav>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
 
 <!-- buy bubble -->
-<div class="buy" id="buy" onmouseleave="this.classList.remove('on')"><div class="r"><div style="flex:1"><b id="buyBand"></b><div class="m" id="buyVenue"></div></div><div class="price" id="buyPrice"></div></div><button class="btn gold sm" style="width:100%;margin-top:9px" onclick="buy('ticket')">🎟️ Buy Now · one tap</button></div>
+<div class="buy" id="buy" onmouseleave="this.classList.remove('on')"><div class="r"><div style="flex:1"><b id="buyBand"></b><div class="m" id="buyVenue"></div></div><div class="price" id="buyPrice"></div></div><button class="btn gold sm" id="buyBtn" style="width:100%;margin-top:9px" onclick="buyFromCur()">🎟️ Buy Now · one tap</button><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="addCalFromCur()">📆 Add to my calendar</button></div>
 
 <!-- ===================== READER MODAL ===================== -->
 <div class="reader" id="reader" onclick="if(event.target===this)closeReader()">
@@ -529,7 +536,7 @@ body{padding-bottom:64px}
       <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
       <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
       <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
-      <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 Archive</button>
+      <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 GD Archive</button>
       <button class="rtab" data-t="art" onclick="readerTab('art')">🎨 Art</button>
       <button class="rx" onclick="closeReader()">×</button>
     </div>
@@ -648,6 +655,7 @@ body{padding-bottom:64px}
       <button id="gtab-band" onclick="gigTab('band')">🎸 Register band</button>
       <button id="gtab-fest" onclick="gigTab('festival')">🎪 Festival</button>
       <button id="gtab-act" onclick="gigTab('act')">🎭 Talent</button>
+      <button id="gtab-fans" onclick="gigTab('fans')">📣 Bring fans</button>
       <button id="gtab-feature" onclick="gigTab('feature')">💡 Add a feature</button>
     </div>
     <div class="gigbody" id="gigbody"></div>
@@ -669,19 +677,50 @@ var REGIONS = {
    {off:18,band:"Melvin Seals & JGB",venue:"Sellersville Theater · 8:00 PM",price:"$45",type:"grateful_dead"},
    {off:22,band:"DJ Terrapin (late dance set)",venue:"The Met, Philadelphia · 10:00 PM",price:"$15",type:"dj"},
    {off:27,band:"Joe Russo's Almost Dead",venue:"The Met, Philadelphia · 7:30 PM",price:"$59",type:"grateful_dead"},
-   {off:33,band:"Cris Jacobs Band",venue:"Ardmore Music Hall · 8:00 PM",price:"$26",type:"original"} ] },
+   {off:33,band:"Cris Jacobs Band",venue:"Ardmore Music Hall · 8:00 PM",price:"$26",type:"original"},
+   {date:"2026-07-14",band:"John Kadlecik (solo)",venue:"Jammin' Java, Vienna VA · 8:00 PM",price:"Tix →",type:"grateful_dead",url:"https://www.johnkmusic.net/schedule.html"},
+   {date:"2026-07-19",band:"Joe Russo's Almost Dead",venue:"Riverfront Park, Harrisburg PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/joe-russos-almost-dead-riverfront-park-20260719"},
+   {date:"2026-08-05",band:"John K's Furthurmore",venue:"Hamilton Live, Washington DC · 8:00 PM",price:"Tix →",type:"grateful_dead",url:"https://wl.eventim.us/event/john-ks-furthurmore/688283"},
+   {date:"2026-08-12",band:"Melvin Seals & JGB",venue:"Lewes Ferry Grounds, Lewes DE",price:"Tix →",type:"grateful_dead",url:"https://rockingthedocks.ticketspice.com/melvin-night1"},
+   {date:"2026-08-13",band:"Melvin Seals & JGB",venue:"Lewes Ferry Grounds, Lewes DE",price:"Tix →",type:"grateful_dead",url:"https://rockingthedocks.ticketspice.com/melvin-night2"},
+   {date:"2026-08-15",band:"Melvin Seals & JGB",venue:"Tropicana Ballroom, Atlantic City NJ",price:"Onsale soon",type:"grateful_dead",url:"https://www.melvinsealsandjgb.com/tour-dates/"},
+   {date:"2026-10-22",band:"Oteil Burbridge w/ John Scofield",venue:"Hamilton Live, Washington DC",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-the-hamilton-20261022"},
+   {date:"2026-11-13",band:"Oteil Burbridge w/ John Scofield",venue:"Ardmore Music Hall, Ardmore PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-ardmore-music-hall-20261113"},
+   {date:"2026-11-15",band:"Oteil Burbridge w/ John Scofield",venue:"Ardmore Music Hall, Ardmore PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-ardmore-music-hall-20261115"},
+   {date:"2026-11-20",band:"Oteil Burbridge w/ John Scofield",venue:"MCG Jazz, Pittsburgh PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-mcg-jazz-20261120"} ] },
  "Northeast + New England": { shows:[
    {off:3,band:"Max Creek",venue:"The Cabot, Beverly · 8:00 PM",price:"$32",type:"grateful_dead"},
    {off:9,band:"Dark Star Orchestra",venue:"Capitol Theatre, Port Chester · 8:00 PM",price:"$48",type:"grateful_dead"},
    {off:15,band:"Playing Dead",venue:"Soundcheck Studios, Pembroke · 8:00 PM",price:"$18",type:"grateful_dead"},
    {off:21,band:"JRAD",venue:"The Rooftop at Pier 17, NYC · 7:30 PM",price:"$65",type:"grateful_dead"},
-   {off:30,band:"Melvin Seals & JGB",venue:"Brooklyn Bowl · 9:00 PM",price:"$45",type:"grateful_dead"} ] },
+   {off:30,band:"Melvin Seals & JGB",venue:"Brooklyn Bowl · 9:00 PM",price:"$45",type:"grateful_dead"},
+   {date:"2026-07-11",band:"Dark Star Orchestra",venue:"Rock the Dock, Lake George NY",price:"Tix →",type:"grateful_dead",url:"https://www.rockthedocklg.com/tickets"},
+   {date:"2026-08-04",band:"Oteil & Friends (w/ Kimock, Melvin Seals)",venue:"The Muse, Nantucket MA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/oteil-friends-the-muse-20260804"},
+   {date:"2026-08-05",band:"Oteil & Friends (w/ Kimock, Melvin Seals)",venue:"The Muse, Nantucket MA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/oteil-friends-the-muse-20260805"},
+   {date:"2026-08-06",band:"Oteil & Friends (w/ Kimock, Melvin Seals)",venue:"Tree House Brewing, Deerfield MA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/oteil-summer-stage-20260806"},
+   {date:"2026-08-07",band:"Oteil & Friends (w/ Kimock, Melvin Seals)",venue:"Nashua Center for the Arts, Nashua NH",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/oteil-friends-nashua-center-for-the-arts-20260807"},
+   {date:"2026-08-08",band:"Oteil & Friends (w/ Kimock, Melvin Seals)",venue:"Jay Peak Resort, Jay VT",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/oteil-friends-stateside-amphitheatre-at-jay-peak-resort-20260808"},
+   {date:"2026-08-09",band:"Oteil & Friends (w/ Kimock, Melvin Seals)",venue:"Lincoln Hill Farms, Canandaigua NY",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/oteil-friends-lincoln-hill-farms-20260809"},
+   {date:"2026-09-25",band:"Joe Russo's Almost Dead",venue:"The Rooftop at Pier 17, NYC",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/joe-russos-almost-dead-the-rooftop-at-pier-17-20260925"},
+   {date:"2026-09-26",band:"Joe Russo's Almost Dead",venue:"The Rooftop at Pier 17, NYC",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/joe-russos-almost-dead-the-rooftop-at-pier-17-20260926"},
+   {date:"2026-10-02",band:"Sages & Spirits ★",venue:"Capitol Theatre, Port Chester NY",price:"Onsale soon",type:"grateful_dead",url:"https://www.thecapitoltheatre.com/"},
+   {date:"2026-10-23",band:"Jeff Mattson & Friends",venue:"City Winery, NYC · 7:00 PM",price:"Tix →",type:"grateful_dead",url:"https://tickets.citywinery.com/"},
+   {date:"2026-10-24",band:"Jeff Mattson & Friends",venue:"City Winery, NYC · 7:00 PM",price:"Tix →",type:"grateful_dead",url:"https://tickets.citywinery.com/"},
+   {date:"2026-11-17",band:"Oteil Burbridge w/ John Scofield",venue:"Town Hall, NYC",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-town-hall-20261117"} ] },
  "Bay Area": { shows:[
    {off:4,band:"Dark Star Orchestra",venue:"The Catalyst · 8:00 PM",price:"$38",type:"grateful_dead"},
    {off:10,band:"Melvin Seals & JGB",venue:"Moe's Alley · 9:00 PM",price:"$45",type:"grateful_dead"},
    {off:14,band:"The China Cats",venue:"Felton Music Hall · 8:30 PM",price:"$28",type:"grateful_dead"},
    {off:20,band:"JRAD",venue:"Greek Theatre, Berkeley · 7:30 PM",price:"$59",type:"grateful_dead"},
-   {off:29,band:"Grateful Shred",venue:"Sweetwater, Mill Valley · 8:00 PM",price:"$30",type:"grateful_dead"} ] }
+   {off:29,band:"Grateful Shred",venue:"Sweetwater, Mill Valley · 8:00 PM",price:"$30",type:"grateful_dead"},
+   {date:"2026-07-31",band:"Dark Star Orchestra",venue:"Greek Theatre, Berkeley CA",price:"Tix →",type:"grateful_dead",url:"https://www.ticketmaster.com/dark-star-orchestra-a-benefit-for-berkeley-california-07-31-2026/event/1C00649BDF0EE190"},
+   {date:"2026-08-01",band:"Dark Star Orchestra",venue:"Greek Theatre, Berkeley CA",price:"Tix →",type:"grateful_dead",url:"https://www.ticketmaster.com/dark-star-orchestra-a-benefit-for-berkeley-california-08-01-2026/event/1C00649BE051E673"},
+   {date:"2026-08-01",band:"Joe Russo's Almost Dead",venue:"Quarry Amphitheater, Santa Cruz CA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/joe-russos-almost-dead-quarry-amphitheater-20260801"},
+   {date:"2026-08-01",band:"Melvin Seals & JGB",venue:"Jerry Garcia Amphitheater, SF · Jerry Day",price:"Tix →",type:"grateful_dead",url:"https://www.jerryday.org/"},
+   {date:"2026-08-02",band:"Joe Russo's Almost Dead",venue:"Meritage Resort, Napa CA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/joe-russos-almost-dead-meritage-resort-and-spa-20260802"},
+   {date:"2026-08-02",band:"Melvin Seals & JGB",venue:"Great American Music Hall, SF",price:"Tix →",type:"grateful_dead",url:"https://gamh.com/"},
+   {date:"2026-08-22",band:"Steve Kimock · Donna Jean Godchaux celebration",venue:"Mystic Theatre, Petaluma CA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/steve-kimock-mystic-theatre-20260822"},
+   {date:"2026-08-23",band:"Steve Kimock · Donna Jean Godchaux celebration",venue:"Mystic Theatre, Petaluma CA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/steve-kimock-mystic-theatre-20260823"} ] }
 };
 var GROUPS = [
  {n:"Dark Star Orchestra",ic:"🌌",tuned:true,seen:"a year ago"},
@@ -739,8 +778,8 @@ function cpad(n){return (n<10?'0':'')+n;}
 function cMid(){var d=new Date();d.setHours(0,0,0,0);return d;}
 function cIso(d){return d.getFullYear()+'-'+cpad(d.getMonth()+1)+'-'+cpad(d.getDate());}
 function buildShowlist(){ var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; var t0=cMid();
- SHOWLIST=(r.shows||[]).map(function(s){ var d=new Date(t0); d.setDate(d.getDate()+s.off);
-   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead'}; })
+ SHOWLIST=(r.shows||[]).map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
+   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||''}; })
    .sort(function(a,b){return a.iso<b.iso?-1:(a.iso>b.iso?1:0);}); }
 function setLocalShows(region){ REG=region||"Mid-Atlantic"; buildShowlist(); renderCal();
  var mt=document.getElementById('myTix'), nx=SHOWLIST[0];
@@ -753,11 +792,30 @@ function calView(v){ CAL_VIEW=v; CAL_SEL=null;
  document.getElementById('vwGrid').classList.toggle('on',v==='grid'); renderCal(); }
 function calNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); var m=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); CAL_MONTH=m; CAL_SEL=null; renderCal(); }
 function dayClick(iso){ CAL_SEL=(CAL_SEL===iso?null:iso); renderCal(); }
-function buyTix(i){ var s=SHOWLIST[i]; if(!s)return; CURBUY={band:s.band,venue:s.venue,price:s.price}; if(typeof buy==='function')buy('ticket'); }
+/* HOUSE RULE: never leave the app. Shows we can't sell yet (s.url present) do NOT
+   link out — tapping registers in-app demand: the waitlist that wins the headliners. */
+function wantState(){ try{return JSON.parse(localStorage.getItem('dd.want')||'{}');}catch(e){return {};} }
+function wantSave(w){ try{localStorage.setItem('dd.want',JSON.stringify(w));}catch(e){} }
+function wantHas(s){ return !!wantState()[s.band+'|'+s.iso]; }
+function wantTix(s){ var k=s.band+'|'+s.iso, w=wantState();
+ if(!w[k]){ w[k]={band:s.band,venue:s.venue,iso:s.iso,at:Date.now()}; wantSave(w);
+   var c=ddClient&&ddClient(),id=ddId&&ddId(); if(c&&id){ try{ c.rpc('chat_ticket_want',{p_band:s.band,p_venue:s.venue,p_date:s.iso}).catch(function(){}); }catch(e){} } }
+ if(typeof toast==='function')toast('🔔 You’re on the list — we’re bringing '+s.band+' tickets right here. We’ll tell you the second they’re live. 🌹');
+ renderCal(); }
+function buyTix(i){ var s=SHOWLIST[i]; if(!s)return;
+ if(s.url){ wantTix(s); return; }
+ CURBUY={band:s.band,venue:s.venue,price:s.price}; if(typeof buy==='function')buy('ticket'); }
+function buyFromCur(){ if(CURBUY&&CURBUY.url){ wantTix({band:CURBUY.band,venue:CURBUY.venue,iso:CURBUY.iso}); var b=document.getElementById('buy'); if(b)b.classList.remove('on'); }
+ else if(typeof buy==='function'){ buy('ticket'); } }
 function calRow(s){ var i=SHOWLIST.indexOf(s);
+ var ext=!!s.url, on=ext&&wantHas(s);
+ var priceTxt = ext ? (s.price==='Onsale soon'?'Onsale soon':'Coming here') : s.price;
+ var btn = ext ? (on?'<button style="background:#1f7a4d;color:#fff" disabled>✓ On the list</button>'
+                     :'<button onclick="buyTix('+i+')">🔔 Notify me</button>')
+               : '<button onclick="buyTix('+i+')">Tickets</button>';
  return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
   '<div class="cinfo"><b>'+s.band+'</b><span>'+s.venue+'</span></div>'+
-  '<div class="cact"><span class="cprice">'+s.price+'</span><button onclick="buyTix('+i+')">Tickets</button></div></div>'; }
+  '<div class="cact"><span class="cprice">'+priceTxt+'</span><div class="cbtns"><button class="cadd" onclick="addToCal('+i+')" title="Add to my calendar">📆</button>'+btn+'</div></div></div>'; }
 function renderCal(){
  if(!SHOWLIST.length) buildShowlist(); if(!CAL_MONTH) CAL_MONTH=cMid();
  var grid=document.getElementById('calGrid'), list=document.getElementById('calList'),
@@ -770,9 +828,11 @@ function renderCal(){
       startDow=new Date(y,mth,1).getDay(), days=new Date(y,mth+1,0).getDate(), tIso=cIso(cMid());
   var byDay={}; SHOWLIST.forEach(function(s){ if(calMatch(s))(byDay[s.iso]=byDay[s.iso]||[]).push(s); });
   var h=CDOW.map(function(x){return '<div class="dow">'+x+'</div>';}).join('');
-  for(var i=0;i<startDow;i++)h+='<div></div>';
+  for(var i=0;i<startDow;i++)h+='<div class="d pad"></div>';
   for(var dd=1;dd<=days;dd++){ var iso=y+'-'+cpad(mth+1)+'-'+cpad(dd); var has=byDay[iso];
    h+='<div class="d'+(has?' has':'')+(iso===tIso?' today':'')+(iso===CAL_SEL?' sel':'')+'" '+(has?'onclick="dayClick(\''+iso+'\')" onmouseenter="calHover(event,\''+iso+'\')" onmouseleave="calHoverOut()"':'')+'>'+dd+(has?'<i></i>':'')+'</div>'; }
+  // pad trailing cells so EVERY month is a constant 6 rows (no resize on ‹ ›)
+  for(var tcell=startDow+days; tcell<42; tcell++) h+='<div class="d pad"></div>';
   grid.innerHTML=h;
   list.innerHTML = (CAL_SEL&&byDay[CAL_SEL]) ? ('<div class="cdh">'+CDOW3[new Date(CAL_SEL+'T12:00:00').getDay()]+' · '+CMONTHS[mth]+' '+(new Date(CAL_SEL+'T12:00:00').getDate())+'</div>'+byDay[CAL_SEL].map(calRow).join('')) : '<div class="chint">Tap a highlighted date to see that night\'s shows.</div>';
  } else {
@@ -790,13 +850,46 @@ function calHover(ev,iso){ var list=SHOWLIST.filter(function(s){return s.iso===i
  if(bb)bb.textContent=s.band+(list.length>1?(' +'+(list.length-1)+' more'):'');
  if(bv)bv.textContent=s.venue+' · '+relDay(s.d);
  if(bp)bp.textContent=s.price;
- CURBUY={band:s.band,venue:s.venue,price:s.price};
+ CURBUY={band:s.band,venue:s.venue,price:s.price,iso:s.iso,url:s.url};
+ var _bt=document.getElementById('buyBtn'); if(_bt)_bt.textContent = s.url ? '🔔 Notify me when tickets open here' : '🎟️ Buy Now · one tap';
  var r=ev.currentTarget.getBoundingClientRect();
  b.style.left=Math.min((window.innerWidth||360)-250, r.right+8)+'px';
  b.style.top=Math.max(8, r.top-10)+'px';
  b.classList.add('on');
 }
 function calHoverOut(){ setTimeout(function(){ var b=document.getElementById('buy'); if(b && !b.matches(':hover')) b.classList.remove('on'); },160); }
+/* 📆 Add to my calendar — universal .ics (Apple / Google / Outlook), in addition to Buy Now */
+var CAL_HOVER_I=-1;
+function _p2(n){return (n<10?'0':'')+n;}
+function icsDownload(band,venue,iso){
+ if(!iso)return;
+ var d=iso.replace(/-/g,''); var dtstart=d+'T200000', dtend=d+'T230000';
+ var n=new Date(); var stamp=n.getUTCFullYear()+_p2(n.getUTCMonth()+1)+_p2(n.getUTCDate())+'T'+_p2(n.getUTCHours())+_p2(n.getUTCMinutes())+_p2(n.getUTCSeconds())+'Z';
+ var esc=function(t){return (t||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');};
+ var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//dead.dance//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+   'UID:dd-'+Math.random().toString(36).slice(2)+'@dead.dance','DTSTAMP:'+stamp,
+   'DTSTART:'+dtstart,'DTEND:'+dtend,'SUMMARY:'+esc(band),'LOCATION:'+esc(venue),
+   'DESCRIPTION:'+esc(band+' — via dead.dance 🌹'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+ try{ var blob=new Blob([ics],{type:'text/calendar;charset=utf-8'}); var url=URL.createObjectURL(blob);
+   var a=document.createElement('a'); a.href=url; a.download=(band||'show').replace(/[^a-z0-9]+/gi,'_')+'.ics';
+   document.body.appendChild(a); a.click(); document.body.removeChild(a);
+   setTimeout(function(){URL.revokeObjectURL(url);},1500);
+ }catch(e){ try{ window.open('data:text/calendar;charset=utf-8,'+encodeURIComponent(ics)); }catch(x){} }
+ calNote(band,iso);
+ toast('📆 Added “'+band+'” — open the file to drop it on your calendar.');
+}
+function addToCal(i){ var s=SHOWLIST[i]; if(s)icsDownload(s.band,s.venue,s.iso); }
+function addCalFromCur(){ if(CAL_HOVER_I>=0) addToCal(CAL_HOVER_I); else if(CURBUY) icsDownload(CURBUY.band,CURBUY.venue,cIso(cMid())); }
+/* added-to-calendar but not bought → ONE gentle reminder, never a pester */
+function calAdded(){ try{return JSON.parse(localStorage.getItem('dd.cal.added')||'[]');}catch(e){return [];} }
+function calAddedSave(a){ try{localStorage.setItem('dd.cal.added',JSON.stringify(a));}catch(e){} }
+function calNote(band,iso){ var a=calAdded(); if(!a.some(function(x){return x.band===band&&x.iso===iso;})){ a.push({band:band,iso:iso,bought:false,reminded:false}); calAddedSave(a); } }
+function calMarkBought(band){ var a=calAdded(),ch=false; a.forEach(function(x){ if(x.band===band&&!x.bought){x.bought=true;ch=true;} }); if(ch)calAddedSave(a); }
+function calRemindCheck(){ var a=calAdded(), today=cIso(cMid());
+ var due=a.filter(function(x){ return !x.bought && !x.reminded && x.iso>=today; });
+ if(!due.length)return; var x=due[0]; x.reminded=true; calAddedSave(a);   // once per show, ever
+ setTimeout(function(){ toast('🎟️ '+x.band+' is on your calendar — grab tickets whenever you\'re ready. No rush. 🌹'); }, 2800);
+}
 function calBuild(){ renderCal(); }   /* back-compat alias */
 function calScope(btn,which){document.querySelectorAll('.cal .seg button').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');toast(which==='nat'?'Calendar: National — every chapter\'s shows':('Calendar: your Local Family — '+(LOCALFAM||REG)));}
 /* best-effort live wiring: pull real shows when signed in; else keep the demo list */
@@ -822,7 +915,7 @@ function drawQR(svg,img){
  else { s+='<text x="50" y="56" font-size="15" text-anchor="middle">🌹</text>'; }
  svg.innerHTML=s;
 }
-function qrBuild(){drawQR(document.getElementById('qr'),ME.img);}
+function qrBuild(){drawQR(document.getElementById('qr'),ME.img);var nq=document.getElementById('navqr');if(nq)drawQR(nq,ME.img);}
 
 /* ---------------- the QR PROFILE — portable, shareable, Facebook-style ---------------- */
 function friendsBuild(){var el=document.getElementById('friendsRow');if(!el)return;
@@ -902,6 +995,7 @@ function coFallback(){ document.getElementById('checkout').classList.remove('on'
   var b=document.querySelector('.co-pay'); if(b){b.textContent=' Pay';b.disabled=false;}
   toast("Secure checkout opens once your Stripe keys are live — nothing was charged."); }
 function coPay(){
+  if(CO&&CO.kind==='ticket'&&CO.meta&&CO.meta.band&&typeof calMarkBought==='function')calMarkBought(CO.meta.band);
   var c=ddClient(),id=ddId();
   if(!c||!id||!CO){ document.getElementById('checkout').classList.remove('on');
     toast('Tap 💬 to sign in — then one tap opens secure Stripe checkout.'); return; }
@@ -1319,7 +1413,21 @@ function gigTab(t){ GIGTAB=t;
  var ft=document.getElementById('gtab-fest'); if(ft)ft.classList.toggle('on',t==='festival');
  var at=document.getElementById('gtab-act'); if(at)at.classList.toggle('on',t==='act');
  var fe=document.getElementById('gtab-feature'); if(fe)fe.classList.toggle('on',t==='feature');
+ var fa=document.getElementById('gtab-fans'); if(fa)fa.classList.toggle('on',t==='fans');
  var b=document.getElementById('gigbody');
+ if(t==='fans'){
+  b.innerHTML=
+   '<div class="gigrow"><div class="gigf"><label>Your band / act <span class="req">*</span></label><input id="gfan_band" placeholder="Your band" value="'+(GIGBAND?GIGBAND.replace(/"/g,"&quot;"):'')+'"></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>📧 Paste your email list (or upload a CSV)</label><textarea id="gfan_email" style="width:100%;min-height:54px;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:13px" placeholder="one per line or comma-separated"></textarea></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>📱 Paste your text / phone list</label><textarea id="gfan_text" style="width:100%;min-height:42px;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:13px" placeholder="phone numbers, one per line"></textarea></div></div>'+
+   '<div class="gigrow"><div class="gigf"><label>📘 Your Facebook groups/pages + socials</label><textarea id="gfan_fb" style="width:100%;min-height:42px;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:13px" placeholder="the pages/groups you post to"></textarea></div></div>'+
+   '<input id="gfan_csv" type="file" accept=".csv,text/csv,text/plain" style="display:none" onchange="gfanCsv(this)">'+
+   '<button class="giginvite" onclick="document.getElementById(\'gfan_csv\').click()">📎 Upload a CSV instead</button>'+
+   '<button class="gigsend" onclick="gigCurateInvites()">✨ Curate my dead.dance invite ▸</button>'+
+   '<div id="gfanOut"></div>'+
+   '<div class="gigfoot">Claude writes the invite <b>for you</b> — email, text, and a social post — personalized from your band. <b>You</b> send it to your own lists, or 📡 <b>HyperPost</b> it to your networks in one click. We never store or email your fans’ contacts — your list, your send.</div>';
+  return;
+ }
  if(t==='feature'){
   b.innerHTML=
    '<div class="gigrow"><div class="gigf"><label>What would make dead.dance better for you? <span class="req">*</span></label>'+
@@ -1422,6 +1530,39 @@ function gigCreateAct(){
  if(c&&id){ try{ c.rpc('chat_act_upsert',payload).then(function(r){ if(r&&r.error) toast('Saved locally — sign in to publish your profile.'); else done(); }).catch(function(){ done(); }); }catch(e){ done(); } }
  else done();
 }
+/* 📣 Bring fans — Claude curates the invite for each musician; they send / HyperPost it. */
+var CURATED_SOCIAL='';
+function gfanCount(id){ var v=(gv(id)||'').trim(); if(!v)return 0; return v.split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean).length; }
+function gfanCsv(input){ var f=input&&input.files&&input.files[0]; if(!f)return; var r=new FileReader();
+ r.onload=function(){ var t=(r.result||'').toString(); var em=document.getElementById('gfan_email'); if(em){ em.value=(em.value?em.value+'\n':'')+t; } toast('📎 CSV loaded — '+gfanCount('gfan_email')+' rows.'); };
+ r.onerror=function(){ toast('Couldn’t read that file.'); }; r.readAsText(f); }
+function gigInviteLink(band,medium){ var slug=(band||'band').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+ return 'https://deaddance.app/?utm_source=musician&utm_medium='+(medium||'invite')+'&utm_campaign=band_fans&utm_content='+slug; }
+function gigCurateInvites(){
+ var band=gv('gfan_band')||'our band';
+ var ne=gfanCount('gfan_email'), nt=gfanCount('gfan_text'), nf=gfanCount('gfan_fb');
+ var le=gigInviteLink(band,'email'), lt=gigInviteLink(band,'text'), ls=gigInviteLink(band,'social');
+ var email='Subject: '+band+' is now on dead.dance — come join the family\n\n'+
+   'Hey everyone — '+band+' is now on dead.dance. This is where you go to see where I’m playing and buy your tickets — fan-first, no junk fees, none of the Ticketmaster nonsense.\n\n'+
+   'I joined the dead.dance family. Now so should you. 👉 '+le+'\n\nSee you out there. 🌹\n— '+band;
+ var text='Hey everyone — it’s '+band+' 🎸 I’m on dead.dance now. See where I’m playing + buy tickets here. I joined the dead.dance family, now so should you 👉 '+lt;
+ var social='Hey everyone — '+band+' is now on dead.dance. This is where you go to see where I’m playing and buy your tickets. I joined the dead.dance family — now so should you. 👉 '+ls;
+ CURATED_SOCIAL=social;
+ var box=function(label,txt,id){ return '<div class="card" style="background:#fff;margin-top:9px"><div style="font-weight:800;font-size:12.5px;margin-bottom:5px">'+label+'</div>'+
+   '<textarea id="'+id+'" style="width:100%;min-height:'+(id==='ci_email'?'120px':'60px')+';border:1px solid var(--line);border-radius:9px;padding:9px;font:inherit;font-size:12.5px">'+txt.replace(/</g,'&lt;')+'</textarea>'+
+   '<button class="btn ghost sm" style="margin-top:6px" onclick="gigCopy(\''+id+'\',this)">📋 Copy</button></div>'; };
+ var out=document.getElementById('gfanOut');
+ out.innerHTML='<div class="gigfoot" style="text-align:left;margin:10px 0 2px"><b>Ready to send</b> — to ~'+ne+' emails · '+nt+' texts · '+nf+' social spots. Copy each to your own tools, or HyperPost the social post to your networks.</div>'+
+   box('📧 Email (paste into your mailer)',email,'ci_email')+
+   box('📱 Text',text,'ci_text')+
+   box('📘 Social post',social,'ci_social')+
+   '<button class="gigsend" style="margin-top:9px" onclick="gigHyperInvite()">📡 HyperPost the invite to my networks ▸</button>';
+ var c=ddClient(),id=ddId();
+ if(c&&id){ try{ c.rpc('chat_band_invite_record',{p_band:band,p_email_n:ne,p_text_n:nt,p_fb_n:nf}).catch(function(){}); }catch(e){} }
+ toast('✨ Your invite is curated — copy it to your lists, or HyperPost it.');
+}
+function gigCopy(id,btn){ var el=document.getElementById(id); if(!el)return; try{ navigator.clipboard.writeText(el.value); btn.textContent='✓ Copied'; }catch(e){ el.select(); btn.textContent='Select & copy'; } }
+function gigHyperInvite(){ closeGig(); if(typeof hyperConsole==='function'){ hyperConsole('Invite my fans to dead.dance'); var t=document.getElementById('hptext'); if(t)setTimeout(function(){ t.value=CURATED_SOCIAL; },80); } }
 function gigSubmitFeature(){ var t=gv('gf_feat'); if(!t||t.length<3){ toast('Tell us the feature — even a sentence.'); return; }
  var c=ddClient(),id=ddId(); closeGig();
  var done=function(){ toast('💡 Sent to Michael — thank you. Your idea is the work, not a “maybe later.”'); };
@@ -1666,10 +1807,10 @@ var QA_DEMO_GROUPS=[{id:null,name:'DEADHEADS',url:'https://www.facebook.com/grou
  {id:null,name:'Jerry Garcia Band - JGB',url:'https://www.facebook.com/groups/1155671899121023/'}];
 var QA_TASKS=[
  // ---- SHARES (recurring; the FB → our-page round trip; this is the share-army) ----
- {key:'share_forward',kind:'share',ic:'📤',title:'Forward a great post to our page',
-  steps:[{fb:1,t:'open your assigned group and find a post the family would love.'},
-         {t:'Share it to the <b>dead.dance Facebook page</b> (your choice — human click).'},
-         {t:'Come back here and tap “I shared it”.'}],
+ {key:'share_forward',kind:'share',ic:'📤',title:'Your mission: forward 10 posts',
+  steps:[{fb:1,t:'open your assigned group (the app gives you the link).'},
+         {t:'Forward <b>10 great posts</b> to the <b>dead.dance Facebook page</b> — your pick, human click each.'},
+         {t:'Tap “✓ I forwarded one” here as you go (0 → 10).'}],
   q:{prompt:'How did forwarding feel?',opts:['Easy','OK','Clunky']}},
  {key:'share_invite_group',kind:'share',ic:'🔵',title:'Drop our page in your group',
   steps:[{fb:1,t:'in your assigned group, where it fits the rules, mention dead.dance and link our page.'},
@@ -1794,24 +1935,39 @@ function shareSave(s){ try{localStorage.setItem('dd.share',JSON.stringify(s));}c
 function shareCandidate(){ return QA_DEMO_GROUPS[Math.floor(Math.random()*QA_DEMO_GROUPS.length)]; }
 var CHORES=['weed the tomatoes 🍅','mow the lawn 🌱','trim the hedges 🌳','water the garden 🪴','rake the leaves 🍂','sweep the porch 🧹'];
 function shareChore(){ return CHORES[Math.floor(Math.random()*CHORES.length)]; }
+var SHARE_GOAL=10;
 function shareAskCard(){ var s=shareState();
- if(s.status==='accepted') return '<div class="qaask done">🌹 You’re watching <b>'+(s.group||'a group')+'</b> for the family — thank you. Forward its best to our page anytime.</div>';
+ if(s.status==='accepted') return shareMissionCard(s);
  if(s.status==='snoozed' && s.until && Date.now()<s.until) return '';
  if(s.status==='declined') return '';
  var c=s.cand || shareCandidate(); if(!s.cand){ s.cand=c; shareSave(s); }
  if(!s.chore){ s.chore=shareChore(); shareSave(s); }
  return '<div class="qaask"><b>Pitch in — '+s.chore+'</b>'+
-   '<p>dead.dance keeps the noise down: the family’s posts, none of Facebook’s clutter. It’s free, it’s ours. Would you watch <b>ONE</b> group — '+c.name+' — and forward its best posts to our page? One group, that’s all.</p>'+
+   '<p>dead.dance keeps the noise down: the family’s posts, none of Facebook’s clutter. It’s free, it’s ours.</p>'+
+   '<p><b>Your mission, if you’re in:</b> go to <b>'+c.name+'</b>'+(c.url?(' (<a href="'+c.url+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">open ↗</a>)'):'')+' and <b>forward 10 great posts</b> to the dead.dance page. That’s the whole job.</p>'+
+   '<p style="margin-top:8px;font-weight:800">🌹 This only works if we all do our share.</p>'+
    '<div class="qaaskbtns"><button class="yes" onclick="shareAccept()">✅ I’m in</button><button onclick="shareSnooze(14)">Later</button><button class="no" onclick="shareSnooze(0)">No thanks</button></div></div>';
 }
-function shareAccept(){ var s=shareState(); var c=s.cand||shareCandidate(); s.status='accepted'; s.group=c.name; shareSave(s);
+function shareMissionCard(s){ var g=s.group||{name:'your group'}; var done=s.done||0, pct=Math.min(100,Math.round(done/SHARE_GOAL*100));
+ if(done>=SHARE_GOAL) return '<div class="qaask done"><b>🎉 You did your share!</b><p>'+SHARE_GOAL+' posts forwarded from <b>'+g.name+'</b> to our page. The family thanks you. 🌹</p><div class="qaaskbtns"><button class="yes" onclick="shareNext()">Take another group</button></div></div>';
+ return '<div class="qaask"><b>📤 Your mission — '+g.name+'</b>'+
+   '<p>Go to your group'+(g.url?(' (<a href="'+g.url+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">open ↗</a>)'):'')+' and forward <b>10 great posts</b> to the dead.dance page.</p>'+
+   '<div class="sharebar"><span style="width:'+pct+'%"></span></div>'+
+   '<p style="font-weight:800;margin:4px 0 0">'+done+' / '+SHARE_GOAL+' forwarded</p>'+
+   '<div class="qaaskbtns"><button class="yes" onclick="shareForward()">✓ I forwarded one</button></div></div>';
+}
+function shareAccept(){ var s=shareState(); var c=s.cand||shareCandidate(); s.status='accepted'; s.group={name:c.name,url:c.url,id:c.id||null}; s.done=0; shareSave(s);
  var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id){ try{ cl.rpc('chat_share_accept').catch(function(){}); }catch(e){} }
- qaRender(); toast('🌹 You’re in — watching '+c.name+'. Forward its gems to our page; that’s the whole job.'); }
+ qaRender(); toast('🌹 You’re in — '+c.name+'. Open it and forward 10 to our page.'); }
+function shareForward(){ var s=shareState(); if(s.status!=='accepted')return; s.done=(s.done||0)+1; shareSave(s);
+ var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id&&s.group&&s.group.id){ try{ cl.rpc('chat_group_mark_shared',{p_group:s.group.id}).catch(function(){}); }catch(e){} }
+ qaRender(); if(s.done>=SHARE_GOAL) toast('🎉 That’s 10 — you did your share! 🌹'); }
+function shareNext(){ shareSave({status:'none'}); qaRender(); toast('🙌 Grab another group anytime — thank you.'); }
 function shareSnooze(days){ var s=shareState(); s.status=days>0?'snoozed':'declined'; if(days>0)s.until=Date.now()+days*864e5; shareSave(s);
  var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id){ try{ cl.rpc('chat_share_decline',{p_snooze_days:days}).catch(function(){}); }catch(e){} }
  qaRender(); toast(days>0?'👍 No rush — we’ll check back later.':'👍 All good — no nags.'); }
 
-buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();gpsFamily();cmpInit();calSync();qaRender();qaSync();
+buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();gpsFamily();cmpInit();calSync();qaRender();qaSync();calRemindCheck();
 </script>
 
 <!-- ===== live spine: install + family chat (the real backend) ===== -->

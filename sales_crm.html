@@ -140,6 +140,7 @@
     <button id="tab-liq" onclick="setTab('liq')">📊 Liquidity</button>
     <button id="tab-qa" onclick="setTab('qa')">🧪 QA</button>
     <button id="tab-road" onclick="setTab('road')">🗺 Roadmap</button>
+    <button id="tab-bench" onclick="setTab('bench')" style="display:none">🐝 Bench <b id="bncount"></b></button>
   </div>
   <div class="tools"><input id="search" placeholder="Search…" oninput="render()"></div>
   <div class="stage" id="stage"></div>
@@ -242,7 +243,8 @@ function setTab(t){ TAB=t; SHOW=120; document.getElementById('tab-venues').class
  document.getElementById('tab-meet').classList.toggle('on',t==='meet');
  document.getElementById('tab-liq').classList.toggle('on',t==='liq');
  document.getElementById('tab-qa').classList.toggle('on',t==='qa');
- document.getElementById('tab-road').classList.toggle('on',t==='road'); render(); }
+ document.getElementById('tab-road').classList.toggle('on',t==='road');
+ document.getElementById('tab-bench').classList.toggle('on',t==='bench'); render(); }
 
 function curRegions(){ var r=REPS.find(function(x){return x.key===CURREP;}); return r&&r.tier!=='chaperone'?downline(CURREP):[CURREP]; }
 
@@ -254,6 +256,12 @@ function render(){
  var vAll=[], bAll=[], cAll=[]; regions.forEach(function(rg){ vAll=vAll.concat(venuesIn(rg)); bAll=bAll.concat(bandsIn(rg)); cAll=cAll.concat(craftIn(rg)); });
  var fAll=festIn(regions);
  document.getElementById('vcount').textContent=vAll.length; document.getElementById('bcount').textContent=bAll.length; document.getElementById('ccount').textContent=cAll.length; document.getElementById('fcount').textContent=fAll.length; document.getElementById('zcount').textContent=(window.DD_TALENT||TALENT_SEED).length; document.getElementById('mcount').textContent=(typeof POOL!=='undefined'&&POOL?POOL.filter(function(p){return p.status==='proposed';}).length:'');
+ // 🐝 Bench (Michele's approval gate) — only Michele (business) + the Founder see it
+ var canBench = (CURREP==='business'||CURREP==='bayarea');
+ document.getElementById('tab-bench').style.display = canBench ? '' : 'none';
+ if(canBench){ var pend=BENCH.filter(function(b){return b.status==='nominated';}).length;
+   document.getElementById('bncount').textContent = pend||''; }
+ if(TAB==='bench' && !canBench){ TAB='venues'; document.getElementById('tab-bench').classList.remove('on'); document.getElementById('tab-venues').classList.add('on'); }
  var patch = rep.tier==='chaperone' ? RLABEL[CURREP] : (CURREP==='bayarea'?'the whole bus':RLABEL[CURREP]+' + downline');
  document.getElementById('farrah').innerHTML='🎙️ <b>'+rep.name+'</b> — '+rep.tier.toUpperCase()+', '+patch+'. '+
    'Your patch: <b>'+vAll.length+' venues</b> to subscribe ('+fmt$(vAll.reduce(function(s,v){return s+(SUBPRICE[DD_CRM_SEED.cap[v]]||0);},0))+'/mo), <b>'+bAll.length+' bands</b> to sign up, and <b>'+cAll.length+' local craft vendors</b> to gather, and <b>'+fAll.length+' summer festivals</b> to land. Work the top of each list first.';
@@ -368,6 +376,8 @@ function render(){
   stage.innerHTML=renderLiquidity();
  } else if(TAB==='qa'){
   stage.innerHTML=renderQA();
+ } else if(TAB==='bench'){
+  stage.innerHTML=renderBench();
  } else {
   stage.innerHTML=renderRoadmap();
  }
@@ -424,6 +434,64 @@ var QA_SUMMARY_SEED=[
  {task:'qa_hostaband',label:'💡 Book on hostaband',n:18,works:83,note:'“A bar owner could do this, easy.”'},
  {task:'share_forward',label:'📤 Forward a post (share)',n:57,works:90,note:'“Happy to weed a row for the family.”'}
 ];
+/* ===== 🐝 The Bench — Michele's approval gate (the hiring edict).
+   Every Chaperone clears "the Michele bar" before being signed: as good as, or
+   BETTER than, the leader who recruits them. Michele has final say on her team.
+   Ambassador nominates → Michele checks the four marks → Approve or Hold.
+   Demo data; live = a house-only nomination table. ===== */
+var BENCH_CRIT=[['family','True family — a real head the scene already trusts'],
+  ['closer','A closer — turns gathering into revenue without feeling like a sale'],
+  ['leader','A leader people want to follow'],
+  ['share','Does their share, visibly — others copy them']];
+var BENCH_SEED=[
+ {id:'b1',name:'Dana R.',region:'midatl',by:'Christopher Eckert (Mid-Atlantic)',why:'Runs the Ardmore lot crew; everyone knows her. Booked 3 rooms before we even asked.',status:'nominated',crit:{}},
+ {id:'b2',name:'Marcus T.',region:'southeast',by:'(open Ambassador seat)',why:'Great energy, big network — but never closed anything. Unproven.',status:'nominated',crit:{}},
+ {id:'b3',name:'Lily V.',region:'pnw',by:'Sage P. (PNW)',why:'Portland scene queen, ran her own venue for years. Clears the bar easily.',status:'approved',crit:{family:1,closer:1,leader:1,share:1},by2:'Michele 🐝',when:'2026-06-29'}
+];
+var BENCH=(function(){ try{var s=JSON.parse(localStorage.getItem('dd.bench')||'null'); if(s&&s.length)return s;}catch(e){} return BENCH_SEED.slice(); })();
+function benchSave(){ try{localStorage.setItem('dd.bench',JSON.stringify(BENCH));}catch(e){} }
+function benchFind(id){ return BENCH.find(function(b){return b.id===id;}); }
+function benchCleared(b){ return BENCH_CRIT.every(function(c){return b.crit&&b.crit[c[0]];}); }
+function benchCrit(id,k){ var b=benchFind(id); if(!b||b.status==='approved')return; b.crit=b.crit||{}; b.crit[k]=!b.crit[k]; benchSave(); render(); }
+function benchApprove(id){ var b=benchFind(id); if(!b)return;
+  if(!benchCleared(b)){ alert("Doesn't clear the bar yet — check all four marks first. An open seat beats a wrong hire. 🐝"); return; }
+  var me=REPS.find(function(x){return x.key===CURREP;})||{}; b.status='approved'; b.by2=me.name||'Michele 🐝'; b.when=new Date().toISOString().slice(0,10); benchSave(); render();
+  toast('✅ '+b.name+' clears the bar — approved. The Ambassador can send the invite.'); }
+function benchHold(id){ var b=benchFind(id); if(!b)return; var n=prompt('Hold '+b.name+' — what would they need to clear the bar?',''); if(n===null)return; b.status='held'; b.note=n; benchSave(); render(); toast('⏸ Held — '+b.name+'. Caliber over headcount. 🐝'); }
+function benchReopen(id){ var b=benchFind(id); if(!b)return; b.status='nominated'; b.note=''; benchSave(); render(); }
+function benchCard(b){
+  var cleared=benchCleared(b);
+  var crit=BENCH_CRIT.map(function(c){ var on=b.crit&&b.crit[c[0]]; var locked=(b.status==='approved');
+    return '<button onclick="benchCrit(\''+b.id+'\',\''+c[0]+'\')" '+(locked?'disabled':'')+' style="text-align:left;font:inherit;font-size:12.5px;border:1px solid '+(on?'#1f7a4d':'var(--line)')+';background:'+(on?'#e9f6ef':'#fff')+';color:'+(on?'#155e3b':'#444')+';border-radius:9px;padding:7px 10px;cursor:'+(locked?'default':'pointer')+';display:flex;gap:7px;align-items:flex-start">'+
+      '<span style="font-weight:800">'+(on?'✓':'○')+'</span><span>'+c[1]+'</span></button>'; }).join('');
+  var badge = b.status==='approved' ? '<span class="pill" style="background:#1f7a4d;color:#fff">✅ Approved</span>'
+            : b.status==='held' ? '<span class="pill" style="background:#a32d2d;color:#fff">⏸ Held</span>'
+            : '<span class="pill target">Awaiting Michele</span>';
+  var actions = b.status==='approved'
+      ? '<div class="meta" style="margin-top:8px">Cleared the bar · approved by <b>'+(b.by2||'Michele')+'</b> · '+(b.when||'')+' &nbsp;<button onclick="benchReopen(\''+b.id+'\')" style="font:inherit;font-size:12px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 9px;cursor:pointer">Re-open</button></div>'
+      : b.status==='held'
+      ? '<div class="meta" style="margin-top:8px">On hold — <i>'+(b.note||'')+'</i> &nbsp;<button onclick="benchReopen(\''+b.id+'\')" style="font:inherit;font-size:12px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 9px;cursor:pointer">Re-open</button></div>'
+      : '<div style="display:flex;gap:8px;margin-top:10px"><button onclick="benchApprove(\''+b.id+'\')" style="font:inherit;font-weight:800;border:none;border-radius:9px;padding:8px 16px;cursor:pointer;background:'+(cleared?'#1f7a4d':'#cfd8d2')+';color:'+(cleared?'#fff':'#7c8a82')+'">✅ Approve'+(cleared?'':' (check all 4)')+'</button>'+
+        '<button onclick="benchHold(\''+b.id+'\')" style="font:inherit;font-weight:800;border:1px solid #a32d2d;border-radius:9px;padding:8px 16px;cursor:pointer;background:#fff;color:#a32d2d">⏸ Hold</button></div>';
+  return '<div class="card"><div class="top">'+
+    '<div class="score" style="background:linear-gradient(135deg,#c79a3a,#5a2e86)">🐝</div>'+
+    '<div class="info"><b>'+b.name+'</b><div class="meta">'+(RLABEL[b.region]||b.region)+' · nominated by '+b.by+'</div></div>'+badge+'</div>'+
+    '<div class="meta" style="margin:6px 0 10px">"'+b.why+'"</div>'+
+    '<div style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#7a6a3a;margin-bottom:6px">Does this person clear the Michele bar?</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+crit+'</div>'+actions+'</div>';
+}
+function renderBench(){
+  var pend=BENCH.filter(function(b){return b.status==='nominated';});
+  var appr=BENCH.filter(function(b){return b.status==='approved';});
+  var held=BENCH.filter(function(b){return b.status==='held';});
+  var h='<div class="netbanner" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">🐝 <b>Michele has final say on her team.</b> Every Chaperone clears the bar before they\'re signed — as good as, or <b>better than</b>, the leader who recruits them. We hire <b>up</b>; an open seat beats a wrong hire. Caliber is the moat, not headcount.</div>';
+  h+='<div class="cnt">'+pend.length+' awaiting your call · '+appr.length+' approved · '+held.length+' on hold</div>';
+  if(pend.length) h+=pend.map(benchCard).join('');
+  else h+='<div class="card" style="border-style:dashed"><div class="meta">No one waiting — bench is clear. 🌹</div></div>';
+  if(appr.length){ h+='<div class="cnt" style="margin-top:14px">✅ Approved — Ambassadors may send the invite</div>'+appr.map(benchCard).join(''); }
+  if(held.length){ h+='<div class="cnt" style="margin-top:14px">⏸ On hold</div>'+held.map(benchCard).join(''); }
+  return h;
+}
 function renderQA(){
  var rows=(window.QA_SUMMARY||QA_SUMMARY_SEED).slice().sort(function(a,b){return a.works-b.works;});
  var tot=rows.reduce(function(s,r){return s+r.n;},0), avg=Math.round(rows.reduce(function(s,r){return s+r.works*r.n;},0)/Math.max(1,tot));
@@ -505,7 +573,8 @@ var TODOS={ business:[
   {k:'share_campaign', t:'📣 <b>Post the “weed the tomatoes” share campaign</b> — ask the family to each watch ONE Facebook group and forward its best posts to our page (free, for the family, cuts the noise). <b>Then the Chancellors echo it</b> to their chapters.'},
   {k:'ambassador_welcomes', t:'Send Ambassador welcomes — only after Michael + Michele review every percentage (still gated).'},
   {k:'headliner_calls', t:'Work the headliner permission replies (DSO/JRAD/Kimock) → book the 15-min calls in the Meetings tab.'},
-  {k:'musician_help_test', t:'<b>Own the Musician Help Test</b> — you + Mike run most of it; ask Matt to do his. (Tasks live in the app’s 🧪 Help test widget; results in the 🧪 QA tab.)'}
+  {k:'musician_help_test', t:'<b>Own the Musician Help Test</b> — you + Mike run most of it; ask Matt to do his. (Tasks live in the app’s 🧪 Help test widget; results in the 🧪 QA tab.)'},
+  {k:'launch_blast', t:'<b>Light the fuse:</b> seed all the <b>Santa Cruz band lists</b> into the group catalog, then send the <b>opening invitation</b> — blast it on your <b>email lists, text lists, and a HyperPost</b>. (Ethos + the mission: “go to your group, forward 10 to our page — this only works if we all do our share.”)'}
 ]};
 function todosDone(){ try{return JSON.parse(localStorage.getItem('dd.todos.done')||'[]');}catch(e){return [];} }
 function todoToggle(k){ var d=todosDone(), i=d.indexOf(k); if(i>=0)d.splice(i,1); else d.push(k);
