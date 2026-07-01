@@ -1881,9 +1881,44 @@ var QA_TASKS=[
   q:{prompt:'Would you actually send that to a band friend?',opts:['Yes','Maybe','No']}},
  {key:'mt_feature',kind:'qa',ic:'💡',title:'Musician test: ask for a feature',
   steps:[{t:'📅 Add a Date → 💡 Add a feature. Describe something you want and send it.'}],
-  q:{prompt:'Did it feel like we actually want your ideas?',opts:['Yes','Sort of','No']}}
+  q:{prompt:'Did it feel like we actually want your ideas?',opts:['Yes','Sort of','No']}},
+ // ——— 🗂 SALES / CRM HELP TEST (the field cockpit) ———
+ {key:'sales_venues',kind:'qa',ic:'🏛',title:'Sales test: the Venues pipeline',
+  steps:[{t:'Open the CRM: <a href="sales_crm.html" target="_blank" rel="noopener">Open the CRM ↗</a> → <b>🏛 Venues</b>.'},{t:'Look at the subscription targets + any inbound hostaband prospects. 📸 <b>Screenshot it and write what you see.</b>'}],
+  q:{prompt:'Is it clear which venue to call first?',opts:['Yes','Sort of','No']}},
+ {key:'sales_meetings',kind:'qa',ic:'📅',title:'Sales test: run today’s outreach',
+  steps:[{t:'CRM → <b>📅 Meetings</b>. Send today’s routine, then <b>Simulate ACCEPT</b> and watch the calendar fill.'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Did the outreach/capacity flow make sense?',opts:['Clear','OK','Confusing']}},
+ {key:'sales_liquidity',kind:'qa',ic:'📊',title:'Sales test: read the Liquidity floor',
+  steps:[{t:'CRM → <b>📊 Liquidity</b>. Find a Hot market and a Thin one.'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Could you tell Hot vs Thin at a glance?',opts:['Yes','Sort of','No']}},
+ {key:'sales_addband',kind:'qa',ic:'🎸',title:'Sales test: sign a band',
+  steps:[{t:'CRM → <b>🎸 Bands</b>. Add a band in your patch.'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Was adding a band quick?',opts:['Easy','OK','Clunky']}},
+ {key:'sales_roadmap',kind:'qa',ic:'🗺',title:'Sales test: the Roadmap board',
+  steps:[{t:'CRM → <b>🗺 Roadmap</b>. Skim the surfaces + status.'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Does the roadmap tell the story?',opts:['Yes','Meh','No']}},
+ // ——— 🏛 VENUE / HOST HELP TEST (hostaband — the booking side-door) ———
+ {key:'venue_book',kind:'qa',ic:'💡',title:'Venue test: book an act',
+  steps:[{t:'Open hostaband: <a href="hostaband.html" target="_blank" rel="noopener">Open hostaband ↗</a>.'},{t:'Pick a genre + date → <b>BOOK NOW</b> on an act. 📸 Screenshot + write what you see.'}],
+  q:{prompt:'Would a venue/host find this easy?',opts:['Very','OK','Hard']}},
+ {key:'venue_availability',kind:'qa',ic:'📆',title:'Venue test: see who’s free',
+  steps:[{t:'In hostaband, pick a date and look at which acts are available.'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Was availability clear?',opts:['Clear','OK','Confusing']}},
+ {key:'venue_account',kind:'qa',ic:'🔑',title:'Venue test: host account gate',
+  steps:[{t:'Try a host account (home = free; business = 3 free bookings, then subscribe).'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Was free-vs-business clear & fair?',opts:['Yes','Sort of','No']}},
+ {key:'venue_vendor',kind:'qa',ic:'🍴',title:'Venue test: vendor tables',
+  steps:[{t:'Look at the vendor-slot setup (a venue sets its 4×4 tables; a Chaperone fills them).'},{t:'📸 Screenshot + write what you see.'}],
+  q:{prompt:'Did vendor-table setup make sense?',opts:['Yes','Meh','No']}}
 ];
-var QA_SEL=null,QA_PICK=null,QA_WORKS=null,QA_CLAIM=null;
+var QA_SEL=null,QA_PICK=null,QA_WORKS=null,QA_CLAIM=null,QA_FILTER=null;
+function qaTester(){ try{return localStorage.getItem('dd.tester')||'';}catch(e){return '';} }
+(function qaInitParams(){ try{
+  var p=new URLSearchParams(location.search);
+  var t=p.get('tester'); if(t){ try{localStorage.setItem('dd.tester',t);}catch(e){} }
+  var ht=p.get('ht'); if(ht){ QA_FILTER=ht; document.addEventListener('DOMContentLoaded',function(){ setTimeout(function(){try{qaOpen();}catch(e){}},600); }); }
+}catch(e){} })();
 function qaDoneList(){ try{return JSON.parse(localStorage.getItem('dd.qa.done')||'[]');}catch(e){return [];} }
 function qaMarkDone(k){ var d=qaDoneList(); if(d.indexOf(k)<0){d.push(k);try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){}} }
 function qaOpen(){ document.getElementById('qaov').classList.add('on'); qaRender(); qaSync(); }
@@ -1892,6 +1927,18 @@ function qaSync(){ var c=ddClient&&ddClient(),id=ddId&&ddId(); if(!c||!id)return
  try{ c.rpc('chat_qa_mine').then(function(r){ if(r&&r.data){ var d=qaDoneList(); r.data.forEach(function(x){ if(d.indexOf(x.task_key)<0)d.push(x.task_key); }); try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){} qaRender(); } }).catch(function(){}); }catch(e){} }
 function qaRowHTML(t,idx,isdone){ return '<div class="qarow'+(isdone?' done':'')+'" onclick="qaOpenTask('+idx+')"><div class="qic">'+t.ic+'</div><div class="qt"><b>'+t.title+'</b><span>'+(t.kind==='share'?'recurring · forward to our page':(isdone?'done — thank you!':'tap to try'))+'</span></div><div class="qchev">'+(isdone?'':'›')+'</div></div>'; }
 function qaRender(){ var done=qaDoneList(), b=document.getElementById('qaBody'); if(!b)return;
+ // ---- deep-link: one console's Help Test (?ht=main|band|sales|venue) ----
+ var CON={main:{pre:['qa_','cal_'],ic:'🌹',nm:'Main App'},band:{pre:['mt_'],ic:'🎸',nm:'Band Management'},sales:{pre:['sales_'],ic:'🗂',nm:'Sales / CRM'},venue:{pre:['venue_'],ic:'🏛',nm:'Venue / Host'}};
+ var cf=QA_FILTER&&(QA_FILTER==='musician'?'band':QA_FILTER);
+ if(cf&&CON[cf]){ var C=CON[cf], who=qaTester();
+   var set=QA_TASKS.filter(function(t){ return C.pre.some(function(p){return t.key.indexOf(p)===0;}); });
+   var left=set.filter(function(t){return done.indexOf(t.key)<0;}).length;
+   var badge=document.getElementById('qaBadge'); if(badge){ badge.style.display=left?'inline-block':'none'; badge.textContent=left; }
+   var h='<div class="qaq" style="margin-top:0">'+C.ic+' '+C.nm+' — Help Test'+(who?(' · '+who):'')+'</div>';
+   h+='<div style="font-size:13px;color:#6c6878;padding:0 2px 10px"><b>How to help:</b> do each task, then <b>📸 screenshot it, write what you see</b>, and hit Submit. Your answers come straight back to us — that’s the crowdsource.</div>';
+   set.forEach(function(t){ h+=qaRowHTML(t,QA_TASKS.indexOf(t),done.indexOf(t.key)>=0); });
+   b.innerHTML=h; return;
+ }
  var remaining=QA_TASKS.filter(function(t){return t.kind==='qa' && done.indexOf(t.key)<0;}).length;
  var badge=document.getElementById('qaBadge'); if(badge){ badge.style.display=remaining?'inline-block':'none'; badge.textContent=remaining; }
  var h=shareAskCard()+'<div class="qaq" style="margin-top:0">📤 Keep the family fed — shares</div>';
@@ -1920,6 +1967,7 @@ function qaDetail(t){ var b=document.getElementById('qaBody');
 function qaPick(el){ QA_PICK=el.getAttribute('data-v'); [].forEach.call(document.querySelectorAll('.qaopt'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
 function qaSetWorks(el,v){ QA_WORKS=v; [].forEach.call(el.parentNode.querySelectorAll('button'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
 function qaSubmit(){ var t=QA_SEL; if(!t)return; var note=(document.getElementById('qaNote')||{}).value||'';
+ var _tester=qaTester(); if(_tester){ note='['+_tester+'] '+note; }
  var c=ddClient&&ddClient(),id=ddId&&ddId();
  if(c&&id){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:QA_WORKS,p_choice:QA_PICK,p_note:note}).catch(function(){}); }catch(e){} }
  if(t.kind==='share'){ if(c&&id&&QA_CLAIM&&QA_CLAIM.id){ try{ c.rpc('chat_group_mark_shared',{p_group:QA_CLAIM.id}).catch(function(){}); }catch(e){} }
