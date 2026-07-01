@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="dead.dance Official Mirror — Family Partner badge">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a3cc0"/><stop offset=".55" stop-color="#5a2e86"/><stop offset="1" stop-color="#2a1b3d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e7c469"/><stop offset="1" stop-color="#c08a2d"/>
+    </linearGradient>
+    <path id="top" d="M32,120 a88,88 0 0,1 176,0" fill="none"/>
+    <path id="bot" d="M40,120 a80,80 0 0,0 160,0" fill="none"/>
+  </defs>
+
+  <!-- seal -->
+  <circle cx="120" cy="120" r="112" fill="url(#gold)"/>
+  <circle cx="120" cy="120" r="104" fill="url(#ring)"/>
+  <circle cx="120" cy="120" r="103" fill="none" stroke="#e7c469" stroke-width="1.5" opacity=".7"/>
+  <circle cx="120" cy="120" r="78" fill="none" stroke="#e7c469" stroke-width="2" opacity=".85"/>
+
+  <!-- curved text -->
+  <text fill="#f2e6c9" font-family="Georgia, 'Times New Roman', serif" font-weight="700" letter-spacing="3" font-size="15">
+    <textPath href="#top" startOffset="50%" text-anchor="middle">OFFICIAL MIRROR</textPath>
+  </text>
+  <text fill="#e0cdf5" font-family="Georgia, 'Times New Roman', serif" font-weight="700" letter-spacing="2.5" font-size="12.5">
+    <textPath href="#bot" startOffset="50%" text-anchor="middle">FAMILY&#160;PARTNER&#160;&#160;·&#160;&#160;SINCE&#160;2026</textPath>
+  </text>
+
+  <!-- stars flanking -->
+  <text x="120" y="52" text-anchor="middle" font-size="12" fill="#e7c469">✦</text>
+
+  <!-- center emblem: rose over a road (original art) -->
+  <g transform="translate(120,124)">
+    <!-- road to the horizon -->
+    <path d="M-46,40 L-10,-20 L10,-20 L46,40 Z" fill="#1c1230"/>
+    <line x1="0" y1="38" x2="0" y2="-16" stroke="#c08a2d" stroke-width="3" stroke-dasharray="6 7" opacity=".9"/>
+    <!-- rose -->
+    <g transform="translate(0,-14)">
+      <circle r="16" fill="#b8002e"/>
+      <circle r="10" fill="#8a0022"/>
+      <path d="M0,-16 C10,-10 10,4 0,10 C-10,4 -10,-10 0,-16 Z" fill="#d61f4a"/>
+      <circle r="4" fill="#f2a9bd"/>
+      <path d="M-15,4 q-9,3 -12,12 q9,-1 13,-8 Z" fill="#2a6b46"/>
+      <path d="M15,4 q9,3 12,12 q-9,-1 -13,-8 Z" fill="#2a6b46"/>
+    </g>
+    <text x="0" y="40" text-anchor="middle" font-family="Georgia, serif" font-weight="800" font-size="15" fill="#fff">dead.dance</text>
+  </g>
+</svg>

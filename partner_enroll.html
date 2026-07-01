@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dead.dance — Family Partner (Group Curators)</title>
+<style>
+:root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#23202a;--muted:#6c6878;--cream:#fbf7ef;--line:#e7e0d2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px 70px}
+.hero{background:linear-gradient(125deg,#2a1b3d,#5a2e86 60%,#7a3cc0);color:#fff;border-radius:0 0 22px 22px;padding:26px 24px 28px;text-align:center}
+.hero img{width:132px;height:132px;filter:drop-shadow(0 8px 20px #0005)}
+.hero h1{margin:10px 0 4px;font-size:27px}
+.hero p{margin:0 auto;opacity:.95;max-width:560px;font-size:16px}
+h2{font-size:19px;margin:28px 0 6px;color:var(--purple);border-top:2px solid var(--line);padding-top:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card b{color:var(--purple)}
+.rule{background:#fff;border:1px solid var(--line);border-left:4px solid var(--green,#2a6b46);border-radius:10px;padding:11px 14px;margin:8px 0;font-size:14.5px}
+.rule.no{border-left-color:var(--rose)}
+.rule b{color:var(--ink)}
+label{display:block;font-weight:700;font-size:13px;margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+textarea{min-height:64px;resize:vertical}
+.chk{display:flex;gap:9px;align-items:flex-start;margin:14px 0;font-size:13.5px}
+.chk input{width:auto;margin-top:3px}
+.btn{background:var(--purple);color:#fff;border:0;border-radius:12px;padding:14px;font-weight:800;font-size:16px;width:100%;cursor:pointer;margin-top:8px}
+.btn:disabled{opacity:.5}
+.foot{margin-top:26px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+.ok{display:none;background:#eafaf0;border:1px solid #b6e4c9;border-radius:14px;padding:20px;text-align:center;margin-top:14px}
+.ok.on{display:block}
+a{color:var(--purple2)}
+</style></head>
+<body>
+<div class="hero">
+  <img src="partner_badge.svg" alt="dead.dance Family Partner badge">
+  <h1>You're already family. Make it official.</h1>
+  <p>If you run a Grateful Dead group, you're part of this whether you've heard of us or not. Become a <b>dead.dance Family Partner</b> — keep your group, your rules, your voice, and let it reach the whole family.</p>
+</div>
+<div class="wrap">
+
+  <h2>🌹 What you get</h2>
+  <div class="grid">
+    <div class="card"><b>Your group, mirrored</b><br>A Mirror Group on dead.dance with a clean <b>daily digest</b> of your best posts — done for you.</div>
+    <div class="card"><b>Traffic back to you</b><br>Every mirrored post <b>links back to your Facebook group</b>. We send the family to you, not away.</div>
+    <div class="card"><b>The Official Mirror badge</b><br>The seal above — proof you're a real, recognized source. Yours to display.</div>
+    <div class="card"><b>Paid as a Curator</b><br>Earn a share for the curation you already do. Real comp, papered by our counsel.</div>
+    <div class="card"><b>Admin tools</b><br>Daily synthesis of your own group, an events calendar, and moderation help — value FB doesn't give you.</div>
+    <div class="card"><b>You stay in charge</b><br>Your group, your rules, your decisions. We amplify — we never take over.</div>
+  </div>
+
+  <h2>✅ How to take part — legally, inside Facebook's rules</h2>
+  <p style="font-size:14.5px;color:#3a3744">Simple and clean. This is human, voluntary sharing — never automation or scraping.</p>
+  <div class="rule"><b>DO — share your gems to the dead.dance page.</b> When a post in your group is worth spreading, use Facebook's own <b>Share</b> button to share it to the dead.dance page. Human click, every time.</div>
+  <div class="rule"><b>DO — keep attribution + links.</b> Shares carry the original poster and a link back to Facebook. Credit stays with the creator.</div>
+  <div class="rule"><b>DO — respect your group's rules and Facebook's terms.</b> Only share what your group allows; honor members' privacy.</div>
+  <div class="rule no"><b>DON'T — no bots, no scraping, no auto-posting.</b> Nothing automated touches Facebook. If it isn't a human choosing to share, we don't do it.</div>
+  <div class="rule no"><b>DON'T — no reposting private/members-only content publicly.</b> When in doubt, ask the poster or leave it.</div>
+  <div class="rule"><b>Disclosure:</b> because Curators are compensated, your sharing is a rewarded partnership — we disclose that, per FTC guidance. It stays honest.</div>
+
+  <h2>🗳 You decide how you help</h2>
+  <p style="font-size:14.5px;color:#3a3744">Pick your level when you enroll — light, regular, or full Curator. Change it anytime. The family only works if it's worth it to you, both ways.</p>
+
+  <h2>🎟 Self-enroll</h2>
+  <form id="enroll" onsubmit="return doEnroll(event)">
+    <label>Your name</label><input id="f_name" required placeholder="The admin behind the group">
+    <label>Your Facebook group (name)</label><input id="f_group" required placeholder="e.g., Bay Area Deadheads">
+    <label>Group link (URL)</label><input id="f_url" type="url" placeholder="https://www.facebook.com/groups/…">
+    <label>Best email to reach you</label><input id="f_email" type="email" required placeholder="you@email.com">
+    <label>Region / chapter</label>
+    <select id="f_region"><option>Mid-Atlantic</option><option>Northeast + New England</option><option>Southeast</option><option>Great Lakes</option><option>Lone Star + Southwest</option><option>Rockies</option><option>Pacific Northwest</option><option>Bay Area</option><option>SoCal</option><option>National / online</option></select>
+    <label>How do you want to help? (you decide)</label>
+    <select id="f_level"><option value="light">Light — I'll share a gem now and then</option><option value="regular" selected>Regular — a few shares a week</option><option value="curator">Full Curator — I'll curate my group daily (paid)</option></select>
+    <label>Anything you want us to know? (optional)</label><textarea id="f_note" placeholder="Your group, your people, your ideas…"></textarea>
+    <div class="chk"><input type="checkbox" id="f_agree" required><label for="f_agree" style="margin:0;font-weight:500">I own/administer this group, I'll share only within Facebook's rules and my group's rules, and I agree to the <a href="#" onclick="alert('The Group Curator Partner Agreement is provided by dead.dance counsel at onboarding.');return false">Group Curator Partner Agreement</a> (human sharing only; links + credit preserved; compensation + FTC disclosure).</label></div>
+    <button class="btn" type="submit">🌹 Welcome me to the family</button>
+  </form>
+  <div class="ok" id="ok"><div style="font-size:34px">🌹</div><b>Welcome home.</b><p style="color:#6c6878;font-size:14px">We've got your enrollment. A human from the family (Michele's team) will reach out to seat you, hand you the badge, and set up your Mirror Group. Meanwhile — start sharing your gems to the dead.dance page.</p></div>
+
+  <div class="foot">dead.dance Family Partner — Group Curator program. Honest-state: voluntary, human sharing only; nothing scraped or automated; links and credit go back to Facebook. Compensation and terms are papered by dead.dance counsel (Group Curator Partner Agreement). Not affiliated with or endorsed by Meta/Facebook. This is an enrollment of intent, not a contract.</div>
+</div>
+<script>
+function doEnroll(e){ e.preventDefault();
+  try{
+    var rec={name:f_name.value,group:f_group.value,url:f_url.value,email:f_email.value,region:f_region.value,level:f_level.value,note:f_note.value,at:Date.now()};
+    var all=JSON.parse(localStorage.getItem('dd.partners')||'[]'); all.push(rec); localStorage.setItem('dd.partners',JSON.stringify(all));
+    // best-effort: send to backend if the app's client is present
+    if(window.parent&&parent.ddClient){ try{ var c=parent.ddClient(); if(c)c.rpc('chat_partner_enroll',{p_name:rec.name,p_group:rec.group,p_url:rec.url,p_email:rec.email,p_region:rec.region,p_level:rec.level,p_note:rec.note}).catch(function(){}); }catch(_){} }
+  }catch(_){}
+  document.getElementById('enroll').style.display='none';
+  document.getElementById('ok').classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+  return false;
+}
+</script>
+</body></html>

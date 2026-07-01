@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dead.dance — Content Partner Upload (TributeDEADbands)</title>
+<style>
+:root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#23202a;--muted:#6c6878;--cream:#fbf7ef;--line:#e7e0d2;--green:#2a6b46}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px 70px}
+.hero{background:linear-gradient(125deg,#2a1b3d,#5a2e86 60%,#7a3cc0);color:#fff;border-radius:0 0 22px 22px;padding:26px 24px;text-align:center}
+.hero h1{margin:6px 0 4px;font-size:26px}.hero p{margin:0 auto;max-width:560px;opacity:.95;font-size:15px}
+h2{font-size:18px;margin:26px 0 6px;color:var(--purple);border-top:2px solid var(--line);padding-top:16px}
+.drop{border:2px dashed var(--purple2);border-radius:16px;padding:26px;text-align:center;background:#fff;cursor:pointer;margin:10px 0}
+.drop b{color:var(--purple)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.thumbs .t{width:74px;height:74px;border-radius:10px;background:#efe5f7;display:grid;place-items:center;font-size:12px;color:var(--muted);overflow:hidden;text-align:center;padding:4px}
+.thumbs .t img{width:100%;height:100%;object-fit:cover}
+label{display:block;font-weight:700;font-size:13px;margin:12px 0 4px}
+input,textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+textarea{min-height:60px;resize:vertical}
+.rule{background:#fff;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;padding:11px 14px;margin:8px 0;font-size:14px}
+.chk{display:flex;gap:9px;align-items:flex-start;margin:14px 0;font-size:13.5px}.chk input{width:auto;margin-top:3px}
+.btn{background:var(--purple);color:#fff;border:0;border-radius:12px;padding:14px;font-weight:800;font-size:16px;width:100%;cursor:pointer;margin-top:8px}
+.hp{background:#fff7e6;border:1px solid #f0d9a8;border-radius:12px;padding:13px 15px;margin:12px 0;font-size:14px;color:#6b5417}
+.ok{display:none;background:#eafaf0;border:1px solid #b6e4c9;border-radius:14px;padding:20px;text-align:center;margin-top:14px}.ok.on{display:block}
+.foot{margin-top:26px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+a{color:var(--purple2)}
+</style></head>
+<body>
+<div class="hero">
+  <h1>🤝 Content Partner Upload</h1>
+  <p>For <b>TributeDEADbands.com</b> — bring your photos, video, posters, band pages and show dates into dead.dance. You upload, you populate, we amplify — and every piece links back to you.</p>
+</div>
+<div class="wrap">
+
+  <div class="hp"><b>📡 Two-way by design:</b> once you're a content partner, a band posting a date in the dead.dance <b>Band App</b> can <b>HyperPost it out to TributeDEADbands.com</b> too — your site gets the traffic, not just ours. Mutual, attributed, link-back.</div>
+
+  <h2>1 · Who's uploading</h2>
+  <label>Your name / role at TributeDEADbands.com</label><input id="u_name" required placeholder="e.g., site admin">
+  <label>Contact email</label><input id="u_email" type="email" required placeholder="you@tributedeadbands.com">
+
+  <h2>2 · Upload your content</h2>
+  <div class="rule">Photos · video · posters · band logos · EPKs. You keep ownership — you're granting dead.dance a license to display it <b>with credit + a link back to your site</b> (per the Mutual Data-Sharing Agreement).</div>
+  <label class="drop" for="u_files"><b>＋ Tap to add files</b><br><span style="font-size:12px;color:var(--muted)">images &amp; video — as many as you like</span>
+    <input id="u_files" type="file" accept="image/*,video/*" multiple style="display:none" onchange="pick(this)"></label>
+  <div class="thumbs" id="thumbs"></div>
+
+  <h2>3 · Populate a band / show (optional)</h2>
+  <label>Band name</label><input id="u_band" placeholder="e.g., China Cats">
+  <label>Feed / gallery URL to pull from (if you have one)</label><input id="u_feed" type="url" placeholder="https://tributedeadbands.com/…">
+  <label>Upcoming dates / notes</label><textarea id="u_notes" placeholder="Paste dates, venues, links — we'll load them onto the calendar."></textarea>
+
+  <div class="chk"><input type="checkbox" id="u_agree" required><label for="u_agree" style="margin:0;font-weight:500">I have the rights to this content (or the creators' permission), and I grant dead.dance the license in the <a href="#" onclick="alert('The Mutual Data-Sharing & Content Partnership Agreement is provided by dead.dance counsel.');return false">Mutual Data-Sharing Agreement</a> — display with attribution + link-back, revocable.</label></div>
+  <button class="btn" onclick="doUpload()">🌹 Send it to dead.dance</button>
+  <div class="ok" id="ok"><div style="font-size:34px">🌹</div><b>Got it — thank you, partners.</b><p style="color:#6c6878;font-size:14px">Your content is staged. Our team will place it, credit you, and link back to TributeDEADbands.com. HyperPost cross-posting to your site gets set up with your feed/endpoint.</p></div>
+
+  <div class="foot">Honest-state: uploads are staged for the partnership; full media storage + auto-pull turns on with the Supabase Storage bucket + your feed endpoint (counsel-papered Mutual Data-Sharing Agreement). You retain ownership; license is revocable; all display carries attribution + link-back. dead.dance is independent; GD marks/music are separately licensed.</div>
+</div>
+<script>
+var FILES=[];
+function pick(inp){ var fs=inp.files||[]; for(var i=0;i<fs.length;i++)FILES.push(fs[i]); render(); }
+function render(){ var t=document.getElementById('thumbs'); t.innerHTML=FILES.map(function(f){ if(/^image\//.test(f.type)){ var u=URL.createObjectURL(f); return '<div class="t"><img src="'+u+'"></div>'; } return '<div class="t">🎞️<br>'+(f.name||'video').slice(0,14)+'</div>'; }).join(''); }
+function doUpload(){ if(!document.getElementById('u_agree').checked){ alert('Please confirm the rights + license box.'); return; }
+  try{ var rec={name:u_name.value,email:u_email.value,band:u_band.value,feed:u_feed.value,notes:u_notes.value,files:FILES.length,at:Date.now()};
+    var all=JSON.parse(localStorage.getItem('dd.partner_uploads')||'[]'); all.push(rec); localStorage.setItem('dd.partner_uploads',JSON.stringify(all));
+  }catch(_){}
+  // Real ingest wires to Supabase Storage (bucket: partner_media) once created — best-effort:
+  try{ if(window.parent&&parent.ddClient){ var c=parent.ddClient(); if(c&&c.storage){ FILES.forEach(function(f){ try{ c.storage.from('partner_media').upload('tributedeadbands/'+Date.now()+'_'+f.name.replace(/[^\w.\-]/g,'_'),f,{upsert:true}); }catch(_){} }); } } }catch(_){}
+  document.querySelectorAll('h2,label,input,textarea,.drop,.chk,.btn,.thumbs').forEach(function(e){e.style.display='none';});
+  document.getElementById('ok').classList.add('on'); window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body></html>
