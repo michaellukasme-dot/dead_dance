@@ -52,6 +52,31 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .cal.big{max-width:720px;margin:0 auto}
 .cal.big .grid{gap:6px}
 .cal.big .grid .cell,.cal.big .grid>div{min-height:64px}
+.roloWrap{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.roloHd{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:8px 2px 0}
+.roloCard{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 12px;cursor:pointer}
+.roloCard:active{transform:scale(.99)}
+.roloImg{width:52px;height:52px;flex:none;border-radius:11px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#fff}
+.roloImg.big{width:100%;height:190px;border-radius:16px;margin:6px 0}
+.roloMeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.roloMeta b{font-size:15px}
+.roloReg{font-size:11px;color:var(--accent);font-weight:700}
+.roloDesc{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.roloNext{font-size:11.5px;color:#3a3346;font-weight:700;margin-top:2px}
+.roloGo{color:var(--muted);font-size:20px;flex:none}
+.bvtabs{display:flex;gap:8px;margin:8px 0 4px}
+.bvtab{flex:1;background:#f1ece0;border:0;border-radius:10px;padding:9px;font-weight:800;color:#6b6457;cursor:pointer}
+.bvtab.on{background:var(--purple,#5a2e86);color:#fff}
+.bvName{font-size:19px;font-weight:800;margin-top:4px}
+.bvReg{font-size:12px;color:var(--accent);font-weight:700}
+.bvDesc{font-size:13.5px;color:#3a3346;line-height:1.5;margin:8px 0}
+.bvSec{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:12px 0 4px}
+.bvShow{display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line);padding:8px 0}
+.bvWhen{font-size:11px;font-weight:800;color:var(--rose,#b8002e);width:64px;flex:none}
+.bvSh b{font-size:14px;display:block}.bvSh span{font-size:11.5px;color:var(--muted)}
+.merchGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.merchTile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer}
+.merchTile .mtIc{font-size:30px}.merchTile .mtN{font-size:13px;font-weight:700;margin-top:5px}.merchTile .mtP{font-size:12px;color:var(--accent);font-weight:800;margin-top:2px}
 .qarow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;cursor:pointer}
 .qarow .qic{font-size:22px;flex:none}
 .qarow .qt{flex:1}.qarow .qt b{font-size:14px;display:block}.qarow .qt span{font-size:11.5px;color:var(--muted)}
@@ -106,7 +131,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .cal .d.today{outline:2px solid var(--gold)}
 .cal .openmap{width:100%;margin-top:11px;background:var(--gold);color:#23202a;border:0;border-radius:9px;padding:9px;font-weight:800;cursor:pointer}
 /* buy bubble */
-.buy{position:fixed;z-index:60;background:#fff;color:#23202a;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px #0004;padding:11px 13px;width:240px;display:none}
+.buy{position:fixed;z-index:95;background:#fff;color:#23202a;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px #0004;padding:11px 13px;width:240px;display:none}
 .buy.on{display:block}
 .buy .r{display:flex;align-items:center;gap:9px}
 .buy b{font-size:14px}.buy .m{color:var(--muted);font-size:12px}
@@ -153,6 +178,12 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .posthead .pwho span{font-size:11.5px;color:var(--muted)}
 .posthead .pwho .grp{color:var(--fb);font-weight:700}
 .posthead .pmore{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;align-self:flex-start}
+.ptext{font-size:14px;line-height:1.5;margin:2px 0 8px}
+.ptext .tag{color:var(--accent);font-weight:700}
+.pvid{margin:6px 0 2px;border-radius:12px;overflow:hidden;background:#000}
+.pvid video{width:100%;display:block;max-height:74vh;background:#000}
+.ptext.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.morebtn{background:none;border:0;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;padding:0;margin:-4px 0 8px}
 .post .by{font-size:12px;color:var(--muted)}
 .post .by a{color:var(--fb);text-decoration:none}
 .post .acts{display:flex;align-items:center;gap:16px;margin-top:10px;color:var(--muted);font-size:13px;font-weight:600}
@@ -336,6 +367,34 @@ body{padding-bottom:64px}
 .act.reply{background:var(--accent);color:#fff}
 .reactpop{position:fixed;z-index:85;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 10px;box-shadow:0 8px 22px #0004;display:none;gap:6px;font-size:21px}
 .reactpop.on{display:flex}.reactpop span{cursor:pointer;transition:.1s}.reactpop span:hover{transform:scale(1.35)}
+.pmenu{position:fixed;z-index:88;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px #0005;padding:6px;width:252px;display:none;max-height:72vh;overflow:auto}
+.pmenu.on{display:block}
+.pmenu button{display:flex;gap:10px;align-items:flex-start;width:100%;background:none;border:0;text-align:left;padding:9px 8px;border-radius:9px;cursor:pointer;color:var(--ink)}
+.pmenu button:hover{background:#f4f0e6}
+.pmenu button>span{font-size:16px;flex:none;width:20px;text-align:center}
+.pmenu button b{font-size:13.5px;display:block;font-weight:700}
+.pmenu button i{font-size:11.5px;color:var(--muted);font-style:normal;line-height:1.35}
+.pmsep{height:1px;background:var(--line);margin:5px 4px}
+.shpanel{background:#fff;border-radius:16px;padding:15px;width:min(94vw,420px);margin:auto;align-self:center}
+.shhd{font-size:16px;font-weight:800;margin-bottom:10px}
+.shopt{display:block;width:100%;text-align:left;background:#faf7f2;border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px;cursor:pointer;color:var(--ink)}
+.shopt b{font-size:14px;display:block}.shopt span{font-size:11.5px;color:var(--muted)}
+.shx{float:right;background:none;border:0;font-size:22px;color:var(--muted);cursor:pointer;line-height:1}
+.shcompose{display:flex;gap:10px;margin:8px 0 10px}
+.shav{width:38px;height:38px;flex:none;border-radius:50%;background:linear-gradient(135deg,#5a2e86,#b8002e);display:grid;place-items:center;color:#fff}
+.shsay{flex:1;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font:inherit;font-size:14px;resize:none;min-height:52px;outline:none}
+.shaud{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.shaudsel{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:13px;background:#fff}
+.shhp{background:var(--rose);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;white-space:nowrap}
+.shhp:active{transform:scale(.96)}
+.shsec{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:12px 0 6px}
+.shfriends{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.shfr{background:none;border:0;cursor:pointer;text-align:center;flex:none;width:56px}
+.shfrav{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#efe5f7;font-size:22px;margin:0 auto}
+.shfrnm{font-size:11px;color:var(--ink);display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shrow{display:flex;gap:8px;flex-wrap:wrap}
+.shto{flex:1;min-width:70px;background:#faf7f2;border:1px solid var(--line);border-radius:12px;padding:10px 6px;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:4px}
+.shto span{font-size:20px}
 /* HyperPost console — REPLY = HYPERPOST, modal overlay, never the page */
 .hp{position:fixed;inset:0;z-index:82;background:rgba(20,12,34,.6);display:none;align-items:center;justify-content:center;padding:18px}
 .hp.on{display:flex}
@@ -494,17 +553,24 @@ body{padding-bottom:64px}
 
     <div class="sec">📚 FROM YOUR GROUPS — SHARED IN</div>
     <div class="post">
-      <div class="posthead"><div class="pav">🎸</div><div class="pwho"><b>Matt Hartle</b><span><span class="grp">Bay Area Deadheads</span> · 2h · shared</span></div><button class="pmore" onclick="toast('Post options')">⋯</button></div>
+      <div class="posthead"><div class="pav">🐝</div><div class="pwho"><b>Michele Murphy</b><span><span class="grp">Santa Cruz Music Scene</span> · with the Blues Trio · 5h</span></div><button class="pmore" onclick="postMenu(this)">⋯</button></div>
+      <div class="ptext clamp">Catch us Tuesday 6–8pm at Woodhouse Blending &amp; Brewing — outdoor patio, dogs &amp; kids welcome! 🎶 We'll run the whole set — some Buffalo blues, a few surprises, and plenty of room to dance in the sunshine. Bring a lawn chair, bring the little ones, bring your dancing shoes. This is our favorite room of the summer and the patio's wide open, so come early, grab a pour, and let's make a night of it. 🌹 <span class="tag">#buffalobluestrio</span> <span class="tag">#michelemurphysings</span> <span class="tag">#bluesandbrews</span></div>
+      <button class="morebtn" onclick="moreToggle(this)">See more…</button>
+      <div class="pvid"><video controls playsinline preload="metadata" poster="rose-192.png"><track kind="captions" srclang="en" label="English"></video></div>
+      <div class="acts"><button class="act" onclick="like(this)">👍 <span>33</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" onclick="openShareSheet(this)">↗ Share</button><button class="act reply" onclick="hyperConsole('Michele · Woodhouse Tuesday')">💬 Comment</button></div>
+    </div>
+    <div class="post">
+      <div class="posthead"><div class="pav">🎸</div><div class="pwho"><b>Matt Hartle</b><span><span class="grp">Bay Area Deadheads</span> · 2h · shared</span></div><button class="pmore" onclick="postMenu(this)">⋯</button></div>
       <div class="txt">Hey y'all — anybody got a Hurdy Gurdy to loan out for a while, or maybe one to sell?</div>
       <div class="by"><a href="#" onclick="toast('Opens the original on Facebook ↗');return false">view on Facebook ↗</a></div>
       <div style="margin-top:7px"><span class="chip loc">elevated → Local</span></div>
-      <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" onclick="toast('↗ Shared to your family')">↗ Share</button><button class="act reply" onclick="hyperConsole('Bay Area Deadheads · Matt\'s Hurdy Gurdy ask')">💬 Comment</button></div>
+      <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" onclick="openShareSheet(this)">↗ Share</button><button class="act reply" onclick="hyperConsole('Bay Area Deadheads · Matt\'s Hurdy Gurdy ask')">💬 Comment</button></div>
       <button class="radiate" title="HyperPost — radiate this everywhere" onclick="hyperConsole('Bay Area Deadheads · Hurdy Gurdy ask')">📡</button>
     </div>
 
     <div class="sec" data-scope="local">📣 CROWDSOURCE — THE FAMILY'S ON IT</div>
     <div class="post" id="cs" data-scope="local">
-      <div class="posthead"><div class="pav">🎸</div><div class="pwho"><b>Matt Hartle</b><span><span class="grp">Crowdsource</span> · 📍 Local · 1h</span></div><button class="pmore" onclick="toast('Post options')">⋯</button></div>
+      <div class="posthead"><div class="pav">🎸</div><div class="pwho"><b>Matt Hartle</b><span><span class="grp">Crowdsource</span> · 📍 Local · 1h</span></div><button class="pmore" onclick="postMenu(this)">⋯</button></div>
       <span class="chip gear">🪕 Gear/Loan</span>
       <div class="txt">Matt needs a Hurdy Gurdy — loan or sell? <span style="color:var(--muted)">(elevated from Bay Area Deadheads)</span></div>
       <div class="acts"><button class="act" onclick="like(this)">👍 <span>95</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act reply" onclick="hyperConsole('Crowdsource · Hurdy Gurdy — loan or sell?')">💬 Comment</button><button class="btn ghost sm" style="margin-left:auto" onclick="this.textContent='✓ Answered';this.disabled=true">Mark answered</button></div>
@@ -527,7 +593,7 @@ body{padding-bottom:64px}
 
     <div class="sec" data-scope="national" style="display:none">🎸 ON TOUR — NATIONAL</div>
     <div class="post" data-scope="national" style="display:none">
-      <div class="posthead"><div class="pav">🌌</div><div class="pwho"><b>Dark Star Orchestra</b><span><span class="grp">National tour feed</span> · verified date</span></div><button class="pmore" onclick="toast('Post options')">⋯</button></div>
+      <div class="posthead"><div class="pav">🌌</div><div class="pwho"><b>Dark Star Orchestra</b><span><span class="grp">National tour feed</span> · verified date</span></div><button class="pmore" onclick="postMenu(this)">⋯</button></div>
       <div class="txt"><b>Dark Star Orchestra</b> — Fri Jul 31, Greek Theatre, Berkeley CA · the Rex Foundation benefit. Who's making the run?</div>
       <div class="acts"><button class="act" onclick="like(this)">👍 <span>240</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" style="background:var(--gold);color:#23202a" onclick="CURBUY={band:'Dark Star Orchestra',venue:'Greek Theatre · Berkeley',price:'$59'};buy('ticket')">🎟️ Tickets</button><button class="act reply" onclick="hyperConsole('DSO · Berkeley Greek 7/31')">💬 Comment</button></div>
       <button class="radiate" onclick="hyperConsole('DSO national run')">📡</button>
@@ -578,6 +644,46 @@ body{padding-bottom:64px}
 
 <!-- reaction popover (shared) -->
 <div class="reactpop" id="reactpop"><span onclick="react('👍')">👍</span><span onclick="react('❤️')">❤️</span><span onclick="react('🌹')">🌹</span><span onclick="react('🔥')">🔥</span><span onclick="react('😂')">😂</span><span onclick="react('🙌')">🙌</span><span onclick="react('💀')">💀</span></div>
+
+<!-- Post ⋯ menu (dead.dance) -->
+<div class="pmenu" id="postmenu">
+ <button onclick="pmAct('interested')"><span>🌹</span><div><b>More like this</b><i>More of this in your feed.</i></div></button>
+ <button onclick="pmAct('less')"><span>🌫️</span><div><b>Less like this</b><i>Fewer posts like it.</i></div></button>
+ <button onclick="pmAct('save')"><span>🔖</span><div><b>Save to my stash</b><i>Find it later on your profile.</i></div></button>
+ <button onclick="pmAct('notify')"><span>🔔</span><div><b>Notify me about <span class="pmwho"></span></b><i>Heads-up on their posts.</i></div></button>
+ <div class="pmsep"></div>
+ <button onclick="pmShare()"><span>↗</span><div><b>Share…</b><i>Friends, a few, or a chapter.</i></div></button>
+ <button onclick="pmAct('hyper')"><span>📡</span><div><b>HyperPost this</b><i>Radiate it out.</i></div></button>
+ <div class="pmsep"></div>
+ <button onclick="pmAct('hide')"><span>🙈</span><div><b>Hide this post</b><i>See fewer like it.</i></div></button>
+ <button onclick="pmAct('snooze')"><span>😴</span><div><b>Snooze <span class="pmwho"></span> 30 days</b><i>Take a break, stay friends.</i></div></button>
+ <button onclick="pmAct('unfollow')"><span>🔕</span><div><b>Unfollow <span class="pmwho"></span></b><i>Stay friends, stop seeing posts.</i></div></button>
+ <div class="pmsep"></div>
+ <button onclick="pmAct('report')"><span>🚩</span><div><b>Report to a Chaperone</b><i>A local human reviews it.</i></div></button>
+ <button onclick="pmAct('block')"><span>⛔</span><div><b>Block <span class="pmwho"></span></b><i>You won't see or contact each other.</i></div></button>
+ <button onclick="pmAct('why')"><span>ℹ️</span><div><b>Why am I seeing this?</b></div></button>
+</div>
+
+<!-- Share modal — HyperPost lives here -->
+<div class="mapov" id="sharesheet" onclick="if(event.target===this)shClose()">
+ <div class="shpanel">
+  <div class="shhd">↗ Share <button class="shx" onclick="shClose()" aria-label="Close">×</button></div>
+  <div class="shcompose"><div class="shav">🌹</div><textarea id="shSay" class="shsay" placeholder="Say something about this…"></textarea></div>
+  <div class="shaud">
+    <select id="shAud" class="shaudsel"><option value="all">👥 All my friends</option><option value="select">✅ Select friends</option><option value="group">🚉 A chapter / group</option></select>
+    <button class="shhp" onclick="shHyper()">📡 HyperPost</button>
+  </div>
+  <div class="shsec">Send to a friend</div>
+  <div class="shfriends" id="shFriends"></div>
+  <div class="shsec">Share to</div>
+  <div class="shrow">
+    <button class="shto" onclick="shCopy()"><span>🔗</span>Copy link</button>
+    <button class="shto" onclick="shDo('group')"><span>🚉</span>Chapter</button>
+    <button class="shto" onclick="shDo('select')"><span>🪪</span>A friend</button>
+    <button class="shto" onclick="shFB()"><span>f</span>Facebook</button>
+  </div>
+ </div>
+</div>
 
 <!-- ===================== HYPERPOST CONSOLE (Reply = HyperPost) ===================== -->
 <div class="hp" id="hp" onclick="if(event.target===this)closeHP()">
@@ -1071,6 +1177,49 @@ function bandProfile(i){ var b=BANDS[i]; if(!b)return; var safe=b.name.replace(/
  drawQR(document.getElementById('profQR'), b.img);
 }
 
+/* ---------- Band Rolodex + two-tab Band View (Card · Merch) ---------- */
+function bandImgHTML(b,big){ var h=big?128:52;
+ if(b.img){ return '<div class="roloImg'+(big?' big':'')+'" style="background-image:url('+b.img+')"></div>'; }
+ return '<div class="roloImg'+(big?' big':'')+'" style="background:linear-gradient(135deg,#5a2e86,#c79a3a);font-size:'+(big?'54px':'26px')+'">'+b.ic+'</div>'; }
+function bandNextShows(name){ return (SHOWLIST||[]).filter(function(s){return s.band===name;}); }
+function bandMerch(b){ return [ {n:"Show poster",p:"$28",ic:"🖼️"},{n:"Logo tee",p:"$25",ic:"👕"},{n:"Sticker pack",p:"$8",ic:"🌹"},{n:"Live set — Print-the-Vinyl",p:"$99",ic:"💿"} ]; }
+function bandRolodexHTML(){
+ var local=[],rest=[]; BANDS.forEach(function(b,i){ (b.region===REG?local:rest).push(i); });
+ var card=function(i){ var b=BANDS[i]; var nx=bandNextShows(b.name)[0];
+   return '<div class="roloCard" onclick="bandView('+i+',\'card\')">'+bandImgHTML(b,false)+
+     '<div class="roloMeta"><b>'+b.name+'</b><span class="roloReg">🎸 '+b.region+'</span>'+
+     '<span class="roloDesc">'+b.story+'</span>'+
+     '<span class="roloNext">'+(nx?('📅 next: '+relDay(nx.d)+' · '+nx.venue):(b.shows?('📅 '+b.shows+' shows on the books'):'📅 no dates yet'))+'</span></div>'+
+     '<span class="roloGo">›</span></div>'; };
+ var h='<p class="rsub"><span class="ff free">FREE</span> 🎸 <b>Bands — your chapter first</b>. Flip through: each card is the band\'s photo, story &amp; calendar, with a Merch tab. Tap one.</p>';
+ h+='<div class="roloWrap">';
+ if(local.length){ h+='<div class="roloHd">📍 '+REG+' — your local bands</div>'+local.map(card).join(''); }
+ h+='<div class="roloHd">🌎 Beyond your chapter</div>'+rest.map(card).join('');
+ h+='</div><div class="note">Local bands lead; the rest roll up. Bands claim their card once, then it\'s theirs — photo, dates, and store.</div>';
+ return h;
+}
+function bandView(i,tab){ var b=BANDS[i]; if(!b)return; tab=tab||'card'; var body=document.getElementById('rbody'); if(!body)return; var safe=b.name.replace(/'/g,"");
+ var tabs='<div class="bvtabs"><button class="bvtab'+(tab==='card'?' on':'')+'" onclick="bandView('+i+',\'card\')">🎴 Card</button><button class="bvtab'+(tab==='merch'?' on':'')+'" onclick="bandView('+i+',\'merch\')">🛍 Merch</button></div>';
+ var top='<button class="qaback" onclick="readerTab(\'bands\')">‹ all bands</button>';
+ var h;
+ if(tab==='merch'){
+   var items=bandMerch(b).map(function(m){return '<div class="merchTile" onclick="toast(\'🛍 '+m.n+' — checkout opens when payments go live; your local chapter gets the credit.\')"><div class="mtIc">'+m.ic+'</div><div class="mtN">'+m.n+'</div><div class="mtP">'+m.p+'</div></div>';}).join('');
+   h=top+tabs+'<div class="bvName">'+b.name+' · Store</div>'+
+     '<div class="merchGrid">'+items+'</div>'+
+     '<div class="note">Every band gets its own store. Proceeds credit the buyer\'s <b>local chapter</b> and roll up. (Representative until payments go live — nothing charges yet.)</div>';
+ } else {
+   var shows=bandNextShows(b.name);
+   var cal=shows.length? shows.map(function(s){return '<div class="bvShow"><span class="bvWhen">'+relDay(s.d)+'</span><div class="bvSh"><b>'+s.venue+'</b><span>'+(s.price?('$'+s.price):'')+(s.url?' · notify me':'')+'</span></div></div>';}).join('')
+     : '<div class="note" style="margin-top:6px">No dates posted yet — the band adds them in one tap.</div>';
+   h=top+tabs+bandImgHTML(b,true)+
+     '<div class="bvName">'+b.name+'</div><div class="bvReg">🎸 '+b.region+'</div>'+
+     '<button class="btn" style="margin:8px 0" onclick="toast(\'🔔 Following '+safe+' — heads-up when they play near you.\')">🔔 Follow</button>'+
+     '<div class="bvDesc">'+b.story+'</div>'+
+     '<div class="bvSec">📅 '+b.name+' — calendar</div>'+cal;
+ }
+ body.innerHTML=h;
+}
+
 /* ---------------- groups mirror strip ---------------- */
 function mirrorBuild(){
  var m=document.getElementById('mirror');
@@ -1359,10 +1508,7 @@ function readerTab(tab){
    MYFRIENDS.map(function(fr,i){return '<div class="fchip" onclick="profile('+i+')"><div class="fav">'+fr.ic+'</div><div class="fnm">'+fr.name.split(' ')[0]+'</div></div>';}).join("")+
    '</div><div class="note">Every head carries one QR — their whole profile in a single code. Tap a friend to open it; meet someone new, tap to add them.</div>';
  } else if(tab==='bands'){
-  b.innerHTML='<p class="rsub"><span class="ff free">FREE</span> 🎸 <b>Bands</b> — each act has its own QR and page. Tap to follow, see dates, and grab tickets.</p>'+
-   '<div class="frow" style="flex-wrap:wrap">'+
-   BANDS.map(function(bn,i){return '<div class="fchip" onclick="bandProfile('+i+')"><div class="fav" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">'+bn.ic+'</div><div class="fnm">'+bn.name.split(' ')[0]+'</div></div>';}).join("")+
-   '</div><div class="note">Bands claim their page once, then add dates in one tap. Follow a band to get a heads-up when they play near you.</div>';
+  b.innerHTML=bandRolodexHTML();
  } else if(tab==='groups'){
   b.innerHTML='<p class="rsub"><span class="ff free">FREE</span> All mirrored Dead groups. <b>TUNE IN</b> to follow one — its posts flow into your feed.</p><div class="glist">'+
    GROUPS.map(function(g,i){return '<div class="gc"><div class="top"><div class="ico">'+g.ic+'</div><div style="flex:1"><div class="nm">'+g.n+'</div><div class="lv">you last visited '+g.seen+'</div></div><label class="tune'+(g.tuned?' in':'')+'"><input type="checkbox" '+(g.tuned?'checked':'')+' onchange="tuneIn('+i+',this.checked)"> <span>'+(g.tuned?'TUNED IN':'TUNE IN')+'</span></label></div><button class="vg" onclick="viewGroup('+i+')">View group</button></div>';}).join("")+
@@ -1721,6 +1867,35 @@ function like(b){var s=b.querySelector('span');var on=b.classList.toggle('on');i
 var _rb=null;
 function reactPop(b){var rp=document.getElementById('reactpop');_rb=b;var r=b.getBoundingClientRect();rp.style.left=Math.max(8,r.left)+'px';rp.style.top=(r.top-48)+'px';rp.classList.add('on');}
 function react(e){document.getElementById('reactpop').classList.remove('on');toast('Reacted '+e);}
+function moreToggle(b){ var t=b.previousElementSibling; if(!t)return; var clamped=t.classList.toggle('clamp'); b.textContent=clamped?'See more…':'See less…'; }
+/* post ⋯ menu */
+var _pm=null;
+function postMenu(btn){ _pm=btn.closest('.post'); var who=(_pm&&_pm.querySelector('.pwho b'))?_pm.querySelector('.pwho b').textContent:'this person';
+ var m=document.getElementById('postmenu'); [].forEach.call(m.querySelectorAll('.pmwho'),function(s){s.textContent=who;});
+ var r=btn.getBoundingClientRect(); m.classList.add('on');
+ var w=m.offsetWidth||252,h=m.offsetHeight||300, vw=window.innerWidth||360, vh=window.innerHeight||640;
+ m.style.left=Math.max(8,Math.min(vw-w-8, r.right-w))+'px';
+ m.style.top=Math.max(8,Math.min(vh-h-8, r.bottom+6))+'px'; }
+function pmClose(){ var m=document.getElementById('postmenu'); if(m)m.classList.remove('on'); }
+function pmAct(a){ pmClose(); var who=(_pm&&_pm.querySelector('.pwho b'))?_pm.querySelector('.pwho b').textContent:'this person';
+ if(a==='hide'){ if(_pm)_pm.style.display='none'; toast('🙈 Hidden — you\'ll see fewer like it.'); return; }
+ if(a==='hyper'){ hyperConsole(who); return; }
+ var msg={interested:'🌹 More like this — noted for your feed.',less:'🌫️ Less like this — noted.',save:'🔖 Saved to your stash.',notify:'🔔 You\'ll get a heads-up on '+who+'\'s posts.',snooze:'😴 Snoozed '+who+' for 30 days — still friends.',unfollow:'🔕 Unfollowed '+who+' — you\'re still friends, just quieter.',report:'🚩 Sent to your chapter\'s Chaperone to review. We won\'t tell '+who+'.',block:'⛔ Blocked '+who+' — you won\'t see or contact each other.',why:'ℹ️ You\'re seeing this because you tuned into their group, or you\'re friends.'};
+ toast(msg[a]||'Done'); }
+function pmShare(){ pmClose(); openShareSheet(); }
+/* Share… audience sheet */
+function openShareSheet(){ var s=document.getElementById('sharesheet'); if(!s)return; var f=document.getElementById('shFriends');
+ if(f&&window.MYFRIENDS){ f.innerHTML=MYFRIENDS.slice(0,10).map(function(fr){ var nm=fr.name.split(' ')[0]; return '<button class="shfr" onclick="shSend(\''+nm.replace(/[^\w]/g,'')+'\')"><span class="shfrav">'+fr.ic+'</span><span class="shfrnm">'+nm+'</span></button>'; }).join(''); }
+ var say=document.getElementById('shSay'); if(say)say.value=''; s.classList.add('on'); }
+function shClose(){ var s=document.getElementById('sharesheet'); if(s)s.classList.remove('on'); }
+function shHyper(){ var say=((document.getElementById('shSay')||{}).value||'').trim(); var a=(document.getElementById('shAud')||{}).value||'all';
+ var aud=a==='all'?'your family':a==='select'?'your selected friends':'your chapter'; shClose();
+ toast('📡 HyperPosted to '+aud+(say?(' — “'+say.slice(0,40)+(say.length>40?'…':'')+'”'):'')+'.'); }
+function shSend(nm){ shClose(); toast('↗ Sent to '+nm+'.'); }
+function shCopy(){ var u='https://deaddance.app/'; try{ if(navigator.clipboard)navigator.clipboard.writeText(u); }catch(e){} shClose(); toast('🔗 Link copied.'); }
+function shDo(kind){ shClose(); toast(kind==='select'?'✅ Sharing to your selected friends.':'🚉 Shared into your chapter.'); }
+function shFB(){ shClose(); var u='https://deaddance.app/'; window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(u),'_blank','noopener'); }
+document.addEventListener('click',function(ev){ var m=document.getElementById('postmenu'); if(m&&m.classList.contains('on')){ var t=ev.target; if(!m.contains(t) && !(t.closest&&t.closest('.pmore'))) m.classList.remove('on'); } });
 document.addEventListener('click',function(ev){var rp=document.getElementById('reactpop');if(rp&&rp.classList.contains('on')&&!rp.contains(ev.target)&&ev.target!==_rb&&!(_rb&&_rb.contains(ev.target)))rp.classList.remove('on');});
 /* radiate (📡) and Reply both open the same console — Reply = HyperPost */
 function radiate(what){hyperConsole(what);}

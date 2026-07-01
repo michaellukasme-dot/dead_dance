@@ -435,10 +435,12 @@
       ".lc-m-nm{font-weight:600;color:#555}.lc-m-acts button{background:none;border:none;color:#bbb;cursor:pointer;font-size:12px;padding:0 2px}" +
       ".lc-m-body{display:inline-block;background:#f1f1f3;border-radius:12px;padding:7px 11px;white-space:pre-wrap;word-break:break-word}" +
       ".lc-msg.mine .lc-m-body{background:" + ac + ";color:#fff}" +
-      "#lc-comp{display:none;padding:9px;border-top:1px solid #eee;gap:7px}#lc-comp.row{display:flex}" +
-      "#lc-input{flex:1;border:1px solid #ddd;border-radius:20px;padding:9px 13px;font-size:14px;outline:none}" +
-      "#lc-comp button{background:" + ac + ";color:#fff;border:none;border-radius:20px;padding:0 16px;cursor:pointer;font-weight:600}" +
-      ".lc-attach{display:flex;align-items:center;justify-content:center;flex:0 0 38px;height:38px;background:#f0f0f2;border-radius:50%;cursor:pointer;font-size:17px}" +
+      "#lc-comp{display:none;padding:7px 8px;border-top:1px solid #eee;gap:3px;align-items:center;background:#fff}#lc-comp.row{display:flex}" +
+      "#lc-input{flex:1;min-width:0;border:1px solid #e7e0d2;border-radius:20px;padding:9px 13px;font-size:14px;outline:none}" +
+      "#lc-comp .lc-ic{background:none;border:0;font-size:16px;padding:4px;cursor:pointer;color:" + ac + ";flex:none;line-height:1}" +
+      "#lc-comp .lc-ic:active{transform:scale(.9)}#lc-comp .lc-ic.gif{font-size:10.5px;font-weight:800}" +
+      "#lc-comp .lc-hp{background:" + ac + ";color:#fff;border:0;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;flex:none;font-weight:600}" +
+      "#lc-comp .lc-hp:active{transform:scale(.94)}" +
       "#lc-attbar{display:none;padding:8px 10px 0;align-items:center;gap:8px}#lc-attbar.on{display:flex}" +
       "#lc-attbar img{height:42px;border-radius:7px}.lc-att-lbl{font-size:12px;color:#888}" +
       "#lc-attbar button{background:#eee;color:#333;border:none;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:12px;font-weight:600;margin-left:auto}" +
@@ -468,7 +470,15 @@
       '<div id="lc-msgs" style="display:none"></div>' +
       '<div id="lc-gate"></div>' +
       '<div id="lc-attbar"></div>' +
-      '<div id="lc-comp" class="row"><label class="lc-attach" title="Attach a photo">📎<input id="lc-file" type="file" accept="image/*" style="display:none" onchange="LukasChat._attach(this)"></label><input id="lc-input" placeholder="Message…" onkeydown="if(event.key===\'Enter\')LukasChat._send()"><button onclick="LukasChat._send()">Send</button></div>';
+      '<div id="lc-comp" class="row">'+
+        '<button class="lc-ic" title="Voice note (coming)" onclick="window.toast&&toast(\'🎤 Voice notes are coming.\')">🎤</button>'+
+        '<label class="lc-ic" title="Photo">🖼<input id="lc-file" type="file" accept="image/*" style="display:none" onchange="LukasChat._attach(this)"></label>'+
+        '<button class="lc-ic" title="File (coming)" onclick="window.toast&&toast(\'📎 File sharing is coming.\')">📎</button>'+
+        '<button class="lc-ic gif" title="GIF (coming)" onclick="window.toast&&toast(\'🎞️ GIFs are coming.\')">GIF</button>'+
+        '<button class="lc-ic" title="Emoji" onclick="var i=document.getElementById(\'lc-input\');if(i){i.value+=\'🌹\';i.focus();}">😊</button>'+
+        '<input id="lc-input" placeholder="Message the family…" onkeydown="if(event.key===\'Enter\')LukasChat._send()">'+
+        '<button class="lc-hp" title="HyperPost — radiate this" onclick="LukasChat._send()">📡</button>'+
+      '</div>';
     document.body.appendChild(panel);
     var modal = document.createElement("div"); modal.id = "lc-modal";
     modal.innerHTML =
