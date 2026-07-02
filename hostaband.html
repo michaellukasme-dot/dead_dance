@@ -385,5 +385,23 @@ function listAct(){
 }
 fillSelects(); render();
 </script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('venue',{ic:'🍺',name:'Venue / Host a Band',tasks:[
+ {key:'venue_book',ic:'🎟️',title:'Book a band for a night',
+  steps:[{t:'On the page: pick a <b>genre</b> and a <b>date</b>, see who’s free with the price up front.'},
+         {t:'<a class="qgo" onclick="window.scrollTo({top:0,behavior:\'smooth\'});return false;">▶ Back to the top ↑</a> then hit <b>BOOK NOW</b> on an act.'}],
+  q:{prompt:'Was the price + availability clear before booking?',opts:['Crystal clear','Mostly','Not really']}},
+ {key:'venue_account',ic:'🔑',title:'Open your host account',
+  steps:[{t:'<a class="qgo" onclick="try{openSignup()}catch(e){};return false;">▶ Open host sign-in ↗</a> — a home party is free; a business gate appears.'}],
+  q:{prompt:'Did you understand free-vs-business?',opts:['Yes','Sort of','No']}},
+ {key:'venue_list',ic:'🎸',title:'List your own act',
+  steps:[{t:'<a class="qgo" onclick="try{openList()}catch(e){};return false;">▶ Open “list your act” ↗</a> — add a band so venues can book YOU.'}],
+  q:{prompt:'Was listing an act simple?',opts:['Easy','OK','Clunky']}},
+ {key:'venue_who',ic:'📅',title:'See who’s free on a given night',
+  steps:[{t:'Change the <b>date</b> up top and watch the free acts update — does the list feel right?'}],
+  q:{prompt:'Did availability update as expected?',opts:['Yes','Sometimes','No']}}
+]});
+</script>
 </body>
 </html>

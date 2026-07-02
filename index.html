@@ -2330,9 +2330,9 @@ function qaSubmitOne(){ var t=QA_SEL; if(!t)return; var who=qaTester(), con=qaCo
  var tagged='['+(who||'tester')+(con?(' · '+con):'')+'] '+note+(QA_SHOT?(' [screenshot: '+QA_SHOT.name+(QA_SHOT.path?' @'+QA_SHOT.path:'')+']'):'');
  // durable local record (always) — structured, capped so it can't blow the quota
  try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); res.push({tester:who||'',console:con,task:t.key,works:QA_WORKS,choice:QA_PICK,note:note,shot:(QA_SHOT&&(QA_SHOT.path||QA_SHOT.name))||'',at:Date.now()}); if(res.length>300)res=res.slice(-300); localStorage.setItem('dd.qa.results',JSON.stringify(res)); }catch(e){}
- // best-effort push to backend → CRM QA results (tester + console live inside p_note until the RPC gains dedicated columns)
+ // best-effort push to backend → CRM QA results (dedicated tester/console/shot columns; tagged note kept for back-compat)
  var c=ddClient&&ddClient();
- if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:QA_WORKS,p_choice:QA_PICK,p_note:tagged}).catch(function(){}); }catch(e){} }
+ if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:QA_WORKS,p_choice:QA_PICK,p_note:tagged,p_tester:(who||null),p_console:(con||null),p_shot:((QA_SHOT&&QA_SHOT.path)||null)}).catch(function(){}); }catch(e){} }
  qaMarkDone(t.key); toast('🙏 Thank you'+(who?(' '+who.split(' ')[0]):'')+' — logged.'); QA_STEP+=1; qaRender();
 }
 

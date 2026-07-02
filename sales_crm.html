@@ -830,4 +830,24 @@ function bandInvite(b){
 document.getElementById('bandtot').textContent=(DD_TARGET_BANDS||[]).length;
 renderTiers(); renderReps(); render();
 </script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('sales',{ic:'🗂',name:'Sales / CRM',tasks:[
+ {key:'sales_venues',ic:'🏛',title:'Open the Venues pipeline',
+  steps:[{t:'<a class="qgo" onclick="try{setTab(\'venues\')}catch(e){};return false;">▶ Open Venues ↗</a> — look at the targets and inbound prospects.'}],
+  q:{prompt:'Is it clear which venue to call first?',opts:['Yes, obvious','Sort of','No']}},
+ {key:'sales_meet',ic:'📅',title:'Run today’s outreach',
+  steps:[{t:'<a class="qgo" onclick="try{setTab(\'meet\')}catch(e){};return false;">▶ Open Meetings ↗</a> — send a routine, then Simulate an ACCEPT.'}],
+  q:{prompt:'Did the outreach flow make sense?',opts:['Clear','OK','Confusing']}},
+ {key:'sales_liq',ic:'📊',title:'Read the Liquidity floor',
+  steps:[{t:'<a class="qgo" onclick="try{setTab(\'liq\')}catch(e){};return false;">▶ Open Liquidity ↗</a> — find a Hot market and a Thin one.'}],
+  q:{prompt:'Could you tell Hot vs Thin at a glance?',opts:['Yes','Sort of','No']}},
+ {key:'sales_bands',ic:'🎸',title:'Sign a band in your patch',
+  steps:[{t:'<a class="qgo" onclick="try{setTab(\'bands\')}catch(e){};return false;">▶ Open Bands ↗</a> — add a band.'}],
+  q:{prompt:'Was adding a band quick?',opts:['Easy','OK','Clunky']}},
+ {key:'sales_talent',ic:'🎭',title:'Place an act (sell the network)',
+  steps:[{t:'<a class="qgo" onclick="try{setTab(\'talent\')}catch(e){};return false;">▶ Open Talent ↗</a> — place an act into an open night.'}],
+  q:{prompt:'Did the “sell the network” pitch land?',opts:['Yes','Meh','No']}}
+]});
+</script>
 </body></html>
