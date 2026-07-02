@@ -42,6 +42,8 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .qaov.dock .qapanel{pointer-events:auto;position:fixed;right:14px;bottom:14px;left:auto;width:min(400px,94vw);max-height:80vh;border-radius:16px;box-shadow:0 18px 50px #0007}
 @media(max-width:560px){.qaov.dock .qapanel{right:8px;left:8px;bottom:8px;width:auto}}
 .qaov.dock.min .qapanel{max-height:none}
+.qgo{display:inline-block;background:var(--purple,#5a2e86);color:#fff;text-decoration:none;font-weight:800;font-size:13px;padding:7px 12px;border-radius:9px;margin:2px 0}
+.qgo:active{transform:scale(.96)}
 .qaprog{font-size:12px;color:var(--muted);font-weight:700;margin:2px 0 8px}
 .qashot{display:block;text-align:center;border:1.5px dashed #1f7a4d;color:#1f7a4d;border-radius:12px;padding:14px;font-weight:800;margin:12px 0;cursor:pointer}
 .qaonebtns{display:flex;gap:8px;align-items:stretch;margin-top:4px}
@@ -1675,7 +1677,7 @@ var SCENES=[["grateful_dead","Grateful Dead"],["phish","Phish"],["allman_brother
 function sceneOpts(){ return SCENES.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>';}).join(""); }
 var ACT_TYPES=[["band","Band"],["tribute","Tribute band"],["original","Original act"],["comedian","Comedian"],["dj","DJ"],["duo","Duo"],["solo","Solo"],["variety","Variety"],["other","Other"]];
 function actTypeOpts(){ return ACT_TYPES.map(function(a){return '<option value="'+a[0]+'">'+a[1]+'</option>';}).join(""); }
-function openGig(tab,region){ GIGREGION=region||ME.chapter||(typeof LOCALFAM!=='undefined'?LOCALFAM:null)||"Mid-Atlantic"; gigTab(tab||'date'); document.getElementById('gig').classList.add('on'); }
+function openGig(tab,region){ GIGREGION=region||(typeof ME!=='undefined'&&ME&&ME.chapter)||(typeof LOCALFAM!=='undefined'?LOCALFAM:null)||"Mid-Atlantic"; try{gigTab(tab||'date');}catch(e){} var g=document.getElementById('gig'); if(g)g.classList.add('on'); }
 function closeGig(){ document.getElementById('gig').classList.remove('on'); }
 function gigTab(t){ GIGTAB=t;
  document.getElementById('gtab-date').classList.toggle('on',t==='date');
@@ -2180,19 +2182,19 @@ var QA_TASKS=[
   q:{prompt:'Would you check this instead of scrolling Facebook for shows?',opts:['Yes','Sometimes','No']}},
  // ——— 🎸 MUSICIAN HELP TEST (Michele owns; Mike & Matt run it) ———
  {key:'mt_register',kind:'qa',ic:'🎸',title:'Musician test: register your band',
-  steps:[{t:'📅 Add a Date → 🎸 Register band. Claim your band page.'}],
+  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'band\')}catch(e){};return false;">▶ Open Register Band ↗</a> — claim your band page.'}],
   q:{prompt:'Was claiming your band easy?',opts:['Easy','OK','Confusing']}},
  {key:'mt_adddate',kind:'qa',ic:'🎸',title:'Musician test: post a date (HyperPost)',
-  steps:[{t:'📅 Add a Date → fill a show → HyperPost it.'},{t:'Then check the calendar for it.'}],
+  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'date\')}catch(e){};return false;">▶ Open Add a Date ↗</a> — fill a show → HyperPost it.'},{t:'Then check the calendar for it.'}],
   q:{prompt:'Did posting a date feel quick (no captcha gauntlet)?',opts:['Yes, instant','OK','Too clunky']}},
  {key:'mt_listact',kind:'qa',ic:'🎸',title:'Musician test: list your act for venues',
-  steps:[{t:'📅 Add a Date → 🎭 Talent → set fee/artwork → List me.'}],
+  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'act\')}catch(e){};return false;">▶ Open Talent ↗</a> — set fee/artwork → List me.'}],
   q:{prompt:'Would venues find your profile useful?',opts:['Definitely','Maybe','Not yet']}},
  {key:'mt_inviteband',kind:'qa',ic:'🎸',title:'Musician test: invite another band',
-  steps:[{t:'In Register band, tap “🤝 Invite another band” and read the message.'}],
+  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'band\')}catch(e){};return false;">▶ Open Register Band ↗</a> — tap “🤝 Invite another band” and read the message.'}],
   q:{prompt:'Would you actually send that to a band friend?',opts:['Yes','Maybe','No']}},
  {key:'mt_feature',kind:'qa',ic:'💡',title:'Musician test: ask for a feature',
-  steps:[{t:'📅 Add a Date → 💡 Add a feature. Describe something you want and send it.'}],
+  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'feature\')}catch(e){};return false;">▶ Open Add a Feature ↗</a> — describe something you want and send it.'}],
   q:{prompt:'Did it feel like we actually want your ideas?',opts:['Yes','Sort of','No']}},
  // ——— 🗂 SALES / CRM HELP TEST (the field cockpit) ———
  {key:'sales_venues',kind:'qa',ic:'🏛',title:'Sales test: the Venues pipeline',
@@ -2229,14 +2231,16 @@ function qaTester(){ try{return localStorage.getItem('dd.tester')||'';}catch(e){
 (function qaInitParams(){ try{
   var p=new URLSearchParams(location.search);
   var t=p.get('tester'); if(t){ try{localStorage.setItem('dd.tester',t);}catch(e){} }
-  var ht=p.get('ht'); if(ht){ QA_FILTER=ht; document.addEventListener('DOMContentLoaded',function(){ setTimeout(function(){try{qaOpen();}catch(e){}},600); }); }
+  var ht=p.get('ht'); if(ht){ QA_FILTER=ht;
+    var go=function(){ var tries=0,fire=function(){ tries++; if(document.getElementById('qaov')){ try{qaOpen();}catch(e){} } else if(tries<40){ setTimeout(fire,150); } }; fire(); };
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(go,300); }); } else { setTimeout(go,300); } }
 }catch(e){} })();
 function qaDoneList(){ try{return JSON.parse(localStorage.getItem('dd.qa.done')||'[]');}catch(e){return [];} }
 function qaMarkDone(k){ var d=qaDoneList(); if(d.indexOf(k)<0){d.push(k);try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){}} }
-function qaOpen(){ var el=document.getElementById('qaov'); el.classList.add('on'); el.classList.remove('min');
+function qaOpen(){ var el=document.getElementById('qaov'); if(!el)return; el.classList.add('on'); el.classList.remove('min');
  var cf=QA_FILTER&&(QA_FILTER==='musician'?'band':QA_FILTER); el.classList.toggle('dock', !!(cf&&({main:1,band:1,sales:1,venue:1})[cf]));
  qaRender(); qaSync(); }
-function qaClose(){ var el=document.getElementById('qaov'); el.classList.remove('on'); el.classList.remove('min'); }
+function qaClose(){ var el=document.getElementById('qaov'); if(!el)return; el.classList.remove('on'); el.classList.remove('min'); }
 function qaMin(on){ var el=document.getElementById('qaov'); if(el){ el.classList.toggle('min', !!on); } }
 function qaSync(){ var c=ddClient&&ddClient(),id=ddId&&ddId(); if(!c||!id)return;
  try{ c.rpc('chat_qa_mine').then(function(r){ if(r&&r.data){ var d=qaDoneList(); r.data.forEach(function(x){ if(d.indexOf(x.task_key)<0)d.push(x.task_key); }); try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){} qaRender(); } }).catch(function(){}); }catch(e){} }
@@ -2290,43 +2294,46 @@ function qaSubmit(){ var t=QA_SEL; if(!t)return; var note=(document.getElementBy
 
 /* ---- one-at-a-time crowdsource card (deep-link console Help Test) ---- */
 var QA_STEP=0, QA_ONE_KEY=null, QA_SHOT=null, QA_NOTE='';
+function qaEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function qaRenderOne(C,set,who,done){ var b=document.getElementById('qaBody'); if(!b)return; var n=set.length;
+ var head='<div class="qaq" style="margin-top:0">'+C.ic+' HELP TEST'+(who?(' · '+qaEsc(who)):'')+'</div>';
+ if(!n){ b.innerHTML=head+'<div style="padding:20px 8px;color:#6c6878">No tasks are set for this section yet — check back soon. 🌹</div>'; return; }
  var remaining=set.filter(function(t){return done.indexOf(t.key)<0;});
- var head='<div class="qaq" style="margin-top:0">'+C.ic+' HELP TEST'+(who?(' · '+who):'')+'</div>';
- if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:26px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+who):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Your notes are on their way to us. You can close this.</p></div>'; return; }
- if(QA_STEP>=n||QA_STEP<0)QA_STEP=0;
+ if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:26px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+qaEsc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Every answer went to the team. You can close this. That\'s a real help.</p></div>'; return; }
+ if(QA_STEP<0)QA_STEP=0; if(QA_STEP>=n)QA_STEP=n-1;   // clamp (never wrap past the end)
  var t=set[QA_STEP];
  if(QA_ONE_KEY!==t.key){ QA_ONE_KEY=t.key; QA_PICK=null; QA_WORKS=null; QA_SHOT=null; QA_NOTE=''; }
  QA_SEL=t;
  var isdone=done.indexOf(t.key)>=0;
  var steps=t.steps.map(function(s,i){ return '<div class="qastep'+(s.fb?' fb':'')+'"><div class="n">'+(i+1)+'</div><div>'+(s.fb?'<span class="qafb">📘 ON FACEBOOK:</span> ':'')+s.t+'</div></div>'; }).join('');
- var opts=t.q.opts.map(function(o){var v=o.replace(/"/g,'');return '<button class="qaopt'+(QA_PICK===v?' sel':'')+'" onclick="qaPick(this)" data-v="'+v+'">'+o+'</button>';}).join('');
- var shot=QA_SHOT?('📎 '+QA_SHOT.name+(QA_SHOT.path?' ✓':'')):'＋ Upload Screenshot';
+ var opts=t.q.opts.map(function(o){var v=o.replace(/"/g,'');return '<button class="qaopt'+(QA_PICK===v?' sel':'')+'" onclick="qaPick(this)" data-v="'+qaEsc(v)+'">'+qaEsc(o)+'</button>';}).join('');
+ var shot=QA_SHOT?('📎 '+qaEsc(QA_SHOT.name)+(QA_SHOT.path?' ✓':' · added')):'📸 Add a screenshot (optional)';
  b.innerHTML=head+
   '<div class="qaprog">Task '+(QA_STEP+1)+' of '+n+' · '+remaining.length+' left'+(isdone?' · ✓ done':'')+'</div>'+
-  '<div style="font-size:26px">'+t.ic+'</div><div class="qaq" style="margin-top:2px">'+t.title+'</div>'+steps+
+  '<div style="font-size:26px">'+t.ic+'</div><div class="qaq" style="margin-top:2px">'+qaEsc(t.title)+'</div>'+steps+
   '<div class="qaq">Did it work?</div><div class="qaworks"><button'+(QA_WORKS===true?' class="sel"':'')+' onclick="qaSetWorks(this,true)">👍 Worked</button><button'+(QA_WORKS===false?' class="sel"':'')+' onclick="qaSetWorks(this,false)">👎 Broke</button></div>'+
-  '<div class="qaq">'+t.q.prompt+'</div>'+opts+
-  '<textarea class="qanote" id="qaNote" placeholder="Type any issues here — what did you see?" oninput="QA_NOTE=this.value">'+(QA_NOTE||'')+'</textarea>'+
+  '<div class="qaq">'+qaEsc(t.q.prompt)+'</div>'+opts+
+  '<textarea class="qanote" id="qaNote" placeholder="💡 Anything to add or improve? (optional)" oninput="QA_NOTE=this.value">'+qaEsc(QA_NOTE)+'</textarea>'+
   '<label class="qashot">'+shot+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="qaShot(this)"></label>'+
   '<div class="qaonebtns"><button class="qasend" onclick="qaSubmitOne()">Submit &amp; next ›</button><button class="qaskip" onclick="qaStepGo(1)" title="Skip for now">Skip ›</button></div>'+
   (QA_STEP>0?'<button class="qaback" onclick="qaStepGo(-1)">‹ previous</button>':'');
 }
 function qaStepGo(d){ QA_STEP+=d; qaRender(); }
+function qaConsole(){ var cf=QA_FILTER&&(QA_FILTER==='musician'?'band':QA_FILTER); return cf||''; }
 function qaShot(inp){ var f=inp.files&&inp.files[0]; if(!f)return; QA_NOTE=(document.getElementById('qaNote')||{}).value||QA_NOTE; QA_SHOT={name:f.name};
  var c=ddClient&&ddClient(),id=ddId&&ddId();
- if(c&&id&&c.storage){ try{ var who=(qaTester()||'anon').replace(/[^\w]/g,'_'); var path=who+'/'+Date.now()+'_'+f.name.replace(/[^\w.\-]/g,'_');
+ if(c&&id&&c.storage){ try{ var w=(qaTester()||'anon').replace(/[^\w]/g,'_'); var path=w+'/'+Date.now()+'_'+f.name.replace(/[^\w.\-]/g,'_');
    c.storage.from('qa_shots').upload(path,f,{upsert:true}).then(function(r){ if(r&&!r.error){ QA_SHOT.path=path; qaRender(); } }).catch(function(){}); }catch(e){} }
- toast('📎 Screenshot attached to this task.'); qaRender(); }
-function qaSubmitOne(){ var t=QA_SEL; if(!t)return; var note=(document.getElementById('qaNote')||{}).value||'';
- var who=qaTester(); if(who){ note='['+who+'] '+note; }
- if(QA_SHOT){ note+=' [screenshot: '+QA_SHOT.name+(QA_SHOT.path?' @'+QA_SHOT.path:'')+']'; }
- // durable local record (always) — so nothing is lost even without a live session
- try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); res.push({tester:who||'',task:t.key,works:QA_WORKS,choice:QA_PICK,note:note,shot:(QA_SHOT&&QA_SHOT.name)||'',at:Date.now()}); localStorage.setItem('dd.qa.results',JSON.stringify(res)); }catch(e){}
- // best-effort push to backend → CRM QA results (attempt even without a resolved identity)
+ toast('📸 Got your screenshot — it goes with your notes.'); qaRender(); }
+function qaSubmitOne(){ var t=QA_SEL; if(!t)return; var who=qaTester(), con=qaConsole();
+ var note=(document.getElementById('qaNote')||{}).value||'';
+ var tagged='['+(who||'tester')+(con?(' · '+con):'')+'] '+note+(QA_SHOT?(' [screenshot: '+QA_SHOT.name+(QA_SHOT.path?' @'+QA_SHOT.path:'')+']'):'');
+ // durable local record (always) — structured, capped so it can't blow the quota
+ try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); res.push({tester:who||'',console:con,task:t.key,works:QA_WORKS,choice:QA_PICK,note:note,shot:(QA_SHOT&&(QA_SHOT.path||QA_SHOT.name))||'',at:Date.now()}); if(res.length>300)res=res.slice(-300); localStorage.setItem('dd.qa.results',JSON.stringify(res)); }catch(e){}
+ // best-effort push to backend → CRM QA results (tester + console live inside p_note until the RPC gains dedicated columns)
  var c=ddClient&&ddClient();
- if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:QA_WORKS,p_choice:QA_PICK,p_note:note}).catch(function(){}); }catch(e){} }
- qaMarkDone(t.key); toast('🙏 Thank you '+(who?who.split(' ')[0]:'')+' — logged.'); QA_STEP+=1; qaRender();
+ if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:QA_WORKS,p_choice:QA_PICK,p_note:tagged}).catch(function(){}); }catch(e){} }
+ qaMarkDone(t.key); toast('🙏 Thank you'+(who?(' '+who.split(' ')[0]):'')+' — logged.'); QA_STEP+=1; qaRender();
 }
 
 /* polite auto-request: "force-crowdsource, nicely." dead.dance reduces the noise;
