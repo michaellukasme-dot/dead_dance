@@ -1,0 +1,12 @@
+# dead.dance — edge/browser cache rules (Cloudflare Pages / Workers Static Assets).
+# WHY: the service worker is the ONE file that must never be cached. If the CDN or
+# browser serves a stale sw.js, every CACHE bump (v107→v119…) never reaches users and
+# the app can't self-update. Force it to revalidate on every request.
+
+/sw.js
+  Cache-Control: no-cache, must-revalidate
+  Service-Worker-Allowed: /
+
+# The web app manifest changes rarely but should also revalidate, not sit stale.
+/manifest.webmanifest
+  Cache-Control: no-cache

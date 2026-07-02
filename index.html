@@ -1148,7 +1148,13 @@ function drawQR(svg,img){
  else { s+='<text x="50" y="56" font-size="15" text-anchor="middle">🌹</text>'; }
  svg.innerHTML=s;
 }
-function qrBuild(){drawQR(document.getElementById('qr'),ME.img);var nq=document.getElementById('navqr');if(nq)drawQR(nq,ME.img);}
+/* one place that stitches the user's photo everywhere it belongs: top-right avatar, the composer card, feed "you" posts */
+function applyMyAvatar(){ var url=ME.img;
+ var img=url?('<img src="'+url+'" alt="You" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">'):'🌹';
+ var av=document.querySelector('.cbtn.avat'); if(av){ av.innerHTML=img; av.style.overflow='hidden'; av.style.padding='0'; av.style.background=url?'#fff':''; }
+ var ca=document.querySelector('.cmp-av'); if(ca){ ca.innerHTML=img; ca.style.overflow='hidden'; ca.style.background=url?'#fff':''; }
+ document.querySelectorAll('[data-me-av]').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; }); }
+function qrBuild(){drawQR(document.getElementById('qr'),ME.img);var nq=document.getElementById('navqr');if(nq)drawQR(nq,ME.img);applyMyAvatar();}
 
 /* ---------------- the QR PROFILE — portable, shareable, Facebook-style ---------------- */
 function friendsBuild(){var el=document.getElementById('friendsRow');if(!el)return;
@@ -1188,6 +1194,7 @@ function onAvatar(input){var fl=input&&input.files&&input.files[0];if(!fl)return
      if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}
      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
      try{ ME.img=cv.toDataURL('image/jpeg',0.6); }catch(e){ ME.img=rd.result; }
+     try{ localStorage.setItem('dd.me.img',ME.img); }catch(e){}
      qrBuild(); var pq=document.getElementById('profQR'); if(pq)drawQR(pq,ME.img); saveMyProfile();
      toast('📷 Profile photo set — it lives in the center of your QR.'); };
    img.onerror=function(){ toast("Couldn't read that image."); };
@@ -2376,7 +2383,8 @@ function shareSnooze(days){ var s=shareState(); s.status=days>0?'snoozed':'decli
  var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id){ try{ cl.rpc('chat_share_decline',{p_snooze_days:days}).catch(function(){}); }catch(e){} }
  qaRender(); toast(days>0?'👍 No rush — we’ll check back later.':'👍 All good — no nags.'); }
 
-buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();gpsFamily();cmpInit();calSync();qaRender();qaSync();calRemindCheck();
+try{ var _mi=localStorage.getItem('dd.me.img'); if(_mi)ME.img=_mi; }catch(e){}
+buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();gpsFamily();cmpInit();calSync();qaRender();qaSync();calRemindCheck();applyMyAvatar();
 </script>
 
 <!-- ===== live spine: install + family chat (the real backend) ===== -->
