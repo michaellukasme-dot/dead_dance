@@ -428,6 +428,11 @@ body{padding-bottom:64px}
 .pmhead b{font-size:14px;display:block}.pmhead span{font-size:11.5px;color:var(--muted)}
 .profmenu .pmi{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 9px;border-radius:9px;cursor:pointer;font-size:13.5px;color:var(--ink)}
 .profmenu .pmi:hover{background:#f4f0e6}
+.ldl{display:block;font-size:11.5px;font-weight:700;color:var(--mut,#b6a9c9);margin:9px 0 0}
+.ldi{display:block;width:100%;margin-top:4px;background:#0e0818;border:1px solid #3a2a52;border-radius:9px;padding:9px 11px;font:inherit;font-size:13.5px;color:var(--ink,#f3ece0)}
+.ldi:focus{outline:none;border-color:var(--gold,#c79a3a)}
+.ldrow{display:flex;gap:10px}.ldrow .ldl{flex:1}
+.ldbadge{background:#2a1c44;border:1px solid #3a2a52;border-radius:11px;padding:10px 12px;margin:6px 0;font-size:12.5px;color:#e0cdf5}
 /* HyperPost console — REPLY = HYPERPOST, modal overlay, never the page */
 .hp{position:fixed;inset:0;z-index:82;background:rgba(20,12,34,.6);display:none;align-items:center;justify-content:center;padding:18px}
 .hp.on{display:flex}
@@ -671,6 +676,49 @@ body{padding-bottom:64px}
   <div class="profbox"><button class="cox" onclick="closeProfile()">×</button><div id="profBody"></div></div>
 </div>
 <input id="avfile" type="file" accept="image/*" style="display:none" onchange="onAvatar(this)">
+
+<!-- FB GROUP LEADER intake — self-identify + tell us about your group -->
+<div class="profileov" id="leaderov" onclick="if(event.target===this)closeLeader()">
+  <div class="profbox" style="text-align:left"><button class="cox" onclick="closeLeader()">×</button>
+    <div class="psec" style="margin-top:2px">🚉 Bring your Facebook group home</div>
+    <p style="font-size:12.5px;color:var(--mut,#b6a9c9);margin:2px 0 12px">Lead a Dead group on Facebook? Tell us about it. You'll own the same room here — your store, your badge, traffic back to you. <b>We never scrape or touch your members</b> — this is just you introducing your group.</p>
+    <div id="ldForm">
+      <label class="ldl">Group name<input id="ld_name" class="ldi" placeholder="Grateful Dead Forever"></label>
+      <label class="ldl">Facebook group URL (or name if unsure)<input id="ld_url" class="ldi" placeholder="facebook.com/groups/…"></label>
+      <div class="ldrow">
+        <label class="ldl">Visibility<select id="ld_vis" class="ldi"><option value="">—</option><option>Public</option><option>Private</option><option>Not sure</option></select></label>
+        <label class="ldl">Members (approx)<input id="ld_size" class="ldi" inputmode="numeric" placeholder="123800"></label>
+      </div>
+      <div class="ldrow">
+        <label class="ldl">Your role<select id="ld_role" class="ldi"><option value="">—</option><option>Owner / creator</option><option>Admin</option><option>Moderator</option></select></label>
+        <label class="ldl">Region / scene<input id="ld_region" class="ldi" placeholder="Bay Area · nationwide"></label>
+      </div>
+      <label class="ldl">What's the group about? (purpose / mission)<textarea id="ld_purpose" class="ldi" rows="2" placeholder="Where the whole family gathers to share shows, tapes, and memories."></textarea></label>
+      <label class="ldl">🌹 Your vision — what do you want to <i>do</i> with your group here?<textarea id="ld_vision" class="ldi" rows="3" placeholder="Run a real events calendar, sell my artists' merch, keep the feed clean, throw a chapter show…"></textarea></label>
+      <label class="ldl">What would help you most? (optional)<input id="ld_help" class="ldi" placeholder="moderation help · a store · getting my bands on"></label>
+      <label class="ldl">Best contact (email or handle)<input id="ld_contact" class="ldi" placeholder="you@email.com"></label>
+      <button class="btn" style="width:100%;margin-top:10px" onclick="saveLeader()">🌹 Send it to the family</button>
+      <p style="font-size:11px;color:var(--mut,#b6a9c9);margin:8px 0 0">Verifying you actually run the group comes next (a one-time code in your group). Nothing auto-enrolls; a human seats every partner.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CROWD: Identify a FB group (build the family map) -->
+<div class="profileov" id="spotov" onclick="if(event.target===this)closeGroupSpot()">
+  <div class="profbox" style="text-align:left"><button class="cox" onclick="closeGroupSpot()">×</button>
+    <div class="psec" style="margin-top:2px">🔎 Name a Dead Facebook group</div>
+    <p style="font-size:12.5px;color:var(--mut,#b6a9c9);margin:2px 0 12px">Know a good one? Point us at it — we'll invite the admin to the family. Takes 20 seconds. <b>We never scrape</b> — you're just telling us it exists.</p>
+    <label class="ldl">Group name<input id="sp_name" class="ldi" placeholder="Grateful Dead Forever"></label>
+    <label class="ldl">Link (if you have it)<input id="sp_url" class="ldi" placeholder="facebook.com/groups/…"></label>
+    <div class="ldrow">
+      <label class="ldl">Public or private?<select id="sp_vis" class="ldi"><option value="">—</option><option>Public</option><option>Private</option><option>Not sure</option></select></label>
+      <label class="ldl">Members (guess ok)<input id="sp_size" class="ldi" inputmode="numeric" placeholder="~50000"></label>
+    </div>
+    <label class="ldl">Who runs it? (if you know)<input id="sp_admin" class="ldi" placeholder="admin name / handle"></label>
+    <label class="ldl">Why it's a good one (optional)<input id="sp_why" class="ldi" placeholder="active, clean, great tape shares"></label>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="saveGroupSpot()">🌹 Add it to the map</button>
+  </div>
+</div>
 
 <!-- tap-to-friend handshake -->
 <div class="shake2" id="shake2" onclick="if(event.target===this)closeShake()">
@@ -1178,6 +1226,7 @@ function profile(who){
   '<div class="ptotal">'+total+' shows on the bus</div>'+
   actions+
   (me?('<div class="psec">🎛️ Your role desks</div><div class="roles" style="margin:2px 0 4px">🎸 <a href="#" onclick="toast(\'Musician studio (demo)\');return false">Musician</a> · 👑 <a href="#" onclick="toast(\'Chancellor desk (demo)\');return false">Chancellor</a> · 🤝 <a href="#" onclick="toast(\'Ambassador desk (demo)\');return false">Ambassador</a> · 🎟️ <a href="#" onclick="toast(\'Chaperone cockpit (demo)\');return false">Chaperone</a> · 🗺 <a href="console_directory.html">Map of consoles</a></div>'):'')+
+  (me?leaderCardHTML():'')+
   '<div class="psec">📖 Dead Family Story</div><div class="pstory">'+f.story+'</div>'+
   '<div class="psec">📝 Posts</div>'+(f.posts||[]).map(function(pp){return '<div class="ppost">'+pp+'</div>';}).join("")+
   '<div class="psec">📷 Photos</div><div class="pphotos">'+(f.photos||[]).map(function(ph){return '<div class="pph">'+ph+'</div>';}).join("")+'</div>'+
@@ -1186,6 +1235,60 @@ function profile(who){
  drawQR(document.getElementById('profQR'), f.img);
 }
 function closeProfile(){document.getElementById('profile').classList.remove('on');}
+/* ---- FB Group Leader: self-identify + intake (data data data) ---- */
+function leaderState(){ try{return JSON.parse(localStorage.getItem('dd.leader')||'null');}catch(e){return null;} }
+function leaderCardHTML(){ var L=leaderState();
+ if(L&&L.name){ var verified=!!L.verified;
+   return '<div class="psec">🚉 Your Facebook group</div>'+
+   '<div class="ldbadge" style="display:flex;gap:12px;align-items:center">'+
+     '<img src="./partner_badge.svg" alt="Family Partner badge" style="width:66px;height:66px;flex:none'+(verified?'':';opacity:.55;filter:grayscale(.3)')+'">'+
+     '<div style="flex:1;min-width:0"><b>'+(L.name||'')+'</b>'+(L.size?(' · '+Number(L.size).toLocaleString()+' members'):'')+(L.vis?(' · '+L.vis):'')+
+     (L.vision?('<br><span style="color:#cdb8f0">🌹 '+String(L.vision).slice(0,120)+'</span>'):'')+
+     '<br><span style="font-size:11px;font-weight:800;letter-spacing:.03em;'+(verified?'color:#7fd0a0':'color:var(--gold,#c79a3a)')+'">'+(verified?'✅ FAMILY PARTNER — VERIFIED':'🌹 FAMILY PARTNER — pending verification')+'</span>'+
+     '<br><a href="#" onclick="openLeaderForm();return false" style="color:var(--gold,#c79a3a);font-weight:700;font-size:12px">✎ Edit / update</a> · <a href="#" onclick="loadFirstHyperPost();return false" style="color:var(--gold,#c79a3a);font-weight:700;font-size:12px">📡 Post your invite</a></div>'+
+   '</div>'; }
+ return '<div class="psec">🚉 Lead a Facebook group?</div><button class="btn ghost" style="width:100%" onclick="openLeaderForm()">🌹 Bring your group home — tell us about it</button>';
+}
+function openLeaderForm(){ var L=leaderState()||{};
+ var g=function(id,v){var e=document.getElementById(id); if(e)e.value=v||'';};
+ g('ld_name',L.name); g('ld_url',L.url); g('ld_vis',L.vis); g('ld_size',L.size); g('ld_role',L.role); g('ld_region',L.region); g('ld_purpose',L.purpose); g('ld_vision',L.vision); g('ld_help',L.help); g('ld_contact',L.contact);
+ var ov=document.getElementById('leaderov'); if(ov)ov.classList.add('on'); }
+function closeLeader(){ var ov=document.getElementById('leaderov'); if(ov)ov.classList.remove('on'); }
+/* Their FIRST HyperPost — written for them, targeting their own group. Loaded, not sent. */
+function leaderFirstPost(L){ L=L||leaderState()||{}; var g=L.name||'our group';
+ var vision=L.vision?('\n\nWhat I want to build here: '+L.vision):'';
+ return '🌹 '+g+' family — I’ve got something for us.\n\n'+
+  'I just brought our group home to dead.dance — our own room, built for the family, without the Facebook noise. Same people, our own place, and it’s ours (not rented from an algorithm).\n\n'+
+  'What’s there for you:\n'+
+  '• Every show, tape, and tour date — in one clean spot.\n'+
+  '• Our group mirrored + amplified — and every post still links right back here.\n'+
+  '• A Shakedown store for the artists and makers among us.\n'+
+  '• No ads in your face, no clickbait. Just us.'+vision+'\n\n'+
+  'It’s all on the level — nothing scraped, nothing automated, I share by hand and it links back to us here. A home next to our group, not instead of it.\n\n'+
+  'Come see what we built: deaddance.app 🌹'; }
+function loadFirstHyperPost(){ var t=document.getElementById('cmpText'); if(t)t.value=leaderFirstPost();
+ closeLeader(); var pv=document.getElementById('profile'); if(pv)pv.classList.remove('on');
+ var c=document.getElementById('composer'); if(c){ try{c.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){} }
+ toast('📡 Your first HyperPost is written — review it, then hit HyperPost to share it to your group. Nothing sends on its own.'); }
+function saveLeader(){ var v=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+ var L={name:v('ld_name'),url:v('ld_url'),vis:v('ld_vis'),size:v('ld_size').replace(/[^0-9]/g,''),role:v('ld_role'),region:v('ld_region'),purpose:v('ld_purpose'),vision:v('ld_vision'),help:v('ld_help'),contact:v('ld_contact'),at:Date.now()};
+ if(!L.name){ toast('Add your group name first 🌹'); return; }
+ try{ localStorage.setItem('dd.leader',JSON.stringify(L)); }catch(e){}
+ ME.leader=true;
+ var c=ddClient&&ddClient(); if(c){ try{ c.rpc('chat_leader_intake',{p_name:L.name,p_url:L.url,p_visibility:L.vis,p_members:parseInt(L.size||'0',10)||null,p_role:L.role,p_region:L.region,p_purpose:L.purpose,p_vision:L.vision,p_help:L.help,p_contact:L.contact}).catch(function(){}); }catch(e){} }
+ toast('🌹 Got it — welcome, family. A human will verify your group and seat you.');
+ loadFirstHyperPost();   // write + load their first HyperPost, ready for them to review + post (never auto-sent)
+}
+/* ---- CROWD: identify a FB group (feeds the Family map / partner catalog) ---- */
+function openGroupSpot(){ ['sp_name','sp_url','sp_vis','sp_size','sp_admin','sp_why'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';}); var ov=document.getElementById('spotov'); if(ov)ov.classList.add('on'); }
+function closeGroupSpot(){ var ov=document.getElementById('spotov'); if(ov)ov.classList.remove('on'); }
+function saveGroupSpot(){ var v=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+ var G={name:v('sp_name'),url:v('sp_url'),vis:v('sp_vis'),size:v('sp_size').replace(/[^0-9]/g,''),admin:v('sp_admin'),why:v('sp_why'),by:qaTester()||'',at:Date.now()};
+ if(!G.name){ toast('Add the group name first 🌹'); return; }
+ try{ var a=JSON.parse(localStorage.getItem('dd.groupspots')||'[]'); a.push(G); if(a.length>200)a=a.slice(-200); localStorage.setItem('dd.groupspots',JSON.stringify(a)); }catch(e){}
+ var c=ddClient&&ddClient(); if(c){ try{ c.rpc('chat_group_spot',{p_name:G.name,p_url:G.url,p_visibility:G.vis,p_members:parseInt(G.size||'0',10)||null,p_admin:G.admin,p_why:G.why,p_by:G.by}).catch(function(){}); }catch(e){} }
+ closeGroupSpot(); toast('🗺 Added to the family map — thank you! We\'ll reach out to the admin.');
+}
 function changePhoto(){document.getElementById('avfile').click();}
 function onAvatar(input){var fl=input&&input.files&&input.files[0];if(!fl)return;
  var rd=new FileReader();
@@ -2129,6 +2232,10 @@ var QA_DEMO_GROUPS=[{id:null,name:'DEADHEADS',url:'https://www.facebook.com/grou
  {id:null,name:'Jerry Garcia Band - JGB',url:'https://www.facebook.com/groups/1155671899121023/'}];
 var QA_TASKS=[
  // ---- SHARES (recurring; the FB → our-page round trip; this is the share-army) ----
+ {key:'spot_group',kind:'share',ic:'🔎',title:'Know a great Dead group? Name it',
+  steps:[{t:'<a href="#" class="qgo" onclick="try{openGroupSpot()}catch(e){};return false;">▶ Identify a Facebook group ↗</a> — 20 seconds: name it, public or private, who runs it (if you know), rough size.'},
+         {t:'That’s it — you just helped build the family map. We reach out to the admins; nothing scraped.'}],
+  q:{prompt:'Was that easy to do?',opts:['Super easy','OK','Confusing']}},
  {key:'share_forward',kind:'share',ic:'📤',title:'Your mission: forward 10 posts',
   steps:[{fb:1,t:'open your assigned group (the app gives you the link).'},
          {t:'Forward <b>10 great posts</b> to the <b>dead.dance Facebook page</b> — your pick, human click each.'},
@@ -2190,19 +2297,24 @@ var QA_TASKS=[
   q:{prompt:'Would you check this instead of scrolling Facebook for shows?',opts:['Yes','Sometimes','No']}},
  // ——— 🎸 MUSICIAN HELP TEST (Michele owns; Mike & Matt run it) ———
  {key:'mt_register',kind:'qa',ic:'🎸',title:'Musician test: register your band',
-  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'band\')}catch(e){};return false;">▶ Open Register Band ↗</a> — claim your band page.'}],
-  q:{prompt:'Was claiming your band easy?',opts:['Easy','OK','Confusing']}},
+  steps:[{t:'📍 Look <b>top-right</b>. Tap the <b>first icon ▦</b> (the little grid/pad). A menu opens — scroll to <b>Create</b>.'},
+         {t:'Tap <b>🎸 Register Band</b> and claim your band page. <span style="opacity:.65">(can’t find it? <a href="#" class="qgo" onclick="try{openGig(\'band\')}catch(e){};return false;">▶ open it for me</a>)</span>'}],
+  q:{prompt:'Could you FIND it, and was claiming your band easy?',opts:['Found it, easy','Found it, clunky','Couldn’t find it']}},
  {key:'mt_adddate',kind:'qa',ic:'🎸',title:'Musician test: post a date (HyperPost)',
-  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'date\')}catch(e){};return false;">▶ Open Add a Date ↗</a> — fill a show → HyperPost it.'},{t:'Then check the calendar for it.'}],
+  steps:[{t:'📍 <b>Top-right ▦ menu</b> → scroll to <b>Create</b> → tap <b>📅 Add a Date</b>.'},
+         {t:'Fill a show and <b>HyperPost</b> it, then check the calendar for it. <span style="opacity:.65">(shortcut: <a href="#" class="qgo" onclick="try{openGig(\'date\')}catch(e){};return false;">▶ open it</a>)</span>'}],
   q:{prompt:'Did posting a date feel quick (no captcha gauntlet)?',opts:['Yes, instant','OK','Too clunky']}},
  {key:'mt_listact',kind:'qa',ic:'🎸',title:'Musician test: list your act for venues',
-  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'act\')}catch(e){};return false;">▶ Open Talent ↗</a> — set fee/artwork → List me.'}],
+  steps:[{t:'📍 <b>Top-right ▦ menu</b> → <b>Create</b> → tap <b>🎭 List Talent</b>.'},
+         {t:'Set your fee/artwork → <b>List me</b>. <span style="opacity:.65">(shortcut: <a href="#" class="qgo" onclick="try{openGig(\'act\')}catch(e){};return false;">▶ open it</a>)</span>'}],
   q:{prompt:'Would venues find your profile useful?',opts:['Definitely','Maybe','Not yet']}},
  {key:'mt_inviteband',kind:'qa',ic:'🎸',title:'Musician test: invite another band',
-  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'band\')}catch(e){};return false;">▶ Open Register Band ↗</a> — tap “🤝 Invite another band” and read the message.'}],
+  steps:[{t:'📍 <b>Top-right ▦ menu</b> → <b>Create</b> → <b>🎸 Register Band</b>.'},
+         {t:'Tap <b>🤝 Invite another band</b> and read the message. <span style="opacity:.65">(shortcut: <a href="#" class="qgo" onclick="try{openGig(\'band\')}catch(e){};return false;">▶ open it</a>)</span>'}],
   q:{prompt:'Would you actually send that to a band friend?',opts:['Yes','Maybe','No']}},
  {key:'mt_feature',kind:'qa',ic:'💡',title:'Musician test: ask for a feature',
-  steps:[{t:'<a href="#" class="qgo" onclick="try{openGig(\'feature\')}catch(e){};return false;">▶ Open Add a Feature ↗</a> — describe something you want and send it.'}],
+  steps:[{t:'📍 <b>Top-right ▦ menu</b> → scroll to <b>Create</b> → tap <b>💡 Add a feature</b>.'},
+         {t:'Describe something you want and send it. <span style="opacity:.65">(shortcut: <a href="#" class="qgo" onclick="try{openGig(\'feature\')}catch(e){};return false;">▶ open it</a>)</span>'}],
   q:{prompt:'Did it feel like we actually want your ideas?',opts:['Yes','Sort of','No']}},
  // ——— 🗂 SALES / CRM HELP TEST (the field cockpit) ———
  {key:'sales_venues',kind:'qa',ic:'🏛',title:'Sales test: the Venues pipeline',
@@ -2232,7 +2344,20 @@ var QA_TASKS=[
   q:{prompt:'Was free-vs-business clear & fair?',opts:['Yes','Sort of','No']}},
  {key:'venue_vendor',kind:'qa',ic:'🍴',title:'Venue test: vendor tables',
   steps:[{t:'Look at the vendor-slot setup (a venue sets its 4×4 tables; a Chaperone fills them).'},{t:'📸 Screenshot + write what you see.'}],
-  q:{prompt:'Did vendor-table setup make sense?',opts:['Yes','Meh','No']}}
+  q:{prompt:'Did vendor-table setup make sense?',opts:['Yes','Meh','No']}},
+ // ---- FB GROUP LEADER (?ht=leader) — bring your group home + tell us your vision ----
+ {key:'lead_identify',kind:'qa',ic:'🚉',title:'Group leader: introduce your group',
+  steps:[{t:'<a href="#" class="qgo" onclick="try{closeQaOrNot&&0;openLeaderForm()}catch(e){};return false;">▶ Open “Bring your group home” ↗</a> — add your group name, size, and what it’s about.'}],
+  q:{prompt:'Was it clear what we’re asking for?',opts:['Clear','OK','Confusing']}},
+ {key:'lead_vision',kind:'qa',ic:'🌹',title:'Group leader: your vision',
+  steps:[{t:'In that form, fill the <b>“what do you want to do with your group here?”</b> box. That’s the one we care about most.'}],
+  q:{prompt:'Did the form let you say what you actually want?',opts:['Yes','Mostly','No']}},
+ {key:'lead_own',kind:'qa',ic:'🏪',title:'Group leader: own your room + store',
+  steps:[{t:'Read the top of the form — you’d <b>own your group here</b> and get <b>your own store</b>. 📸 Screenshot + tell us if that’s compelling.'}],
+  q:{prompt:'Is “own your room + your store” a reason to join?',opts:['Definitely','Maybe','Not really']}},
+ {key:'lead_rules',kind:'qa',ic:'🛡️',title:'Group leader: the rules are clear',
+  steps:[{t:'Read the creed (human share only, no bots/scraping, AI is a co-pilot, links back). 📸 Screenshot if anything’s unclear.'}],
+  q:{prompt:'Do the Facebook-safe rules feel clear + fair?',opts:['Clear','Sort of','No']}}
 ];
 var QA_SEL=null,QA_PICK=null,QA_WORKS=null,QA_CLAIM=null,QA_FILTER=null;
 function qaTester(){ try{return localStorage.getItem('dd.tester')||'';}catch(e){return '';} }
@@ -2255,7 +2380,7 @@ function qaSync(){ var c=ddClient&&ddClient(),id=ddId&&ddId(); if(!c||!id)return
 function qaRowHTML(t,idx,isdone){ return '<div class="qarow'+(isdone?' done':'')+'" onclick="qaOpenTask('+idx+')"><div class="qic">'+t.ic+'</div><div class="qt"><b>'+t.title+'</b><span>'+(t.kind==='share'?'recurring · forward to our page':(isdone?'done — thank you!':'tap to try'))+'</span></div><div class="qchev">'+(isdone?'':'›')+'</div></div>'; }
 function qaRender(){ var done=qaDoneList(), b=document.getElementById('qaBody'); if(!b)return;
  // ---- deep-link: one console's Help Test (?ht=main|band|sales|venue) ----
- var CON={main:{pre:['qa_','cal_'],ic:'🌹',nm:'Main App'},band:{pre:['mt_'],ic:'🎸',nm:'Band Management'},sales:{pre:['sales_'],ic:'🗂',nm:'Sales / CRM'},venue:{pre:['venue_'],ic:'🏛',nm:'Venue / Host'}};
+ var CON={main:{pre:['qa_','cal_'],ic:'🌹',nm:'Main App'},band:{pre:['mt_'],ic:'🎸',nm:'Band Management'},sales:{pre:['sales_'],ic:'🗂',nm:'Sales / CRM'},venue:{pre:['venue_'],ic:'🏛',nm:'Venue / Host'},leader:{pre:['lead_'],ic:'🚉',nm:'FB Group Leader'}};
  var cf=QA_FILTER&&(QA_FILTER==='musician'?'band':QA_FILTER);
  if(cf&&CON[cf]){ var C=CON[cf], who=qaTester();
    var set=QA_TASKS.filter(function(t){ return C.pre.some(function(p){return t.key.indexOf(p)===0;}); });
