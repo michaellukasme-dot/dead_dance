@@ -508,7 +508,7 @@ body{padding-bottom:64px}
     <div class="cal" id="calCard">
       <div class="findshow">🎟️ <b>Find a Show</b><span>tap a date or scan what's coming up — always current. The bus is always rolling.</span><button class="calx" onclick="calExpand()" title="Expand calendar" aria-label="Expand calendar">⤢</button></div>
       <div class="ch">
-        <span class="viewseg"><button id="vwList" class="on" onclick="calView('list')">📋 Upcoming</button><button id="vwGrid" onclick="calView('grid')">▦ Month</button></span>
+        <span class="viewseg"><button id="vwGrid" class="on" onclick="calView('grid')">▦ Month</button><button id="vwList" onclick="calView('list')">📋 Upcoming</button></span>
         <select id="calType" class="caltype" onchange="calType(this.value)" title="Filter by type (calendar only — the family feed stays Dead)">
           <option value="all">🎟️ All</option>
           <option value="grateful_dead">🌹 Grateful Dead</option>
@@ -522,7 +522,7 @@ body{padding-bottom:64px}
         <button class="cnav" onclick="calNav(-1)" aria-label="Previous month">‹</button>
         <span class="mo" id="calMo"></span>
         <button class="cnav" onclick="calNav(1)" aria-label="Next month">›</button>
-        <span class="seg"><button class="on" onclick="calScope(this,'nat')">National</button><button onclick="calScope(this,'mine')">My chapter</button></span>
+        <span class="seg"><button class="on" onclick="calScope(this,'mine')">My chapter</button><button onclick="calScope(this,'nat')">National</button></span>
       </div>
       <div class="grid" id="calGrid" style="display:none"></div>
       <div id="calList"></div>
@@ -825,7 +825,6 @@ body{padding-bottom:64px}
   <span class="mb-badge" id="mfabBadge" style="display:none">0</span>
 </button>
 <!-- ===== Built-in User QA Assist (a chat-style widget) ===== -->
-<button class="qafab" id="qafab" title="Help us test dead.dance" onclick="qaOpen()">🧪 <span>Help test</span><span class="qa-badge" id="qaBadge" style="display:none">0</span></button>
 <div class="qaov" id="qaov" onclick="if(event.target===this)qaClose()">
   <div class="qapanel">
     <div class="qahead" onclick="if(document.getElementById('qaov').classList.contains('min'))qaMin(false)"><b>🧪 QA Assist</b><span id="qaSub">Grab a task, try it, tell us how it went.</span><button class="qmin" onclick="event.stopPropagation();qaMin(true)" title="Tuck out of the way">▾</button><button class="rx" onclick="event.stopPropagation();qaClose()">×</button></div>
@@ -1005,12 +1004,14 @@ function toast(m){var t=document.createElement('div');t.textContent=m;t.style.cs
 /* ===== Calendar — dynamic, forward-looking, list-first (the front door) ===== */
 var CMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var CDOW=['S','M','T','W','T','F','S'], CDOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='list', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all';
+var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='mine';
 function cpad(n){return (n<10?'0':'')+n;}
 function cMid(){var d=new Date();d.setHours(0,0,0,0);return d;}
 function cIso(d){return d.getFullYear()+'-'+cpad(d.getMonth()+1)+'-'+cpad(d.getDate());}
-function buildShowlist(){ var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; var t0=cMid();
- SHOWLIST=(r.shows||[]).map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
+function buildShowlist(){ var t0=cMid(); var src;
+ if(CAL_SCOPE==='nat'){ src=[]; for(var k in REGIONS){ if(REGIONS.hasOwnProperty(k)&&REGIONS[k].shows) src=src.concat(REGIONS[k].shows); } }
+ else { var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; src=r.shows||[]; }
+ SHOWLIST=src.map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
    return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||''}; })
    .sort(function(a,b){return a.iso<b.iso?-1:(a.iso>b.iso?1:0);}); }
 function setLocalShows(region){ REG=region||"Mid-Atlantic"; buildShowlist(); renderCal();
@@ -1123,7 +1124,7 @@ function calRemindCheck(){ var a=calAdded(), today=cIso(cMid());
  setTimeout(function(){ toast('🎟️ '+x.band+' is on your calendar — grab tickets whenever you\'re ready. No rush. 🌹'); }, 2800);
 }
 function calBuild(){ renderCal(); }   /* back-compat alias */
-function calScope(btn,which){document.querySelectorAll('.cal .seg button').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');toast(which==='nat'?'Calendar: National — every chapter\'s shows':('Calendar: your Local Family — '+(LOCALFAM||REG)));}
+function calScope(btn,which){ CAL_SCOPE=which; document.querySelectorAll('.cal .seg button').forEach(function(b){b.classList.remove('on');});btn.classList.add('on'); CAL_SEL=null; buildShowlist(); renderCal(); toast(which==='nat'?'Calendar: National — every chapter\'s shows':('Calendar: your Local Family — '+(LOCALFAM||REG)));}
 /* best-effort live wiring: pull real shows when signed in; else keep the demo list */
 function calSync(){ try{ var c=ddClient&&ddClient(); if(!c)return;
  c.rpc('chat_shows_for_scene',{p_scene:(CALTYPE==='all'?null:CALTYPE),p_region:null}).then(function(r){
