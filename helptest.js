@@ -83,7 +83,15 @@
     var head='<div class="htq" style="margin-top:0">'+esc(C.ic)+' HELP TEST'+(who?(' · '+esc(who)):'')+'</div>';
     if(!n){ b.innerHTML=head+'<div style="padding:18px 6px;color:#6c6878">No tasks are set here yet — check back soon. 🌹</div>'; return; }
     var done=doneList(), remaining=set.filter(function(t){return done.indexOf(t.key)<0;});
-    if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:26px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+esc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Every answer went to the team. You can close this.</p></div>'; return; }
+    if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:22px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+esc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Your answers are saved on this device. Tap below to send them to the team.</p><button class="htsend" style="width:100%" onclick="HelpTest._send()">📤 Send my results to the team</button></div>'; return; }
+    if(!seenIntro()){ b.innerHTML=head+
+      '<div class="htq" style="margin-top:0">👋 How this works — 15 seconds</div>'+
+      '<div class="htstep"><div class="n">1</div><div>I give you <b>one tiny task at a time.</b> Just do it.</div></div>'+
+      '<div class="htstep"><div class="n">2</div><div>Tell me <b>👍 Worked</b> or <b>👎 Broke</b> — add a note if you like.</div></div>'+
+      '<div class="htstep"><div class="n">3</div><div><b>Can’t find something? Tap “🤔 Stuck” and type what’s confusing.</b> That comes <b>straight to the team — you don’t need to ask Michael.</b></div></div>'+
+      '<div class="htstep"><div class="n">4</div><div>You <b>can’t break anything.</b> Nothing here is real.</div></div>'+
+      '<div class="htstep"><div class="n">5</div><div><b>When you’re done, tap 📤 “Send my results.”</b> Your answers save as you go — that button ships them to the team.</div></div>'+
+      '<button class="htsend" style="width:100%;margin-top:12px" onclick="HelpTest._start()">Let’s go →</button>'; return; }
     if(STEP<0)STEP=0; if(STEP>=n)STEP=n-1;
     var t=set[STEP];
     if(ONEKEY!==t.key){ ONEKEY=t.key; PICK=null; WORKS=null; SHOT=null; NOTE=''; }
@@ -95,10 +103,11 @@
       '<div style="font-size:24px">'+esc(t.ic||'🧪')+'</div><div class="htq" style="margin-top:2px">'+esc(t.title||'')+'</div>'+steps+
       '<div class="htq">Did it work?</div><div class="htworks"><button'+(WORKS===true?' class="sel"':'')+' onclick="HelpTest._works(this,true)">👍 Worked</button><button'+(WORKS===false?' class="sel"':'')+' onclick="HelpTest._works(this,false)">👎 Broke</button></div>'+
       ((t.q&&t.q.prompt)?('<div class="htq">'+esc(t.q.prompt)+'</div>'+opts):'')+
-      '<textarea class="htnote" id="htnote" placeholder="💡 Anything to add or improve? (optional)" oninput="HelpTest._note(this.value)">'+esc(NOTE)+'</textarea>'+
+      '<textarea class="htnote" id="htnote" placeholder="💡 What did you see? Confused? Type it here — don&#39;t ask Michael, tell us. (This is the gold.)" oninput="HelpTest._note(this.value)">'+esc(NOTE)+'</textarea>'+
       '<label class="htshot">'+shot+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="HelpTest._shot(this)"></label>'+
-      '<div class="htbtns"><button class="htsend" onclick="HelpTest._submit()">Submit &amp; next ›</button><button class="htskip" onclick="HelpTest._go(1)">Skip ›</button></div>'+
-      (STEP>0?'<button class="htback" onclick="HelpTest._go(-1)">‹ previous</button>':'');
+      '<div class="htbtns"><button class="htsend" onclick="HelpTest._submit()">Submit &amp; next ›</button><button class="htskip" onclick="HelpTest._stuck()" title="Confused? Log it — comes to the team">🤔 Stuck</button><button class="htskip" onclick="HelpTest._go(1)">Skip ›</button></div>'+
+      (STEP>0?'<button class="htback" onclick="HelpTest._go(-1)">‹ previous</button>':'')+
+      '<div style="text-align:center;margin-top:6px"><a href="#" onclick="HelpTest._send();return false" style="font-size:12px;color:#6c6878">📤 Send my results to the team</a></div>';
   }
   function pick(el){ PICK=el.getAttribute('data-v'); var p=el.parentNode; [].forEach.call(document.querySelectorAll('#htbody .htopt'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
   function works(el,v){ WORKS=v; [].forEach.call(el.parentNode.querySelectorAll('button'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
@@ -114,6 +123,23 @@
     var c=client(); if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:WORKS,p_choice:PICK,p_note:tagged,p_tester:(who||null),p_console:(con||null),p_shot:((SHOT&&SHOT.path)||null)}).catch(function(){}); }catch(e){} }
     markDone(t.key); toast('🙏 Thank you'+(who?(' '+who.split(' ')[0]):'')+' — logged.'); STEP+=1; render();
   }
+  function sendResults(){ var arr=[]; try{arr=JSON.parse(localStorage.getItem('dd.qa.results')||'[]');}catch(e){}
+    if(!arr.length){ toast('Nothing to send yet — do a task first 🌹'); return; }
+    var who=tester()||'tester';
+    var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
+    var text='dead.dance Help Test — '+who+'\n'+arr.length+' answer'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n');
+    var copy=function(){ var done=function(){ toast('📋 Copied your results — paste them to the team.'); };
+      if(root.navigator&&navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(function(){ try{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Screenshot this and send it 🌹');} }); }
+      else { try{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Screenshot this and send it 🌹');} } };
+    if(root.navigator&&navigator.share){ navigator.share({title:'dead.dance Help Test',text:text}).catch(copy); } else copy(); }
+  function seenIntro(){ try{return localStorage.getItem('dd.ht.introseen')==='1';}catch(e){return false;} }
+  function startTasks(){ try{localStorage.setItem('dd.ht.introseen','1');}catch(e){} render(); }
+  function stuck(){ var C=CONS[conKey()]; if(!C)return; var set=C.tasks||[]; var t=set[STEP]; if(!t)return;
+    var who=tester(), con=conKey(); var nel=q('htnote'); var note='🤔 STUCK: '+((nel?nel.value:NOTE)||'(no detail)');
+    var tagged='['+(who||'tester')+(con?(' · '+con):'')+'] '+note;
+    try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); res.push({tester:who||'',console:con,task:t.key,works:false,choice:'STUCK',note:note,shot:'',at:Date.now()}); if(res.length>300)res=res.slice(-300); localStorage.setItem('dd.qa.results',JSON.stringify(res)); }catch(e){}
+    var c=client(); if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:false,p_choice:'STUCK',p_note:tagged,p_tester:(who||null),p_console:(con||null),p_shot:null}).catch(function(){}); }catch(e){} }
+    toast('🙏 Got it — being stuck IS the test. Logged. Next one…'); STEP+=1; render(); }
 
   // ---- init: read ?ht + ?tester, auto-open docked (reliable across load timing) ----
   try{ var p=new URLSearchParams(location.search); var tv=p.get('tester'); if(tv){ try{localStorage.setItem('dd.tester',tv);}catch(e){} }
@@ -128,5 +154,5 @@
 
   root.HelpTest={ set:function(k,def){ CONS[k]=def; if(FILTER&&conKey()===k&&mounted){ render(); } },
     open:open, close:close, min:min, unmin:unmin, _m:isMin,
-    _pick:pickConsole, _opt:pick, _works:works, _go:go, _shot:shot, _submit:submit, _note:function(v){NOTE=v;} };
+    _pick:pickConsole, _opt:pick, _works:works, _go:go, _shot:shot, _submit:submit, _note:function(v){NOTE=v;}, _start:startTasks, _stuck:stuck, _send:sendResults };
 })(window);

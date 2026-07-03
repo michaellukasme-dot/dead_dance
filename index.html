@@ -195,7 +195,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .post .by a{color:var(--fb);text-decoration:none}
 .post .acts{display:flex;align-items:center;gap:16px;margin-top:10px;color:var(--muted);font-size:13px;font-weight:600}
 .post .acts .react{margin-left:auto;display:flex;gap:3px;font-size:16px}
-.radiate{position:absolute;right:13px;bottom:13px;width:46px;height:46px;border-radius:50%;border:0;background:radial-gradient(circle at 50% 40%,#8a4be0,#5a2e86);color:#fff;cursor:pointer;box-shadow:0 6px 16px #5a2e8666;display:grid;place-items:center}
+.radiate{display:none}   /* retired — redundant to Comment/Share + the ⋯ HyperPost menu, and it overlapped card buttons */
 .radiate svg{width:24px;height:24px}
 .radiate:hover{transform:scale(1.06)}
 .evt .go{display:flex;gap:8px;margin-top:9px}
@@ -2347,8 +2347,9 @@ var QA_TASKS=[
   q:{prompt:'Did vendor-table setup make sense?',opts:['Yes','Meh','No']}},
  // ---- FB GROUP LEADER (?ht=leader) — bring your group home + tell us your vision ----
  {key:'lead_identify',kind:'qa',ic:'🚉',title:'Group leader: introduce your group',
-  steps:[{t:'<a href="#" class="qgo" onclick="try{closeQaOrNot&&0;openLeaderForm()}catch(e){};return false;">▶ Open “Bring your group home” ↗</a> — add your group name, size, and what it’s about.'}],
-  q:{prompt:'Was it clear what we’re asking for?',opts:['Clear','OK','Confusing']}},
+  steps:[{t:'📍 Bottom bar → tap <b>You</b> to open your profile. Find <b>“Bring your group home.”</b>'},
+         {t:'Add your group name, size, and what it’s about. <span style="opacity:.65">(shortcut: <a href="#" class="qgo" onclick="try{openLeaderForm()}catch(e){};return false;">▶ open it</a>)</span>'}],
+  q:{prompt:'Could you FIND it, and was the ask clear?',opts:['Found it, clear','Found it, unclear','Couldn’t find it']}},
  {key:'lead_vision',kind:'qa',ic:'🌹',title:'Group leader: your vision',
   steps:[{t:'In that form, fill the <b>“what do you want to do with your group here?”</b> box. That’s the one we care about most.'}],
   q:{prompt:'Did the form let you say what you actually want?',opts:['Yes','Mostly','No']}},
@@ -2431,8 +2432,16 @@ function qaEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</
 function qaRenderOne(C,set,who,done){ var b=document.getElementById('qaBody'); if(!b)return; var n=set.length;
  var head='<div class="qaq" style="margin-top:0">'+C.ic+' HELP TEST'+(who?(' · '+qaEsc(who)):'')+'</div>';
  if(!n){ b.innerHTML=head+'<div style="padding:20px 8px;color:#6c6878">No tasks are set for this section yet — check back soon. 🌹</div>'; return; }
+ if(!qaSeenIntro()){ b.innerHTML=head+
+  '<div class="qaq" style="margin-top:0">👋 How this works — 15 seconds</div>'+
+  '<div class="qastep"><div class="n">1</div><div>I give you <b>one tiny task at a time.</b> Just do it.</div></div>'+
+  '<div class="qastep"><div class="n">2</div><div>Tell me <b>👍 Worked</b> or <b>👎 Broke</b> — add a note if you like.</div></div>'+
+  '<div class="qastep"><div class="n">3</div><div><b>Can’t find something? Tap “🤔 Stuck” and type what’s confusing.</b> That’s the most useful thing you can do — it comes <b>straight to us. You don’t need to ask Michael.</b></div></div>'+
+  '<div class="qastep"><div class="n">4</div><div>You <b>can’t break anything.</b> Nothing here is real.</div></div>'+
+  '<div class="qastep"><div class="n">5</div><div><b>When you’re done, tap 📤 “Send my results.”</b> Your answers save on your phone as you go — that button ships them to the team.</div></div>'+
+  '<button class="qasend" style="width:100%;margin-top:12px" onclick="qaStartTasks()">Let’s go →</button>'; return; }
  var remaining=set.filter(function(t){return done.indexOf(t.key)<0;});
- if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:26px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+qaEsc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Every answer went to the team. You can close this. That\'s a real help.</p></div>'; return; }
+ if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:22px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+qaEsc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Your answers are saved on this device. Tap below to send them to the team.</p><button class="qasend" style="width:100%" onclick="qaSend()">📤 Send my results to the team</button></div>'; return; }
  if(QA_STEP<0)QA_STEP=0; if(QA_STEP>=n)QA_STEP=n-1;   // clamp (never wrap past the end)
  var t=set[QA_STEP];
  if(QA_ONE_KEY!==t.key){ QA_ONE_KEY=t.key; QA_PICK=null; QA_WORKS=null; QA_SHOT=null; QA_NOTE=''; }
@@ -2446,12 +2455,30 @@ function qaRenderOne(C,set,who,done){ var b=document.getElementById('qaBody'); i
   '<div style="font-size:26px">'+t.ic+'</div><div class="qaq" style="margin-top:2px">'+qaEsc(t.title)+'</div>'+steps+
   '<div class="qaq">Did it work?</div><div class="qaworks"><button'+(QA_WORKS===true?' class="sel"':'')+' onclick="qaSetWorks(this,true)">👍 Worked</button><button'+(QA_WORKS===false?' class="sel"':'')+' onclick="qaSetWorks(this,false)">👎 Broke</button></div>'+
   '<div class="qaq">'+qaEsc(t.q.prompt)+'</div>'+opts+
-  '<textarea class="qanote" id="qaNote" placeholder="💡 Anything to add or improve? (optional)" oninput="QA_NOTE=this.value">'+qaEsc(QA_NOTE)+'</textarea>'+
+  '<textarea class="qanote" id="qaNote" placeholder="💡 What did you see? Confused? Type it here — don\'t ask Michael, tell us. (This is the gold.)" oninput="QA_NOTE=this.value">'+qaEsc(QA_NOTE)+'</textarea>'+
   '<label class="qashot">'+shot+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="qaShot(this)"></label>'+
-  '<div class="qaonebtns"><button class="qasend" onclick="qaSubmitOne()">Submit &amp; next ›</button><button class="qaskip" onclick="qaStepGo(1)" title="Skip for now">Skip ›</button></div>'+
-  (QA_STEP>0?'<button class="qaback" onclick="qaStepGo(-1)">‹ previous</button>':'');
+  '<div class="qaonebtns"><button class="qasend" onclick="qaSubmitOne()">Submit &amp; next ›</button><button class="qaskip" onclick="qaStuck()" title="Confused? Log it — comes to the team">🤔 Stuck</button><button class="qaskip" onclick="qaStepGo(1)" title="Skip for now">Skip ›</button></div>'+
+  (QA_STEP>0?'<button class="qaback" onclick="qaStepGo(-1)">‹ previous</button>':'')+
+  '<div style="text-align:center;margin-top:6px"><a href="#" onclick="qaSend();return false" style="font-size:12px;color:#6c6878">📤 Send my results to the team</a></div>';
 }
 function qaStepGo(d){ QA_STEP+=d; qaRender(); }
+function qaResultsText(){ var arr=[]; try{arr=JSON.parse(localStorage.getItem('dd.qa.results')||'[]');}catch(e){}
+ var who=qaTester()||'tester';
+ var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
+ return {n:arr.length, text:'dead.dance Help Test — '+who+'\n'+arr.length+' answer'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n')}; }
+function qaCopy(text){ var done=function(){ toast('📋 Copied your results — paste them to the team (text or email).'); };
+ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(function(){ try{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Screenshot this and send it 🌹');} }); }
+ else { try{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Screenshot this and send it 🌹');} } }
+function qaSend(){ var r=qaResultsText(); if(!r.n){ toast('Nothing to send yet — do a task first 🌹'); return; }
+ if(navigator.share){ navigator.share({title:'dead.dance Help Test',text:r.text}).catch(function(){ qaCopy(r.text); }); }
+ else { qaCopy(r.text); } }
+function qaSeenIntro(){ try{return localStorage.getItem('dd.qa.introseen')==='1';}catch(e){return false;} }
+function qaStartTasks(){ try{localStorage.setItem('dd.qa.introseen','1');}catch(e){} qaRender(); }
+function qaStuck(){ var t=QA_SEL; if(!t)return; var who=qaTester(),con=qaConsole(); var note='🤔 STUCK: '+((document.getElementById('qaNote')||{}).value||'(no detail)');
+ var tagged='['+(who||'tester')+(con?(' · '+con):'')+'] '+note;
+ try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); res.push({tester:who||'',console:con,task:t.key,works:false,choice:'STUCK',note:note,shot:'',at:Date.now()}); if(res.length>300)res=res.slice(-300); localStorage.setItem('dd.qa.results',JSON.stringify(res)); }catch(e){}
+ var c=ddClient&&ddClient(); if(c){ try{ c.rpc('chat_qa_submit',{p_task:t.key,p_works:false,p_choice:'STUCK',p_note:tagged,p_tester:(who||null),p_console:(con||null),p_shot:null}).catch(function(){}); }catch(e){} }
+ toast('🙏 Got it — being stuck IS the test. Logged, thank you. Next one…'); QA_STEP+=1; qaRender(); }
 function qaConsole(){ var cf=QA_FILTER&&(QA_FILTER==='musician'?'band':QA_FILTER); return cf||''; }
 function qaShot(inp){ var f=inp.files&&inp.files[0]; if(!f)return; QA_NOTE=(document.getElementById('qaNote')||{}).value||QA_NOTE; QA_SHOT={name:f.name};
  var c=ddClient&&ddClient(),id=ddId&&ddId();
