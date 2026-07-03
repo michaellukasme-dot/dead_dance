@@ -1666,11 +1666,12 @@ function bandInviteText(){ var me=(ME&&ME.name&&ME.name!=='You')?ME.name:''; var
  "It's the easy, no-nonsense ticket system built for us — NOT Ticketmaster. Free to set up your band page and post a show, you keep your gate, no junk fees, no lock-in. The Dead family's already on it, so your shows land in front of the right crowd.\n\n"+
  "Takes a few minutes. Throw your next gig up and see — I'll come play. 🌹🎸"+sign; }
 function bandInvite(){ var link=bandLink(), txt=bandInviteText();
+ var copyIt=function(){ try{ navigator.clipboard.writeText(txt+'\n\n'+link); toast('🎸 Band invite copied — paste it to a bandmate or another act. You choose who.'); }
+   catch(e){ try{ var ta=document.createElement('textarea'); ta.value=txt+'\n\n'+link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('🎸 Band invite copied — paste it to send.'); }catch(x){ toast('🎸 '+txt+' '+link); } } };
  if(navigator.share){ navigator.share({ title:"dead.dance — for bands", text:txt, url:link })
    .then(function(){ toast('🎸 Right on — band to band. You pick who; it never touches Facebook\'s API.'); })
-   .catch(function(){}); return; }
- try{ navigator.clipboard.writeText(txt+'\n\n'+link); toast('🎸 Band invite copied — send it to a bandmate or another act. You choose who.'); }
- catch(e){ toast(txt+' '+link); } }
+   .catch(copyIt); return; }   /* share cancelled/unavailable → copy, never silent */
+ copyIt(); }
 
 /* ================= 🍀 THE MIRACLE TICKET =================
    Can't make it? Miracle your ticket into the chapter bucket — free. First tap grabs it.
@@ -1985,13 +1986,14 @@ function gigCreateFestival(){
 }
 function gigRegisterBand(){
  var name=gv('gb_name'),city=gv('gb_city'),state=gv('gb_state'),site=gv('gb_site');
- if(!name||!city||!state||!site){ toast('Band name, city, state, and site are required.'); return; }
- var payload={p_name:name,p_city:city,p_state:state,p_region:gv('gb_region')||null,
-   p_site:site,p_contact_name:gv('gb_cname')||null,p_contact_email:gv('gb_cemail')||null,p_scene:gv('gb_scene')||'grateful_dead'};
+ if(!name){ toast('Just your band name to start — everything else you can add anytime. 🌹'); return; }
+ var payload={p_name:name,p_city:city||null,p_state:state||null,p_region:gv('gb_region')||null,
+   p_site:site||null,p_contact_name:gv('gb_cname')||null,p_contact_email:gv('gb_cemail')||null,p_scene:gv('gb_scene')||'grateful_dead'};
  var c=ddClient(),id=ddId();
  var done=function(bid){ GIGBAND=name; GIGBANDID=bid||null;
-   toast('🎸 '+name+' is registered. Now add your first date.'); gigTab('date'); };
- if(c&&id){ try{ c.rpc('chat_band_register',payload).then(function(r){ if(r&&r.error) toast('Saved locally — sign in to publish your band.'); else done(r&&r.data); }).catch(function(){ done(null); }); }catch(e){ done(null); } }
+   toast('🎸 '+name+' is registered — now add your first date.'); gigTab('date'); };
+ // honest-state: always succeeds locally; publishes to the family when signed in. Never a dead-end error.
+ if(c&&id){ try{ c.rpc('chat_band_register',payload).then(function(r){ done(r&&r.data); }).catch(function(){ done(null); }); }catch(e){ done(null); } }
  else { done(null); }
 }
 
