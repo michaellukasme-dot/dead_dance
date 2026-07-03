@@ -115,6 +115,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .top .friendsbtn:hover{transform:scale(1.06)}
 /* layout */
 .wrap{display:grid;grid-template-columns:288px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:start}
+.center,.left{min-width:0}   /* let grid columns shrink to fit — no more content clipped off the right edge */
 .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:14px;box-shadow:0 1px 3px #0000000a}
 .sec{font-size:12.5px;font-weight:800;letter-spacing:.04em;color:var(--purple2);margin:18px 2px 8px;display:flex;align-items:center;gap:7px}
 .btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
@@ -594,9 +595,9 @@ body{padding-bottom:64px}
         <textarea id="cmpText" class="cmp-text" placeholder="What's on your mind, Stagger Lee?"></textarea>
       </div>
       <div id="cmpNets" class="cmp-nets"></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
+      <div style="display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap">
         <button class="cmp-gear" onclick="cmpToggleNets()" title="Set your default networks">⚙ Networks</button>
-        <span id="cmpNote" style="font-size:11px;color:var(--muted);flex:1"></span>
+        <span id="cmpNote" style="font-size:11px;color:var(--muted);flex:1;min-width:120px"></span>
         <button class="hpbtn" style="background:var(--rose);color:#fff" onclick="hpComposer()">📡 HyperPost</button>
       </div>
       <div class="wedo">🌹 dead.dance runs on the family — <b>this only works if we all do our share.</b> Post a show, forward a gem, weed a row.</div>

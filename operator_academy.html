@@ -6,7 +6,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>dead.dance — Operator Academy (Chancellor · Ambassador · Chaperone · Student Chaperone)</title>
 <style>
-:root{--navy:#15366e;--ink:#0f1b2d;--muted:#5b6b80;--line:#dde5ef;--paper:#f6f8fb;--card:#fff;--ok:#1d7a4d;--warn:#c2410c;--gold:#c79a3a;--rose:#b8002e;--cyan:#1f6f86;--edu:#5a2e86}
+:root{--navy:#3a1f57;--ink:#23202a;--muted:#5b6b80;--line:#e2dac9;--paper:#fbf7ef;--card:#fff;--ok:#1d7a4d;--warn:#c2410c;--gold:#c79a3a;--rose:#b8002e;--cyan:#7a3cc0;--edu:#5a2e86}
 *{box-sizing:border-box}html,body{margin:0;background:var(--paper);font-family:'Inter','Helvetica Neue',Arial,sans-serif;color:var(--ink);line-height:1.55}
 #app{max-width:920px;margin:0 auto;min-height:100vh}
 /* header — matches CRM .h */
@@ -14,20 +14,27 @@
 .h .nm{font-size:19px;font-weight:800}
 .h .sb{font-size:11px;opacity:.85;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
 .maplink{font-size:11.5px;font-weight:800;background:#ffffff22;color:#fff;border:1px solid #ffffff3a;border-radius:999px;padding:3px 9px;text-decoration:none;margin-left:8px;vertical-align:middle}
-/* pill nav — matches CRM .repbar */
-.nav{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:56px;z-index:15}
-.nav::-webkit-scrollbar{display:none}
-.nav a{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;white-space:nowrap}
-.nav a:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* left sidebar nav — matches the CRM console sidebar */
+.shell{display:flex;gap:20px;max-width:940px;margin:0 auto;padding:0 16px;align-items:flex-start}
+.nav{display:flex;flex-direction:column;gap:3px;flex:none;width:210px;position:sticky;top:72px;padding:16px 0}
+.nav a{display:block;border:1px solid var(--line);border-left:3px solid transparent;background:#fff;border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:none}
+.nav a:hover{background:#efe8fb;color:var(--navy);border-left-color:var(--navy)}
+@media(max-width:760px){
+ .shell{flex-direction:column;padding:0}
+ .nav{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px 16px;position:sticky;top:56px;background:#fff;border-bottom:1px solid var(--line);z-index:15}
+ .nav::-webkit-scrollbar{display:none}
+ .nav a{flex:none;white-space:nowrap;border-radius:999px;border-left:1px solid var(--line)}
+}
 /* farrah-style intro band — matches CRM .farrah */
-.farrah{background:#23304d;color:#eaf1ff;border-left:3px solid var(--gold);padding:11px 18px;font-size:13px;line-height:1.5}
+.farrah{background:#2e1f47;color:#f1ecfb;border-left:3px solid var(--gold);padding:11px 18px;font-size:13px;line-height:1.5}
 .farrah b{color:var(--gold)}
-.wrap{padding:18px 18px 80px}
+.wrap{flex:1;min-width:0;padding:16px 4px 80px}
+@media(max-width:760px){.wrap{padding:16px 16px 80px}}
 h1{font-size:26px;margin:6px 2px 2px}
 .sub{color:var(--navy);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;margin:2px}
 .lede{color:var(--muted);font-size:15px;margin:10px 2px 22px}
 h2{font-size:19px;margin:30px 0 10px;border-left:3px solid var(--navy);padding-left:12px;scroll-margin-top:112px}
-.console{font-size:13px;font-weight:800;color:var(--navy);text-decoration:none;background:#eef4ff;border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin-left:10px;white-space:nowrap;vertical-align:middle}
+.console{font-size:13px;font-weight:800;color:var(--navy);text-decoration:none;background:#efe8fb;border:1px solid var(--line);border-radius:8px;padding:3px 9px;margin-left:10px;white-space:nowrap;vertical-align:middle}
 .console:hover{background:var(--navy);color:#fff}
 .samenote{font-size:12px;font-style:italic;color:var(--muted);font-weight:400;margin-left:8px;white-space:nowrap}
 h3{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--navy);margin:14px 0 6px}
@@ -38,12 +45,12 @@ table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:.03em}
 .pill{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:3px 9px;text-transform:uppercase;letter-spacing:.03em}
-.pill.navy{background:#eef4ff;color:var(--navy)}.pill.gold{background:#fbf1d8;color:#8a6a12}.pill.ok{background:#e7f6ee;color:var(--ok)}
+.pill.navy{background:#efe8fb;color:var(--navy)}.pill.gold{background:#fbf1d8;color:#8a6a12}.pill.ok{background:#e7f6ee;color:var(--ok)}
 .pill.edu{background:#efe8fb;color:var(--edu)}.pill.rose{background:#fde3e3;color:var(--rose)}
 ul{margin:6px 0 6px 0;padding-left:20px}li{margin:3px 0}
 .muted{color:var(--muted);font-size:13px}
 .legal{border-left:3px solid var(--rose);background:#fff6f7}
-code{background:#eef2f8;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12.5px;color:var(--navy)}
+code{background:#f1ecfb;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12.5px;color:var(--navy)}
 .step{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin:8px 0;font-size:13.5px}
 .step b{color:var(--navy)}
 /* stat strip — matches CRM .capgrid */
@@ -63,11 +70,12 @@ a{color:var(--cyan)}
   <div class="sb">Your role · your tools · how we know you're crushing it</div>
 </div>
 
+<div class="farrah">🐝 <b>Field brief:</b> read your role section, then the tool you'll touch most. Twenty minutes and you're running. It's a <b>family business</b> — we already know each other, we picked you on purpose. Copy, never auto-send; a human always hits the button.</div>
+
+<div class="shell">
 <div class="nav">
   <a href="#welcome">Welcome</a><a href="#org">Org &amp; Pay</a><a href="#chancellor">Chancellor</a><a href="#ambassador">Ambassador</a><a href="#chaperone">Chaperone</a><a href="#student">Student Chaperone</a><a href="#campus">Campus Program</a><a href="#bigidea">Sell the Network</a><a href="#crowd">Crowd-Forward</a><a href="#crm">CRM</a><a href="#mms">Musician Tools</a><a href="#app">The App</a><a href="#amplify">Amplify</a><a href="#scorecard">Scorecard</a><a href="#rules">The Rules</a>
 </div>
-
-<div class="farrah">🐝 <b>Field brief:</b> read your role section, then the tool you'll touch most. Twenty minutes and you're running. It's a <b>family business</b> — we already know each other, we picked you on purpose. Copy, never auto-send; a human always hits the button.</div>
 
 <div class="wrap">
 
@@ -252,4 +260,4 @@ a{color:var(--cyan)}
 dead.dance Operator Academy · for Chancellors, Ambassadors, Chaperones &amp; Student Chaperones · 2026. Pairs with your Rep Agreement (legal terms), the Student Co-op Addendum, the Crowd-Forward + Amplifier standards, and the Musician-First Doctrine. Questions go to your leader → Ambassador → Michele → Michael.
 </div>
 
-</div></div></body></html>
+</div></div></div></body></html>
