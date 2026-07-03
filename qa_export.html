@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!-- dead.dance — QA export/rescue page. A NEW file the old service worker never cached,
+     so it loads fresh. Reads the Help Test answers saved in this origin's localStorage
+     and shows them for copy. Read-only; never clears anything. -->
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dead.dance — my Help Test results</title>
+<style>
+:root{--navy:#15366e;--ink:#0f1b2d;--muted:#5b6b80;--line:#dde5ef;--paper:#f6f8fb;--ok:#1d7a4d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',-apple-system,Segoe UI,Arial,sans-serif;line-height:1.5;padding:18px;max-width:760px;margin:0 auto}
+h1{font-size:20px;margin:6px 0 2px}.sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.k{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);margin:0 0 6px}
+.big{font-size:26px;font-weight:800;color:var(--ok)}
+button{background:var(--navy);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:800;font-size:15px;cursor:pointer}
+textarea{width:100%;min-height:260px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;background:#fff;color:var(--ink)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.none{color:#b8002e;font-weight:700}
+</style></head>
+<body>
+<h1>🧪 Your Help Test results</h1>
+<p class="sub">Saved on this device. Tap <b>Copy</b>, then paste them back to the team. (This page only reads — it never deletes anything.)</p>
+
+<div class="card">
+  <div class="k">Answers found</div>
+  <div class="big" id="count">…</div>
+  <div class="hint" id="who"></div>
+</div>
+
+<button id="copy">📋 Copy my results</button>
+
+<div class="card">
+  <div class="k">Readable</div>
+  <textarea id="readable" readonly></textarea>
+</div>
+<div class="card">
+  <div class="k">Raw (JSON — belt &amp; suspenders)</div>
+  <textarea id="raw" readonly style="min-height:160px"></textarea>
+</div>
+
+<script>
+(function(){
+  var arr=[]; try{ arr=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); }catch(e){}
+  var tester=''; try{ tester=localStorage.getItem('dd.tester')||''; }catch(e){}
+  document.getElementById('count').textContent=arr.length;
+  document.getElementById('who').textContent=tester?('tester tag: '+tester):'(no tester tag saved)';
+  var lines=arr.map(function(r){
+    return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+
+      (r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+
+      (r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):'')+
+      (r.at?('  ·  '+new Date(r.at).toLocaleString()):'');
+  });
+  var readable = arr.length
+    ? ('dead.dance Help Test — '+(tester||'tester')+'\n'+arr.length+' answer'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n'))
+    : 'No saved answers were found in THIS browser/profile.\n\n(If you tested in a different window, an incognito window, or a different browser, open this page there instead.)';
+  document.getElementById('readable').value=readable;
+  document.getElementById('raw').value=arr.length?JSON.stringify(arr,null,2):'[]';
+  if(!arr.length){ document.getElementById('count').className='big none'; }
+  document.getElementById('copy').addEventListener('click',function(){
+    var ta=document.getElementById('readable'); ta.select(); ta.setSelectionRange(0,ta.value.length);
+    var ok=function(){ document.getElementById('copy').textContent='✅ Copied — paste it to the team'; };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(ok).catch(function(){try{document.execCommand('copy');ok();}catch(e){}}); }
+    else { try{document.execCommand('copy');ok();}catch(e){} }
+  });
+})();
+</script>
+</body></html>
