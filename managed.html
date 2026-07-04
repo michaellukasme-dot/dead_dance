@@ -130,8 +130,8 @@ function pitch(){
   '</div>'+
   '<div class="disc">Illustrative estimate — not a forecast or guarantee. Modeled from comparable rooms (~'+cap+'-cap, ~$'+ticket+' ticket, ~'+Math.round(fill*100)+'% fill). Your results will differ.</div>'+
   '<div class="firewall">🔒 <b>These are venue-level estimates for a room like yours.</b> We never show you any individual act’s draw, guarantee, or financials — that stays private to the artists.</div>'+
-  '<button class="cta" onclick="go(\'interview\')">▶ Try it for a Month — free</button>'+
-  '<div class="terms">Free for 30 days, then converts to your plan (from $399/mo). Cancel anytime before then — no charge.</div>'+
+  '<button class="cta" onclick="go(\'interview\')">▶ Get started — 50% off your first 3 months</button>'+
+  '<div class="terms">See your tailored Vision first (no card). Intro promo: <b>50% off months 1–3</b> (from $199/mo), then your plan. Cancel anytime.</div>'+
   '</div>'+
   '<button class="skip" onclick="seeSample()">or just show me a sample month →</button>';
 }
@@ -164,8 +164,8 @@ function vision(){
   '<div><div class="lbl">~'+cap+'-cap room</div><div class="big">$'+ticket+'</div></div></div>'+
   '<div class="disc dark">Illustrative estimates, not a forecast or guarantee — modeled from comparable rooms; your actual results will differ. 🔒 Venue-level only; no act’s private numbers shown. Tap <b>swap</b> to change an act and watch the total move.</div>'+
   rows+
-  '<button class="cta rose" onclick="go(\'engage\')">This looks right — start my free month ▸</button>'+
-  '<div class="terms" style="color:var(--muted)">Free 30 days, then from $399/mo. Cancel anytime before then.</div></div>';
+  '<button class="cta rose" onclick="go(\'engage\')">This looks right — start at 50% off ▸</button>'+
+  '<div class="terms" style="color:var(--muted)">Intro promo: 50% off months 1–3 (from $199/mo), then your plan. Cancel anytime.</div></div>';
 }
 function swap(i){ var cur=S.venue_plan[i].act; var idx=VACTS.indexOf(cur); S.venue_plan[i].act=VACTS[(idx+1)%VACTS.length]; S.venue_plan[i].fill=Math.min(0.7,S.venue_plan[i].fill+0.05); save(); render(); }
 
@@ -240,5 +240,33 @@ function done(){ $('stage').innerHTML='<div class="card" style="text-align:cente
 function go(step){ S[ROLE+'_step']=step; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
 function reset(){ delete S[ROLE+'_step']; delete S.venue_plan; save(); go('pitch'); }
 render();
+</script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('venuemgr',{ic:'🗓️',name:'Venue Manager',tasks:[
+ {key:'vm_model',ic:'💰',title:'Read the money model',
+  steps:[{t:'📍 On first open you land on a <b>money model</b> card — the room, the gate, the bar, the net for one night.'},{t:'Read it — would this make a venue owner lean in?'}],
+  q:{prompt:'Is the money model compelling + clear?',opts:['Yes, hooks me','OK','Not really']}},
+ {key:'vm_try',ic:'▶️',title:'Try it for a Month',
+  steps:[{t:'📍 Tap the gold <b>“▶ Try it for a Month — free”</b> button.'},{t:'Do the 2-minute interview (capacity, ticket, nights) → tap <b>Build my Vision</b>.'}],
+  q:{prompt:'Was the interview quick and clear?',opts:['Super quick','OK','Confusing']}},
+ {key:'vm_vision',ic:'🗓️',title:'Your proforma Vision + swap',
+  steps:[{t:'📍 On the Vision, read the <b>month total</b> up top and a per-night P&L.'},{t:'Tap <b>swap</b> on any night — watch the month total move.'}],
+  q:{prompt:'Believable proforma, and did swap update the total?',opts:['Yes, both','Sort of','No']}},
+ {key:'vm_guard',ic:'🔒',title:'The guardrails',
+  steps:[{t:'Find three: the <b>“illustrative estimate”</b> note by the numbers, the 🔒 <b>“we never show an act’s private numbers”</b> line, and the <b>“nothing books automatically”</b> banner up top.'}],
+  q:{prompt:'Are the honesty guardrails clear?',opts:['Crystal','Mostly','I missed them']}}
+]});
+HelpTest.set('tour',{ic:'🚌',name:'Go On Tour',tasks:[
+ {key:'tour_plan',ic:'🚌',title:'Plan a tour',
+  steps:[{t:'📍 Tap <b>“▶ Plan my tour — free”</b>.'},{t:'Fill the interview (home base, how far, # cities, your draw) → tap <b>Route my tour</b>.'}],
+  q:{prompt:'Was planning a tour easy?',opts:['Easy','OK','Clunky']}},
+ {key:'tour_vision',ic:'🗺️',title:'Your routed run + Miracle Housing',
+  steps:[{t:'📍 On the Vision, read the cities + est. guarantees.'},{t:'Find the purple <b>🏠 Miracle Housing</b> card — “house a 4-piece band… host gets 2 free tickets.”'}],
+  q:{prompt:'Would you run this? Is Miracle Housing clear?',opts:['Yes + clear','Maybe','No']}},
+ {key:'tour_gate',ic:'🎟️',title:'You keep your gate',
+  steps:[{t:'Check the terms: <b>you keep your gate</b>, and we never take a cut of your guarantee.'}],
+  q:{prompt:'Does “keep your gate” land as musician-first?',opts:['Love it','OK','Skeptical']}}
+]});
 </script>
 </body></html>
