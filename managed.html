@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<!-- Dead Dance — Managed Booking console. Venue Manager (?role=venue) + Go On Tour (?role=band).
+     Honest-state DEMO: all numbers are ILLUSTRATIVE, client-side; nothing books; a human approves;
+     bands keep their gate. Reviewed by the team + Claudine — P0 guardrails baked in. -->
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Dead Dance — Managed Booking</title>
+<style>
+:root{--navy:#3a1f57;--ink:#23202a;--muted:#5b6b80;--line:#e2dac9;--paper:#fbf7ef;--card:#fff;--ok:#1d7a4d;--gold:#c79a3a;--rose:#b8002e;--edu:#5a2e86;--purple2:#5a2e86}
+*{box-sizing:border-box}html,body{margin:0;overflow-x:hidden;max-width:100%;background:var(--paper);font-family:'Inter','Helvetica Neue',Arial,sans-serif;color:var(--ink);line-height:1.55}
+#app{max-width:940px;margin:0 auto;min-height:100vh}
+.h{background:linear-gradient(90deg,#2a1b3d,#3a1f57);color:#fff;padding:14px 18px;position:sticky;top:0;z-index:20}
+.h .nm{font-size:19px;font-weight:800}
+.h .sb{font-size:11px;opacity:.85;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.maplink{font-size:11.5px;font-weight:800;background:#ffffff22;color:#fff;border:1px solid #ffffff3a;border-radius:999px;padding:3px 9px;text-decoration:none;margin-left:8px;vertical-align:middle}
+.honest{background:#2e1f47;color:#efe8fb;border-left:3px solid var(--gold);padding:8px 18px;font-size:12px}
+.honest b{color:var(--gold)}
+.shell{display:flex;gap:20px;max-width:940px;margin:0 auto;padding:12px 16px 0;align-items:flex-start}
+.side{flex:none;width:210px;display:flex;flex-direction:column;gap:4px;position:sticky;top:74px}
+.side button{display:flex;align-items:center;gap:8px;text-align:left;background:#fff;border:1px solid var(--line);border-left:3px solid transparent;border-radius:10px;padding:11px 12px;font-weight:800;font-size:13px;color:var(--muted);cursor:pointer}
+.side button.on{color:var(--navy);border-left-color:var(--navy);background:#efe8fb}
+.side .soon{opacity:.6;cursor:default;font-weight:700}
+.side .soon small{display:block;font-size:10px;color:var(--muted);font-weight:600}
+.main{flex:1;min-width:0;padding-bottom:60px}
+@media(max-width:760px){.shell{flex-direction:column;padding:0}.side{width:auto;flex-direction:row;overflow-x:auto;gap:6px;padding:10px 14px;position:static;border-bottom:1px solid var(--line)}.side button{flex:none;white-space:nowrap;border-left:0}.main{padding:12px 14px 60px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+.pitch{background:linear-gradient(135deg,#2e1f47,#3a1f57);color:#f3ecff;border:0}
+.pitch h1{font-size:23px;margin:2px 0 6px}.pitch p{color:#e0cdf5;font-size:14px}
+.model{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.model .m{background:#ffffff14;border:1px solid #ffffff26;border-radius:12px;padding:10px;text-align:center}
+.model .m .k{font-size:20px;font-weight:800}.model .m .l{font-size:10.5px;color:#cdb8f0;margin-top:2px}
+@media(max-width:560px){.model{grid-template-columns:repeat(2,1fr)}}
+.disc{font-size:11px;color:#cdb8f0;font-style:italic;margin-top:4px}
+.disc.dark{color:var(--muted)}
+.firewall{background:#ffffff14;border:1px solid #ffffff26;border-radius:10px;padding:9px 12px;font-size:12px;color:#efe8fb;margin-top:10px}
+.cta{display:block;width:100%;background:var(--gold);color:#231f0e;border:0;border-radius:12px;padding:15px;font-weight:800;font-size:16px;cursor:pointer;margin-top:14px}
+.cta.rose{background:var(--rose);color:#fff}
+.terms{font-size:11px;color:#cdb8f0;text-align:center;margin-top:7px}
+.q{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);margin:16px 0 6px}
+label.f{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 0}
+.f input,.f select{display:block;width:100%;margin-top:4px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font:inherit;font-size:14px;background:#fff}
+.row{display:flex;gap:10px}.row .f{flex:1}
+.btn{background:var(--navy);color:#fff;border:0;border-radius:11px;padding:12px 18px;font-weight:800;font-size:15px;cursor:pointer}
+.btn.ghost{background:#efe8fb;color:var(--navy)}
+.skip{background:none;border:0;color:var(--navy);font-weight:800;font-size:13px;cursor:pointer;text-decoration:underline;padding:8px 0}
+.tot{background:linear-gradient(135deg,#2e1f47,#3a1f57);color:#fff;border-radius:13px;padding:14px 16px;margin:10px 0;display:flex;flex-wrap:wrap;gap:14px;align-items:baseline}
+.tot .big{font-size:26px;font-weight:800}.tot .lbl{font-size:11px;color:#cdb8f0;text-transform:uppercase;letter-spacing:.04em}
+.night{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:8px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.night .d{flex:none;width:52px;text-align:center;background:#efe8fb;color:var(--navy);border-radius:9px;padding:6px 4px;font-weight:800;font-size:12px}
+.night .info{flex:1;min-width:130px}.night .info b{font-size:14px}.night .info .sub{font-size:12px;color:var(--muted)}
+.night .pl{font-size:12px;text-align:right;min-width:120px}.night .pl b{color:var(--ok);font-size:15px}
+.night .sw{background:#efe8fb;color:var(--navy);border:0;border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800;cursor:pointer}
+.stop{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0}
+.stop .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.stop b{font-size:15px}.stop .g{color:var(--ok);font-weight:800}
+.stop .promo{font-size:12px;color:var(--muted);margin-top:4px}
+.foot{font-size:11px;color:var(--muted);padding:18px 2px;line-height:1.5}
+a{color:var(--purple2)}
+</style></head>
+<body>
+<div id="app">
+  <div class="h"><div class="nm">🌹 Dead Dance — Managed Booking <a href="./console_directory.html" class="maplink">🗺 Map</a></div>
+    <div class="sb" id="hsub">done-for-you booking</div></div>
+  <div class="honest">🤝 <b>Honest-state:</b> nothing books automatically — we propose, a <b>human approves every offer</b>, and <b>bands keep their gate</b>. Dollar figures here are <b>illustrative estimates</b>, not forecasts.</div>
+  <div class="shell">
+    <div class="side" id="side"></div>
+    <div class="main" id="stage"></div>
+  </div>
+</div>
+<script>
+var ROLE=(new URLSearchParams(location.search).get('role')||'').toLowerCase();
+if(ROLE!=='venue'&&ROLE!=='band')ROLE='';
+var S={}; try{S=JSON.parse(localStorage.getItem('dd.managed')||'{}');}catch(e){}
+function save(){ try{localStorage.setItem('dd.managed',JSON.stringify(S));}catch(e){} }
+function $(id){return document.getElementById(id);}
+function money(n){ n=Math.round(n/10)*10; return '$'+n.toLocaleString(); }
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+/* ---- illustrative proforma (transparent rules of thumb — NOT a forecast) ---- */
+function venueNightPL(cap,ticket,fill){ var att=Math.round(cap*fill);
+ var gate=att*ticket, bar=att*11, act=Math.round((cap*8)/50)*50+250, house=350;
+ return {att:att, gate:gate, bar:bar, act:act, net:gate+bar-act-house}; }
+
+/* ---- sample data ---- */
+var VACTS=['Splintered Sunlight','DEAL','Cris Jacobs Band','Strange Design','Terrapin Flyer','Lotus Land','Reckoning','Cosmic Charlie'];
+var CITIES=[{c:'Philadelphia, PA',v:'Ardmore Music Hall',g:750},{c:'Washington, DC',v:'Hamilton Live',g:900},{c:'Pittsburgh, PA',v:'Thunderbird Café',g:500}];
+
+function sidebar(){
+ var s=$('side'); if(!s)return;
+ if(ROLE==='venue'){ s.innerHTML=
+   '<button class="on">🗓️ Venue Manager</button>'+
+   '<div class="side soon">🎪 Vendor Tables<small>coming soon</small></div>'+
+   '<div class="side soon">📊 My Proforma<small>after you start</small></div>'; $('hsub').textContent='Venue Manager · buy back your nights'; }
+ else if(ROLE==='band'){ s.innerHTML=
+   '<button class="on">🚌 Go On Tour</button>'+
+   '<div class="side soon">🌍 The Rotation<small>swap territories · soon</small></div>'+
+   '<div class="side soon">🗺 My Route<small>after you start</small></div>'; $('hsub').textContent='Go On Tour · we set up the whole run'; }
+ else s.innerHTML='';
+}
+
+function render(){
+ sidebar();
+ var st=$('stage'); if(!ROLE){ st.innerHTML=rolePicker(); return; }
+ var step=S[ROLE+'_step']||'pitch';
+ if(step==='pitch') st.innerHTML=pitch();
+ else if(step==='interview') st.innerHTML=interview();
+ else if(step==='vision') st.innerHTML=vision();
+ else if(step==='engage') st.innerHTML=engage();
+}
+function rolePicker(){ return '<div class="card"><div class="q" style="margin-top:0">Who are you?</div>'+
+ '<p class="disc dark">Managed Booking has two sides. Pick yours.</p>'+
+ '<button class="btn" style="width:100%;margin-top:8px" onclick="pick(\'venue\')">🗓️ I run a VENUE — fill my calendar</button>'+
+ '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="pick(\'band\')">🚌 I\'m in a BAND — put us on tour</button></div>'; }
+function pick(r){ ROLE=r; history.replaceState(null,'','?role='+r); render(); }
+
+/* ===================== VENUE ===================== */
+function pitch(){
+ if(ROLE==='band') return bandPitch();
+ var cap=S.venue_cap||300, ticket=18, fill=0.55;
+ var p=venueNightPL(cap,ticket,fill);
+ return '<div class="card pitch">'+
+  '<h1>🗓️ Let us run your calendar.</h1>'+
+  '<p>Stop chasing acts for 200 hours a month. Tell us the room you want; we fill your open nights with our act network and audience. You pour the drinks and count the house.</p>'+
+  '<div class="q" style="color:#cdb8f0">A room like yours — one filled night looks like this</div>'+
+  '<div class="model">'+
+   '<div class="m"><div class="k">~'+p.att+'</div><div class="l">in the room</div></div>'+
+   '<div class="m"><div class="k">'+money(p.gate)+'</div><div class="l">est. gate</div></div>'+
+   '<div class="m"><div class="k">'+money(p.bar)+'</div><div class="l">est. bar uplift</div></div>'+
+   '<div class="m"><div class="k">'+money(p.net)+'</div><div class="l">est. net / night</div></div>'+
+  '</div>'+
+  '<div class="disc">Illustrative estimate — not a forecast or guarantee. Modeled from comparable rooms (~'+cap+'-cap, ~$'+ticket+' ticket, ~'+Math.round(fill*100)+'% fill). Your results will differ.</div>'+
+  '<div class="firewall">🔒 <b>These are venue-level estimates for a room like yours.</b> We never show you any individual act’s draw, guarantee, or financials — that stays private to the artists.</div>'+
+  '<button class="cta" onclick="go(\'interview\')">▶ Try it for a Month — free</button>'+
+  '<div class="terms">Free for 30 days, then converts to your plan (from $399/mo). Cancel anytime before then — no charge.</div>'+
+  '</div>'+
+  '<button class="skip" onclick="seeSample()">or just show me a sample month →</button>';
+}
+function interview(){
+ if(ROLE==='band') return bandInterview();
+ return '<div class="card"><div class="q" style="margin-top:0">2-minute interview — then your tailored Vision</div>'+
+  '<label class="f">Your room capacity<input id="v_cap" type="number" value="'+(S.venue_cap||300)+'"></label>'+
+  '<div class="row"><label class="f">Typical ticket price<input id="v_tix" type="number" value="'+(S.venue_tix||18)+'"></label>'+
+  '<label class="f">Nights to fill / month<input id="v_nights" type="number" value="'+(S.venue_nights||8)+'"></label></div>'+
+  '<label class="f">Scene<select id="v_scene"><option>Grateful Dead / jam</option><option>Multi-genre (Dead, Phish, originals, comedy, DJ)</option><option>Americana / roots</option></select></label>'+
+  '<label class="f">Deal you prefer<select id="v_deal"><option>Door split</option><option>Guarantee</option><option>Free + bar</option></select></label>'+
+  '<button class="btn" style="width:100%;margin-top:14px" onclick="saveVenue()">Build my Vision →</button>'+
+  '<div class="disc dark" style="margin-top:8px">🔒 We model from comparable rooms. You’ll never see any act’s private numbers.</div></div>';
+}
+function saveVenue(){ S.venue_cap=+($('v_cap').value)||300; S.venue_tix=+($('v_tix').value)||18; S.venue_nights=Math.min(20,Math.max(1,+($('v_nights').value)||8)); save(); go('vision'); }
+function seeSample(){ S.venue_cap=S.venue_cap||300; S.venue_tix=S.venue_tix||18; S.venue_nights=S.venue_nights||8; S.venue_sampled=true; save(); go('vision'); }
+function vision(){
+ if(ROLE==='band') return bandVision();
+ var cap=S.venue_cap||300, ticket=S.venue_tix||18, nights=S.venue_nights||8;
+ if(!S.venue_plan){ var plan=[]; var dows=['Tue','Wed','Thu','Fri','Sat','Sun']; for(var i=0;i<nights;i++){ var fill=0.4+((i*7)%5)*0.06; plan.push({dow:dows[i%6], day:(3+i*3), act:VACTS[i%VACTS.length], fill:fill}); } S.venue_plan=plan; save(); }
+ var rows='', month=0;
+ S.venue_plan.forEach(function(n,i){ var p=venueNightPL(cap,ticket,n.fill); month+=p.net;
+   rows+='<div class="night"><div class="d">'+n.dow+'<br>7/'+n.day+'</div>'+
+   '<div class="info"><b>'+n.act+'</b><div class="sub">~'+p.att+' in · '+money(p.gate)+' gate · '+money(p.bar)+' bar</div></div>'+
+   '<div class="pl">est. net<br><b>'+money(p.net)+'</b></div>'+
+   '<button class="sw" onclick="swap('+i+')">swap</button></div>'; });
+ return '<div class="card"><div class="q" style="margin-top:0">🗓️ Your Vision — a proforma month (rolling 3)</div>'+
+  '<div class="tot"><div><div class="lbl">Month · est. net to the house</div><div class="big">'+money(month)+'</div></div>'+
+  '<div><div class="lbl">shows</div><div class="big">'+S.venue_plan.length+'</div></div>'+
+  '<div><div class="lbl">~'+cap+'-cap room</div><div class="big">$'+ticket+'</div></div></div>'+
+  '<div class="disc dark">Illustrative estimates, not a forecast or guarantee — modeled from comparable rooms; your actual results will differ. 🔒 Venue-level only; no act’s private numbers shown. Tap <b>swap</b> to change an act and watch the total move.</div>'+
+  rows+
+  '<button class="cta rose" onclick="go(\'engage\')">This looks right — start my free month ▸</button>'+
+  '<div class="terms" style="color:var(--muted)">Free 30 days, then from $399/mo. Cancel anytime before then.</div></div>';
+}
+function swap(i){ var cur=S.venue_plan[i].act; var idx=VACTS.indexOf(cur); S.venue_plan[i].act=VACTS[(idx+1)%VACTS.length]; S.venue_plan[i].fill=Math.min(0.7,S.venue_plan[i].fill+0.05); save(); render(); }
+
+/* ===================== BAND ===================== */
+function bandPitch(){
+ return '<div class="card pitch">'+
+  '<h1>🚌 We’ll set up the whole run.</h1>'+
+  '<p>Regional band that wants to tour? You usually can’t get an agent and can’t route it yourself. Tell us where you’ll go — we line up the rooms, the dates, the tickets, and a street team in every town. <b>You keep your gate.</b></p>'+
+  '<div class="q" style="color:#cdb8f0">A 3-city run like yours could look like</div>'+
+  '<div class="model">'+
+   '<div class="m"><div class="k">3</div><div class="l">rooms booked</div></div>'+
+   '<div class="m"><div class="k">~'+money(2150)+'</div><div class="l">est. guarantees</div></div>'+
+   '<div class="m"><div class="k">$0</div><div class="l">lodging · Miracle Housing</div></div>'+
+   '<div class="m"><div class="k">100%</div><div class="l">your gate, kept</div></div>'+
+  '</div>'+
+  '<div class="disc">Illustrative estimate — not a forecast or guarantee. We never take a cut of your guarantee; we earn on ticketing + the venue side.</div>'+
+  '<button class="cta" onclick="go(\'interview\')">▶ Plan my tour — free</button>'+
+  '<div class="terms">Free to plan. Tour Engine is $149/mo while touring ($99 if signed to Dead Dance) + $29/confirmed date. You keep your gate.</div>'+
+  '</div>'+
+  '<button class="skip" onclick="seeSampleBand()">or just show me a sample run →</button>';
+}
+function bandInterview(){
+ return '<div class="card"><div class="q" style="margin-top:0">2-minute interview — then your routed Vision</div>'+
+  '<label class="f">Home base (city)<input id="b_home" value="'+esc(S.band_home||'Philadelphia, PA')+'"></label>'+
+  '<div class="row"><label class="f">How far will you travel?<select id="b_radius"><option>Regional (~300 mi)</option><option>Half the country</option><option>Coast to coast</option></select></label>'+
+  '<label class="f"># of cities<input id="b_cities" type="number" value="'+(S.band_cities||3)+'"></label></div>'+
+  '<label class="f">Typical draw at home<input id="b_draw" type="number" value="'+(S.band_draw||150)+'"></label>'+
+  '<label class="f">Housing<select id="b_house"><option>Chapter-hosted (a head puts us up) — free</option><option>We’ll sort our own</option></select></label>'+
+  '<button class="btn" style="width:100%;margin-top:14px" onclick="saveBand()">Route my tour →</button></div>';
+}
+function saveBand(){ S.band_home=$('b_home').value||'Philadelphia, PA'; S.band_cities=Math.min(5,Math.max(2,+($('b_cities').value)||3)); S.band_draw=+($('b_draw').value)||150; save(); go('vision'); }
+function seeSampleBand(){ S.band_home=S.band_home||'Philadelphia, PA'; S.band_cities=3; S.band_draw=150; save(); go('vision'); }
+function bandVision(){
+ var n=Math.min(CITIES.length,S.band_cities||3), tot=0, rows='';
+ for(var i=0;i<n;i++){ var c=CITIES[i]; var g=c.g; tot+=Math.round(g*0.6);
+   rows+='<div class="stop"><div class="top"><b>'+c.c+'</b><span class="g">~'+money(Math.round(g*0.6))+' est. guarantee</span></div>'+
+   '<div class="promo">'+c.v+' · week-long anchor + a regional spoke · 🏠 Miracle Housing (a local head hosts you) · 🎟️ your gate is yours</div>'+
+   '<div class="promo">📣 Local chapter street team + Daily Synthesis intro you to the town before you arrive.</div></div>'; }
+ return '<div class="card"><div class="q" style="margin-top:0">🚌 Your Vision — a routed run</div>'+
+  '<div class="tot"><div><div class="lbl">est. guarantees (you keep your gate on top)</div><div class="big">'+money(tot)+'</div></div>'+
+  '<div><div class="lbl">cities</div><div class="big">'+n+'</div></div>'+
+  '<div><div class="lbl">lodging</div><div class="big">$0</div></div></div>'+
+  '<div class="disc dark">Illustrative estimates, not a forecast or guarantee. Chapter-hosted housing to start; verified band-to-band <b>house swaps (The Rotation)</b> are coming soon.</div>'+
+  rows+
+  '<div class="card" style="margin:10px 0;background:#faf7ff;border-color:var(--edu)"><div class="q" style="margin-top:0;color:var(--edu)">🏠 Miracle Housing — the family’s Trail Magic</div>'+
+   '<p class="disc dark" style="font-style:normal">No hotel bills. For each town, we post to the local chapter:</p>'+
+   '<div class="night" style="background:#efe8fb"><div class="d" style="background:#fff">🛏️</div><div class="info"><b>“House a 4-piece band for 3 nights to play these dates.”</b><div class="sub">🎟️ Host gets <b>2 free tickets</b> to the show. Opt-in, your home, your call.</div></div></div>'+
+   '<p class="disc dark">A local head raises their hand; the band crashes with family — trail-angel style. <b>Verified band-to-band house swaps (The Rotation) come later, with counsel.</b></p></div>'+
+  '<button class="cta rose" onclick="go(\'engage\')">Route looks good — let’s book it ▸</button>'+
+  '<div class="terms" style="color:var(--muted)">Free to plan · Tour Engine $149/mo while touring + $29/confirmed date · you keep your gate.</div></div>';
+}
+
+/* ===================== ENGAGE (honest stub) ===================== */
+function engage(){
+ var isv=ROLE==='venue';
+ return '<div class="card"><div class="q" style="margin-top:0">'+(isv?'Start your free month':'Kick off your tour')+'</div>'+
+  '<p>Here’s what happens when you approve:</p>'+
+  '<div class="night"><div class="d">1</div><div class="info"><b>We send the offers</b><div class="sub">'+(isv?'to the acts for your calendar':'to the rooms on your route')+' — through hostaband, our booking rails.</div></div></div>'+
+  '<div class="night"><div class="d">2</div><div class="info"><b>A human approves each one</b><div class="sub">you (or your auto-approve rules). Nothing books on its own.</div></div></div>'+
+  '<div class="night"><div class="d">3</div><div class="info"><b>The chapter promotes it</b><div class="sub">street team + Daily Synthesis fill the room.</div></div></div>'+
+  '<div class="night"><div class="d">4</div><div class="info"><b>'+(isv?'The nights just fill':'You play a real run')+'</b><div class="sub">'+(isv?'rolling 3 months out, reported monthly.':'and you keep your gate.')+'</div></div></div>'+
+  '<div class="firewall" style="background:#efe8fb;color:var(--navy);border-color:var(--line)">👀 <b>This is a preview.</b> It does <b>not</b> book anything or charge anything. In the live product, this is where real offers go out — with your approval on every one.</div>'+
+  '<button class="cta rose" onclick="done()">'+(isv?'Approve & start — free 30 days':'Approve the route')+'</button>'+
+  (isv?'<div class="terms" style="color:var(--muted)">Free for 30 days, then from $399/mo. Cancel anytime before then — no charge.</div>':'')+
+  '<button class="skip" onclick="reset()">← start over</button></div>';
+}
+function done(){ $('stage').innerHTML='<div class="card" style="text-align:center;padding:34px 16px"><div style="font-size:40px">🌹</div>'+
+  '<h1 style="font-size:20px;margin:8px 0">You’re on the bus.</h1>'+
+  '<p class="disc dark">This preview didn’t book or charge anything — a real person from Dead Dance follows up to set it up with you. Nothing auto-sends; you approve every offer.</p>'+
+  '<button class="btn ghost" style="margin-top:10px" onclick="reset()">Run it again</button></div>'; }
+
+function go(step){ S[ROLE+'_step']=step; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function reset(){ delete S[ROLE+'_step']; delete S.venue_plan; save(); go('pitch'); }
+render();
+</script>
+</body></html>
