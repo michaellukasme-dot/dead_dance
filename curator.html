@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Group Leader Console — Shakedown Street</title>
+<meta name="theme-color" content="#2a1b3d">
+<style>
+:root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#23202a;--muted:#6c6878;--cream:#faf7f2;--card:#fff;--line:#e7e0d2;--green:#2a6b46}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{position:sticky;top:0;z-index:20;background:linear-gradient(120deg,#1a1030,#3a1d5e 60%,#5a2e86);color:#fff;padding:12px 16px;font-weight:800}
+.top b{opacity:.6;font-weight:600;font-size:13px}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 90px}
+h2{font-size:18px;margin:22px 0 8px;border-top:1px solid var(--line);padding-top:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+.deal{background:#efe7f7;border:1px solid #cdb8ec;border-left:4px solid var(--purple);border-radius:12px;padding:14px 16px;margin:12px 0;font-size:14.5px}
+.deal b{color:var(--purple)}
+.tier{display:flex;gap:8px;margin:8px 0}.tier .b{flex:none;font-weight:800;color:#fff;background:var(--purple);border-radius:8px;padding:3px 9px;font-size:12px}
+input{font:inherit;border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%;margin:6px 0}
+button{font:inherit;font-weight:800;cursor:pointer;border-radius:10px;border:0;padding:11px 15px}
+.pri{background:var(--purple);color:#fff}.gho{background:#fff;border:1px solid var(--line);color:var(--purple)}
+.row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #f0ece2}
+.row:last-child{border-bottom:0}.row .n{flex:1}.row .n .t{font-weight:700}.row .n .d{font-size:12.5px;color:var(--muted)}
+.pill{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#eef7f0;color:var(--green)}
+.link{background:#fff7e6;border:1px solid #f0d9a8;border-radius:10px;padding:10px 13px;font-size:13px;word-break:break-all;color:#6b5417}
+.stat{display:flex;gap:10px;margin:8px 0}.stat .s{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.stat .k{font-size:22px;font-weight:800;color:var(--purple)}.stat .l{font-size:11px;color:var(--muted)}
+.honest{background:#efe7f7;border-left:4px solid var(--purple);border-radius:10px;padding:11px 14px;margin:16px 0;font-size:12.5px;color:#3f2b66}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#23202a;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:50}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top">🌹 Group Leader Console <b>· Shakedown Street</b></div>
+<div class="wrap">
+
+<div class="deal">
+<b>The deal — same for every leader.</b> Monetize your own group (<b>5% of your group's net</b>), and <b>flip a group, earn an override</b> on what it produces — diminishing by generation:
+<div class="tier"><span class="b">MOST</span><span>a group <b>you</b> flip</span></div>
+<div class="tier"><span class="b">LESS</span><span>a group <b>they</b> flip (½ of MOST)</span></div>
+<div class="tier"><span class="b">LEAST</span><span>the 3rd generation (½ of LESS) — then it ends</span></div>
+Deprecating, personal, paid only on real revenue. <b>No fee to join, no bounty for signing up.</b>
+</div>
+
+<div id="gate" class="card"></div>
+<div id="panel" style="display:none">
+  <h2>Your recruit link</h2>
+  <div class="link" id="reflink"></div>
+  <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Share this. Every group that flips through it is credited to you (MOST), and the ones they bring are LESS, then LEAST.</div>
+
+  <h2>The Party, so far</h2>
+  <div class="stat" id="promo"></div>
+
+  <h2>Flip a group <span style="font-weight:400;color:var(--muted);font-size:13px">— biggest first</span></h2>
+  <div class="card" id="recruit" style="padding:6px 16px"></div>
+
+  <h2>Groups you've flipped</h2>
+  <div class="card" id="mine" style="padding:6px 16px"></div>
+</div>
+
+<div class="honest">Honest-state: this is a <b>prototype gated by your leader code</b> (counsel hardens it to full sign-in before scale). The list is the real Master List; a group already <b>joined</b> can't be flipped again (no double-claims). Nothing here pays out automatically — overrides are computed on real net revenue and papered by counsel. 🌹</div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+var C=null; try{ C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2400);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function getCode(){ try{ var u=new URLSearchParams(location.search).get('ref'); if(u){localStorage.setItem('sxs.leadercode',u);return u;} return localStorage.getItem('sxs.leadercode')||''; }catch(e){return '';} }
+function setCode(c){ try{localStorage.setItem('sxs.leadercode',c);}catch(e){} }
+
+function renderGate(){ var code=getCode(); var g=document.getElementById('gate');
+  if(code){ document.getElementById('panel').style.display='block'; g.style.display='none'; boot(code); return; }
+  g.innerHTML='<h2 style="margin-top:0;border:0;padding:0">Get started</h2>'+
+    '<p style="font-size:14px;color:var(--muted);margin:4px 0 10px">Have a leader code? Enter it. New? Register and we\'ll make you one.</p>'+
+    '<input id="c_code" placeholder="Leader code (if you have one)"><button class="pri" style="width:100%" onclick="useCode()">Use my code →</button>'+
+    '<div style="text-align:center;color:var(--muted);margin:12px 0;font-size:12px">— or —</div>'+
+    '<input id="c_name" placeholder="Your name"><input id="c_contact" placeholder="Email or phone"><button class="gho" style="width:100%" onclick="register()">Register &amp; get my code</button>';
+}
+function useCode(){ var v=(document.getElementById('c_code').value||'').trim(); if(!v){toast('Enter your code');return;} setCode(v); renderGate(); }
+function register(){ var n=(document.getElementById('c_name').value||'').trim(), ct=(document.getElementById('c_contact').value||'').trim();
+  if(!n){toast('Your name, please');return;} if(!C){toast('Offline — try again in a moment');return;}
+  C.rpc('chat_leader_register',{p_name:n,p_contact:ct||null}).then(function(r){ if(r&&r.data){ setCode(r.data); toast('🌹 You\'re in — code: '+r.data); renderGate(); } else { toast('Hmm — try again'); } }).catch(function(){ toast('Connection hiccup — try again'); }); }
+
+function boot(code){ document.getElementById('reflink').textContent='https://shakedownstreet.app/curator?ref='+code;
+  if(!C){ document.getElementById('recruit').innerHTML='<div style="padding:14px;color:var(--muted)">Offline — reconnect to load the Master List.</div>'; return; }
+  C.rpc('chat_promo_status',{p_code:code}).then(function(r){ var d=(r&&r.data&&(r.data[0]||r.data))||{}; document.getElementById('promo').innerHTML=
+    '<div class="s"><div class="k">'+(d.recruitable_left!=null?d.recruitable_left:'—')+'</div><div class="l">left to flip</div></div>'+
+    '<div class="s"><div class="k">'+(d.joined!=null?d.joined:'—')+'</div><div class="l">in the Party</div></div>'+
+    '<div class="s"><div class="k">'+(d.total_known!=null?d.total_known:'—')+'</div><div class="l">known groups</div></div>'; }).catch(function(){});
+  loadRecruit(code); loadMine(code);
+}
+function loadRecruit(code){ C.rpc('chat_recruitable',{p_code:code}).then(function(r){ var el=document.getElementById('recruit'); var a=(r&&r.data)||[];
+  if(!a.length){ el.innerHTML='<div style="padding:14px;color:var(--muted)">Nothing left to flip right now — the known universe is all in. New groups get added as the crowd identifies them. 🌹</div>'; return; }
+  el.innerHTML=a.map(function(g){ return '<div class="row"><div class="n"><div class="t">'+esc(g.name)+'</div><div class="d">'+(g.member_count?(g.member_count.toLocaleString()+' members · '):'')+esc(g.region||'')+' · '+esc(g.status)+'</div></div><button class="pri" onclick="flip('+g.id+',\''+esc(g.name).replace(/'/g,'')+'\')">🔗 Flip</button></div>'; }).join(''); }).catch(function(){}); }
+function loadMine(code){ C.rpc('chat_my_claims',{p_code:code}).then(function(r){ var el=document.getElementById('mine'); var a=(r&&r.data)||[];
+  if(!a.length){ el.innerHTML='<div style="padding:14px;color:var(--muted)">None yet. Flip your first group above — or share your link and let others bring theirs.</div>'; return; }
+  el.innerHTML=a.map(function(g){ return '<div class="row"><div class="n"><div class="t">'+esc(g.name)+'</div><div class="d">'+esc(g.status)+(g.member_count?(' · '+g.member_count.toLocaleString()+' members'):'')+'</div></div><span class="pill">yours</span></div>'; }).join(''); }).catch(function(){}); }
+function flip(id,name){ var code=getCode(); if(!C){toast('Offline');return;}
+  C.rpc('chat_master_claim_group',{p_group_id:id,p_leader_ref:code}).then(function(r){ var res=r&&r.data;
+    if(res==='claimed'){ toast('🔗 Flipped "'+name+'" — it\'s on your tree (MOST).'); loadRecruit(code); loadMine(code); }
+    else if(res==='already_joined'){ toast('That one\'s already in the Party.'); loadRecruit(code); }
+    else if(res==='no_such_leader'){ toast('Your code didn\'t validate — re-register.'); }
+    else { toast('Try again'); } }).catch(function(){ toast('Connection hiccup'); }); }
+
+renderGate();
+</script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('curator',{ic:'👑',name:'Group Leader Console',tasks:[
+ {key:'cur2_get',ic:'🔑',title:'Get your leader code',steps:[{t:'Register (name + email) or enter a code you were given.'}],q:{prompt:'Did you get in cleanly?',opts:['Yes','Confusing','Broke']}},
+ {key:'cur2_flip',ic:'🔗',title:'Flip a group',steps:[{t:'Find a group in the recruit list and tap <b>🔗 Flip</b>.'}],q:{prompt:'Was it clear what flipping does?',opts:['Clear','Sort of','No']}},
+ {key:'cur2_link',ic:'📤',title:'Grab your recruit link',steps:[{t:'Copy your recruit link and imagine sharing it.'}],q:{prompt:'Would you share it?',opts:['Yes','Maybe','No']}},
+ {key:'cur2_deal',ic:'💰',title:'The MOST/LESS/LEAST deal',steps:[{t:'Read the deal box up top. In the note: is it clear and fair? What would you change?'}],q:{prompt:'Clear & fair?',opts:['Yes','Unclear','Change it (below)']}}
+]});
+</script>
+</body></html>

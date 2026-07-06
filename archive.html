@@ -41,6 +41,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-syst
 <div class="top"><div class="logo">🌹 The Archive <b>· Shakedown Street</b></div></div>
 <div class="wrap">
 <p class="lede">Every show the family ever taped — made to <b>explore, argue about, and listen to together.</b> Pick a lens. 🌹</p>
+<div id="sotd"></div>
 
 <div class="tabs">
   <button class="tab on" data-v="decade" onclick="setView('decade')">By Decade</button>
@@ -54,11 +55,49 @@ body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-syst
 </div>
 <div id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* shared Shakedown Street client — anon key is public by design; reads open, writes via SECURITY DEFINER rpc */
+(function(){ try{ var c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return c;}; }catch(e){} })();
+function cli(){ try{ return window.ddClient?window.ddClient():null; }catch(e){ return null; } }
+</script>
 <script>
 var A=archiveSearch; function archiveSearch(q){ return 'https://archive.org/search?query='+encodeURIComponent('collection:GratefulDead '+q); }
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2200);}
 function share(t){ toast('↗ Draft a HyperPost about "'+t+'" — you choose, you post. (Human share, links back.)'); }
-function discuss(t){ toast('💬 Opening the discussion for "'+t+'" — say your piece.'); }
+function discuss(item){ var body=prompt('💬 Argue about "'+item+'" — say your piece:'); if(!body)return;
+  var c=cli(); if(c){ try{ c.rpc('chat_archive_comment',{p_category:(RCAT||'General'),p_item:item,p_body:body,p_author:(localStorage.getItem('dd.tester')||null)}).catch(function(){}); }catch(e){} }
+  toast('💬 Posted — now defend it.'); }
+// pull the REAL community tallies and merge over the seeds (data becomes the crowd's actual ranking)
+function loadTallies(){ var c=cli(); if(!c)return; try{ c.from('archive_vote_tallies').select('category,item,votes').then(function(r){
+  if(r&&r.data&&r.data.length){ r.data.forEach(function(t){ var arr=RANK[t.category]; if(!arr)return; var hit=false;
+    for(var i=0;i<arr.length;i++){ if(arr[i][0]===t.item){ arr[i][1]=t.votes; hit=true; break; } } if(!hit)arr.push([t.item,t.votes]); });
+    var on=document.querySelector('.tab.on'); if(on)setView(on.getAttribute('data-v')); } }).catch(function(){}); }catch(e){} }
+// 🎧 Show of the Day — date-seeded so EVERY user lands on the same show today (zero backend needed)
+var SOTD=[
+ ['Cornell — May 8, 1977','Barton Hall. The one.','1977-05-08'],
+ ['Veneta, OR — Aug 27, 1972','Sunshine Daydream.','1972-08-27'],
+ ['Fillmore East — Feb 13, 1970','The acoustic/electric peak.','1970-02-13'],
+ ['Nassau — Mar 29, 1990','Brent&#39;s spring; Branford sits in.','1990-03-29'],
+ ['Englishtown — Sep 3, 1977','Raceway monster.','1977-09-03'],
+ ['Fillmore West — Feb 27, 1969','The Live/Dead nights.','1969-02-27'],
+ ['Hampton — Oct 9, 1989','Dark Star returns.','1989-10-09'],
+ ['Radio City — Oct 31, 1980','Halloween in NYC.','1980-10-31'],
+ ['RFK — Jul 12, 1989','Summer stadium peak.','1989-07-12'],
+ ['Cap Centre — Mar 24, 1973','Landover fire.','1973-03-24'],
+ ['Winterland — Oct 18, 1974','Wall of Sound farewell run.','1974-10-18'],
+ ['Alpine Valley — Jul 19, 1989','East Troy magic.','1989-07-19']
+];
+function dayIdx(){ var n=new Date(); var s=Date.UTC(n.getUTCFullYear(),0,0); return Math.floor((Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate())-s)/86400000); }
+function renderSOTD(){ var el=document.getElementById('sotd'); if(!el)return; var s=SOTD[dayIdx()%SOTD.length]; var nm=s[0].replace(/'/g,'');
+  el.innerHTML='<div style="background:linear-gradient(120deg,#3a1d5e,#5a2e86);color:#fff;border-radius:14px;padding:16px 18px;margin:0 0 16px">'+
+   '<div style="font:12px/1 -apple-system,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#e6d4ff;font-weight:800">🎧 Show of the Day · everyone, together</div>'+
+   '<div style="font-size:20px;font-weight:800;margin:8px 0 2px">'+s[0]+'</div>'+
+   '<div style="opacity:.92;font-size:14px">'+s[1]+' &nbsp;·&nbsp; the whole family listens to the same show today.</div>'+
+   '<div class="acts" style="margin-top:10px"><a class="play" style="background:#fff;color:#5a2e86" target="_blank" rel="noopener" href="'+A(s[2])+'">▶ Listen on Archive</a>'+
+   '<button onclick="discuss(\''+nm+'\')" style="background:#ffffff22;color:#fff;border:1px solid #ffffff55">💬 Discuss</button>'+
+   '<button onclick="share(\''+nm+'\')" style="background:#ffffff22;color:#fff;border:1px solid #ffffff55">↗ Share</button></div></div>';
+}
 
 // ---- data (curated seeds; titles only, no lyrics) ----
 function row(title,desc,q){ return '<div class="row"><div class="t">'+title+'</div><div class="d">'+desc+'</div><div class="acts">'+
@@ -133,8 +172,10 @@ function setView(v){
   }
   document.getElementById('view').innerHTML=h;
 }
-function castVote(cat,name){ var arr=RANK[cat]; for(var i=0;i<arr.length;i++){ if(arr[i][0]===name){arr[i][1]++;break;} } setView('debate'); toast('🗳️ Upvoted "'+name+'" — now defend it! 💬'); }
-setView('decade');
+function castVote(cat,name){ var arr=RANK[cat]; for(var i=0;i<arr.length;i++){ if(arr[i][0]===name){arr[i][1]++;break;} }
+  var c=cli(); if(c){ try{ c.rpc('chat_archive_vote',{p_category:cat,p_item:name,p_voter:(localStorage.getItem('dd.tester')||null)}).catch(function(){}); }catch(e){} }
+  setView('debate'); toast('🗳️ Upvoted "'+name+'" — now defend it! 💬'); }
+renderSOTD(); setView('decade'); loadTallies();
 </script>
 <script src="helptest.js"></script>
 <script>
