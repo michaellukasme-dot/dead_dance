@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tour Tees — Shakedown Street</title>
+<meta name="theme-color" content="#17101f">
+<style>
+:root{--purple:#5a2e86;--gold:#c08a2d;--rose:#b8002e;--green:#2a6b46;--muted:#9a8fb0;--line:#2e2148}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 65%,#b8002e);padding:16px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:20px}.top .logo span{color:#ffd76a}
+.top .tag{font-size:12px;color:#e0cdf5}
+.note{margin:12px 16px;background:#1e2a1e;border:1px solid #2f5a2f;border-left:4px solid var(--green);border-radius:12px;padding:12px 15px;font-size:13px;color:#bfe0bf}
+.note b{color:#8ef0a0}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px}
+.ctrl select{font:inherit;background:#2a1c40;color:#fff;border:1px solid #43305f;border-radius:10px;padding:9px 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:8px 16px 40px}
+.p{cursor:pointer}
+.tee{aspect-ratio:1/1;border-radius:10px;box-shadow:0 8px 20px #000a,inset 0 0 0 1px #ffffff1f;display:flex;flex-direction:column;justify-content:space-between;padding:14px;position:relative;overflow:hidden}
+.tee .band{font-size:11px;font-weight:800;letter-spacing:.5px;opacity:.9;z-index:1}
+.tee .ttl{font-weight:900;font-size:17px;line-height:1.1;text-shadow:0 1px 6px #0007;z-index:1}
+.tee .yr{position:absolute;top:10px;right:12px;font-size:11px;font-weight:800;background:#00000045;padding:2px 8px;border-radius:999px;z-index:1}
+.tee .neck{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:52px;height:26px;border:3px solid #ffffff33;border-top:0;border-radius:0 0 40px 40px}
+.tee .rays{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 60%, #ffffff12 0deg 9deg, transparent 9deg 18deg);opacity:.5}
+.pm{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+.ov{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.rec{background:#211533;border:1px solid #3a2a55;border-radius:16px;max-width:380px;width:100%;padding:20px;text-align:center}
+.rec .big{aspect-ratio:1/1;max-width:230px;margin:0 auto 12px;border-radius:10px;display:flex;flex-direction:column;justify-content:space-between;padding:18px;position:relative;overflow:hidden;box-shadow:0 12px 34px #000b}
+.rec h3{margin:4px 0 2px;font-size:19px}.rec .ra{color:var(--muted);font-size:13px}
+.btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.buy{background:#ffd76a;color:#3a1d00;border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}
+.print{background:#5a2e86;color:#fff;border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}
+.x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:6px}
+.honest{margin:0 16px 30px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;font-size:12px;color:#c9bde0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">👕 Tour Tees <span>· Shakedown Street</span></div><div class="tag">the original tour shirts — GD · Zero · JGB — by year, reprinted on demand</div></div>
+<div class="note">🖨️ <b>Print Me the T-Shirt:</b> these are the <b>original, licensed tour tees</b> — catalogued by <b>year & tour</b> — reprinted on demand by the family's <b>reprint company</b> (sister to Print Me the Vinyl). Nothing charges until payments go live, and a design prints only once its rights are cleared.</div>
+
+<div class="ctrl">
+  <select id="fBand" onchange="render()"><option value="">All bands</option><option>Grateful Dead</option><option>Zero</option><option>JGB</option></select>
+  <select id="fEra" onchange="render()"><option value="">All years</option><option>1970s</option><option>1980s</option><option>1990s</option></select>
+</div>
+<div class="grid" id="grid"></div>
+<div class="honest">Honest-state: shirt art shown is an <b>original stylized placeholder</b> — <b>no third-party artwork is reproduced here</b>. A real catalogue is the licensed originals, cleared per design (the <b>shirt artist's copyright</b> + any <b>GD marks</b> on it). <b>Buy Now</b> licenses the shirt; <b>Print Me the T-Shirt</b> orders a made-to-order reprint from the family reprint company. Nothing charges until payments go live. 🌹</div>
+
+<div class="ov" id="ov"><div class="rec" id="rec"></div></div>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2800);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var PAL=[['#b8002e','#3a1d5e'],['#1f7a4d','#0e2b3b'],['#c08a2d','#5a1e0e'],['#5a2e86','#0e0716'],['#0e6b6b','#2a1b3d'],['#b8006e','#3a1d5e'],['#e0a021','#7a1020']];
+function pal(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return PAL[h%PAL.length];}
+function era(y){return y<1980?'1970s':y<1990?'1980s':'1990s';}
+// original placeholder tees (no third-party art); a real catalogue = the licensed originals by year/tour.
+var TEES=[
+ {t:'Summer Tour',b:'Grateful Dead',y:1977,p:'32'},
+ {t:'Spring Tour',b:'Grateful Dead',y:1990,p:'34'},
+ {t:'New Year’s Run',b:'Grateful Dead',y:1985,p:'36'},
+ {t:'Fall Tour',b:'Grateful Dead',y:1979,p:'32'},
+ {t:'West Coast Nights',b:'Zero',y:1992,p:'30'},
+ {t:'Bay Area Run',b:'Zero',y:1988,p:'28'},
+ {t:'East Coast Tour',b:'JGB',y:1991,p:'30'},
+ {t:'Cats Under The Stars',b:'JGB',y:1978,p:'34'}
+];
+function fillYears(){}
+function filtered(){var b=document.getElementById('fBand').value,e=document.getElementById('fEra').value;return TEES.filter(function(t){if(b&&t.b!==b)return false;if(e&&era(t.y)!==e)return false;return true;});}
+function inner(t){var c=pal(t.b+t.t);return 'style="background:linear-gradient(160deg,'+c[0]+','+c[1]+')"><span class="neck"></span><span class="rays"></span><div class="yr">'+t.y+'</div><div class="band">'+esc(t.b)+'</div><div class="ttl">'+esc(t.t)+'</div>';}
+function render(){var g=document.getElementById('grid');var a=filtered();if(!a.length){g.innerHTML='<div style="color:var(--muted);padding:20px">No tees in that bin. 🌹</div>';return;}
+ g.innerHTML=a.map(function(t){var i=TEES.indexOf(t);return '<div class="p" onclick="open_('+i+')"><div class="tee" '+inner(t)+'</div><div class="pm">$'+esc(t.p)+' · tap to view</div></div>';}).join('');}
+function open_(i){var t=TEES[i];var r=document.getElementById('rec');
+ r.innerHTML='<div class="big" '+inner(t)+'</div><h3>'+esc(t.t)+'</h3><div class="ra">'+esc(t.b)+' · '+t.y+' · $'+esc(t.p)+'</div>'+
+  '<div class="btns"><button class="buy" onclick="buy(\''+esc(t.t).replace(/\x27/g,'')+'\')">🛒 Buy Now — licensed reprint</button>'+
+  '<button class="print" onclick="prnt(\''+esc(t.t).replace(/\x27/g,'')+'\')">🖨️ Print Me the T-Shirt</button></div>'+
+  '<button class="x" onclick="close_()">close</button>';
+ document.getElementById('ov').classList.add('on');}
+function close_(){document.getElementById('ov').classList.remove('on');}
+document.getElementById('ov').onclick=function(e){if(e.target===this)close_();};
+function buy(t){toast('🛒 "'+t+'" — licensed reprint of the original tour tee. Demo: nothing charges yet.');}
+function prnt(t){toast('🖨️ "'+t+'" — made-to-order by the family reprint company (sister to Print Me the Vinyl). Demo only.');}
+render();
+</script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('tees',{ic:'👕',name:'Tour Tees',tasks:[
+ {key:'tee_browse',ic:'👕',title:'Browse the tees',steps:[{t:'Scroll the shop, filter by band or era, tap a tee to view it.'}],q:{prompt:'Did it feel like flipping a rack of vintage tour shirts?',opts:['Yes','Sort of','No']}},
+ {key:'tee_print',ic:'🖨️',title:'Print Me the T-Shirt',steps:[{t:'Open a tee and try <b>Buy Now</b> and <b>Print Me the T-Shirt</b>.'}],q:{prompt:'Clear what each does?',opts:['Clear','Sort of','No']}},
+ {key:'tee_year',ic:'📅',title:'By year',steps:[{t:'Use the year filter. Does organizing tour tees by year make sense to you?'}],q:{prompt:'Is by-year the right way to browse?',opts:['Yes','Unsure','No']}}
+]});
+</script>
+</body></html>

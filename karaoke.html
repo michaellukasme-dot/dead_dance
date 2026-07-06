@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shakedown Karaoke — Shakedown Street</title>
+<meta name="theme-color" content="#140b22">
+<style>
+:root{--purple:#5a2e86;--gold:#ffd76a;--rose:#b8002e;--green:#2a6b46;--muted:#a99cc4;--line:#2e2148}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#140b22;color:#f2ecff;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+/* string lights */
+.lights{height:16px;background:repeating-linear-gradient(90deg,transparent 0 26px,#ffd76a 26px 30px,transparent 30px 56px);opacity:.55;filter:drop-shadow(0 0 4px #ffd76a)}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 60%,#b8002e);padding:18px 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 16px #0008}
+.top .logo{font-weight:900;font-size:22px;letter-spacing:.4px}.top .logo span{color:var(--gold)}
+.top .tag{font-size:12.5px;color:#e9d8ff;letter-spacing:.4px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 60px}
+.honest{margin:12px 0;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:11px 14px;font-size:12px;color:#d9cbef}
+h2{font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+/* stage */
+.stage{background:radial-gradient(120% 90% at 50% 0%,#2a1650,#160c28);border:1px solid #3a2a55;border-radius:18px;padding:18px;box-shadow:0 14px 40px #0009}
+.np{display:flex;align-items:center;gap:12px}
+.np .disc{width:52px;height:52px;border-radius:50%;background:conic-gradient(from 0deg,#0e0716,#5a2e86,#0e0716);box-shadow:inset 0 0 0 6px #201233,0 0 0 2px #ffffff22;animation:spin 3.2s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.np .t{font-weight:900;font-size:19px;line-height:1.15}.np .s{font-size:13px;color:var(--muted)}
+.np .star{color:var(--gold)}
+.screen{margin:14px 0;background:#0c0718;border:1px solid #33244f;border-radius:12px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;position:relative;overflow:hidden}
+.lyric{font-size:20px;font-weight:800;letter-spacing:2px;color:#4a3b6b}
+.lyric b{color:var(--gold);text-shadow:0 0 14px #ffd76a88}
+.screen .note{font-size:11px;color:#7c6ea0}
+.ctrls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.ctl{background:#1b1030;border:1px solid #362552;border-radius:12px;padding:10px 12px}
+.ctl .cl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.ctl .row{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.ctl .val{font-weight:900;font-size:16px}
+.stp{width:34px;height:34px;border-radius:9px;border:0;background:#5a2e86;color:#fff;font-size:20px;font-weight:900;cursor:pointer}
+.tg{width:100%;border:0;border-radius:10px;padding:9px;font-weight:800;cursor:pointer;background:#241638;color:#e9d8ff}
+.tg.on{background:var(--green);color:#dfffe9}
+.score{margin-top:10px;background:#1b1030;border:1px solid #362552;border-radius:12px;padding:10px 12px}
+.bar{height:12px;border-radius:8px;background:#241638;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;width:60%;background:linear-gradient(90deg,#2a6b46,#ffd76a,#b8002e);transition:width .5s}
+.sc-l{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+/* wheel */
+.wheel{display:flex;gap:10px;overflow-x:auto;padding:4px 0 8px}
+.who{flex:none;min-width:120px;background:#1b1030;border:1px solid #362552;border-radius:12px;padding:11px 13px}
+.who.now{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.who .k{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.who .n{font-weight:800;margin-top:3px}.who .sg{font-size:12px;color:#b7a9d6}
+/* emcee */
+.emcee{background:linear-gradient(120deg,#241041,#3a1d5e);border:1px solid #4a2f6f;border-radius:14px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+.emcee .av{font-size:26px;flex:none}
+.emcee .who2{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.emcee .line{font-size:14.5px;margin-top:2px}
+/* songbook */
+.sb-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sb-ctrl input,.sb-ctrl select{font:inherit;background:#1b1030;color:#fff;border:1px solid #362552;border-radius:10px;padding:9px 12px}
+.sb-ctrl input{flex:1;min-width:150px}
+.song{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid #2a1c40;border-radius:11px;margin-bottom:7px;background:#170d29;cursor:pointer}
+.song:hover{border-color:#4a2f6f}
+.song .ti{font-weight:800}.song .ba{font-size:12px;color:var(--muted)}
+.song .pin{margin-left:auto;font-size:11px;font-weight:800;color:#3a1d00;background:var(--gold);border-radius:999px;padding:3px 9px}
+.song .add{margin-left:auto;font-size:20px;color:var(--gold);font-weight:900}
+.song .pin+.add{margin-left:10px}
+/* business */
+.biz{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:#1b1030;border:1px solid #362552;border-radius:14px;padding:16px}
+.card.pro{border-color:var(--gold)}
+.card h3{margin:0 0 4px;font-size:17px}.card .p{font-size:13px;color:var(--muted);min-height:54px}
+.card .price{font-size:24px;font-weight:900;color:var(--gold);margin:8px 0}
+.card .price small{font-size:12px;color:var(--muted);font-weight:600}
+.card button{width:100%;border:0;border-radius:11px;padding:12px;font-weight:900;cursor:pointer}
+.card .go{background:var(--gold);color:#3a1d00}.card .go2{background:#5a2e86;color:#fff}
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.modal{background:#211533;border:1px solid #3a2a55;border-radius:16px;max-width:360px;width:100%;padding:20px;text-align:center}
+.modal input{width:100%;font:inherit;background:#160c28;color:#fff;border:1px solid #43305f;border-radius:10px;padding:11px;margin:12px 0}
+.modal .go{background:var(--gold);color:#3a1d00;border:0;border-radius:11px;padding:12px;font-weight:900;width:100%;cursor:pointer}
+.modal .x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80;text-align:center;max-width:90%}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="lights"></div>
+<div class="top"><div class="logo">🎤 SHAKEDOWN <span>KARAOKE</span></div><div class="tag">sing outta tune under the string lights · GD · JGB · Zero</div></div>
+<div class="wrap">
+
+<div class="honest">🎶 <b>Honest-state:</b> this is the real machine — but <b>on-screen lyrics and backing tracks are licensed rights.</b> Nothing plays and no lyric displays until the songbook is cleared (the karaoke license — part of the Grateful Dead package we license with Steve's help). Song <i>titles</i> below are just the catalogue. Names/queue are a demo; nothing charges yet.</div>
+
+<h2>🎙️ The Stage</h2>
+<div class="stage">
+  <div class="np"><div class="disc"></div><div><div class="t" id="npTitle">Catalina <span class="star">★</span></div><div class="s" id="npMeta">Zero · sung by You · key of E</div></div></div>
+  <div class="screen">
+    <div class="lyric" id="lyric">•••••• ••• •••••• •• ••••</div>
+    <div class="note">Lyrics light up here — bouncing-highlight, on screen — <b>once the songbook is licensed.</b></div>
+  </div>
+  <div class="ctrls">
+    <div class="ctl"><div class="cl">🎚️ Key (fit your range)</div><div class="row"><button class="stp" onclick="key(-1)">−</button><span class="val" id="keyV">E</span><button class="stp" onclick="key(1)">+</button></div></div>
+    <div class="ctl"><div class="cl">🐢 Tempo</div><div class="row"><button class="stp" onclick="tempo(-1)">−</button><span class="val" id="tempoV">100%</span><button class="stp" onclick="tempo(1)">+</button></div></div>
+    <div class="ctl"><div class="cl">🎸 Jerry's guide vocal</div><button class="tg" id="guide" onclick="tg('guide')">Turn ON to follow the melody</button></div>
+    <div class="ctl"><div class="cl">🌫️ Mic reverb</div><button class="tg on" id="verb" onclick="tg('verb')">On — a little hall echo</button></div>
+  </div>
+  <div class="score">
+    <div class="sc-l"><span>Applause-o-meter</span><span id="scoreN">—</span></div>
+    <div class="bar"><i id="scoreBar" style="width:8%"></i></div>
+    <div class="note" style="margin-top:6px;text-align:center">Backyard rule: <b>nobody's in tune, and that's the point.</b> Tap “Rate the take” when the song ends.</div>
+    <button class="tg" style="margin-top:8px" onclick="rate()">👏 Rate the take</button>
+  </div>
+</div>
+
+<h2>🎡 The Wheel — who's up</h2>
+<div class="wheel" id="wheel"></div>
+<div style="font-size:12px;color:var(--muted)">Auto-rotation + “Who's Next” callouts, just like a pro KJ rig. At a party, everyone joins from their phone — no app to install.</div>
+
+<h2>📣 On the mic</h2>
+<div class="emcee"><div class="av" id="emAv">🎩</div><div><div class="who2" id="emWho">Harlan &amp; Fig — your emcees</div><div class="line" id="emLine">Warming up the crowd…</div></div></div>
+
+<h2>📸 Snap the set — author it here, share it out</h2>
+<div class="stage" style="padding:16px">
+  <div id="frame" style="aspect-ratio:4/3;border-radius:12px;border:1px dashed #4a3b6b;background:#0c0718;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;text-align:center;color:#7c6ea0;font-size:13px">
+    <div style="font-size:34px">📷</div><div>Snap whoever's killing it on the mic</div>
+  </div>
+  <input type="file" accept="image/*" capture="environment" id="cam" style="display:none" onchange="gotPhoto(this)">
+  <button class="tg" style="margin-top:10px" onclick="document.getElementById('cam').click()">📷 Take a photo</button>
+
+  <input id="cap" placeholder="Caption it… (e.g., Deb absolutely wailing on Sugar Magnolia)" style="width:100%;font:inherit;background:#160c28;color:#fff;border:1px solid #43305f;border-radius:10px;padding:11px;margin-top:10px">
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <button class="tg" id="gps" onclick="toggleGPS()" style="width:auto;flex:1;min-width:120px">📍 Tag this spot</button>
+    <span class="tg on" style="width:auto;flex:1;min-width:120px;text-align:center;cursor:default">🎟️ Verified at the show</span>
+  </div>
+
+  <label style="display:flex;gap:9px;align-items:flex-start;margin-top:12px;font-size:12.5px;color:#d9cbef;cursor:pointer">
+    <input type="checkbox" id="consent" style="margin-top:2px;transform:scale(1.2)">
+    <span>Everyone in this shot is cool with being posted. <b>Real people, real consent</b> — that's the house rule.</span>
+  </label>
+
+  <button class="go" id="postBtn" style="width:100%;background:var(--gold);color:#3a1d00;border:0;border-radius:11px;padding:13px;font-weight:900;cursor:pointer;margin-top:12px;opacity:.55" onclick="postSD()">🌹 Post to Shakedown Street</button>
+  <div id="fbWrap" style="display:none;margin-top:8px"><button class="go2" style="width:100%;background:#3b5998;color:#fff;border:0;border-radius:11px;padding:13px;font-weight:900;cursor:pointer" onclick="shareFB()">↗ Share this to Facebook</button></div>
+
+  <div class="note" style="margin-top:10px;text-align:center">Honest-state: content is <b>authored here on Shakedown Street first</b>, from a real human at a real show (📍GPS + 🎟️ ticket QR are the proof). Sharing to Facebook is <b>your click</b> — nothing auto-posts, nothing's scraped, the photo stays on your device in this demo.</div>
+
+  <div style="margin-top:12px;background:#160c28;border:1px solid #33244f;border-radius:11px;padding:11px 13px">
+    <div style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)">🔎 Content ledger — Claude's tally (Holmes is counting)</div>
+    <div style="display:flex;gap:16px;margin-top:7px;flex-wrap:wrap">
+      <div><b id="ledIn" style="color:var(--gold);font-size:18px">0</b> <span style="font-size:12px;color:var(--muted)">authored on SD.app</span></div>
+      <div><b id="ledOut" style="color:var(--gold);font-size:18px">0</b> <span style="font-size:12px;color:var(--muted)">→ pushed to Facebook</span></div>
+    </div>
+  </div>
+</div>
+
+<h2>📖 The Songbook <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— they never have Kimock. We do.</span></h2>
+<div class="sb-ctrl">
+  <input id="q" placeholder="Search a song…" oninput="renderBook()">
+  <select id="band" onchange="renderBook()"><option value="">All family</option><option>Grateful Dead</option><option>JGB</option><option>Zero</option></select>
+</div>
+<div id="book"></div>
+
+<h2>🎉 Bring it home · 🏛️ Run it at your venue</h2>
+<div class="biz">
+  <div class="card">
+    <h3>🎉 Backyard</h3>
+    <div class="p">Your party, your yard, your phone as the remote. The whole family songbook, the Wheel, the emcees.</div>
+    <div class="price">Free <small>for fans</small></div>
+    <button class="go2" onclick="toast('🎉 Backyard mode is free for fans — start a party, share the QR, everybody sings. (Songbook goes live once licensed.)')">Start a backyard party</button>
+  </div>
+  <div class="card pro">
+    <h3>🏛️ Venue <span style="font-size:11px;color:var(--gold)">SUBSCRIPTION</span></h3>
+    <div class="p">Replace the KJ rig. Host nights from a laptop: rotation, phone requests, scoring leagues, your branding, analytics.</div>
+    <div class="price">$79<small>/mo per room</small></div>
+    <button class="go" onclick="venue()">Run Shakedown Karaoke here</button>
+  </div>
+</div>
+<div class="honest" style="margin-top:12px">Why a venue pays: nobody else can offer a <b>licensed Grateful Dead / JGB / Zero / Kimock songbook</b> — that's the moat. A Dead karaoke night fills a slow Tuesday, and it feeds the room right back into the calendar, tickets, and merch. 🌹</div>
+
+</div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},3400);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ---- the songbook (TITLES ONLY — facts, not lyrics) ---- */
+var BOOK=[
+ {t:'Catalina',b:'Zero',pin:true,star:true},
+ {t:'Chance in a Million',b:'Zero',star:true},
+ {t:'Home on the Range',b:'Zero'},
+ {t:'End of the Line',b:'Zero'},
+ {t:'Gregg’s Eggs',b:'Zero'},
+ {t:'Tender Love',b:'Zero'},
+ {t:'Ripple',b:'Grateful Dead'},
+ {t:'Sugar Magnolia',b:'Grateful Dead'},
+ {t:'Friend of the Devil',b:'Grateful Dead'},
+ {t:'Truckin’',b:'Grateful Dead'},
+ {t:'Uncle John’s Band',b:'Grateful Dead'},
+ {t:'Casey Jones',b:'Grateful Dead'},
+ {t:'Fire on the Mountain',b:'Grateful Dead'},
+ {t:'Scarlet Begonias',b:'Grateful Dead'},
+ {t:'Touch of Grey',b:'Grateful Dead'},
+ {t:'Franklin’s Tower',b:'Grateful Dead'},
+ {t:'Bertha',b:'Grateful Dead'},
+ {t:'Eyes of the World',b:'Grateful Dead'},
+ {t:'Brown-Eyed Women',b:'Grateful Dead'},
+ {t:'Tennessee Jed',b:'Grateful Dead'},
+ {t:'Deal',b:'JGB'},
+ {t:'Cats Under the Stars',b:'JGB',star:true},
+ {t:'Run for the Roses',b:'JGB'},
+ {t:'Mission in the Rain',b:'JGB'},
+ {t:'Midnight Moonlight',b:'JGB'},
+ {t:'That’s What Love Will Make You Do',b:'JGB'}
+];
+function renderBook(){
+ var q=(document.getElementById('q').value||'').toLowerCase(), b=document.getElementById('band').value;
+ var rows=BOOK.filter(function(s){ if(b&&s.b!==b)return false; if(q&&s.t.toLowerCase().indexOf(q)<0)return false; return true; });
+ var el=document.getElementById('book');
+ if(!rows.length){el.innerHTML='<div style="color:var(--muted);padding:14px">No song by that name — yet. 🌹</div>';return;}
+ el.innerHTML=rows.map(function(s){
+   return '<div class="song" onclick="queueUp(\''+esc(s.t).replace(/\x27/g,'')+'\')"><div><div class="ti">'+esc(s.t)+(s.star?' <span style="color:var(--gold)">★</span>':'')+'</div><div class="ba">'+esc(s.b)+'</div></div>'+
+     (s.pin?'<span class="pin">Michael’s pick</span>':'')+'<span class="add">＋</span></div>';
+ }).join('');
+}
+
+/* ---- the wheel ---- */
+var WHEEL=[{n:'You',s:'Catalina',now:true},{n:'Deb',s:'Sugar Magnolia'},{n:'Ray',s:'Deal'},{n:'Jules',s:'Ripple'}];
+function renderWheel(){
+ document.getElementById('wheel').innerHTML=WHEEL.map(function(w,i){
+   return '<div class="who'+(w.now?' now':'')+'"><div class="k">'+(w.now?'🎤 Up now':(i===1?'On deck':'In line'))+'</div><div class="n">'+esc(w.n)+'</div><div class="sg">'+esc(w.s)+'</div></div>';
+ }).join('');
+}
+function queueUp(title){
+ openModal('<h3 style="margin:0">Get in the rotation</h3><div style="font-size:13px;color:var(--muted);margin-top:4px">“'+esc(title)+'” — who’s singing?</div>'+
+  '<input id="who" placeholder="Your name" autofocus>'+
+  '<button class="go" onclick="doQueue(\''+esc(title).replace(/\x27/g,'')+'\')">Add me to the Wheel</button>'+
+  '<button class="x" onclick="closeModal()">never mind</button>');
+}
+function doQueue(title){
+ var n=(document.getElementById('who').value||'').trim()||'A friend';
+ WHEEL.push({n:n,s:title}); renderWheel(); closeModal();
+ toast('🎡 '+n+' is in line for “'+title+'.” At a real party this comes in from their phone — no app needed.');
+}
+
+/* ---- emcees: Harlan & Fig ---- */
+var EM=[
+ {a:'🎩',w:'Harlan — the hype man',l:'Ladies and gentlemen and Deadheads of all persuasions… give it up for the next brave soul on the mic!'},
+ {a:'🌼',w:'Fig — keeper of the lore',l:'Fun fact before you sing: this one’s a Hunter lyric. No pressure. Jerry’s watching. Lovingly.'},
+ {a:'🎩',w:'Harlan — the hype man',l:'Remember the house rule — we don’t boo flat notes here, we <i>cheer</i> ’em. Outta tune is in tune tonight.'},
+ {a:'🌼',w:'Fig — keeper of the lore',l:'Whoever nails the “Fire on the Mountain” groove gets the last veggie burrito. That’s a real prize.'},
+ {a:'🎩',w:'Harlan — the hype man',l:'Next up on the Wheel… tune your soul, not your pitch. Let’s go!'}
+];
+var emI=0;
+function rollEmcee(){ var e=EM[emI%EM.length]; document.getElementById('emAv').textContent=e.a; document.getElementById('emWho').textContent=e.w; document.getElementById('emLine').innerHTML=e.l; emI++; }
+
+/* ---- controls ---- */
+var KEYS=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'], ki=4, tv=100;
+function key(d){ ki=(ki+d+12)%12; document.getElementById('keyV').textContent=KEYS[ki]; document.getElementById('npMeta').textContent='Zero · sung by You · key of '+KEYS[ki]; }
+function tempo(d){ tv=Math.max(70,Math.min(130,tv+d*5)); document.getElementById('tempoV').textContent=tv+'%'; }
+function tg(id){ var b=document.getElementById(id); b.classList.toggle('on');
+ if(id==='guide') b.textContent=b.classList.contains('on')?'On — follow Jerry’s melody':'Turn ON to follow the melody';
+ if(id==='verb') b.textContent=b.classList.contains('on')?'On — a little hall echo':'Off — dry';
+}
+function rate(){ var pct=55+Math.floor(Math.random()*45); document.getElementById('scoreBar').style.width=pct+'%'; document.getElementById('scoreN').textContent=pct+' / 100';
+ var q=pct>90?'Jerry smiled. 🌹':pct>75?'The lot is roaring!':pct>62?'Solid — the yard approves.':'Gloriously, beautifully off-key. 👏';
+ toast('👏 '+pct+'/100 — '+q); }
+
+/* ---- modal ---- */
+function openModal(html){ document.getElementById('modal').innerHTML=html; document.getElementById('ov').classList.add('on'); var i=document.getElementById('who'); if(i)i.focus(); }
+function closeModal(){ document.getElementById('ov').classList.remove('on'); }
+document.getElementById('ov').onclick=function(e){ if(e.target===this)closeModal(); };
+function venue(){ openModal('<h3 style="margin:0">Run it at your venue</h3><div style="font-size:13px;color:var(--muted);margin-top:6px">$79/mo per room — the licensed family songbook, phone requests, auto-rotation, scoring leagues, your branding. We’ll reach out to set up your first night.</div>'+
+  '<input id="who" placeholder="Venue name + your email">'+
+  '<button class="go" onclick="closeModal();toast(\'🏛️ Got it — a Chaperone will reach out to book your first Shakedown Karaoke night. (Demo: nothing charges; songbook goes live once licensed.)\')">Request setup</button>'+
+  '<button class="x" onclick="closeModal()">close</button>'); }
+
+/* ---- Snap & HyperPost + the content-request engine (reuses the Help Test request/capture backend) ---- */
+var LED={in:0,out:0}, hasPhoto=false, gpsOn=false, lastCity='';
+function gotPhoto(input){
+ var f=input.files&&input.files[0]; if(!f)return;
+ try{ var url=URL.createObjectURL(f); document.getElementById('frame').innerHTML='<img src="'+url+'" alt="your snap" style="width:100%;height:100%;object-fit:cover">'; }catch(e){}
+ hasPhoto=true; refreshPost();
+ emceeSay('🌼','Fig','Ooh, a keeper! Caption it and send it to the family — that’s free marketing with a heartbeat.');
+}
+function refreshPost(){ var ok=hasPhoto&&document.getElementById('consent').checked; var b=document.getElementById('postBtn'); b.style.opacity=ok?'1':'.55'; b.disabled=!ok; }
+document.addEventListener('change',function(e){ if(e.target&&e.target.id==='consent')refreshPost(); });
+function toggleGPS(){
+ var b=document.getElementById('gps');
+ if(gpsOn){ gpsOn=false; b.classList.remove('on'); b.textContent='📍 Tag this spot'; return; }
+ b.textContent='📍 Locating…';
+ if(!navigator.geolocation){ gpsOn=true; b.classList.add('on'); b.textContent='📍 Spot tagged'; contentRequest(); return; }
+ navigator.geolocation.getCurrentPosition(function(){ gpsOn=true; b.classList.add('on'); b.textContent='📍 Spot tagged'; contentRequest(); },
+   function(){ gpsOn=true; b.classList.add('on'); b.textContent='📍 Spot tagged (approx)'; contentRequest(); }, {timeout:6000});
+}
+/* the polite, GPS-triggered CONTENT REQUEST — free crowd marketing, human-click only */
+function contentRequest(){ emceeSay('🎩','Harlan','Looks like you’re out at a show tonight! Snap one for the family and post it — original, from the source, and it puts Shakedown Street in front of every Deadhead you know. No charge, all love.'); }
+function postSD(){
+ if(!(hasPhoto&&document.getElementById('consent').checked)){ toast('📷 Add a photo and check the consent box first — real people, real consent.'); return; }
+ LED.in++; updateLedger();
+ var cap=(document.getElementById('cap').value||'').trim();
+ document.getElementById('fbWrap').style.display='block';
+ logFlow('in','shakedownstreet.app',cap);   // authored ON sd.app (origination event)
+ toast('🌹 Authored on Shakedown Street — original content, live in the family feed. Now share it out if you like.');
+ emceeSay('🌼','Fig','That’s a HyperPost! Born on Shakedown Street. Push it to Facebook and watch the family find us.');
+}
+function shareFB(){
+ LED.out++; updateLedger();
+ var cap=(document.getElementById('cap').value||'').trim()||'Shakedown Karaoke — sing outta tune under the string lights. 🌹';
+ logFlow('out','facebook',cap);             // egress: human push to FB
+ var u='https://shakedownstreet.app', share='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(u)+'&quote='+encodeURIComponent(cap);
+ try{ window.open(share,'_blank','noopener'); }catch(e){}
+ toast('↗ Facebook share opened — you post it (human click). Shakedown Street just reached your whole feed, free.');
+}
+function updateLedger(){ document.getElementById('ledIn').textContent=LED.in; document.getElementById('ledOut').textContent=LED.out; }
+/* honest-state: logs the crossing to the content-flow ledger when the DB is wired; demo = console + counters */
+function logFlow(dir,network,caption){ try{ var c=window.ddClient&&window.ddClient(); if(c){ c.from('content_flow_events').insert({direction:dir,network:network,surface:'karaoke',authored_on:'shakedownstreet.app',has_caption:!!caption}).then(function(){},function(){}); } }catch(e){} }
+function emceeSay(av,who,line){ document.getElementById('emAv').textContent=av; document.getElementById('emWho').textContent=who+' — on the mic'; document.getElementById('emLine').innerHTML=line; }
+
+renderBook(); renderWheel(); rollEmcee(); setInterval(rollEmcee,5200);
+setTimeout(function(){ toast('📍 At a show tonight? Snap the moment and post it — original content, straight from the source. Free reach for the whole family.'); },2600);
+</script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('karaoke',{ic:'🎤',name:'Shakedown Karaoke',tasks:[
+ {key:'kar_book',ic:'📖',title:'Find a song',steps:[{t:'Search the songbook and filter by band. Find <b>Catalina</b> (Zero) and <b>Cats Under the Stars</b> (JGB).'}],q:{prompt:'Did you find songs you’d actually sing?',opts:['Yes!','Some','No']}},
+ {key:'kar_queue',ic:'🎡',title:'Get on the Wheel',steps:[{t:'Tap a song, add your name, watch it join the rotation.'}],q:{prompt:'Was getting in the queue easy?',opts:['Easy','Sort of','Confusing']}},
+ {key:'kar_stage',ic:'🎙️',title:'Work the stage',steps:[{t:'Change the key to fit your voice, toggle Jerry’s guide vocal, then “Rate the take.”'}],q:{prompt:'Do the controls feel like a real karaoke rig?',opts:['Yes','Kinda','No']}},
+ {key:'kar_venue',ic:'🏛️',title:'The venue offer',steps:[{t:'Read the “Run it at your venue” card. Would a bar pay $79/mo for a Dead karaoke night?'}],q:{prompt:'Is the venue subscription a good idea?',opts:['Love it','Unsure','No']}}
+]});
+</script>
+</body></html>
