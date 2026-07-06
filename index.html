@@ -663,6 +663,7 @@ body{padding-bottom:64px}
   <button class="fn" onclick="openGame()"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="profile('me')"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
 </nav>
+<button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:78px;z-index:35;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
 
 <!-- buy bubble -->
@@ -818,9 +819,26 @@ body{padding-bottom:64px}
     <a class="citem" href="band_vault.html"><span>🎙️</span>Live Recordings</a>
     <a class="citem" href="archive.html"><span>🗄️</span>The Archive — Rank &amp; Argue</a>
     <a class="citem" href="record_store.html"><span>🛍️</span>Shakedown Records</a>
+    <a class="citem" href="your_catalogue.html"><span>🎚️</span>Upload your catalogue</a>
+    <a class="citem" href="poster_shop.html"><span>🖼️</span>The Poster Shop</a>
     <a class="citem" href="curator.html"><span>👑</span>Group Leader Console</a>
     <a class="citem" onclick="coGo('appsov',function(){openGig('feature')})"><span>💡</span>Add a feature</a>
    </div>
+  </div>
+ </div>
+</div>
+
+<!-- ===== Corner: ＋ Create (discoverable) ===== -->
+<div class="cornerov" id="createov" onclick="if(event.target===this)coClose('createov')">
+ <div class="cpanel">
+  <div class="cphd">➕ Create <button class="shx" onclick="coClose('createov')">×</button></div>
+  <div class="appscreate">
+   <a class="citem" onclick="coGo('createov',function(){hyperConsole('dead.dance')})"><span>📝</span>Post / HyperPost</a>
+   <a class="citem" onclick="coGo('createov',function(){openGig('date')})"><span>📅</span>Add a Date</a>
+   <a class="citem" onclick="coGo('createov',function(){openGig('band')})"><span>🎸</span>Register a Band</a>
+   <a class="citem" onclick="coGo('createov',function(){openGig('festival')})"><span>🎪</span>Create a Festival</a>
+   <a class="citem" onclick="coGo('createov',function(){openGig('act')})"><span>🎭</span>List Talent</a>
+   <a class="citem" onclick="coGo('createov',function(){openGig('feature')})"><span>💡</span>Suggest a Feature</a>
   </div>
  </div>
 </div>
@@ -2100,6 +2118,7 @@ function react(e){document.getElementById('reactpop').classList.remove('on');toa
 function moreToggle(b){ var t=b.previousElementSibling; if(!t)return; var clamped=t.classList.toggle('clamp'); b.textContent=clamped?'See more…':'See less…'; }
 /* top-right corner: ▦ menu · 🔔 notifications · profile */
 function openApps(){ var e=document.getElementById('appsov'); if(e)e.classList.add('on'); }
+function openCreate(){ var e=document.getElementById('createov'); if(e)e.classList.add('on'); }
 function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; }
 function coClose(id){ var e=document.getElementById(id); if(e)e.classList.remove('on'); }
 function coGo(id,fn){ coClose(id); try{fn();}catch(e){} }

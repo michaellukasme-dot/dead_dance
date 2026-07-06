@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your Catalogue — Shakedown Records</title>
+<meta name="theme-color" content="#17101f">
+<style>
+:root{--purple:#5a2e86;--gold:#c08a2d;--rose:#b8002e;--green:#2a6b46;--muted:#9a8fb0;--line:#2e2148}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 65%,#b8002e);padding:16px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:20px}.top .logo span{color:#ffd76a}
+.top .tag{font-size:12px;color:#e0cdf5}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 90px}
+h2{font-size:17px;margin:22px 0 8px;border-top:1px solid var(--line);padding-top:16px}
+.card{background:#211533;border:1px solid #3a2a55;border-radius:14px;padding:16px 18px;margin:12px 0}
+label{display:block;font-size:12.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 4px}
+input,select{font:inherit;width:100%;background:#2a1c40;color:#fff;border:1px solid #43305f;border-radius:10px;padding:11px 13px}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+.file{display:block;text-align:center;border:1.5px dashed #5a2e86;color:#cdb8ec;border-radius:12px;padding:16px;font-weight:800;cursor:pointer;margin:6px 0}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-size:13.5px;color:#d7cceb}.chk input{width:auto;margin-top:3px}
+.pub{width:100%;background:#ffd76a;color:#3a1d00;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:15px;cursor:pointer;margin-top:6px}
+.rel{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #2e2148}.rel:last-child{border-bottom:0}
+.rel .sq{flex:none;width:44px;height:44px;border-radius:6px;display:grid;place-items:center;font-size:20px}
+.rel .n{flex:1}.rel .n .t{font-weight:700}.rel .n .d{font-size:12px;color:var(--muted)}
+.pill{font-size:10px;font-weight:900;padding:3px 8px;border-radius:999px;background:#3a2a1a;color:#ffd76a}
+.honest{background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;margin:16px 0;font-size:12.5px;color:#c9bde0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">🎚️ Your Catalogue <span>· Shakedown Records</span></div><div class="tag">upload once you're in — add the rest anytime, on your terms</div></div>
+<div class="wrap">
+
+<div class="card">
+  <label>Release title</label><input id="f_title" placeholder="e.g., Go Hear Nothin' (Zero Live)">
+  <div class="row2">
+    <div><label>Year</label><input id="f_year" inputmode="numeric" placeholder="1991"></div>
+    <div><label>Format</label><select id="f_kind"><option>Live album</option><option>Studio album</option><option>Single / EP</option><option>Compilation</option></select></div>
+  </div>
+  <label>Audio (your master — one or many tracks)</label>
+  <label class="file" id="lbl_audio">🎵 Choose audio files<input id="f_audio" type="file" accept="audio/*" multiple style="display:none" onchange="pickAudio(this)"></label>
+  <label>Cover artwork (your jacket)</label>
+  <label class="file" id="lbl_art">🖼️ Choose artwork<input id="f_art" type="file" accept="image/*" style="display:none" onchange="pickArt(this)"></label>
+  <div class="row2">
+    <div><label>Download price ($)</label><input id="f_price" inputmode="decimal" placeholder="9.99"></div>
+    <div><label>Print Me the Vinyl?</label><select id="f_vinyl"><option>Yes — offer vinyl</option><option>No — download only</option></select></div>
+  </div>
+  <div class="chk"><input type="checkbox" id="f_rights"><label style="text-transform:none;color:#d7cceb;font-weight:600;margin:0" for="f_rights">I control, or am licensed to distribute, this recording <b>and</b> its artwork — and I grant Shakedown Street a standing license to sell it on my terms (revocable anytime).</label></div>
+  <button class="pub" onclick="publish()">➕ Add to my shelf</button>
+</div>
+
+<h2>Your shelf</h2>
+<div class="card" id="shelf" style="padding:6px 18px"></div>
+
+<div class="honest">Honest-state: this is <b>your</b> catalogue. <b>Nothing sells until (a) you check the rights box, (b) per-title rights are confirmed with counsel, and (c) payments go live.</b> Files stay on this device in the demo — real upload + the <i>Print Me the Vinyl</i> press (via <b>Print_the_Vinyl</b>) turn on with the entity. Add releases anytime; pull any title anytime. 🌹</div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},3000);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var AUDIO=[], ART='';
+function pickAudio(inp){ AUDIO=[].map.call(inp.files||[],function(f){return f.name;}); document.getElementById('lbl_audio').innerHTML=(AUDIO.length?('🎵 '+AUDIO.length+' track'+(AUDIO.length>1?'s':'')+' ✓'):'🎵 Choose audio files')+'<input id="f_audio" type="file" accept="audio/*" multiple style="display:none" onchange="pickAudio(this)">'; }
+function pickArt(inp){ var f=inp.files&&inp.files[0]; ART=f?f.name:''; document.getElementById('lbl_art').innerHTML=(ART?('🖼️ '+esc(ART)+' ✓'):'🖼️ Choose artwork')+'<input id="f_art" type="file" accept="image/*" style="display:none" onchange="pickArt(this)">'; }
+function shelf(){ try{return JSON.parse(localStorage.getItem('sxs.catalogue')||'[]');}catch(e){return [];} }
+function saveShelf(a){ try{localStorage.setItem('sxs.catalogue',JSON.stringify(a));}catch(e){} }
+function render(){ var el=document.getElementById('shelf'); var a=shelf();
+  if(!a.length){ el.innerHTML='<div style="padding:14px;color:var(--muted)">Nothing here yet. Add your first release above — then the rest whenever you like.</div>'; return; }
+  el.innerHTML=a.map(function(r,i){ return '<div class="rel"><div class="sq" style="background:linear-gradient(135deg,#5a2e86,#b8002e)">💿</div><div class="n"><div class="t">'+esc(r.title)+'</div><div class="d">'+esc(r.year||'')+' · '+esc(r.kind)+' · '+(r.price?('$'+esc(r.price)):'price TBD')+(r.vinyl?' · vinyl':'')+' · '+(r.tracks||0)+' tracks'+(r.art?' · art ✓':'')+'</div></div><span class="pill">'+esc(r.status)+'</span></div>'; }).join(''); }
+function publish(){ var t=(document.getElementById('f_title').value||'').trim();
+  if(!t){ toast('Give the release a title 🌹'); return; }
+  if(!document.getElementById('f_rights').checked){ toast('Please confirm the rights box — that’s the standing license.'); return; }
+  var r={ title:t, year:(document.getElementById('f_year').value||'').trim(), kind:document.getElementById('f_kind').value,
+    price:(document.getElementById('f_price').value||'').trim(), vinyl:(document.getElementById('f_vinyl').value.indexOf('Yes')===0),
+    tracks:AUDIO.length, art:!!ART, status:'ready — pending rights + payments', at:Date.now() };
+  var a=shelf(); a.unshift(r); saveShelf(a);
+  var c=window.ddClient?ddClient():null;
+  if(c){ try{ c.rpc('chat_qa_submit',{p_task:'catalogue_upload',p_note:'[catalogue] '+t+' · '+r.kind+' · '+(r.tracks)+' tracks'+(r.vinyl?' · vinyl':''),p_console:'catalogue'}).catch(function(){}); }catch(e){} }
+  document.getElementById('f_title').value=''; document.getElementById('f_year').value=''; document.getElementById('f_price').value=''; document.getElementById('f_rights').checked=false; AUDIO=[]; ART=''; pickAudio({files:[]}); pickArt({files:[]});
+  toast('➕ "'+t+'" is on your shelf — goes live once rights are confirmed + payments are on. 🌹'); render(); }
+render();
+</script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('catalogue',{ic:'🎚️',name:'Your Catalogue upload',tasks:[
+ {key:'cat_add',ic:'➕',title:'Add a release',steps:[{t:'Type a title, pick a format, choose audio + artwork, set a price, check the rights box, and tap <b>Add to my shelf</b>.'}],q:{prompt:'Was uploading a release easy?',opts:['Easy','OK','Clunky']}},
+ {key:'cat_rights',ic:'⚖️',title:'The rights box',steps:[{t:'Notice you can’t publish without checking the rights/standing-license box.'}],q:{prompt:'Is the rights step clear + fair?',opts:['Clear','Confusing','No']}},
+ {key:'cat_more',ic:'📀',title:'Add another, anytime',steps:[{t:'Add a second release — the point is you (or Johnny) can add the whole catalogue whenever, no re-asking.'}],q:{prompt:'Does “add anytime” feel right?',opts:['Yes','Meh']}}
+]});
+</script>
+</body></html>

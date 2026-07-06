@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Poster Shop — Shakedown Street</title>
+<meta name="theme-color" content="#17101f">
+<style>
+:root{--purple:#5a2e86;--gold:#c08a2d;--rose:#b8002e;--green:#2a6b46;--muted:#9a8fb0;--line:#2e2148}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 65%,#b8002e);padding:16px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:20px}.top .logo span{color:#ffd76a}
+.top .tag{font-size:12px;color:#e0cdf5}
+.must{margin:12px 16px;background:#1e2a1e;border:1px solid #2f5a2f;border-left:4px solid var(--green);border-radius:12px;padding:12px 15px;font-size:13px;color:#bfe0bf}
+.must b{color:#8ef0a0}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px}
+.ctrl select{font:inherit;background:#2a1c40;color:#fff;border:1px solid #43305f;border-radius:10px;padding:9px 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:8px 16px 40px}
+.p{cursor:pointer}
+.pimg{aspect-ratio:2/3;border-radius:8px;box-shadow:0 8px 20px #000a,inset 0 0 0 1px #ffffff1f;display:flex;flex-direction:column;justify-content:space-between;padding:12px;position:relative;overflow:hidden}
+.pimg .ttl{font-weight:900;font-size:16px;line-height:1.1;text-shadow:0 1px 6px #0007;z-index:1}
+.pimg .by{font-size:11px;opacity:.9;font-weight:700;z-index:1}
+.pimg .rays{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 38%, #ffffff14 0deg 8deg, transparent 8deg 16deg);opacity:.5}
+.pm{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+.ov{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.rec{background:#211533;border:1px solid #3a2a55;border-radius:16px;max-width:380px;width:100%;padding:20px;text-align:center}
+.rec .big{aspect-ratio:2/3;max-width:220px;margin:0 auto 12px;border-radius:8px;display:flex;flex-direction:column;justify-content:space-between;padding:16px;position:relative;overflow:hidden;box-shadow:0 12px 34px #000b}
+.rec h3{margin:4px 0 2px;font-size:19px}.rec .ra{color:var(--muted);font-size:13px}
+.btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.buy{background:#ffd76a;color:#3a1d00;border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}
+.mod{background:#5a2e86;color:#fff;border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}
+.x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:6px}
+.honest{margin:0 16px 30px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;font-size:12px;color:#c9bde0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">🖼️ The Poster Shop <span>· Shakedown Street</span></div><div class="tag">gig art for every band — buy it, or make it yours</div></div>
+<div class="must">🎁 <b>The MUST:</b> every Show-Poster Artist here gifts <b>one bottom-tier band a poster every month</b> — a different band each time. It's the price of entry, and it's how the smallest bands get pro art. Everyone gives.</div>
+
+<div class="ctrl">
+  <select id="fArtist" onchange="render()"></select>
+  <select id="fStyle" onchange="render()"><option value="">All styles</option><option>Psychedelic</option><option>Minimal</option><option>Woodcut</option><option>Photo</option><option>Collage</option></select>
+</div>
+<div class="grid" id="grid"></div>
+<div class="honest">Honest-state: covers are <b>original stylized placeholders</b> — no third-party art is reproduced. <b>Buy Now</b> licenses the poster (show promo/merch or personal) + optional made-to-order print; <b>Pay to Modify</b> commissions a tweak from the artist (their price, their credit preserved). Nothing charges until payments go live; artists own their work; GD marks on a poster need the marks license. 🌹</div>
+
+<div class="ov" id="ov"><div class="rec" id="rec"></div></div>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2800);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var PAL=[['#b8002e','#3a1d5e'],['#1f7a4d','#0e2b3b'],['#c08a2d','#5a1e0e'],['#5a2e86','#0e0716'],['#0e6b6b','#2a1b3d'],['#b8006e','#3a1d5e'],['#e0a021','#7a1020']];
+function pal(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return PAL[h%PAL.length];}
+// original placeholder posters (no third-party art); a real gallery = artist uploads.
+var POSTERS=[
+ {t:'Summer Tour',a:'RoseGlow Studio',s:'Psychedelic',p:'25'},
+ {t:'Cold Rain & Snow',a:'Ink & Iron',s:'Woodcut',p:'30'},
+ {t:'Two Nights',a:'Marin Press Co.',s:'Minimal',p:'20'},
+ {t:'The Lot',a:'Shakedown Silk',s:'Collage',p:'28'},
+ {t:'Terrapin Nights',a:'RoseGlow Studio',s:'Psychedelic',p:'35'},
+ {t:'Barton Hall Tribute',a:'Ink & Iron',s:'Woodcut',p:'40'},
+ {t:'Bay Area Run',a:'Marin Press Co.',s:'Minimal',p:'22'},
+ {t:'Wharf Rats Benefit',a:'Shakedown Silk',s:'Photo',p:'18'}
+];
+function fillArtists(){var sel=document.getElementById('fArtist');var arts=['All artists'].concat(POSTERS.map(function(p){return p.a;}).filter(function(v,i,x){return x.indexOf(v)===i;}));sel.innerHTML=arts.map(function(a){return '<option>'+esc(a)+'</option>';}).join('');}
+function filtered(){var ar=document.getElementById('fArtist').value,st=document.getElementById('fStyle').value;return POSTERS.filter(function(p){if(ar&&ar!=='All artists'&&p.a!==ar)return false;if(st&&p.s!==st)return false;return true;});}
+function inner(p){var c=pal(p.t+p.a);return 'style="background:linear-gradient(160deg,'+c[0]+','+c[1]+')"><span class="rays"></span><div class="ttl">'+esc(p.t)+'</div><div class="by">'+esc(p.a)+' · '+esc(p.s)+'</div>';}
+function render(){var g=document.getElementById('grid');var a=filtered();if(!a.length){g.innerHTML='<div style="color:var(--muted);padding:20px">No posters in that bin. 🌹</div>';return;}
+ g.innerHTML=a.map(function(p){var i=POSTERS.indexOf(p);return '<div class="p" onclick="open_('+i+')"><div class="pimg" '+inner(p)+'</div><div class="pm">$'+esc(p.p)+' · tap to view</div></div>';}).join('');}
+function open_(i){var p=POSTERS[i];var r=document.getElementById('rec');
+ r.innerHTML='<div class="big" '+inner(p)+'</div><h3>'+esc(p.t)+'</h3><div class="ra">by '+esc(p.a)+' · '+esc(p.s)+' · $'+esc(p.p)+'</div>'+
+  '<div class="btns"><button class="buy" onclick="buy(\''+esc(p.t).replace(/\x27/g,'')+'\')">🛒 Buy Now — license + print</button>'+
+  '<button class="mod" onclick="modf(\''+esc(p.a).replace(/\x27/g,'')+'\')">✏️ Pay to Modify (your date/venue)</button></div>'+
+  '<button class="x" onclick="close_()">close</button>';
+ document.getElementById('ov').classList.add('on');}
+function close_(){document.getElementById('ov').classList.remove('on');}
+document.getElementById('ov').onclick=function(e){if(e.target===this)close_();};
+function buy(t){toast('🛒 "'+t+'" — you license the poster (+ optional print). Artist keeps the majority. Demo: nothing charges yet.');}
+function modf(a){toast('✏️ Commission '+a+' to modify it — your date, venue, colors. Artist sets the price + keeps credit. Demo only.');}
+fillArtists(); render();
+</script>
+<script src="helptest.js"></script>
+<script>
+HelpTest.set('posters',{ic:'🖼️',name:'The Poster Shop',tasks:[
+ {key:'pos_browse',ic:'🖼️',title:'Browse the posters',steps:[{t:'Scroll the shop, filter by artist or style, tap a poster to view it.'}],q:{prompt:'Did it feel like flipping a poster bin?',opts:['Yes','Sort of','No']}},
+ {key:'pos_buy',ic:'🛒',title:'Buy / Modify',steps:[{t:'Open a poster and try <b>Buy Now</b> and <b>Pay to Modify</b>.'}],q:{prompt:'Clear what each does?',opts:['Clear','Sort of','No']}},
+ {key:'pos_must',ic:'🎁',title:'The MUST',steps:[{t:'Read the green banner up top. In the note: does the “gift a small band a poster every month” rule feel right?'}],q:{prompt:'Is the give-back MUST a good idea?',opts:['Love it','Unsure','No']}}
+]});
+</script>
+</body></html>
