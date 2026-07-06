@@ -125,6 +125,7 @@ function openRec(i){ var al=ALBUMS[i]; var r=document.getElementById('rec');
   r.innerHTML='<div class="bigcover" '+coverInner(al)+'</div><h3>'+esc(al.t)+'</h3><div class="ra">'+esc(al.a)+' · '+al.y+' · '+esc(al.k||'')+(al.real?' · <b style="color:#ffd76a">first real release</b>':' · <span style="opacity:.7">catalog · rights pending</span>')+'</div>'+songs+
    '<div class="btns"><button class="buy" onclick="buy(\''+esc(al.t).replace(/'/g,'')+'\','+(!!al.real)+')">🛒 Buy Now — download</button>'+
    '<button class="vinyl" onclick="vinyl(\''+esc(al.t).replace(/'/g,'')+'\')">💿 Print Me the Vinyl</button>'+
+   '<button class="vinyl" style="background:#0e6b6b" onclick="sample('+i+')">🎧 Listen — 90s sample</button>'+
    '<a class="listen" target="_blank" rel="noopener" href="'+disc(al.dc||al.t)+'">🖼️ Original jacket &amp; full tracklist ↗</a>'+
    '<a class="listen" target="_blank" rel="noopener" href="'+arch(al.y)+'">▶ Hear the era on Archive</a></div>'+
    '<button class="x" onclick="closeRec()">close the sleeve</button>';
@@ -133,6 +134,7 @@ function closeRec(){ document.getElementById('ov').classList.remove('on'); }
 document.getElementById('ov').onclick=function(e){ if(e.target===this)closeRec(); };
 function buy(t,real){ toast(real?('🛒 "'+t+'" — you choose to buy. Nothing charges until payments go live; this one’s the cleared first release.'):('🛒 "'+t+'" queued — sold once its rights are cleared. You choose; nothing charges yet.')); }
 function vinyl(t){ toast('💿 Print Me the Vinyl — a 3rd party presses a high-quality repop LP + jacket. Rights + art cleared per release.'); }
+function sample(i){ var al=ALBUMS[i]; if((al.k||'')==='Live'){ window.open(arch(al.y),'_blank'); toast('🎧 Live show — free full stream on Archive. (Studio previews arm when the artist uploads.)'); } else { toast('🎧 Listening station — a 90-second preview. It arms the moment the artist uploads the master (self-serve). We never stream what isn\'t licensed.'); } }
 
 fillArtists(); render();
 </script>

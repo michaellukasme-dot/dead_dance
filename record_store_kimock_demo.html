@@ -86,6 +86,7 @@ function openRec(i){var al=ALBUMS[i];var r=document.getElementById('rec');
  r.innerHTML='<div class="bigcover" '+coverInner(al)+'</div><h3>'+esc(al.t)+'</h3><div class="ra">'+esc(al.a)+' · '+al.y+' · '+al.k+(al.real?' · <b style="color:#ffd76a">first release · the market test</b>':'')+'</div>'+
   '<div class="btns"><button class="buy" onclick="buy(\''+esc(al.t).replace(/'/g,'')+'\')">🛒 Buy Now — download</button>'+
   '<button class="vinyl" onclick="vinyl()">💿 Print Me the Vinyl</button>'+
+  '<button class="vinyl" style="background:#0e6b6b" onclick="sample()">🎧 Listen — 90s sample</button>'+
   '<a class="see" target="_blank" rel="noopener" href="'+disc(al.dc)+'">🖼️ See the original jacket ↗</a></div>'+
   '<button class="x" onclick="closeRec()">close the sleeve</button>';
  document.getElementById('ov').classList.add('on');}
@@ -93,6 +94,7 @@ function closeRec(){document.getElementById('ov').classList.remove('on');}
 document.getElementById('ov').onclick=function(e){if(e.target===this)closeRec();};
 function buy(t){toast('🛒 "'+t+'" — in the real store you set the price and keep the lion\'s share. Demo: nothing charges.');}
 function vinyl(){toast('💿 A 3rd party presses a high-quality repop LP + jacket. Your art, licensed from you. Demo only.');}
+function sample(){toast('🎧 Listening station — a 90-second preview. It arms the moment you upload the master + set it. Demo: we never stream what isn\'t licensed.');}
 // watermark fill
 (function(){var w=document.getElementById('wm');var h='';for(var i=0;i<14;i++){h+='<div style="top:'+(i*90-40)+'px;left:-60px">STEVE KIMOCK · EYES ONLY · DEMO · STEVE KIMOCK · EYES ONLY · DEMO · STEVE KIMOCK · EYES ONLY</div>';}w.innerHTML=h;})();
 fillArtists(); render();
