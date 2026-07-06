@@ -62,27 +62,48 @@ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.c
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2600);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function arch(q){ return 'https://archive.org/search?query='+encodeURIComponent('collection:GratefulDead '+q); }
+function disc(q){ return 'https://www.discogs.com/search/?type=release&q='+encodeURIComponent(q); }
 var PAL=[['#b8002e','#5a2e86'],['#1f7a4d','#0e3b6b'],['#c08a2d','#6b2f0e'],['#5a2e86','#b8002e'],['#0e6b6b','#2a1b3d'],['#7a3cc0','#c08a2d'],['#2a6b46','#0e0716'],['#b8006e','#3a1d5e']];
 function pal(s){ var h=0; for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0; return PAL[h%PAL.length]; }
 
 // Catalog seed — titles/artists/years only (no reproduced art). real:true = clearable first release (Zero test).
 var ALBUMS=[
- {t:'Go Hear Nothin’',a:'Zero (Live)',y:1991,real:true},
- {t:'Here Goes Nothing',a:'Zero',y:1987},
- {t:'Last Danger of Frost',a:'Steve Kimock',y:2014},
- {t:'Satellite City',a:'Steve Kimock',y:2020},
- {t:'Workingman’s Dead',a:'Grateful Dead',y:1970},
- {t:'American Beauty',a:'Grateful Dead',y:1970},
- {t:'Shakedown Street',a:'Grateful Dead',y:1978},
- {t:'Terrapin Station',a:'Grateful Dead',y:1977},
- {t:'Blues for Allah',a:'Grateful Dead',y:1975},
- {t:'Wake of the Flood',a:'Grateful Dead',y:1973},
- {t:'From the Mars Hotel',a:'Grateful Dead',y:1974},
- {t:'In the Dark',a:'Grateful Dead',y:1987},
- {t:'Aoxomoxoa',a:'Grateful Dead',y:1969},
- {t:'Anthem of the Sun',a:'Grateful Dead',y:1968},
- {t:'Cats Under the Stars',a:'Jerry Garcia Band',y:1978},
- {t:'Heart of Gold Band',a:'Keith &amp; Donna',y:1980}
+ // ── Grateful Dead — studio
+ {t:"The Grateful Dead",a:'Grateful Dead',y:1967,k:'Studio',dc:'Grateful Dead 1967 debut album'},
+ {t:"Anthem of the Sun",a:'Grateful Dead',y:1968,k:'Studio',dc:'Grateful Dead Anthem of the Sun'},
+ {t:"Aoxomoxoa",a:'Grateful Dead',y:1969,k:'Studio',dc:'Grateful Dead Aoxomoxoa'},
+ {t:"Workingman's Dead",a:'Grateful Dead',y:1970,k:'Studio',dc:'Workingmans Dead',s:["Uncle John's Band","High Time","Dire Wolf","New Speedway Boogie","Cumberland Blues","Black Peter","Easy Wind","Casey Jones"]},
+ {t:"American Beauty",a:'Grateful Dead',y:1970,k:'Studio',dc:'American Beauty Grateful Dead',s:["Box of Rain","Friend of the Devil","Sugar Magnolia","Operator","Candyman","Ripple","Brokedown Palace","Till the Morning Comes","Attics of My Life","Truckin'"]},
+ {t:"Wake of the Flood",a:'Grateful Dead',y:1973,k:'Studio',dc:'Wake of the Flood'},
+ {t:"From the Mars Hotel",a:'Grateful Dead',y:1974,k:'Studio',dc:'From the Mars Hotel'},
+ {t:"Blues for Allah",a:'Grateful Dead',y:1975,k:'Studio',dc:'Blues for Allah'},
+ {t:"Terrapin Station",a:'Grateful Dead',y:1977,k:'Studio',dc:'Terrapin Station Grateful Dead'},
+ {t:"Shakedown Street",a:'Grateful Dead',y:1978,k:'Studio',dc:'Shakedown Street Grateful Dead'},
+ {t:"Go to Heaven",a:'Grateful Dead',y:1980,k:'Studio',dc:'Go to Heaven Grateful Dead'},
+ {t:"In the Dark",a:'Grateful Dead',y:1987,k:'Studio',dc:'In the Dark Grateful Dead'},
+ {t:"Built to Last",a:'Grateful Dead',y:1989,k:'Studio',dc:'Built to Last Grateful Dead'},
+ // ── Grateful Dead — live
+ {t:"Live/Dead",a:'Grateful Dead',y:1969,k:'Live',dc:'Live Dead 1969'},
+ {t:"Grateful Dead (Skull & Roses)",a:'Grateful Dead',y:1971,k:'Live',dc:'Grateful Dead Skull and Roses'},
+ {t:"Europe '72",a:'Grateful Dead',y:1972,k:'Live',dc:'Europe 72 Grateful Dead'},
+ // ── Jerry Garcia / JGB
+ {t:"Garcia",a:'Jerry Garcia',y:1972,k:'Solo',dc:'Jerry Garcia 1972 album'},
+ {t:"Compliments",a:'Jerry Garcia',y:1974,k:'Solo',dc:'Jerry Garcia Compliments'},
+ {t:"Old & In the Way",a:'Old & In the Way',y:1975,k:'Live',dc:'Old and In the Way 1975'},
+ {t:"Reflections",a:'Jerry Garcia',y:1976,k:'Solo',dc:'Jerry Garcia Reflections'},
+ {t:"Cats Under the Stars",a:'Jerry Garcia Band',y:1978,k:'Studio',dc:'Cats Under the Stars'},
+ {t:"Run for the Roses",a:'Jerry Garcia',y:1982,k:'Solo',dc:'Jerry Garcia Run for the Roses'},
+ {t:"Jerry Garcia Band",a:'Jerry Garcia Band',y:1991,k:'Live',dc:'Jerry Garcia Band 1991 live album'},
+ {t:"How Sweet It Is",a:'Jerry Garcia Band',y:1997,k:'Live',dc:'Jerry Garcia Band How Sweet It Is'},
+ // ── Zero + Kimock
+ {t:"Live: Go Hear Nothin'",a:'Zero',y:1991,k:'Live',real:true,dc:'Zero Go Hear Nothin'},
+ {t:"Here Goes Nothin'",a:'Zero',y:1987,k:'Studio',dc:'Zero Here Goes Nothin'},
+ {t:"Nothin' Goes Here",a:'Zero',y:1990,k:'Studio',dc:'Zero Nothin Goes Here'},
+ {t:"Chance in a Million",a:'Zero',y:1994,k:'Live',dc:'Zero Chance in a Million'},
+ {t:"Zero",a:'Zero',y:1997,k:'Studio',dc:'Zero self titled 1997'},
+ {t:"Absolute Zero",a:'Zero',y:2011,k:'Studio',dc:'Zero Absolute Zero'},
+ {t:"Last Danger of Frost",a:'Steve Kimock',y:2014,k:'Solo',dc:'Steve Kimock Last Danger of Frost'},
+ {t:"Satellite City",a:'Steve Kimock',y:2020,k:'Solo',dc:'Steve Kimock Satellite City'}
 ];
 function decadeOf(y){ if(y<1970)return'1960s'; if(y<1980)return'1970s'; if(y<1990)return'1980s'; if(y<2000)return'1990s'; return'2000s+'; }
 
@@ -100,9 +121,11 @@ function render(){ var el=document.getElementById('crate'); var list=filtered();
   el.innerHTML=list.map(function(al){ var i=ALBUMS.indexOf(al); return '<div class="sleeve" onclick="openRec('+i+')"><div class="cover" '+coverInner(al)+'</div><div class="smeta"><div class="st">'+esc(al.t)+'</div><div class="sa">'+esc(al.a)+' · '+al.y+'</div></div></div>'; }).join(''); }
 
 function openRec(i){ var al=ALBUMS[i]; var r=document.getElementById('rec');
-  r.innerHTML='<div class="bigcover" '+coverInner(al)+'</div><h3>'+esc(al.t)+'</h3><div class="ra">'+esc(al.a)+' · '+al.y+(al.real?' · <b style="color:#ffd76a">first real release</b>':' · <span style="opacity:.7">catalog · rights pending</span>')+'</div>'+
-   '<div class="btns"><button class="buy" onclick="buy(\''+esc(al.t).replace(/'/g,'')+'\','+al.real+')">🛒 Buy Now — download</button>'+
+  var songs=(al.s&&al.s.length)?('<div style="text-align:left;margin:12px 0;font-size:13px;color:#cdbde6"><div style="font-weight:800;color:#fff;margin-bottom:4px">Tracklist</div>'+al.s.map(function(x,n){return (n+1)+'. '+esc(x);}).join('<br>')+'</div>'):'';
+  r.innerHTML='<div class="bigcover" '+coverInner(al)+'</div><h3>'+esc(al.t)+'</h3><div class="ra">'+esc(al.a)+' · '+al.y+' · '+esc(al.k||'')+(al.real?' · <b style="color:#ffd76a">first real release</b>':' · <span style="opacity:.7">catalog · rights pending</span>')+'</div>'+songs+
+   '<div class="btns"><button class="buy" onclick="buy(\''+esc(al.t).replace(/'/g,'')+'\','+(!!al.real)+')">🛒 Buy Now — download</button>'+
    '<button class="vinyl" onclick="vinyl(\''+esc(al.t).replace(/'/g,'')+'\')">💿 Print Me the Vinyl</button>'+
+   '<a class="listen" target="_blank" rel="noopener" href="'+disc(al.dc||al.t)+'">🖼️ Original jacket &amp; full tracklist ↗</a>'+
    '<a class="listen" target="_blank" rel="noopener" href="'+arch(al.y)+'">▶ Hear the era on Archive</a></div>'+
    '<button class="x" onclick="closeRec()">close the sleeve</button>';
   document.getElementById('ov').classList.add('on'); }
