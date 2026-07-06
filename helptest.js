@@ -9,7 +9,7 @@
    no-wrap clamp, quota cap, honest screenshot, structured tester+console.
    ============================================================================ */
 (function(root){
-  var CONS={}, FILTER=null, STEP=0, ONEKEY=null, PICK=null, WORKS=null, NOTE='', SHOT=null, mounted=false;
+  var CONS={}, FILTER=null, STEP=0, ONEKEY=null, PICK=null, WORKS=null, NOTE='', SHOT=null, SHOTS=[], mounted=false;
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function q(id){ return document.getElementById(id); }
@@ -22,6 +22,11 @@
   function toast(m){ if(root.toast){try{root.toast(m);return;}catch(e){}} var t=q('ht-toast'); if(!t){t=document.createElement('div');t.id='ht-toast';document.body.appendChild(t);} t.textContent=m; t.className='on'; setTimeout(function(){t.className='';},2600); }
   function doneList(){ try{return JSON.parse(localStorage.getItem('dd.qa.done')||'[]');}catch(e){return [];} }
   function markDone(k){ var d=doneList(); if(d.indexOf(k)<0){d.push(k); try{localStorage.setItem('dd.qa.done',JSON.stringify(d));}catch(e){}} }
+  // ---- screenshots kept client-side (downscaled) so "Send to Claude" can re-download them in one click ----
+  function loadShots(){ try{ return JSON.parse(localStorage.getItem('dd.qa.shots')||'[]'); }catch(e){ return []; } }
+  function saveShots(a){ try{ localStorage.setItem('dd.qa.shots', JSON.stringify(a.slice(-8))); }catch(e){} }
+  function toSmall(file, cb){ try{ var img=new Image(), u=URL.createObjectURL(file); img.onload=function(){ var m=1200, s=Math.min(1, m/Math.max(img.width,img.height)); var c=document.createElement('canvas'); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); var d=null; try{d=c.toDataURL('image/jpeg',0.72);}catch(e){} try{URL.revokeObjectURL(u);}catch(e){} cb(d); }; img.onerror=function(){cb(null);}; img.src=u; }catch(e){ cb(null); } }
+  function stashShot(task, file){ toSmall(file, function(d){ if(!d)return; SHOTS.push({task:task||'',name:file.name,url:d}); if(SHOTS.length>8)SHOTS=SHOTS.slice(-8); saveShots(SHOTS); }); }
 
   var CSS=''+
   '.htfab{position:fixed;left:14px;bottom:16px;z-index:2147483000;border:0;border-radius:999px;background:#1f7a4d;color:#fff;font-weight:800;font-size:13px;padding:11px 15px;display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px #1f7a4d66;cursor:pointer;font-family:-apple-system,Segoe UI,Roboto,sans-serif}'+
@@ -83,14 +88,14 @@
     var head='<div class="htq" style="margin-top:0">'+esc(C.ic)+' HELP TEST'+(who?(' · '+esc(who)):'')+'</div>';
     if(!n){ b.innerHTML=head+'<div style="padding:18px 6px;color:#6c6878">No tasks are set here yet — check back soon. 🌹</div>'; return; }
     var done=doneList(), remaining=set.filter(function(t){return done.indexOf(t.key)<0;});
-    if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:22px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+esc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Your answers are saved on this device. Tap below to send them to the team.</p><button class="htsend" style="width:100%" onclick="HelpTest._send()">📤 Send my results to the team</button></div>'; return; }
+    if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:22px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+esc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Tap below — it <b>copies your notes</b> and <b>downloads your screenshots</b>. Then paste + drag them into the Claude chat. No email.</p><button class="htsend" style="width:100%" onclick="HelpTest._claude()">📤 Send to Claude</button><div style="margin-top:8px"><a href="#" onclick="HelpTest._send();return false" style="font-size:12px;color:#6c6878">copy text only</a></div></div>'; return; }
     if(!seenIntro()){ b.innerHTML=head+
       '<div class="htq" style="margin-top:0">👋 How this works — 15 seconds</div>'+
       '<div class="htstep"><div class="n">1</div><div>I give you <b>one tiny task at a time.</b> Just do it.</div></div>'+
       '<div class="htstep"><div class="n">2</div><div>Tell me <b>👍 Worked</b> or <b>👎 Broke</b> — add a note if you like.</div></div>'+
       '<div class="htstep"><div class="n">3</div><div><b>Can’t find something? Tap “🤔 Stuck” and type what’s confusing.</b> That comes <b>straight to the team — you don’t need to ask Michael.</b></div></div>'+
       '<div class="htstep"><div class="n">4</div><div>You <b>can’t break anything.</b> Nothing here is real.</div></div>'+
-      '<div class="htstep"><div class="n">5</div><div><b>When you’re done, tap 📤 “Send my results.”</b> Your answers save as you go — that button ships them to the team.</div></div>'+
+      '<div class="htstep"><div class="n">5</div><div><b>When you’re done, tap 📤 “Send to Claude.”</b> It copies your notes and downloads your screenshots — then just <b>paste + drag them into the chat.</b> No email.</div></div>'+
       '<button class="htsend" style="width:100%;margin-top:12px" onclick="HelpTest._start()">Let’s go →</button>'; return; }
     if(STEP<0)STEP=0; if(STEP>=n)STEP=n-1;
     var t=set[STEP];
@@ -107,12 +112,12 @@
       '<label class="htshot">'+shot+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="HelpTest._shot(this)"></label>'+
       '<div class="htbtns"><button class="htsend" onclick="HelpTest._submit()">Submit &amp; next ›</button><button class="htskip" onclick="HelpTest._stuck()" title="Confused? Log it — comes to the team">🤔 Stuck</button><button class="htskip" onclick="HelpTest._go(1)">Skip ›</button></div>'+
       (STEP>0?'<button class="htback" onclick="HelpTest._go(-1)">‹ previous</button>':'')+
-      '<div style="text-align:center;margin-top:6px"><a href="#" onclick="HelpTest._send();return false" style="font-size:12px;color:#6c6878">📤 Send my results to the team</a></div>';
+      '<div style="text-align:center;margin-top:6px"><a href="#" onclick="HelpTest._claude();return false" style="font-size:12px;color:#6c6878">📤 Send to Claude (copy notes + download shots)</a></div>';
   }
   function pick(el){ PICK=el.getAttribute('data-v'); var p=el.parentNode; [].forEach.call(document.querySelectorAll('#htbody .htopt'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
   function works(el,v){ WORKS=v; [].forEach.call(el.parentNode.querySelectorAll('button'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
   function go(d){ STEP+=d; render(); }
-  function shot(inp){ var f=inp.files&&inp.files[0]; if(!f)return; var nel=q('htnote'); if(nel)NOTE=nel.value; SHOT={name:f.name};
+  function shot(inp){ var f=inp.files&&inp.files[0]; if(!f)return; var nel=q('htnote'); if(nel)NOTE=nel.value; SHOT={name:f.name}; stashShot(ONEKEY, f);
     var c=client(); if(c&&c.storage){ try{ var w=(tester()||'anon').replace(/[^\w]/g,'_'); var path=w+'/'+Date.now()+'_'+f.name.replace(/[^\w.\-]/g,'_');
       c.storage.from('qa_shots').upload(path,f,{upsert:true}).then(function(r){ if(r&&!r.error){ SHOT.path=path; render(); } }).catch(function(){}); }catch(e){} }
     toast('📸 Got your screenshot — it goes with your notes.'); render(); }
@@ -132,6 +137,15 @@
       if(root.navigator&&navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(function(){ try{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Screenshot this and send it 🌹');} }); }
       else { try{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(e){toast('Screenshot this and send it 🌹');} } };
     if(root.navigator&&navigator.share){ navigator.share({title:'dead.dance Help Test',text:text}).catch(copy); } else copy(); }
+  function sendToClaude(){ var arr=[]; try{arr=JSON.parse(localStorage.getItem('dd.qa.results')||'[]');}catch(e){}
+    if(!arr.length){ toast('Nothing yet — do a task first 🌹'); return; }
+    var who=tester()||'tester';
+    var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
+    var text='Shakedown Street Help Test — '+who+'\n'+arr.length+' answer'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n');
+    try{ if(root.navigator&&navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text); } else { var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } }catch(e){}
+    var shots=(SHOTS&&SHOTS.length)?SHOTS:loadShots(); var n=0;
+    shots.forEach(function(s,i){ if(!s||!s.url)return; n++; setTimeout(function(){ try{ var a=document.createElement('a'); a.href=s.url; a.download='qa_'+(i+1)+'_'+((s.task||'shot').replace(/[^\w]/g,'_'))+'.jpg'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }catch(e){} }, i*400); });
+    toast('📋 Notes copied — paste into Claude. '+(n?('📸 '+n+' screenshot'+(n===1?'':'s')+' downloading — drag them into the chat.'):'(no screenshots this time)')+' No email needed. 🌹'); }
   function seenIntro(){ try{return localStorage.getItem('dd.ht.introseen')==='1';}catch(e){return false;} }
   function startTasks(){ try{localStorage.setItem('dd.ht.introseen','1');}catch(e){} render(); }
   function stuck(){ var C=CONS[conKey()]; if(!C)return; var set=C.tasks||[]; var t=set[STEP]; if(!t)return;
@@ -154,5 +168,5 @@
 
   root.HelpTest={ set:function(k,def){ CONS[k]=def; if(FILTER&&conKey()===k&&mounted){ render(); } },
     open:open, close:close, min:min, unmin:unmin, _m:isMin,
-    _pick:pickConsole, _opt:pick, _works:works, _go:go, _shot:shot, _submit:submit, _note:function(v){NOTE=v;}, _start:startTasks, _stuck:stuck, _send:sendResults };
+    _pick:pickConsole, _opt:pick, _works:works, _go:go, _shot:shot, _submit:submit, _note:function(v){NOTE=v;}, _start:startTasks, _stuck:stuck, _send:sendResults, _claude:sendToClaude };
 })(window);
