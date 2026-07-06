@@ -879,5 +879,46 @@ HelpTest.set('sales',{ic:'🗂',name:'Sales / CRM',tasks:[
          {t:'Place an act into an open night. <span style="opacity:.65">(shortcut: <a class="qgo" onclick="try{setTab(\'talent\')}catch(e){};return false;">▶ open it</a>)</span>'}],
   q:{prompt:'Did the “sell the network” pitch land?',opts:['Yes','Meh','No']}}
 ]});
+
+/* ===== Group Leader console — Help Test + SURVEY for FB group leaders =====
+   Link: sales_crm.html?role=curator&ht=curator&tester=<Name>  (e.g. tester=Ronnie)
+   These are power users — on Facebook all day, some with teams. We're here to LEARN.
+   Every open-ended answer lands in the note field (the gold); screenshots welcome. */
+HelpTest.set('curator',{ic:'👑',name:'Group Leader Console',tasks:[
+ {key:'cur_about',ic:'👋',title:'First — tell us who we’re learning from',
+  steps:[{t:'You run Grateful Dead groups on Facebook — probably all day, maybe with a <b>team.</b> We’re building <b>your</b> tool, so we want the truth.'},
+         {t:'In the note: <b>how many groups do you run, how big, and do you have help?</b>'}],
+  q:{prompt:'Do you run these solo or with a team?',opts:['Solo','A small team','A big team']}},
+ {key:'cur_look',ic:'👑',title:'Look around your new console',
+  steps:[{t:'This is <b>your</b> console — your groups, members, store, posts. Poke every tab.'},
+         {t:'In the note: <b>what’s the first thing you’d want that isn’t here?</b>'}],
+  q:{prompt:'First impression vs. the tools you use now?',opts:['Better','About the same','Worse','Confusing']}},
+ {key:'cur_hyperpost',ic:'📡',title:'Make your first HyperPost',
+  steps:[{t:'Open the app and create a <b>HyperPost</b> — the way you’d post to your group. <a class="qgo" href="index.html" target="_blank">▶ open the app</a>'},
+         {t:'In the note: <b>How did HyperPost feel? What was clunky? What’s missing vs. posting on Facebook?</b> This is the gold.'}],
+  q:{prompt:'How did HyperPost work for you?',opts:['Loved it','Fine','Clunky','It sucked (tell us below)']}},
+ {key:'cur_seeit',ic:'📲',title:'Share it out — then check Facebook',
+  steps:[{t:'Share your post out, then <b>look at how it appears on Facebook</b> (and any other network you use).'},
+         {t:'📸 <b>Screenshot what you see on FB</b> and add it below — good or bad, we want the truth.'}],
+  q:{prompt:'Pleased with how it looked on Facebook / other socials?',opts:['Looked great','OK','Not happy']}},
+ {key:'cur_vsfb',ic:'⚖️',title:'Console vs. Facebook — be honest',
+  steps:[{t:'Think about running your group <b>here</b> vs. on Facebook.'},
+         {t:'In the note: <b>what does Facebook do that we don’t?</b> What would you miss?'}],
+  q:{prompt:'For running your group day-to-day…',opts:['Here is better','FB is better','Need both']}},
+ {key:'cur_missing',ic:'🧩',title:'What features are we missing?',
+  steps:[{t:'You know these tools cold. In the note, <b>list the features you rely on</b> (on FB or elsewhere) that you’d need here — moderation, scheduling, analytics, whatever.'}],
+  q:{prompt:'How complete does this feel for a pro like you?',opts:['Ready','Close','Missing a lot']}},
+ {key:'cur_better',ic:'🔧',title:'What sucks? Make us better.',
+  steps:[{t:'No filter. In the note: <b>what sucks, and what would make this a daily driver</b> for you and your team? Screenshot anything.'}],
+  q:{prompt:'Would you use this every day as-is?',opts:['Yes','Not yet','No']}},
+ {key:'cur_flip',ic:'🔗',title:'“Flip a group, earn the override”',
+  steps:[{t:'The idea: you monetize your own group, <b>and earn an override on any group you bring in</b> (diminishing MOST → LESS → LEAST).'},
+         {t:'In the note: <b>does this make sense and feel fair?</b> What would you change?'}],
+  q:{prompt:'Is the override clear and fair?',opts:['Clear & fair','Unclear','Don’t like it']}},
+ {key:'cur_lead',ic:'⭐',title:'Would you help lead this?',
+  steps:[{t:'We want a <b>lead group leader</b> to guide the whole program — shape the console, set the tone, help the other leaders. We think that’s you.'},
+         {t:'In the note: <b>interested? What would you need to say yes?</b>'}],
+  q:{prompt:'Take the lead position?',opts:['Yes, let’s talk','Maybe','Not for me']}}
+]});
 </script>
 </body></html>
