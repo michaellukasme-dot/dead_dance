@@ -43,10 +43,10 @@
   bar.innerHTML =
     '<div class="row">'
     + '<div class="disc" id="npDisc"></div>'
-    + '<div class="meta"><div class="t" id="npT">🎲 Tap Shuffle — put the Dead on</div><div class="s" id="npS">the Archive, baked in · background music while you browse</div></div>'
+    + '<div class="meta"><div class="t" id="npT">🎲 Tap Shuffle — put the Dead on</div><div class="s" id="npS">🔇 preview — audio unlocks once the songbook is licensed</div></div>'
     + '<button class="sh" onclick="npShuffle(\'song\')">🎲<span class="lbl"> Song</span></button>'
     + '<button class="sh hide2" onclick="npShuffle(\'show\')">📻<span class="lbl"> Show</span></button>'
-    + '<button class="pp" id="npPP" onclick="npToggle()">▶︎</button>'
+    + '<button class="pp" id="npPP" onclick="npPreview()" title="Preview — audio unlocks once the Dead songbook is licensed">🔇</button>'
     + '<a class="vinyl" id="npVinyl" href="record_store.html" title="Get it on vinyl">💿</a>'
     + '<button class="x" onclick="npClose()" title="hide">✕</button>'
     + '</div><div class="dj" id="npDJ"></div>';
@@ -59,8 +59,9 @@
     if(kind==="show"){ var sh=pick(SHOWS); set("📻 "+sh, "Shuffled show · full set · Grateful Dead"); toast("📻 “"+sh+"” — a whole show, on shuffle. (Audio lights up once the songbook's licensed.)"); }
     else { var sg=pick(SONGS); set("🎵 "+sg, "Shuffled version · tap 💿 to own it on vinyl"); toast("🎲 “"+sg+"” — great version. (Preview: audio turns on once licensed.) Loving it? 💿 Get it on vinyl."); }
   };
-  window.npToggle = function(){ var b=document.getElementById("npPP"); var on=b.textContent.indexOf("❚")<0? false : true; setPlay(b.textContent==="▶︎"); };
-  function setPlay(on){ var b=document.getElementById("npPP"), d=document.getElementById("npDisc"); if(!b)return; b.textContent = on? "❚❚":"▶︎"; if(d) d.className = "disc"+(on?" spin":""); }
+  window.npToggle = function(){ npPreview(); };
+  window.npPreview = function(){ if(window.toast) toast("🔇 Preview — the shuffle shows what would play. Audio turns on once the Dead songbook is licensed. Loving it? 💿 Get it on vinyl."); };
+  function setPlay(on){ var d=document.getElementById("npDisc"); if(d) d.className = "disc"+(on?" spin":""); } // honest-state: no fake ▶/⏸; button stays 🔇
   function set(t,s){ var T=document.getElementById("npT"), S=document.getElementById("npS"); if(T)T.textContent=t; if(S)S.textContent=s; }
   window.npClose = function(){ var e=document.getElementById("npbar"); if(e)e.style.display="none"; };
 
