@@ -23,7 +23,9 @@
   function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 
   var css = ""
-   + "#npbar{position:fixed;left:0;right:0;bottom:61px;z-index:54;background:linear-gradient(120deg,#160c28,#2a1650 70%,#3a1d5e);"
+   + "#npbar{position:fixed;left:0;right:0;bottom:61px;z-index:54;transition:bottom .28s ease;background:linear-gradient(120deg,#160c28,#2a1650 70%,#3a1d5e);"
+   + "#npbar.tucked{bottom:1px}"
+   + "#npbar .np-tuck{position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:46px;height:19px;border-radius:10px 10px 0 0;border:0;background:#3a1d5e;color:#f3ecff;font-size:12px;line-height:19px;padding:0;cursor:pointer;box-shadow:0 -2px 6px #0004}"
    + "border-top:1px solid #4a2f6f;box-shadow:0 -6px 24px #0007;color:#f3ecff;"
    + "font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}"
    + "#npbar .row{display:flex;align-items:center;gap:9px;max-width:720px;margin:0 auto}"
@@ -43,15 +45,16 @@
   bar.innerHTML =
     '<div class="row">'
     + '<div class="disc" id="npDisc"></div>'
-    + '<div class="meta"><div class="t" id="npT">🎲 Tap Shuffle — put the Dead on</div><div class="s" id="npS">🔇 preview — audio unlocks once the songbook is licensed</div></div>'
+    + '<div class="meta"><div class="t" id="npT">🎲 Tap ▶ — ambient bed while you browse</div><div class="s" id="npS">🎶 house-made loop · the Dead songbook lights up once licensed</div></div>'
     + '<button class="sh" onclick="npShuffle(\'song\')">🎲<span class="lbl"> Song</span></button>'
     + '<button class="sh hide2" onclick="npShuffle(\'show\')">📻<span class="lbl"> Show</span></button>'
-    + '<button class="pp" id="npPP" onclick="npPreview()" title="Preview — audio unlocks once the Dead songbook is licensed">🔇</button>'
+    + '<button class="pp" id="npPP" onclick="npPreview()" title="Play an ambient bed (house-made sample — the real songbook once licensed)">▶︎</button>'
     + '<a class="vinyl" id="npVinyl" href="record_store.html" title="Get it on vinyl">💿</a>'
-    + '<button class="x" onclick="npClose()" title="hide">✕</button>'
+    + '<button class="np-tuck" id="npTuck" onclick="npTuck()" title="tuck / raise the bar">▼</button>'
     + '</div><div class="dj" id="npDJ"></div>';
 
-  function mount(){ if(document.getElementById("npbar")) return; document.body.appendChild(bar); rollDJ(); setInterval(rollDJ, 6000); }
+  function mount(){ if(document.getElementById("npbar")) return; document.body.appendChild(bar); rollDJ(); setInterval(rollDJ, 6000);
+    try{ if(localStorage.getItem("dd.np.tuck")==="1"){ bar.classList.add("tucked"); var b=document.getElementById("npTuck"); if(b)b.textContent="▲"; } }catch(e){} }
   function rollDJ(){ var e=document.getElementById("npDJ"); if(e) e.innerHTML = pick(DJ); }
 
   window.npShuffle = function(kind){
@@ -59,9 +62,28 @@
     if(kind==="show"){ var sh=pick(SHOWS); set("📻 "+sh, "Shuffled show · full set · Grateful Dead"); toast("📻 “"+sh+"” — a whole show, on shuffle. (Audio lights up once the songbook's licensed.)"); }
     else { var sg=pick(SONGS); set("🎵 "+sg, "Shuffled version · tap 💿 to own it on vinyl"); toast("🎲 “"+sg+"” — great version. (Preview: audio turns on once licensed.) Loving it? 💿 Get it on vinyl."); }
   };
-  window.npToggle = function(){ npPreview(); };
-  window.npPreview = function(){ if(window.toast) toast("🔇 Preview — the shuffle shows what would play. Audio turns on once the Dead songbook is licensed. Loving it? 💿 Get it on vinyl."); };
-  function setPlay(on){ var d=document.getElementById("npDisc"); if(d) d.className = "disc"+(on?" spin":""); } // honest-state: no fake ▶/⏸; button stays 🔇
+  // ── house-made ambient bed (Web Audio, zero copyright — real Dead songbook lights up once licensed) ──
+  var AUD={ctx:null,on:false,gain:null,nodes:[]};
+  function ambientStart(){ try{
+    if(!AUD.ctx) AUD.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    var c=AUD.ctx; if(c.state==='suspended') c.resume();
+    var g=c.createGain(); g.gain.value=0; g.connect(c.destination);
+    var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=650; lp.connect(g);
+    [110,164.81,220].forEach(function(f,i){ var o=c.createOscillator(); o.type=(i===2?'triangle':'sine'); o.frequency.value=f; o.detune.value=(i-1)*5; o.connect(lp); o.start(); AUD.nodes.push(o); });
+    var lfo=c.createOscillator(); lfo.frequency.value=0.07; var lg=c.createGain(); lg.gain.value=0.025; lfo.connect(lg); lg.connect(g.gain); lfo.start(); AUD.nodes.push(lfo);
+    g.gain.setTargetAtTime(0.055, c.currentTime, 1.3); AUD.gain=g; AUD.on=true;
+  }catch(e){ AUD.on=false; } }
+  function ambientStop(){ try{ if(AUD.gain&&AUD.ctx) AUD.gain.gain.setTargetAtTime(0, AUD.ctx.currentTime, 0.4);
+    var ns=AUD.nodes; AUD.nodes=[]; setTimeout(function(){ ns.forEach(function(o){try{o.stop()}catch(e){}}); },700); AUD.on=false; }catch(e){} }
+  window.npPreview = function(){ var b=document.getElementById("npPP");
+    if(AUD.on){ ambientStop(); setPlay(false); if(b)b.textContent="▶︎"; if(window.toast) toast("⏸ Paused the ambient bed."); }
+    else { ambientStart(); setPlay(true); if(b)b.textContent="❚❚"; if(window.toast) toast("🎶 Ambient bed on — a house-made loop while you browse. The real Dead songbook lights up once licensed. 💿"); } };
+  window.npToggle = window.npPreview;
+  function setPlay(on){ var d=document.getElementById("npDisc"); if(d) d.className = "disc"+(on?" spin":""); }
+  // ── tuck / raise the bar (replaces the old ✕ close) ──
+  window.npTuck = function(){ var e=document.getElementById("npbar"), b=document.getElementById("npTuck"); if(!e) return;
+    var tucked=e.classList.toggle("tucked"); if(b) b.textContent = tucked ? "▲" : "▼";
+    try{ localStorage.setItem("dd.np.tuck", tucked?"1":"0"); }catch(x){} };
   function set(t,s){ var T=document.getElementById("npT"), S=document.getElementById("npS"); if(T)T.textContent=t; if(S)S.textContent=s; }
   window.npClose = function(){ var e=document.getElementById("npbar"); if(e)e.style.display="none"; };
 
