@@ -1,6 +1,6 @@
 /* dd_games.js — Shakedown Games hub + the reusable Game Shell, with the first playable game
    (Dead Song-Title Word Scramble). Self-contained: injects its own styles + overlay, overrides
-   the footnav's openGame() to open the hub. Points (Rose Points 🌹) bank locally → Shakedown discounts.
+   the footnav's openGame() to open the hub. Points (Roses 🌹) bank locally → Shakedown discounts.
    One-tap Share via FFShare. Hanz & Franz emcee. Honest-state: leaderboard is local/demo until backend. */
 (function(){
   'use strict';
@@ -81,7 +81,7 @@
     var types={}; CATALOG.forEach(function(g){ (types[g.type]=types[g.type]||[]).push(g); });
     var order=['Wordplay','Knowledge','Audio','Visual'];
     var h='<div class="ddg-hf">'+esc(pick(HF))+'</div>'+
-      '<div class="ddg-hud" style="margin-top:0"><div><div class="n">🌹 '+points()+'</div><div class="l">your points → discounts</div></div></div>';
+      '<div class="ddg-hud" style="margin-top:0"><div><div class="n">🌹 '+points()+'</div><div class="l">your Roses → discounts</div></div></div>';
     order.forEach(function(t){ if(!types[t])return;
       h+='<div class="ddg-typ">'+t+'</div>';
       types[t].forEach(function(g){ h+='<div class="ddg-card'+(g.status==='play'?'':' soon')+'"'+(g.status==='play'?' onclick="DDGames.play(\''+g.id+'\')"':'')+'>'+
@@ -156,7 +156,7 @@
     var share=(window.FFShare&&FFShare.button)?FFShare.button({title:'I scored '+S.score+' on Shakedown '+S.gameName+' 🌹', text:'Think you know your Dead? Beat me.', tags:'#GratefulDead #deaddance'}):'';
     render('<div class="ddg-end"><div class="ddg-hf">'+esc(pick(HF))+'</div>'+
       '<div class="big">'+S.score+'</div><div>final score</div>'+
-      '<div style="margin:10px 0">🌹 <b>+'+earned+'</b> Rose Points banked → Shakedown discounts <span style="opacity:.7">(total '+points()+')</span></div>'+
+      '<div style="margin:10px 0">🌹 <b>+'+earned+'</b> Roses banked → Shakedown discounts <span style="opacity:.7">(total '+points()+')</span></div>'+
       share+
       '<div class="ddg-btns" style="margin-top:12px"><button class="ddg-btn" onclick="DDGames.play(\'scramble\')">Play again</button><button class="ddg-btn alt" onclick="DDGames.open()">More games</button></div>'+
       '<div style="font-size:11px;color:#bfb2df;margin-top:12px">Leaderboard + live rooms turn on with the backend. Points bank now; redeem for discounts once the store is live.</div></div>');
