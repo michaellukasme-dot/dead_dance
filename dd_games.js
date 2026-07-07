@@ -14,13 +14,31 @@
     {id:'nametune', type:'Audio', ic:'🎧', name:'Name That Tune', blurb:'A clip drops — race to name it.', status:'soon'},
     {id:'tapers', type:'Audio', ic:'📼', name:'Taper’s Ear', blurb:'Call the year from the mix. AUD or SBD?', status:'soon'},
     {id:'guessshow', type:'Visual', ic:'🖼️', name:'Guess the Show', blurb:'Clues reveal until you nail the date.', status:'soon'},
-    {id:'trivia', type:'Knowledge', ic:'🧠', name:'GD Trivia Night', blurb:'Hosted on the Karaoke Machine. Buzz in!', status:'soon'},
+    {id:'trivia', type:'Knowledge', ic:'🧠', name:'GD Trivia Night', blurb:'Hosted on the Karaoke Machine. Buzz in!', status:'play'},
     {id:'setlist', type:'Knowledge', ic:'📝', name:'Setlist Showdown', blurb:'Predict/order the setlist. Closest wins.', status:'soon'},
     {id:'segue', type:'Knowledge', ic:'➡️', name:'Segue Chain', blurb:'Name what comes next. Scarlet → ___', status:'soon'}
   ];
   var TITLES=["Scarlet Begonias","Fire on the Mountain","Ripple","Sugar Magnolia","Truckin","Casey Jones","Uncle John's Band","Friend of the Devil","Box of Rain","Touch of Grey","Franklin's Tower","Eyes of the World","Bertha","Sugaree","Tennessee Jed","Jack Straw","Ramble On Rose","Brown Eyed Women","Deal","Loser","Wharf Rat","Estimated Prophet","Terrapin Station","Playing in the Band","China Cat Sunflower","I Know You Rider","Dark Star","St Stephen","The Other One","Cassidy","Row Jimmy","Shakedown Street","Althea","Bird Song","Cumberland Blues","Black Peter","He's Gone","Stella Blue","Ship of Fools","US Blues","Help on the Way","Bertha","Cold Rain and Snow"];
 
-  var S={score:0,streak:0,round:0,rounds:5,answer:'',timer:null,left:0};
+  var TRIVIA=[
+    {q:"The band became 'the Grateful Dead' in what year?",c:["1963","1965","1967","1971"],a:1},
+    {q:"Who wrote the lyrics to most of Jerry Garcia's songs?",c:["Robert Hunter","John Barlow","Bob Weir","Phil Lesh"],a:0},
+    {q:"'Ripple' appears on which 1970 album?",c:["Workingman's Dead","American Beauty","Aoxomoxoa","Blues for Allah"],a:1},
+    {q:"What instrument did Phil Lesh play?",c:["Bass","Drums","Rhythm guitar","Organ"],a:0},
+    {q:"'Pigpen' was the nickname of which founding member?",c:["Ron McKernan","Brent Mydland","Keith Godchaux","Tom Constanten"],a:0},
+    {q:"Scarlet Begonias famously segues into…",c:["Fire on the Mountain","Playing in the Band","Eyes of the World","Franklin's Tower"],a:0},
+    {q:"The skull-and-lightning-bolt logo is called…",c:["Steal Your Face","Dancing Bear","Terrapin","Sunshine Daydream"],a:0},
+    {q:"Which album title is a palindrome?",c:["Aoxomoxoa","Anthem of the Sun","Wake of the Flood","Terrapin Station"],a:0},
+    {q:"Where did the Grateful Dead form?",c:["SF Bay Area","Los Angeles","New York","Seattle"],a:0},
+    {q:"Jerry Garcia passed away in what year?",c:["1995","1990","1998","2001"],a:0},
+    {q:"'Truckin'': what a long, strange ___ it's been.",c:["trip","road","night","ride"],a:0},
+    {q:"The band's devoted fans are known as…",c:["Deadheads","Phans","Parrotheads","Junkies"],a:0},
+    {q:"'Casey Jones': you better watch your ___.",c:["speed","step","back","time"],a:0},
+    {q:"'Dark Star' was a vehicle for extended ___.",c:["improvisation","vocals","drum solos","silence"],a:0},
+    {q:"Which two were Dead keyboard players?",c:["Brent Mydland & Keith Godchaux","Bob Weir & Phil Lesh","Mickey Hart & Bill Kreutzmann","Pigpen & Bobby"],a:0},
+    {q:"'American Beauty' can also be read as American…",c:["Reality","Dreamer","Rose","Highway"],a:0}
+  ];
+  var S={score:0,streak:0,round:0,rounds:5,answer:'',timer:null,left:0,gameName:'Shakedown Games'};
 
   function css(){ if(document.getElementById('ddg-css')) return; var s=document.createElement('style'); s.id='ddg-css';
     s.textContent=
@@ -72,14 +90,14 @@
     });
     return h;
   }
-  window.DDGames={ open:open, close:close, play:function(id){ if(id==='scramble') startScramble(); else open(); } };
+  window.DDGames={ open:open, close:close, play:function(id){ if(id==='scramble') startScramble(); else if(id==='trivia') startTrivia(); else open(); } };
   // Games button opens the hub.
   window.openGame=open;
 
   /* ---------- Game #1: Word Scramble (in the shell) ---------- */
   function scramble(t){ return t.split(' ').map(function(w){ if(w.length<3) return w; var a=w.split(''); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var x=a[i];a[i]=a[j];a[j]=x; } var s=a.join(''); return (s.toLowerCase()===w.toLowerCase())?scramble1(w):s; }).join('  '); }
   function scramble1(w){ return w.split('').reverse().join(''); }
-  function startScramble(){ S.score=0; S.streak=0; S.round=0; nextScramble(); }
+  function startScramble(){ S.score=0; S.streak=0; S.round=0; S.gameName='Song-Title Scramble'; nextScramble(); }
   function nextScramble(){
     clearInterval(S.timer); S.round++;
     if(S.round>S.rounds){ return endGame(); }
@@ -107,9 +125,35 @@
     var b=document.querySelector('.ddg-btns'); if(b) b.innerHTML='<button class="ddg-btn" onclick="DDGames.next()">'+(S.round>=S.rounds?'See results →':'Next →')+'</button>';
   }
   window.DDGames.next=function(){ nextScramble(); };
+  /* ---------- Game #2: GD Trivia Night (same shell; Karaoke-Machine ready) ---------- */
+  function startTrivia(){ S.score=0; S.streak=0; S.round=0; S.gameName='GD Trivia'; S.tq=TRIVIA.slice().sort(function(){return Math.random()-0.5;}); nextTrivia(); }
+  function nextTrivia(){
+    clearInterval(S.timer); S.round++;
+    if(S.round>S.rounds){ return endGame(); }
+    S.q=S.tq[(S.round-1)%S.tq.length]; S.left=15;
+    var choices=S.q.c.map(function(t,i){ return '<button class="ddg-btn alt" style="margin-bottom:8px;width:100%;text-align:left" data-i="'+i+'" onclick="DDGames.answer('+i+')">'+esc(t)+'</button>'; }).join('');
+    render(hud()+
+      '<div class="ddg-scr" style="font-size:17px;letter-spacing:normal;font-family:inherit;font-weight:800">'+esc(S.q.q)+'</div>'+
+      '<div id="ddgChoices">'+choices+'</div>'+
+      '<div class="ddg-reveal" id="ddgRev"></div>');
+    S.timer=setInterval(function(){ S.left--; var t=document.getElementById('ddgT'); if(t) t.textContent=S.left; if(S.left<=0){ clearInterval(S.timer); DDGames.answer(-1); } },1000);
+  }
+  window.DDGames.answer=function(i){
+    if(!S.q) return; clearInterval(S.timer);
+    var ok=(i===S.q.a), gain=0;
+    document.querySelectorAll('#ddgChoices .ddg-btn').forEach(function(b){ var bi=+b.dataset.i; b.onclick=null;
+      if(bi===S.q.a){ b.style.background='#2a8a4a'; b.style.color='#fff'; } else if(bi===i){ b.style.background='#b8002e'; b.style.color='#fff'; } });
+    var rev=document.getElementById('ddgRev');
+    if(ok){ S.streak++; gain=100+S.left*4+(S.streak>=3?50:0); S.score+=gain; if(rev) rev.innerHTML='✅ +'+gain+(S.streak>=3?' 🔥 streak!':' — buzz-in bonus'); }
+    else { S.streak=0; if(rev) rev.innerHTML=(i<0?'⏱️ Time! ':'❌ ')+'Answer: <b>'+esc(S.q.c[S.q.a])+'</b>'; }
+    var sc=document.getElementById('ddgSc'); if(sc) sc.textContent=S.score;
+    var ch=document.getElementById('ddgChoices'); if(ch) ch.insertAdjacentHTML('afterend','<button class="ddg-btn" style="margin-top:6px" onclick="DDGames.nextT()">'+(S.round>=S.rounds?'See results →':'Next →')+'</button>');
+  };
+  window.DDGames.nextT=function(){ nextTrivia(); };
+
   function endGame(){
     var earned=Math.round(S.score/10); addPoints(earned);
-    var share=(window.FFShare&&FFShare.button)?FFShare.button({title:'I scored '+S.score+' on Shakedown Song-Title Scramble 🌹', text:'Think you know your Dead titles? Beat me.', tags:'#GratefulDead #deaddance'}):'';
+    var share=(window.FFShare&&FFShare.button)?FFShare.button({title:'I scored '+S.score+' on Shakedown '+S.gameName+' 🌹', text:'Think you know your Dead? Beat me.', tags:'#GratefulDead #deaddance'}):'';
     render('<div class="ddg-end"><div class="ddg-hf">'+esc(pick(HF))+'</div>'+
       '<div class="big">'+S.score+'</div><div>final score</div>'+
       '<div style="margin:10px 0">🌹 <b>+'+earned+'</b> Rose Points banked → Shakedown discounts <span style="opacity:.7">(total '+points()+')</span></div>'+
