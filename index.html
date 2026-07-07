@@ -247,7 +247,7 @@ body{padding-bottom:64px}
 .cact button{border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
 .cact .cadd{background:#fff;border:1px solid var(--line);color:var(--accent);padding:6px 9px}
 /* 🍀 Miracle Ticket — bottom-right bouncing/blinking FREE-ticket FAB */
-.mfab{position:fixed;right:16px;bottom:80px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
+.mfab{position:fixed;right:16px;bottom:146px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
 .mfab .tkt{position:relative;width:74px;height:48px;border-radius:9px;background:linear-gradient(135deg,#2a8a4a,#c79a3a);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:.04em;text-align:center;line-height:1.05;box-shadow:0 0 0 3px #fff, 0 0 0 5px #2a8a4a55}
 .mfab .tkt::before,.mfab .tkt::after{content:"";position:absolute;width:12px;height:12px;background:var(--cream);border-radius:50%;top:50%;transform:translateY(-50%)}
 .mfab .tkt::before{left:-7px}.mfab .tkt::after{right:-7px}
@@ -659,12 +659,27 @@ body{padding-bottom:64px}
   <button class="fn" onclick="openReader('groups')"><span class="ic">🚉</span><span class="lb">Chapters</span></button>
   <button class="fn" onclick="openReader('shakedown')"><span class="ic">🛍️</span><span class="lb">Shakedown</span></button>
   <button class="fn" onclick="openReader('archive')"><span class="ic">🎵</span><span class="lb">GD Archive</span></button>
-  <button class="fn" onclick="location.href='record_store.html'"><span class="ic">💿</span><span class="lb">Records</span></button>
+  <button class="fn" onclick="ddSheet('record_store.html','💿 Shakedown Records')"><span class="ic">💿</span><span class="lb">Records</span></button>
   <button class="fn" onclick="openGame()"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="profile('me')"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
 </nav>
-<button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:78px;z-index:35;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
+<button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
+<!-- In-app sheet: opens sub-pages (Records, etc.) in a modal so there is no browser-back dead-end in the PWA -->
+<div id="ddsheet" style="position:fixed;inset:0;z-index:130;display:none">
+  <div style="position:absolute;inset:0;background:#160c28dd" onclick="ddSheetClose()"></div>
+  <div style="position:absolute;inset:0;top:max(18px,env(safe-area-inset-top));display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#2a1650;color:#f3ecff;font-weight:800">
+      <span id="ddsheet-t">Shakedown Records</span>
+      <button onclick="ddSheetClose()" aria-label="Close" style="border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer">✕</button>
+    </div>
+    <iframe id="ddsheet-f" title="Shakedown sub-page" style="flex:1;width:100%;border:0;background:#fff"></iframe>
+  </div>
+</div>
+<script>
+function ddSheet(url,title){var s=document.getElementById('ddsheet');if(!s)return;document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.style.display='block';document.body.style.overflow='hidden';}
+function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.style.display='none';document.getElementById('ddsheet-f').src='about:blank';document.body.style.overflow='';}
+</script>
 
 <!-- buy bubble -->
 <div class="buy" id="buy" onmouseleave="this.classList.remove('on')"><div class="r"><div style="flex:1"><b id="buyBand"></b><div class="m" id="buyVenue"></div></div><div class="price" id="buyPrice"></div></div><button class="btn gold sm" id="buyBtn" style="width:100%;margin-top:9px" onclick="buyFromCur()">🎟️ Buy Now · one tap</button><button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="addCalFromCur()">📆 Add to my calendar</button></div>
@@ -818,7 +833,7 @@ body{padding-bottom:64px}
     <a class="citem" href="managed.html?role=band"><span>🚌</span>Go On Tour</a>
     <a class="citem" href="band_vault.html"><span>🎙️</span>Live Recordings</a>
     <a class="citem" href="archive.html"><span>🗄️</span>The Archive — Rank &amp; Argue</a>
-    <a class="citem" href="record_store.html"><span>🛍️</span>Shakedown Records</a>
+    <a class="citem" onclick="ddSheet('record_store.html','💿 Shakedown Records');return false;" style="cursor:pointer"><span>🛍️</span>Shakedown Records</a>
     <a class="citem" href="your_catalogue.html"><span>🎚️</span>Upload your catalogue</a>
     <a class="citem" href="poster_shop.html"><span>🖼️</span>The Poster Shop</a>
     <a class="citem" href="tshirt_shop.html"><span>👕</span>Tour Tees — Print Me the T-Shirt</a>

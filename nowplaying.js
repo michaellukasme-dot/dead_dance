@@ -23,7 +23,7 @@
   function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 
   var css = ""
-   + "#npbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:linear-gradient(120deg,#160c28,#2a1650 70%,#3a1d5e);"
+   + "#npbar{position:fixed;left:0;right:0;bottom:61px;z-index:54;background:linear-gradient(120deg,#160c28,#2a1650 70%,#3a1d5e);"
    + "border-top:1px solid #4a2f6f;box-shadow:0 -6px 24px #0007;color:#f3ecff;"
    + "font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}"
    + "#npbar .row{display:flex;align-items:center;gap:9px;max-width:720px;margin:0 auto}"
