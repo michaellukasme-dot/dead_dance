@@ -107,7 +107,7 @@ h2{font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted
 <div style="font-size:12px;color:var(--muted)">Auto-rotation + “Who's Next” callouts, just like a pro KJ rig. At a party, everyone joins from their phone — no app to install.</div>
 
 <h2>📣 On the mic</h2>
-<div class="emcee"><div class="av" id="emAv">🎩</div><div><div class="who2" id="emWho">Harlan &amp; Fig — your emcees</div><div class="line" id="emLine">Warming up the crowd…</div></div></div>
+<div class="emcee"><div class="av" id="emAv">🎩</div><div><div class="who2" id="emWho">Hanz &amp; Franz — your emcees</div><div class="line" id="emLine">Warming up the crowd…</div></div></div>
 
 <h2>📸 Snap the set — author it here, share it out</h2>
 <div class="stage" style="padding:16px">
@@ -237,13 +237,13 @@ function doQueue(title){
  toast('🎡 '+n+' is in line for “'+title+'.” At a real party this comes in from their phone — no app needed.');
 }
 
-/* ---- emcees: Harlan & Fig ---- */
+/* ---- emcees: Hanz & Franz ---- */
 var EM=[
- {a:'🎩',w:'Harlan — the hype man',l:'Ladies and gentlemen and Deadheads of all persuasions… give it up for the next brave soul on the mic!'},
- {a:'🌼',w:'Fig — keeper of the lore',l:'Fun fact before you sing: this one’s a Hunter lyric. No pressure. Jerry’s watching. Lovingly.'},
- {a:'🎩',w:'Harlan — the hype man',l:'Remember the house rule — we don’t boo flat notes here, we <i>cheer</i> ’em. Outta tune is in tune tonight.'},
- {a:'🌼',w:'Fig — keeper of the lore',l:'Whoever nails the “Fire on the Mountain” groove gets the last veggie burrito. That’s a real prize.'},
- {a:'🎩',w:'Harlan — the hype man',l:'Next up on the Wheel… tune your soul, not your pitch. Let’s go!'}
+ {a:'🎩',w:'Hanz — the hype man',l:'Ladies and gentlemen and Deadheads of all persuasions… give it up for the next brave soul on the mic!'},
+ {a:'🌼',w:'Franz — keeper of the lore',l:'Fun fact before you sing: this one’s a Hunter lyric. No pressure. Jerry’s watching. Lovingly.'},
+ {a:'🎩',w:'Hanz — the hype man',l:'Remember the house rule — we don’t boo flat notes here, we <i>cheer</i> ’em. Outta tune is in tune tonight.'},
+ {a:'🌼',w:'Franz — keeper of the lore',l:'Whoever nails the “Fire on the Mountain” groove gets the last veggie burrito. That’s a real prize.'},
+ {a:'🎩',w:'Hanz — the hype man',l:'Next up on the Wheel… tune your soul, not your pitch. Let’s go!'}
 ];
 var emI=0;
 function rollEmcee(){ var e=EM[emI%EM.length]; document.getElementById('emAv').textContent=e.a; document.getElementById('emWho').textContent=e.w; document.getElementById('emLine').innerHTML=e.l; emI++; }
@@ -275,7 +275,7 @@ function gotPhoto(input){
  var f=input.files&&input.files[0]; if(!f)return;
  try{ var url=URL.createObjectURL(f); document.getElementById('frame').innerHTML='<img src="'+url+'" alt="your snap" style="width:100%;height:100%;object-fit:cover">'; }catch(e){}
  hasPhoto=true; refreshPost();
- emceeSay('🌼','Fig','Ooh, a keeper! Caption it and send it to the family — that’s free marketing with a heartbeat.');
+ emceeSay('🌼','Franz','Ooh, a keeper! Caption it and send it to the family — that’s free marketing with a heartbeat.');
 }
 function refreshPost(){ var ok=hasPhoto&&document.getElementById('consent').checked; var b=document.getElementById('postBtn'); b.style.opacity=ok?'1':'.55'; b.disabled=!ok; }
 document.addEventListener('change',function(e){ if(e.target&&e.target.id==='consent')refreshPost(); });
@@ -288,7 +288,7 @@ function toggleGPS(){
    function(){ gpsOn=true; b.classList.add('on'); b.textContent='📍 Spot tagged (approx)'; contentRequest(); }, {timeout:6000});
 }
 /* the polite, GPS-triggered CONTENT REQUEST — free crowd marketing, human-click only */
-function contentRequest(){ emceeSay('🎩','Harlan','Looks like you’re out at a show tonight! Snap one for the family and post it — original, from the source, and it puts Shakedown Street in front of every Deadhead you know. No charge, all love.'); }
+function contentRequest(){ emceeSay('🎩','Hanz','Looks like you’re out at a show tonight! Snap one for the family and post it — original, from the source, and it puts Shakedown Street in front of every Deadhead you know. No charge, all love.'); }
 function postSD(){
  if(!(hasPhoto&&document.getElementById('consent').checked)){ toast('📷 Add a photo and check the consent box first — real people, real consent.'); return; }
  LED.in++; updateLedger();
@@ -296,7 +296,7 @@ function postSD(){
  document.getElementById('fbWrap').style.display='block';
  logFlow('in','shakedownstreet.app',cap);   // authored ON sd.app (origination event)
  toast('🌹 Authored on Shakedown Street — original content, live in the family feed. Now share it out if you like.');
- emceeSay('🌼','Fig','That’s a HyperPost! Born on Shakedown Street. Push it to Facebook and watch the family find us.');
+ emceeSay('🌼','Franz','That’s a HyperPost! Born on Shakedown Street. Push it to Facebook and watch the family find us.');
 }
 function shareFB(){
  LED.out++; updateLedger();

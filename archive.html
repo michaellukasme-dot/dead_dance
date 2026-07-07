@@ -140,13 +140,13 @@ var RCATS=Object.keys(RANK); var RCAT=RCATS[0];
 function setRank(c){ RCAT=c; setView('debate'); }
 // 🔥 The house instigators — H&Z's two troublemaker friends. Clearly labeled characters (a mascot device), never posing as real fans. All in good fun.
 var HOTTAKES=[
- ['🔥 Hot-Take Harlan','Brent was the best keyboardist and it is NOT close. Keith fans, form a line.'],
- ['🌶️ Rebuttal Rae','Cornell 77 is overrated. Veneta 72 smokes it. I said what I said.'],
- ['🔥 Hot-Take Harlan','Any Dark Star under 20 minutes does not count as a Dark Star. Sorry.'],
- ['🌶️ Rebuttal Rae','John Mayer is the best thing to happen to this music since 1995. Meet me at the lot.'],
- ['🔥 Hot-Take Harlan','Pigpen-era is the only REAL Dead. Everything after is a tribute band. Discuss.']
+ ['🔥 Hot-Take Hanz','Brent was the best keyboardist and it is NOT close. Keith fans, form a line.'],
+ ['🌶️ Rebuttal Franz','Cornell 77 is overrated. Veneta 72 smokes it. I said what I said.'],
+ ['🔥 Hot-Take Hanz','Any Dark Star under 20 minutes does not count as a Dark Star. Sorry.'],
+ ['🌶️ Rebuttal Franz','John Mayer is the best thing to happen to this music since 1995. Meet me at the lot.'],
+ ['🔥 Hot-Take Hanz','Pigpen-era is the only REAL Dead. Everything after is a tribute band. Discuss.']
 ];
-function reactHot(){ toast('🍿 Ooooh. Take it to the comments — Harlan & Rae are counting.'); }
+function reactHot(){ toast('🍿 Ooooh. Take it to the comments — Hanz & Franz are counting.'); }
 
 function setView(v){
   [].forEach.call(document.querySelectorAll('.tab'),function(b){b.classList.toggle('on',b.getAttribute('data-v')===v);});
@@ -186,4 +186,5 @@ HelpTest.set('archive',{ic:'🗄️',name:'The Archive Explorer',tasks:[
  {key:'arc_dream',ic:'💡',title:'Dream up an engagement cut (H&Z)',steps:[{t:'What category would YOU add? (longest jam, best segue, rarest song…) Type it below — this is the gold.'}],q:{prompt:'Got an idea for us?',opts:['Yes (below)','Not now']}}
 ]});
 </script>
+<script src="nowplaying.js" defer></script>
 </body></html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Built by Stagger Lee — Shakedown Street</title>
+<style>
+:root{--purple:#5a2e86;--gold:#c08a2d;--gold2:#ffd76a;--rose:#b8002e;--ink:#17101f;--muted:#a99cc4}
+*{box-sizing:border-box}
+body{margin:0;background:#17101f;color:#f2ecff;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.sig{max-width:760px;margin:0 auto;padding:34px 18px 44px}
+/* trust bar */
+.trust{background:linear-gradient(120deg,#0e0716,#3a1d5e 65%,#b8002e);border-radius:14px;padding:16px;text-align:center;
+  font-weight:800;letter-spacing:3px;font-size:14px;color:#fff;box-shadow:0 8px 28px #0007}
+.trust .dot{color:var(--gold2);margin:0 6px}
+/* avatar + credit */
+.who{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:30px}
+.av{width:118px;height:118px;border-radius:50%;padding:5px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--rose));box-shadow:0 10px 30px #0008}
+.av .inner{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#241638;display:flex;align-items:center;justify-content:center}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.av .mono{font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:40px;color:var(--gold2);letter-spacing:1px}
+.credit{margin-top:16px;font-size:19px;color:#efe7ff}
+.credit b{font-weight:800}
+.credit .lee{color:var(--gold2);font-style:italic}
+.dom{margin-top:8px;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--gold2);text-decoration:none;letter-spacing:.3px}
+.dom:hover{text-decoration:underline}
+.rose{margin-top:14px;font-size:18px;opacity:.85}
+</style></head>
+<body>
+<div class="sig">
+  <div class="trust">FAN&#8209;FIRST<span class="dot">·</span>ARTIST&#8209;OWNED<span class="dot">·</span>THE ANTI&#8209;TICKETMASTER</div>
+
+  <div class="who">
+    <div class="av"><div class="inner">
+      <!-- Drop your portrait in as stagger_lee.png (same one from the trek planner works). Falls back to the monogram. -->
+      <img src="stagger_lee.png" alt="Michael Lukas — Stagger Lee" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="mono" style="display:none">SL</div>
+    </div></div>
+    <div class="credit">Built by <b>Michael Lukas</b> · <span class="lee">"Stagger Lee"</span> · Hellertown, PA</div>
+    <a class="dom" href="https://shakedownstreet.app">shakedownstreet.app</a>
+    <div class="rose">🌹</div>
+  </div>
+</div>
+</body></html>
