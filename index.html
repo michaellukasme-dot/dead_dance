@@ -468,6 +468,10 @@ body{padding-bottom:64px}
 /* blog Local/National toggle */
 .sgb{background:#f2eee6;border:0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:#6a6577;cursor:pointer}
 .sgb.on{background:var(--accent);color:#fff}
+/* feed-scope single toggle (below composer) */
+.famtoggle{display:flex;background:#efe9f7;border-radius:999px;padding:3px;margin:8px auto 4px;max-width:320px}
+.famtoggle .ft-opt{flex:1;border:0;background:none;border-radius:999px;padding:8px 10px;font-size:12.5px;font-weight:800;color:#6a5f86;cursor:pointer;transition:.15s}
+.famtoggle .ft-opt.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px #5a2e8655}
 /* tap-to-friend handshake */
 .shake2{position:fixed;inset:0;z-index:84;background:rgba(20,12,34,.6);display:none;align-items:center;justify-content:center;padding:18px}
 .shake2.on{display:flex}
@@ -574,13 +578,6 @@ body{padding-bottom:64px}
 
   <!-- ===================== CENTER FEED ===================== -->
   <div class="center">
-    <div class="card" style="padding:9px 13px;display:flex;align-items:center;gap:8px">
-      <b style="font-size:13.5px">📖 The Blog</b>
-      <span style="margin-left:auto;display:flex;gap:5px">
-        <button class="sgb on" id="sgLocal" onclick="feedScope('local')">📍 Local Family</button>
-        <button class="sgb" id="sgNat" onclick="feedScope('national')">🌎 National</button>
-      </span>
-    </div>
     <div class="card">
       <div class="gm-h"><span class="fb">f</span><b>Groups Mirror</b><span style="color:var(--muted);font-size:12px;margin-left:auto">all Dead FB groups, mirrored</span></div>
       <div class="mirror" id="mirror"></div>
@@ -601,6 +598,12 @@ body{padding-bottom:64px}
         <button class="hpbtn" style="background:var(--rose);color:#fff" onclick="hpComposer()">📡 HyperPost</button>
       </div>
       <div class="wedo">🌹 dead.dance runs on the family — <b>this only works if we all do our share.</b> Post a show, forward a gem, weed a row.</div>
+    </div>
+
+    <!-- Feed scope: single toggle (default Local Family) -->
+    <div class="famtoggle" role="group" aria-label="Feed scope">
+      <button class="ft-opt on" id="sgLocal" onclick="feedScope('local')">📍 Local Family</button>
+      <button class="ft-opt" id="sgNat" onclick="feedScope('national')">🌎 National</button>
     </div>
 
     <div class="sec">📚 FROM YOUR GROUPS — SHARED IN</div>
@@ -665,6 +668,7 @@ body{padding-bottom:64px}
 </nav>
 <button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
+<button id="gamefab" onclick="openGame()" aria-label="Games" title="Games — win points for discounts" style="position:fixed;left:16px;bottom:146px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#2a8a4a,#c79a3a);color:#fff;font-size:26px;box-shadow:0 8px 22px #0007;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite">🎮</button>
 <!-- In-app sheet: opens sub-pages (Records, etc.) in a modal so there is no browser-back dead-end in the PWA -->
 <div id="ddsheet" style="position:fixed;inset:0;z-index:130;display:none">
   <div style="position:absolute;inset:0;background:#160c28dd" onclick="ddSheetClose()"></div>
