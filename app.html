@@ -848,7 +848,9 @@ function gigHyper(moment){
 function safeUrl(u){u=String(u||"").trim();return /^https?:\/\//i.test(u)?u:"";}
 var SHARES=(function(){try{var s=localStorage.getItem("dd.shares");if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return [];})();
 function saveShares(){try{localStorage.setItem("dd.shares",JSON.stringify(SHARES.slice(0,200)));}catch(e){}}
-function groupNames(){var g={};SHARES.forEach(function(s){if(s.group)g[s.group]=1;});["Grateful Dead Tapers","Jerry Garcia Band Fans","Shakedown Street","Dead & Company Family","NorCal Deadheads"].forEach(function(n){g[n]=1;});return Object.keys(g);}
+function groupNames(){var g={};SHARES.forEach(function(s){if(s.group)g[s.group]=1;});["Stealing Your Face","Grateful Dead Tapers","Jerry Garcia Band Fans","Shakedown Street","Dead & Company Family","NorCal Deadheads"].forEach(function(n){g[n]=1;});return Object.keys(g);}
+/* Stealing Your Face — SDS lot community (facebook.com/groups/792214340115407). Registered as a
+   vacuum/recruit target; the authoritative recruitable Master List is server-side (chat_recruitable RPC). */
 function captureShare(url,text){
  var groups=groupNames();
  document.getElementById("sheet").innerHTML='<h3>📥 Drop it into a group</h3><div class="sb">Share a post you\'re looking at on Facebook into the same group here. <b>You\'re sharing, not scraping</b> — we keep your link + note (private group content stays private to that group).</div>'+
