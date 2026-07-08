@@ -42,9 +42,9 @@
 
   function css(){ if(document.getElementById('ddg-css')) return; var s=document.createElement('style'); s.id='ddg-css';
     s.textContent=
-    '.ddgov{position:fixed;inset:0;z-index:140;display:none;background:linear-gradient(160deg,#160c28,#2a1650 70%,#3a1d5e);color:#f3ecff;overflow-y:auto}'+
-    '.ddgov.on{display:block}'+
-    '.ddg-wrap{max-width:520px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom));min-height:100%}'+
+    '.ddgov{position:fixed;inset:0;z-index:140;display:none;background:rgba(18,10,30,.62);color:#f3ecff;overflow-y:auto;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}'+
+    '.ddgov.on{display:flex;align-items:flex-start;justify-content:center;padding:26px 12px calc(26px + env(safe-area-inset-bottom))}'+
+    '.ddg-wrap{width:100%;max-width:520px;margin:auto;padding:16px 16px 20px;background:linear-gradient(160deg,#160c28,#2a1650 70%,#3a1d5e);border:1px solid #ffffff1f;border-radius:20px;box-shadow:0 30px 90px #000a;max-height:calc(100vh - 52px);overflow-y:auto}'+
     '.ddg-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'+
     '.ddg-title{font-weight:900;font-size:20px;letter-spacing:.3px}'+
     '.ddg-x{border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer}'+
@@ -65,7 +65,7 @@
     '.ffsh-btn{border:0;background:#c79a3a;color:#2a1650;border-radius:999px;padding:11px 16px;font-weight:800;cursor:pointer;margin-top:8px}';
     document.head.appendChild(s);
   }
-  function ov(){ var o=document.getElementById('ddgov'); if(!o){ o=document.createElement('div'); o.id='ddgov'; o.className='ddgov'; document.body.appendChild(o); } return o; }
+  function ov(){ var o=document.getElementById('ddgov'); if(!o){ o=document.createElement('div'); o.id='ddgov'; o.className='ddgov'; o.onclick=function(e){ if(e.target===o) close(); }; document.body.appendChild(o); } return o; }
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
   function norm(s){ return (s||'').toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim(); }
