@@ -13,12 +13,23 @@
     "Catalina — Zero","Chance in a Million — Zero","Cats Under the Stars — JGB","Deal — JGB"];
   var SHOWS = ["Cornell · 5/8/77","Veneta · 8/27/72","Barton Hall · '77","Winterland · '74",
     "Englishtown · 9/3/77","Radio City · '80","Fillmore East · '70","Capitol Theatre · '71"];
-  var DJ = [
-    "🎩 Hanz: Put one on and let it riiide! &nbsp;🌶️ Franz: He means press shuffle, sweetheart.",
-    "🌶️ Franz: THIS version is the one. &nbsp;🎩 Hanz: Every version is the one, that's the whole point!",
-    "🎩 Hanz: Crank it. &nbsp;🌶️ Franz: It's a browser tab, Hanz, there's no knob.",
-    "🌶️ Franz: Veneta smokes Cornell. &nbsp;🎩 Hanz: Here we go again, folks.",
-    "🎩 Hanz &amp; 🌶️ Franz: Loving it? Take it home on vinyl. 🌹"
+  // Same two personas — roles randomized each roll (either can bicker), and sometimes they agree.
+  var BICKER = [
+    {a:"Put one on and let it riiide!", b:"He means press shuffle, sweetheart."},
+    {a:"THIS version is the one.", b:"Every version is the one — that's the whole point!"},
+    {a:"Crank it.", b:"It's a browser tab — there's no knob."},
+    {a:"Veneta smokes Cornell.", b:"Here we go again, folks."},
+    {a:"'77 is peak Dead, case closed.", b:"'72 just called — it wants its crown back."},
+    {a:"Too many notes in this jam.", b:"There's no such thing as too many notes."},
+    {a:"Speed it up, more fun.", b:"Let it breathe, would ya?"},
+    {a:"Skip to the Fire.", b:"You don't skip the Scarlet. Heathen."}
+  ];
+  var AGREE = [
+    "okay okay… we both love this one.",
+    "chills. every. time.",
+    "no notes — just dance. 🌹",
+    "this jam? unimpeachable.",
+    "loving it? take it home on vinyl. 🌹"
   ];
   function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 
@@ -55,7 +66,12 @@
 
   function mount(){ if(document.getElementById("npbar")) return; document.body.appendChild(bar); rollDJ(); setInterval(rollDJ, 6000);
     try{ if(localStorage.getItem("dd.np.tuck")==="1"){ bar.classList.add("tucked"); var b=document.getElementById("npTuck"); if(b)b.textContent="▲"; } }catch(e){} }
-  function rollDJ(){ var e=document.getElementById("npDJ"); if(e) e.innerHTML = pick(DJ); }
+  function rollDJ(){ var e=document.getElementById("npDJ"); if(!e) return;
+    var H="🎩 Hanz", F="🌶️ Franz";
+    if(Math.random()<0.28){ e.innerHTML = H+" &amp; "+F+": "+pick(AGREE); return; }   // sometimes they agree
+    var ex=pick(BICKER), first=Math.random()<0.5, s1=first?H:F, s2=first?F:H;            // random bickerer / bickeree
+    e.innerHTML = s1+": "+ex.a+" &nbsp; "+s2+": "+ex.b;
+  }
 
   window.npShuffle = function(kind){
     var playing = true; setPlay(true);
