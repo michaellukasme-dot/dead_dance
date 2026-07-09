@@ -38,9 +38,35 @@ body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMa
 .rec .x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:6px}
 .honest{margin:0 16px 30px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;font-size:12px;color:#c9bde0}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
+/* market tiles */
+.mktiles{display:flex;gap:12px;flex-wrap:wrap;padding:16px 16px 4px}
+.mktile{display:flex;align-items:center;gap:12px;flex:1;min-width:240px;text-align:left;cursor:pointer;border:1px solid #43305f;border-radius:14px;padding:14px 16px;color:#f2ecff;background:linear-gradient(120deg,#241041,#3a1d5e);transition:transform .15s,box-shadow .15s}
+.mktile:hover{transform:translateY(-2px);box-shadow:0 10px 26px #0007}
+.mktile.kar{border-color:#ffd76a}
+.mktile .mkic{font-size:30px;flex:none}
+.mktile .mkbody{display:flex;flex-direction:column;flex:1}
+.mktile .mkbody b{font-size:16px}.mktile .mkbody small{font-size:12px;color:#c9bde0}
+.mktile .mkgo{margin-left:auto;font-weight:900;color:#ffd76a;font-size:13px;white-space:nowrap}
+/* karaoke iframe modal */
+#karov{position:fixed;inset:0;z-index:130;display:none}
+#karov.on{display:block}
+#karov .kbg{position:absolute;inset:0;background:#160c28e6}
+#karov .kpanel{position:absolute;inset:0;top:max(10px,env(safe-area-inset-top));display:flex;flex-direction:column;max-width:1000px;margin:0 auto;left:0;right:0}
+#karov .khead{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(120deg,#0e0716,#3a1d5e 60%,#b8002e);color:#f3ecff;font-weight:800;border-radius:14px 14px 0 0}
+#karov .kx{border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer}
+#karov iframe{flex:1;width:100%;border:0;background:#140b22;border-radius:0 0 14px 14px}
 </style></head>
 <body>
 <div class="top"><div class="logo">🌹 SHAKEDOWN <span>RECORDS</span></div><div class="tag">the crate that never ends · flip through the whole collection</div></div>
+
+<!-- ===== The Dealer's market tiles: Karaoke opens the whole show in a modal ===== -->
+<div class="mktiles">
+  <button class="mktile kar" onclick="openKaraoke()">
+    <span class="mkic">🎤</span>
+    <span class="mkbody"><b>Shakedown Karaoke</b><small>the whole show — Live Room · soundboard · songbook · pricing</small></span>
+    <span class="mkgo">Open ▸</span>
+  </button>
+</div>
 
 <div class="ctrl">
   <select id="fArtist" onchange="render()"></select>
@@ -54,12 +80,25 @@ body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMa
 <div class="honest">Honest-state: <b>Shakedown Records</b> is the crate-digging front for the <i>Deal with the Dead</i> Reader/Store. Covers shown are original stylized sleeves — <b>no third-party album art is reproduced</b>. <b>Buy Now</b> and <b>Print Me the Vinyl</b> are real buttons, but <b>nothing charges until payments go live</b>, and each title is sold <b>only once its rights are cleared</b> (masters + mechanical + vinyl-manufacturing + cover art). First real release: <b>Zero — "Go Hear Nothin'"</b> (the market test). 🌹</div>
 
 <div class="ov" id="ov"><div class="rec" id="rec"></div></div>
+
+<!-- Karaoke — the whole show, in a modal -->
+<div id="karov">
+  <div class="kbg" onclick="closeKaraoke()"></div>
+  <div class="kpanel">
+    <div class="khead"><span>🎤 Shakedown Karaoke — the whole show</span><button class="kx" onclick="closeKaraoke()" aria-label="Close">✕</button></div>
+    <iframe id="karframe" title="Shakedown Karaoke" src="about:blank" loading="lazy"></iframe>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2600);}
+function openKaraoke(){var o=document.getElementById('karov'),f=document.getElementById('karframe');if(f.src.indexOf('karaoke_store.html')<0)f.src='karaoke_store.html';o.classList.add('on');document.body.style.overflow='hidden';}
+function closeKaraoke(){var o=document.getElementById('karov');o.classList.remove('on');document.body.style.overflow='';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeKaraoke();});
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function arch(q){ return 'https://archive.org/search?query='+encodeURIComponent('collection:GratefulDead '+q); }
 function disc(q){ return 'https://www.discogs.com/search/?type=release&q='+encodeURIComponent(q); }

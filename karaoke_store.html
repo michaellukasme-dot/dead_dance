@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shakedown Karaoke — the whole show</title>
+<meta name="theme-color" content="#140b22">
+<style>
+:root{--bg:#140b22;--purple:#5a2e86;--purple2:#7a3cc0;--gold:#ffd76a;--rose:#b8002e;--green:#2a6b46;--muted:#a99cc4;--line:#2e2148;--card:#1b1030;--card2:#170d29}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:var(--bg);color:#f2ecff;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.lights{height:16px;background:repeating-linear-gradient(90deg,transparent 0 26px,var(--gold) 26px 30px,transparent 30px 56px);opacity:.55;filter:drop-shadow(0 0 4px var(--gold))}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 60%,var(--rose));padding:16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 16px #0008}
+.top .logo{font-weight:900;font-size:22px;letter-spacing:.4px}.top .logo span{color:var(--gold)}
+.top .tag{font-size:12.5px;color:#e9d8ff;letter-spacing:.4px}
+.wrap{max-width:940px;margin:0 auto;padding:0 16px 70px}
+.honest{margin:12px 0;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:11px 14px;font-size:12.5px;color:#d9cbef}
+.honest b{color:#f2ecff}
+h2{font-size:14px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;display:flex;align-items:center;gap:8px}
+h2 .free{font-size:9.5px;letter-spacing:.6px;color:#bfe9cc;background:#193d29;border:1px solid #2a6b46;border-radius:999px;padding:2px 8px;font-weight:800;text-transform:uppercase}
+h2 .gate{font-size:9.5px;letter-spacing:.6px;color:#3a1d00;background:var(--gold);border-radius:999px;padding:2px 8px;font-weight:800;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+/* stage / live room */
+.stage{background:radial-gradient(120% 90% at 50% 0%,#2a1650,#160c28);border:1px solid #3a2a55;border-radius:18px;padding:18px;box-shadow:0 14px 40px #0009;position:relative;overflow:hidden}
+.roomhdr{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:12px}
+.roomhdr .rn{font-weight:800;color:#e9d8ff;font-size:13px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#37d67a;box-shadow:0 0 8px #37d67a;margin-right:5px;vertical-align:middle;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.np{display:flex;align-items:center;gap:12px}
+.np .disc{width:52px;height:52px;border-radius:50%;background:conic-gradient(from 0deg,#0e0716,#5a2e86,#0e0716);box-shadow:inset 0 0 0 6px #201233,0 0 0 2px #ffffff22;animation:spin 3.2s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.np .t{font-weight:900;font-size:19px;line-height:1.15}.np .s{font-size:13px;color:var(--muted)}
+.np .star{color:var(--gold)}
+.livestats{display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap}
+.livestats .st{flex:1;min-width:88px;background:#1b1030;border:1px solid #362552;border-radius:11px;padding:9px 11px;text-align:center}
+.livestats .st b{display:block;font-size:19px;color:var(--gold);font-weight:900}
+.livestats .st span{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.screen{margin:14px 0;background:#0c0718;border:1px solid #33244f;border-radius:12px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;position:relative;overflow:hidden}
+.lyric{font-size:20px;font-weight:800;letter-spacing:2px;color:#4a3b6b}
+.screen .note{font-size:11px;color:#7c6ea0}
+.ctrls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.ctl{background:#1b1030;border:1px solid #362552;border-radius:12px;padding:10px 12px}
+.ctl .cl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.ctl .row{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.ctl .val{font-weight:900;font-size:16px}
+.stp{width:34px;height:34px;border-radius:9px;border:0;background:#5a2e86;color:#fff;font-size:20px;font-weight:900;cursor:pointer}
+.tg{width:100%;border:0;border-radius:10px;padding:9px;font-weight:800;cursor:pointer;background:#241638;color:#e9d8ff}
+.tg.on{background:var(--green);color:#dfffe9}
+.score{margin-top:10px;background:#1b1030;border:1px solid #362552;border-radius:12px;padding:10px 12px}
+.bar{height:12px;border-radius:8px;background:#241638;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;width:8%;background:linear-gradient(90deg,#2a6b46,#ffd76a,#b8002e);transition:width .5s}
+.sc-l{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+/* shared queue */
+.qrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #2a1c40;border-radius:11px;margin-bottom:7px;background:var(--card2)}
+.qrow .qn{font-weight:800}.qrow .qs{font-size:12px;color:var(--muted)}
+.qrow .tag{margin-left:auto;font-size:10px;font-weight:900;letter-spacing:.5px;padding:3px 9px;border-radius:999px;text-transform:uppercase}
+.tag.next{background:var(--gold);color:#3a1d00}.tag.group{background:#0e6b6b;color:#dff}.tag.duet{background:#7a3cc0;color:#fff}
+/* soundboard + emoji */
+.pads{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.pad{border:0;border-radius:14px;padding:16px 8px;font-weight:800;cursor:pointer;background:#241638;color:#e9d8ff;font-size:13px;transition:transform .08s;display:flex;flex-direction:column;gap:6px;align-items:center}
+.pad:active{transform:scale(.93)}
+.pad .pe{font-size:26px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{border:1px solid #43305f;background:#1b1030;color:#e9d8ff;border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:14px}
+.chip:active{transform:scale(.92)}
+/* songbook */
+.sb-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sb-ctrl input,.sb-ctrl select{font:inherit;background:#1b1030;color:#fff;border:1px solid #362552;border-radius:10px;padding:9px 12px}
+.sb-ctrl input{flex:1;min-width:150px}
+.book{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+@media(max-width:560px){.book{grid-template-columns:1fr}}
+.song{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid #2a1c40;border-radius:11px;background:var(--card2);cursor:pointer}
+.song:hover{border-color:#4a2f6f}
+.song .ti{font-weight:800}.song .ba{font-size:12px;color:var(--muted)}
+.song .pin{margin-left:auto;font-size:10px;font-weight:800;color:#3a1d00;background:var(--gold);border-radius:999px;padding:3px 9px}
+.song .add{margin-left:auto;font-size:20px;color:var(--gold);font-weight:900}
+.song .pin+.add{margin-left:10px}
+/* emcee */
+.emcee{background:linear-gradient(120deg,#241041,#3a1d5e);border:1px solid #4a2f6f;border-radius:14px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+.emcee .av{font-size:26px;flex:none}
+.emcee .who2{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.emcee .line{font-size:14.5px;margin-top:2px}
+/* pricing */
+.doors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:720px){.doors{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid #362552;border-radius:14px;padding:16px;position:relative}
+.card.pro{border-color:var(--gold)}
+.card .dl{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.card h3{margin:2px 0 4px;font-size:17px}.card .p{font-size:12.5px;color:var(--muted);min-height:64px}
+.card .price{font-size:24px;font-weight:900;color:var(--gold);margin:8px 0 2px}
+.card .price small{font-size:12px;color:var(--muted);font-weight:600}
+.card .who{font-size:11px;color:#cdbde6;margin-bottom:8px}
+.card button{width:100%;border:0;border-radius:11px;padding:11px;font-weight:900;cursor:pointer;margin-top:6px}
+.card .go{background:var(--gold);color:#3a1d00}.card .go2{background:#5a2e86;color:#fff}
+.plan{font-size:9.5px;font-weight:900;letter-spacing:.5px;color:#3a1d00;background:var(--gold);border-radius:999px;padding:2px 8px;position:absolute;top:12px;right:12px}
+/* genre menu */
+.gmenu{background:var(--card);border:1px solid #362552;border-radius:14px;overflow:hidden}
+.gmenu .gr{display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid #241638}
+.gmenu .gr:last-child{border-bottom:0}
+.gmenu .gr .gt{font-weight:800}.gmenu .gr .gd{font-size:11.5px;color:var(--muted)}
+.gmenu .gr .gp{margin-left:auto;font-weight:900;color:var(--gold);font-size:16px;white-space:nowrap}
+.gmenu .gr.floor .gp{color:#bfe9cc}
+/* hours calc */
+.calc{background:var(--card);border:1px solid #362552;border-radius:14px;padding:16px}
+.calc .frow{display:flex;align-items:center;gap:10px;margin:10px 0}
+.calc .frow label{flex:1;font-size:13px;color:#cdbde6}
+.calc select,.calc input[type=range]{font:inherit;background:#160c28;color:#fff;border:1px solid #43305f;border-radius:9px;padding:8px 10px}
+.calc input[type=range]{padding:0;flex:1;accent-color:var(--gold)}
+.calc .hv{font-weight:900;color:var(--gold);min-width:64px;text-align:right}
+.calc .out{margin-top:14px;background:#160c28;border:1px solid #33244f;border-radius:12px;padding:14px;text-align:center}
+.calc .out .big{font-size:30px;font-weight:900;color:var(--gold)}
+.calc .out .fm{font-size:12px;color:var(--muted);margin-top:4px}
+/* logistics gates */
+.gates{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:720px){.gates{grid-template-columns:1fr}}
+.gate-c{background:var(--card);border:1px solid #362552;border-radius:14px;padding:15px;text-align:center}
+.gate-c .qi{width:76px;height:76px;margin:2px auto 10px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;padding:6px}
+.gate-c .qi svg{width:100%;height:100%}
+.gate-c .gl{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.gate-c h4{margin:2px 0 6px;font-size:15px}
+.gate-c .gp2{font-size:12px;color:#cdbde6}
+/* overlay + toast */
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.modal{background:#211533;border:1px solid #3a2a55;border-radius:16px;max-width:380px;width:100%;padding:20px;text-align:center}
+.modal input{width:100%;font:inherit;background:#160c28;color:#fff;border:1px solid #43305f;border-radius:10px;padding:11px;margin:12px 0}
+.modal .go{background:var(--gold);color:#3a1d00;border:0;border-radius:11px;padding:12px;font-weight:900;width:100%;cursor:pointer}
+.modal .x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:120;text-align:center;max-width:90%}#toast.on{opacity:1}
+/* emoji rain layer */
+#rain{position:fixed;inset:0;pointer-events:none;z-index:110;overflow:hidden}
+.drop{position:absolute;top:-40px;font-size:28px;animation:fall linear forwards;will-change:transform}
+@keyframes fall{to{transform:translateY(105vh) rotate(220deg);opacity:.15}}
+.foot{text-align:center;color:#6f6191;font-size:12px;margin-top:30px}
+</style></head>
+<body>
+<div id="rain"></div>
+<div class="lights"></div>
+<div class="top"><div class="logo">🎤 SHAKEDOWN <span>KARAOKE</span></div><div class="tag">the whole show · sing outta tune under the string lights · GD · JGB · Zero · Kimock</div></div>
+<div class="wrap">
+
+<div class="honest">🎶 <b>Honest-state / the licensing gate:</b> the machine, the Live Room, the soundboard and the reactions all work today. But <b>on-screen lyrics and backing tracks are two licensed rights</b> (lyric display = a publishing right via Warner Chappell / Ice Nine; backing tracks = a mechanical + karaoke-reproduction license). <b>No lyric displays and no audio plays until the songbook is cleared.</b> Song <i>titles</i> below are just the catalogue (facts). All prices are <b>planning / not live</b> — nothing charges yet.</div>
+
+<!-- ===================== LIVE ROOM ===================== -->
+<h2>🎙️ Live Room <span class="free">works today</span></h2>
+<div class="grid2">
+  <div class="stage">
+    <div class="roomhdr"><span class="rn">🌹 Friday Night Crew</span><span><span class="dot"></span><span id="onlineN">12</span> online · <b style="color:#cbe9d6">Host screen synced</b></span></div>
+    <div class="np"><div class="disc"></div><div><div class="t" id="npTitle">Catalina <span class="star">★</span></div><div class="s" id="npMeta">Zero · sung by You · key of E</div></div></div>
+    <div class="livestats">
+      <div class="st"><b id="stScore">—</b><span>Score</span></div>
+      <div class="st"><b id="stHearts">0</b><span>❤ Hearts</span></div>
+      <div class="st"><b id="stQueue">4</b><span>In queue</span></div>
+    </div>
+    <div class="screen">
+      <div class="lyric" id="lyric">•••••• ••• •••••• •• ••••</div>
+      <div class="note">Lyrics light up here — bouncing-highlight, on the host screen — <b>once the songbook is licensed.</b></div>
+    </div>
+    <div class="ctrls">
+      <div class="ctl"><div class="cl">🎚️ Key (fit your range)</div><div class="row"><button class="stp" aria-label="Key down" onclick="key(-1)">−</button><span class="val" id="keyV">E</span><button class="stp" aria-label="Key up" onclick="key(1)">+</button></div></div>
+      <div class="ctl"><div class="cl">🐢 Tempo</div><div class="row"><button class="stp" aria-label="Tempo down" onclick="tempo(-1)">−</button><span class="val" id="tempoV">100%</span><button class="stp" aria-label="Tempo up" onclick="tempo(1)">+</button></div></div>
+      <div class="ctl"><div class="cl">🎸 Jerry's guide vocal</div><button class="tg" id="guide" onclick="tg('guide')">Turn ON to follow the melody</button></div>
+      <div class="ctl"><div class="cl">🌫️ Mic reverb</div><button class="tg on" id="verb" onclick="tg('verb')">On — a little hall echo</button></div>
+    </div>
+    <div class="score">
+      <div class="sc-l"><span>Applause-o-meter</span><span id="scoreN">—</span></div>
+      <div class="bar"><i id="scoreBar"></i></div>
+      <div class="note" style="margin-top:6px;text-align:center">Backyard rule: <b>nobody's in tune, and that's the point.</b></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="tg" style="flex:1" onclick="rate()">👏 Rate the take</button><button class="tg" style="flex:1" onclick="heart()">❤ Send a heart</button></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="stage" style="padding:16px">
+      <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800;margin-bottom:10px">🎡 Shared Queue — everyone sees the same screen</div>
+      <div id="queue"></div>
+      <button class="tg" style="margin-top:4px" onclick="addToQueue()">＋ Add me / a song to the queue</button>
+    </div>
+    <div class="emcee" style="margin-top:14px"><div class="av" id="emAv">🎩</div><div><div class="who2" id="emWho">Hanz &amp; Franz — your emcees</div><div class="line" id="emLine">Warming up the crowd…</div></div></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px">Auto-rotation + "Who's Next" callouts, just like a pro KJ rig. Everyone joins from their phone — <b>no app to install.</b></div>
+  </div>
+</div>
+
+<!-- ===================== SOUNDBOARD + EMOJI RAIN ===================== -->
+<h2>🎛️ DJ Soundboard &amp; Emoji Rain <span class="free">works today</span></h2>
+<div class="grid2">
+  <div class="stage" style="padding:16px">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800;margin-bottom:12px">The Soundboard — fires on the host screen</div>
+    <div class="pads">
+      <button class="pad" onclick="sfx('Air horn','📢','horn')"><span class="pe">📢</span>Air horn</button>
+      <button class="pad" onclick="sfx('Applause','👏','applause')"><span class="pe">👏</span>Applause</button>
+      <button class="pad" onclick="sfx('Drum roll','🥁','roll')"><span class="pe">🥁</span>Drum roll</button>
+      <button class="pad" onclick="sfx('Cheer','🎉','cheer')"><span class="pe">🎉</span>Cheer</button>
+      <button class="pad" onclick="sfx('Crickets','🦗','crickets')"><span class="pe">🦗</span>Crickets</button>
+      <button class="pad" onclick="sfx('Rimshot','💥','rim')"><span class="pe">🥁</span>Rimshot</button>
+    </div>
+    <div class="note" style="font-size:11px;color:#7c6ea0;margin-top:12px">"Every moment deserves the right soundtrack." These are the Hanz &amp; Franz reaction effects, pointed at the karaoke room. <b>Original house SFX — no licensed content needed.</b></div>
+  </div>
+  <div class="stage" style="padding:16px">
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800;margin-bottom:12px">Emoji Rain — tap to rain reactions down the screen</div>
+    <div class="chips">
+      <button class="chip" onclick="rain('🔥','Fire')">🔥 Fire</button>
+      <button class="chip" onclick="rain('👑','Crown')">👑 Crown</button>
+      <button class="chip" onclick="rain('😂','Laugh')">😂 Laugh</button>
+      <button class="chip" onclick="rain('🎤','Mic')">🎤 Mic</button>
+      <button class="chip" onclick="rain('💎','Gem')">💎 Gem</button>
+      <button class="chip" onclick="rain('🎉','Party')">🎉 Party</button>
+    </div>
+    <div class="note" style="font-size:11px;color:#7c6ea0;margin-top:14px">Guests rain 🔥👑😂🎤💎🎉 down the host screen in real time — built to <b>capture shareable moments for TikTok / Reels.</b> That's the organic-growth loop.</div>
+    <button class="tg" style="margin-top:12px;background:#5a2e86;color:#fff" onclick="startParty()">▶ Name your party &amp; start</button>
+    <div class="note" style="font-size:10.5px;color:#7c6ea0;margin-top:8px;text-align:center">No download · Guests join by link · Live reactions</div>
+  </div>
+</div>
+
+<!-- ===================== SONGBOOK ===================== -->
+<h2>📖 The Songbook <span class="gate">titles only · lyrics gated</span></h2>
+<div class="honest" style="margin-top:0">They never have Kimock — <b>we do.</b> Below are song <b>titles only</b> (facts). Tap one to queue it: the lyrics area shows a <b>placeholder</b> and <b>no audio plays</b> — that's the licensing gate, honest and on purpose.</div>
+<div class="sb-ctrl">
+  <input id="q" placeholder="Search a song…" aria-label="Search the songbook" oninput="renderBook()">
+  <select id="band" onchange="renderBook()" aria-label="Filter by band"><option value="">All family</option><option>Grateful Dead</option><option>JGB</option><option>Zero</option><option>Kimock</option></select>
+</div>
+<div class="book" id="book"></div>
+
+<!-- ===================== LESS / MORE / MOST ===================== -->
+<h2>🎟️ Less · More · Most <span class="gate">planning · not live</span></h2>
+<div class="doors">
+  <div class="card">
+    <span class="plan">PLAN</span>
+    <div class="dl">LESS</div>
+    <h3>🎉 Karaoke in your pocket</h3>
+    <div class="who">the fan · consumer subscription</div>
+    <div class="p">Home / solo / party from the licensed family songbook. Logged on your profile QR as a new category — songs sung, karaoke nights, personal bests, Roses. Free to throw a party; subscribe to carry the songbook.</div>
+    <div class="price">$[X]<small>/mo</small></div>
+    <div class="note" style="font-size:11px;color:#7c6ea0">Consumer market sits ~$9.99/mo — set with counsel. Backyard party stays free.</div>
+    <button class="go2" onclick="toast('🎉 LESS — the consumer sub. Backyard party is free; the pocket songbook goes live once licensed. Price set with counsel; nothing charges yet.')">See LESS</button>
+  </div>
+  <div class="card pro">
+    <span class="plan">PLAN</span>
+    <div class="dl">MORE</div>
+    <h3>💍 Commercial for a night</h3>
+    <div class="who">venue or private host · per-booking</div>
+    <div class="p">Book a single night like a band — a flat per-night fee, on the calendar. Not just bars: a <b>wedding</b>, reception, corporate event, reunion, fundraiser, birthday. The always-available headliner for one night.</div>
+    <div class="price">$[X]<small>/night</small></div>
+    <div class="note" style="font-size:11px;color:#7c6ea0">Configurable — see the hours × rate meter below.</div>
+    <button class="go" onclick="toast('💍 MORE — book a night like a band. Wedding-tier vs. bar-tier pricing to test; needs the commercial-use license. Nothing charges yet.')">See MORE</button>
+  </div>
+  <div class="card">
+    <span class="plan">PLAN</span>
+    <div class="dl">MOST</div>
+    <h3>🏛️ Venue subscription</h3>
+    <div class="who">the venue · unlimited, any night</div>
+    <div class="p">Replace the KJ rig. Run it any night, unlimited — cheaper than per-night past ~twice a week. Leagues, tournaments, sponsored nights, multi-room, analytics. The flywheel tier: that room is now on the platform for calendar, tickets, merch.</div>
+    <div class="price">$79<small>/mo per room</small></div>
+    <div class="note" style="font-size:11px;color:#7c6ea0">Pro ~$149/mo. Undercuts ~$50/mo content-only commercial tools + content they can't buy.</div>
+    <button class="go2" onclick="venue()">See MOST</button>
+  </div>
+</div>
+
+<!-- ===================== PER-GENRE MENU ===================== -->
+<h2>🎚️ Per-genre menu — the catalogue is a menu, not a monolith <span class="gate">planning · not live</span></h2>
+<div class="gmenu">
+  <div class="gr floor"><span style="font-size:20px">🤠</span><div><div class="gt">Country Western</div><div class="gd">broad, classic, cheaply &amp; widely licensable — the everyday floor</div></div><span class="gp">$2<small style="font-size:11px;color:var(--muted)">/mo</small></span></div>
+  <div class="gr"><span style="font-size:20px">🌾</span><div><div class="gt">Bluegrass</div><div class="gd">mid-tier niche with real, loyal draw</div></div><span class="gp">$99<small style="font-size:11px;color:var(--muted)">/mo</small></span></div>
+  <div class="gr"><span style="font-size:20px">🎤</span><div><div class="gt">Rap / Hip-Hop</div><div class="gd">big modern demand; concentrated catalogs (Roc Nation), sampling-heavy → premium to clear</div></div><span class="gp">$99<small style="font-size:11px;color:var(--muted)">/mo</small></span></div>
+  <div class="gr"><span style="font-size:20px">✨</span><div><div class="gt">Taylor Swift</div><div class="gd">marquee current pop — most in demand, most controlled &amp; expensive → the ceiling</div></div><span class="gp">$199<small style="font-size:11px;color:var(--muted)">/mo</small></span></div>
+</div>
+<div class="note" style="font-size:11.5px;color:#7c6ea0;margin-top:10px">Subscriptions are <b>modular</b>: a base + per-genre upgrades. From <b>$2 to $199</b> — a cheap classic floor anyone adds, a marquee ceiling that funds the licensing. The Dead songbook is the anchor; Taylor Swift is the upsell. <b>Cost tracks price</b> — the premium tier passes the licensing cost through.</div>
+
+<!-- ===================== HOURS × RATE ===================== -->
+<h2>⏱️ The unifying meter — Price ≈ Hours × Rate <span class="gate">planning · not live</span></h2>
+<div class="calc">
+  <div style="font-size:12.5px;color:#cdbde6;margin-bottom:6px">Build an event plan — the plan sets the <b>hours</b>, the configuration sets the <b>rate</b>. Every door is the same meter at a different duration.</div>
+  <div class="frow"><label>⏳ Hours (the event plan)</label><input type="range" id="cHours" min="1" max="8" value="5" oninput="calc()"><span class="hv" id="cHoursV">5 hrs</span></div>
+  <div class="frow"><label>🎚️ Genre tier</label><select id="cGenre" onchange="calc()"><option value="15">Country Western — floor</option><option value="45">Bluegrass</option><option value="45">Rap / Hip-Hop</option><option value="120">Taylor Swift — ceiling</option><option value="30" selected>Grateful Dead — anchor</option></select></div>
+  <div class="frow"><label>🎸 Band tier (single-night configurator)</label><select id="cBands" onchange="calc()"><option value="1">LESS — one band</option><option value="1.6" selected>MORE — 3 bands (mini-lineup)</option><option value="2.2">MOST — Shuffle all (festival)</option></select></div>
+  <div class="frow"><label>📅 Date premium</label><select id="cDate" onchange="calc()"><option value="1">Flexible weeknight</option><option value="1.5" selected>Prime Saturday / wedding season</option><option value="1.8">Holiday</option></select></div>
+  <div class="out">
+    <div class="big" id="calcOut">$[—]</div>
+    <div class="fm" id="calcFm">hours × rate</div>
+    <div class="note" style="font-size:10.5px;color:#7c6ea0;margin-top:6px">Illustrative planning math only — real rates set with counsel + the market; nothing charges. You're buying <b>time on a licensed, configurable act</b>.</div>
+  </div>
+</div>
+
+<!-- ===================== EVENT LOGISTICS ===================== -->
+<h2>📶 Event logistics — how a night runs <span class="free">works today</span></h2>
+<div class="honest" style="margin-top:0">The whole flow hangs off two things the house already has: <b>the calendar</b> (venue-created events) and <b>every user's profile QR.</b> No new accounts, no passwords. The <b>three gates are cleanly separated</b> — identity vs. room/Wi-Fi vs. paid entry. Everything here is <b>shippable now</b>; only the licensed songbook waits.</div>
+<div class="gates">
+  <div class="gate-c">
+    <div class="qi" id="qrProfile"></div>
+    <div class="gl">Identity / sign-in</div>
+    <h4>Your profile QR</h4>
+    <div class="gp2">Scan your existing QR (or you're already signed in). Score, hearts, Roses, queue slot &amp; badges attach to the real you. Passwordless, instant.</div>
+  </div>
+  <div class="gate-c">
+    <div class="qi" id="qrWifi"></div>
+    <div class="gl">Room + Wi-Fi access</div>
+    <h4>Event QR + Wi-Fi QR</h4>
+    <div class="gp2">A standard Wi-Fi QR joins the phone to the room's network natively (no typing). The shareable Event QR drops you into the room — walk-up or RSVP. Venue can rotate/expire it per night.</div>
+  </div>
+  <div class="gate-c">
+    <div class="qi" id="qrTicket"></div>
+    <div class="gl">Paid entry</div>
+    <h4>The ticket gate</h4>
+    <div class="gp2">A charged event gates on the <b>ticket</b> (bought from the calendar), not just Wi-Fi — so a shared code can't dodge the paywall. Ticket = entry. Free backyard events skip this gate.</div>
+  </div>
+</div>
+<div class="note" style="font-size:11.5px;color:#7c6ea0;margin-top:10px">★ Same engine powers <b>GD Trivia Night</b> and every live house game — build the Live Venue Event module once; only the content (songbook vs. question bank) differs, and only content waits on licensing.</div>
+
+<div class="foot">The songbook nobody else can offer — free in every backyard, a fee in every bar. <b>Tune your soul, not your pitch.</b> 🌹</div>
+
+</div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+
+<script>
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(window._tt);window._tt=setTimeout(function(){t.className='';},3600);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ---- the songbook (TITLES ONLY — facts, not lyrics) ---- */
+var BOOK=[
+ {t:'Catalina',b:'Zero',pin:true,star:true},{t:'Chance in a Million',b:'Zero',star:true},
+ {t:'Home on the Range',b:'Zero'},{t:'End of the Line',b:'Zero'},{t:"Gregg's Eggs",b:'Zero'},{t:'Tender Love',b:'Zero'},
+ {t:'Ripple',b:'Grateful Dead'},{t:'Sugar Magnolia',b:'Grateful Dead'},{t:'Friend of the Devil',b:'Grateful Dead'},
+ {t:"Truckin'",b:'Grateful Dead'},{t:"Uncle John's Band",b:'Grateful Dead'},{t:'Casey Jones',b:'Grateful Dead'},
+ {t:'Fire on the Mountain',b:'Grateful Dead'},{t:'Scarlet Begonias',b:'Grateful Dead'},{t:'Touch of Grey',b:'Grateful Dead'},
+ {t:"Franklin's Tower",b:'Grateful Dead'},{t:'Bertha',b:'Grateful Dead'},{t:'Eyes of the World',b:'Grateful Dead'},
+ {t:'Brown-Eyed Women',b:'Grateful Dead'},{t:'Tennessee Jed',b:'Grateful Dead'},
+ {t:'Deal',b:'JGB'},{t:'Cats Under the Stars',b:'JGB',star:true},{t:'Run for the Roses',b:'JGB'},
+ {t:'Mission in the Rain',b:'JGB'},{t:'Midnight Moonlight',b:'JGB'},{t:"That's What Love Will Make You Do",b:'JGB'},
+ {t:'Last Danger of Frost',b:'Kimock',star:true},{t:'Satellite City',b:'Kimock'}
+];
+function renderBook(){
+ var q=(document.getElementById('q').value||'').toLowerCase(), b=document.getElementById('band').value;
+ var rows=BOOK.filter(function(s){ if(b&&s.b!==b)return false; if(q&&s.t.toLowerCase().indexOf(q)<0)return false; return true; });
+ var el=document.getElementById('book');
+ if(!rows.length){el.innerHTML='<div style="color:var(--muted);padding:14px;grid-column:1/-1">No song by that name — yet. 🌹</div>';return;}
+ el.innerHTML=rows.map(function(s){
+   return '<div class="song" onclick="pickSong(\''+esc(s.t).replace(/\x27/g,'')+'\')"><div><div class="ti">'+esc(s.t)+(s.star?' <span style="color:var(--gold)">★</span>':'')+'</div><div class="ba">'+esc(s.b)+'</div></div>'+
+     (s.pin?'<span class="pin">Michael’s pick</span>':'')+'<span class="add">＋</span></div>';
+ }).join('');
+}
+function pickSong(title){
+ document.getElementById('npTitle').innerHTML=esc(title)+' <span class="star">★</span>';
+ document.getElementById('lyric').textContent='•••••• ••• •••••• •• ••••';
+ openModal('<h3 style="margin:0">Get in the rotation</h3><div style="font-size:13px;color:var(--muted);margin-top:4px">"'+esc(title)+'" — who’s singing? Lyrics &amp; audio stay <b>gated</b> until licensed.</div>'+
+  '<input id="who" placeholder="Your name" autofocus>'+
+  '<button class="go" onclick="doQueue(\''+esc(title).replace(/\x27/g,'')+'\')">Add me to the queue</button>'+
+  '<button class="x" onclick="closeModal()">never mind</button>');
+}
+
+/* ---- shared queue (Next / Group / Duet tags) ---- */
+var QUEUE=[{n:'You',s:'Catalina',tag:'next'},{n:'Deb & the yard',s:'Sugar Magnolia',tag:'group'},{n:'Ray + Jules',s:'Friend of the Devil',tag:'duet'},{n:'Sam',s:'Ripple',tag:''}];
+function renderQueue(){
+ document.getElementById('queue').innerHTML=QUEUE.map(function(w){
+   var tag=w.tag?('<span class="tag '+w.tag+'">'+w.tag+'</span>'):'<span class="qs" style="margin-left:auto">in line</span>';
+   return '<div class="qrow"><div><div class="qn">'+esc(w.n)+'</div><div class="qs">'+esc(w.s)+'</div></div>'+tag+'</div>';
+ }).join('');
+ document.getElementById('stQueue').textContent=QUEUE.length;
+}
+function addToQueue(){ openModal('<h3 style="margin:0">Add to the shared queue</h3><div style="font-size:13px;color:var(--muted);margin-top:4px">Pick a song from the songbook, or type one below.</div>'+
+  '<input id="who" placeholder="Your name" autofocus><input id="sng" placeholder="Song title">'+
+  '<button class="go" onclick="doQueueForm()">Add to queue</button><button class="x" onclick="closeModal()">close</button>'); }
+function doQueueForm(){ var n=(document.getElementById('who').value||'').trim()||'A friend'; var s=(document.getElementById('sng').value||'').trim()||'a family tune';
+  QUEUE.push({n:n,s:s,tag:''}); renderQueue(); closeModal(); toast('🎡 '+n+' is in line for "'+s+'." At a real party this comes in from their phone — no app needed.'); }
+function doQueue(title){ var n=(document.getElementById('who').value||'').trim()||'A friend'; QUEUE.push({n:n,s:title,tag:''}); renderQueue(); closeModal();
+  toast('🎡 '+n+' is in line for "'+title+'." Lyrics & backing track stay gated until the songbook clears.'); }
+
+/* ---- emcees: Hanz & Franz ---- */
+var EM=[
+ {a:'🎩',w:'Hanz — the hype man',l:'Ladies and gentlemen and Deadheads of all persuasions… give it up for the next brave soul on the mic!'},
+ {a:'🌼',w:'Franz — keeper of the lore',l:'Fun fact before you sing: this one’s a Hunter lyric. No pressure. Jerry’s watching. Lovingly.'},
+ {a:'🎩',w:'Hanz — the hype man',l:'House rule — we don’t boo flat notes here, we <i>cheer</i> ’em. Outta tune is in tune tonight.'},
+ {a:'🌼',w:'Franz — keeper of the lore',l:'Whoever nails the "Fire on the Mountain" groove gets the last veggie burrito. That’s a real prize.'},
+ {a:'🎩',w:'Hanz — the hype man',l:'Next up on the Wheel… tune your soul, not your pitch. Let’s go!'}
+];
+var emI=0;
+function rollEmcee(){ var e=EM[emI%EM.length]; document.getElementById('emAv').textContent=e.a; document.getElementById('emWho').textContent=e.w; document.getElementById('emLine').innerHTML=e.l; emI++; }
+function emceeSay(av,who,line){ document.getElementById('emAv').textContent=av; document.getElementById('emWho').textContent=who+' — on the mic'; document.getElementById('emLine').innerHTML=line; }
+
+/* ---- stage controls ---- */
+var KEYS=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'], ki=4, tv=100;
+function key(d){ ki=(ki+d+12)%12; document.getElementById('keyV').textContent=KEYS[ki]; document.getElementById('npMeta').textContent='Zero · sung by You · key of '+KEYS[ki]; }
+function tempo(d){ tv=Math.max(70,Math.min(130,tv+d*5)); document.getElementById('tempoV').textContent=tv+'%'; }
+function tg(id){ var b=document.getElementById(id); b.classList.toggle('on');
+ if(id==='guide') b.textContent=b.classList.contains('on')?'On — follow Jerry’s melody':'Turn ON to follow the melody';
+ if(id==='verb') b.textContent=b.classList.contains('on')?'On — a little hall echo':'Off — dry';
+}
+function rate(){ var pct=55+Math.floor(Math.random()*45); document.getElementById('scoreBar').style.width=pct+'%'; document.getElementById('scoreN').textContent=pct+' / 100'; document.getElementById('stScore').textContent=pct;
+ var q=pct>90?'Jerry smiled. 🌹':pct>75?'The lot is roaring!':pct>62?'Solid — the yard approves.':'Gloriously, beautifully off-key. 👏';
+ toast('👏 '+pct+'/100 — '+q); rain('🔥','Fire'); }
+var hearts=0;
+function heart(){ hearts++; document.getElementById('stHearts').textContent=hearts; rain('❤','Heart'); }
+
+/* ---- soundboard (WebAudio blips — original, no licensed content) ---- */
+var AC=null; function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function blip(type){ var c=ac(); if(!c)return; var now=c.currentTime;
+ function tone(f,t,dur,shape,g){ var o=c.createOscillator(),ga=c.createGain(); o.type=shape||'sine'; o.frequency.setValueAtTime(f,now+t); ga.gain.setValueAtTime(0,now+t); ga.gain.linearRampToValueAtTime(g||.18,now+t+.01); ga.gain.exponentialRampToValueAtTime(.0001,now+t+dur); o.connect(ga); ga.connect(c.destination); o.start(now+t); o.stop(now+t+dur+.02); }
+ function noise(t,dur,g){ var n=c.sampleRate*dur, buf=c.createBuffer(1,n,c.sampleRate), d=buf.getChannelData(0); for(var i=0;i<n;i++)d[i]=(Math.random()*2-1); var s=c.createBufferSource();s.buffer=buf; var ga=c.createGain();ga.gain.setValueAtTime(g||.12,now+t);ga.gain.exponentialRampToValueAtTime(.0001,now+t+dur); s.connect(ga);ga.connect(c.destination);s.start(now+t);s.stop(now+t+dur); }
+ if(type==='horn'){ tone(392,0,.5,'sawtooth',.16); tone(523,0,.5,'sawtooth',.14); }
+ else if(type==='applause'){ for(var i=0;i<8;i++)noise(i*0.05,.08,.10); }
+ else if(type==='roll'){ for(var j=0;j<14;j++)tone(140,j*0.045,.05,'square',.14); tone(180,.66,.25,'square',.16); }
+ else if(type==='cheer'){ [523,587,659,784].forEach(function(f,k){tone(f,k*0.07,.4,'triangle',.12);}); for(var m=0;m<5;m++)noise(m*0.06,.09,.07); }
+ else if(type==='crickets'){ for(var q=0;q<6;q++){tone(2400,q*0.12,.03,'sine',.05);tone(2400,q*0.12+.05,.03,'sine',.05);} }
+ else if(type==='rim'){ tone(300,0,.05,'square',.18); noise(0,.04,.14); }
+}
+function sfx(name,e,type){ blip(type); rain(e,name); emceeSay('🎩','Hanz',name+'! '+(name==='Crickets'?'Ouch. The house still loves you.':'That’s the right soundtrack for the moment.')); }
+
+/* ---- emoji rain ---- */
+function rain(emoji,label){ var r=document.getElementById('rain'); var count=10+Math.floor(Math.random()*6);
+ for(var i=0;i<count;i++){ (function(i){ setTimeout(function(){ var d=document.createElement('div'); d.className='drop'; d.textContent=emoji;
+   d.style.left=(Math.random()*96)+'vw'; var dur=1.8+Math.random()*1.6; d.style.animationDuration=dur+'s'; d.style.fontSize=(20+Math.random()*22)+'px';
+   r.appendChild(d); setTimeout(function(){ if(d.parentNode)d.parentNode.removeChild(d); }, dur*1000+120);
+ }, i*60); })(i); }
+}
+
+/* ---- party / venue ---- */
+function startParty(){ openModal('<h3 style="margin:0">Name your party</h3><div style="font-size:13px;color:var(--muted);margin-top:4px">Zero-friction — guests join by link, no download, live reactions.</div>'+
+  '<input id="who" placeholder="e.g., Deb’s Backyard Bash" autofocus>'+
+  '<button class="go" onclick="doParty()">▶ Start Party</button><button class="x" onclick="closeModal()">close</button>'); }
+function doParty(){ var n=(document.getElementById('who').value||'').trim()||'The Friday Night Crew'; closeModal(); document.querySelector('.roomhdr .rn').textContent='🌹 '+n; rain('🎉','Party');
+  toast('🎉 "'+n+'" is live — share the link, everyone sings. Reactions & room work today; songbook goes live once licensed.'); }
+function venue(){ openModal('<h3 style="margin:0">Run it at your venue (MOST)</h3><div style="font-size:13px;color:var(--muted);margin-top:6px">$79/mo per room — the licensed family songbook, phone requests, auto-rotation, scoring leagues, your branding. A Chaperone reaches out to book your first night.</div>'+
+  '<input id="who" placeholder="Venue name + your email">'+
+  '<button class="go" onclick="closeModal();toast(\'🏛️ Got it — a Chaperone will reach out to book your first Shakedown Karaoke night. Planning only; nothing charges, songbook goes live once licensed.\')">Request setup</button>'+
+  '<button class="x" onclick="closeModal()">close</button>'); }
+
+/* ---- hours × rate meter ---- */
+function calc(){
+ var h=+document.getElementById('cHours').value; document.getElementById('cHoursV').textContent=h+' hr'+(h>1?'s':'');
+ var base=+document.getElementById('cGenre').value, bands=+document.getElementById('cBands').value, date=+document.getElementById('cDate').value;
+ var rate=Math.round(base*bands*date); var total=rate*h;
+ document.getElementById('calcOut').textContent='$'+total.toLocaleString()+' *';
+ document.getElementById('calcFm').textContent=h+' hrs × $'+rate+'/hr  ·  * illustrative planning only';
+}
+
+/* ---- QR renderer (simple deterministic module mosaic — decorative, honest) ---- */
+function drawQR(id,seed,color){ var el=document.getElementById(id); if(!el)return; var N=13, cell=100/N, h=0; for(var i=0;i<seed.length;i++)h=(h*31+seed.charCodeAt(i))>>>0;
+ function rnd(){ h=(h*1103515245+12345)&0x7fffffff; return h/0x7fffffff; }
+ var svg='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#fff"/>';
+ for(var y=0;y<N;y++)for(var x=0;x<N;x++){ var fp=(x<3&&y<3)||(x>N-4&&y<3)||(x<3&&y>N-4); var on=fp?((x===0||x===2||y===0||y===2||(x===1&&y===1))?false:( (x<3&&y<3)||(x>N-4&&y<3)||(x<3&&y>N-4))):rnd()>.5;
+   if(fp){ on=!(x===N-1||y===N-1) && !((x%1)&&false); on=true; if((x===1&&y===1)||(x===N-2&&y===1)||(x===1&&y===N-2)) on=true; }
+   if(on) svg+='<rect x="'+(x*cell).toFixed(2)+'" y="'+(y*cell).toFixed(2)+'" width="'+cell.toFixed(2)+'" height="'+cell.toFixed(2)+'" fill="'+color+'"/>';
+ }
+ // corner finder squares (clean)
+ function finder(ox,oy){ return '<rect x="'+(ox*cell).toFixed(2)+'" y="'+(oy*cell).toFixed(2)+'" width="'+(3*cell).toFixed(2)+'" height="'+(3*cell).toFixed(2)+'" fill="'+color+'"/><rect x="'+((ox+.6)*cell).toFixed(2)+'" y="'+((oy+.6)*cell).toFixed(2)+'" width="'+(1.8*cell).toFixed(2)+'" height="'+(1.8*cell).toFixed(2)+'" fill="#fff"/><rect x="'+((ox+1.1)*cell).toFixed(2)+'" y="'+((oy+1.1)*cell).toFixed(2)+'" width="'+(.8*cell).toFixed(2)+'" height="'+(.8*cell).toFixed(2)+'" fill="'+color+'"/>'; }
+ svg+=finder(0,0)+finder(N-3,0)+finder(0,N-3)+'</svg>'; el.innerHTML=svg;
+}
+
+/* ---- modal ---- */
+function openModal(html){ document.getElementById('modal').innerHTML=html; document.getElementById('ov').classList.add('on'); var i=document.getElementById('who'); if(i)i.focus(); }
+function closeModal(){ document.getElementById('ov').classList.remove('on'); }
+document.getElementById('ov').onclick=function(e){ if(e.target===this)closeModal(); };
+document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeModal(); });
+
+/* ---- init ---- */
+renderBook(); renderQueue(); rollEmcee(); setInterval(rollEmcee,5600); calc();
+drawQR('qrProfile','shakedown-profile-you','#5a2e86'); drawQR('qrWifi','WIFI:S:ShakedownRoom;T:WPA;P:deadhead;;','#2a6b46'); drawQR('qrTicket','ticket:dead-karaoke-night','#b8002e');
+// gentle online-count flicker for liveliness
+setInterval(function(){ var n=10+Math.floor(Math.random()*8); document.getElementById('onlineN').textContent=n; },4200);
+</script>
+</body></html>
