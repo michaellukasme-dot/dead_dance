@@ -88,11 +88,44 @@
     return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
   }
 
-  /* ---- 4. Lightweight contiguous-US silhouette (single path, low-poly). ---- */
-  var US_PATH = "M110,150 L250,120 L430,95 L620,88 L770,110 L860,150 L905,205 " +
-    "L900,255 L860,300 L845,360 L820,410 L775,470 L720,515 L650,545 L560,560 " +
-    "L470,558 L400,540 L340,500 L300,470 L255,430 L210,400 L170,360 L140,320 " +
-    "L120,270 L100,215 Z";
+  /* ---- 4. Recognizable contiguous-US outline, traced as real [lat,lng] border points and
+     projected through the SAME projection as the dots (so land + dots always align). ---- */
+  var US_OUTLINE = [
+    // Pacific coast, N→S
+    [48.4,-124.7],[46.9,-124.1],[46.2,-123.9],[43.9,-124.1],[42.0,-124.4],[40.4,-124.4],
+    [38.9,-123.7],[37.8,-122.5],[36.6,-121.9],[35.4,-120.9],[34.4,-119.7],[34.0,-118.5],
+    [33.4,-117.6],[32.5,-117.1],
+    // Southern (Mexico) border, W→E
+    [32.6,-114.7],[31.3,-111.0],[31.3,-108.2],[31.8,-108.2],[31.8,-106.5],[29.8,-104.5],
+    [29.2,-102.8],[29.4,-100.9],[28.4,-100.3],[27.4,-99.5],[26.0,-97.5],
+    // Gulf coast, TX→FL
+    [27.8,-97.1],[28.4,-96.4],[29.3,-94.8],[29.7,-93.9],[29.6,-92.1],[29.2,-90.3],
+    [29.1,-89.2],[30.0,-89.1],[30.4,-88.0],[30.4,-86.5],[29.9,-84.4],[29.1,-83.0],
+    [27.8,-82.7],[26.4,-82.1],[25.8,-81.5],[25.1,-80.9],[25.2,-80.3],
+    // Atlantic coast, FL→ME
+    [25.8,-80.1],[26.7,-80.0],[28.4,-80.6],[29.9,-81.3],[31.1,-81.4],[32.1,-80.8],
+    [32.8,-79.9],[33.9,-78.0],[34.7,-76.7],[35.2,-75.5],[36.9,-76.0],[37.9,-75.4],
+    [38.8,-75.0],[39.3,-74.4],[40.5,-74.0],[40.6,-73.1],[41.0,-71.9],[41.4,-71.4],
+    [41.7,-70.3],[42.4,-70.9],[43.0,-70.7],[43.7,-70.2],[44.1,-69.1],[44.4,-68.2],[44.9,-67.0],
+    // Northern (Canada) border, E→W — Great Lakes simplified to a clean notch
+    [47.1,-68.4],[47.4,-69.2],[45.3,-71.1],[45.0,-73.3],[45.0,-74.7],[44.1,-76.4],
+    [43.4,-79.2],[42.3,-79.8],[41.7,-82.5],[41.9,-83.4],[45.8,-84.4],[46.5,-84.5],
+    [46.9,-88.5],[46.8,-90.9],[46.7,-92.1],[47.3,-95.0],[49.0,-95.2],[49.0,-104.0],
+    [49.0,-117.0],[49.0,-123.0]
+  ];
+  function buildPath(pts) {
+    return pts.map(function (p, i) { var xy = project(p[0], p[1]); return (i ? "L" : "M") + xy[0] + "," + xy[1]; }).join(" ") + " Z";
+  }
+  var US_PATH = buildPath(US_OUTLINE);
+
+  /* faint lat/lng graticule (clipped to the land) → reads as a map, not a blob */
+  function buildGraticule() {
+    var lines = "";
+    for (var lng = -120; lng <= -70; lng += 10) { var a = project(24, lng), b = project(50, lng); lines += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>'; }
+    for (var lat = 25; lat <= 45; lat += 5) { var c = project(lat, -125), d = project(lat, -66); lines += '<line x1="' + c[0] + '" y1="' + c[1] + '" x2="' + d[0] + '" y2="' + d[1] + '"/>'; }
+    return lines;
+  }
+  var US_GRATICULE = buildGraticule();
 
   var TOTAL = SHOWS.length, REAL = SHOWS.filter(function (s) { return s.real; }).length;
 
@@ -134,7 +167,9 @@
         '</div>' +
         '<div class="showmap-wrap">' +
           '<svg class="showmap-svg" viewBox="0 0 960 600" role="img" aria-label="US map of upcoming shows" preserveAspectRatio="xMidYMid meet">' +
+            '<defs><clipPath id="usClip"><path d="' + US_PATH + '"></path></clipPath></defs>' +
             '<path class="us-land" d="' + US_PATH + '"></path>' +
+            '<g class="us-grat" clip-path="url(#usClip)">' + US_GRATICULE + '</g>' +
             dots +
           '</svg>' +
           '<div class="showmap-pop" id="showmapPop" hidden></div>' +

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jerry Garcia Band — Every Show · Shakedown Records</title>
+<meta name="theme-color" content="#1a1030">
+<style>
+:root{--purple:#5a2e86;--gold:#ffd76a;--gold2:#c08a2d;--rose:#b8002e;--muted:#9a8fb0;--line:#2e2148;--panel:#20142f;--panel2:#211533}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 68%,#b8002e);padding:16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 16px #0008}
+.top .logo{font-weight:900;font-size:21px}.top .logo span{color:var(--gold)}
+.top .tag{font-size:12px;color:#e0cdf5;letter-spacing:.4px;margin-top:2px}
+/* persistent licensing notice */
+.notice{margin:14px 16px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:12px;padding:14px 42px 14px 16px;font-size:13.5px;line-height:1.5;position:relative;z-index:10}
+.notice b{color:var(--gold)}
+.notice .nx{position:absolute;top:9px;right:10px;background:#ffffff14;border:0;color:#fff;width:26px;height:26px;border-radius:13px;font-size:15px;cursor:pointer}
+.notice .seek{display:inline-block;margin-top:8px;background:#2a1c40;border:1px solid #43305f;border-radius:8px;padding:6px 10px;font-size:12px;color:#e0cdf5}
+.steps{margin:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:560px){.steps{grid-template-columns:1fr}}
+.step{background:#160c28;border:1px solid #3a2a55;border-radius:10px;padding:11px 12px;font-size:13px}
+.step .num{display:inline-flex;width:21px;height:21px;border-radius:50%;background:var(--gold);color:#3a1d00;font-weight:900;align-items:center;justify-content:center;font-size:12px;margin-right:7px}
+.step b{color:var(--gold)}
+.trust{margin:8px 16px 0;background:#101a12;border:1px solid #1f7a4d55;border-left:4px solid #2a8a4a;border-radius:10px;padding:11px 14px;font-size:12.5px;color:#bfe6c9}
+.trust b{color:#7fe3a0}
+/* activation form */
+.activate{margin:22px 16px 0;background:linear-gradient(135deg,#241634,#1a1030);border:1px solid var(--gold2);border-radius:16px;padding:16px}
+.activate h3{margin:0 0 4px;font-size:17px}.activate h3 b{color:var(--gold)}
+.activate .p{font-size:13px;color:#cbb9e6;margin-bottom:10px}
+.activate label{display:block;font-size:12px;color:var(--muted);margin:9px 0 3px}
+.activate input[type=text]{width:100%;background:#120c1c;border:1px solid #43305f;border-radius:9px;color:#fff;font:15px -apple-system;padding:10px 11px}
+.activate .sum{background:#160c28;border:1px solid #3a2a55;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#cbb9e6;margin:10px 0}
+.activate .sum b{color:var(--gold)}
+.activate .ack{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#cbb9e6;margin:10px 0;cursor:pointer}
+.activate .send{width:100%;background:var(--gold);color:#3a1d00;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:15px;cursor:pointer}
+.activate .send:disabled{opacity:.5;cursor:not-allowed}
+.activate .verify{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.5}
+h2.sec{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 16px 8px}
+/* pricing model */
+.model{margin:0 16px}
+.tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:560px){.tiers{grid-template-columns:1fr}}
+.tier{background:var(--panel);border:1px solid #3a2a55;border-radius:14px;padding:14px;position:relative}
+.tier.most{border-color:var(--gold2);box-shadow:0 0 0 1px #c08a2d55 inset}
+.tier .lbl{font-weight:900;font-size:12px;letter-spacing:.1em;color:var(--gold)}
+.tier .name{font-weight:800;font-size:15px;margin:3px 0 2px}
+.tier .desc{font-size:12.5px;color:var(--muted);min-height:34px}
+.tier .pricerow{display:flex;align-items:baseline;gap:4px;margin-top:8px}
+.tier .cur{font-size:18px;color:var(--muted)}
+.tier input.price{width:86px;background:#120c1c;border:1px solid #43305f;border-radius:8px;color:#fff;font:900 22px/1 -apple-system,sans-serif;padding:8px 8px;text-align:right}
+.tier .per{font-size:12px;color:var(--muted)}
+.setline{font-size:11.5px;color:var(--muted);margin-top:6px;font-style:italic}
+.event{margin:10px 0 0;background:#160c28;border:1px dashed #6b4f9c;border-radius:12px;padding:12px 14px;font-size:13px}
+.event b{color:var(--gold)}
+/* revenue projector */
+.proj{margin:12px 0 0;background:linear-gradient(135deg,#241634,#1a1030);border:1px solid #3a2a55;border-radius:14px;padding:14px 16px}
+.proj .h{font-weight:800;font-size:13.5px;margin-bottom:8px}
+.proj .grid{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;font-size:13px}
+.proj .grid input{width:92px;background:#120c1c;border:1px solid #43305f;border-radius:8px;color:#fff;font:700 14px -apple-system;padding:6px 8px;text-align:right}
+.proj .big{margin-top:12px;text-align:center}
+.proj .big .n{font-weight:900;font-size:30px;color:var(--gold);letter-spacing:.5px}
+.proj .big .c{font-size:11.5px;color:var(--muted);margin-top:2px}
+/* catalog */
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px}
+.ctrl input,.ctrl select{font:inherit;background:#2a1c40;color:#fff;border:1px solid #43305f;border-radius:10px;padding:9px 12px}.ctrl input{flex:1;min-width:150px}
+#status{margin:0 16px 6px;font-size:12.5px;color:var(--muted)}
+.list{padding:2px 16px 30px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.list{grid-template-columns:1fr}}
+.show{background:var(--panel);border:1px solid #3a2a55;border-radius:12px;padding:12px 13px;cursor:pointer;transition:.15s;position:relative}
+.show:hover{transform:translateY(-2px);border-color:var(--gold2)}
+.show .d{font-weight:900;font-size:16px}.show .d b{color:var(--gold)}
+.show .v{font-size:12.5px;color:#cbb9e6;margin-top:2px;min-height:17px}
+.show .r{position:absolute;top:11px;right:12px;font-size:11px;color:var(--gold);font-weight:800}
+.show .src{font-size:10px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.06em}
+/* purchase modal */
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:flex-end;justify-content:center;z-index:60;padding:0}.ov.on{display:flex}
+.buy{background:#191024;border-top:1px solid #3a2a55;border-radius:18px 18px 0 0;max-width:520px;width:100%;max-height:92vh;overflow:auto;padding:18px 16px 26px}
+.buy .grip{width:42px;height:5px;background:#43305f;border-radius:3px;margin:0 auto 12px}
+.buy h3{margin:2px 0 2px;font-size:20px}.buy h3 b{color:var(--gold)}
+.buy .sub{color:var(--muted);font-size:13px}
+.buy .setlist{margin:12px 0;background:#120c1c;border:1px solid #2e2148;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#cbb9e6;max-height:150px;overflow:auto}
+.buy .setlist .st{color:var(--gold);font-weight:700;margin:6px 0 3px}
+.buy .opt{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid #3a2a55;border-radius:12px;padding:12px 14px;margin:8px 0;cursor:pointer}
+.buy .opt:hover{border-color:var(--gold2)}
+.buy .opt .on{font-weight:800}.buy .opt .op{font-size:12px;color:var(--muted)}
+.buy .opt .pr{font-weight:900;color:var(--gold);white-space:nowrap}
+.buy .go{width:100%;margin-top:10px;background:var(--gold);color:#3a1d00;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:15px;cursor:pointer}
+.buy .honest{margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.5}
+.buy .x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:8px;width:100%;padding:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:12px 18px;border-radius:14px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
+.foot{padding:8px 16px 30px;font-size:11px;color:#8a7a55;text-align:center}
+</style></head>
+<body>
+<div class="top"><div class="logo">🌹 SHAKEDOWN <span>RECORDS</span></div><div class="tag">Jerry Garcia Band — every show · live catalog</div></div>
+
+<div class="notice" id="notice">
+  <b>To the Jerry Garcia Band &amp; the Garcia Family —</b> this store is <b>live and working</b>. These are real shows, pulled straight from the archive; this is the real interface your fans would use. Right now <b>nothing here charges and nothing streams</b>. <b>We are seeking all appropriate licensing — we've added you to our list and we'll notify you if and when it clears.</b> The day you say yes, it switches on exactly as you see it: your catalog, <b>your price, your terms</b>.
+  <div class="seek">What we're seeking: (1) sell these shows to the community · (2) the right for <b>dead.dance</b> to play them at dead dance events &amp; Greyhound Rock · (3) a fair, family-set price. 🌹</div>
+  <button class="nx" onclick="document.getElementById('notice').style.display='none'" aria-label="Dismiss">✕</button>
+</div>
+
+<div class="steps">
+  <div class="step"><span class="num">1</span> Browse <b>every JGB show</b> — all of it, real, right here.</div>
+  <div class="step"><span class="num">2</span> <b>You</b> pick the price — out in the open, together.</div>
+  <div class="step"><span class="num">3</span> Fans buy → <b>the family gets paid.</b></div>
+</div>
+
+<h2 class="sec">The model — you set the price</h2>
+<div class="model">
+  <div class="tiers">
+    <div class="tier">
+      <div class="lbl">LESS</div><div class="name">One show</div>
+      <div class="desc">A single show — yours to keep for a year.</div>
+      <div class="pricerow"><span class="cur">$</span><input class="price" id="pLess" type="number" min="0" value="29" oninput="recalc()"><span class="per">/ show · yr</span></div>
+      <div class="setline">suggested — you decide</div>
+    </div>
+    <div class="tier">
+      <div class="lbl">MORE</div><div class="name">A dozen a year</div>
+      <div class="desc">Pick 12 shows across the year — one a month.</div>
+      <div class="pricerow"><span class="cur">$</span><input class="price" id="pMore" type="number" min="0" value="99" oninput="recalc()"><span class="per">/ year</span></div>
+      <div class="setline">suggested — you decide</div>
+    </div>
+    <div class="tier most">
+      <div class="lbl">MOST</div><div class="name">The whole vault</div>
+      <div class="desc">Every JGB show — <span id="allN">all</span>, all year long.</div>
+      <div class="pricerow"><span class="cur">$</span><input class="price" id="pMost" type="number" min="0" value="999" oninput="recalc()"><span class="per">/ year</span></div>
+      <div class="setline">suggested — you decide</div>
+    </div>
+  </div>
+
+  <div class="event">🎸 <b>dead.dance event-play right</b> — separate from the fan store: the right for dead.dance to <b>play these shows at dead dance events &amp; Greyhound Rock</b>. A public-performance grant, priced/negotiated with the family. <span style="color:var(--muted)">(placeholder — your number)</span></div>
+
+  <div class="proj">
+    <div class="h">💵 What the model earns — <span style="color:var(--muted);font-weight:600">illustrative, so everyone sees the dollars</span></div>
+    <div class="grid">
+      <div>LESS — one-show buyers / year</div><input id="nLess" type="number" min="0" value="20000" oninput="recalc()">
+      <div>MORE — dozen-a-year members</div><input id="nMore" type="number" min="0" value="8000" oninput="recalc()">
+      <div>MOST — whole-vault members</div><input id="nMost" type="number" min="0" value="3000" oninput="recalc()">
+    </div>
+    <div class="big"><div class="n" id="rev">$0</div><div class="c">illustrative annual gross · <span id="revBreak"></span> · the family sets the split</div></div>
+  </div>
+  <div class="trust">🤝 <b>No back rooms.</b> Everyone opens the same screen and sees the same number. Change a price and the dollars update in front of everyone. Nobody sets it alone, nobody hides anything — <b>you decide the price together, in the open.</b></div>
+</div>
+
+<div class="activate">
+  <h3>🎚️ <b>Price it. Release it.</b> It's yours to decide.</h3>
+  <div class="p">Set the numbers above the way <b>you</b> want them, then send it over. Michael calls you right back — a real person, a real conversation. Release as much or as little as you like: one show, a handful, or the whole vault.</div>
+  <label>Your name</label>
+  <input type="text" id="aName" placeholder="Who are you?" oninput="aCheck()">
+  <label>Your connection to the Jerry Garcia Band</label>
+  <input type="text" id="aRole" placeholder="Family, estate, management, band…" oninput="aCheck()">
+  <label>Best number or email for Michael to call/reach you</label>
+  <input type="text" id="aContact" placeholder="Phone or email" oninput="aCheck()">
+  <div class="sum" id="aSum"></div>
+  <label class="ack"><input type="checkbox" id="aAck" onchange="aCheck()"> <span>I understand <b>nothing goes live</b> until Michael <b>verifies who I am</b> and we confirm it together. This just starts the conversation.</span></label>
+  <button class="send" id="aSend" disabled onclick="aSubmit()">📞 Send it — Michael calls you right back</button>
+  <div class="verify">🔒 <b>Verification first, always.</b> We never switch a catalog on from a form alone — Michael personally confirms your identity and authority before a single show is released for sale. Your prices here are a starting point, not a commitment.</div>
+</div>
+
+<h2 class="sec">The catalog — every show</h2>
+<div class="ctrl">
+  <input id="q" placeholder="Search by year, venue, city…" oninput="render()">
+  <select id="yr" onchange="render()"><option value="">All years</option></select>
+</div>
+<div id="status">Loading the Jerry Garcia Band catalog from the Internet Archive…</div>
+<div class="list" id="list"></div>
+<div class="foot">Live catalog · band-sanctioned recordings indexed from the Internet Archive · setlists are factual song titles · honest-state: nothing streams or charges until licensed.</div>
+
+<div class="ov" id="ov"><div class="buy" id="buybox"></div></div>
+<div id="toast"></div>
+
+<script src="gd_live.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3400);}
+function money(n){n=Math.round(n);return '$'+n.toLocaleString('en-US');}
+function fmtDate(iso){try{var d=new Date(iso+'T12:00:00');return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}catch(e){return iso;}}
+
+var SHOWS=[], VIEW=[];
+
+/* ---- revenue projector: they set price + counts, everyone sees the dollars ---- */
+function val(id){var e=document.getElementById(id);return Math.max(0,+e.value||0);}
+function recalc(){
+  var rl=val('pLess')*val('nLess'), rm=val('pMore')*val('nMore'), ro=val('pMost')*val('nMost');
+  var tot=rl+rm+ro;
+  document.getElementById('rev').textContent=money(tot);
+  document.getElementById('revBreak').textContent='LESS '+money(rl)+' · MORE '+money(rm)+' · MOST '+money(ro);
+  updateSum();
+}
+
+/* ---- activation form: they price & release; Michael verifies then switches it on ---- */
+function updateSum(){
+  var e=document.getElementById('aSum'); if(!e)return;
+  e.innerHTML='<b>Your prices:</b> LESS one show $'+val('pLess')+' · MORE a dozen/yr $'+val('pMore')+' · MOST whole vault/yr $'+val('pMost')+
+    '<br><b>+ dead.dance event-play right</b> (Greyhound Rock &amp; dead dance events) — to discuss.';
+}
+function aCheck(){
+  var ok=document.getElementById('aName').value.trim() && document.getElementById('aRole').value.trim() && document.getElementById('aContact').value.trim() && document.getElementById('aAck').checked;
+  document.getElementById('aSend').disabled=!ok;
+}
+function aSubmit(){
+  var name=document.getElementById('aName').value.trim(), role=document.getElementById('aRole').value.trim(), contact=document.getElementById('aContact').value.trim();
+  var body='Jerry Garcia Band — price & release request (via the dead.dance JGB store)\n\n'+
+    'Name: '+name+'\nConnection to JGB: '+role+'\nCall / reach me at: '+contact+'\n\n'+
+    'Prices I want to start with:\n'+
+    '  LESS (one show, one year): $'+val('pLess')+'\n'+
+    '  MORE (a dozen shows / year): $'+val('pMore')+'\n'+
+    '  MOST (the whole vault / year): $'+val('pMost')+'\n'+
+    '  + dead.dance event-play right (Greyhound Rock & dead dance events): to discuss\n\n'+
+    'I understand nothing goes live until Michael verifies my identity and we confirm it together.\n';
+  try{ localStorage.setItem('jgb.activation.request', JSON.stringify({name:name,role:role,contact:contact,pLess:val('pLess'),pMore:val('pMore'),pMost:val('pMost'),t:Date.now()})); }catch(e){}
+  var mail='mailto:michaellukas.me@gmail.com?subject='+encodeURIComponent('JGB — price & release request from '+name)+'&body='+encodeURIComponent(body);
+  try{ window.location.href=mail; }catch(e){}
+  toast('🌹 Sent to Michael — he calls you right back to verify and talk it through. Nothing goes live until you both confirm.');
+}
+
+/* ---- catalog render ---- */
+function fillYears(){
+  var ys={};SHOWS.forEach(function(s){if(s.year)ys[s.year]=1;});
+  var sel=document.getElementById('yr');
+  Object.keys(ys).sort().forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);});
+}
+function render(){
+  var q=(document.getElementById('q').value||'').toLowerCase(), yr=document.getElementById('yr').value;
+  VIEW=SHOWS.filter(function(s){
+    if(yr && String(s.year)!==yr)return false;
+    if(q){var hay=(s.date+' '+(s.venue||'')+' '+(s.city||'')+' '+(s.state||'')).toLowerCase();if(hay.indexOf(q)<0)return false;}
+    return true;
+  });
+  var el=document.getElementById('list');
+  if(!VIEW.length){el.innerHTML='<div style="grid-column:1/-1;padding:30px;color:var(--muted)">No shows match. 🌹</div>';return;}
+  el.innerHTML=VIEW.map(function(s,i){
+    var loc=[s.venue,s.city&&(s.city+(s.state?', '+s.state:''))].filter(Boolean).join(' · ')||'Jerry Garcia Band';
+    return '<div class="show" onclick="openBuy('+i+')">'+
+      (s.rating?'<div class="r">★'+s.rating+'</div>':'')+
+      '<div class="d">🌹 <b>'+esc(fmtDate(s.date))+'</b></div>'+
+      '<div class="v">'+esc(loc)+'</div>'+
+      '<div class="src">'+esc(s.source||'tape')+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ---- purchase screen ---- */
+function openBuy(i){
+  var s=VIEW[i]; var box=document.getElementById('buybox');
+  var loc=[s.venue,s.city&&(s.city+(s.state?', '+s.state:''))].filter(Boolean).join(' · ')||'Jerry Garcia Band';
+  box.innerHTML='<div class="grip"></div>'+
+    '<h3>🌹 <b>'+esc(fmtDate(s.date))+'</b></h3><div class="sub">'+esc(loc)+(s.rating?' · ★'+s.rating:'')+'</div>'+
+    '<div class="setlist" id="setlist"><span style="color:var(--muted)">Loading the setlist…</span></div>'+
+    '<div class="opt" onclick="pick(\'less\')"><div><div class="on">LESS · this show</div><div class="op">yours for a year</div></div><div class="pr">'+money(val('pLess'))+'</div></div>'+
+    '<div class="opt" onclick="pick(\'more\')"><div><div class="on">MORE · a dozen a year</div><div class="op">pick 12 shows</div></div><div class="pr">'+money(val('pMore'))+'/yr</div></div>'+
+    '<div class="opt" onclick="pick(\'most\')"><div><div class="on">MOST · the whole vault</div><div class="op">every JGB show</div></div><div class="pr">'+money(val('pMost'))+'/yr</div></div>'+
+    '<button class="go" onclick="pick(\'less\')">🛒 Get this show</button>'+
+    '<div class="honest"><b>Honest-state:</b> nothing charges and no audio streams yet — <b>we are seeking all appropriate licensing</b> from the Jerry Garcia Band &amp; the Garcia Family. The moment it clears, this button is live at the family\'s chosen price. Setlist below = factual song titles only.</div>'+
+    '<button class="x" onclick="closeBuy()">close</button>';
+  document.getElementById('ov').classList.add('on');
+  // hydrate the setlist (facts only — no audio)
+  if(window.GDLive && GDLive.hydrate){
+    GDLive.hydrate(s,function(res){
+      var sl=document.getElementById('setlist'); if(!sl)return;
+      if(res && res.sets && res.sets.length && res.sets[0].songs.length){
+        sl.innerHTML=res.sets.map(function(st){return '<div class="st">'+esc(st.name)+'</div>'+st.songs.map(function(g){return esc(g);}).join(' · ');}).join('');
+      } else { sl.innerHTML='<span style="color:var(--muted)">Setlist not catalogued for this recording.</span>'; }
+    });
+  }
+}
+function pick(t){var n=t==='less'?'LESS — this show':t==='more'?'MORE — a dozen a year':'MOST — the whole vault';
+  toast('🌹 '+n+' — the model works. Nothing charges yet: we\'re seeking licensing, and the family sets the price.');}
+function closeBuy(){document.getElementById('ov').classList.remove('on');}
+document.getElementById('ov').onclick=function(e){if(e.target===this)closeBuy();};
+
+/* ---- load the live JGB catalog ---- */
+recalc();
+if(window.GDLive){
+  GDLive.load(function(shows){
+    var st=document.getElementById('status');
+    if(shows&&shows.length){
+      SHOWS=shows; fillYears(); render();
+      document.getElementById('allN').textContent='all '+shows.length;
+      st.innerHTML='<b style="color:var(--gold)">'+shows.length+' Jerry Garcia Band shows</b> — every date with a taper recording on the Internet Archive.';
+    } else { st.textContent='Couldn’t reach the Internet Archive just now — try again in a moment.'; }
+  }, function(done,total,cached){
+    var st=document.getElementById('status'); if(!st||cached)return;
+    st.textContent='Loading the Jerry Garcia Band catalog… '+done+(total?(' / '+total):'');
+  }, { query:'(identifier:jgb* OR identifier:jerry-garcia-band* OR title:(Jerry Garcia Band)) AND mediatype:audio', cacheKey:'jgb.live.index.v2', band:'Jerry Garcia Band' });
+} else {
+  document.getElementById('status').textContent='Catalog engine not loaded — reload the page.';
+}
+</script>
+<script src="dd_back.js"></script>
+</body></html>

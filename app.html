@@ -140,6 +140,7 @@ a{color:inherit}
 <script src="bands.js"></script>
 <script src="market-core.js"></script>
 <script src="cassette-reader.js"></script>
+<script src="gd_live.js"></script>
 <script src="ad-engine.js"></script>
 <script src="crm_seed.js"></script>
 <script src="doodles.js"></script>
@@ -1744,17 +1745,31 @@ function buildArchive(){
  var p=document.getElementById("archivepanel");
  if(typeof CassetteReader==="undefined"){p.innerHTML='<div class="sec-h">📼 The Live Archive</div><div class="note">Couldn\'t load the cassette player (cassette-reader.js). Reload the page — the rest of dead_dance still works.</div>';archiveBuilt=true;return;}
  p.innerHTML='<div class="sec-h">📼 The Live Archive · plays right here in the app</div>'+
+  '<div id="czstatus" class="note" style="margin-bottom:8px">Loading every show from the Internet Archive…</div>'+
   '<div class="card" style="overflow:hidden"><div id="cassettehost"></div></div>'+
-  '<div class="card pad"><div class="row"><div class="ic">🌹</div><div style="flex:1"><b>JGB — licensed catalog</b><div class="muted">Jerry Garcia Band · 750 shows · Buy / subscribe per show</div></div></div>'+
-   '<button class="btn rose" style="display:block;width:100%;text-align:center;margin-top:12px" onclick="toast(\'JGB licensed catalog — per-show buy/subscribe wires in once Jerry Garcia Band licenses. Default-deny until then.\')">JGB catalog → licensing</button></div>'+
+  '<div class="card pad"><div class="row"><div class="ic">🌹</div><div style="flex:1"><b>Jerry Garcia Band — every show</b><div class="muted">Live catalog · you set the price · seeking licensing</div></div></div>'+
+   '<button class="btn rose" style="display:block;width:100%;text-align:center;margin-top:12px" onclick="ddSheet(\'jgb_store.html\',\'🌹 Jerry Garcia Band — Every Show\')">Open the JGB store →</button></div>'+
   '<div class="note"><b>Rights, not copies.</b> The cassette streams <b>band-sanctioned recordings from the Internet Archive</b> (the etree collection — taping always allowed). JGB and anything unlicensed stays <b>default-deny</b> — setlists are factual; those recordings stream only under the license the rights-holders grant.</div>'+
   '<div id="iwt"></div>';
- CassetteReader.mount(document.getElementById("cassettehost"),{
+ var czReader = CassetteReader.mount(document.getElementById("cassettehost"),{
   brand:{name:"Every Show",sub:"Grateful Dead · live archive · in dead_dance",logo:"syf.png"},
   marketId:"dead_dance_archive",account:{id:"head1",region:"US"},
   theme:{tape:"#3c2a54",gold:"#d8a24a",rust:"#b5384e",blue:"#3f6fb0",paper:"#f3ece0",ink:"#241a2b",line:"#e6dccb"},
-  shows:GD_SHOWS
+  shows:GD_SHOWS,                                    // instant seed — plays immediately
+  hydrate:(typeof GDLive!=="undefined")?GDLive.hydrate:null   // lazy per-show tracklists from the Archive
  });
+ // Swap the 8-show seed for the FULL live index (every GD show on the Archive), then let it play on demand.
+ if(typeof GDLive!=="undefined"){
+  GDLive.load(function(shows){
+   var st=document.getElementById("czstatus");
+   if(shows&&shows.length){ if(czReader&&czReader.setShows) czReader.setShows(shows);
+     if(st) st.innerHTML='<b>'+shows.length+' shows</b> loaded from the Internet Archive — every date the band played that has a taper stream. Tap a tape and press ▶.'; }
+   else { if(st) st.textContent='Couldn’t reach the Internet Archive just now — showing the featured shows. Pull to refresh later for the full run.'; }
+  }, function(done,total,cached){
+   var st=document.getElementById("czstatus"); if(!st) return;
+   if(cached) return; st.textContent='Loading every show from the Internet Archive… '+done+(total?(' / '+total):'');
+  });
+ } else { var st0=document.getElementById("czstatus"); if(st0) st0.textContent=''; }
  renderIWT();
  archiveBuilt=true;
 }

@@ -89,7 +89,8 @@
    + "#npbar .s{font-size:11px;color:#b7a9d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
    + "#npbar button{border:0;border-radius:10px;padding:8px 11px;font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap}"
    + "#npbar .sh{background:#241638;color:#e9d8ff}#npbar .pp{background:#5a2e86;color:#fff;width:38px}"
-   + "#npbar .vinyl{background:#ffd76a;color:#3a1d00;text-decoration:none;display:inline-flex;align-items:center;padding:8px 11px;border-radius:10px;font-weight:900;cursor:pointer;border:0;font-size:13px}"
+   + "#npbar .vinyl{background:#ffd76a;color:#3a1d00;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border-radius:10px;font-weight:900;cursor:pointer;border:0;font-size:13px}"
+   + "#npbar .vinyl svg{display:block;flex:none}"
    // ── dice tooltip ──
    + "#npbar .sh[data-tip]{position:relative}"
    + "#npbar .sh[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0e0716;color:#f3ecff;font-size:11px;font-weight:700;padding:5px 9px;border-radius:7px;white-space:nowrap;box-shadow:0 4px 12px #0007;pointer-events:none}"
@@ -139,7 +140,9 @@
     +   '<button class="sh" data-tip="Shuffle play" onclick="npShuffle(\'song\')">🎲<span class="lbl"> Song</span></button>'
     +   '<button class="sh hide2" data-tip="Shuffle a show" onclick="npShuffle(\'show\')">📻<span class="lbl"> Show</span></button>'
     +   '<button class="pp" id="npPP" onclick="npPreview()" title="Play the house-made ambient bed (the real songbook once licensed)">▶︎</button>'
-    +   '<button class="vinyl" id="npVinyl" onclick="npOwnIt()" title="Tap vinyl to own it — opens the Record Store">💿 Own it</button>'
+    +   '<button class="vinyl" id="npVinyl" onclick="npOwnIt()" title="Tap vinyl to own it — opens the Record Store">'
+    +     '<svg width="20" height="20" viewBox="0 0 24 24" aria-label="Records"><circle cx="12" cy="12" r="11" fill="#1a1030"/><circle cx="12" cy="12" r="8.4" fill="none" stroke="#c79a3a" stroke-width=".8" opacity=".5"/><circle cx="12" cy="12" r="5.2" fill="#e6b23c"/><circle cx="12" cy="12" r="1.2" fill="#1a1030"/></svg>'
+    +     '<span>Own it</span></button>'
     + '</div>'
     + '<div class="dj" id="npDJ"></div>'
     // reactions on Hanz & Franz
@@ -155,8 +158,8 @@
 
   function mount(){ if(document.getElementById("npbar")) return; document.body.appendChild(bar);
     rollDJ(); paintReact(); prefillReply();
-    // persist + restore tuck state
-    try{ if(localStorage.getItem("dd.np.tuck")==="1"){ bar.classList.add("tucked"); var b=document.getElementById("npTuck"); if(b)b.textContent="▲"; } }catch(e){}
+    // persist + restore tuck state (measured, so it restores fully tucked)
+    try{ if(localStorage.getItem("dd.np.tuck")==="1"){ applyTuck(true); } }catch(e){}
   }
 
   // ── H&F: fresh riff each shuffle, drawn from the SONGFACTS bank (facts only) ──
@@ -282,10 +285,29 @@
     if(el) el.value="";
   };
 
-  // ── tuck / raise the bar — REAL accordion: slides #npbar down behind the footnav, handle stays. ──
-  window.npTuck = function(){ var e=document.getElementById("npbar"), b=document.getElementById("npTuck"); if(!e) return;
-    var tucked=e.classList.toggle("tucked"); if(b) b.textContent = tucked ? "▲" : "▼";
-    try{ localStorage.setItem("dd.np.tuck", tucked?"1":"0"); }catch(x){} };
+  // ── tuck / raise the bar — REAL accordion. Measured in PIXELS (not %), so it always
+  //    slides fully down behind the footnav leaving a fixed ~22px handle, regardless of
+  //    content height or the iOS safe-area inset. Inline transform overrides the CSS fallback. ──
+  var TUCK_PEEK = 22; // px of handle strip left visible above the footnav
+  function applyTuck(tucked){
+    var e=document.getElementById("npbar"), b=document.getElementById("npTuck"); if(!e) return;
+    if(tucked){
+      e.classList.add("tucked");
+      var h = e.offsetHeight || 200;                 // force reflow → real height
+      e.style.transform = "translateY(" + (h - TUCK_PEEK) + "px)";
+      if(b){ b.textContent="▲"; b.title="raise the shuffle bar"; }
+    } else {
+      e.classList.remove("tucked");
+      e.style.transform = "translateY(0)";
+      if(b){ b.textContent="▼"; b.title="tuck the shuffle bar"; }
+    }
+  }
+  window.npTuck = function(){
+    var e=document.getElementById("npbar"); if(!e) return;
+    var tucked = !e.classList.contains("tucked");   // toggle
+    applyTuck(tucked);
+    try{ localStorage.setItem("dd.np.tuck", tucked?"1":"0"); }catch(x){}
+  };
 
   function set(t,s){ var T=document.getElementById("npT"), S=document.getElementById("npS"); if(T)T.textContent=t; if(S)S.textContent=s; }
   window.npClose = function(){ var e=document.getElementById("npbar"); if(e)e.style.display="none"; };
