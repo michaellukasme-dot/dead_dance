@@ -842,12 +842,12 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="citem" onclick="coGo('appsov',function(){openGig('festival')})"><span>🎪</span>Festival</a>
     <a class="citem" onclick="coGo('appsov',function(){openGig('act')})"><span>🎭</span>List Talent</a>
     <a class="citem" href="managed.html?role=band"><span>🚌</span>Go On Tour</a>
-    <a class="citem" href="band_vault.html"><span>🎙️</span>Live Recordings</a>
-    <a class="citem" href="archive.html"><span>🗄️</span>The Archive — Rank &amp; Argue</a>
+    <a class="citem" onclick="ddSheet('band_vault.html','🎙️ Live Recordings');return false;" style="cursor:pointer"><span>🎙️</span>Live Recordings</a>
+    <a class="citem" onclick="ddSheet('archive.html','🗄️ The Archive');return false;" style="cursor:pointer"><span>🗄️</span>The Archive — Rank &amp; Argue</a>
     <a class="citem" onclick="ddSheet('record_store.html','💿 Shakedown Records');return false;" style="cursor:pointer"><span>🛍️</span>Shakedown Records</a>
-    <a class="citem" href="your_catalogue.html"><span>🎚️</span>Upload your catalogue</a>
-    <a class="citem" href="poster_shop.html"><span>🖼️</span>The Poster Shop</a>
-    <a class="citem" href="tshirt_shop.html"><span>👕</span>Tour Tees — Print Me the T-Shirt</a>
+    <a class="citem" onclick="ddSheet('your_catalogue.html','🎚️ Your Catalogue');return false;" style="cursor:pointer"><span>🎚️</span>Upload your catalogue</a>
+    <a class="citem" onclick="ddSheet('poster_shop.html','🖼️ The Poster Shop');return false;" style="cursor:pointer"><span>🖼️</span>The Poster Shop</a>
+    <a class="citem" onclick="ddSheet('tshirt_shop.html','👕 Tour Tees');return false;" style="cursor:pointer"><span>👕</span>Tour Tees — Print Me the T-Shirt</a>
     <a class="citem" onclick="ddSheet('karaoke_store.html','🎤 Shakedown Karaoke');return false;" style="cursor:pointer"><span>🎤</span>Shakedown Karaoke</a>
     <a class="citem" href="curator.html"><span>👑</span>Group Leader Console</a>
     <a class="citem" onclick="coGo('appsov',function(){openGig('feature')})"><span>💡</span>Add a feature</a>
