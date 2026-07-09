@@ -34,6 +34,7 @@ cur=$(grep -oE 'deaddance-v[0-9]+' "$SRC/sw.js" | head -1 | grep -oE '[0-9]+' ||
 if [ -n "$cur" ]; then
   next=$((cur+1)); today=$(date '+%Y-%m-%d')
   perl -pi -e "s/deaddance-v[0-9]+-[0-9-]+/deaddance-v${next}-${today}/" "$SRC/sw.js"
+  VER="deaddance-v${next}-${today}"
   echo "🔖 service worker bumped: v${cur} → v${next} (${today})"
 fi
 
@@ -59,5 +60,6 @@ git commit -m "$MSG"
 git push origin "$BRANCH"
 
 echo "✅ deployed: $MSG"
+echo "   🔖 LIVE VERSION: ${VER:-unknown}"
 echo "   GitHub Pages rebuilds in ~1–2 min (watch the repo's Actions tab)."
 echo "   Then hard-refresh the site (Cmd+Shift+R) to pull the new build."
