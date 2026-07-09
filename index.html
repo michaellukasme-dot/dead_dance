@@ -545,6 +545,14 @@ body{padding-bottom:64px}
 .profileov{position:fixed;inset:0;z-index:86;background:rgba(20,12,34,.62);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto}
 .profileov.on{display:flex}
 .profbox{background:#fff;border-radius:20px;max-width:400px;width:100%;max-height:90vh;overflow:auto;padding:22px;text-align:center;box-shadow:0 30px 80px #0007;position:relative}
+/* expand-to-full-page: Profile + the ♠ Dealer reader (full-page shopping per tab) */
+.rexp{margin-left:auto;background:#ffffff22;border:0;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px}
+.rhead .rx{margin-left:6px}
+.coexp{position:absolute;top:10px;right:42px;background:none;border:0;font-size:19px;color:#aaa;cursor:pointer;z-index:2}
+.reader.full{padding:0}
+.reader.full .rpanel{max-width:100%;height:100vh;max-height:100vh;border-radius:0}
+.profileov.full{padding:0}
+.profileov.full .profbox{max-width:100%;min-height:100vh;max-height:100vh;border-radius:0}
 .pqr{width:150px;height:150px;margin:4px auto 10px;display:block}
 .pname{font-size:22px;font-weight:800}.pchap{font-size:12.5px;color:var(--muted);margin-bottom:13px}
 .pstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:10px}
@@ -618,16 +626,7 @@ body{padding-bottom:64px}
       <div style="text-align:center;font-weight:800;margin-top:8px">My Purchased Tickets</div>
       <div class="tix" id="myTix"><span class="when">Tomorrow</span><div class="nm"><b>Splintered Sunlight</b><span>Sellersville Theater · 8:00 PM · 11 mi</span></div></div>
       <button class="btn ghost sm" style="width:100%" onclick="toast('🎙️ Farrah: routing you to Felton Music Hall — hands-free.')">🎙️ Farrah, guide me there</button>
-      <div style="font-weight:800;font-size:12.5px;margin:11px 2px 0">Upload GD Ticket Stubs</div>
-      <div class="upbub">
-        <input id="upfile" type="file" accept="image/*" multiple style="display:none" onchange="upAdd(this.files)">
-        <div class="upzone" id="upzone" onclick="document.getElementById('upfile').click()">
-          <div class="upplus">+</div>
-          <div class="uptxt">Drag your stubs here<span>or tap + to add — drop them on the target</span></div>
-        </div>
-        <div class="upthumbs" id="upthumbs"></div>
-      </div>
-      <div class="qrnote" id="qrnote2">One QR = <b>your paid tickets</b> · <b>shows you attended</b> (log) · <b>uploaded stubs</b> · and <b>Archive shows you've listened to</b> — all in the one code.</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:9px">🎟️ Upload your ticket stubs in <a href="#" onclick="profile('me');return false" style="color:var(--accent);font-weight:700">your QR profile ›</a></div>
     </div>
 
 
@@ -760,6 +759,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
       <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
       <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 GD Archive</button>
       <button class="rtab" data-t="art" onclick="readerTab('art')">🎨 Art</button>
+      <button class="rexp" onclick="readerExpand(this)" title="Expand to full screen" aria-label="Expand">⤢</button>
       <button class="rx" onclick="closeReader()">×</button>
     </div>
     <div class="rbody" id="rbody"></div>
@@ -768,7 +768,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 
 <!-- QR PROFILE (portable, shareable, Facebook-style) -->
 <div class="profileov" id="profile" onclick="if(event.target===this)closeProfile()">
-  <div class="profbox"><button class="cox" onclick="closeProfile()">×</button><div id="profBody"></div></div>
+  <div class="profbox"><button class="coexp" onclick="profExpand(this)" title="Expand to full screen" aria-label="Expand">⤢</button><button class="cox" onclick="closeProfile()">×</button><div id="profBody"></div></div>
 </div>
 <input id="avfile" type="file" accept="image/*" style="display:none" onchange="onAvatar(this)">
 
@@ -1326,7 +1326,7 @@ function friendsBuild(){var el=document.getElementById('friendsRow');if(!el)retu
  el.innerHTML=MYFRIENDS.map(function(fr,i){return '<div class="fchip" onclick="profile('+i+')"><div class="fav">'+fr.ic+'</div><div class="fnm">'+fr.name.split(' ')[0]+'</div></div>';}).join("");}
 function profile(who){
  var me=(who==='me'); var f=me?ME:MYFRIENDS[who];
- if(me)ME.stubs=document.querySelectorAll('#upthumbs .upth').length;
+ if(me)ME.stubs=STUBS.length;
  var total=(f.preJerry||0)+(f.postJerry||0);
  var nm=me?'You':f.name, safe=nm.replace(/'/g,"");
  var actions = me
@@ -1342,16 +1342,21 @@ function profile(who){
   '</div>'+
   '<div class="ptotal">'+total+' shows on the bus</div>'+
   actions+
+  (me?('<div class="psec">🎟️ Upload GD Ticket Stubs</div><div class="upbub"><input id="upfile" type="file" accept="image/*" multiple style="display:none" onchange="upAdd(this.files)"><div class="upzone" id="upzone" onclick="document.getElementById(\'upfile\').click()"><div class="upplus">+</div><div class="uptxt">Drag your stubs here<span>or tap + to add — drop them on the target</span></div></div><div class="upthumbs" id="upthumbs"></div></div><div class="qrnote" id="qrnote2">One QR = <b>your paid tickets</b> · <b>shows you attended</b> (log) · <b>uploaded stubs</b> · and <b>Archive shows you\'ve listened to</b> — all in the one code.</div>'):'')+
   (me?('<div class="psec">🎛️ Your role desks</div><div class="roles" style="margin:2px 0 4px">🎸 <a href="#" onclick="toast(\'Musician studio (demo)\');return false">Musician</a> · 👑 <a href="#" onclick="toast(\'Chancellor desk (demo)\');return false">Chancellor</a> · 🤝 <a href="#" onclick="toast(\'Ambassador desk (demo)\');return false">Ambassador</a> · 🎟️ <a href="#" onclick="toast(\'Chaperone cockpit (demo)\');return false">Chaperone</a> · 🗺 <a href="console_directory.html">Map of consoles</a></div>'):'')+
   (me?leaderCardHTML():'')+
   '<div class="psec">📖 Dead Family Story</div><div class="pstory">'+f.story+'</div>'+
   '<div class="psec">📝 Posts</div>'+(f.posts||[]).map(function(pp){return '<div class="ppost">'+pp+'</div>';}).join("")+
   '<div class="psec">📷 Photos</div><div class="pphotos">'+(f.photos||[]).map(function(ph){return '<div class="pph">'+ph+'</div>';}).join("")+'</div>'+
   '<div class="pfoot">The QR <b>is</b> the profile — tickets, your show log, stubs, what you\'ve heard, your story &amp; posts, all in one code. <b>Just for fun — no verification.</b> Scan a friend\'s QR to see theirs.</div>';
+ if(me){ renderStubThumbs(); bindUpzone(); qrNote(); }
  document.getElementById('profile').classList.add('on');
  drawQR(document.getElementById('profQR'), f.img);
 }
-function closeProfile(){document.getElementById('profile').classList.remove('on');}
+function closeProfile(){document.getElementById('profile').classList.remove('on');document.getElementById('profile').classList.remove('full');}
+/* expand a modal to a full-page experience (Profile · the ♠ Dealer reader, full-page per tab) */
+function profExpand(btn){var ov=document.getElementById('profile');var full=ov.classList.toggle('full');btn.textContent=full?'⤡':'⤢';btn.title=full?'Shrink':'Expand to full screen';}
+function readerExpand(btn){var ov=document.getElementById('reader');var full=ov.classList.toggle('full');btn.textContent=full?'⤡':'⤢';btn.title=full?'Shrink':'Expand to full screen';}
 /* ---- FB Group Leader: self-identify + intake (data data data) ---- */
 function leaderState(){ try{return JSON.parse(localStorage.getItem('dd.leader')||'null');}catch(e){return null;} }
 function leaderCardHTML(){ var L=leaderState();
@@ -1826,7 +1831,7 @@ function syncMiracle(){ var c=ddClient(),id=ddId(); if(!c||!id)return;
 
 /* ---------------- reader modal ---------------- */
 function openReader(tab){document.getElementById('reader').classList.add('on');readerTab(tab||'groups');}
-function closeReader(){document.getElementById('reader').classList.remove('on');}
+function closeReader(){var r=document.getElementById('reader');r.classList.remove('on');r.classList.remove('full');}
 function readerTab(tab){
  document.querySelectorAll('.rtab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-t')===tab);});
  var b=document.getElementById('rbody');
@@ -2350,20 +2355,25 @@ function gpsFamily(){
 }
 
 /* ---------------- stub upload: "+" target, drag images to it, ✕ to remove ---------------- */
-function upAdd(files){
- var box=document.getElementById('upthumbs'); if(!files)return; var n=0;
+var STUBS=[];   // dataURLs of uploaded stubs — persist across profile opens
+function addStubThumb(src){ var box=document.getElementById('upthumbs'); if(!box)return;
+ var d=document.createElement('div'); d.className='upth';
+ d.innerHTML='<img src="'+src+'" alt="stub"><span class="x" title="remove">×</span>';
+ d.querySelector('.x').onclick=function(){ var i=STUBS.indexOf(src); if(i>=0)STUBS.splice(i,1); d.remove(); ME.stubs=STUBS.length; };
+ box.appendChild(d);
+}
+function renderStubThumbs(){ var box=document.getElementById('upthumbs'); if(!box)return; box.innerHTML=''; STUBS.forEach(addStubThumb); }
+function upAdd(files){ if(!files)return; var n=0;
  Array.prototype.slice.call(files).forEach(function(f){ if(!/^image\//.test(f.type))return; n++;
-  var rd=new FileReader(); rd.onload=function(){ var d=document.createElement('div'); d.className='upth';
-   d.innerHTML='<img src="'+rd.result+'" alt="stub"><span class="x" title="remove" onclick="this.parentNode.remove()">×</span>'; box.appendChild(d);
-  }; rd.readAsDataURL(f);
+  var rd=new FileReader(); rd.onload=function(){ STUBS.push(rd.result); addStubThumb(rd.result); ME.stubs=STUBS.length; }; rd.readAsDataURL(f);
  });
  if(n)toast('🎟️ '+n+' stub'+(n>1?'s':'')+' added — verifies your shows, rolls into your QR + badge.');
 }
-(function(){ var z=document.getElementById('upzone'); if(!z)return;
+function bindUpzone(){ var z=document.getElementById('upzone'); if(!z||z._bound)return; z._bound=1;
  ['dragenter','dragover'].forEach(function(ev){ z.addEventListener(ev,function(e){ e.preventDefault(); z.classList.add('over'); }); });
  ['dragleave','dragend'].forEach(function(ev){ z.addEventListener(ev,function(e){ e.preventDefault(); z.classList.remove('over'); }); });
  z.addEventListener('drop',function(e){ e.preventDefault(); z.classList.remove('over'); if(e.dataTransfer&&e.dataTransfer.files)upAdd(e.dataTransfer.files); });
-})();
+}
 
 /* ============ Built-in QA Assist — Claude manages it: SHARES + test tasks ============ */
 var QA_DEMO_GROUPS=[{id:null,name:'DEADHEADS',url:'https://www.facebook.com/groups/180412138792814/'},
