@@ -3,11 +3,11 @@
    • install is BEST-EFFORT (one missing asset can't abort the whole install)
    • HTML navigations are NETWORK-FIRST (no more stale index.html), cache as fallback
    • runtime cache is SAME-ORIGIN ONLY — never caches cross-origin archive.org audio (no quota blowout) */
-var CACHE = "deaddance-v170-2026-07-09";
+var CACHE = "deaddance-v172-2026-07-09";
 var ASSETS = ["./", "./index.html", "./app.html", "./welcome.html", "./studio_calculator.html", "./post_scale.html", "./qr_print.html",
   "./sales_crm.html", "./operator_academy.html", "./hostaband.html", "./managed.html", "./band_vault.html", "./archive.html", "./curator.html", "./record_store.html", "./record_store_kimock_demo.html", "./your_catalogue.html", "./poster_shop.html", "./tshirt_shop.html", "./karaoke.html", "./karaoke_store.html", "./console_directory.html", "./target_bands.js", "./audio_manifest.js", "./festivals_seed.js", "./shakedown_scene_seed.js", "./shakedown_scene_seed.csv",
   "./manifest.webmanifest", "./bands.js", "./market-core.js", "./cassette-reader.js", "./ad-engine.js", "./syf.png", "./lukas_a2hs.js",
-  "./crm_seed.js", "./lukas_chat.js", "./lukas_badge.js", "./helptest.js", "./nowplaying.js", "./doodles.js", "./doodles/chancellor.svg", "./doodles/sunset.svg",
+  "./crm_seed.js", "./dd_showmap.js", "./lukas_chat.js", "./lukas_badge.js", "./helptest.js", "./nowplaying.js", "./dd_back.js", "./doodles.js", "./doodles/chancellor.svg", "./doodles/sunset.svg",
   "./rosebud.svg", "./rosebud-192.png", "./rosebud-512.png", "./rosebud-32.png",
   "./rose.svg", "./rose-192.png", "./rose-512.png", "./rose-32.png"];
 

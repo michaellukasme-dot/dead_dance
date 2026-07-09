@@ -305,6 +305,41 @@ body{padding-bottom:64px}
 .mpanel .mh b{flex:1}
 .mpanel .mb{padding:14px}
 .mapcanvas{height:280px;border-radius:12px;background:radial-gradient(circle at 60% 45%,#2a6b46 0 8px,transparent 9px),radial-gradient(circle at 58% 47%,#7a3cc0 0 60px,transparent 61px),linear-gradient(160deg,#dfeae0,#cfe0d4);position:relative;border:1px solid var(--line);display:grid;place-items:center;color:#2a6b46;font-weight:700}
+/* ===== Home Show Map (dd_showmap.js) ===== */
+#showMap{margin:0 0 14px}
+.showmap-card{background:linear-gradient(170deg,#241634,#3a1f57);color:#fff;border-radius:14px;padding:12px 13px 14px;border:1px solid #ffffff14;box-shadow:0 1px 3px #0000000a}
+.showmap-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.showmap-head b{font-size:14.5px}
+.showmap-sub{font-size:11px;color:var(--gold);font-weight:800;margin-left:2px}
+.showmap-x{margin-left:auto;background:#ffffff1c;border:0;color:#fff;width:26px;height:26px;border-radius:8px;font-size:14px;line-height:1;cursor:pointer}
+.showmap-x:active{transform:scale(.92)}
+.showmap-legend{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;font-size:10.5px;color:#e9def7;margin-bottom:8px}
+.showmap-legend .lg{font-weight:700}
+.showmap-legend .lg.real{color:#f5c65a}.showmap-legend .lg.sample{color:#b6a9c9}
+.showmap-honest{font-size:10px;color:#9d90b3;font-style:italic;flex-basis:100%}
+.showmap-wrap{position:relative;border-radius:12px;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#31204d 0,#1c1230 62%,#140c22 100%)}
+.showmap-svg{display:block;width:100%;height:auto}
+.us-land{fill:#2c1c47;stroke:#5a3f86;stroke-width:2;stroke-linejoin:round}
+.smdot{cursor:pointer;outline:none}
+.smcore{fill:url(#_none)} /* fallback; real fill below */
+.smdot .smcore{fill:#c79a3a;stroke:#fff;stroke-width:1.2}
+.smdot.sample .smcore{fill:#8f7bb3;stroke:#e9def7;stroke-width:1}
+.smdot .smpulse{fill:#c79a3a;opacity:.5;transform-box:fill-box;transform-origin:center;animation:smpulse 2.4s ease-out infinite}
+.smdot.sample .smpulse{fill:#8f7bb3;opacity:.35}
+.smdot:hover .smcore,.smdot:focus .smcore{stroke-width:2}
+.smdot:focus .smpulse{opacity:.8}
+@keyframes smpulse{0%{transform:scale(.7);opacity:.55}70%{transform:scale(2.1);opacity:0}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.smdot .smpulse{animation:none;opacity:.4}}
+.showmap-pop{position:absolute;z-index:5;width:210px;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 12px 32px #0007;padding:10px 12px;font-size:12.5px;line-height:1.4}
+.showmap-pop[hidden]{display:none}
+.pop-band{font-weight:800;font-size:13.5px}
+.pop-band .pop-tag{font-size:9px;font-style:normal;font-weight:800;letter-spacing:.05em;background:#efe7f6;color:var(--accent);border-radius:5px;padding:1px 5px;vertical-align:middle}
+.pop-line{color:#4a4356;margin-top:2px}
+.pop-date{color:var(--rose);font-weight:800;margin-top:4px;font-size:12px}
+.pop-notify{width:100%;margin-top:9px;border:0;border-radius:9px;background:var(--gold);color:#23202a;font-weight:800;font-size:13px;padding:9px;cursor:pointer}
+.pop-notify:active{transform:scale(.97)}
+.pop-notify.done{background:#e7f6ee;color:#15502f}
+.pop-foot{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}
 /* Farrah voice caption + tiered bus map */
 .farrah-say{background:#2a1b3d;color:#f3ece0;border-left:3px solid var(--gold);border-radius:9px;padding:9px 12px;font-size:13px;line-height:1.45;margin-bottom:12px}
 .farrah-say b{color:var(--gold)}
@@ -586,6 +621,10 @@ body{padding-bottom:64px}
   <div class="center">
     <div class="fb-strip" id="fbStrip">🅕 <b>A Facebook enhancement — not a replacement.</b> It’s still Facebook: your words &amp; photos originate here, click by click, then flow to your group. We just add the communication + marketplace tools that huge Dead groups — the ones fragmented by their own chatter — don’t get on their own. Real human content, no bots.<button class="fb-x" aria-label="Close" onclick="this.closest('.fb-strip').style.display='none';try{localStorage.setItem('dd.fbstrip','1')}catch(e){}">✕</button></div>
     <script>try{if(localStorage.getItem('dd.fbstrip')){var _s=document.getElementById('fbStrip');if(_s)_s.style.display='none';}}catch(e){}</script>
+
+    <!-- ===== US SHOW MAP — upcoming shows plotted by venue (dd_showmap.js) ===== -->
+    <div id="showMap"></div>
+
     <div class="card">
       <div class="gm-h"><span class="fb">f</span><b>Groups Mirror</b><span style="color:var(--muted);font-size:12px;margin-left:auto">all Dead FB groups, mirrored</span></div>
       <div class="mirror" id="mirror"></div>
@@ -2614,6 +2653,7 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="dd_share.js" defer></script>
 <script src="dd_games.js" defer></script>
 <script src="dd_hyperpost.js" defer></script>
+<script src="dd_showmap.js" defer></script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
   try{ if(window.LukasChat && LukasChat.init) LukasChat.init({ app:"dead_dance", brand:{ name:"dead_dance", accent:"#b8002e", icon:"💬" }, launcher:false }); }catch(e){}
