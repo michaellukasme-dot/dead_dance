@@ -252,7 +252,11 @@ body{padding-bottom:64px}
 .cbtns{display:flex;gap:5px;justify-content:flex-end;margin-top:3px}
 .cact button{border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
 .cact .cadd{background:#fff;border:1px solid var(--line);color:var(--accent);padding:6px 9px}
-/* 🍀 Miracle Ticket — bottom-right bouncing/blinking FREE-ticket FAB */
+/* 🍀 Miracle Ticket — compact bouncing chip at the top of the calendar */
+.mfab-mini{position:relative;margin-left:auto;background:linear-gradient(135deg,#2a8a4a,#c79a3a);color:#fff;border:0;border-radius:999px;padding:5px 11px;font:800 11px/1 inherit;letter-spacing:.02em;cursor:pointer;box-shadow:0 0 0 2px #ffffff40,0 4px 10px #0004;animation:mbounce 1.7s ease-in-out infinite;white-space:nowrap}
+.mfab-mini:active{transform:scale(.92)}
+.mfab-mini .mm-badge{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:var(--rose);color:#fff;font-size:9.5px;font-weight:800;display:grid;place-items:center;padding:0 3px;box-shadow:0 0 0 1.5px #fff}
+/* 🍀 Miracle Ticket — bottom-right bouncing/blinking FREE-ticket FAB (legacy — element moved to calendar) */
 .mfab{position:fixed;right:16px;bottom:146px;z-index:60;border:0;background:none;cursor:pointer;animation:mbounce 1.7s ease-in-out infinite;filter:drop-shadow(0 6px 14px #0004)}
 .mfab .tkt{position:relative;width:74px;height:48px;border-radius:9px;background:linear-gradient(135deg,#2a8a4a,#c79a3a);display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:.04em;text-align:center;line-height:1.05;box-shadow:0 0 0 3px #fff, 0 0 0 5px #2a8a4a55}
 .mfab .tkt::before,.mfab .tkt::after{content:"";position:absolute;width:12px;height:12px;background:var(--cream);border-radius:50%;top:50%;transform:translateY(-50%)}
@@ -488,7 +492,19 @@ body{padding-bottom:64px}
 #hptext{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;padding:11px;font:14px/1.5 inherit;min-height:78px;resize:vertical}
 .hpemoji{font-size:22px;margin:9px 0;display:flex;gap:8px;flex-wrap:wrap}.hpemoji span{cursor:pointer}.hpemoji span:hover{transform:scale(1.25)}
 .hplabel{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.hpchips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.hpchips{display:flex;flex-direction:column;gap:6px;margin:6px 0 12px;max-height:190px;overflow:auto}
+.hpchk{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:#4a4657}
+.hpchk input{width:17px;height:17px;accent-color:var(--rose);flex:none;cursor:pointer}
+.hpchk.chat{border-left:4px solid var(--rose)}                 /* the red chat boxes */
+.hpchk.chat.on{background:#fff1f3;border-color:#f0c4cc}
+.hpchk.on{background:#f6f2fb;border-color:#d8c8ee}
+.hpchk.net{border-left:4px solid var(--purple)}
+.hpchk.net.on{background:#f2eefb;border-color:#d8c8ee}
+.hpchk.lock{opacity:.85;background:#f3eef8}.hpchk.lock input{accent-color:var(--purple)}
+.hpmanage{width:100%;margin-top:2px;background:#fff;border:1px dashed var(--line);border-radius:10px;padding:9px;font-size:12px;font-weight:800;color:var(--purple);cursor:pointer}
+.hpspread{font-size:12.5px;color:var(--ink);background:linear-gradient(135deg,#f6f2fb,#fff1f3);border:1px solid #e6d4ee;border-radius:10px;padding:10px 12px;margin:2px 0 8px;line-height:1.5}
+.hpspread b{color:var(--rose)}
+.hpaddmedia{width:100%;margin-bottom:10px;background:#fff;border:1px dashed var(--line);border-radius:10px;padding:10px;font-size:12.5px;font-weight:800;color:var(--purple);cursor:pointer}
 .hpchip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;cursor:pointer;background:#fff;color:#6a6577}
 .hpchip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .hppost{width:100%;background:var(--accent);color:#fff;border:0;border-radius:13px;padding:13px;font-weight:800;font-size:15px;cursor:pointer}
@@ -560,7 +576,6 @@ body{padding-bottom:64px}
   <input class="search" placeholder="Search heads, shows, tapes, art…">
   <button class="cbtn" onclick="openApps()" title="Menu" aria-label="Menu">▦</button>
   <button class="chatbtn" onclick="if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')" title="Family chat" aria-label="Family chat">💬</button>
-  <button class="cbtn" onclick="openNotifs()" title="Notifications" aria-label="Notifications">🔔<span class="cbadge" id="notifBadge">3</span></button>
   <button class="cbtn avat" onclick="openProfMenu()" title="You" aria-label="You">🌹</button>
   <button class="hpbtn" onclick="hyperConsole('dead.dance')" title="HyperPost — reply, radiate, share">📡 HyperPost</button>
 </div>
@@ -569,7 +584,7 @@ body{padding-bottom:64px}
   <!-- ===================== LEFT RAIL ===================== -->
   <div class="left">
     <div class="cal" id="calCard">
-      <div class="findshow">🎟️ <b>Find a Show</b><span>tap a date or scan what's coming up — always current. The bus is always rolling.</span><button class="calx" onclick="calExpand()" title="Expand calendar" aria-label="Expand calendar">⤢</button></div>
+      <div class="findshow">🎟️ <b>Find a Show</b><span>tap a date or scan what's coming up — always current. The bus is always rolling.</span><button class="mfab-mini" id="mfabMini" onclick="openMiracle()" title="The Miracle Bucket — free tickets from the family">🍀 Miracle<span class="mm-badge" id="mfabBadge" style="display:none">0</span></button><button class="calx" onclick="calExpand()" title="Expand calendar" aria-label="Expand calendar">⤢</button></div>
       <div class="ch">
         <span class="viewseg"><button id="vwGrid" class="on" onclick="calView('grid')">▦ Month</button><button id="vwList" onclick="calView('list')">📋 Upcoming</button></span>
         <select id="calType" class="caltype" onchange="calType(this.value)" title="Filter by type (calendar only — the family feed stays Dead)">
@@ -707,10 +722,10 @@ body{padding-bottom:64px}
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
-  <button class="fn" onclick="openReader('groups')"><span class="ic">🚉</span><span class="lb">Chapters</span></button>
-  <button class="fn" onclick="openReader('shakedown')"><span class="ic">🛍️</span><span class="lb">Shakedown</span></button>
-  <button class="fn" onclick="openReader('archive')"><span class="ic">🎵</span><span class="lb">GD Archive</span></button>
+  <button class="fn" onclick="openReader('groups')" title="The Dealer — Groups, Friends, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="openGame()"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="ddSheet('record_store.html','💿 Shakedown Records')"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
+  <button class="fn" onclick="openNotifs()" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
   <button class="fn" onclick="profile('me')"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
 </nav>
 <button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
@@ -856,7 +871,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
    <div class="appssecs">
     <div class="asec">Social</div>
     <a class="aitem" onclick="coGo('appsov',function(){openMap()})"><span>🎟️</span><div><b>Shows</b><i>The calendar / ticket store.</i></div></a>
-    <a class="aitem" onclick="coGo('appsov',function(){openReader('groups')})"><span>🚉</span><div><b>Chapters &amp; Groups</b><i>Your family, mirrored.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){openReader('groups')})"><span>📡</span><div><b>Groups</b><i>Your family, mirrored.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('friends')})"><span>👥</span><div><b>Friends</b><i>Your heads.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('bands')})"><span>🎸</span><div><b>Bands</b><i>The rolodex.</i></div></a>
     <div class="asec">Play &amp; listen</div>
@@ -944,10 +959,13 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
       <div class="hpctx" id="hpctx"></div>
       <textarea id="hptext" placeholder="Reply to the family… your words post here and radiate where you choose."></textarea>
       <div class="hpemoji"><span onclick="hpEmoji('😀')">😀</span><span onclick="hpEmoji('🌹')">🌹</span><span onclick="hpEmoji('🔥')">🔥</span><span onclick="hpEmoji('🎶')">🎶</span><span onclick="hpEmoji('🙌')">🙌</span><span onclick="hpEmoji('💀')">💀</span><span onclick="hpEmoji('🐻')">🐻</span><span onclick="hpEmoji('✨')">✨</span></div>
-      <div class="hplabel">Radiate to</div>
+      <div class="hplabel">Goes everywhere by default — chat groups, socials, your lists. <b>Uncheck any to narrow:</b></div>
       <div class="hpchips" id="hpchips"></div>
-      <button class="hppost" onclick="hpPost()">📡 Post · Reply radiates ▸</button>
-      <div class="hpfoot"><b>Reply = HyperPost.</b> It posts to the dead_dance feed and radiates to any channel you switch on — you post it, nothing auto-sends.</div>
+      <div class="hpspread" id="hpspread"></div>
+      <input type="file" id="hpmedia" accept="image/*,video/*" multiple style="display:none" onchange="hpAddMedia(this)">
+      <button class="hpaddmedia" onclick="document.getElementById('hpmedia').click()">📸 Add photos / video for the spread</button>
+      <button class="hppost" onclick="hpPost()">📡 HyperPost ▸ one tap, everywhere on</button>
+      <div class="hpfoot"><b>One button, everywhere.</b> Connect your networks once and they're <b>all ON by default</b> — a single HyperPost hits the dead_dance feed, your checked chat groups, and every network &amp; list. Want it to only go back to Facebook? Uncheck the rest. You post it; nothing auto-sends.</div>
     </div>
   </div>
 </div>
@@ -970,12 +988,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
   </div>
 </div>
 
-<!-- ============ 🍀 MIRACLE TICKET — bouncing/blinking FREE-ticket FAB + bucket ============ -->
-<button class="mfab" id="mfab" title="The Miracle Bucket — free tickets from the family" onclick="openMiracle()">
-  <span class="ring"></span>
-  <span class="tkt"><span class="clover">🍀</span>MIRACLE</span>
-  <span class="mb-badge" id="mfabBadge" style="display:none">0</span>
-</button>
+<!-- ============ 🍀 MIRACLE TICKET — bucket (button now lives small at the top of the calendar) ============ -->
 <!-- ===== Built-in User QA Assist (a chat-style widget) ===== -->
 <div class="qaov" id="qaov" onclick="if(event.target===this)qaClose()">
   <div class="qapanel">
@@ -2223,12 +2236,32 @@ document.addEventListener('click',function(ev){ var m=document.getElementById('p
 document.addEventListener('click',function(ev){var rp=document.getElementById('reactpop');if(rp&&rp.classList.contains('on')&&!rp.contains(ev.target)&&ev.target!==_rb&&!(_rb&&_rb.contains(ev.target)))rp.classList.remove('on');});
 /* radiate (📡) and Reply both open the same console — Reply = HyperPost */
 function radiate(what){hyperConsole(what);}
-var HPCH=[{id:'dd',n:'dead_dance feed',on:true},{id:'fb',n:'Facebook',on:false},{id:'ig',n:'Instagram',on:false},{id:'x',n:'X',on:false},{id:'sms',n:'Text',on:false}];
-function hyperConsole(ctx){document.getElementById('hpctx').textContent='↩ Replying to: '+ctx;document.getElementById('hptext').value='';hpChips();document.getElementById('hp').classList.add('on');setTimeout(function(){var t=document.getElementById('hptext');if(t)t.focus();},60);}
-function hpChips(){document.getElementById('hpchips').innerHTML=HPCH.map(function(c,i){return '<span class="hpchip'+(c.on?' on':'')+'" onclick="hpTog('+i+')">'+c.n+'</span>';}).join("");}
-function hpTog(i){HPCH[i].on=!HPCH[i].on;hpChips();}
+/* HyperPost targets. The dead_dance feed is always on. Your CHAT GROUPS are checked
+   BY DEFAULT — one HyperPost fans out to every checked group. Social channels are off
+   by default. Everything here is a default the user can uncheck: ONE button, one post. */
+var HPCH=[{id:'dd',n:'📡 dead_dance feed',on:true,lock:true}]
+ .concat((typeof GROUPS!=='undefined'?GROUPS:[]).map(function(g,i){return {id:'grp'+i,n:(g.ic?g.ic+' ':'')+g.n,on:true,chat:true};}))
+ .concat([{id:'fb',n:'📘 Facebook',on:true,net:true},{id:'ig',n:'📷 Instagram',on:true,net:true},{id:'x',n:'✖ X',on:true,net:true},{id:'email',n:'✉️ Email list',on:true,net:true},{id:'sms',n:'💬 Text list',on:true,net:true}]);
+function hyperConsole(ctx){document.getElementById('hpctx').textContent='↩ Replying to: '+ctx;document.getElementById('hptext').value='';hpMediaCount=0;hpChips();document.getElementById('hp').classList.add('on');setTimeout(function(){var t=document.getElementById('hptext');if(t)t.focus();},60);}
+function hpChips(){document.getElementById('hpchips').innerHTML=HPCH.map(function(c,i){
+  return '<label class="hpchk'+(c.chat?' chat':'')+(c.net?' net':'')+(c.on?' on':'')+(c.lock?' lock':'')+'"><input type="checkbox" '+(c.on?'checked':'')+(c.lock?' disabled':'')+' onchange="hpTog('+i+')"><span>'+c.n+'</span></label>';
+}).join("")+'<button class="hpmanage" onclick="hpManage()">＋ Connect / manage your networks &amp; lists</button>';hpSpread();}
+function hpTog(i){if(HPCH[i].lock)return;HPCH[i].on=!HPCH[i].on;hpChips();}
+function hpManage(){toast('⚙️ Connect your networks once — Facebook, Instagram, X, your email list, your text list. They all default ON, so one HyperPost goes everywhere. (Connecting wires up when the accounts link.)');}
+/* FULL SPREAD: # of checked OUTBOUND networks = # of posts I write, one image/video each.
+   If you're short on media, I ask for more — "Take two more pictures and I'll send a full spread." */
+var hpMediaCount=0;
+function hpSpreadSize(){return HPCH.filter(function(c){return c.on&&!c.lock;}).length;}
+function hpSpread(){var el=document.getElementById('hpspread');if(!el)return;
+  var n=hpSpreadSize(),m=hpMediaCount,name=(window.ME&&ME.name)?ME.name:'Stagger Lee',msg;
+  if(n===0){msg='Pick a network — a <b>full spread</b> writes one post per network, each with its own photo/video. I write every one.';}
+  else if(m>=n){msg='✓ <b>Full spread ready</b> — <b>'+n+'</b> posts, <b>'+n+'</b> images/videos, one per network, rotated. I write each one for its audience.';}
+  else if(m>0){var need=n-m;msg='🖼️ <b>Full spread = '+n+'</b> (one image per network — I write each post). You\'ve got <b>'+m+'</b>. “Take '+need+' more, '+name+', and I\'ll send a full spread” — <b>or just HyperPost now</b> and I\'ll spread the '+m+' you gave me across all '+n+', rotated. <b>Get more later? I already know where they go</b> — straight to the '+need+' still sharing.';}
+  else{msg='🖼️ A <b>full spread</b> is <b>'+n+'</b> images (one per network) — add a few, or <b>just HyperPost with your words</b>. Your call — I take whatever you give me.';}
+  el.innerHTML=msg;}
+function hpAddMedia(inp){hpMediaCount+=(inp&&inp.files?inp.files.length:0);hpSpread();}
 function hpEmoji(e){var t=document.getElementById('hptext');t.value+=e;t.focus();}
-function hpPost(){var n=HPCH.filter(function(c){return c.on;}).length;document.getElementById('hp').classList.remove('on');toast('📡 Posted — your reply radiated to '+n+' voice'+(n>1?'s':'')+'. You posted it; nothing auto-sent.');}
+function hpPost(){var on=HPCH.filter(function(c){return c.on;});var g=on.filter(function(c){return c.chat;}).length;var s=on.filter(function(c){return c.net;}).length;var n=g+s;var short=(n>0?Math.max(0,n-hpMediaCount):0);var spread=(n>0&&hpMediaCount>=n)?' — a FULL SPREAD, one post + one image written per network':(n>0&&hpMediaCount>0?' — partial spread; '+short+' network'+(short>1?'s':'')+' sharing for now (add more later, I know where they go)':(n>0?' — I write each of the '+n+' posts':''));document.getElementById('hp').classList.remove('on');toast('📡 HyperPosted to your feed'+(n?(' + '+n+' outbound'+(g&&s?(' ('+g+' groups, '+s+' networks)'):'')):'')+spread+'. You posted it; nothing auto-sent.');}
 function closeHP(){document.getElementById('hp').classList.remove('on');}
 
 /* ---------------- "What's on your mind" composer + DEFAULT HyperPost ----------------

@@ -93,7 +93,7 @@ h2.sec{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--
 
 <div class="notice" id="notice">
   <b>To the Jerry Garcia Band &amp; the Garcia Family —</b> this store is <b>live and working</b>. These are real shows, pulled straight from the archive; this is the real interface your fans would use. Right now <b>nothing here charges and nothing streams</b>. <b>We are seeking all appropriate licensing — we've added you to our list and we'll notify you if and when it clears.</b> The day you say yes, it switches on exactly as you see it: your catalog, <b>your price, your terms</b>.
-  <div class="seek">What we're seeking: (1) sell these shows to the community · (2) the right for <b>dead.dance</b> to play them at dead dance events &amp; Greyhound Rock · (3) a fair, family-set price. 🌹</div>
+  <div class="seek">What we're seeking: (1) sell these shows to the community — <b>digital + Print-the-Vinyl on demand</b> · (2) the right for <b>dead.dance</b> to play them at dead dance events &amp; Greyhound Rock · (3) a fair, family-set price. 🌹</div>
   <button class="nx" onclick="document.getElementById('notice').style.display='none'" aria-label="Dismiss">✕</button>
 </div>
 
@@ -125,6 +125,8 @@ h2.sec{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--
       <div class="setline">suggested — you decide</div>
     </div>
   </div>
+
+  <div class="event">🎵 <b>Print the Vinyl</b> — <b>any</b> show, pressed to a real LP on demand (your jacket art, licensed from the family; a third-party presser handles it — no inventory, no risk). Suggested $<input id="pVinyl" type="number" min="0" value="45" oninput="recalc()" style="width:66px;background:#120c1c;border:1px solid #43305f;border-radius:7px;color:#fff;font:800 15px -apple-system;padding:5px 6px;text-align:right"> / record — <span style="color:var(--muted)">you set it</span>.</div>
 
   <div class="event">🎸 <b>dead.dance event-play right</b> — separate from the fan store: the right for dead.dance to <b>play these shows at dead dance events &amp; Greyhound Rock</b>. A public-performance grant, priced/negotiated with the family. <span style="color:var(--muted)">(placeholder — your number)</span></div>
 
@@ -189,7 +191,7 @@ function recalc(){
 /* ---- activation form: they price & release; Michael verifies then switches it on ---- */
 function updateSum(){
   var e=document.getElementById('aSum'); if(!e)return;
-  e.innerHTML='<b>Your prices:</b> LESS one show $'+val('pLess')+' · MORE a dozen/yr $'+val('pMore')+' · MOST whole vault/yr $'+val('pMost')+
+  e.innerHTML='<b>Your prices:</b> LESS one show $'+val('pLess')+' · MORE a dozen/yr $'+val('pMore')+' · MOST whole vault/yr $'+val('pMost')+' · 🎵 Vinyl $'+val('pVinyl')+'/record'+
     '<br><b>+ dead.dance event-play right</b> (Greyhound Rock &amp; dead dance events) — to discuss.';
 }
 function aCheck(){
@@ -204,6 +206,7 @@ function aSubmit(){
     '  LESS (one show, one year): $'+val('pLess')+'\n'+
     '  MORE (a dozen shows / year): $'+val('pMore')+'\n'+
     '  MOST (the whole vault / year): $'+val('pMost')+'\n'+
+    '  Print the Vinyl (any show, pressed on demand): $'+val('pVinyl')+' / record\n'+
     '  + dead.dance event-play right (Greyhound Rock & dead dance events): to discuss\n\n'+
     'I understand nothing goes live until Michael verifies my identity and we confirm it together.\n';
   try{ localStorage.setItem('jgb.activation.request', JSON.stringify({name:name,role:role,contact:contact,pLess:val('pLess'),pMore:val('pMore'),pMost:val('pMost'),t:Date.now()})); }catch(e){}
@@ -248,6 +251,7 @@ function openBuy(i){
     '<div class="opt" onclick="pick(\'less\')"><div><div class="on">LESS · this show</div><div class="op">yours for a year</div></div><div class="pr">'+money(val('pLess'))+'</div></div>'+
     '<div class="opt" onclick="pick(\'more\')"><div><div class="on">MORE · a dozen a year</div><div class="op">pick 12 shows</div></div><div class="pr">'+money(val('pMore'))+'/yr</div></div>'+
     '<div class="opt" onclick="pick(\'most\')"><div><div class="on">MOST · the whole vault</div><div class="op">every JGB show</div></div><div class="pr">'+money(val('pMost'))+'/yr</div></div>'+
+    '<div class="opt" style="border-color:#c08a2d55" onclick="pick(\'vinyl\')"><div><div class="on">🎵 Print Me the Vinyl</div><div class="op">this show, pressed to a real LP on demand</div></div><div class="pr">'+money(val('pVinyl'))+'</div></div>'+
     '<button class="go" onclick="pick(\'less\')">🛒 Get this show</button>'+
     '<div class="honest"><b>Honest-state:</b> nothing charges and no audio streams yet — <b>we are seeking all appropriate licensing</b> from the Jerry Garcia Band &amp; the Garcia Family. The moment it clears, this button is live at the family\'s chosen price. Setlist below = factual song titles only.</div>'+
     '<button class="x" onclick="closeBuy()">close</button>';
@@ -262,7 +266,7 @@ function openBuy(i){
     });
   }
 }
-function pick(t){var n=t==='less'?'LESS — this show':t==='more'?'MORE — a dozen a year':'MOST — the whole vault';
+function pick(t){var n=t==='less'?'LESS — this show':t==='more'?'MORE — a dozen a year':t==='vinyl'?'🎵 Print the Vinyl — this show on a real LP':'MOST — the whole vault';
   toast('🌹 '+n+' — the model works. Nothing charges yet: we\'re seeking licensing, and the family sets the price.');}
 function closeBuy(){document.getElementById('ov').classList.remove('on');}
 document.getElementById('ov').onclick=function(e){if(e.target===this)closeBuy();};

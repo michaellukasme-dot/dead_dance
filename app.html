@@ -1756,7 +1756,8 @@ function buildArchive(){
   marketId:"dead_dance_archive",account:{id:"head1",region:"US"},
   theme:{tape:"#3c2a54",gold:"#d8a24a",rust:"#b5384e",blue:"#3f6fb0",paper:"#f3ece0",ink:"#241a2b",line:"#e6dccb"},
   shows:GD_SHOWS,                                    // instant seed — plays immediately
-  hydrate:(typeof GDLive!=="undefined")?GDLive.hydrate:null   // lazy per-show tracklists from the Archive
+  hydrate:(typeof GDLive!=="undefined")?GDLive.hydrate:null,  // lazy per-show tracklists from the Archive
+  vinyl:{label:"Print the Vinyl"}                    // press ANY show to a first-ever LP (never released on vinyl)
  });
  // Swap the 8-show seed for the FULL live index (every GD show on the Archive), then let it play on demand.
  if(typeof GDLive!=="undefined"){

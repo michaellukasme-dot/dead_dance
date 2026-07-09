@@ -188,9 +188,10 @@
         '<div class="cz-player"><button data-trk="-1" title="previous track">⏮</button><button class="cz-play" data-play="1">' + (playing ? "⏸" : "▶") + '</button><div class="cz-seek"><i></i></div><button data-trk="1" title="next track">⏭</button><button data-like="1">♥</button></div>' +
         (cfg.rec ? '<button class="cz-recbtn" data-rec="1"><span class="dot"></span> REC a bootleg</button>' : '');
       var buyBtn = cfg.buy ? '<button class="cz-buy" data-buy="1">🛒 ' + esc(cfg.buy.label || "Buy Now") + '</button>' : '';
+      var vinylBtn = cfg.vinyl ? '<button class="cz-buy" style="background:linear-gradient(135deg,#c8932f,#9a3b1b)" data-vinyl="1">🎵 ' + esc(cfg.vinyl.label || "Print the Vinyl") + '</button>' : '';
       var showRow = cfg.hidePlayer ? "" : '<div class="cz-showrow"><button class="cz-mode' + (showMode ? " on" : "") + '" data-show="1" title="Play the whole show — no track breaks, like the concert">🌹 dead_dance</button><button class="cz-mode" data-new="1" title="Play a show you haven\'t heard yet">🎲 New show</button></div>';
       var thruRow = cfg.hidePlayer ? "" : '<div class="cz-thru"><span class="lbl">Between songs:</span><button class="cz-seg' + (playThru ? " on" : "") + '" data-thru="play" title="Gapless — no pause between songs, like the concert">▶▶ Play through</button><button class="cz-seg' + (!playThru ? " on" : "") + '" data-thru="sep" title="Distinct tracks with the natural gap">❘❘ Separate tracks</button></div>';
-      return transport + showRow + thruRow + buyBtn +
+      return transport + showRow + thruRow + buyBtn + vinylBtn +
         '<div class="cz-sets">' + setPills + '</div>' +
         (s.notes ? '<div class="cz-notes">' + esc(s.notes) + '</div>' : '');
     }
@@ -257,7 +258,7 @@
       });
     }
     el.addEventListener("click", function (e) {
-      var t = e.target.closest("[data-pop],[data-nav],[data-trk],[data-play],[data-rec],[data-set],[data-lyr],[data-like],[data-clear],[data-buy],[data-show],[data-new],[data-thru]"); if (!t) return;
+      var t = e.target.closest("[data-pop],[data-nav],[data-trk],[data-play],[data-rec],[data-set],[data-lyr],[data-like],[data-clear],[data-buy],[data-vinyl],[data-show],[data-new],[data-thru]"); if (!t) return;
       if (t.dataset.pop) { if (openKey === t.dataset.pop) { closeUI(); } else { openPop(t.dataset.pop, t); } }
       else if (t.dataset.nav) { var n = idx + (+t.dataset.nav); if (n >= 0 && n < view.length) { idx = n; try { audio.pause(); } catch (e2) {} playing = false; curTrack = (view[n] && view[n].startTrack) || 0; render(); } }
       else if (t.dataset.trk) { var s = view[idx], tl = trackList(s); if (tl.length) { showMode = false; playTrack(curTrack + (+t.dataset.trk)); } }
@@ -299,6 +300,8 @@
         });
       }
       else if (t.dataset.thru != null) { setPlayThru(t.dataset.thru === "play"); render(); }
+      else if (t.dataset.vinyl != null) { var sv = view[idx]; if (!sv) return; var loc = [esc(sv.venue), esc(sv.city)].filter(Boolean).join(", ");
+        toast('<h4>🎵 Press this show to vinyl — a first</h4><div style="font-size:13px;line-height:1.5"><b>' + esc(sv.date) + '</b>' + (loc ? ' · ' + loc : '') + ' was <b>never released on vinyl.</b> Here you go — a real LP, pressed on demand just for you: the show, on wax, that never existed before. A third-party presser handles it (no inventory), jacket art licensed from the rights-holder.</div><div class="lic">Honest-state: <b>nothing charges yet.</b> This arms the moment the recording is licensed — we never press or sell what isn\'t cleared.</div>'); }
       else if (t.dataset.like) { /* like */ }
       else if (t.dataset.clear) { F = { years: [], place: null, song: "", venue: "", dream: null, custom: F.custom }; idx = 0; apply(); }
       else if (t.dataset.rec != null) { pts += 25; ptsSave(); if (MC) MC.emit({ type: "listing_viewed", market_id: cfg.marketId || "gd_archive", actor_account: acct.id, payload: { rec: true, show: (view[idx] || {}).id } }); toast('<h4>🎙️ Bootleg recorded — +25 pts</h4><div style="font-size:13px">Thanks for taping for the community. If 5+ sources exist, we rate them and always play the best — yours. (Capture runs only with the band\'s consent.)</div>'); render(); }
