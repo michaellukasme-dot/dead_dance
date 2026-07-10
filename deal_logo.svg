@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="DEAL">
+  <!-- Honest placeholder badge — dead.dance's own treatment, NOT the band's artwork.
+       Replaced automatically by deal_logo.png when the band supplies their real logo. -->
+  <defs>
+    <linearGradient id="dealg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5a2e86"/>
+      <stop offset="1" stop-color="#b8002e"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="url(#dealg)"/>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="#ffd76a" stroke-width="2" opacity="0.7"/>
+  <text x="60" y="63" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="2" fill="#ffd76a">DEAL</text>
+  <text x="60" y="86" text-anchor="middle" font-size="15">🌹</text>
+</svg>

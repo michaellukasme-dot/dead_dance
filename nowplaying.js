@@ -167,7 +167,14 @@
   function rollDJ(rec){
     var e=document.getElementById("npDJ"); if(!e) return;
     rec = rec || curRec || pick(SONGFACTS); curRec = rec;
-    var ex = hfExchange(rec);
+    var ex, lore = [];
+    // H&F also riff on Jerry's guitars + his bands (guitar_facts.js / band_facts.js)
+    if (window.GDGuitars && GDGuitars.HF) lore = lore.concat(GDGuitars.HF);
+    if (window.GDBands && GDBands.HF) lore = lore.concat(GDBands.HF);
+    if (lore.length && Math.random() < 0.35) {
+      var g = pick(lore);
+      ex = { h: HANZ + ": " + esc(g.h), f: FRANZ + ": " + esc(g.f) };
+    } else { ex = hfExchange(rec); }
     e.innerHTML = '<div class="hf"><span class="hfline">'+ex.h+'</span></div>'
       + (ex.f ? '<div class="hf" style="margin-top:3px"><span class="hfline">'+ex.f+'</span></div>' : '');
   }

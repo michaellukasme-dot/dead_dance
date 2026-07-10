@@ -877,12 +877,17 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <div class="asec">Play &amp; listen</div>
     <a class="aitem" onclick="coGo('appsov',function(){window.openGame&&openGame()})"><span>🎮</span><div><b>Games</b><i>Name That Tune.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('archive')})"><span>🎵</span><div><b>GD Archive</b><i>Every show.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('guitars.html','🎸 Jerry\'s Guitars')})"><span>🎸</span><div><b>Jerry's Guitars</b><i>Seven groups. Your photos.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('bands.html','🎸 Jerry\'s Bands')})"><span>🎼</span><div><b>Jerry's Bands</b><i>1961–1995. Every one.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('band_onboard.html','🌹 Band Install')})"><span>🎤</span><div><b>Band Install</b><i>Claim your band. 963 seeded.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('venue_console.html','🗓️ Venue Console')})"><span>🗓️</span><div><b>Venue Console</b><i>Find an act. Your store. Night math.</i></div></a>
     <div class="asec">Shop</div>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shakedown</b><i>The lot.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.openMiracle&&openMiracle()})"><span>🍀</span><div><b>Miracle Bucket</b><i>Free tickets.</i></div></a>
     <div class="asec">You</div>
     <a class="aitem" onclick="coGo('appsov',function(){profile('me')})"><span>🪪</span><div><b>Your QR profile</b><i>Tickets, stubs, story.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.qaOpen&&qaOpen()})"><span>🧪</span><div><b>Help test</b><i>Shape the app.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.lukasA2HS&&lukasA2HS.show)?lukasA2HS.show():toast('🌹 Already installed — you\'re running the app.') })"><span>📲</span><div><b>Install Dead Dance</b><i>Full-screen app · works offline.</i></div></a>
     <div class="asec">Team tools</div>
     <a class="aitem" href="sales_crm.html"><span>🗂</span><div><b>Sales CRM</b><i>The field cockpit.</i></div></a>
     <a class="aitem" href="operator_academy.html"><span>🎓</span><div><b>Operator Academy</b><i>Train the org.</i></div></a>
@@ -1068,7 +1073,6 @@ var REGIONS = {
    {off:2,band:"Splintered Sunlight",venue:"Ardmore Music Hall · 8:00 PM",price:"$30",type:"grateful_dead"},
    {off:5,band:"Strange Design (Phish tribute)",venue:"Ardmore Music Hall · 8:00 PM",price:"$28",type:"phish"},
    {off:8,band:"Dark Star Orchestra",venue:"Ardmore Music Hall · 8:00 PM",price:"$42",type:"grateful_dead"},
-   {off:11,band:"DEAL",venue:"Sun Inn, Bethlehem · 8:00 PM",price:"$20",type:"grateful_dead"},
    {off:14,band:"Laffs McGee (comedy night)",venue:"Sellersville Theater · 8:00 PM",price:"$22",type:"comedy"},
    {off:18,band:"Melvin Seals & JGB",venue:"Sellersville Theater · 8:00 PM",price:"$45",type:"grateful_dead"},
    {off:22,band:"DJ Terrapin (late dance set)",venue:"The Met, Philadelphia · 10:00 PM",price:"$15",type:"dj"},
@@ -1163,21 +1167,35 @@ var MYFRIENDS=[
   posts:["Founders' meetup at Greyhound Rock — north lot.","320 shows and the wheel keeps turning."],photos:["👑","🌹","🌅","📼","🐻","🎸"]}
 ];
 
-function toast(m){var t=document.createElement('div');t.textContent=m;t.style.cssText="position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#241634;color:#fff;padding:11px 17px;border-radius:11px;z-index:90;font-size:13px;box-shadow:0 8px 24px #0006;max-width:88%;text-align:center";document.body.appendChild(t);setTimeout(function(){t.style.opacity=0;t.style.transition=".4s";},1800);setTimeout(function(){t.remove();},2300);}
+function toast(m){var t=document.createElement('div');t.className='dd-toast';t.style.cssText="position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#241634;color:#fff;padding:10px 10px 10px 16px;border-radius:11px;z-index:90;font-size:13px;box-shadow:0 8px 24px #0006;max-width:88%;display:flex;align-items:center;gap:11px";
+ var msg=document.createElement('span');msg.textContent=m;msg.style.cssText="text-align:left;line-height:1.35;flex:1";
+ var x=document.createElement('button');x.textContent='×';x.setAttribute('aria-label','Dismiss');x.style.cssText="flex:none;background:#ffffff26;border:0;color:#fff;width:24px;height:24px;border-radius:50%;font-size:16px;line-height:22px;text-align:center;cursor:pointer;padding:0";
+ var killed=false;function kill(){if(killed)return;killed=true;clearTimeout(t._h);t.style.opacity=0;t.style.transition=".35s";setTimeout(function(){t.remove();},380);}
+ x.onclick=kill;t.appendChild(msg);t.appendChild(x);document.body.appendChild(t);t._h=setTimeout(kill,3600);}
 
 /* ---------------- calendar ---------------- */
 /* ===== Calendar — dynamic, forward-looking, list-first (the front door) ===== */
 var CMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var CDOW=['S','M','T','W','T','F','S'], CDOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='mine';
+/* DEAL — band #1, real schedule from John Smith (deal_shows.js). Merged lazily (once), because
+   deal_shows.js loads later in the body than this inline block. */
+var _dealMerged=false;
+function dealMergeOnce(){ if(_dealMerged)return; try{
+  if(window.dealCalendarRows && REGIONS["Mid-Atlantic"] && REGIONS["Mid-Atlantic"].shows){
+    var rows=window.dealCalendarRows();
+    REGIONS["Mid-Atlantic"].shows=REGIONS["Mid-Atlantic"].shows.filter(function(s){return String(s.band).indexOf("DEAL")!==0;}).concat(rows);
+    _dealMerged=true;
+  }
+}catch(e){} }
 function cpad(n){return (n<10?'0':'')+n;}
 function cMid(){var d=new Date();d.setHours(0,0,0,0);return d;}
 function cIso(d){return d.getFullYear()+'-'+cpad(d.getMonth()+1)+'-'+cpad(d.getDate());}
-function buildShowlist(){ var t0=cMid(); var src;
+function buildShowlist(){ dealMergeOnce(); var t0=cMid(); var src;
  if(CAL_SCOPE==='nat'){ src=[]; for(var k in REGIONS){ if(REGIONS.hasOwnProperty(k)&&REGIONS[k].shows) src=src.concat(REGIONS[k].shows); } }
  else { var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; src=r.shows||[]; }
  SHOWLIST=src.map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
-   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||''}; })
+   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', deal:!!s.deal}; })
    .sort(function(a,b){return a.iso<b.iso?-1:(a.iso>b.iso?1:0);}); }
 function setLocalShows(region){ REG=region||"Mid-Atlantic"; buildShowlist(); renderCal();
  var mt=document.getElementById('myTix'), nx=SHOWLIST[0];
@@ -1211,8 +1229,9 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var btn = ext ? (on?'<button style="background:#1f7a4d;color:#fff" disabled>✓ On the list</button>'
                      :'<button onclick="buyTix('+i+')">🔔 Notify me</button>')
                : '<button onclick="buyTix('+i+')">Tickets</button>';
+ var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\'deal_logo.svg\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
  return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
-  '<div class="cinfo"><b>'+s.band+'</b><span>'+s.venue+'</span></div>'+
+  '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div><b>'+s.band+'</b><span style="display:block">'+s.venue+'</span></div></div>'+
   '<div class="cact"><span class="cprice">'+priceTxt+'</span><div class="cbtns"><button class="cadd" onclick="addToCal('+i+')" title="Add to my calendar">📆</button>'+btn+'</div></div></div>'; }
 function renderCal(){
  if(!SHOWLIST.length) buildShowlist(); if(!CAL_MONTH) CAL_MONTH=cMid();
@@ -1759,8 +1778,8 @@ function gBoard(){ var el=document.getElementById('gBoard'); if(!el)return; var 
 /* ---- Invite the family — compliant native share (YOU pick who; we never touch FB's API) ---- */
 function inviteLink(){ var who=(ddId&&ddId()&&ddId().id)?String(ddId().id).slice(0,8):'family';
  return 'https://deaddance.app/?utm_source=invite&utm_medium=friend&utm_campaign=family_invite&utm_content='+who; }
-function inviteText(){ return "Hey — I want to invite you to dead.dance: a Facebook-enhanced community for Deadheads, tribute bands, and the venues that host them. "+
- "We synthesize the Dead groups on Facebook, strip out all the ads, and let you engage with the content, the community, and the music. "+
+function inviteText(){ return "Hey — I want to invite you to dead.dance: a new community for Deadheads, tribute bands, and the venues that host them. "+
+ "It brings the Dead world into one place, without the ads, and lets you engage with the content, the community, and the music. "+
  "It's brand new — so tell us if you spot anomalies or ways to improve it. 🌹"; }
 function inviteFamily(){ var link=inviteLink(), txt=inviteText();
  if(navigator.share){ navigator.share({ title:"dead.dance", text:txt, url:link })
@@ -1768,6 +1787,118 @@ function inviteFamily(){ var link=inviteLink(), txt=inviteText();
    .catch(function(){}); return; }
  try{ navigator.clipboard.writeText(txt+'\n\n'+link); toast('🌹 Invite copied — paste it to a friend in Messenger, texts, anywhere. You choose who.'); }
  catch(e){ toast(txt+' '+link); } }
+
+/* ================= THE FLYWHEEL =================
+   A new user's FIRST HyperPost goes back to Facebook — where they came from —
+   and points their friends here. That is the whole acquisition loop:
+   arrive → post home → friends follow → they arrive → they post home.
+   Honest-state: nothing auto-sends. The share sheet is a human tap. We never
+   touch Facebook's API, never read their friends, never post silently. */
+function ddfEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var DDFIRST_CH=[{id:'fb',n:'📘 Facebook',on:true},{id:'ms',n:'💬 Messenger',on:true},
+  {id:'ig',n:'📷 Instagram',on:true},{id:'x',n:'✖ X',on:true},{id:'sms',n:'💬 Text a friend',on:true}];
+function ddFirstText(){
+  return "I just found dead.dance — a new community built for Deadheads, the tribute bands, and the rooms that host them.\n\n"+
+   "It pulls the Dead world together in one place: the live show map, the archive that actually plays, Shakedown karaoke, the games, and a group for every corner of the country. "+
+   "No outside advertisers, and no algorithm deciding what you see — just the shows and the people.\n\n"+
+   "I'm in the "+((window.ME&&ME.chapter)||"family")+" group. Come find me 🌹\n\n"+ddFirstLink();
+}
+function ddFirstLink(){ return (typeof inviteLink==='function')?inviteLink():'https://deaddance.app/'; }
+function ddFirstSpread(){ return DDFIRST_CH.filter(function(c){return c.on;}).length; }
+function ddFirstDue(){ try{ return !localStorage.getItem('dd.firstpost'); }catch(e){ return false; } }
+function ddFirstDone(){ try{ localStorage.setItem('dd.firstpost','1'); }catch(e){} }
+function ddFirstOpen(force){
+  if(!force && !ddFirstDue()) return;
+  var w=document.getElementById('ddfirst');
+  if(!w){ w=document.createElement('div'); w.id='ddfirst';
+    w.style.cssText="position:fixed;inset:0;background:#000b;z-index:95;display:flex;align-items:flex-end;justify-content:center";
+    w.onclick=function(e){ if(e.target===w) ddFirstSkip(); };
+    document.body.appendChild(w); }
+  w.innerHTML='<div style="background:#20142f;border:1px solid #3a2a55;border-radius:20px 20px 0 0;max-width:520px;width:100%;max-height:92vh;overflow:auto;padding:20px 18px 26px">'+
+    '<div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c08a2d;font-weight:800">Your first HyperPost</div>'+
+    '<div style="font-size:22px;font-weight:900;margin:5px 0 6px">Tell them where you went.</div>'+
+    '<div style="font-size:13.5px;color:#9a8fb0;line-height:1.55;margin-bottom:12px">Now that you\'ve had a look around — your people are still back on Facebook. '+
+      'I wrote this for you — <b style="color:#cbb9e6">edit it, then you click send.</b> Or hit Later; it\'ll wait in your Profile.</div>'+
+    '<textarea id="ddfText" rows="9" style="width:100%;background:#120c1c;border:1px solid #43305f;border-radius:11px;color:#fff;font:14px/1.6 -apple-system;padding:12px">'+
+      ddFirstText().replace(/</g,'&lt;')+'</textarea>'+
+    '<div style="margin:12px 0 4px;font-size:12px;color:#9a8fb0;font-weight:700">Goes out to — all on by default</div>'+
+    '<div id="ddfChips" style="display:flex;flex-wrap:wrap;gap:7px"></div>'+
+    '<div style="margin-top:13px;background:#160c28;border:1px solid #c08a2d;border-left:4px solid #ffd76a;border-radius:11px;padding:11px 13px">'+
+      '<b style="color:#ffd76a;display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px">One image per network — <span id="ddfN">5</span> networks on</b>'+
+      '<p style="margin:0;font-size:13px;color:#e6ddf5;line-height:1.55" id="ddfMsg"></p></div>'+
+    '<input type="file" id="ddfMedia" accept="image/*,video/*" multiple style="display:none" onchange="ddFirstMedia(this.files)">'+
+    '<button onclick="document.getElementById(\'ddfMedia\').click()" style="width:100%;margin-top:10px;background:#2a1c40;color:#e0cdf5;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer">📸 Add photos <span id="ddfHave"></span></button>'+
+    '<div style="display:flex;gap:9px;margin-top:10px">'+
+      '<button onclick="ddFirstSkip()" style="flex:0 0 96px;background:#2a1c40;color:#9a8fb0;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:14px;cursor:pointer">Later</button>'+
+      '<button onclick="ddFirstSend()" style="flex:1;background:#ffd76a;color:#3a1d00;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:14.5px;cursor:pointer">📡 HyperPost it</button>'+
+    '</div>'+
+    '<div style="margin-top:12px;font-size:11.5px;color:#9a8fb0;line-height:1.6">'+
+      '<b style="color:#cbb9e6">Nothing auto-sends.</b> Each network opens for you to confirm. '+
+      'We never read your friends list, never post as you, and never touch Facebook\'s API. Skip this and nothing happens.</div>'+
+    '</div>';
+  ddFirstChips();
+}
+/* Arm the flywheel on an EARNED moment — never on a timer.
+   A share prompt fired 3 seconds after arrival is an ad before they've seen anything;
+   it costs trust and poisons every prompt after it. So we wait until they've actually
+   looked around: two real navigations, or one deep action (played a show, opened a
+   group, saw their town on the map). Then, once, we ask. Never twice. */
+var ddfActs=0;
+function ddFirstNudge(weight){ try{
+  if(!ddFirstDue()) return;
+  ddfActs += (weight||1);
+  if(ddfActs < 2) return;                                  // they haven't seen the room yet
+  if(document.querySelector('.hp.on, .sheet.on, #qaov.on, #ddfirst')) return;
+  setTimeout(function(){                                    // let their tap finish landing
+    if(ddFirstDue() && !document.querySelector('.hp.on, .sheet.on, #qaov.on, #ddfirst')) ddFirstOpen();
+  }, 900);
+}catch(e){} }
+(function ddFirstArm(){ try{
+  var p=new URLSearchParams(location.search);
+  if(p.get('ht')||p.get('tester')) return;                  // never interrupt a QA run
+  if(p.get('firstpost')==='1'){ try{localStorage.removeItem('dd.firstpost');}catch(e){} } // test hook
+  var arm=function(){
+    document.addEventListener('click',function(ev){
+      var t=ev.target.closest&&ev.target.closest('.tab,.nav-item,.card,[data-nav]');
+      if(t) ddFirstNudge(1);
+    }, true);
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',arm); else arm();
+}catch(e){} })();
+
+var ddfMediaCount=0;
+function ddFirstChips(){
+  var box=document.getElementById('ddfChips'); if(!box)return;
+  box.innerHTML=DDFIRST_CH.map(function(c,i){
+    return '<span onclick="ddFirstTog('+i+')" style="cursor:pointer;font-size:12.5px;font-weight:700;padding:7px 11px;border-radius:20px;border:1px solid '+(c.on?'#ffd76a':'#3a2a55')+';background:'+(c.on?'#241634':'#20142f')+';color:'+(c.on?'#ffd76a':'#9a8fb0')+'">'+(c.on?'✓ ':'')+c.n+'</span>';
+  }).join('');
+  ddFirstMsg();
+}
+function ddFirstTog(i){ DDFIRST_CH[i].on=!DDFIRST_CH[i].on; ddFirstChips(); }
+function ddFirstMedia(f){ ddfMediaCount=(f&&f.length)||0; ddFirstChips();
+  var h=document.getElementById('ddfHave'); if(h)h.textContent=ddfMediaCount?('· '+ddfMediaCount+' added'):''; }
+function ddFirstMsg(){
+  var n=ddFirstSpread(), m=ddfMediaCount, el=document.getElementById('ddfMsg'), nn=document.getElementById('ddfN');
+  if(nn)nn.textContent=n; if(!el)return;
+  var nm=ddfEsc((window.ME&&ME.name&&ME.name!=='You')?ME.name:'Stagger Lee');
+  if(n===0) el.innerHTML='Pick a network. I write one post per network — each in its own voice.';
+  else if(m>=n) el.innerHTML='✓ <b>'+n+'</b> posts, <b>'+n+'</b> images, one per network. I write each for its audience.';
+  else if(m>0) el.innerHTML='Take <b>'+(n-m)+'</b> more, '+nm+', and every network gets its own image. <b>Or HyperPost right now</b> — I\'ll rotate the '+m+' you gave me across all '+n+'. Get more later? <b>I already know where they go.</b>';
+  else el.innerHTML='<b>Words are enough.</b> If you add <b>'+n+'</b> photos, each network gets its own. Your call; I take whatever you give me.';
+}
+function ddFirstSkip(){ ddFirstDone(); var w=document.getElementById('ddfirst'); if(w)w.remove();
+  toast('No problem — it\'s in ⚙️ Profile whenever you want it.'); }
+function ddFirstSend(){
+  var t=document.getElementById('ddfText'), txt=(t&&t.value||'').trim();
+  if(!txt){ toast('Say something first 🌹'); return; }
+  var n=ddFirstSpread(), link=ddFirstLink(), fb=DDFIRST_CH[0].on;
+  ddFirstDone(); var w=document.getElementById('ddfirst'); if(w)w.remove();
+  if(navigator.share){ navigator.share({title:'dead.dance',text:txt,url:link}).catch(function(){}); }
+  else if(fb){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link),'_blank','noopener'); }
+  else { try{ navigator.clipboard.writeText(txt); }catch(e){} }
+  var spread=(n&&ddfMediaCount>=n)?' — a FULL SPREAD, one post + one image per network':(n?' — I wrote all '+n:'');
+  toast('📡 Ready for '+n+' network'+(n===1?'':'s')+spread+'. You send it; nothing went out on its own.');
+}
 
 /* ---- 🎸 Musician-to-musician invite — pre-written, peer voice. Share the love, band to band. ---- */
 function bandLink(){ var who=(ddId&&ddId()&&ddId().id)?String(ddId().id).slice(0,8):'band';
@@ -2693,6 +2824,9 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="lukas_a2hs.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lukas_chat.js"></script>
+<script src="guitar_facts.js"></script>
+<script src="band_facts.js"></script>
+<script src="deal_shows.js"></script>
 <script src="nowplaying.js" defer></script>
 <script src="dd_share.js" defer></script>
 <script src="dd_games.js" defer></script>

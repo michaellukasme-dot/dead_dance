@@ -38,6 +38,14 @@
     {q:"Which two were Dead keyboard players?",c:["Brent Mydland & Keith Godchaux","Bob Weir & Phil Lesh","Mickey Hart & Bill Kreutzmann","Pigpen & Bobby"],a:0},
     {q:"'American Beauty' can also be read as American…",c:["Reality","Dreamer","Rose","Highway"],a:0}
   ];
+  /* Jerry's guitars — folded in from guitar_facts.js (one source of truth) */
+  if (window.GDGuitars && GDGuitars.TRIVIA && GDGuitars.TRIVIA.length) {
+    TRIVIA = TRIVIA.concat(GDGuitars.TRIVIA);
+  }
+  /* Jerry's bands — folded in from band_facts.js */
+  if (window.GDBands && GDBands.TRIVIA && GDBands.TRIVIA.length) {
+    TRIVIA = TRIVIA.concat(GDBands.TRIVIA);
+  }
   var S={score:0,streak:0,round:0,rounds:5,answer:'',timer:null,left:0,gameName:'Shakedown Games'};
 
   function css(){ if(document.getElementById('ddg-css')) return; var s=document.createElement('style'); s.id='ddg-css';

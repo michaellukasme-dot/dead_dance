@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Band Install — dead.dance</title>
+<meta name="theme-color" content="#1a1030">
+<style>
+:root{--purple:#5a2e86;--gold:#ffd76a;--gold2:#c08a2d;--rose:#b8002e;--muted:#9a8fb0;--line:#2e2148;--panel:#20142f;--green:#2a8a4a}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 68%,#b8002e);padding:14px 16px;position:sticky;top:0;z-index:30;box-shadow:0 2px 16px #0008;display:flex;align-items:center;gap:12px}
+.top .logo{font-weight:900;font-size:18px}.top .logo span{color:var(--gold)}
+.bar{flex:1;height:6px;background:#2a1c40;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));width:0;transition:width .3s}
+.step-n{font-size:11.5px;color:#e0cdf5;white-space:nowrap}
+/* split — on a phone the FORM comes first; the showcase collapses below it */
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:calc(100vh - 58px);min-height:calc(100dvh - 58px)}
+.left{position:sticky;top:58px;align-self:start;height:calc(100vh - 58px);height:calc(100dvh - 58px);overflow:auto;padding:22px 20px;background:linear-gradient(160deg,#1b1129,#140e20);border-right:1px solid var(--line)}
+.right{padding:22px 20px 60px}
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  .left{position:static;height:auto;order:2;border-right:0;border-top:1px solid var(--line);padding:16px 18px 30px}
+  .right{order:1}
+}
+.show-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-weight:800}
+.show-t{font-size:24px;font-weight:900;margin:5px 0 8px;line-height:1.2}
+.show-p{font-size:14px;color:#cbb9e6;line-height:1.6}
+.mock{margin:16px 0;background:var(--panel);border:1px solid #3a2a55;border-radius:14px;padding:14px}
+.mock .mh{font-size:12px;color:var(--muted);margin-bottom:8px}
+.auto{margin-top:14px;background:#160c28;border:1px solid var(--gold2);border-left:4px solid var(--gold);border-radius:11px;padding:12px 14px}
+.auto b.hd{color:var(--gold);display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
+.auto p{margin:0;font-size:13px;color:#e6ddf5;line-height:1.55}
+.more{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.6}
+.more b{color:#cbb9e6}
+h2{margin:0 0 4px;font-size:22px}h2:focus{outline:none}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:16px}
+label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px;font-weight:700}
+input[type=text],input[type=email],input[type=number],input[type=url],select,textarea{width:100%;background:#120c1c;border:1px solid #43305f;border-radius:10px;color:#fff;font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;padding:11px 12px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
+.btn:focus-visible,.hit:focus-visible,.logo-drop:focus-visible,.toggle:focus-visible,.linkchip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hit{background:var(--panel);border:1px solid #3a2a55;border-radius:11px;padding:10px 12px;margin:7px 0;cursor:pointer;display:flex;align-items:center;gap:11px}
+.hit:hover{border-color:var(--gold2)}
+.hit.on{border-color:var(--gold);background:#241634}
+.mono{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--rose));display:grid;place-items:center;font-weight:900;font-size:15px;flex:none;color:#fff}
+.hit .nm{font-weight:800;font-size:14.5px}
+.hit .lo{font-size:12.5px;color:#cbb9e6;font-weight:600}
+.hit .ch{font-size:11.5px;color:var(--muted)}
+.logo-drop{border:1px dashed #43305f;border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:#160c28}
+.logo-drop img{max-width:110px;max-height:110px;border-radius:10px;display:block;margin:0 auto 8px}
+.consent{background:#101a12;border:1px solid #1f7a4d55;border-left:4px solid var(--green);border-radius:10px;padding:11px 13px;font-size:12.5px;color:#bfe6c9;margin-top:10px;line-height:1.55}
+.skipbar{background:#160c28;border:1px solid #3a2a55;border-radius:11px;padding:11px 13px;font-size:12.5px;color:#cbb9e6;line-height:1.55;margin-bottom:14px}
+.skipbar b{color:var(--gold)}
+.days{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(max-width:560px){.days{grid-template-columns:1fr}}
+.day{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid #3a2a55;border-radius:10px;padding:8px 11px}
+.day span{width:38px;font-weight:800;font-size:13px;color:var(--gold)}
+.day input{padding:8px 9px;font-size:14px}
+.toggle{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid #3a2a55;border-radius:11px;padding:11px 13px;margin:8px 0;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--green);flex:none}
+.toggle.off{opacity:.6}
+.toggle .t{font-weight:800;font-size:14px}.toggle .d{font-size:12px;color:var(--muted)}
+.linkchip{display:inline-flex;align-items:center;gap:6px;background:#241634;border:1px solid var(--gold2);color:var(--gold);border-radius:20px;padding:5px 11px;font-size:12.5px;font-weight:700;margin:3px 4px 3px 0;cursor:pointer}
+.preview{background:#120c1c;border:1px solid #43305f;border-radius:11px;padding:13px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;color:#e6ddf5}
+.nav{display:flex;gap:9px;margin-top:22px}
+.btn{flex:1;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:14.5px;cursor:pointer}
+.btn.go{background:var(--gold);color:#3a1d00}
+.btn.back{background:#2a1c40;color:#e0cdf5;flex:0 0 92px}
+.btn.ghost{background:#2a1c40;color:#cbb9e6;flex:0 0 auto;padding:10px 14px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.honest{margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.6}
+.honest b{color:#cbb9e6}
+.saved{font-size:11px;color:#7fbf95;margin-top:10px}
+.done{text-align:center;padding:26px 8px}
+.done .big{font-size:44px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:13px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:80;pointer-events:none}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top">
+  <div class="logo">🌹 BAND <span>INSTALL</span></div>
+  <div class="bar" id="barwrap" role="progressbar" aria-valuemin="1" aria-valuemax="10" aria-valuenow="1" aria-label="Install progress"><i id="bar"></i></div>
+  <div class="step-n" id="stepn">1 / 10</div>
+</div>
+
+<div class="wrap">
+  <div class="left" id="left"></div>
+  <div class="right" id="right"></div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="band_seed.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3800);}
+var SEED=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
+
+/* ---------- state, with a validator (a corrupt record must never brick the wizard) ---------- */
+var DEF={step:0,band:null,logo:null,logoLost:false,email:'',payout:'',sched:'',dates:'',store:true,tickets:true,
+  price:{Mon:250,Tue:250,Wed:300,Thu:400,Fri:600,Sat:700,Sun:350},
+  auto:{ads:true,setlist:true,drip:true,calendar:true,dtb:true,followup:true,hyperpost:true,invite:true,qr:true},
+  lists:{email:'',fbpage:'',fbgroups:'',ig:'',x:'',web:'',otherSites:''}, listOK:false,
+  chans:{fbpage:true,fbgroups:true,ig:true,x:true,email:true}, media:0, post:''};
+var S=JSON.parse(JSON.stringify(DEF));
+try{ var sv=JSON.parse(localStorage.getItem('dd.bandonboard')||'null');
+     if(sv&&typeof sv==='object'&&!Array.isArray(sv)) S=Object.assign(S,sv); }catch(e){}
+(function validate(){                        // hostile / stale / half-written state self-heals
+  if(typeof S.step!=='number'||!isFinite(S.step)||S.step<0||S.step>9) S.step=0;
+  if(S.band!==null&&(typeof S.band!=='object'||Array.isArray(S.band)||!S.band.name)) S.band=null;
+  ['price','auto','lists','chans'].forEach(function(k){
+    if(!S[k]||typeof S[k]!=='object'||Array.isArray(S[k])) S[k]=JSON.parse(JSON.stringify(DEF[k]));
+    else S[k]=Object.assign(JSON.parse(JSON.stringify(DEF[k])),S[k]); });
+  if(typeof S.media!=='number'||!isFinite(S.media)||S.media<0) S.media=0;
+  if(S.logo) S.logo=null;                    // never restored from storage — see logoLost
+  ['email','payout','sched','dates','post'].forEach(function(k){ if(typeof S[k]!=='string') S[k]=''; });
+})();
+function save(){ try{ var c=Object.assign({},S); c.logo=null; localStorage.setItem('dd.bandonboard',JSON.stringify(c)); }
+  catch(e){ /* quota or private browsing — the wizard still works, it just won't resume */ } }
+
+/* ---------- LEFT showcase ---------- */
+var LEFT=[
+ {h:"Step 1 · Your band, found",t:"You're already in here.",
+  p:"We seeded <b>963 Dead tribute bands</b> — every one we could find, with your city and your public page. Find yourself and claim it. Nobody has to type your history from scratch.",
+  mock:'<div class="mh">The directory</div><div style="font-size:13px;color:#cbb9e6">963 bands · 11 chapters · your city already listed</div>',
+  auto:["We never posted your logo","We list your <b>name</b> and your <b>public page</b> — facts. <b>Your artwork is yours.</b> It appears only when you upload it, in the next step."]},
+
+ {h:"Step 2 · Your mark",t:"Your logo. Your permission.",
+  p:"Upload it and it's on your band page, your merch, your show cards, your ads. We will never take it from the internet — <b>you hand it to us, and you can pull it back any time.</b>",
+  mock:'<div class="mh">Your band page</div><div style="display:flex;gap:11px;align-items:center"><div class="mono" id="mkMono">?</div><div><div style="font-weight:800" id="mkName">Your Band</div><div style="font-size:12px;color:#9a8fb0" id="mkCity">Your City</div></div></div>',
+  auto:["Automation you're turning on","Your logo auto-populates <b>every show card, poster, ad, and merch mock</b> across dead.dance. Upload once."]},
+
+ {h:"Step 3 · Your calendar",t:"Every gig, everywhere, once.",
+  p:"Paste your schedule link or your dates. From then on your shows appear on the <b>map</b>, the <b>chapter calendar</b> (a chapter is your region — yours is below), the <b>Near You</b> feed, and every fan who tuned in to you.",
+  mock:'<div class="mh">Shows on the map</div><div style="font-size:13px;color:#cbb9e6">🗺️ your dates, plotted · 🔔 fans notified · 📅 one calendar</div>',
+  auto:["Automation you're turning on","<b>Post once, appear everywhere.</b> Add a date and it lands on the map, the chapter calendar, and the feeds of everyone tuned in to your band."]},
+
+ {h:"Step 4 · Your store",t:"A merch store that runs itself.",
+  p:"Shirts, stickers, posters, and — when you're ready — <b>Print-the-Vinyl</b>: a fan orders your own live show pressed to a real record, one at a time, and it ships to them. No inventory, no boxes in the van.",
+  mock:'<div class="mh">Your store</div><div style="font-size:13px;color:#cbb9e6">👕 Tour tees · 🎵 Print-the-Vinyl on demand · 🎟️ ticket bundles</div>',
+  auto:["Automation you're turning on","Every show you add spins up a <b>show-specific merch card</b> — the shirt, the poster, the date. It closes when the night ends."]},
+
+ {h:"Step 5 · Your price",t:"Monday isn't Friday.",
+  p:"Set what you charge to play, <b>per day of the week</b>. Venues and wedding planners search dead.dance for a Dead band on a Thursday — and you show up with a real number.",
+  mock:'<div class="mh">Booking search</div><div style="font-size:13px;color:#cbb9e6">“Who plays around here?” → <b>your band, your night, your price</b></div>',
+  auto:["Nothing here is a commitment","These are <b>starting points, not offers.</b> A number only shows when a host searches your region for that night, and you can change it any time."]},
+
+ {h:"Step 6 · Getting paid",t:"Your money, straight to you.",
+  p:"Tickets, merch, bookings — paid to you. <b>We never take a cut of your door.</b> Any platform fee sits with the ticket buyer, never with the band. That's a house rule, not a promo.",
+  mock:'<div class="mh">The house rule</div><div style="font-size:13.5px;color:#e6ddf5">🔒 <b>We do not charge the band. Ever.</b></div>',
+  auto:["Our promise","<b>Nothing bills today.</b> Payouts arm when payments are connected <b>and you've signed a short agreement</b> — you'll read it first, and nothing is owed either way."]},
+
+ {h:"Step 7 · The automations",t:"We write your ad. Every show.",
+  p:"This is the part nobody else does. Add a show, and dead.dance <b>curates the ad for that show</b> — your copy, your art, your ticket link — and serves it to Deadheads near that venue, on the right dates.",
+  mock:'<div class="mh">Auto-curated show ad</div><div style="border:1px solid #3a2a55;border-radius:9px;padding:9px;font-size:12.5px;color:#cbb9e6"><b id="adBand" style="color:#ffd76a">Your Band</b><br><span id="adLine">Friday · The Venue · doors 7, show 8</span><br><span style="color:#9a8fb0">shown to Deadheads within 50 miles</span></div>',
+  auto:["It costs you nothing","<b>You never buy an ad here.</b> You register the show; we write it and show it near the venue, by date. There's <b>no auction and nobody can outbid you</b> — your own show is always the ad in your own town. A human always clicks send."]},
+
+ {h:"Step 8 · Your people",t:"Bring your list — or don't.",
+  p:"Your email list, your Facebook page, your groups. <b>Every bit of this step is optional</b>, and everything else works without it. If you do import: <b>we never sell, rent, or share your list, and we never mail it without you.</b>",
+  mock:'<div class="mh">Your channels</div><div style="font-size:13px;color:#cbb9e6" id="mkChans">📘 Page · 👥 Groups · 📷 IG · ✖ X · ✉️ Email</div>',
+  auto:["What a HyperPost is","<b>One post, sent to every place your fans already follow you.</b> We call that a HyperPost. We write a version for each channel — the long one for email, the right one for each feed — and <b>you click send on every single one.</b>"]},
+
+ {h:"Step 9 · Your first HyperPost",t:"We wrote it. You send it.",
+  p:"Your calendar, your store, your Friday night — one post, out to everybody you already have. This is your <b>first</b> HyperPost. There will be one for every show.",
+  mock:'<div class="mh">One image per channel</div><div style="font-size:13px;color:#cbb9e6" id="mkSpread">— channels checked</div>',
+  auto:["Art is optional","<b>Words are enough.</b> If you do have show art, one image per channel makes each post its own — that's <b id='mkAsk'>5</b> right now. <b>Don't have them? Send it anyway.</b> Add more later and I already know where they go."]},
+
+ {h:"Step 10 · Done",t:"You're all set.",
+  p:"Your page is live, your logo is yours, your calendar syncs, your store is open, and your ads write themselves. Welcome to the family.",
+  mock:'<div class="mh">What just turned on</div><div style="font-size:13px;color:#cbb9e6">🎸 Band page · 🗺️ Map · 📅 Calendar · 🛍️ Store · 📡 Ads · 🔊 HyperPost · 🎟️ QR</div>',
+  auto:["Our promise","Nothing bills. Nothing mails without you. <b>You can remove your logo, your list, your dates, or your whole band page at any time.</b>"]}
+];
+
+function renderLeft(){
+  var L=LEFT[S.step];
+  document.getElementById('left').innerHTML=
+    '<div class="show-h">'+L.h+'</div><div class="show-t">'+L.t+'</div><div class="show-p">'+L.p+'</div>'+
+    '<div class="mock">'+L.mock+'</div>'+
+    '<div class="auto"><b class="hd">'+L.auto[0]+'</b><p>'+L.auto[1]+'</p></div>'+
+    '<div class="more"><b>And this is more than a tribute-band listing:</b> the live Grateful Dead archive that plays, Shakedown Karaoke, the games, a group for every region, real-time setlist broadcast, and a marketplace — <b>your fans are already in here.</b></div>';
+  var b=S.band;
+  if(b){ var mn=document.getElementById('mkMono'), nm=document.getElementById('mkName'), ct=document.getElementById('mkCity');
+    if(mn){ if(S.logo){mn.outerHTML='<img src="'+esc(S.logo)+'" alt="" style="width:40px;height:40px;border-radius:9px;object-fit:cover">';} else mn.textContent=b.mono; }
+    if(nm)nm.textContent=b.name; if(ct)ct.textContent=[b.city,b.state].filter(Boolean).join(', ');
+    var ab=document.getElementById('adBand'); if(ab)ab.textContent=b.name;
+  }
+  var mc=document.getElementById('mkChans'), cn=hpSpread();
+  if(mc)mc.innerHTML=cn?('<b style="color:#ffd76a">'+cn+'</b> channel'+(cn===1?'':'s')+' · '+listCount()+' contacts<br>'+
+      CHANS.filter(function(c){return S.chans[c[0]];}).map(function(c){return esc(c[1]);}).join(' · ')):'<span style="color:#b8002e">no channels checked</span>';
+  var ms=document.getElementById('mkSpread'), mk=document.getElementById('mkAsk');
+  if(ms)ms.innerHTML='<b style="color:#ffd76a">'+cn+'</b> channel'+(cn===1?'':'s')+' · <b style="color:#ffd76a">'+cn+'</b> post'+(cn===1?'':'s')+' · '+listCount()+' contacts';
+  if(mk)mk.textContent=cn;
+  document.getElementById('bar').style.width=((S.step+1)/LEFT.length*100)+'%';
+  document.getElementById('barwrap').setAttribute('aria-valuenow',S.step+1);
+  document.getElementById('stepn').textContent=(S.step+1)+' / '+LEFT.length;
+}
+
+/* ---------- Step 1 · find ---------- */
+function search(q){ q=(q||'').trim().toLowerCase(); if(q.length<2) return [];
+  return SEED.filter(function(b){return b.name.toLowerCase().indexOf(q)>=0;}).slice(0,8); }
+function stepFind(){
+  var b=S.band;
+  return '<h2 tabindex="-1">Find your band</h2><div class="sub">We seeded '+SEED.length+' Dead tribute bands. Start typing — you\'re probably already here.</div>'+
+    (b?'<div class="consent" style="margin-bottom:12px">🌹 <b>'+esc(b.name)+'</b> — '+esc([b.city,b.state].filter(Boolean).join(', ')||'location not listed')+
+        '<br><span style="color:#9fd6b3">Wrong one? Search again below and pick a different city.</span></div>':'')+
+    '<label for="q">Band name</label><input type="text" id="q" placeholder="Start typing your band…" autocomplete="off" oninput="doSearch()">'+
+    '<div id="hits"></div>'+
+    '<div id="newband"></div>'+
+    '<div class="honest">Not listed? <button class="btn ghost" onclick="addNew()">Add your band</button><br><br><b>We list names and public pages only.</b> No logos, no contact details, until you give them.</div>';
+}
+window.doSearch=function(){
+  var q=document.getElementById('q').value, hits=search(q);
+  document.getElementById('hits').innerHTML=hits.map(function(b){
+    var loc=[b.city,b.state].filter(Boolean).join(', ');
+    return '<div class="hit'+(S.band&&S.band.id===b.id?' on':'')+'" tabindex="0" role="button" '+
+      'onclick="pick(\''+esc(b.id)+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();pick(\''+esc(b.id)+'\');}">'+
+      '<div class="mono">'+esc(b.mono)+'</div>'+
+      '<div><div class="nm">'+esc(b.name)+'</div><div class="lo">'+esc(loc||'—')+'</div><div class="ch">'+esc(b.chapterName||b.chapter)+'</div></div></div>';
+  }).join('')||(q.length>=2?'<div class="honest">No match — you can add it below.</div>':'');
+};
+window.pick=function(id){ var f=SEED.filter(function(b){return b.id===id;})[0]; if(!f)return;
+  S.band=f; save(); render();
+  toast('🌹 '+f.name+' — '+([f.city,f.state].filter(Boolean).join(', ')||'that\'s you')+'. Not you? Pick again.'); };
+window.addNew=function(){
+  document.getElementById('newband').innerHTML=
+    '<div class="mock"><div class="mh">Add your band</div>'+
+    '<label for="nbName">Band name</label><input type="text" id="nbName" placeholder="The Band Name">'+
+    '<label for="nbCity">City</label><input type="text" id="nbCity" placeholder="Allentown">'+
+    '<label for="nbState">State / country</label><input type="text" id="nbState" placeholder="PA">'+
+    '<button class="btn go" style="margin-top:12px" onclick="addNewSave()">Add it →</button></div>';
+  document.getElementById('nbName').focus(); };
+window.addNewSave=function(){
+  var n=(document.getElementById('nbName').value||'').trim(); if(!n){toast('Your band needs a name 🌹');return;}
+  S.band={id:'new-'+Date.now(),name:n,city:(document.getElementById('nbCity').value||'').trim(),
+    state:(document.getElementById('nbState').value||'').trim(),chapter:'',chapterName:'',
+    mono:n.replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'?'};
+  save(); render(); toast('🌹 '+n+' — added. Welcome.'); };
+
+/* ---------- Step 2 · logo ---------- */
+var OKIMG=/^data:image\/(png|jpeg|jpg|webp|gif);/i;
+function stepLogo(){
+  var b=S.band;
+  return '<h2 tabindex="-1">Claim it — and add your mark</h2><div class="sub">This is how your logo gets here: <b>you upload it.</b> We never took it.</div>'+
+    (S.logoLost?'<div class="skipbar">↺ <b>Your logo didn\'t save.</b> We keep artwork in memory only, never in this browser\'s storage — so if you reloaded, please add it again. Takes a second.</div>':'')+
+    '<div class="logo-drop" tabindex="0" role="button" aria-label="Upload your logo" onclick="document.getElementById(\'lf\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();document.getElementById(\'lf\').click();}">'+
+      (S.logo?'<img src="'+esc(S.logo)+'" alt="Your logo">':'<div class="mono" style="width:64px;height:64px;font-size:22px;margin:0 auto 9px">'+esc(b?b.mono:'?')+'</div>')+
+      '<div style="font-weight:800;font-size:14px">'+(S.logo?'Looks good — tap to replace':'Tap to upload your logo')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-top:3px">PNG or JPG. Square works best. Until then we show your initials.</div>'+
+    '</div><input type="file" id="lf" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" onchange="upLogo(this.files)">'+
+    '<div class="consent">🔒 <b>Your permission, your control.</b> By uploading, you confirm you own or control this artwork and give dead.dance permission to display it on your band page, show cards, and ads. <b>You can remove it at any time and we stop using it.</b> We will never take a logo from the internet.</div>'+
+    '<label for="em">Band contact email <span style="font-weight:400">(private — never shown publicly, never sold)</span></label>'+
+    '<input type="email" id="em" value="'+esc(S.email)+'" placeholder="you@yourband.com" oninput="S.email=this.value;save()">';
+}
+window.upLogo=function(files){ if(!files||!files[0])return;
+  var rd=new FileReader();
+  rd.onload=function(){ if(!OKIMG.test(String(rd.result||''))){ toast('That file type isn\'t supported — PNG, JPG, WEBP or GIF.'); return; }
+    S.logo=rd.result; S.logoLost=false; save(); render(); toast('🎨 Logo received. It stays yours — and it stays in this window until you finish.'); };
+  rd.onerror=function(){ toast('Couldn\'t read that file. Try another?'); };
+  rd.readAsDataURL(files[0]); };
+
+/* ---------- Step 3 · calendar ---------- */
+function stepCal(){
+  return '<h2 tabindex="-1">Your calendar</h2><div class="sub">Paste your schedule page, or drop in dates. One place, everywhere.</div>'+
+    '<label for="sc">Your schedule / events page <span style="font-weight:400">(a Facebook events page is perfect)</span></label>'+
+    '<input type="url" id="sc" value="'+esc(S.sched||(S.band&&S.band.sched)||'')+'" placeholder="https://facebook.com/yourband/events" oninput="S.sched=this.value;save()">'+
+    '<label for="dt">Or paste dates — one per line: <span style="font-weight:400">date, venue, city</span></label>'+
+    '<textarea id="dt" rows="5" placeholder="2026-08-14, FreeWill Brewing, Perkasie PA" oninput="S.dates=this.value;save()">'+esc(S.dates)+'</textarea>'+
+    '<div class="honest">Commas, dashes or dots — whatever\'s easy to type. <b>Import, don\'t retype:</b> we\'ll pull what we can from your page and show you before anything publishes. <b>A human always clicks.</b></div>';
+}
+/* ---------- Step 4 · store ---------- */
+function stepStore(){
+  return '<h2 tabindex="-1">Your merch store is ready</h2><div class="sub">Every band on dead.dance already has a store the day they claim their page. <b>Just load it up.</b></div>'+
+    '<div class="consent" style="margin-bottom:10px">🛍️ <b>Your store is live.</b> Add tees, posters, hats, stickers — and <b>Print-the-Vinyl</b>, where a fan orders your own live show pressed to a real record, one at a time. No inventory, no boxes in the van; a partner prints and ships.</div>'+
+    '<label class="toggle" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
+      '<input type="checkbox" '+(S.store?'checked':'')+' onchange="S.store=this.checked;save()">'+
+      '<div><div class="t">🛍️ Keep my store on</div><div class="d">On by default. Leave it on and load your merch whenever you\'re ready — turn it off only if you truly don\'t want one.</div></div></label>'+
+    '<label class="toggle" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
+      '<input type="checkbox" '+(S.tickets?'checked':'')+' onchange="S.tickets=this.checked;save()">'+
+      '<div><div class="t">🎟️ Sell tickets through dead.dance</div><div class="d">Let fans buy tickets to your shows right on the calendar. Optional — leave it off and your dates still show, fans just get sent to your door or your own ticket link.</div></div></label>'+
+    '<div class="honest"><b>No inventory, no risk.</b> A third party prints and ships merch. <b>You set the price and keep the lion\'s share — the platform share is on merch only, never on your door,</b> and if you sell tickets here any fee sits with the buyer, never with you.</div>';
+}
+/* ---------- Step 5 · price ---------- */
+function stepPrice(){
+  var d=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  return '<h2 tabindex="-1">Your booking price</h2><div class="sub">Monday isn\'t Friday. Set what you charge to play, by night.</div>'+
+    '<div class="skipbar">These are <b>starting points, not offers.</b> Nothing here is a commitment, nobody sees a number until they search your region for that night, and you can change any of it later.</div>'+
+    '<div class="days">'+d.map(function(k){
+      return '<div class="day"><span>'+k+'</span><label for="p'+k+'" style="position:absolute;left:-9999px">'+k+' price</label>'+
+        '<input type="number" id="p'+k+'" min="0" step="25" value="'+(+S.price[k]||0)+'" oninput="S.price[\''+k+'\']=+this.value||0;save()"></div>';
+    }).join('')+'</div>'+
+    '<div class="honest">Hosts searching <b>“who plays around here?”</b> for a given night see your band and your number. <b>Set a night to 0 if you don\'t play it</b> — you simply won\'t appear for that night.</div>';
+}
+/* ---------- Step 6 · pay ---------- */
+function stepPay(){
+  return '<h2 tabindex="-1">Getting paid</h2><div class="sub">Straight to you.</div>'+
+    '<div class="consent" style="background:#160c28;border-color:var(--gold2);border-left-color:var(--gold);color:#e6ddf5">🔒 <b>No charge to you, or any band. Ever.</b> No override, no fee, no cut out of your door, your guarantee, or your pay. The platform is paid by the <b>venues and the subscribers</b> — a small per-transaction fee — <b>never by the artist.</b> That is a standing house rule.</div>'+
+    '<div class="consent" style="background:#101a12;border-color:#1f7a4d55;border-left-color:var(--green);color:#bfe6c9">💵 <b>Paid at booking — stop waiting to get paid.</b> When a venue books you here, your fee is secured the moment they confirm, and released to you — not 30, 60, or 90 days after the gig, and never by chasing anyone. <span style="color:#9fd6b3">(This arms when payments go live; nothing bills today.)</span></div>'+
+    '<label for="pe">Payout email or account name</label>'+
+    '<input type="text" id="pe" value="'+esc(S.payout)+'" placeholder="where the money goes" oninput="S.payout=this.value;save()">'+
+    '<div class="skipbar" style="margin-top:14px">📄 <b>One thing to know now, not at the end:</b> before money can actually move, there\'s a <b>short agreement to sign</b> — plain language, no fee, no exclusivity, cancel whenever. Michael or your regional Ambassador (a volunteer from your scene) will walk you through it. <b>Nothing is owed either way.</b></div>'+
+    '<div class="honest"><b>Our promise:</b> nothing bills and no money moves today. Payouts arm when payments are connected and you\'ve signed. You\'ll review every number first.</div>';
+}
+/* ---------- Step 7 · automations ---------- */
+function stepAuto(){
+  var A=S.auto;
+  var rows=[['ads','📡 Auto-curated show ads','We write the ad for each show and show it to Deadheads near the venue, by date. It costs you nothing — no auction, nobody outbids you.'],
+            ['setlist','🎼 Real-time setlist broadcast','One person taps; the room and the region see the setlist live.'],
+            ['drip','🎶 Setlist teaser drip','Put your setlist in before the show and we release it to your fans one song at a time, on a schedule you set — a slow tease that fills the room. Email and your feeds, on consent. You set and approve the schedule; nothing texts, nothing sends itself.'],
+            ['calendar','📅 Calendar + map sync','Your dates on the map, the regional calendar, and Near You.'],
+            ['dtb','🔁 Keep DeadTributeBands.com updated','When you add or change a date here, we keep your listing on DeadTributeBands.com current too. One calendar, everywhere you already are — no double entry.'],
+            ['followup','📩 Booking follow-ups, handled','When a venue books you, the confirmation, the details, and the reminders happen here automatically. You never chase a venue for a start time, a deposit, or a load-in again.'],
+            ['hyperpost','🔊 HyperPost — one post, every channel','One post reaches your groups, your networks, and your email list. You click send on each.'],
+            ['invite','✉️ Invite my fans to dead.dance','With your permission, we help you invite your own email + social following to follow you here. You review it, you click send — we never mail your list without you.'],
+            ['qr','🎟️ Merch-table QR','One scan and the room joins your band and the family.']];
+  return '<h2 tabindex="-1">The automations</h2><div class="sub">Everything you\'re switching on. Uncheck anything.</div>'+
+    rows.map(function(r){ return '<label class="toggle" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
+      '<input type="checkbox" '+(A[r[0]]?'checked':'')+' onchange="S.auto[\''+r[0]+'\']=this.checked;save()">'+
+      '<div><div class="t">'+r[1]+'</div><div class="d">'+r[2]+'</div></div></label>'; }).join('')+
+    '<div class="honest"><b>Nothing auto-sends.</b> Every post, ad and broadcast waits for a human to click. You can switch any of these off forever, right here.</div>';
+}
+
+/* ---------- Step 8 · the band's own lists ---------- */
+var CHANS=[['fbpage','📘 Facebook page'],['fbgroups','👥 Facebook groups'],['ig','📷 Instagram'],['x','✖ X'],['email','✉️ Email list']];
+window.hpSpread=function(){ return CHANS.filter(function(c){return S.chans[c[0]];}).length; };
+function countLines(s){ return String(s||'').split(/[\n,;]+/).map(function(x){return x.trim();}).filter(Boolean).length; }
+window.listCount=function(){ return countLines(S.lists.email); };
+window.hpTick=function(){                                  // live counts WITHOUT destroying the textarea
+  var e=document.getElementById('cntEmail'); if(e)e.textContent=listCount();
+  var g=document.getElementById('gate');
+  if(g)g.style.display=listCount()?'block':'none';
+  var nx=document.getElementById('nx'); if(nx)nx.disabled=!canNext();
+  renderLeft(); save(); };
+function stepLists(){
+  return '<h2 tabindex="-1">Your people</h2><div class="sub">Import once. <b>They stay yours.</b></div>'+
+    '<div class="skipbar">✅ <b>All of this is optional — you can skip the whole step.</b> Your page, calendar, store, booking price and show ads all work without importing a single contact. Add your list later, or never.</div>'+
+    '<div class="consent" style="margin-bottom:14px">🔒 <b>Before you paste anything.</b> Your list is <b>not our list.</b> We never sell it, rent it, share it, or use it for our own marketing. We never mail it without you — you click send on every message. You can export or delete it in one click, and deleting it removes it from our side too.</div>'+
+    '<label for="le">✉️ Email list <span style="color:var(--gold)" id="cntEmail">'+listCount()+'</span> <span style="font-weight:400">contacts</span></label>'+
+    '<textarea id="le" rows="3" placeholder="paste addresses, or a CSV export — one per line" oninput="S.lists.email=this.value;hpTick()" onchange="render()">'+esc(S.lists.email)+'</textarea>'+
+    '<div id="gate" style="display:'+(listCount()?'block':'none')+'">'+
+      '<label class="toggle" style="background:#0e1a12;border-color:#1f7a4d55;margin-top:10px" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
+        '<input type="checkbox" '+(S.listOK?'checked':'')+' onchange="S.listOK=this.checked;save();hpTick()">'+
+        '<div><div class="t" style="font-size:13px">I have each person\'s permission to email them.</div>'+
+        '<div class="d">They signed up with us, or asked to hear from the band. You\'re responsible for that permission — and every email we draft carries your address and a one-click unsubscribe, because the law requires it.</div></div></label></div>'+
+    '<label style="margin-top:6px">🌐 Your social networks — link them all, we keep them in sync</label>'+
+    '<input type="url" id="lp" value="'+esc(S.lists.fbpage)+'" placeholder="📘 Facebook page — https://facebook.com/yourband" oninput="S.lists.fbpage=this.value;save()">'+
+    '<input type="text" id="lig" style="margin-top:8px" value="'+esc(S.lists.ig)+'" placeholder="📷 Instagram — @yourband" oninput="S.lists.ig=this.value;save()">'+
+    '<input type="text" id="lx" style="margin-top:8px" value="'+esc(S.lists.x)+'" placeholder="✖ X — @yourband" oninput="S.lists.x=this.value;save()">'+
+    '<input type="url" id="lw" style="margin-top:8px" value="'+esc(S.lists.web)+'" placeholder="🔗 Website / Linktree — https://…" oninput="S.lists.web=this.value;save()">'+
+    '<label for="los">🗓️ Every OTHER place you post your schedule (one per line)</label>'+
+    '<textarea id="los" rows="3" placeholder="Bandsintown\nSongkick\nGigSalad / The Bash\nReverbNation\nDeadTributeBands.com\nyour venues’ own calendars…" oninput="S.lists.otherSites=this.value;save()">'+esc(S.lists.otherSites)+'</textarea>'+
+    '<div class="honest" style="margin-top:4px"><b>This is the list we keep in sync for you.</b> Name every site you post dates to — enter a show once here and we keep them all current. Where a site lets us, we push automatically; where it doesn’t, we queue it for a human. <b>You enter a show once, everywhere updates.</b></div>'+
+    '<label for="lg">👥 Facebook groups you post to (one per line)</label>'+
+    '<textarea id="lg" rows="2" placeholder="Lehigh Valley Deadheads" oninput="S.lists.fbgroups=this.value;save()">'+esc(S.lists.fbgroups)+'</textarea>'+
+    '<label style="margin-top:16px">Where your HyperPost goes — all on by default, uncheck any</label>'+
+    CHANS.map(function(c){ return '<label class="toggle" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
+      '<input type="checkbox" '+(S.chans[c[0]]?'checked':'')+' onchange="S.chans[\''+c[0]+'\']=this.checked;save();hpTick()">'+
+      '<div><div class="t">'+c[1]+'</div></div></label>'; }).join('')+
+    '<label class="toggle off" style="cursor:default"><input type="checkbox" disabled>'+
+      '<div><div class="t">💬 Text your list <span style="color:var(--gold);font-size:11px">— NOT YET</span></div>'+
+      '<div class="d">We won\'t let you upload phone numbers, and we won\'t text your fans for you. Federal law (the TCPA) requires each person\'s written consent to receive texts, with a record of it — and the fines run per message. When fans can opt in to your texts <b>here</b>, on the record, we\'ll switch it on. Not before.</div></div></label>'+
+    '<div class="honest"><b>Our promise:</b> nothing sends today. This loads the list. <b>A human clicks send, every time.</b></div>'+
+    '<div class="saved">✓ Saved on this device as you go — you can close this and come back.</div>';
+}
+
+/* ---------- Step 9 · the first HyperPost ---------- */
+var SEP=/\s*[·,–—|]\s*|\s+-\s+|\t+/;              // ·  ,  –  —  |  " - "  tab
+function nextShow(){
+  var first=String(S.dates||'').split('\n').map(function(l){return l.trim();}).filter(Boolean)[0];
+  if(!first) return null;
+  var p=first.split(SEP).map(function(x){return x.trim();}).filter(Boolean);
+  return {date:p[0]||'',venue:p[1]||'',city:p[2]||''};
+}
+window.hpCompose=function(){
+  var b=S.band||{name:'%BAND%'}, ns=nextShow();
+  var line = ns ? [ns.date,ns.venue,ns.city].filter(Boolean).join(' · ') : 'Friday night · %VENUE% · 8pm';
+  return 'Hey folks —\n\n'+
+    'Here\'s my calendar for the next month, on a great new community built just for us: dead.dance. No ads, no algorithm burying my shows.\n\n'+
+    '📅 My calendar → %BAND_CALENDAR%\n'+
+    '🛍️ My merch store → %ARTIST_MERCH_STORE%\n\n'+
+    '🎸 Next up: '+line+'\n'+
+    'Buy tickets on the calendar, or right here → %BUY_SHOWS_NOW%\n\n'+
+    'Come dance. 🌹\n— '+b.name;
+};
+var LINKS={'%BAND_CALENDAR%':'🔗 your calendar','%ARTIST_MERCH_STORE%':'🔗 your store','%BUY_SHOWS_NOW%':'🔗 your tickets'};
+window.hpPretty=function(t){ var s=esc(t);
+  Object.keys(LINKS).forEach(function(k){ s=s.split(esc(k)).join('<span class="linkchip">'+LINKS[k]+'</span>'); });
+  return s; };
+window.hpMedia=function(files){ S.media=(files&&files.length)||0; save(); render();
+  var need=hpSpread(); toast(S.media>=need?'📸 '+S.media+' images for '+need+' channels — each post gets its own.':'📸 '+S.media+' of '+need+'. We\'ll post anyway.'); };
+window.hpShowRaw=function(){ var r=document.getElementById('rawpost'); if(r) r.style.display = r.style.display==='none'?'block':'none'; };
+function stepHyper(){
+  var need=hpSpread(), have=S.media, b=S.band||{name:'Your band'};
+  var post=S.post||hpCompose();
+  var ns=nextShow();
+  var short='🌹 '+b.name+' — my calendar + merch, all in one place on dead.dance. Next show: '+((ns&&ns.venue)||'see the calendar')+'.';
+  var ask = have>=need
+    ? '<b style="color:var(--gold)">'+have+' images for '+need+' channels.</b> Every post gets its own.'
+    : '<b style="color:var(--gold)">Words are enough</b> — you can send this right now. If you have show art, <b>'+need+' images</b> means each channel gets its own. You\'ve added <b>'+have+'</b>. Add more later and I already know where they go.';
+  return '<h2 tabindex="-1">Your first HyperPost</h2>'+
+    '<div class="sub"><b>A HyperPost is one message, sent to every place your fans already follow you.</b> We wrote yours. Edit anything. <b>You click send.</b></div>'+
+    '<label>What your people will see</label>'+
+    '<div class="preview">'+hpPretty(post)+'</div>'+
+    '<div class="honest" style="margin-top:6px">The <span class="linkchip">🔗 like this</span> chips become your real links when you send — nothing to fill in. '+
+      '<button class="btn ghost" onclick="hpShowRaw()">Edit the words</button></div>'+
+    '<div id="rawpost" style="display:none">'+
+      '<label for="pt">The post — goes to '+need+' channel'+(need===1?'':'s')+' and '+listCount()+' contacts</label>'+
+      '<textarea id="pt" rows="12" oninput="S.post=this.value;save()">'+esc(post)+'</textarea>'+
+      '<div class="honest">Leave the %WORDS% in — they turn into your links. Delete one and that link is simply left out.</div></div>'+
+    (listCount()?'<div class="consent" style="margin-top:14px">✉️ <b>The email version</b> automatically carries your band\'s mailing address and a one-click <b>unsubscribe</b>. That\'s federal law (CAN-SPAM), and we won\'t send one without it. Anyone who unsubscribes is never mailed again.</div>':'')+
+    '<label style="margin-top:14px">💬 The short version, for feeds</label>'+
+    '<div class="mock" style="margin:0"><div style="font-size:13px;color:#cbb9e6">'+esc(short)+'</div></div>'+
+    '<label style="margin-top:14px">📸 Show art <span style="font-weight:400">(optional)</span></label>'+
+    '<div class="logo-drop" tabindex="0" role="button" aria-label="Add show art" onclick="document.getElementById(\'mf\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();document.getElementById(\'mf\').click();}">'+
+      '<div style="font-size:30px">'+(have?'📸':'🖼️')+'</div>'+
+      '<div style="font-weight:800;font-size:14px;margin-top:4px">'+(have?have+' image'+(have===1?'':'s')+' added — tap to change':'Tap to add show art, or skip it')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-top:3px">One per channel means each post gets its own image.</div>'+
+    '</div><input type="file" id="mf" accept="image/*" multiple style="display:none" onchange="hpMedia(this.files)">'+
+    '<div class="auto" style="margin-top:12px"><b class="hd">Art is optional</b><p>'+ask+'</p></div>'+
+    '<div class="honest"><b>Nothing sends from this screen.</b> Your post is saved as a draft. You — or your Ambassador — open it, look at it, and click send. '+
+      (listCount()&&!S.listOK?'<br><b style="color:var(--gold)">⚠️ Confirm permission for your email list on the previous step before anything can go out.</b>':'')+'</div>';
+}
+
+/* ---------- Step 10 ---------- */
+function stepDone(){
+  var b=S.band||{name:'Your band'};
+  return '<div class="done"><div class="big">🌹</div><h2 tabindex="-1">'+esc(b.name)+' is all set.</h2>'+
+    '<div class="sub">Your page is live, your logo is yours, and your ads write themselves.</div>'+
+    '<div class="consent" style="text-align:left">✅ Band page · ✅ Calendar &amp; map · ✅ Store'+(S.store?'':' (off)')+' · ✅ Booking price by night · ✅ '+
+      Object.keys(S.auto).filter(function(k){return S.auto[k];}).length+' automations · ✅ '+hpSpread()+' channels · ✅ first HyperPost drafted</div>'+
+    '<div class="honest" style="text-align:left"><b>Our promise:</b> nothing bills, nothing sends without a human, your list is never sold or shared, and we never take a cut of your door. Remove anything, any time.<br><br>'+
+      '<b>Next:</b> Michael or your regional Ambassador reviews your page and brings you that short agreement. <b>Nothing is owed, and nothing sends, until you say so.</b></div>'+
+    '<button class="btn go" style="margin-top:16px" onclick="finish()">Finish install</button></div>';
+}
+var STEPS=[stepFind,stepLogo,stepCal,stepStore,stepPrice,stepPay,stepAuto,stepLists,stepHyper,stepDone];
+
+function canNext(){
+  if(S.step===0) return !!S.band;
+  if(S.step===7) return !listCount()||S.listOK;   // never move a real list without permission
+  return true;
+}
+function render(){
+  document.getElementById('right').innerHTML=STEPS[S.step]()+
+    (S.step<STEPS.length-1?'<div class="nav">'+(S.step>0?'<button class="btn back" onclick="go(-1)">← Back</button>':'')+
+      '<button class="btn go" id="nx" onclick="go(1)" '+(canNext()?'':'disabled')+'>'+(S.step===0?'That\'s my band →':'Continue →')+'</button></div>':'');
+  renderLeft();
+  if(S.step===0){var q=document.getElementById('q'); if(q&&S.band){q.value=S.band.name; doSearch();}}
+  var h=document.querySelector('#right h2'); if(h&&h.focus)h.focus();
+  var r=document.getElementById('right');
+  if(window.innerWidth<=900&&r&&r.scrollIntoView) r.scrollIntoView({block:'start'});
+  else window.scrollTo(0,0);
+}
+window.go=function(d){ if(d>0&&!canNext())return; S.step=Math.max(0,Math.min(STEPS.length-1,S.step+d)); save(); render(); };
+window.finish=function(){
+  S.lists={email:'',fbpage:'',fbgroups:''}; S.listOK=false; S.logo=null; save();   // don't leave PII sitting on the device
+  toast('🌹 Installed. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };
+
+/* boot — a bad saved state must never white-screen a band */
+if(!SEED.length){ document.getElementById('right').innerHTML='<h2>Band directory didn\'t load</h2><div class="sub">Reload the page.</div>'; }
+else { try{ if(S.step>1&&!S.logo) S.logoLost=true; render(); }
+  catch(e){ try{localStorage.removeItem('dd.bandonboard');}catch(x){}
+    document.getElementById('right').innerHTML='<h2>Let\'s start fresh</h2><div class="sub">Something in your saved progress was unreadable, so we cleared it. <button class="btn ghost" onclick="location.reload()">Start over</button></div>'; } }
+</script>
+<script src="dd_back.js"></script>
+</body></html>

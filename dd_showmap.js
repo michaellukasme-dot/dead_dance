@@ -79,6 +79,16 @@
     { band: "House Band (sample)", venue: "Ardmore Music Hall", city: "Ardmore, PA", date: "2026-09-04", sample: true }
   ];
 
+  /* DEAL — band #1, real dates from the band (deal_shows.js). Merge in + register their towns. */
+  try {
+    if (window.dealMapRows) {
+      window.dealMapRows().forEach(function (r) {
+        SHOWS.push({ band: r.band, venue: r.venue, city: r.city, date: r.date, real: true });
+        if (r.coords && !CITY[r.city]) CITY[r.city] = r.coords;
+      });
+    }
+  } catch (e) {}
+
   /* ---- 3. Projection: lat/lng → x/y in the SVG viewBox (0..960 x 0..600). ---- */
   /* Simple linear fit tuned to the contiguous-US outline used below.
      lng -125..-66  →  x 40..915 ;  lat 24..49.5  →  y 560..70. */

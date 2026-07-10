@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jerry's Bands — 1961–1995</title>
+<meta name="theme-color" content="#1a1030">
+<style>
+:root{--purple:#5a2e86;--gold:#ffd76a;--gold2:#c08a2d;--rose:#b8002e;--muted:#9a8fb0;--line:#2e2148;--panel:#20142f;--green:#2a8a4a}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 68%,#b8002e);padding:16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 16px #0008}
+.top .logo{font-weight:900;font-size:20px}.top .logo span{color:var(--gold)}
+.top .tag{font-size:12px;color:#e0cdf5;margin-top:2px}
+.intro{margin:14px 16px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:12px;padding:13px 15px;font-size:13.5px;line-height:1.55}
+.intro b{color:var(--gold)}
+/* timeline */
+.tl{position:relative;padding:6px 16px 26px 16px}
+.tl:before{content:"";position:absolute;left:31px;top:0;bottom:24px;width:2px;background:linear-gradient(#3a2a55,var(--green),#3a2a55)}
+.era{margin:18px 0 8px 34px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-weight:800}
+.b{position:relative;margin:0 0 9px 34px;background:var(--panel);border:1px solid #3a2a55;border-radius:12px;padding:11px 13px;cursor:pointer;transition:.15s}
+.b:hover{transform:translateX(2px);border-color:var(--gold2)}
+.b.big{border-color:var(--gold2);box-shadow:0 0 0 1px #c08a2d33 inset}
+.b:before{content:"";position:absolute;left:-19px;top:19px;width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px #17101f}
+.b.big:before{background:var(--gold);width:14px;height:14px;left:-20.5px}
+.b .ic{font-size:19px;margin-right:6px}
+.b .nm{font-weight:900;font-size:15.5px;display:inline}
+.b.big .nm{font-size:18px}
+.b .yr{font-size:11.5px;color:var(--gold);font-weight:700;margin-top:2px}
+.b .kd{font-size:12px;color:var(--muted);margin-top:1px}
+.b .sp{position:absolute;right:11px;top:11px;font-size:9.5px;color:var(--muted);border:1px solid #3a2a55;border-radius:5px;padding:1px 5px}
+/* detail */
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:flex-end;justify-content:center;z-index:60}.ov.on{display:flex}
+.d{background:#191024;border-top:1px solid #3a2a55;border-radius:18px 18px 0 0;max-width:560px;width:100%;max-height:93vh;overflow:auto;padding:18px 16px 26px}
+.d .grip{width:42px;height:5px;background:#43305f;border-radius:3px;margin:0 auto 12px}
+.d h2{margin:2px 0 2px;font-size:23px}
+.d .sub{color:var(--gold);font-size:12.5px;font-weight:700}
+.d .kd{color:var(--muted);font-size:12.5px;margin-bottom:4px}
+.d .who{background:#120c1c;border:1px solid #2e2148;border-radius:10px;padding:9px 11px;font-size:12.5px;color:#cbb9e6;margin:9px 0}
+.d .story{font-size:14.5px;line-height:1.68;color:#e6ddf5;margin:12px 0}
+.d .facts{margin:10px 0;padding-left:18px;font-size:13px;color:#cbb9e6}.d .facts li{margin:4px 0}
+.d .thin{background:#160c28;border:1px dashed #6b4f9c;border-radius:10px;padding:9px 11px;font-size:12px;color:#cbb9e6;margin:8px 0}
+.tune{width:100%;margin:10px 0;background:var(--purple);color:#fff;border:0;border-radius:12px;padding:12px;font-weight:900;font-size:14.5px;cursor:pointer}
+.tune.on{background:var(--green)}
+.pw{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.pw h3{font-size:13px;margin:0 0 4px;color:var(--gold)}
+.pw .p{font-size:12.5px;color:var(--muted);margin-bottom:9px}
+.pw .add{width:100%;background:#221636;border:1px dashed #43305f;border-radius:11px;padding:14px;font-size:13px;font-weight:800;color:#e0cdf5;cursor:pointer}
+.thumbs{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.th{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;border:1px solid #3a2a55}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th .x{position:absolute;top:2px;right:2px;background:#000b;color:#fff;border-radius:9px;width:18px;height:18px;font-size:12px;display:grid;place-items:center;cursor:pointer}
+.d .x2{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:10px;width:100%;padding:9px}
+.foot{padding:2px 16px 30px;font-size:11px;color:#8a7a55;text-align:center;line-height:1.6}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:13px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">🎸 JERRY'S <span>BANDS</span></div><div class="tag">1961 – 1995 · every band · a group for each</div></div>
+
+<div class="intro">
+  From a folk duo with Robert Hunter to the last acoustic sessions with David Grisman — <b>every band Jerry ever stood in</b>, on one timeline. Tune in to the ones you love, read the history, and <b>add your photos</b>. <b>The family builds the archive.</b> 🌹
+</div>
+
+<div class="tl" id="tl"></div>
+
+<div class="foot">
+  Histories written by us from public sources — no text or images reproduced from anyone else's site.<br>
+  The earliest Palo Alto outfits are thinly documented; where the record is thin, <b>we say so</b> rather than invent.<br>
+  Photos are <b>crowdsourced from you</b> — honest-state: they stay on your device this session. Please upload only photos <b>you took</b>.
+</div>
+
+<div class="ov" id="ov"><div class="d" id="dbox"></div></div>
+<div id="toast"></div>
+
+<script src="band_facts.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3200);}
+
+var B = (window.GDBands && GDBands.BANDS) || [];
+var PHOTOS = {};   // id -> [dataURL] (session only — honest-state)
+function tkey(id){return 'dd.band.tuned.'+id;}
+function isTuned(id){try{return localStorage.getItem(tkey(id))==='1';}catch(e){return false;}}
+function setTuned(id,on){try{localStorage.setItem(tkey(id),on?'1':'0');}catch(e){}}
+
+function renderTL(){
+  var h='', lastEra=null;
+  B.forEach(function(b,i){
+    if(b.era!==lastEra){ h+='<div class="era">'+esc(b.era)+'</div>'; lastEra=b.era; }
+    h+='<div class="b'+(b.big?' big':'')+'" onclick="openB('+i+')">'+
+        (b.sparse?'<span class="sp">thinly documented</span>':'')+
+        '<div><span class="ic">'+b.icon+'</span><span class="nm">'+esc(b.name)+'</span></div>'+
+        '<div class="yr">'+esc(b.years)+(isTuned(b.id)?' · ✓ tuned in':'')+'</div>'+
+        '<div class="kd">'+esc(b.kind)+'</div>'+
+      '</div>';
+  });
+  document.getElementById('tl').innerHTML=h;
+}
+
+function openB(i){
+  var b=B[i], box=document.getElementById('dbox');
+  box.innerHTML='<div class="grip"></div>'+
+    '<h2>'+b.icon+' '+esc(b.name)+'</h2>'+
+    '<div class="sub">'+esc(b.years)+'</div>'+
+    '<div class="kd">'+esc(b.kind)+'</div>'+
+    '<div class="who">👥 '+esc(b.who)+'</div>'+
+    (b.sparse?'<div class="thin">📎 <b>Thinly documented.</b> Beyond the dates and the roster, very little about this band survives. We\'d rather tell you that than make something up.</div>':'')+
+    '<div class="story">'+esc(b.story)+'</div>'+
+    '<ul class="facts">'+b.facts.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>'+
+    '<button class="tune'+(isTuned(b.id)?' on':'')+'" id="tuneBtn" onclick="toggleTune(\''+b.id+'\')">'+(isTuned(b.id)?'✓ Tuned in to '+esc(b.name):'📡 Tune in to '+esc(b.name))+'</button>'+
+    '<div class="pw"><h3>📷 The '+esc(b.name)+' photo wall</h3>'+
+      '<div class="p">Crowdsourced by the family. Were you there? Add it — only photos <b>you took</b>.</div>'+
+      '<input type="file" id="pf" accept="image/*" multiple style="display:none" onchange="addPhotos(\''+b.id+'\',this.files)">'+
+      '<button class="add" onclick="document.getElementById(\'pf\').click()">＋ Add your photos</button>'+
+      '<div class="thumbs" id="thumbs"></div>'+
+    '</div>'+
+    '<button class="x2" onclick="closeB()">close</button>';
+  renderThumbs(b.id);
+  document.getElementById('ov').classList.add('on');
+}
+function toggleTune(id){
+  var on=!isTuned(id); setTuned(id,on);
+  var b=B.filter(function(x){return x.id===id;})[0];
+  var btn=document.getElementById('tuneBtn');
+  if(btn){ btn.className='tune'+(on?' on':''); btn.textContent=(on?'✓ Tuned in to ':'📡 Tune in to ')+b.name; }
+  toast(on?('📡 Tuned in to '+b.name+' 🌹'):('Tuned out of '+b.name+'.'));
+  renderTL();
+}
+function addPhotos(id,files){
+  if(!files)return; var n=0; PHOTOS[id]=PHOTOS[id]||[];
+  Array.prototype.slice.call(files).forEach(function(f){
+    if(!/^image\//.test(f.type))return; n++;
+    var rd=new FileReader(); rd.onload=function(){ PHOTOS[id].push(rd.result); renderThumbs(id); }; rd.readAsDataURL(f);
+  });
+  if(n)toast('📷 '+n+' photo'+(n>1?'s':'')+' added. Stays on your device for now.');
+}
+function renderThumbs(id){
+  var box=document.getElementById('thumbs'); if(!box)return;
+  box.innerHTML=(PHOTOS[id]||[]).map(function(src,i){
+    return '<div class="th"><img src="'+src+'" alt="photo"><span class="x" onclick="rmPhoto(\''+id+'\','+i+')">×</span></div>';
+  }).join('');
+}
+function rmPhoto(id,i){ (PHOTOS[id]||[]).splice(i,1); renderThumbs(id); }
+function closeB(){ document.getElementById('ov').classList.remove('on'); }
+document.getElementById('ov').onclick=function(e){ if(e.target===this) closeB(); };
+
+if(!B.length){ document.getElementById('tl').innerHTML='<div style="color:var(--muted);padding:20px">Band facts didn\'t load — reload the page.</div>'; }
+else renderTL();
+</script>
+<script src="dd_back.js"></script>
+</body></html>

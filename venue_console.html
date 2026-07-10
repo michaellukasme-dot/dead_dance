@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Venue Console — dead.dance</title>
+<meta name="theme-color" content="#1c2540">
+<style>
+:root{--ink:#16181d;--paper:#faf7f2;--card:#fff;--line:#e6ddcb;--muted:#6b6457;--rose:#b8002e;--navy:#1c2540;--gold:#caa53d;--ok:#1f7a4d;--warn:#b8002e}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+header{background:linear-gradient(120deg,#141b30,#3a1d5e);color:#fff;padding:18px 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px #0006}
+header h1{margin:0;font-size:19px}header p{margin:3px 0 0;color:#d7ddee;font-size:12.5px}
+.wrap{max-width:940px;margin:0 auto;padding:0 14px 60px}
+.tabs{display:flex;gap:6px;position:sticky;top:60px;background:var(--paper);z-index:15;padding:11px 0 9px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{flex:1;min-width:130px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 8px;font-weight:800;font-size:13.5px;cursor:pointer;text-align:center;color:var(--navy)}
+.tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+h2{font-size:17px;margin:18px 0 4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+label{display:block;font-size:11.5px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:12px 0 4px}
+input,select{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin:11px 0}
+.act{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.act:last-child{border-bottom:0}
+.mono{width:42px;height:42px;border-radius:9px;background:linear-gradient(135deg,#5a2e86,#b8002e);color:#fff;display:grid;place-items:center;font-weight:900;flex:none}
+.act .nm{font-weight:800;font-size:14.5px}.act .mt{font-size:12px;color:var(--muted)}
+.badge{font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.b-free{background:#e6f4ec;color:var(--ok)}.b-unk{background:#f3eede;color:#8a7a3a}.b-booked{background:#f7e3e3;color:var(--warn)}
+.b-pend{background:#fff4d6;color:#8a6d12}.b-conf{background:#e6f4ec;color:var(--ok)}
+.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;font-size:14px;cursor:pointer}
+.btn.go{background:var(--gold);color:#2a2100}.btn.nav{background:var(--navy);color:#fff}
+.btn.sm{padding:8px 12px;font-size:13px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#efe8fb;color:var(--navy)}
+.firewall{background:#fbf3da;border-left:3px solid var(--gold);padding:9px 12px;border-radius:0 8px 8px 0;font-size:12px;color:#5a4a1a;margin:10px 0}
+.honest{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:12px}.honest b{color:var(--ink)}
+.pl{display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:14px;margin-top:6px}
+.pl .lbl{color:var(--muted)}.pl .val{font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.pl .pos{color:var(--ok)}.pl .neg{color:var(--warn)}
+.pl .tot{border-top:2px solid var(--ink);margin-top:6px;padding-top:6px;font-size:16px}
+.mini{font-size:11px;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin:8px 0;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--ok);flex:none}
+.pill{display:inline-block;background:#f0ece2;border-radius:999px;padding:4px 10px;font-size:12px;margin:3px 5px 3px 0}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111d;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:60}#toast.on{opacity:1}
+.hide{display:none}
+</style></head>
+<body>
+<header>
+  <h1>🗓️ Venue Console</h1>
+  <p id="vname">Set up your room — then fill your calendar.</p>
+</header>
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab on" data-t="find" onclick="tab('find')">🎪 Find an Act</div>
+    <div class="tab" data-t="store" onclick="tab('store')">🛍️ Venue Store</div>
+    <div class="tab" data-t="roi" onclick="tab('roi')">📊 Night Math</div>
+  </div>
+  <div id="view"></div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="band_seed.js"></script>
+<script src="deal_shows.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3600);}
+var BANDS=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
+
+/* ---------- state ---------- */
+var DEF={venue:{name:'',city:'',state:'',cap:150,ticket:15,barHead:22,soundStaff:250,hasStore:false,storeOpen:false},
+  find:{date:'',chapter:'',genre:'grateful_dead'}, requests:{} };
+var S=JSON.parse(JSON.stringify(DEF));
+try{var sv=JSON.parse(localStorage.getItem('dd.venueconsole')||'null'); if(sv&&typeof sv==='object'&&!Array.isArray(sv)) S=Object.assign(JSON.parse(JSON.stringify(DEF)),sv);}catch(e){}
+(function(){ ['venue','find','requests'].forEach(function(k){ if(!S[k]||typeof S[k]!=='object') S[k]=JSON.parse(JSON.stringify(DEF[k])); }); })();
+function save(){ try{localStorage.setItem('dd.venueconsole',JSON.stringify(S));}catch(e){} }
+
+/* ---------- AVAILABILITY ENGINE ----------
+   A band is only invited if it has NO booking that night.
+   We know a band's real schedule when the band gave us one (DEAL did, via deal_shows.js).
+   For bands with no schedule yet, availability is UNKNOWN — the venue may still request,
+   and the band confirms or declines. We never claim a band is free when we don't know. */
+var SCHED={};                                   // bandId → { 'YYYY-MM-DD': true }
+(function buildSched(){
+  if(window.DEAL_SHOWS){
+    var deal=BANDS.filter(function(b){return b.name==='DEAL';})[0];
+    var id=deal?deal.id:'deal';
+    SCHED[id]=SCHED[id]||{};
+    window.DEAL_SHOWS.forEach(function(s){ SCHED[id][s.date]=true; });   // any DEAL project = the org is booked
+  }
+})();
+function bandStatus(bandId,date){
+  if(!date) return 'unknown';
+  if(SCHED[bandId]){ return SCHED[bandId][date] ? 'booked' : 'free'; }
+  return 'unknown';                             // no schedule on file
+}
+/* the request handshake — a request is NOT a booking until the band confirms */
+function reqKey(bandId,date){ return bandId+'|'+date; }
+function reqStatus(bandId,date){ var r=S.requests[reqKey(bandId,date)]; return r?r.status:''; }
+window.sendRequest=function(bandId,date){
+  if(!date){ toast('Pick a date first.'); return; }
+  if(bandStatus(bandId,date)==='booked'){ toast('That act is already booked that night — we don’t double-book.'); return; }
+  S.requests[reqKey(bandId,date)]={status:'pending',ts:Date.now()}; save(); renderFind();
+  toast('📨 Request sent — pending the band’s confirmation. Nothing is booked until they accept.');
+};
+window.cancelRequest=function(bandId,date){ delete S.requests[reqKey(bandId,date)]; save(); renderFind(); toast('Request withdrawn.'); };
+/* DEMO ONLY: simulate the band accepting, so the venue can see the whole flow.
+   In production this flips from the BAND's console (chat_act_book_confirm). A human on both sides. */
+window.simConfirm=function(bandId,date){ var k=reqKey(bandId,date); if(S.requests[k]){ S.requests[k].status='confirmed'; save(); renderFind(); toast('✅ Booked. Confirmation, details, and reminders now go out automatically — the band never has to chase you, and you never chase them.'); } };
+
+/* ---------- tabs ---------- */
+function tab(t){ document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-t')===t);});
+  if(t==='find')renderFind(); else if(t==='store')renderStore(); else renderROI(); }
+
+/* ---------- TAB 1 · FIND AN ACT ---------- */
+function bandsForFinder(){
+  var chap=S.find.chapter, q=(S.find.date||'');
+  var list=BANDS.slice();
+  if(chap) list=list.filter(function(b){return b.chapter===chap;});
+  // rank: free first, then unknown; NEVER show booked-that-night as invitable
+  var out=list.map(function(b){ return {b:b, st:bandStatus(b.id,q), rq:reqStatus(b.id,q)}; });
+  var order={free:0,unknown:1,booked:2};
+  out.sort(function(a,b){ return (order[a.st]-order[b.st]) || a.b.name.localeCompare(b.b.name); });
+  return out;
+}
+function renderFind(){
+  var chapters={}; BANDS.forEach(function(b){ if(b.chapter) chapters[b.chapter]=b.chapterName||b.chapter; });
+  var chOpts='<option value="">All regions</option>'+Object.keys(chapters).sort().map(function(k){return '<option value="'+esc(k)+'"'+(S.find.chapter===k?' selected':'')+'>'+esc(chapters[k])+'</option>';}).join('');
+  var rows=bandsForFinder();
+  var freeCount=rows.filter(function(r){return r.st==='free';}).length;
+  var shown=rows.filter(function(r){return r.st!=='booked';}).slice(0,40);   // hide the booked from the invite list
+  var bookedCount=rows.filter(function(r){return r.st==='booked';}).length;
+  var body=
+    '<h2>Find an act for a night</h2><div class="sub">Pick a date. We show who’s open — and we <b>never invite a band that’s already booked that night.</b></div>'+
+    '<div class="card"><div class="row">'+
+      '<div><label for="fd">Date you want to fill</label><input type="date" id="fd" value="'+esc(S.find.date)+'" onchange="S.find.date=this.value;save();renderFind()"></div>'+
+      '<div><label for="fc">Region</label><select id="fc" onchange="S.find.chapter=this.value;save();renderFind()">'+chOpts+'</select></div>'+
+    '</div>'+
+    (S.find.date?'<div class="mini" style="margin-top:8px">For <b>'+esc(fmt(S.find.date))+'</b>: <b style="color:var(--ok)">'+freeCount+'</b> confirmed-free · the rest unconfirmed · <b style="color:var(--warn)">'+bookedCount+'</b> already booked (hidden).</div>':'<div class="firewall">Pick a date to see who’s available. Until then, availability is unknown.</div>')+
+    '</div>';
+  if(S.find.date){
+    body+='<div class="card">'+(shown.map(function(r){
+      var b=r.b, loc=[b.city,b.state].filter(Boolean).join(', ');
+      var badge = r.st==='free' ? '<span class="badge b-free">✓ Free that night</span>'
+                : '<span class="badge b-unk">availability unconfirmed</span>';
+      var action;
+      if(r.rq==='confirmed') action='<span class="badge b-conf">✅ Confirmed</span>';
+      else if(r.rq==='pending') action='<span class="badge b-pend">⏳ Pending band</span> <button class="btn ghost sm" onclick="simConfirm(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">demo: accept</button> <button class="btn sm" style="background:#f0ece2" onclick="cancelRequest(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">✕</button>';
+      else action='<button class="btn go sm" onclick="sendRequest(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">Request →</button>';
+      return '<div class="act"><div class="mono">'+esc(b.mono)+'</div>'+
+        '<div style="flex:1"><div class="nm">'+esc(b.name)+'</div><div class="mt">'+esc(loc||'—')+' · '+badge+'</div></div>'+
+        '<div style="text-align:right">'+action+'</div></div>';
+    }).join('')||'<div class="sub">No acts in this region yet.</div>')+'</div>';
+    body+='<div class="honest"><b>How this works:</b> you send a request, the <b>band confirms or declines from their own console</b> — a request is never a booking. We only surface acts with no show that night; anyone already playing elsewhere is hidden, so <b>you can’t double-book and neither can they.</b> Bands marked “unconfirmed” haven’t loaded their calendar yet, so we ask them directly. <b>We don’t charge you to book, and a human clicks send on both sides.</b></div>';
+  }
+  document.getElementById('view').innerHTML=body;
+}
+function fmt(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
+
+/* ---------- TAB 2 · VENUE STORE ---------- */
+function renderStore(){
+  var v=S.venue;
+  var body=
+    '<h2>Your venue store</h2><div class="sub">Every room sells merch now. If you don’t have a store, we give you one — same engine as the bands.</div>'+
+    (!v.hasStore
+      ? '<div class="card"><div style="font-weight:800;font-size:15px;margin-bottom:4px">You don’t have a store yet.</div>'+
+        '<div class="sub" style="margin:0 0 10px">Spin one up in a tap: house tees, pint glasses, koozies, posters — and <b>Print-the-Vinyl of the shows recorded in your room.</b> No inventory; a partner prints &amp; ships.</div>'+
+        '<button class="btn go" onclick="S.venue.hasStore=true;S.venue.storeOpen=true;save();renderStore()">🛍️ Give my venue a store</button></div>'
+      : '<div class="card"><label class="toggle"><input type="checkbox" '+(v.storeOpen?'checked':'')+' onchange="S.venue.storeOpen=this.checked;save();renderStore()"><div><div style="font-weight:800">🛍️ Venue store is '+(v.storeOpen?'OPEN':'closed')+'</div><div class="mini">house merch + Print-the-Vinyl of live sets recorded here</div></div></label>'+
+        '<div style="margin-top:10px"><span class="pill">👕 House tees</span><span class="pill">🍺 Pint glasses</span><span class="pill">🧢 Hats</span><span class="pill">🖼️ Show posters</span><span class="pill">🎵 Print-the-Vinyl</span></div>'+
+        '<div class="firewall" style="margin-top:12px">The store shares the split on <b>merch only</b>. <b>We never touch your bar, your door, or your kitchen.</b></div></div>')+
+    '<div class="honest"><b>Already have a Shopify or Square store?</b> Keep it — link it and we just add your merch to your venue page and every show card here. The store we give you is for rooms that don’t have one, so <b>nobody’s left without a table.</b></div>';
+  document.getElementById('view').innerHTML=body;
+}
+
+/* ---------- TAB 3 · NIGHT MATH (ROI / TCO / revenue) ---------- */
+function money(n){ n=Math.round(n); return (n<0?'-$':'$')+Math.abs(n).toLocaleString('en-US'); }
+function renderROI(){
+  var v=S.venue;
+  var body=
+    '<h2>Night math</h2><div class="sub">What a booked night looks like for a room like yours. Estimates you control — change any number.</div>'+
+    '<div class="card"><label for="vn">Venue name (optional)</label><input id="vn" value="'+esc(v.name)+'" placeholder="The Lost Tavern" oninput="S.venue.name=this.value;save();hdr()">'+
+    '<div class="row"><div><label for="cap">Room capacity</label><input id="cap" type="number" min="0" value="'+(+v.cap||0)+'" oninput="S.venue.cap=+this.value||0;save();roiCalc()"></div>'+
+      '<div><label for="fill">Expected fill %</label><input id="fill" type="number" min="0" max="100" value="'+(v.fill!=null?v.fill:60)+'" oninput="S.venue.fill=+this.value||0;save();roiCalc()"></div></div>'+
+    '<div class="row"><div><label for="tix">Cover / ticket $</label><input id="tix" type="number" min="0" value="'+(+v.ticket||0)+'" oninput="S.venue.ticket=+this.value||0;save();roiCalc()"></div>'+
+      '<div><label for="bar">Bar+kitchen $ / head</label><input id="bar" type="number" min="0" value="'+(+v.barHead||0)+'" oninput="S.venue.barHead=+this.value||0;save();roiCalc()"></div></div>'+
+    '<div class="row"><div><label for="fee">Band fee $ (their ask)</label><input id="fee" type="number" min="0" value="'+(+v.bandFee||600)+'" oninput="S.venue.bandFee=+this.value||0;save();roiCalc()"></div>'+
+      '<div><label for="ss">Sound + staff $</label><input id="ss" type="number" min="0" value="'+(+v.soundStaff||0)+'" oninput="S.venue.soundStaff=+this.value||0;save();roiCalc()"></div></div>'+
+    '</div>'+
+    '<div class="card" id="roiOut"></div>'+
+    '<div class="honest"><b>TCO / house rules baked in:</b> your <b>marketing cost is $0</b> — the per-show ad is written and targeted for you, no auction, no ad spend. <b>Our platform fee to the venue is $0</b> — we never take the door, the bar, or the kitchen; any platform fee sits with the ticket buyer. The only split is on <b>venue merch</b>, if you run our store. <b>These are planning estimates, not a guarantee.</b></div>';
+  document.getElementById('view').innerHTML=body; roiCalc();
+}
+function roiCalc(){
+  var v=S.venue, out=document.getElementById('roiOut'); if(!out)return;
+  var fill=(v.fill!=null?v.fill:60)/100; var att=Math.round((+v.cap||0)*fill);
+  var door=att*(+v.ticket||0), bar=att*(+v.barHead||0);
+  var band=(+v.bandFee||0), ss=(+v.soundStaff||0);
+  var rev=door+bar, cost=band+ss, net=rev-cost;
+  var perHead=att?net/att:0;
+  out.innerHTML=
+    '<div style="font-weight:800;margin-bottom:6px">A booked night · '+att+' of '+(+v.cap||0)+' in the room</div>'+
+    '<div class="pl">'+
+      '<div class="lbl">Door ('+att+' × '+money(v.ticket||0)+')</div><div class="val pos">'+money(door)+'</div>'+
+      '<div class="lbl">Bar + kitchen ('+att+' × '+money(v.barHead||0)+')</div><div class="val pos">'+money(bar)+'</div>'+
+      '<div class="lbl">Band fee</div><div class="val neg">-'+money(band)+'</div>'+
+      '<div class="lbl">Sound + staff</div><div class="val neg">-'+money(ss)+'</div>'+
+      '<div class="lbl">Marketing (auto-ad)</div><div class="val">$0</div>'+
+      '<div class="lbl">Platform fee to you</div><div class="val">$0</div>'+
+      '<div class="lbl tot">Net for the night</div><div class="val tot '+(net>=0?'pos':'neg')+'">'+money(net)+'</div>'+
+    '</div>'+
+    '<div class="mini" style="margin-top:8px">≈ '+money(perHead)+' per head · at <b>'+Math.round(fill*100)+'%</b> full. '+
+      'Fill 4 nights/month → <b>'+money(net*4)+'</b>/mo · a year of one-a-week → <b>'+money(net*52)+'</b>.</div>';
+}
+
+/* ---------- header + boot ---------- */
+function hdr(){ var el=document.getElementById('vname'); if(el) el.textContent = S.venue.name ? (S.venue.name+' — fill your calendar, sell your merch.') : 'Set up your room — then fill your calendar.'; }
+hdr(); renderFind();
+</script>
+<script src="dd_back.js"></script>
+</body></html>
