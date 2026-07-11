@@ -81,12 +81,13 @@
 
   /* DEAL — band #1, real dates from the band (deal_shows.js). Merge in + register their towns. */
   try {
-    if (window.dealMapRows) {
-      window.dealMapRows().forEach(function (r) {
+    [window.dealMapRows, window.hotSauceMapRows].forEach(function (fn) {
+      if (!fn) return;
+      fn().forEach(function (r) {
         SHOWS.push({ band: r.band, venue: r.venue, city: r.city, date: r.date, real: true });
         if (r.coords && !CITY[r.city]) CITY[r.city] = r.coords;
       });
-    }
+    });
   } catch (e) {}
 
   /* ---- 3. Projection: lat/lng → x/y in the SVG viewBox (0..960 x 0..600). ---- */

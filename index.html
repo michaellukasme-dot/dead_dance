@@ -881,6 +881,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('bands.html','🎸 Jerry\'s Bands')})"><span>🎼</span><div><b>Jerry's Bands</b><i>1961–1995. Every one.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('band_onboard.html','🌹 Band Install')})"><span>🎤</span><div><b>Band Install</b><i>Claim your band. 963 seeded.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('venue_console.html','🗓️ Venue Console')})"><span>🗓️</span><div><b>Venue Console</b><i>Find an act. Your store. Night math.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('poster_maker.html','🖼️ Create a Show Poster')})"><span>🖼️</span><div><b>Show Poster</b><i>Your look, the show, QR baked in.</i></div></a>
     <div class="asec">Shop</div>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shakedown</b><i>The lot.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.openMiracle&&openMiracle()})"><span>🍀</span><div><b>Miracle Bucket</b><i>Free tickets.</i></div></a>
@@ -888,6 +889,14 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){profile('me')})"><span>🪪</span><div><b>Your QR profile</b><i>Tickets, stubs, story.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.qaOpen&&qaOpen()})"><span>🧪</span><div><b>Help test</b><i>Shape the app.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ (window.lukasA2HS&&lukasA2HS.show)?lukasA2HS.show():toast('🌹 Already installed — you\'re running the app.') })"><span>📲</span><div><b>Install Dead Dance</b><i>Full-screen app · works offline.</i></div></a>
+    <div class="asec">Talk to us</div>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.contact)?HelpTest.contact():toast('One sec — loading…') })"><span>✉️</span><div><b>Contact Us</b><i>Say hello — we read every note.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.support)?HelpTest.support():toast('One sec — loading…') })"><span>🛟</span><div><b>Support</b><i>Something off? One tap, we\'re on it.</i></div></a>
+    <div class="asec">Ask Claude · one tap</div>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('fb_post'):toast('One sec — loading…') })"><span>📘</span><div><b>Make me a Facebook post</b><i>One tap. You approve, then post.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('spread'):toast('One sec — loading…') })"><span>🎯</span><div><b>Make me a Spread</b><i>One image per network.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('tiktok'):toast('One sec — loading…') })"><span>🎵</span><div><b>Make me a TikTok</b><i>Caption + shot list.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('hyperpost'):toast('One sec — loading…') })"><span>⚡</span><div><b>Write my HyperPost</b><i>The differentiated post.</i></div></a>
     <div class="asec">Team tools</div>
     <a class="aitem" href="sales_crm.html"><span>🗂</span><div><b>Sales CRM</b><i>The field cockpit.</i></div></a>
     <a class="aitem" href="operator_academy.html"><span>🎓</span><div><b>Operator Academy</b><i>Train the org.</i></div></a>
@@ -1183,8 +1192,10 @@ var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=nu
 var _dealMerged=false;
 function dealMergeOnce(){ if(_dealMerged)return; try{
   if(window.dealCalendarRows && REGIONS["Mid-Atlantic"] && REGIONS["Mid-Atlantic"].shows){
-    var rows=window.dealCalendarRows();
-    REGIONS["Mid-Atlantic"].shows=REGIONS["Mid-Atlantic"].shows.filter(function(s){return String(s.band).indexOf("DEAL")!==0;}).concat(rows);
+    var ma=REGIONS["Mid-Atlantic"].shows.filter(function(s){return String(s.band).indexOf("DEAL")!==0;});
+    ma=ma.concat(window.dealCalendarRows());
+    if(window.hotSauceCalendarRows) ma=ma.concat(window.hotSauceCalendarRows());   // band #2
+    REGIONS["Mid-Atlantic"].shows=ma;
     _dealMerged=true;
   }
 }catch(e){} }
@@ -1229,7 +1240,8 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var btn = ext ? (on?'<button style="background:#1f7a4d;color:#fff" disabled>✓ On the list</button>'
                      :'<button onclick="buyTix('+i+')">🔔 Notify me</button>')
                : '<button onclick="buyTix('+i+')">Tickets</button>';
- var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\'deal_logo.svg\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
+ var lf=(s.logo||'').replace(/\.png$/,'.svg');
+ var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
  return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
   '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div><b>'+s.band+'</b><span style="display:block">'+s.venue+'</span></div></div>'+
   '<div class="cact"><span class="cprice">'+priceTxt+'</span><div class="cbtns"><button class="cadd" onclick="addToCal('+i+')" title="Add to my calendar">📆</button>'+btn+'</div></div></div>'; }
@@ -2827,11 +2839,13 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="guitar_facts.js"></script>
 <script src="band_facts.js"></script>
 <script src="deal_shows.js"></script>
+<script src="hot_sauce_shows.js"></script>
 <script src="nowplaying.js" defer></script>
 <script src="dd_share.js" defer></script>
 <script src="dd_games.js" defer></script>
 <script src="dd_hyperpost.js" defer></script>
 <script src="dd_showmap.js" defer></script>
+<script src="helptest.js" defer></script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
   try{ if(window.LukasChat && LukasChat.init) LukasChat.init({ app:"dead_dance", brand:{ name:"dead_dance", accent:"#b8002e", icon:"💬" }, launcher:false }); }catch(e){}

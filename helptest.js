@@ -11,7 +11,7 @@
 (function(root){
   var CONS={}, FILTER=null, STEP=0, ONEKEY=null, PICK=null, WORKS=null, NOTE='', SHOT=null, SHOTS=[], mounted=false;
 
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function q(id){ return document.getElementById(id); }
   function tester(){ try{return localStorage.getItem('dd.tester')||'';}catch(e){return '';} }
   function client(){ // works across pages: main app (ddClient), hostaband (hbClient), or LukasChat
@@ -27,6 +27,120 @@
   function saveShots(a){ try{ localStorage.setItem('dd.qa.shots', JSON.stringify(a.slice(-8))); }catch(e){} }
   function toSmall(file, cb){ try{ var img=new Image(), u=URL.createObjectURL(file); img.onload=function(){ var m=1200, s=Math.min(1, m/Math.max(img.width,img.height)); var c=document.createElement('canvas'); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); var d=null; try{d=c.toDataURL('image/jpeg',0.72);}catch(e){} try{URL.revokeObjectURL(u);}catch(e){} cb(d); }; img.onerror=function(){cb(null);}; img.src=u; }catch(e){ cb(null); } }
   function stashShot(task, file){ toSmall(file, function(d){ if(!d)return; SHOTS.push({task:task||'',name:file.name,url:d}); if(SHOTS.length>8)SHOTS=SHOTS.slice(-8); saveShots(SHOTS); }); }
+
+  /* ============================================================================
+     ONE CLICK = SEND.  The user answers the questions, then taps 📸 once — that
+     single tap captures THIS screen, bundles their answers, and ships it straight
+     to the team/Claude. No Send button, no Save, no download, no email, no files.
+     Honest: it is the user's OWN screen, they initiated the capture (consent), it
+     goes only to the support ticket. Nothing runs in the background; nothing is
+     captured until they tap. Offline-safe: queues locally and retries.
+     ============================================================================ */
+  var H2C_Q=null, SENDING=false, STUCKBUSY=false;
+  function ensureH2C(cb){ if(root.html2canvas){cb(root.html2canvas);return;} if(H2C_Q){H2C_Q.push(cb);return;} H2C_Q=[cb];
+    var s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; s.async=true;
+    s.onload=function(){ var q2=H2C_Q; H2C_Q=null; (q2||[]).forEach(function(f){ try{f(root.html2canvas);}catch(e){} }); };
+    s.onerror=function(){ var q2=H2C_Q; H2C_Q=null; (q2||[]).forEach(function(f){ try{f(null);}catch(e){} }); };
+    document.head.appendChild(s); }
+  function du2blob(d){ try{ var a=String(d).split(','), m=(a[0].match(/:(.*?);/)||[])[1]||'image/jpeg', b=atob(a[1]), n=b.length, u=new Uint8Array(n); while(n--)u[n]=b.charCodeAt(n); return new Blob([u],{type:m}); }catch(e){ return null; } }
+  function captureScreen(cb){ // hide OUR panel + FAB so the shot shows the app, not our own chrome
+    var ov=q('htov'), prev=ov?ov.style.visibility:'';
+    var fab=document.querySelector('.htfab'), fprev=fab?fab.style.visibility:'';
+    if(ov)ov.style.visibility='hidden'; if(fab)fab.style.visibility='hidden';
+    var restore=function(){ if(ov)ov.style.visibility=prev; if(fab)fab.style.visibility=fprev; };
+    var guard=setTimeout(function(){ restore(); cb(null); cb=function(){}; }, 12000); // never hang the UI
+    ensureH2C(function(H){ if(!H){ clearTimeout(guard); restore(); cb(null); return; }
+      try{
+        H(document.body,{backgroundColor:'#140b22',logging:false,useCORS:true,scale:1,
+          windowWidth:document.documentElement.clientWidth,windowHeight:document.documentElement.clientHeight})
+        .then(function(cv){ clearTimeout(guard); restore();
+          try{ var mx=1400, sc=Math.min(1,mx/Math.max(cv.width||1,cv.height||1)); var out=cv;
+            if(sc<1){ out=document.createElement('canvas'); out.width=Math.round(cv.width*sc); out.height=Math.round(cv.height*sc); out.getContext('2d').drawImage(cv,0,0,out.width,out.height); }
+            var d=null; try{ d=out.toDataURL('image/jpeg',0.7); }catch(e){ d=null; }
+            cb(d);
+          }catch(e){ cb(null); }
+        })
+        .catch(function(){ clearTimeout(guard); restore(); cb(null); });
+      }catch(e){ clearTimeout(guard); restore(); cb(null); }
+    }); }
+
+  /* ---- the REQUEST DESK: every one-tap category the community can send us — all through the SAME loop.
+     Each is tagged so Claude can triage/act on receipt. req:true = "make something FOR the user."
+     "YOU DREAM IT UP" — add a row here and it becomes a real one-tap ask. ---- */
+  var CATS={
+    support:  {ic:'🛟', name:'Support',                tag:'[SUPPORT]',  label:'🛟 Send to support',       req:false, prompt:'What’s going wrong? Tell us what you were doing and what happened — a picture of this screen comes with it.'},
+    contact:  {ic:'✉️', name:'Contact Us',             tag:'[CONTACT]',  label:'✉️ Send my message',       req:false, prompt:'Tell us your name and the best way to reach you — then what’s on your mind. We read every note.'},
+    fb_post:  {ic:'📘', name:'Make me a Facebook post',tag:'[FB-POST]',  label:'📘 Make my Facebook post', req:true,  prompt:'What’s the show or the news? Add a line if you like, then tap — I’ll write you a Facebook post from this screen, ready to approve and drop on your page.'},
+    spread:   {ic:'🎯', name:'Make me a Spread',       tag:'[SPREAD]',   label:'🎯 Make my full spread',   req:true,  prompt:'A full spread = one image per network (Facebook, Instagram, X, TikTok & more). Tap and I’ll build it from this screen — you approve before anything goes out.'},
+    tiktok:   {ic:'🎵', name:'Make me a TikTok',       tag:'[TIKTOK]',   label:'🎵 Make my TikTok',        req:true,  prompt:'Tell me the vibe (or nothing). Tap and I’ll cut you a TikTok-ready caption + shot list from this screen.'},
+    ig_story: {ic:'📸', name:'Make me an IG Story',    tag:'[IG-STORY]', label:'📸 Make my IG Story',      req:true,  prompt:'Tap and I’ll draft an Instagram Story frame + caption from this screen — your look, ready to post.'},
+    poster:   {ic:'🖼️', name:'Make me a Show Poster',  tag:'[POSTER]',   label:'🖼️ Make my show poster',   req:true,  prompt:'Which show? Tap with this screen and I’ll draft a show poster in your look, QR baked in.'},
+    hyperpost:{ic:'⚡', name:'Write my HyperPost',     tag:'[HYPERPOST]',label:'⚡ Write my HyperPost',    req:true,  prompt:'Tap and I’ll write your HyperPost — the differentiated, de-noised post — ready for you to approve and fire.'}
+  };
+  function catOf(){ return CATS[conKey()]||null; }
+  function capTag(){ var c=catOf(); return c?c.tag:'[SCREEN]'; }
+  function capLabel(){ var c=catOf(); return c?c.label:'📸 Screenshot & send'; }
+
+  function sessionSummary(){ var arr=[]; try{arr=JSON.parse(localStorage.getItem('dd.qa.results')||'[]');}catch(e){}
+    var con=conKey(); if(con){ arr=arr.filter(function(r){ return (r.console||'')===con; }); }   // scope this send to its own surface
+    var who=tester()||'tester';
+    var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
+    return { who:who, count:arr.length,
+      text:'Shakedown Street — '+who+' · '+(location&&location.pathname||'')+'\n'+arr.length+' line'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n') }; }
+
+  /* ---- offline queue: cap by count, keep newest, and CHECK that the write actually succeeded (Claudine H1) ---- */
+  function readQ(){ try{ return JSON.parse(localStorage.getItem('dd.qa.pending')||'[]'); }catch(e){ return []; } }
+  function writeQ(a){ try{ localStorage.setItem('dd.qa.pending', JSON.stringify(a)); return true; }catch(e){ return false; } }
+  function queuePending(rec){ var q2=readQ(); q2.push(rec);
+    while(q2.length){ if(writeQ(q2.slice(-12))) return true; q2.shift(); }   // shed oldest until it fits; report REAL success
+    return false; }
+  function dropFromQ(rec){ writeQ(readQ().filter(function(r){ return !(r&&r.at===rec.at&&r.console===rec.console); })); }
+
+  /* ---- one send. Always settles exactly once (Claudine C1): a hard timeout guarantees `done` fires,
+     so a hung upload/RPC can never wedge the only button. ---- */
+  function sendRec(c, rec, done){ var called=false; var fin=function(ok){ if(called)return; called=true; clearTimeout(t); done&&done(!!ok); };
+    var t=setTimeout(function(){ fin(false); }, 15000);
+    var rpc=function(shotPath){ try{ c.rpc('chat_qa_submit',{p_task:'__screen__',p_works:null,p_choice:null,p_note:rec.note,p_tester:(rec.who||null),p_console:(rec.console||null),p_shot:(shotPath||null)}).then(function(r){ fin(!(r&&r.error)); },function(){ fin(false); }); }catch(e){ fin(false); } };
+    if(rec.screen && c.storage){ var blob=du2blob(rec.screen);
+      if(blob){ var w=(rec.who||'anon').replace(/[^\w]/g,'_'); var path=w+'/'+(rec.at||Date.now())+'_'+Math.random().toString(36).slice(2,8)+'_screen.jpg';   // random suffix → no same-ms overwrite
+        try{ c.storage.from('qa_shots').upload(path,blob,{upsert:false,contentType:'image/jpeg'}).then(function(r){ rpc(r&&!r.error?path:null); },function(){ rpc(null); }); }catch(e){ rpc(null); }
+        return; } }
+    rpc(null); }
+  function flushPending(){ var c=client(); if(!c)return; var q2=readQ(); if(!q2.length)return;
+    q2.forEach(function(rec){ sendRec(c, rec, function(ok){ if(ok) dropFromQ(rec); }); }); }   // remove ONLY after confirmed delivery (Claudine H2)
+
+  /* ---- honest thank-you: tells the truth about whether it actually went out (Claudine C2/H3) ---- */
+  function thanks(who, ok, queued){ var b=q('htbody'); if(!b)return; var nm=who?(', '+esc(String(who).split(' ')[0])):'';
+    var body = ok ? '<p style="color:#6c6878;font-size:13px;margin-top:8px">Your screen and your note went straight to the team.<br>That’s all we needed. 💚</p>'
+      : (queued ? '<p style="color:#6c6878;font-size:13px;margin-top:8px">Saved on your device — we’ll send it automatically the moment you’re back online.<br>Nothing was lost. 💚</p>'
+                : '<p style="color:#a23;font-size:13px;margin-top:8px">We couldn’t send it just now and your device is low on space, so it may not have saved. Please try again in a moment. 🙏</p>');
+    b.innerHTML='<div style="text-align:center;padding:28px 12px"><div style="font-size:42px">'+(ok?'🌹':(queued?'📩':'⚠️'))+'</div>'+
+      '<b style="font-size:17px;display:block;margin-top:6px">Thank you'+nm+' — for your help.</b>'+body+
+      '<button class="htsend" style="width:auto;padding:10px 20px;margin-top:6px" onclick="HelpTest.close()">Done</button></div>'; }
+
+  function screenshotAndSend(){ if(SENDING) return; SENDING=true;
+    var who=tester()||'';
+    var nel=q('htnote'); if(nel){ NOTE=nel.value; autoSave(); }   // capture any open note first
+    var s=sessionSummary();
+    var b=q('htbody'); if(b){ b.innerHTML='<div style="text-align:center;padding:30px 12px"><div style="font-size:34px">📸</div><b>One moment'+(who?(', '+esc(String(who).split(' ')[0])):'')+'…</b><p style="color:#6c6878;font-size:13px;margin-top:6px">Capturing your screen and sending it to the team.</p></div>'; }
+    captureScreen(function(dataURL){
+      if(dataURL){ SHOTS.push({task:'__screen__',name:'screen.jpg',url:dataURL}); if(SHOTS.length>8)SHOTS=SHOTS.slice(-8); saveShots(SHOTS); }
+      var rec={ who:who, console:conKey(), note:capTag()+' '+s.text, screen:dataURL||null, at:Date.now() };
+      var c=client();
+      var settle=function(ok){ SENDING=false; if(ok){ thanks(who,true,true); return; } var queued=queuePending(rec); thanks(who,false,queued); };
+      if(c){ sendRec(c, rec, function(ok){ settle(ok); }); }
+      else { settle(false); }   // offline: queue + honest message, never make the user fumble a file
+    });
+  }
+  /* auto-save the current answer as the user toggles/notes — so ANSWERING never needs a Submit button */
+  function autoSave(){ var C=CONS[conKey()]; if(!C)return; var set=C.tasks||[]; var t=set[STEP]; if(!t)return;
+    var who=tester(), con=conKey();
+    try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]');
+      res=res.filter(function(r){ return !(r.task===t.key && (r.console||'')===con); });
+      res.push({tester:who||'',console:con,task:t.key,works:WORKS,choice:PICK,note:NOTE,shot:(SHOT&&(SHOT.path||SHOT.name))||'',at:Date.now()});
+      if(res.length>300)res=res.slice(-300); localStorage.setItem('dd.qa.results',JSON.stringify(res));
+    }catch(e){}
+    markDone(t.key); }
 
   var CSS=''+
   '.htfab{position:fixed;left:14px;bottom:16px;z-index:2147483000;border:0;border-radius:999px;background:#1f7a4d;color:#fff;font-weight:800;font-size:13px;padding:11px 15px;display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px #1f7a4d66;cursor:pointer;font-family:-apple-system,Segoe UI,Roboto,sans-serif}'+
@@ -51,6 +165,7 @@
   '.htnote{width:100%;border:1px solid #e7e0d2;border-radius:10px;padding:9px 11px;font:inherit;font-size:14px;min-height:56px;resize:vertical;margin:6px 0}'+
   '.htshot{display:block;text-align:center;border:1.5px dashed #1f7a4d;color:#1f7a4d;border-radius:12px;padding:13px;font-weight:800;margin:8px 0;cursor:pointer}'+
   '.htbtns{display:flex;gap:8px;margin-top:4px}.htsend{flex:1;background:#1f7a4d;color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;cursor:pointer}.htskip{background:#ece7db;color:#555;border:0;border-radius:12px;padding:0 16px;font-weight:800;cursor:pointer}'+
+  '.htcap{box-shadow:0 6px 16px #1f7a4d55;letter-spacing:.2px}.htcap:active{transform:translateY(1px)}'+
   '.htback{background:none;border:0;color:#5a2e86;font-weight:800;font-size:13px;cursor:pointer;margin-top:8px;padding:4px 0}'+
   '.qgo{display:inline-block;background:#5a2e86;color:#fff;text-decoration:none;font-weight:800;font-size:13px;padding:7px 12px;border-radius:9px;margin:2px 0}'+
   '#ht-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#23202a;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;z-index:2147483002;opacity:0;transition:.2s;pointer-events:none;font-family:-apple-system,sans-serif}#ht-toast.on{opacity:1}';
@@ -68,7 +183,7 @@
   }
   function conKey(){ return FILTER&&(FILTER==='musician'?'band':FILTER)||''; }
   function open(){ mount(); var ov=q('htov'); if(!ov)return; ov.classList.add('on'); ov.classList.remove('min');
-    ov.classList.toggle('dock', !!CONS[conKey()]); render(); }
+    ov.classList.toggle('dock', !!CONS[conKey()]); render(); try{ flushPending(); }catch(e){} }
   function close(){ var ov=q('htov'); if(!ov)return; ov.classList.remove('on'); ov.classList.remove('min'); }
   function min(){ var ov=q('htov'); if(ov)ov.classList.add('min'); }
   function unmin(){ var ov=q('htov'); if(ov)ov.classList.remove('min'); }
@@ -84,23 +199,39 @@
   }
   function pickConsole(k){ FILTER=k; STEP=0; ONEKEY=null; var ov=q('htov'); if(ov)ov.classList.add('dock'); render(); }
 
-  function renderOne(C){ var b=q('htbody'); if(!b)return; var set=C.tasks||[], n=set.length, who=tester();
+  /* Contact Us / Support: a message goes through the SAME loop (capture → upload → chat_qa_submit),
+     just tagged by console so Claude can triage it on receipt. No new plumbing. */
+  function ensureMsgConsole(kind){ var def=CATS[kind]; if(!def)return; if(!CONS[kind]){ CONS[kind]={ic:def.ic,name:def.name,msg:true,req:!!def.req,prompt:def.prompt,tasks:[{key:kind+'_msg',ic:def.ic,title:def.name,prompt:def.prompt}]}; } }
+  function openMsg(kind){ ensureMsgConsole(kind); FILTER=kind; STEP=0; ONEKEY=null; try{localStorage.setItem('dd.ht.introseen','1');}catch(e){}
+    mount(); var ov=q('htov'); if(ov){ ov.classList.add('on'); ov.classList.remove('min'); ov.classList.add('dock'); } render(); try{flushPending();}catch(e){} }
+  function renderMsg(C){ var b=q('htbody'); if(!b)return; var who=tester(); var t=(C.tasks&&C.tasks[0])||{};
+    if(ONEKEY!==t.key){ ONEKEY=t.key; NOTE=''; WORKS=null; PICK=null; SHOT=null; }
+    b.innerHTML='<div class="htq" style="margin-top:0">'+esc(C.ic)+' '+esc(C.name)+(who?(' · '+esc(who)):'')+'</div>'+
+      '<div class="htstep"><div class="n">✍️</div><div>'+esc(t.prompt||'How can we help?')+'</div></div>'+
+      '<textarea class="htnote" id="htnote" placeholder="Type your message here…" oninput="HelpTest._note(this.value)" style="min-height:120px">'+esc(NOTE)+'</textarea>'+
+      '<button class="htsend htcap" style="width:100%;font-size:15px" onclick="HelpTest._cap()">'+esc(capLabel())+'</button>'+
+      '<div style="font-size:11px;color:#9a95a6;text-align:center;margin-top:8px">Sends your message + a picture of this screen to the team. No email, nothing to attach. 🌹</div>';
+  }
+  function renderOne(C){ var b=q('htbody'); if(!b)return; if(C.msg){ renderMsg(C); return; } var set=C.tasks||[], n=set.length, who=tester();
     var head='<div class="htq" style="margin-top:0">'+esc(C.ic)+' HELP TEST'+(who?(' · '+esc(who)):'')+'</div>';
     if(!n){ b.innerHTML=head+'<div style="padding:18px 6px;color:#6c6878">No tasks are set here yet — check back soon. 🌹</div>'; return; }
     var done=doneList(), remaining=set.filter(function(t){return done.indexOf(t.key)<0;});
-    if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:22px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+esc(who)):'')+' — thank you!</b><p style="color:#6c6878;font-size:13px">Tap below — it <b>copies your notes</b> and <b>downloads your screenshots</b>. Then paste + drag them into the Claude chat. No email.</p><button class="htsend" style="width:100%" onclick="HelpTest._claude()">📤 Send to Claude</button><div style="margin-top:8px"><a href="#" onclick="HelpTest._send();return false" style="font-size:12px;color:#6c6878">copy text only</a></div></div>'; return; }
+    if(!remaining.length){ b.innerHTML=head+'<div style="text-align:center;padding:22px 10px"><div style="font-size:34px">🌹</div><b>All done'+(who?(', '+esc(who)):'')+'!</b><p style="color:#6c6878;font-size:13px">One tap sends your screen <b>and</b> your notes straight to the team. No files, no email — just this:</p><button class="htsend htcap" style="width:100%;font-size:15px" onclick="HelpTest._cap()">📸 Screenshot &amp; send</button><div style="font-size:11px;color:#9a95a6;margin-top:8px">Sends a picture of this screen + your answers to the team.</div></div>'; return; }
     if(!seenIntro()){ b.innerHTML=head+
       '<div class="htq" style="margin-top:0">👋 How this works — 15 seconds</div>'+
       '<div class="htstep"><div class="n">1</div><div>I give you <b>one tiny task at a time.</b> Just do it.</div></div>'+
       '<div class="htstep"><div class="n">2</div><div>Tell me <b>👍 Worked</b> or <b>👎 Broke</b> — add a note if you like.</div></div>'+
       '<div class="htstep"><div class="n">3</div><div><b>Can’t find something? Tap “🤔 Stuck” and type what’s confusing.</b> That comes <b>straight to the team — you don’t need to ask Michael.</b></div></div>'+
       '<div class="htstep"><div class="n">4</div><div>You <b>can’t break anything.</b> Nothing here is real.</div></div>'+
-      '<div class="htstep"><div class="n">5</div><div><b>When you’re done, tap 📤 “Send to Claude.”</b> It copies your notes and downloads your screenshots — then just <b>paste + drag them into the chat.</b> No email.</div></div>'+
+      '<div class="htstep"><div class="n">5</div><div><b>When you’re done, tap 📸 “Screenshot &amp; send.”</b> One tap sends your screen and your notes straight to the team — <b>no files, no email, nothing to drag.</b></div></div>'+
       '<button class="htsend" style="width:100%;margin-top:12px" onclick="HelpTest._start()">Let’s go →</button>'; return; }
     if(STEP<0)STEP=0; if(STEP>=n)STEP=n-1;
     var t=set[STEP];
-    if(ONEKEY!==t.key){ ONEKEY=t.key; PICK=null; WORKS=null; SHOT=null; NOTE=''; }
-    var steps=(t.steps||[]).map(function(s,i){ return '<div class="htstep"><div class="n">'+(i+1)+'</div><div>'+(s.t||'')+'</div></div>'; }).join('');
+    if(ONEKEY!==t.key){ ONEKEY=t.key; PICK=null; WORKS=null; SHOT=null; NOTE='';
+      try{ var _prev=(JSON.parse(localStorage.getItem('dd.qa.results')||'[]')).filter(function(r){ return r.task===t.key && (r.console||'')===conKey(); }).pop();
+        if(_prev){ WORKS=(_prev.works===true||_prev.works===false)?_prev.works:null; PICK=_prev.choice||null; NOTE=_prev.note||''; if(_prev.shot)SHOT={name:_prev.shot}; } }catch(e){}   // rehydrate: reopening never looks like it "forgot"
+    }
+    var steps=(t.steps||[]).map(function(s,i){ return '<div class="htstep"><div class="n">'+(i+1)+'</div><div>'+esc(s.t||'')+'</div></div>'; }).join('');
     var opts=((t.q&&t.q.opts)||[]).map(function(o){var v=String(o).replace(/"/g,'');return '<button class="htopt'+(PICK===v?' sel':'')+'" onclick="HelpTest._opt(this)" data-v="'+esc(v)+'">'+esc(o)+'</button>';}).join('');
     var shot=SHOT?('📎 '+esc(SHOT.name)+(SHOT.path?' ✓':' · added')):'📸 Add a screenshot (optional)';
     b.innerHTML=head+
@@ -109,15 +240,20 @@
       '<div class="htq">Did it work?</div><div class="htworks"><button'+(WORKS===true?' class="sel"':'')+' onclick="HelpTest._works(this,true)">👍 Worked</button><button'+(WORKS===false?' class="sel"':'')+' onclick="HelpTest._works(this,false)">👎 Broke</button></div>'+
       ((t.q&&t.q.prompt)?('<div class="htq">'+esc(t.q.prompt)+'</div>'+opts):'')+
       '<textarea class="htnote" id="htnote" placeholder="💡 What did you see? Confused? Type it here — don&#39;t ask Michael, tell us. (This is the gold.)" oninput="HelpTest._note(this.value)">'+esc(NOTE)+'</textarea>'+
-      '<label class="htshot">'+shot+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="HelpTest._shot(this)"></label>'+
-      '<div class="htbtns"><button class="htsend" onclick="HelpTest._submit()">Submit &amp; next ›</button><button class="htskip" onclick="HelpTest._stuck()" title="Confused? Log it — comes to the team">🤔 Stuck</button><button class="htskip" onclick="HelpTest._go(1)">Skip ›</button></div>'+
-      (STEP>0?'<button class="htback" onclick="HelpTest._go(-1)">‹ previous</button>':'')+
-      '<div style="text-align:center;margin-top:6px"><a href="#" onclick="HelpTest._claude();return false" style="font-size:12px;color:#6c6878">📤 Send to Claude (copy notes + download shots)</a></div>';
+      '<div class="htbtns">'+
+        '<button class="htsend htcap" onclick="HelpTest._cap()">📸 Screenshot &amp; send</button>'+
+        (STEP<n-1?'<button class="htskip" onclick="HelpTest._go(1)" title="Next question">next ›</button>':'')+
+      '</div>'+
+      '<div class="htbtns" style="margin-top:6px">'+
+        '<button class="htskip" style="flex:1" onclick="HelpTest._stuck()" title="Confused? Log it — comes straight to the team">🤔 Stuck — I&#39;m confused</button>'+
+        (STEP>0?'<button class="htskip" onclick="HelpTest._go(-1)">‹ prev</button>':'')+
+      '</div>'+
+      '<div style="font-size:11px;color:#9a95a6;text-align:center;margin-top:8px">📸 sends a picture of this screen + your answers to the team. No files, no email.</div>';
   }
-  function pick(el){ PICK=el.getAttribute('data-v'); var p=el.parentNode; [].forEach.call(document.querySelectorAll('#htbody .htopt'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
-  function works(el,v){ WORKS=v; [].forEach.call(el.parentNode.querySelectorAll('button'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); }
+  function pick(el){ PICK=el.getAttribute('data-v'); var p=el.parentNode; [].forEach.call(document.querySelectorAll('#htbody .htopt'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); autoSave(); }
+  function works(el,v){ WORKS=v; [].forEach.call(el.parentNode.querySelectorAll('button'),function(x){x.classList.remove('sel');}); el.classList.add('sel'); autoSave(); }
   function go(d){ STEP+=d; render(); }
-  function shot(inp){ var f=inp.files&&inp.files[0]; if(!f)return; var nel=q('htnote'); if(nel)NOTE=nel.value; SHOT={name:f.name}; stashShot(ONEKEY, f);
+  function shot(inp){ var f=inp.files&&inp.files[0]; if(!f)return; var nel=q('htnote'); if(nel)NOTE=nel.value; SHOT={name:f.name}; stashShot(ONEKEY, f); autoSave();
     var c=client(); if(c&&c.storage){ try{ var w=(tester()||'anon').replace(/[^\w]/g,'_'); var path=w+'/'+Date.now()+'_'+f.name.replace(/[^\w.\-]/g,'_');
       c.storage.from('qa_shots').upload(path,f,{upsert:true}).then(function(r){ if(r&&!r.error){ SHOT.path=path; render(); } }).catch(function(){}); }catch(e){} }
     toast('📸 Got your screenshot — it goes with your notes.'); render(); }
@@ -148,7 +284,8 @@
     toast('📋 Notes copied — paste into Claude. '+(n?('📸 '+n+' screenshot'+(n===1?'':'s')+' downloading — drag them into the chat.'):'(no screenshots this time)')+' No email needed. 🌹'); }
   function seenIntro(){ try{return localStorage.getItem('dd.ht.introseen')==='1';}catch(e){return false;} }
   function startTasks(){ try{localStorage.setItem('dd.ht.introseen','1');}catch(e){} render(); }
-  function stuck(){ var C=CONS[conKey()]; if(!C)return; var set=C.tasks||[]; var t=set[STEP]; if(!t)return;
+  function stuck(){ if(STUCKBUSY)return; STUCKBUSY=true; setTimeout(function(){STUCKBUSY=false;},1500);   // de-dupe rapid taps
+    var C=CONS[conKey()]; if(!C)return; var set=C.tasks||[]; var t=set[STEP]; if(!t)return;
     var who=tester(), con=conKey(); var nel=q('htnote'); var note='🤔 STUCK: '+((nel?nel.value:NOTE)||'(no detail)');
     var tagged='['+(who||'tester')+(con?(' · '+con):'')+'] '+note;
     try{ var res=JSON.parse(localStorage.getItem('dd.qa.results')||'[]'); res.push({tester:who||'',console:con,task:t.key,works:false,choice:'STUCK',note:note,shot:'',at:Date.now()}); if(res.length>300)res=res.slice(-300); localStorage.setItem('dd.qa.results',JSON.stringify(res)); }catch(e){}
@@ -161,12 +298,19 @@
       var goOpen=function(){ var tries=0,fire=function(){ tries++; if(document.body){ try{open();}catch(e){} } else if(tries<40){ setTimeout(fire,150); } }; fire(); };
       if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(goOpen,300); }); } else { setTimeout(goOpen,300); }
     } else {
-      // still mount the FAB so any page with tasks can open Help Test manually
-      if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(mount,400); }); } else { setTimeout(mount,400); }
+      // still mount the FAB so any page with tasks can open Help Test manually —
+      // but NOT on a page that already has its own help affordance (e.g. index's qaOpen), to avoid a duplicate button.
+      var autoMount=function(){ if(root.qaOpen) return; mount(); };
+      if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){ setTimeout(autoMount,400); }); } else { setTimeout(autoMount,400); }
     }
+    setTimeout(function(){ try{ flushPending(); }catch(e){} }, 3500); // retry any send that was queued while offline
   }catch(e){}
 
   root.HelpTest={ set:function(k,def){ CONS[k]=def; if(FILTER&&conKey()===k&&mounted){ render(); } },
     open:open, close:close, min:min, unmin:unmin, _m:isMin,
-    _pick:pickConsole, _opt:pick, _works:works, _go:go, _shot:shot, _submit:submit, _note:function(v){NOTE=v;}, _start:startTasks, _stuck:stuck, _send:sendResults, _claude:sendToClaude };
+    _pick:pickConsole, _opt:pick, _works:works, _go:go, _shot:shot, _submit:submit, _note:function(v){NOTE=v; autoSave();}, _start:startTasks, _stuck:stuck,
+    _cap:screenshotAndSend, _send:sendResults, _claude:sendToClaude,
+    ask:function(k){ openMsg(k); },                                  // one-tap request desk: HelpTest.ask('fb_post'|'spread'|'tiktok'|…)
+    cats:function(){ var o=[]; for(var k in CATS){ if(CATS.hasOwnProperty(k)) o.push({key:k,ic:CATS[k].ic,name:CATS[k].name,req:!!CATS[k].req}); } return o; },
+    contact:function(){ openMsg('contact'); }, support:function(){ openMsg('support'); } };
 })(window);

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Hot Sauce Band">
+  <!-- Honest placeholder badge — dead.dance's own treatment, NOT the band's artwork.
+       Replaced automatically by hot_sauce_logo.png when the band supplies their real logo. -->
+  <defs>
+    <linearGradient id="hsg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c81d0f"/>
+      <stop offset="1" stop-color="#f08a1d"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="url(#hsg)"/>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="#ffe08a" stroke-width="2" opacity="0.75"/>
+  <text x="60" y="52" text-anchor="middle" font-family="'Trebuchet MS', Verdana, sans-serif" font-size="30" font-weight="800" letter-spacing="1" fill="#fff">HOT</text>
+  <text x="60" y="80" text-anchor="middle" font-family="'Trebuchet MS', Verdana, sans-serif" font-size="26" font-weight="800" letter-spacing="1" fill="#ffe08a">SAUCE</text>
+  <text x="60" y="103" text-anchor="middle" font-size="14">🔥</text>
+</svg>

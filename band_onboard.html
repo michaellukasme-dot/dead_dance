@@ -87,12 +87,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 
 <script src="band_seed.js"></script>
 <script>
+/* ---------- DEMO/TEST band — injected ONLY when the URL has ?demo (or ?test).
+   Never ships in the public 963-band directory; lets you run the whole Band Install
+   onboarding end-to-end as a throwaway act. Clearly fake by name. ---------- */
+(function(){ try{ var p=new URLSearchParams(location.search); if(!(p.has('demo')||p.has('test'))) return;
+  var G=window.GDBandSeed; if(!G||!G.BANDS) return;
+  if(G.BANDS.some(function(b){return b.id==='demo-soundcheck';})) return;
+  G.BANDS.unshift({ id:'demo-soundcheck', name:'Soundcheck Sam & the Test Tones (DEMO)', city:'Anytown', state:'PA',
+    chapter:'midatl', chapterName:'🌹 Mid-Atlantic', link:'https://example.com', sched:'', __demo:true });
+}catch(e){} })();
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3800);}
 var SEED=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
 
 /* ---------- state, with a validator (a corrupt record must never brick the wizard) ---------- */
-var DEF={step:0,band:null,logo:null,logoLost:false,email:'',payout:'',sched:'',dates:'',store:true,tickets:true,
+var DEF={step:0,band:null,logo:null,logoLost:false,email:'',homepage:'',payout:'',sched:'',dates:'',store:true,tickets:true,
   price:{Mon:250,Tue:250,Wed:300,Thu:400,Fri:600,Sat:700,Sun:350},
   auto:{ads:true,setlist:true,drip:true,calendar:true,dtb:true,followup:true,hyperpost:true,invite:true,qr:true},
   lists:{email:'',fbpage:'',fbgroups:'',ig:'',x:'',web:'',otherSites:''}, listOK:false,
@@ -108,7 +117,7 @@ try{ var sv=JSON.parse(localStorage.getItem('dd.bandonboard')||'null');
     else S[k]=Object.assign(JSON.parse(JSON.stringify(DEF[k])),S[k]); });
   if(typeof S.media!=='number'||!isFinite(S.media)||S.media<0) S.media=0;
   if(S.logo) S.logo=null;                    // never restored from storage — see logoLost
-  ['email','payout','sched','dates','post'].forEach(function(k){ if(typeof S[k]!=='string') S[k]=''; });
+  ['email','homepage','payout','sched','dates','post'].forEach(function(k){ if(typeof S[k]!=='string') S[k]=''; });
 })();
 function save(){ try{ var c=Object.assign({},S); c.logo=null; localStorage.setItem('dd.bandonboard',JSON.stringify(c)); }
   catch(e){ /* quota or private browsing — the wizard still works, it just won't resume */ } }
@@ -243,6 +252,9 @@ function stepLogo(){
       '<div style="font-size:12px;color:var(--muted);margin-top:3px">PNG or JPG. Square works best. Until then we show your initials.</div>'+
     '</div><input type="file" id="lf" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" onchange="upLogo(this.files)">'+
     '<div class="consent">🔒 <b>Your permission, your control.</b> By uploading, you confirm you own or control this artwork and give dead.dance permission to display it on your band page, show cards, and ads. <b>You can remove it at any time and we stop using it.</b> We will never take a logo from the internet.</div>'+
+    '<label for="hp">🔗 Your band\'s homepage <span style="font-weight:400">(where fans already find you — shown on your band page)</span></label>'+
+    '<input type="url" id="hp" value="'+esc(S.homepage||(b&&b.link)||'')+'" placeholder="https://facebook.com/yourband  ·  your site  ·  Linktree" oninput="S.homepage=this.value;save()">'+
+    '<div class="honest" style="margin-top:4px">We pre-filled the public page we already had for you. This becomes the <b>Links</b> on your band page — add your site, socials, and the rest on the next steps.</div>'+
     '<label for="em">Band contact email <span style="font-weight:400">(private — never shown publicly, never sold)</span></label>'+
     '<input type="email" id="em" value="'+esc(S.email)+'" placeholder="you@yourband.com" oninput="S.email=this.value;save()">';
 }
@@ -260,8 +272,20 @@ function stepCal(){
     '<input type="url" id="sc" value="'+esc(S.sched||(S.band&&S.band.sched)||'')+'" placeholder="https://facebook.com/yourband/events" oninput="S.sched=this.value;save()">'+
     '<label for="dt">Or paste dates — one per line: <span style="font-weight:400">date, venue, city</span></label>'+
     '<textarea id="dt" rows="5" placeholder="2026-08-14, FreeWill Brewing, Perkasie PA" oninput="S.dates=this.value;save()">'+esc(S.dates)+'</textarea>'+
-    '<div class="honest">Commas, dashes or dots — whatever\'s easy to type. <b>Import, don\'t retype:</b> we\'ll pull what we can from your page and show you before anything publishes. <b>A human always clicks.</b></div>';
+    '<button class="btn go" style="width:100%;margin-top:10px" onclick="makePoster()">🖼️ Create a Show Poster for your next date</button>'+
+    '<div class="honest">Commas, dashes or dots — whatever\'s easy to type. <b>Import, don\'t retype:</b> we\'ll pull what we can from your page and show you before anything publishes. <b>A human always clicks.</b> Every show can get a poster — your look, the details, and the QR baked into the corner.</div>';
 }
+var CAL_SEP=/\s*[·,–—|]\s*|\s+-\s+|\t+/;
+window.makePoster=function(){
+  var first=String(S.dates||'').split('\n').map(function(l){return l.trim();}).filter(Boolean)[0];
+  var p=first?first.split(CAL_SEP).map(function(x){return x.trim();}).filter(Boolean):[];
+  var b=S.band||{name:'Your Band'};
+  var qs='band='+encodeURIComponent(b.name)+'&bandId='+encodeURIComponent(b.id||'')+
+    '&date='+encodeURIComponent(p[0]||'')+'&venue='+encodeURIComponent(p[1]||'')+'&city='+encodeURIComponent(p[2]||'');
+  var url='poster_maker.html?'+qs;
+  try{ if(window.parent&&window.parent!==window&&window.parent.ddSheet){ window.parent.ddSheet(url,'🖼️ Create a Show Poster'); return; } }catch(e){}
+  window.open(url,'_blank');
+};
 /* ---------- Step 4 · store ---------- */
 function stepStore(){
   return '<h2 tabindex="-1">Your merch store is ready</h2><div class="sub">Every band on dead.dance already has a store the day they claim their page. <b>Just load it up.</b></div>'+

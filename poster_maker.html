@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Show Poster — dead.dance</title>
+<meta name="theme-color" content="#141018">
+<style>
+:root{--bg:#141018;--panel:#20142f;--line:#2e2148;--gold:#ffd76a;--gold2:#c08a2d;--rose:#b8002e;--muted:#9a8fb0;--green:#2a8a4a}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#141018;color:#eee;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{background:linear-gradient(120deg,#0e0716,#3a1d5e 70%,#b8002e);padding:14px 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 14px #0008}
+header h1{margin:0;font-size:18px}header p{margin:2px 0 0;font-size:12px;color:#e0cdf5}
+.wrap{max-width:960px;margin:0 auto;padding:16px 14px 60px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
+h2{font-size:15px;margin:0 0 4px}.sub{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+label{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:11px 0 4px}
+input,select{width:100%;background:#120c1c;border:1px solid #43305f;border-radius:9px;color:#fff;font:14px -apple-system;padding:9px 11px}
+input:focus,select:focus{outline:none;border-color:var(--gold2)}
+.drop{border:1px dashed #43305f;border-radius:11px;padding:16px;text-align:center;cursor:pointer;background:#160c28}
+.drop:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;font-size:14px;cursor:pointer}
+.btn.go{background:var(--gold);color:#3a1d00}.btn.ghost{background:#2a1c40;color:#e0cdf5}.btn.rose{background:linear-gradient(135deg,#c8932f,#9a3b1b);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#241634;border:1px solid var(--gold2);color:var(--gold);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700}
+.thumbs{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.thumbs img{width:52px;height:70px;object-fit:cover;border-radius:6px;border:1px solid #3a2a55}
+.seg{display:flex;gap:0;border:1px solid #43305f;border-radius:10px;overflow:hidden;margin-top:6px}
+.seg button{flex:1;background:#160c28;color:#cbb9e6;border:0;padding:9px;font-weight:800;font-size:12.5px;cursor:pointer}
+.seg button.on{background:var(--gold);color:#3a1d00}
+.tiers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.tier{border:1px solid var(--line);border-radius:11px;padding:12px;background:#160c28}
+.tier b{font-size:14px}.tier .p{font-size:11px;color:var(--muted);margin-top:3px}
+.tier.on{border-color:var(--gold)}
+canvas{width:100%;height:auto;border-radius:10px;border:1px solid #3a2a55;background:#000;display:block}
+.honest{font-size:11px;color:var(--muted);line-height:1.55;margin-top:12px}.honest b{color:#cbb9e6}
+.mini{font-size:11px;color:var(--muted);margin-top:6px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 15px;border-radius:12px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:60}#toast.on{opacity:1}
+</style></head>
+<body>
+<header><h1>🖼️ Create a Show Poster</h1><p id="hp">We read your posters, match your look, and drop the show QR bottom-right.</p></header>
+<div class="wrap">
+  <div class="card" id="left"></div>
+  <div class="card">
+    <h2>Your poster</h2><div class="sub">The show QR is always in the bottom-right — scan → this show on dead.dance.</div>
+    <canvas id="cv" width="800" height="1035"></canvas>
+    <div class="row" style="margin-top:10px">
+      <button class="btn go" id="dl" onclick="downloadPoster()" style="flex:1">⬇︎ Download poster</button>
+      <button class="btn ghost" onclick="regen()">↻ Redraw</button>
+    </div>
+    <div class="honest" id="honest"></div>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="qr.js"></script>
+<script src="deal_shows.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3200);}
+function qp(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return'';}}
+
+/* ---------- show (from query params, or typed) ---------- */
+var S={
+  band:qp('band')||'Your Band', date:qp('date')||'', venue:qp('venue')||'', city:qp('city')||'', time:qp('time')||'',
+  bandId:qp('bandId')||'', url:qp('url')||'', tier:'free',
+  photo:null, artistPoster:null,
+  style:null, font:'serif', placement:'top'
+};
+try{var sv=JSON.parse(localStorage.getItem('dd.poster.'+(S.bandId||S.band))||'null'); if(sv&&sv.style){ S.style=sv.style; S.font=sv.font||'serif'; S.placement=sv.placement||'top'; }}catch(e){}
+function showUrl(){ if(S.url) return S.url;
+  var slug=(S.band+' '+(S.date||'')).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  return 'https://deaddance.app/s/'+slug; }
+function saveStyle(){ try{localStorage.setItem('dd.poster.'+(S.bandId||S.band),JSON.stringify({style:S.style,font:S.font,placement:S.placement}));}catch(e){} }
+
+/* ---------- STYLE ANALYSIS — read the band's visual voice from their posters ----------
+   Pure + testable: given RGBA pixels, decide mono vs color, the accent color, and darkness.
+   This is a real read of their images — not generated art, not a claim we can't keep. */
+function analyzePixels(px){                       // px = Uint8ClampedArray RGBA
+  var n=px.length/4, satSum=0, lumSum=0, count=0;
+  var rS=0,gS=0,bS=0, vivid=0, lumSq=0;
+  for(var i=0;i<px.length;i+=4){
+    var r=px[i],g=px[i+1],b=px[i+2],a=px[i+3]; if(a<8) continue;
+    var mx=Math.max(r,g,b),mn=Math.min(r,g,b), lum=(0.299*r+0.587*g+0.114*b);
+    var sat=mx===0?0:(mx-mn)/mx;
+    satSum+=sat; lumSum+=lum; lumSq+=lum*lum; count++;
+    if(sat>0.35 && mx>60){ rS+=r; gS+=g; bS+=b; vivid++; }
+  }
+  if(!count) return {mono:true, accent:'#ffd76a', avgLum:40, contrast:60};
+  var avgSat=satSum/count, avgLum=lumSum/count, variance=Math.max(0,lumSq/count-avgLum*avgLum);
+  var accent = vivid>count*0.02 ? rgb(Math.round(rS/vivid),Math.round(gS/vivid),Math.round(bS/vivid)) : '#ffd76a';
+  return { mono: avgSat < 0.12, accent: accent, avgLum: Math.round(avgLum), contrast: Math.round(Math.sqrt(variance)) };
+}
+function rgb(r,g,b){return '#'+[r,g,b].map(function(x){x=Math.max(0,Math.min(255,x));return (x<16?'0':'')+x.toString(16);}).join('');}
+window.QRPosterAnalyze=analyzePixels;  // exported for tests
+
+function readSpread(files, done){                 // analyze uploaded posters → a merged style profile
+  var arr=Array.prototype.slice.call(files).slice(0,6), profs=[], loaded=0;
+  if(!arr.length){done(null);return;}
+  arr.forEach(function(f){ var rd=new FileReader();
+    rd.onload=function(){ var img=new Image(); img.onload=function(){
+      var c=document.createElement('canvas'), w=80, h=Math.round(80*img.height/img.width)||100; c.width=w;c.height=h;
+      var cx=c.getContext('2d'); cx.drawImage(img,0,0,w,h);
+      try{ profs.push(analyzePixels(cx.getImageData(0,0,w,h).data)); }catch(e){}
+      if(++loaded===arr.length) done(merge(profs)); };
+      img.onerror=function(){ if(++loaded===arr.length) done(merge(profs)); }; img.src=rd.result; };
+    rd.onerror=function(){ if(++loaded===arr.length) done(merge(profs)); }; rd.readAsDataURL(f); });
+}
+function merge(profs){ if(!profs.length) return null;
+  var monoVotes=0, lum=0, con=0, accents=[];
+  profs.forEach(function(p){ if(p.mono)monoVotes++; lum+=p.avgLum; con+=p.contrast; if(p.accent!=='#ffd76a')accents.push(p.accent); });
+  return { mono: monoVotes> profs.length/2, avgLum: Math.round(lum/profs.length), contrast: Math.round(con/profs.length),
+    accent: accents.length? accents[0] : '#ffd76a', modeledFrom: profs.length }; }
+
+/* ---------- LEFT PANEL ---------- */
+function firstRun(){ return !S.style; }
+function renderLeft(){
+  var L=document.getElementById('left'), fr=firstRun();
+  var html='<h2>'+esc(S.band)+'</h2><div class="sub">'+esc([fmtDate(S.date),S.time].filter(Boolean).join(' · ')||'add the show details below')+'</div>';
+  // show detail fields (prefilled from the show)
+  html+='<label>Band</label><input value="'+esc(S.band)+'" oninput="S.band=this.value;regen()">'+
+    '<div class="row"><div style="flex:1"><label>Date</label><input type="date" value="'+esc(S.date)+'" oninput="S.date=this.value;regen()"></div>'+
+    '<div style="flex:1"><label>Time</label><input value="'+esc(S.time)+'" placeholder="8:00 PM" oninput="S.time=this.value;regen()"></div></div>'+
+    '<label>Venue</label><input value="'+esc(S.venue)+'" oninput="S.venue=this.value;regen()">'+
+    '<label>City</label><input value="'+esc(S.city)+'" placeholder="Hellertown, PA" oninput="S.city=this.value;regen()">';
+
+  if(fr){
+    html+='<div class="honest" style="margin:12px 0 6px"><b>First poster? Show me your look.</b> Upload a spread of your existing posters — crazy or clean — and I\'ll match your voice, the way we match your words. <b>Your art stays yours; I only read the style.</b></div>'+
+      '<div class="drop" tabindex="0" role="button" onclick="document.getElementById(\'spread\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();document.getElementById(\'spread\').click();}">'+
+      '<div style="font-size:26px">🎨</div><div style="font-weight:800;font-size:13px;margin-top:3px">Upload 3–5 of your posters</div><div class="mini">or skip — I\'ll start from a clean look</div></div>'+
+      '<input type="file" id="spread" accept="image/*" multiple style="display:none" onchange="onSpread(this.files)">'+
+      '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="S.style={mono:false,accent:\'#ffd76a\',avgLum:40,contrast:60,modeledFrom:0};saveStyle();render()">Skip — use a clean look</button>';
+  } else {
+    html+='<div class="row" style="margin-top:12px"><span class="chip">'+(S.style.mono?'◐ mono':'● color')+'</span>'+
+      '<span class="chip" style="border-color:'+esc(S.style.accent)+';color:'+esc(S.style.accent)+'">■ your accent</span>'+
+      (S.style.modeledFrom?'<span class="chip">modeled from '+S.style.modeledFrom+'</span>':'<span class="chip">clean look</span>')+'</div>'+
+      '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="S.style=null;saveStyle();render()">↻ Re-read my posters</button>'+
+      // photo for THIS poster
+      '<label style="margin-top:12px">This show\'s photo</label>'+
+      '<div class="drop" tabindex="0" role="button" onclick="document.getElementById(\'ph\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();document.getElementById(\'ph\').click();}">'+
+      '<div style="font-size:22px">'+(S.photo?'📸':'🖼️')+'</div><div style="font-weight:800;font-size:13px">'+(S.photo?'Tap to change photo':'Tap to add a band photo')+'</div></div>'+
+      '<input type="file" id="ph" accept="image/*" style="display:none" onchange="onPhoto(this.files)">'+
+      '<label>Name style</label><div class="seg">'+
+        seg('serif','Serif')+seg('sans','Bold Sans')+seg('display','Display')+'</div>'+
+      '<label>Name placement</label><div class="seg">'+
+        segP('top','Top')+segP('center','Center')+segP('bottom','Bottom')+'</div>'+
+      // TIERS: Less = free, More = artist
+      '<label>Poster</label><div class="tiers">'+
+        '<div class="tier'+(S.tier==='free'?' on':'')+'" onclick="S.tier=\'free\';regen();renderLeft()"><b>🆓 Free dead.dance poster</b><div class="p">Your photo, your look, the QR. Ready now.</div></div>'+
+        '<div class="tier'+(S.tier==='artist'?' on':'')+'" onclick="S.tier=\'artist\';regen();renderLeft()"><b>🎨 Commission an artist</b><div class="p">Buy a show poster from a dead.dance artist. We still drop the QR on it.</div></div>'+
+      '</div>'+
+      (S.tier==='artist'
+        ? '<button class="btn rose" style="width:100%;margin-top:8px" onclick="goArtist()">Browse the Poster Shop →</button>'+
+          '<div class="drop" style="margin-top:8px" tabindex="0" role="button" onclick="document.getElementById(\'ap\').click()" onkeydown="if(event.key===\'Enter\'){document.getElementById(\'ap\').click();}"><div style="font-size:13px;font-weight:800">Already have your artist poster? Upload it</div><div class="mini">we place your QR bottom-right and you\'re done</div></div>'+
+          '<input type="file" id="ap" accept="image/*" style="display:none" onchange="onArtist(this.files)">'
+        : '');
+  }
+  L.innerHTML=html;
+}
+function seg(v,t){return '<button class="'+(S.font===v?'on':'')+'" onclick="S.font=\''+v+'\';saveStyle();regen()">'+t+'</button>';}
+function segP(v,t){return '<button class="'+(S.placement===v?'on':'')+'" onclick="S.placement=\''+v+'\';saveStyle();regen()">'+t+'</button>';}
+function fmtDate(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}); }
+
+window.onSpread=function(files){ readSpread(files,function(prof){ S.style=prof||{mono:false,accent:'#ffd76a',avgLum:40,contrast:60,modeledFrom:0}; saveStyle(); render(); toast(prof?('🎨 Read '+prof.modeledFrom+' posters — matched your '+(prof.mono?'black-and-white':'color')+' look.'):'Starting from a clean look.'); }); };
+window.onPhoto=function(files){ if(!files[0])return; var rd=new FileReader(); rd.onload=function(){ var img=new Image(); img.onload=function(){ S.photo=img; regen(); }; img.src=rd.result; }; rd.readAsDataURL(files[0]); };
+window.onArtist=function(files){ if(!files[0])return; var rd=new FileReader(); rd.onload=function(){ var img=new Image(); img.onload=function(){ S.artistPoster=img; regen(); toast('🎨 Artist poster loaded — QR placed bottom-right.'); }; img.src=rd.result; }; rd.readAsDataURL(files[0]); };
+window.goArtist=function(){ try{ if(window.parent&&window.parent.ddSheet){ window.parent.ddSheet('poster_shop.html','🖼️ The Poster Shop'); return; } }catch(e){} location.href='poster_shop.html'; };
+
+/* ---------- COMPOSE (canvas) ---------- */
+var FONTS={serif:"Georgia, 'Times New Roman', serif", sans:"Arial Black, Impact, sans-serif", display:"'Trebuchet MS', Verdana, sans-serif"};
+function drawPoster(){
+  var cv=document.getElementById('cv'), ctx=cv&&cv.getContext&&cv.getContext('2d'); if(!ctx)return; var W=cv.width, H=cv.height;
+  var st=S.style||{mono:false,accent:'#ffd76a',avgLum:40};
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  // background: artist poster (if bought) else the show photo, else a tone
+  var bg=S.artistPoster||S.photo;
+  if(bg){ var s=Math.max(W/bg.width,H/bg.height), bw=bg.width*s, bh=bg.height*s;
+    ctx.save(); if(st.mono && !S.artistPoster){ try{ctx.filter='grayscale(1) contrast(1.05)';}catch(e){} }
+    ctx.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh); ctx.restore(); }
+  else { var g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#241634'); g.addColorStop(1,'#0e0716'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
+  // if it's OUR free poster, add legibility scrim + name + show line; artist posters get only the QR
+  if(!S.artistPoster){
+    var top=S.placement==='top', mid=S.placement==='center';
+    var gy=top?0:(mid?H*0.28:H*0.55);
+    var grd=ctx.createLinearGradient(0,gy,0,gy+H*0.45); grd.addColorStop(0,'rgba(0,0,0,.72)'); grd.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grd; ctx.fillRect(0,gy,W,H*0.45);
+    // band name
+    var name=(S.band||'YOUR BAND').toUpperCase();
+    var fs=nameSize(ctx,name,W*0.86,FONTS[S.font]);
+    ctx.font='700 '+fs+'px '+FONTS[S.font]; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=12;
+    var ny=top?H*0.12:(mid?H*0.42:H*0.66); ctx.fillText(name,W/2,ny); ctx.shadowBlur=0;
+    // accent rule + show line
+    var line=[fmtDateShort(S.date),S.time].filter(Boolean).join(', ');
+    var line2=[S.venue,S.city].filter(Boolean).join(' · ');
+    ctx.fillStyle=st.accent||'#ffd76a'; ctx.fillRect(W/2-W*0.18,ny+fs*0.35,W*0.36,4);
+    ctx.font='600 26px '+FONTS.display; ctx.fillStyle='#fff';
+    if(line) ctx.fillText(line, W/2, ny+fs*0.35+40);
+    if(line2){ ctx.font='500 22px '+FONTS.display; ctx.fillStyle='#e8dff7'; ctx.fillText(line2, W/2, ny+fs*0.35+72); }
+  }
+  // QR — ALWAYS bottom-right, on a white plate
+  drawQR(ctx,W,H);
+  updateHonest();
+}
+function nameSize(ctx,txt,maxW,font){ var fs=120; do{ ctx.font='700 '+fs+'px '+font; if(ctx.measureText(txt).width<=maxW) break; fs-=2; }while(fs>28); return fs; }
+function fmtDateShort(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase(); }
+function drawQR(ctx,W,H){
+  var q; try{ q=window.QRLite.matrix(showUrl()); }catch(e){ return; }
+  var plate=Math.round(W*0.20), pad=Math.round(W*0.02), x=W-plate-pad*1.4, y=H-plate-pad*1.4;
+  ctx.fillStyle='#fff'; roundRect(ctx,x-6,y-6,plate+12,plate+12,8); ctx.fill();
+  var px=Math.floor(plate/(q.size+2)), off=Math.round((plate-px*q.size)/2);
+  ctx.fillStyle='#000';
+  for(var r=0;r<q.size;r++)for(var c=0;c<q.size;c++) if(q.modules[r][c]) ctx.fillRect(x+off+c*px, y+off+r*px, px, px);
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function updateHonest(){ document.getElementById('honest').innerHTML=
+  '<b>Honest-state:</b> '+(S.artistPoster?'this is your artist\'s poster — their work, their credit — and we only added the QR.':'this is your photo in your own style, composed by us.')+
+  ' The <b>QR is always bottom-right</b> and points to <b>'+esc(showUrl())+'</b>. Nothing here is anyone else\'s artwork.'; }
+
+function regen(){ if(!firstRun()) drawPoster(); document.getElementById('dl').disabled=firstRun(); }
+window.regen=regen;
+function downloadPoster(){ var cv=document.getElementById('cv'); try{ var a=document.createElement('a'); a.download=((S.band||'poster').replace(/[^a-z0-9]+/gi,'_'))+'_'+(S.date||'show')+'.png'; a.href=cv.toDataURL('image/png'); a.click(); toast('⬇︎ Poster saved. HyperPost it, print it, tape it up. 🌹'); }catch(e){ toast('Could not export — try Redraw first.'); } }
+window.downloadPoster=downloadPoster;
+
+function render(){ renderLeft(); regen(); }
+/* prefill DEAL if launched for a DEAL show and no band given */
+render();
+</script>
+<script src="dd_back.js"></script>
+</body></html>
