@@ -86,6 +86,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="band_seed.js"></script>
+<script src="dd_attrib.js"></script>
+<script src="dd_refer.js"></script>
 <script>
 /* ---------- DEMO/TEST band — injected ONLY when the URL has ?demo (or ?test).
    Never ships in the public 963-band directory; lets you run the whole Band Install
@@ -448,6 +450,7 @@ function stepDone(){
       Object.keys(S.auto).filter(function(k){return S.auto[k];}).length+' automations · ✅ '+hpSpread()+' channels · ✅ first HyperPost drafted</div>'+
     '<div class="honest" style="text-align:left"><b>Our promise:</b> nothing bills, nothing sends without a human, your list is never sold or shared, and we never take a cut of your door. Remove anything, any time.<br><br>'+
       '<b>Next:</b> Michael or your regional Ambassador reviews your page and brings you that short agreement. <b>Nothing is owed, and nothing sends, until you say so.</b></div>'+
+    (window.DDRefer?DDRefer.card(b.name,(b.id||'')):'')+
     '<button class="btn go" style="margin-top:16px" onclick="finish()">Finish install</button></div>';
 }
 var STEPS=[stepFind,stepLogo,stepCal,stepStore,stepPrice,stepPay,stepAuto,stepLists,stepHyper,stepDone];
@@ -472,6 +475,14 @@ window.go=function(d){ if(d>0&&!canNext())return; S.step=Math.max(0,Math.min(STE
 window.finish=function(){
   S.lists={email:'',fbpage:'',fbgroups:''}; S.listOK=false; S.logo=null; save();   // don't leave PII sitting on the device
   toast('🌹 Installed. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };
+
+/* ---------- attribution: land an invited band on THEIR page, and remember where the claim came from ---------- */
+(function(){ try{
+  var cid=new URLSearchParams(location.search).get('claim');            // HOP 1: our email → this band
+  if(cid){ var f=SEED.filter(function(b){return b.id===cid;})[0]; if(f && (!S.band || S.band.id!==f.id)){ S.band=f; if(S.step<1)S.step=0; } }
+  if(window.DDAttrib){ S.attrib=window.DDAttrib.stamp(); }              // stamp src/wave/batch (rides to server when claims record)
+  save();
+}catch(e){} })();
 
 /* boot — a bad saved state must never white-screen a band */
 if(!SEED.length){ document.getElementById('right').innerHTML='<h2>Band directory didn\'t load</h2><div class="sub">Reload the page.</div>'; }
