@@ -1813,7 +1813,7 @@ var DDFIRST_CH=[{id:'fb',n:'📘 Facebook',on:true},{id:'ms',n:'💬 Messenger',
 function ddFirstText(){
   return "I just found dead.dance — a new community built for Deadheads, the tribute bands, and the rooms that host them.\n\n"+
    "It pulls the Dead world together in one place: the live show map, the archive that actually plays, Shakedown karaoke, the games, and a group for every corner of the country. "+
-   "No outside advertisers, and no algorithm deciding what you see — just the shows and the people.\n\n"+
+   "It brings the good stuff together and posts it right back to Facebook and everywhere else — just the shows and the people, wherever you already are.\n\n"+
    "I'm in the "+((window.ME&&ME.chapter)||"family")+" group. Come find me 🌹\n\n"+ddFirstLink();
 }
 function ddFirstLink(){ return (typeof inviteLink==='function')?inviteLink():'https://deaddance.app/'; }
@@ -2844,13 +2844,15 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="nowplaying.js" defer></script>
 <script src="dd_share.js" defer></script>
 <script src="dd_games.js" defer></script>
+<script src="qr.js" defer></script>
+<script src="dd_spread.js" defer></script>
 <script src="dd_hyperpost.js" defer></script>
 <script src="dd_showmap.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
   try{ if(window.LukasChat && LukasChat.init) LukasChat.init({ app:"dead_dance", brand:{ name:"dead_dance", accent:"#b8002e", icon:"💬" }, launcher:false }); }catch(e){}
-  setTimeout(function(){ try{ syncMyProfile(); }catch(e){} }, 2200);  /* pull my real profile once the session resolves */
+  setTimeout(function(){ try{ syncMyProfile(); }catch(e){} try{ if(window.ME&&ME.chapter) localStorage.setItem('dd.chapter',ME.chapter); }catch(e){} }, 2200);  /* pull my real profile + seed region for support/referral routing */
   /* returning from Stripe hosted checkout */
   (function(){ try{ var p=new URLSearchParams(location.search);
     if(p.get('order')==='ok') setTimeout(function(){ toast('✅ Paid — your ticket is in your QR; you\'re in the show group.'); },900);

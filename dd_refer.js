@@ -12,6 +12,9 @@
     try { if (root.ddClient) { var c = root.ddClient(); if (c) return c; } } catch (e) {}
     return null;
   }
+  function region() {   // origination region → routes to the patch's Ambassador
+    try { if (root.ME && root.ME.chapter) return root.ME.chapter; return root.localStorage.getItem('dd.chapterName') || root.localStorage.getItem('dd.chapter') || ''; } catch (e) { return ''; }
+  }
   function refLink(bandId) { return LINK_BASE + '?src=refer&ref=' + encodeURIComponent(bandId || ''); }
   function composeText(referrer, bandId) {
     return 'Hey — Michael here, from dead.dance. ' + (referrer ? (referrer + ' ') : 'A friend ') +
@@ -38,18 +41,18 @@
     var eT = document.getElementById('rfEmails'), tT = document.getElementById('rfTexts');
     var emails = parseEmails(eT && eT.value), texts = parseTexts(tT && tT.value);
     var c = client(), out = { emails: 0, texts: 0 };
-    var by = CUR.band, byId = CUR.id;
+    var by = CUR.band, byId = CUR.id, rg = region(), tail = rg ? ('  · region: ' + rg) : '';
 
     emails.forEach(function (em) {
-      stash('dd.refer.emails', [{ type: 'email', to: em, by: by, byId: byId, at: Date.now() }]);
-      if (c) { try { c.rpc('chat_qa_submit', { p_task: 'refer', p_note: '[REFER-EMAIL] ' + em + '  ← referred by ' + (by || 'a band'), p_tester: (by || null), p_console: 'refer', p_shot: null }).catch(function () {}); } catch (e) {} }
+      stash('dd.refer.emails', [{ type: 'email', to: em, by: by, byId: byId, region: rg, at: Date.now() }]);
+      if (c) { try { c.rpc('chat_qa_submit', { p_task: 'refer', p_note: '[REFER-EMAIL] ' + em + '  ← referred by ' + (by || 'a band') + tail, p_tester: (by || null), p_console: 'refer', p_shot: null }).catch(function () {}); } catch (e) {} }
       out.emails++;
     });
 
     texts.forEach(function (t) {
       var msg = composeText(by, byId);
-      stash('dd.refer.texts', [{ type: 'text', name: t.name, phone: t.phone, msg: msg, sms: smsLink(t.phone, msg), by: by, byId: byId, at: Date.now() }]);
-      if (c) { try { c.rpc('chat_qa_submit', { p_task: 'refer', p_note: '[REFER-TEXT] send to ' + t.phone + (t.name ? (' (' + t.name + ')') : '') + ': ' + msg, p_tester: (by || null), p_console: 'refer', p_shot: null }).catch(function () {}); } catch (e) {} }
+      stash('dd.refer.texts', [{ type: 'text', name: t.name, phone: t.phone, msg: msg, sms: smsLink(t.phone, msg), by: by, byId: byId, region: rg, at: Date.now() }]);
+      if (c) { try { c.rpc('chat_qa_submit', { p_task: 'refer', p_note: '[REFER-TEXT] send to ' + t.phone + (t.name ? (' (' + t.name + ')') : '') + ': ' + msg + tail, p_tester: (by || null), p_console: 'refer', p_shot: null }).catch(function () {}); } catch (e) {} }
       out.texts++;
     });
     return out;

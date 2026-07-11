@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Make a Spread — dead.dance</title>
+<style>
+:root{--bg:#140b22;--card:#1e1236;--line:#3a2a55;--accent:#c9a5ff;--gold:#f0c96b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f3eefc;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:14px}
+h1{font-size:19px;margin:6px 0 2px}.sub{color:#b9a9d8;font-size:13px;margin-bottom:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:700;color:#cbb9ee;margin:8px 0 3px}
+input,textarea{width:100%;background:#160c28;border:1px solid var(--line);border-radius:9px;color:#fff;padding:9px 11px;font:inherit}
+.btn{background:#5a2e86;color:#fff;border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer}
+.btn.gold{background:var(--gold);color:#2a1c00}
+.drop{border:1.5px dashed var(--accent);border-radius:12px;padding:22px;text-align:center;color:var(--accent);font-weight:800;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.v{background:#160c28;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.v .lab{font-size:11px;font-weight:800;padding:6px 8px;display:flex;justify-content:space-between;align-items:center;color:#cbb9ee}
+.v img{width:100%;display:block;background:#000}
+.v a{font-size:11px;color:var(--gold);text-decoration:none;font-weight:800}
+.honest{font-size:11.5px;color:#9a86c4;margin-top:10px;line-height:1.5}
+</style></head><body>
+<h1>🎯 Make a Spread</h1>
+<div class="sub">One image → a native-looking post for every network. We’re the invisible layer — it looks like you posted it. Better.</div>
+
+<div class="panel">
+  <label>Headline</label><input id="hl" placeholder="Friday at the Fillmore" value="Friday at the Fillmore">
+  <label>Sub (date · doors · venue) <span style="font-weight:400">— shown where the network uses one</span></label>
+  <input id="sb" placeholder="Aug 14 · 8pm doors" value="Aug 14 · 8pm doors">
+  <label>Link the QR points home to</label><input id="url" placeholder="https://deaddance.app/?ref=deal" value="https://deaddance.app/">
+  <label style="margin-top:12px">Your photos (give it 1 — or 10; a video works, we grab a frame)</label>
+  <div class="drop" id="drop" tabindex="0">Tap to choose photos or a video — the more you give it, the richer the spread</div>
+  <input type="file" id="file" accept="image/*,video/*" multiple style="display:none">
+  <button class="btn gold" style="width:100%;margin-top:12px" onclick="go()">Make the spread →</button>
+  <div class="honest">🌹 <b>The QR is our only mark</b> — the Rose lives in its center; no wordmark, nothing that looks like another brand parked on your post. Each variant is sized and styled the way that network wants it (TikTok shouts, Reddit stays plain, Facebook stays warm).</div>
+</div>
+
+<div id="out" class="panel" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <b>Your spread</b><button class="btn" onclick="dlAll()">⬇︎ Download all</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script src="qr.js"></script>
+<script src="dd_spread.js"></script>
+<script src="dd_back.js"></script>
+<script>
+var SRC=null, LAST=[];
+var drop=document.getElementById('drop'), file=document.getElementById('file');
+drop.onclick=function(){file.click()}; drop.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();file.click();}};
+file.onchange=function(){ var f=file.files[0]; if(!f)return;
+  if(/^video\//.test(f.type)){ grabFrame(f); } else { var img=new Image(); img.onload=function(){ SRC=img; drop.textContent='✅ '+f.name+' — ready'; }; img.src=URL.createObjectURL(f); } };
+function grabFrame(f){ var v=document.createElement('video'); v.muted=true; v.playsInline=true; v.src=URL.createObjectURL(f);
+  v.onloadeddata=function(){ try{ v.currentTime=Math.min(1,(v.duration||2)/3); }catch(e){} };
+  v.onseeked=function(){ var c=document.createElement('canvas'); c.width=v.videoWidth||1080; c.height=v.videoHeight||1920; c.getContext('2d').drawImage(v,0,0,c.width,c.height); var img=new Image(); img.onload=function(){SRC=img; drop.textContent='✅ frame grabbed from '+f.name;}; img.src=c.toDataURL('image/png'); };
+}
+function meta(){ return { headline:document.getElementById('hl').value, sub:document.getElementById('sb').value, url:document.getElementById('url').value||'https://deaddance.app/' }; }
+function go(){ if(!SRC){ drop.textContent='⬆︎ Pick an image or video first'; return; }
+  if(!window.DDSpread){ alert('spread engine not loaded'); return; }
+  LAST=DDSpread.spread(SRC, meta());
+  var g=document.getElementById('grid'); g.innerHTML='';
+  LAST.forEach(function(v){ if(!v.dataURL)return;
+    var d=document.createElement('div'); d.className='v';
+    d.innerHTML='<div class="lab"><span>'+v.name+' · '+v.ratio+'</span><a href="'+v.dataURL+'" download="spread_'+v.id+'.png">⬇︎</a></div><img src="'+v.dataURL+'" alt="'+v.name+'">';
+    g.appendChild(d); });
+  document.getElementById('out').style.display='block';
+}
+function dlAll(){ LAST.forEach(function(v,i){ if(!v.dataURL)return; setTimeout(function(){ var a=document.createElement('a'); a.href=v.dataURL; a.download='spread_'+v.id+'.png'; document.body.appendChild(a); a.click(); a.remove(); }, i*350); }); }
+</script>
+</body></html>

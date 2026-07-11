@@ -14,6 +14,7 @@
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function q(id){ return document.getElementById(id); }
   function tester(){ try{return localStorage.getItem('dd.tester')||'';}catch(e){return '';} }
+  function region(){ try{ if(root.ME&&root.ME.chapter) return root.ME.chapter; return localStorage.getItem('dd.chapterName')||localStorage.getItem('dd.chapter')||''; }catch(e){ return ''; } }  // origination region → routes to the patch's Ambassador + Chaperone
   function client(){ // works across pages: main app (ddClient), hostaband (hbClient), or LukasChat
     try{ if(root.ddClient){var a=root.ddClient(); if(a)return a;} }catch(e){}
     try{ if(root.hbClient){var b=root.hbClient(); if(b)return b;} }catch(e){}
@@ -85,8 +86,9 @@
     var con=conKey(); if(con){ arr=arr.filter(function(r){ return (r.console||'')===con; }); }   // scope this send to its own surface
     var who=tester()||'tester';
     var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
-    return { who:who, count:arr.length,
-      text:'Shakedown Street — '+who+' · '+(location&&location.pathname||'')+'\n'+arr.length+' line'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n') }; }
+    var rg=region();
+    return { who:who, count:arr.length, region:rg,
+      text:'Shakedown Street — '+who+(rg?(' · '+rg):'')+' · '+(location&&location.pathname||'')+'\nregion: '+(rg||'—')+'\n'+arr.length+' line'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n') }; }
 
   /* ---- offline queue: cap by count, keep newest, and CHECK that the write actually succeeded (Claudine H1) ---- */
   function readQ(){ try{ return JSON.parse(localStorage.getItem('dd.qa.pending')||'[]'); }catch(e){ return []; } }

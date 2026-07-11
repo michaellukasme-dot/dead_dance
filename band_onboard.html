@@ -225,7 +225,7 @@ window.doSearch=function(){
   }).join('')||(q.length>=2?'<div class="honest">No match — you can add it below.</div>':'');
 };
 window.pick=function(id){ var f=SEED.filter(function(b){return b.id===id;})[0]; if(!f)return;
-  S.band=f; save(); render();
+  S.band=f; persistRegion(f); save(); render();
   toast('🌹 '+f.name+' — '+([f.city,f.state].filter(Boolean).join(', ')||'that\'s you')+'. Not you? Pick again.'); };
 window.addNew=function(){
   document.getElementById('newband').innerHTML=
@@ -395,7 +395,7 @@ window.hpCompose=function(){
   var b=S.band||{name:'%BAND%'}, ns=nextShow();
   var line = ns ? [ns.date,ns.venue,ns.city].filter(Boolean).join(' · ') : 'Friday night · %VENUE% · 8pm';
   return 'Hey folks —\n\n'+
-    'Here\'s my calendar for the next month, on a great new community built just for us: dead.dance. No ads, no algorithm burying my shows.\n\n'+
+    'Here\'s my calendar for the next month — all in one place at dead.dance, and it comes right back here to Facebook so you never miss a show. 🌹\n\n'+
     '📅 My calendar → %BAND_CALENDAR%\n'+
     '🛍️ My merch store → %ARTIST_MERCH_STORE%\n\n'+
     '🎸 Next up: '+line+'\n'+
@@ -476,10 +476,14 @@ window.finish=function(){
   S.lists={email:'',fbpage:'',fbgroups:''}; S.listOK=false; S.logo=null; save();   // don't leave PII sitting on the device
   toast('🌹 Installed. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };
 
+/* ---------- region: stamp the origination chapter so support/referrals route to the right Ambassador ---------- */
+function persistRegion(b){ try{ if(b&&b.chapter){ localStorage.setItem('dd.chapter',b.chapter); if(b.chapterName)localStorage.setItem('dd.chapterName',b.chapterName); } }catch(e){} }
+
 /* ---------- attribution: land an invited band on THEIR page, and remember where the claim came from ---------- */
 (function(){ try{
   var cid=new URLSearchParams(location.search).get('claim');            // HOP 1: our email → this band
   if(cid){ var f=SEED.filter(function(b){return b.id===cid;})[0]; if(f && (!S.band || S.band.id!==f.id)){ S.band=f; if(S.step<1)S.step=0; } }
+  if(S.band) persistRegion(S.band);
   if(window.DDAttrib){ S.attrib=window.DDAttrib.stamp(); }              // stamp src/wave/batch (rides to server when claims record)
   save();
 }catch(e){} })();
