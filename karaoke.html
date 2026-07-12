@@ -61,6 +61,30 @@ h2{font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted
 .part.all .big{font-size:16px;font-weight:900;color:#ffe08a}.part.all .sub{font-size:12px;color:#d7c9ef;margin-top:2px}
 .voxcount{display:flex;gap:18px;flex-wrap:wrap;background:#160c28;border:1px solid #33244f;border-radius:11px;padding:11px 14px;margin-top:11px}
 .voxcount b{color:var(--gold);font-size:20px}.voxcount span{font-size:12px;color:var(--muted)}
+/* phone-as-mic + the conductor */
+.micwrap{background:#160c28;border:1px solid #33244f;border-radius:14px;padding:15px}
+.micmode{display:flex;align-items:center;gap:10px;margin-bottom:13px;font-size:13px;color:var(--muted)}
+.seg2{display:flex;gap:4px;background:#0e0716;border-radius:999px;padding:3px;margin-left:auto}
+.seg2 button{border:0;background:none;color:#b7a9d6;font-weight:800;font-size:12px;padding:7px 12px;border-radius:999px;cursor:pointer}
+.seg2 button.on{background:#5a2e86;color:#fff}
+.microw{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.tapin{border:0;border-radius:11px;background:var(--gold);color:#3a1d00;font-weight:900;font-size:14px;padding:12px 16px;cursor:pointer;white-space:nowrap}
+.tapin.on{background:var(--green);color:#dfffe9}
+.meterwrap{flex:1;min-width:170px}
+.meter{height:18px;border-radius:9px;background:#0e0716;border:1px solid #33244f;overflow:hidden}
+.meter>i{display:block;height:100%;width:0%;background:#4a3b6b;transition:width .05s}
+.meter.live-red>i{background:linear-gradient(90deg,#b8002e,#ff5a7a)}
+.meterlbl{font-size:11px;font-weight:800;color:var(--muted);margin-top:4px}
+.microw2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--muted)}
+.microw2 select{background:#1b1030;color:#fff;border:1px solid #362552;border-radius:10px;padding:8px 11px;font:inherit;font-weight:700}
+.runbtn{margin-left:auto;border:0;border-radius:10px;background:#5a2e86;color:#fff;font-weight:800;font-size:13px;padding:9px 14px;cursor:pointer}
+.runbtn.on{background:var(--rose)}
+.conductor{margin-top:12px;border-radius:12px;padding:16px;text-align:center;background:#0e0716;border:1px solid #33244f;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.conductor .cue{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800}
+.conductor .big{font-size:19px;font-weight:900;color:#b7a9d6}
+.conductor.hot{background:#0f2a1e;border-color:#1f6d4a}.conductor.hot .big{color:#7ef5b8}
+.conductor.all{background:linear-gradient(120deg,#241041,#3a1d5e);border-color:#7a5b18}.conductor.all .big{color:#ffe08a}
+.micnote{font-size:11px;color:#8c7eb0;line-height:1.5;margin-top:10px}
 /* stage */
 .stage{background:radial-gradient(120% 90% at 50% 0%,#2a1650,#160c28);border:1px solid #3a2a55;border-radius:18px;padding:18px;box-shadow:0 14px 40px #0009}
 .np{display:flex;align-items:center;gap:12px}
@@ -173,6 +197,29 @@ h2{font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted
 <div class="voxcount" id="voxcount"></div>
 <div class="note" style="color:var(--muted);margin-top:7px">Leads rotate verse-by-verse; harmony slots fill from the room; the chorus is <b>the whole bar</b>. As few as a dozen or as many as show up — <b>that's the engagement.</b> Who sang which verse is Dead lore (a fact), so it shows freely — <b>no lyrics, ever.</b></div>
 <div class="note" style="color:var(--muted);margin-top:5px;font-size:11.5px;opacity:.85"><b>Honest state:</b> exact verse-by-verse assignments varied show to show — this is a <b>representative arrangement</b> from Dead lore, not a claim about one exact performance. Sections are named by structure (verse / chorus / refrain), never by lyric.</div>
+
+<h2>🎙️ Your phone is the mic — the system runs the band <span class="live-chip">live</span></h2>
+<div class="micwrap">
+  <div class="micmode"><span>Input mode:</span>
+    <div class="seg2" id="micmode">
+      <button class="on" data-m="phone" onclick="setMicMode('phone')">📱 Phones as mics</button>
+      <button data-m="house" onclick="setMicMode('house')">🎤 House mics &amp; PA</button>
+    </div>
+  </div>
+  <div id="micPhone">
+    <div class="microw">
+      <button class="tapin" id="tapin" onclick="tapInMic()">🎤 Tap in your phone</button>
+      <div class="meterwrap"><div class="meter" id="meter"><i></i></div><div class="meterlbl" id="meterlbl">mic off</div></div>
+    </div>
+    <div class="micnote">No app to install — one tap opens your phone's mic, and your voice moves the meter. Capture stays on your device in this demo; streaming the room mix to the PA is the production step.</div>
+  </div>
+  <div class="microw2"><span>You're singing:</span>
+    <select id="myRole" onchange="if(!condRunning)renderConductor()"></select>
+    <button class="runbtn" id="runbtn" onclick="toggleConductor()">▶ Run the night</button>
+  </div>
+  <div class="conductor" id="conductor"></div>
+  <div class="micnote"><b>Latency is real</b> — phone-over-web lands ~150ms, fine through the PA (you sing to the room, not a monitor). The system <b>keeps the band</b>, opens <b>your</b> mic when you're up, mutes it when you're not, and throws <b>every</b> mic open on the chorus. Shops with their own mics &amp; PA: flip to <b>House</b> — DeadDance just conducts the night on-screen.</div>
+</div>
 
 <h2>🎛️ Play the machine — full function <span class="live-chip">live</span></h2>
 <div class="note" style="color:var(--muted);margin:-4px 0 8px">Real audio, real controls — on <b>public-domain songs everybody knows</b> (nothing to get sued over). Pick one, hit play, and bend it with Key / Tempo / Guide / Reverb. The last chip is a <b>🔒 Grateful Dead preview</b> — same rig, audio gated.</div>
@@ -290,7 +337,7 @@ function renderShowPick(){
   return '<div class="showchip'+(s.id===curShow.id?' on':'')+'" onclick="pickShow(\''+s.id+'\')"><div class="d">'+esc(s.d)+'</div><div class="v">'+esc(s.v)+'</div><div class="c">'+esc(s.band)+' · '+esc(s.c)+'</div></div>';
  }).join('');
 }
-function pickShow(id){ for(var i=0;i<SHOWS.length;i++) if(SHOWS[i].id===id) curShow=SHOWS[i]; VOX_TAKE={}; renderShowPick(); renderShow(); /* new night => fresh mic grabs, consistent with pickVox */
+function pickShow(id){ for(var i=0;i<SHOWS.length;i++) if(SHOWS[i].id===id) curShow=SHOWS[i]; if(typeof stopConductor==='function')stopConductor(); VOX_TAKE={}; renderShowPick(); renderShow(); /* new night => fresh mic grabs, consistent with pickVox */
  emceeSay('🌼','Franz','Tonight we run '+curShow.v+', '+curShow.d+'. Learn the setlist — that\'s the running order on the mic.'); }
 function renderShow(){
  var s=curShow, songs=s.set1.length+s.set2.length, singers=songs;
@@ -352,7 +399,7 @@ var VOCALS={
 var VOX_SONG='The Weight', VOX_TAKE={};
 function voxSongs(){ return Object.keys(VOCALS); }
 function renderVoxPick(){ document.getElementById('voxpick').innerHTML=voxSongs().map(function(s){ return '<button class="'+(s===VOX_SONG?'on':'')+'" onclick="pickVox('+JSON.stringify(s).replace(/"/g,'&quot;')+')">'+esc(s)+'</button>'; }).join(''); }
-function pickVox(s){ if(!VOCALS[s])return; VOX_SONG=s; VOX_TAKE={}; renderVoxPick(); renderVox(); }
+function pickVox(s){ if(!VOCALS[s])return; if(typeof stopConductor==='function')stopConductor(); VOX_SONG=s; VOX_TAKE={}; renderVoxPick(); renderVox(); }
 function renderVox(){
  var lp=document.getElementById('lineup'); if(!lp) return;
  /* curShow-safe: eraRoster() guards a null/undefined show (band 'Grateful Dead', year 1977 fallback). */
@@ -378,6 +425,7 @@ function renderVox(){
    '<div><b>'+(leadCount+backCount)+'</b> <span>named parts<br>(leads + harmonies)</span></div>'+
    '<div><b>'+taken+'</b> <span>grabbed<br>from the room</span></div>'+
    '<div><b>'+allCount+'×</b> <span>whole-bar<br>moments 🙌</span></div>';
+ if(typeof renderConductor==='function') renderConductor();
 }
 function grabVox(id,role){
  /* Shares the single #ov/#modal + #who input with the Wheel's queueUp/doQueue.
@@ -389,6 +437,78 @@ function grabVox(id,role){
 }
 function doGrabVox(id){ var n=(document.getElementById('who').value||'').trim()||'A friend'; VOX_TAKE[id]=n; closeModal(); renderVox();
  toast('🎤 '+n+' has a part in “'+VOX_SONG+'.” The bar’s filling up — everybody on the chorus!'); }
+
+/* ===== PHONE-AS-MIC + THE CONDUCTOR =====
+   getUserMedia turns the phone into a mic (no app). A live meter proves it. The "conductor"
+   walks the arrangement: your mic goes HOT only when you're up, muted otherwise, and the
+   chorus opens every mic. House mode = the venue's own mics/PA carry sound; we just conduct. */
+var micMode='phone', micStream=null, micAnalyser=null, micData=null, micRAF=0, micTapped=false, micHot=false;
+var condRunning=false, condTimer=0, condIdx=0;
+function setMicMode(m){
+ micMode=m; [].forEach.call(document.querySelectorAll('#micmode button'),function(b){ b.classList.toggle('on',b.getAttribute('data-m')===m); });
+ var ph=document.getElementById('micPhone'); if(ph) ph.style.display = (m==='phone')?'block':'none';
+ if(m==='house'){ toast('🎤 House mode — your venue’s mics &amp; PA carry the sound; DeadDance just conducts the night on-screen.'); }
+}
+function tapInMic(){
+ if(micTapped){ toast('🎤 Your phone’s already the mic — sing! 🌹'); return; }
+ if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ toast('🎤 This browser can’t open the mic here — try the live app on your phone.'); return; }
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+   ensureAudio(); if(AC.state==='suspended'){ try{AC.resume();}catch(e){} }
+   micStream=stream;
+   var src=AC.createMediaStreamSource(stream);
+   micAnalyser=AC.createAnalyser(); micAnalyser.fftSize=512; micData=new Uint8Array(micAnalyser.fftSize);
+   src.connect(micAnalyser);                    // analyser only — never to destination → no feedback
+   micTapped=true;
+   var b=document.getElementById('tapin'); b.classList.add('on'); b.textContent='🎤 Mic connected';
+   setMeterLbl(); meterLoop();
+   toast('🎤 Your phone is the mic — sing and watch the meter move. 🌹');
+ }).catch(function(){ toast('🎤 Mic permission denied — allow the microphone to sing into the room.'); });
+}
+function meterLoop(){
+ if(!micAnalyser){ return; }
+ micAnalyser.getByteTimeDomainData(micData);
+ var sum=0; for(var i=0;i<micData.length;i++){ var v=(micData[i]-128)/128; sum+=v*v; }
+ var rms=Math.sqrt(sum/micData.length), pct=Math.min(100, Math.round(rms*280));
+ var m=document.getElementById('meter'); if(m){ m.querySelector('i').style.width=pct+'%'; m.className='meter'+(micHot?' live-red':''); }
+ micRAF=requestAnimationFrame(meterLoop);
+}
+function setMeterLbl(){ var l=document.getElementById('meterlbl'); if(!l) return;
+ l.textContent = !micTapped ? 'mic off' : (micHot ? '🔴 LIVE — you’re up' : 'muted — listen'); }
+function myRoleOptions(){
+ var roster=eraRoster(curShow), song=VOCALS[VOX_SONG]||VOCALS['The Weight'], roles={};
+ song.parts.forEach(function(p){ if(p.lead)roles[p.lead]=1; (p.back||[]).forEach(function(r){roles[r]=1;}); });
+ return Object.keys(roles).map(function(r){ return '<option value="'+r+'">'+esc(roleName(roster,r))+'</option>'; }).join('')+'<option value="__chorus">Just here for the chorus</option>';
+}
+function renderConductor(){
+ var sel=document.getElementById('myRole'); if(sel && !condRunning) sel.innerHTML=myRoleOptions();
+ if(condRunning) return;
+ micHot=false; setMeterLbl();
+ var c=document.getElementById('conductor'); if(c){ c.className='conductor'; c.innerHTML='<div class="cue">the system holds the band</div><div class="big">▶ Run the night — your mic opens when you’re up</div>'; }
+}
+function toggleConductor(){
+ if(condRunning){ stopConductor(); return; }
+ condRunning=true; condIdx=0;
+ var b=document.getElementById('runbtn'); b.classList.add('on'); b.textContent='■ Stop';
+ stepConductor(); condTimer=setInterval(stepConductor,4200);
+}
+function stopConductor(){
+ condRunning=false; if(condTimer){ clearInterval(condTimer); condTimer=0; } micHot=false;
+ var b=document.getElementById('runbtn'); if(b){ b.classList.remove('on'); b.textContent='▶ Run the night'; }
+ renderConductor();
+}
+function stepConductor(){
+ var song=VOCALS[VOX_SONG]||VOCALS['The Weight'], p=song.parts[condIdx%song.parts.length];
+ var myRole=(document.getElementById('myRole')||{}).value||'__chorus', roster=eraRoster(curShow);
+ micHot = !!(p.all || p.lead===myRole || (p.back||[]).indexOf(myRole)>=0);
+ var c=document.getElementById('conductor');
+ if(p.all){ c.className='conductor all'; c.innerHTML='<div class="cue">'+esc(p.label)+'</div><div class="big">🙌 EVERYONE — all mics open</div>'; }
+ else {
+   var leadNm=roleName(roster,p.lead);
+   c.className='conductor'+(micHot?' hot':'');
+   c.innerHTML='<div class="cue">'+esc(p.label)+' · lead: '+esc(leadNm)+'</div><div class="big">'+(micHot?'🔴 YOU’RE UP — mic open':('🔇 '+esc(leadNm)+' has it — you listen'))+'</div>';
+ }
+ setMeterLbl(); condIdx++;
+}
 
 /* ---- the songbook (TITLES ONLY — facts, not lyrics) ---- */
 var BOOK=[
