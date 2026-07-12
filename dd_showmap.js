@@ -1,13 +1,17 @@
-/* dead_dance — Show Map (home page).
-   Honest-state: plots UPCOMING shows on a US map by venue city.
-   Data source = real headliner tour dates (cross-checked to seeded venues where they overlap).
-   Sample rows are labeled SAMPLE.
-   National / Near-me toggle: "Near me" zooms the map to the viewer's region — detected by GPS,
-   or picked from the region menu. Framework-less. "🔔 Notify me" only captures demand. */
+/* dead_dance — Show Map (home page). MERGED with the TCTP/Farrah "bus map" brain.
+   Honest-state: plots UPCOMING shows on a real projected US map by venue city.
+   Data = real headliner tour dates (cross-checked to seeded venues). Sample rows labeled.
+
+   Two levels, ported from the proven TCTP tiered map:
+     • NATIONAL — real map (state borders) + 11 CHAPTER badges. Lit = show count.
+       DIM (dashed "+") = a chapter waiting — tap to post the first date (the growth loop).
+     • CHAPTER — geographic zoom into the chapter + its show list / festivals / tickets /
+       "add a date". Farrah narrates every level.
+   "Near me" zooms to the viewer's chapter (GPS or picked). Framework-less. Nothing sells here. */
 (function () {
   "use strict";
 
-  /* ---- 1. City → lat/lng lookup (seeded venues + real headliner cities) ---- */
+  /* ---- 1. City → lat/lng ---- */
   var CITY = {
     "Santa Cruz, CA": [36.97, -122.03], "Felton, CA": [37.05, -122.07],
     "Mill Valley, CA": [37.91, -122.55], "San Francisco, CA": [37.77, -122.42],
@@ -47,7 +51,7 @@
     "Petaluma, CA": [38.23, -122.64]
   };
 
-  /* ---- 2. Shows. real=true → sourced from headliner sheet. sample → clearly labeled. ---- */
+  /* ---- 2. Shows ---- */
   var SHOWS = [
     { band: "Melvin Seals & JGB", venue: "McDonald Theatre", city: "Eugene, OR", date: "2026-07-03", real: true },
     { band: "Dark Star Orchestra", venue: "Rock the Dock", city: "Lake George, NY", date: "2026-07-11", real: true },
@@ -75,8 +79,6 @@
     { band: "House Band (sample)", venue: "The Sinclair", city: "Cambridge, MA", date: "2026-08-26", sample: true },
     { band: "House Band (sample)", venue: "Ardmore Music Hall", city: "Ardmore, PA", date: "2026-09-04", sample: true }
   ];
-
-  /* DEAL + Hot Sauce — real band dates. Merge in + register their towns. */
   try {
     [window.dealMapRows, window.hotSauceMapRows].forEach(function (fn) {
       if (!fn) return;
@@ -87,14 +89,14 @@
     });
   } catch (e) {}
 
-  /* ---- 3. Projection: lat/lng → x/y in the SVG viewBox (0..960 x 0..600). ---- */
+  /* ---- 3. Projection lat/lng → viewBox (0..960 x 0..600) ---- */
   function project(lat, lng) {
     var x = (lng - (-125)) / ((-66) - (-125)) * (915 - 40) + 40;
     var y = (lat - 24) / (49.5 - 24) * (70 - 560) + 560;
     return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
   }
 
-  /* ---- 4. Contiguous-US outline, projected through the SAME projection as the dots. ---- */
+  /* ---- 4. US outline + graticule ---- */
   var US_OUTLINE = [
     [48.4,-124.7],[46.9,-124.1],[46.2,-123.9],[43.9,-124.1],[42.0,-124.4],[40.4,-124.4],
     [38.9,-123.7],[37.8,-122.5],[36.6,-121.9],[35.4,-120.9],[34.4,-119.7],[34.0,-118.5],
@@ -113,11 +115,10 @@
     [46.9,-88.5],[46.8,-90.9],[46.7,-92.1],[47.3,-95.0],[49.0,-95.2],[49.0,-104.0],
     [49.0,-117.0],[49.0,-123.0]
   ];
-  function buildPath(pts) {
-    return pts.map(function (p, i) { var xy = project(p[0], p[1]); return (i ? "L" : "M") + xy[0] + "," + xy[1]; }).join(" ") + " Z";
+  function toPath(pts, close) {
+    return pts.map(function (p, i) { var xy = project(p[0], p[1]); return (i ? "L" : "M") + xy[0] + "," + xy[1]; }).join(" ") + (close ? " Z" : "");
   }
-  var US_PATH = buildPath(US_OUTLINE);
-
+  var US_PATH = toPath(US_OUTLINE, true);
   function buildGraticule() {
     var lines = "";
     for (var lng = -120; lng <= -70; lng += 10) { var a = project(24, lng), b = project(50, lng); lines += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>'; }
@@ -126,35 +127,51 @@
   }
   var US_GRATICULE = buildGraticule();
 
-  /* ---- 4b. Regions — the "Near me" menu. Each is a lat/lng box we zoom to. ---- */
-  var REGIONS = [
-    { key: "west",   label: "West Coast",       latMin: 32.0, latMax: 49.0, lngMin: -125.0, lngMax: -116.0 },
-    { key: "mtn",    label: "Mountain West",    latMin: 31.5, latMax: 49.0, lngMin: -117.5, lngMax: -103.5 },
-    { key: "texas",  label: "Texas & South",    latMin: 25.5, latMax: 37.0, lngMin: -107.0, lngMax: -92.0 },
-    { key: "midwest",label: "Midwest & Lakes",  latMin: 36.5, latMax: 48.5, lngMin: -98.0,  lngMax: -80.0 },
-    { key: "south",  label: "Southeast",        latMin: 24.5, latMax: 37.5, lngMin: -91.0,  lngMax: -75.0 },
-    { key: "midatl", label: "Mid-Atlantic",     latMin: 36.5, latMax: 43.2, lngMin: -81.5,  lngMax: -73.0 },
-    { key: "ne",     label: "Northeast",        latMin: 39.8, latMax: 47.6, lngMin: -76.5,  lngMax: -66.8 }
+  /* ---- 4b. State borders — exact western straight lines + iconic rivers + key eastern lines.
+     Curated at the same abstraction level as the outline; clipped to the land. ---- */
+  var STATE_LINES = [
+    [[42.0,-120.0],[39.0,-120.0],[35.0,-114.63],[34.3,-114.14],[32.72,-114.53]], // CA east (NV + Colorado River)
+    [[42.0,-124.2],[42.0,-114.05]],                 // 42N: OR/CA, NV/OR, UT/ID south
+    [[42.0,-117.0],[49.0,-117.0]],                  // -117: ID west (OR/ID, WA/ID)
+    [[37.0,-114.05],[42.0,-114.05]],                // -114: NV/UT, AZ/UT
+    [[37.0,-114.05],[37.0,-94.62]],                 // 37N: UT/AZ, CO/NM, KS/OK
+    [[31.33,-109.05],[41.0,-109.05]],               // -109: four-corners vertical (UT/CO, AZ/NM)
+    [[41.0,-111.05],[41.0,-102.05]],                // 41N: CO/WY, NE/CO
+    [[41.0,-111.05],[45.0,-111.05]],                // -111: WY west
+    [[45.0,-111.05],[45.0,-104.05]],                // 45N: MT/WY
+    [[41.0,-104.05],[49.0,-104.05]],                // -104: WY/NE-SD, MT/ND
+    [[37.0,-102.05],[41.0,-102.05]],                // -102: CO/KS, CO/NE
+    [[43.0,-104.05],[43.0,-96.44]],                 // 43N: SD/NE
+    [[40.0,-102.05],[40.0,-95.30]],                 // 40N: KS/NE
+    [[32.0,-103.05],[36.5,-103.05]],                // -103: NM/TX (panhandle west)
+    [[36.5,-103.05],[36.5,-100.00]],                // 36.5N: OK panhandle top
+    [[43.0,-96.44],[41.5,-96.10],[40.6,-95.90],[39.6,-95.10],[39.1,-94.60]], // Missouri R (NE/IA/MO)
+    [[47.2,-95.00],[45.0,-92.90],[43.5,-91.20],[42.5,-90.60],[41.4,-91.05],[40.4,-91.40],[38.8,-90.20],[37.0,-89.20],[35.1,-90.10],[33.6,-91.05],[32.3,-91.10],[31.0,-91.60],[30.0,-91.20],[29.95,-90.10]], // Mississippi R
+    [[37.0,-89.20],[37.9,-88.00],[37.9,-86.50],[38.3,-85.80],[38.7,-84.90],[38.4,-82.60],[39.2,-81.50]], // Ohio R
+    [[36.50,-89.70],[36.50,-81.70]],                // 36.5N: TN/KY (VA)
+    [[35.00,-90.30],[35.00,-81.70]],                // 35N: TN south
+    [[30.70,-85.00],[35.00,-85.00]],                // -85: AL/GA
+    [[30.20,-88.40],[35.00,-88.20]],                // -88: MS/AL
+    [[39.72,-80.52],[39.72,-75.80]],                // Mason–Dixon: PA/MD
+    [[38.40,-80.52],[42.30,-80.52]]                 // -80.5: OH-WV/PA-ish
   ];
-  function regionByKey(k) { for (var i = 0; i < REGIONS.length; i++) if (REGIONS[i].key === k) return REGIONS[i]; return null; }
+  var STATE_PATH = STATE_LINES.map(function (ln) { return toPath(ln, false); }).join(" ");
 
-  var FULL_VB = [0, 0, 960, 600];
-
-  /* lat/lng box → padded viewBox, aspect-corrected to the 960×600 frame so it isn't letterboxed. */
-  function boxToVB(b) {
-    var pts = [project(b.latMax, b.lngMin), project(b.latMin, b.lngMax), project(b.latMax, b.lngMax), project(b.latMin, b.lngMin)];
-    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
-    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
-    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-    var w = maxX - minX, h = maxY - minY;
-    var padX = w * 0.10, padY = h * 0.12;
-    minX -= padX; maxX += padX; minY -= padY; maxY += padY;
-    w = maxX - minX; h = maxY - minY;
-    // correct to 960:600 (1.6) aspect so the zoom fills the frame edge-to-edge
-    var aspect = 960 / 600, cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-    if (w / h > aspect) h = w / aspect; else w = h * aspect;
-    return [cx - w / 2, cy - h / 2, w, h];
-  }
+  /* ---- 4c. Chapters (= Ambassador patches / Farrah regions). centroid + festival key. ---- */
+  var CHAPTERS = [
+    { name: "Bay Area",                c: [37.9, -122.3], fk: "bayarea" },
+    { name: "Pacific Northwest",       c: [46.2, -122.3], fk: "pnw" },
+    { name: "Mountain West",           c: [39.6, -105.8], fk: "rockies" },
+    { name: "Southwest",               c: [34.2, -114.5], fk: "rockies" },
+    { name: "Texas",                   c: [30.6, -97.5],  fk: "lonestar" },
+    { name: "South Central",           c: [35.4, -90.5],  fk: "lonestar" },
+    { name: "Midwest",                 c: [40.6, -89.5],  fk: "greatlakes" },
+    { name: "Great Lakes",             c: [42.6, -84.0],  fk: "greatlakes" },
+    { name: "Southeast",               c: [33.4, -83.8],  fk: "southeast" },
+    { name: "Mid-Atlantic",            c: [39.3, -77.2],  fk: "midatl" },
+    { name: "Northeast + New England", c: [43.2, -72.6],  fk: "northeast" }
+  ];
+  function shortName(n) { return n.split(" + ")[0]; }
 
   function haversineMi(a, b, c, d) {
     var R = 3958.8, toR = Math.PI / 180;
@@ -162,26 +179,51 @@
     var s = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a * toR) * Math.cos(c * toR) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
     return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
   }
-  function nearestRegion(lat, lng) {
-    var best = null, bd = 1e9;
-    REGIONS.forEach(function (r) {
-      var cLat = (r.latMin + r.latMax) / 2, cLng = (r.lngMin + r.lngMax) / 2;
-      var d = haversineMi(lat, lng, cLat, cLng);
-      if (d < bd) { bd = d; best = r; }
-    });
+  function nearestChapter(lat, lng) {
+    var best = CHAPTERS[0], bd = 1e9;
+    CHAPTERS.forEach(function (ch) { var d = haversineMi(lat, lng, ch.c[0], ch.c[1]); if (d < bd) { bd = d; best = ch; } });
     return best;
   }
+  // assign every locatable show to its nearest chapter
+  var CH_INDEX = {}; CHAPTERS.forEach(function (ch) { ch.shows = []; CH_INDEX[ch.name] = ch; });
+  SHOWS.forEach(function (s) { var ll = CITY[s.city]; if (!ll) return; s._ll = ll; var ch = nearestChapter(ll[0], ll[1]); ch.shows.push(s); s._chapter = ch.name; });
+  CHAPTERS.forEach(function (ch) { ch.shows.sort(function (a, b) { return a.date < b.date ? -1 : 1; }); });
+  function chapterByName(n) { return CH_INDEX[n] || null; }
+  function festsFor(ch) { try { return (window.DD_FESTIVALS || []).filter(function (f) { return f.region === ch.fk; }); } catch (e) { return []; } }
 
-  var TOTAL = SHOWS.length, REAL = SHOWS.filter(function (s) { return s.real; }).length;
+  var FULL_VB = [0, 0, 960, 600];
+  function boxToVB(b) {
+    var pts = [project(b.latMax, b.lngMin), project(b.latMin, b.lngMax), project(b.latMax, b.lngMax), project(b.latMin, b.lngMin)];
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var w = maxX - minX, h = maxY - minY;
+    minX -= w * 0.14; maxX += w * 0.14; minY -= h * 0.16; maxY += h * 0.16;
+    w = maxX - minX; h = maxY - minY;
+    var aspect = 960 / 600, cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    if (w / h > aspect) h = w / aspect; else w = h * aspect;
+    return [cx - w / 2, cy - h / 2, w, h];
+  }
+  function chapterVB(ch) {
+    if (ch.shows.length) {
+      var lats = ch.shows.map(function (s) { return s._ll[0]; }), lngs = ch.shows.map(function (s) { return s._ll[1]; });
+      var b = { latMin: Math.min.apply(null, lats), latMax: Math.max.apply(null, lats), lngMin: Math.min.apply(null, lngs), lngMax: Math.max.apply(null, lngs) };
+      if (b.latMax - b.latMin < 2.4) { var mLat = (b.latMin + b.latMax) / 2; b.latMin = mLat - 1.6; b.latMax = mLat + 1.6; }
+      if (b.lngMax - b.lngMin < 3.2) { var mLng = (b.lngMin + b.lngMax) / 2; b.lngMin = mLng - 2.4; b.lngMax = mLng + 2.4; }
+      return boxToVB(b);
+    }
+    return boxToVB({ latMin: ch.c[0] - 4.2, latMax: ch.c[0] + 4.2, lngMin: ch.c[1] - 6.0, lngMax: ch.c[1] + 6.0 });
+  }
 
   function fmtDate(iso) { var d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function notified(id) { try { return !!localStorage.getItem("dd.showmap.notify." + id); } catch (e) { return false; } }
   function setNotified(id) { try { localStorage.setItem("dd.showmap.notify." + id, "1"); } catch (e) {} }
+  function showId(s) { return (s.band + s.date).replace(/[^a-z0-9]/gi, "").toLowerCase(); }
 
   /* ---- 5. Render ---- */
   function render(host) {
-    var mode = "national", curVB = FULL_VB.slice(), rafId = 0, youMarker = null;
+    var level = "nation", curVB = FULL_VB.slice(), rafId = 0;
 
     host.innerHTML =
       '<div class="showmap-card">' +
@@ -193,18 +235,20 @@
           '</div>' +
           '<button class="showmap-x" aria-label="Hide map" title="Hide">✕</button>' +
         '</div>' +
+        '<div class="showmap-farrah" id="farrahMap"></div>' +
         '<div class="showmap-region" hidden>' +
+          '<button class="showmap-back" hidden>‹ All chapters</button>' +
           '<button class="showmap-loc">📍 Use my location</button>' +
-          '<select class="showmap-select" aria-label="Pick a region">' +
-            '<option value="">Pick a region…</option>' +
-            REGIONS.map(function (r) { return '<option value="' + r.key + '">' + r.label + '</option>'; }).join('') +
+          '<select class="showmap-select" aria-label="Pick a chapter">' +
+            '<option value="">Pick a chapter…</option>' +
+            CHAPTERS.map(function (ch) { return '<option value="' + esc(ch.name) + '">' + esc(shortName(ch.name)) + '</option>'; }).join('') +
           '</select>' +
           '<span class="showmap-near"></span>' +
         '</div>' +
         '<div class="showmap-legend">' +
-          '<span class="showmap-sub">' + TOTAL + ' upcoming · ' + REAL + ' real dates</span>' +
           '<span class="lg real">● verified date</span>' +
           '<span class="lg sample">● sample (from our venues)</span>' +
+          '<span class="lg dim">◌ chapter waiting — tap to seed it</span>' +
           '<span class="showmap-honest">Honest-state — sample rows labeled; nothing sells here.</span>' +
         '</div>' +
         '<div class="showmap-wrap">' +
@@ -212,50 +256,54 @@
             '<defs><clipPath id="usClip"><path d="' + US_PATH + '"></path></clipPath></defs>' +
             '<path class="us-land" d="' + US_PATH + '"></path>' +
             '<g class="us-grat" clip-path="url(#usClip)">' + US_GRATICULE + '</g>' +
+            '<path class="us-states" clip-path="url(#usClip)" d="' + STATE_PATH + '"></path>' +
             '<g class="sm-you"></g>' +
             '<g class="sm-dots"></g>' +
+            '<g class="sm-badges"></g>' +
           '</svg>' +
           '<div class="showmap-pop" id="showmapPop" hidden></div>' +
         '</div>' +
+        '<div class="showmap-panel" id="showmapPanel" hidden></div>' +
       '</div>';
 
-    var card = host.querySelector(".showmap-card");
     var svg = host.querySelector(".showmap-svg");
     var dotsG = host.querySelector(".sm-dots");
+    var badgeG = host.querySelector(".sm-badges");
     var youG = host.querySelector(".sm-you");
     var pop = host.querySelector("#showmapPop");
     var wrap = host.querySelector(".showmap-wrap");
     var regionRow = host.querySelector(".showmap-region");
     var nearEl = host.querySelector(".showmap-near");
     var sel = host.querySelector(".showmap-select");
+    var backBtn = host.querySelector(".showmap-back");
+    var farrahEl = host.querySelector("#farrahMap");
+    var panel = host.querySelector("#showmapPanel");
 
-    /* --- dots sized as a fraction of the current viewBox width → constant on-screen size at any zoom --- */
-    function drawDots(vbW) {
-      var rCore = 0.0066 * vbW, rPulse = 0.011 * vbW, sw = 0.0016 * vbW;
-      var labels = (vbW / 960) < 0.72;
+    function farrah(html) { farrahEl.innerHTML = '🎙️ ' + html; }
+
+    /* --- dots: sized as fraction of viewBox → constant on-screen. mode: 'nation' faint, 'chapter' bold+labels --- */
+    function drawDots(vbW, chapterName) {
+      var isCh = !!chapterName;
+      var rCore = (isCh ? 0.0066 : 0.0042) * vbW, rPulse = (isCh ? 0.011 : 0.007) * vbW, sw = 0.0016 * vbW;
       var vx0 = curVB[0], vy0 = curVB[1], vx1 = curVB[0] + curVB[2], vy1 = curVB[1] + curVB[3];
       var html = "";
       SHOWS.forEach(function (s, i) {
-        var ll = CITY[s.city]; if (!ll) return;
+        var ll = s._ll; if (!ll) return;
+        if (isCh && s._chapter !== chapterName) return;      // chapter view shows only that chapter
         var p = project(ll[0], ll[1]);
-        var cls = s.sample ? "smdot sample" : "smdot real";
-        html += '<g class="' + cls + '" data-i="' + i + '" tabindex="0" role="button" ' +
-          'aria-label="' + esc(s.band + " at " + s.venue + ", " + s.city + ", " + fmtDate(s.date)) + '">' +
+        var cls = "smdot " + (s.sample ? "sample" : "real") + (isCh ? "" : " faint");
+        html += '<g class="' + cls + '" data-i="' + i + '"' + (isCh ? ' tabindex="0" role="button"' : '') +
+          ' aria-label="' + esc(s.band + " at " + s.venue + ", " + s.city) + '">' +
           '<circle class="smpulse" cx="' + p[0] + '" cy="' + p[1] + '" r="' + rPulse.toFixed(1) + '"></circle>' +
           '<circle class="smcore" cx="' + p[0] + '" cy="' + p[1] + '" r="' + rCore.toFixed(1) + '" style="stroke-width:' + sw.toFixed(2) + '"></circle>';
-        if (labels && p[0] >= vx0 && p[0] <= vx1 && p[1] >= vy0 && p[1] <= vy1) {
-          var name = s.city.replace(/,.*$/, "");
+        if (isCh && p[0] >= vx0 && p[0] <= vx1 && p[1] >= vy0 && p[1] <= vy1) {
           html += '<text class="smlabel" x="' + (p[0] + rCore + 2) + '" y="' + (p[1] + rCore * 0.4) +
-            '" style="font-size:' + (0.019 * vbW).toFixed(1) + 'px;stroke-width:' + (0.0022 * vbW).toFixed(2) + 'px">' + esc(name) + '</text>';
+            '" style="font-size:' + (0.019 * vbW).toFixed(1) + 'px;stroke-width:' + (0.0022 * vbW).toFixed(2) + 'px">' + esc(s.city.replace(/,.*$/, "")) + '</text>';
         }
         html += '</g>';
       });
       dotsG.innerHTML = html;
-      bindDots();
-    }
-
-    function bindDots() {
-      dotsG.querySelectorAll(".smdot").forEach(function (g) {
+      if (isCh) dotsG.querySelectorAll(".smdot").forEach(function (g) {
         var i = +g.getAttribute("data-i");
         g.addEventListener("click", function (e) { e.stopPropagation(); showPop(i, g); });
         g.addEventListener("mouseenter", function () { showPop(i, g); });
@@ -263,28 +311,48 @@
       });
     }
 
+    /* --- chapter badges (national only): lit=count, dim=+ (tap to seed) --- */
+    function drawBadges(show) {
+      if (!show) { badgeG.innerHTML = ""; return; }
+      var vbW = 960, rB = 0.03 * vbW, fC = 0.026 * vbW, fL = 0.017 * vbW;
+      badgeG.innerHTML = CHAPTERS.map(function (ch) {
+        var p = project(ch.c[0], ch.c[1]), n = ch.shows.length, live = n > 0;
+        var sz = live ? (rB + Math.min(n, 8) * 0.0022 * vbW) : rB * 0.86;
+        return '<g class="smbadge' + (live ? "" : " dim") + '" data-ch="' + esc(ch.name) + '" tabindex="0" role="button" ' +
+          'aria-label="' + esc(ch.name + (live ? (": " + n + " shows") : ": no dates yet — add the first")) + '">' +
+          '<circle class="bdot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + sz.toFixed(1) + '"></circle>' +
+          '<text class="bnum" x="' + p[0] + '" y="' + (p[1] + fC * 0.34) + '" style="font-size:' + fC.toFixed(1) + 'px">' + (live ? n : "+") + '</text>' +
+          '<text class="blbl" x="' + p[0] + '" y="' + (p[1] + sz + fL * 1.1) + '" style="font-size:' + fL.toFixed(1) + 'px">' + esc(shortName(ch.name)) + '</text>' +
+          '</g>';
+      }).join("");
+      badgeG.querySelectorAll(".smbadge").forEach(function (g) {
+        var name = g.getAttribute("data-ch");
+        g.addEventListener("click", function (e) { e.stopPropagation(); drill(name); });
+        g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); drill(name); } });
+      });
+    }
+
     /* --- viewBox tween --- */
     function easeIO(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
-    function animateTo(target, ms) {
+    function animateTo(target, ms, chapterName, onDone) {
       hidePop();
       if (rafId) cancelAnimationFrame(rafId);
       var start = curVB.slice(), t0 = null;
-      drawDots(target[2]); // size dots for destination up front
+      drawDots(target[2], chapterName);
       function step(ts) {
         if (t0 === null) t0 = ts;
         var k = Math.min(1, (ts - t0) / ms), e = easeIO(k);
         var vb = start.map(function (v, idx) { return v + (target[idx] - v) * e; });
         svg.setAttribute("viewBox", vb.join(" "));
-        if (k < 1) { rafId = requestAnimationFrame(step); }
-        else { curVB = target.slice(); svg.setAttribute("viewBox", curVB.join(" ")); drawDots(curVB[2]); }
+        if (k < 1) rafId = requestAnimationFrame(step);
+        else { curVB = target.slice(); svg.setAttribute("viewBox", curVB.join(" ")); drawDots(curVB[2], chapterName); if (onDone) onDone(); }
       }
       rafId = requestAnimationFrame(step);
     }
 
-    function clearYou() { youG.innerHTML = ""; youMarker = null; }
+    function clearYou() { youG.innerHTML = ""; }
     function markYou(lat, lng, vbW) {
       var p = project(lat, lng), r = 0.011 * (vbW || curVB[2]);
-      youMarker = [lat, lng];
       youG.innerHTML =
         '<circle class="you-ring" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r * 1.9).toFixed(1) + '"></circle>' +
         '<circle class="you-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r.toFixed(1) + '"></circle>';
@@ -292,9 +360,7 @@
 
     /* --- popover (Notify me) --- */
     function showPop(i, gEl) {
-      var s = SHOWS[i];
-      var id = (s.band + s.date).replace(/[^a-z0-9]/gi, "").toLowerCase();
-      var done = notified(id);
+      var s = SHOWS[i], id = showId(s), done = notified(id);
       pop.innerHTML =
         '<div class="pop-band">' + esc(s.band) + (s.sample ? ' <em class="pop-tag">SAMPLE</em>' : '') + '</div>' +
         '<div class="pop-line">' + esc(s.venue) + ' · ' + esc(s.city) + '</div>' +
@@ -318,71 +384,113 @@
     }
     function hidePop() { pop.hidden = true; }
 
-    /* --- region + near-me --- */
-    function countNear(lat, lng, mi) {
-      return SHOWS.filter(function (s) { var ll = CITY[s.city]; return ll && haversineMi(lat, lng, ll[0], ll[1]) <= mi; }).length;
+    /* --- wiring into the app's existing flows (guarded) --- */
+    function addDate(chapterName) {
+      hidePop();
+      if (typeof window.closeMap === "function") { try { window.closeMap(); } catch (e) {} }
+      if (typeof window.openGig === "function") { try { window.openGig("date", chapterName); return; } catch (e) {} }
+      if (window.toast) window.toast("📅 Add a date in " + chapterName + " — opening the date desk.");
     }
-    function goRegion(r, note) {
-      if (!r) return;
-      sel.value = r.key;
-      animateTo(boxToVB(r), 620);
-      nearEl.textContent = note || (r.label + " — zoomed in");
-      try { localStorage.setItem("dd.showmap.region", r.key); } catch (e) {}
+    function buyTicket(s) {
+      hidePop();
+      try { window.CURBUY = { band: s.band, venue: s.venue, price: s.price || "" }; } catch (e) {}
+      if (typeof window.buy === "function") { try { window.buy("ticket"); return; } catch (e) {} }
+      if (window.toast) window.toast("🎟️ " + s.band + " — secure checkout. (Demo)");
     }
+
+    /* --- the drill panel (Farrah show list) --- */
+    function renderPanel(ch) {
+      var fests = festsFor(ch);
+      var rows = ch.shows.map(function (s) {
+        var id = showId(s), done = notified(id);
+        return '<div class="prow">' +
+          '<div class="pdt">' + esc(fmtDate(s.date).split(" ")[0]) + '<small>' + esc(fmtDate(s.date).split(" ")[1]) + '</small></div>' +
+          '<div class="pinfo"><b>' + esc(s.band) + (s.sample ? ' <em class="pop-tag">SAMPLE</em>' : '') + '</b><span>' + esc(s.venue) + ' · ' + esc(s.city) + '</span></div>' +
+          '<button class="ptix" data-i="' + SHOWS.indexOf(s) + '">🎟️ Tickets</button>' +
+          '<button class="pnotify' + (done ? ' done' : '') + '" data-id="' + id + '">' + (done ? '✓' : '🔔') + '</button>' +
+          '</div>';
+      }).join("");
+      var fhtml = fests.length ? ('<div class="pfhead">🎆 Summer festivals</div>' + fests.map(function (f) {
+        var when = f.start ? (f.start.slice(5) + (f.end && f.end !== f.start ? ("–" + f.end.slice(5)) : "")) : "Summer";
+        return '<div class="pfrow"><div class="pfdt">🎆<small>' + esc(f.days || "") + 'd</small></div>' +
+          '<div class="pinfo"><b>' + esc(f.name) + '</b><span>' + esc(f.city || "") + ' · ' + esc(when) + '</span></div>' +
+          '<span class="pftag">Festival</span></div>';
+      }).join("")) : "";
+      if (!ch.shows.length && !fests.length) {
+        panel.innerHTML = '<button class="paddbig" data-ch="' + esc(ch.name) + '">📅 Be the first to post a date in ' + esc(shortName(ch.name)) + '</button>';
+      } else {
+        panel.innerHTML = fhtml + rows + '<button class="padd" data-ch="' + esc(ch.name) + '">＋ Add a date in ' + esc(shortName(ch.name)) + '</button>';
+      }
+      panel.hidden = false;
+      panel.querySelectorAll(".ptix").forEach(function (b) { b.onclick = function () { buyTicket(SHOWS[+b.getAttribute("data-i")]); }; });
+      panel.querySelectorAll(".pnotify").forEach(function (b) { b.onclick = function () { setNotified(b.getAttribute("data-id")); b.classList.add("done"); b.textContent = "✓"; if (window.toast) window.toast("🔔 Noted — we'll ping you."); }; });
+      panel.querySelectorAll(".padd,.paddbig").forEach(function (b) { b.onclick = function () { addDate(b.getAttribute("data-ch")); }; });
+    }
+
+    /* --- levels --- */
+    function toNation() {
+      level = "nation"; clearYou();
+      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "national"); });
+      backBtn.hidden = true; regionRow.hidden = true; panel.hidden = true;
+      animateTo(FULL_VB.slice(), 560, null, function () { drawBadges(true); });
+      var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
+      lit.forEach(function (c) { tot += c.shows.length; });
+      var nf = 0; try { nf = (window.DD_FESTIVALS || []).length; } catch (e) {}
+      farrah('The bus is rolling through <b>' + lit.length + ' chapter' + (lit.length !== 1 ? 's' : '') + '</b> tonight — <b>' + tot + ' shows</b>' + (nf ? (' + <b>' + nf + ' summer festivals</b>') : '') + ' on the board. Tap a lit region — or a <b>dark one to post the first date.</b>');
+    }
+    function drill(chapterName) {
+      var ch = chapterByName(chapterName); if (!ch) return;
+      level = chapterName;
+      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
+      drawBadges(false); clearYou();
+      regionRow.hidden = false; backBtn.hidden = false; sel.value = ch.name;
+      nearEl.textContent = ch.shows.length ? (ch.shows.length + (ch.shows.length === 1 ? " show" : " shows")) : "waiting — seed it";
+      animateTo(chapterVB(ch), 620, chapterName);
+      renderPanel(ch);
+      var fests = festsFor(ch);
+      if (ch.shows.length) farrah('<b>' + esc(shortName(ch.name)) + '</b> — <b>' + ch.shows.length + ' show' + (ch.shows.length > 1 ? 's' : '') + '</b>' + (fests.length ? (' + <b>' + fests.length + ' festival' + (fests.length > 1 ? 's' : '') + '</b>') : '') + ' on the board. Grab tickets, or add your own date.');
+      else farrah('<b>' + esc(shortName(ch.name)) + '</b> is quiet right now. Light it up — <b>add the first date</b> and the whole chapter sees it.');
+      try { localStorage.setItem("dd.showmap.chapter", ch.name); } catch (e) {}
+    }
+
     function useLocation() {
-      if (!navigator.geolocation) { nearEl.textContent = "Location off — pick a region"; return; }
+      if (!navigator.geolocation) { nearEl.textContent = "Location off — pick a chapter"; return; }
       nearEl.textContent = "📍 Locating…";
       navigator.geolocation.getCurrentPosition(function (pos) {
-        var lat = pos.coords.latitude, lng = pos.coords.longitude;
-        var r = nearestRegion(lat, lng);
-        var n = countNear(lat, lng, 300);
-        // custom box centered on the viewer (a few states wide), then zoom
-        var box = { latMin: lat - 4.4, latMax: lat + 4.4, lngMin: lng - 6.2, lngMax: lng + 6.2 };
-        var tvb = boxToVB(box);
-        animateTo(tvb, 620);
-        markYou(lat, lng, tvb[2]);
-        if (r) sel.value = r.key;
+        var lat = pos.coords.latitude, lng = pos.coords.longitude, ch = nearestChapter(lat, lng);
+        drill(ch.name);
+        markYou(lat, lng, curVB[2]);
+        var n = SHOWS.filter(function (s) { return s._ll && haversineMi(lat, lng, s._ll[0], s._ll[1]) <= 300; }).length;
         nearEl.textContent = n + (n === 1 ? " show" : " shows") + " within 300 mi";
-        try { localStorage.setItem("dd.showmap.region", r ? r.key : ""); } catch (e) {}
-      }, function () {
-        nearEl.textContent = "Location blocked — pick a region";
-      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+      }, function () { nearEl.textContent = "Location blocked — pick a chapter"; }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
     }
 
     function setMode(m) {
-      mode = m;
-      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === m); });
-      if (m === "national") {
-        regionRow.hidden = true; clearYou();
-        animateTo(FULL_VB.slice(), 560);
-      } else {
-        regionRow.hidden = false;
-        var saved = null; try { saved = localStorage.getItem("dd.showmap.region"); } catch (e) {}
-        var r = saved && regionByKey(saved);
-        if (r) goRegion(r); else useLocation();
-      }
+      if (m === "national") { toNation(); return; }
+      // Near me
+      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
+      regionRow.hidden = false; backBtn.hidden = false; drawBadges(false);
+      var saved = null; try { saved = localStorage.getItem("dd.showmap.chapter"); } catch (e) {}
+      if (saved && chapterByName(saved)) drill(saved); else useLocation();
     }
 
-    /* --- wire controls --- */
-    host.querySelectorAll(".showmap-seg button").forEach(function (b) {
-      b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); });
-    });
+    /* --- controls --- */
+    host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); }); });
+    backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
-    sel.addEventListener("change", function () { clearYou(); goRegion(regionByKey(sel.value)); });
-
+    sel.addEventListener("change", function () { if (sel.value) drill(sel.value); });
     wrap.addEventListener("mouseleave", hidePop);
     document.addEventListener("click", function (e) {
       if (pop.hidden) return;
       if (!pop.contains(e.target) && !e.target.closest(".smdot")) hidePop();
     });
-
     var x = host.querySelector(".showmap-x");
-    if (x) x.onclick = function () {
-      host.style.display = "none";
-      try { localStorage.setItem("dd.showmap.hidden", "1"); } catch (e) {}
-    };
+    if (x) x.onclick = function () { host.style.display = "none"; try { localStorage.setItem("dd.showmap.hidden", "1"); } catch (e) {} };
 
-    drawDots(FULL_VB[2]);
+    // boot at national
+    drawDots(FULL_VB[2], null);
+    drawBadges(true);
+    toNation();
   }
 
   function init() {
@@ -391,7 +499,6 @@
     try { if (localStorage.getItem("dd.showmap.hidden")) { host.style.display = "none"; return; } } catch (e) {}
     render(host);
   }
-
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();

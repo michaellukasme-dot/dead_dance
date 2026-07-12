@@ -334,9 +334,14 @@ body{padding-bottom:64px}
 .showmap-seg button:active{transform:scale(.96)}
 .showmap-x{background:#f3eef8;border:0;color:#6a6280;width:26px;height:26px;border-radius:8px;font-size:14px;line-height:1;cursor:pointer;flex:none}
 .showmap-x:hover{background:#ebe4f4}.showmap-x:active{transform:scale(.92)}
-/* region picker row (Near me) */
+/* Farrah caption */
+.showmap-farrah{font-size:12px;line-height:1.4;color:#4a4356;background:#faf7ff;border:1px solid #efe9f6;border-left:3px solid var(--gold);border-radius:9px;padding:8px 11px;margin:0 0 9px}
+.showmap-farrah b{color:var(--purple2);font-weight:800}
+/* region picker row (Near me / chapter) */
 .showmap-region{display:flex;align-items:center;gap:8px;margin:0 0 9px;flex-wrap:wrap}
 .showmap-region[hidden]{display:none}
+.showmap-back{border:1px solid #e6e0f0;background:#fff;color:var(--ink);font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.showmap-back[hidden]{display:none}.showmap-back:hover{background:#f6f2fc}.showmap-back:active{transform:scale(.97)}
 .showmap-loc{border:1px solid #e6e0f0;background:#fff;color:var(--purple2);font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}
 .showmap-loc:hover{background:#faf6ff}.showmap-loc:active{transform:scale(.97)}
 .showmap-select{border:1px solid #e6e0f0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--ink);background:#fff;cursor:pointer}
@@ -344,13 +349,16 @@ body{padding-bottom:64px}
 .showmap-legend{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;font-size:10.5px;color:#6a6280;margin-bottom:8px}
 .showmap-sub{font-size:11px;color:#9a7b12;font-weight:800}
 .showmap-legend .lg{font-weight:800}
-.showmap-legend .lg.real{color:#b8002e}.showmap-legend .lg.sample{color:#9a8fb0}
+.showmap-legend .lg.real{color:#b8002e}.showmap-legend .lg.sample{color:#9a8fb0}.showmap-legend .lg.dim{color:#b8a9d4}
 .showmap-honest{font-size:10px;color:#a49bb3;font-style:italic;flex-basis:100%}
 .showmap-wrap{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#faf8fd,#f1ebfa);border:1px solid #efe9f6}
 .showmap-svg{display:block;width:100%;height:auto}
 .us-land{fill:#efe9f8;stroke:#c6b2e4;stroke-width:1.6;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(90,46,134,.10))}
-.us-grat line{stroke:#c6b2e4;stroke-width:.8;opacity:.35}
+.us-grat line{stroke:#c6b2e4;stroke-width:.8;opacity:.28}
+.us-states{fill:none;stroke:#bda6e0;stroke-width:1.1;stroke-linejoin:round;stroke-linecap:round;opacity:.9}
 .smdot{cursor:pointer;outline:none}
+.smdot.faint{cursor:default;pointer-events:none}
+.smdot.faint .smcore{opacity:.5}.smdot.faint .smpulse{display:none}
 .smdot .smcore{fill:#b8002e;stroke:#fff}
 .smdot.sample .smcore{fill:#b79bd6;stroke:#fff}
 .smdot .smpulse{fill:#b8002e;opacity:.26;transform-box:fill-box;transform-origin:center;animation:smpulse 2.4s ease-out infinite}
@@ -358,6 +366,16 @@ body{padding-bottom:64px}
 .smdot:hover .smcore,.smdot:focus .smcore{stroke:var(--gold)}
 .smdot:focus .smpulse{opacity:.55}
 .smlabel{fill:#4a3a63;font-weight:800;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round;pointer-events:none}
+/* chapter badges (national) */
+.smbadge{cursor:pointer;outline:none}
+.smbadge .bdot{fill:#b8002e;stroke:#fff;stroke-width:2.4;filter:drop-shadow(0 2px 4px rgba(184,0,46,.28))}
+.smbadge .bnum{fill:#fff;font-weight:900;text-anchor:middle;pointer-events:none}
+.smbadge .blbl{fill:#4a3a63;font-weight:800;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round;pointer-events:none}
+.smbadge.dim .bdot{fill:#f4f0fa;stroke:#c3b2e0;stroke-width:2;stroke-dasharray:5 4;filter:none}
+.smbadge.dim .bnum{fill:#a892d4}
+.smbadge.dim .blbl{fill:#9a8fb0}
+.smbadge:hover .bdot,.smbadge:focus .bdot{stroke:var(--gold);stroke-width:3}
+.smbadge:hover .blbl,.smbadge:focus .blbl{fill:var(--purple2)}
 .sm-you .you-dot{fill:#1877f2;stroke:#fff;stroke-width:2}
 .sm-you .you-ring{fill:#1877f2;opacity:.22;transform-box:fill-box;transform-origin:center;animation:smpulse 2.2s ease-out infinite}
 @keyframes smpulse{0%{transform:scale(.7);opacity:.5}70%{transform:scale(2.1);opacity:0}100%{opacity:0}}
@@ -372,6 +390,28 @@ body{padding-bottom:64px}
 .pop-notify:active{transform:scale(.97)}
 .pop-notify.done{background:#e7f6ee;color:#15502f}
 .pop-foot{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}
+/* chapter drill panel (Farrah show list) */
+.showmap-panel{margin-top:11px;display:flex;flex-direction:column;gap:7px}
+.showmap-panel[hidden]{display:none}
+.showmap-panel .prow,.showmap-panel .pfrow{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #ece6f2;border-radius:11px;padding:8px 10px;box-shadow:0 1px 3px rgba(30,18,48,.05)}
+.showmap-panel .pfrow{border-left:3px solid var(--accent)}
+.pdt,.pfdt{width:40px;flex:none;text-align:center;border-radius:8px;padding:5px 0;font-size:11px;font-weight:800;color:#fff;line-height:1;background:linear-gradient(135deg,#b8002e,#7a3cc0)}
+.pdt small,.pfdt small{display:block;font-size:15px;font-weight:900;margin-top:1px}
+.pfdt{background:linear-gradient(135deg,#7a3cc0,#b8002e)}
+.pinfo{flex:1;min-width:0}
+.pinfo b{font-size:13.5px;font-weight:800;color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pinfo b .pop-tag{font-size:9px;font-style:normal;font-weight:800;background:#efe7f6;color:var(--accent);border-radius:5px;padding:1px 5px;margin-left:4px}
+.pinfo span{font-size:11.5px;color:#6a6280;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptix{flex:none;border:0;border-radius:9px;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;padding:7px 10px;cursor:pointer}
+.ptix:active{transform:scale(.96)}
+.pnotify{flex:none;border:1px solid #e6e0f0;background:#fff;border-radius:9px;font-size:13px;padding:6px 9px;cursor:pointer}
+.pnotify.done{background:#e7f6ee;border-color:#bfe6cf}
+.pftag{flex:none;font-size:10px;font-weight:800;color:var(--accent);background:#efe7f6;border-radius:6px;padding:3px 7px}
+.pfhead{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.02em;margin:2px 2px -1px}
+.padd{border:1px dashed #cdbbe8;background:#faf7ff;color:var(--purple2);font-weight:800;font-size:12.5px;border-radius:11px;padding:10px;cursor:pointer;margin-top:2px}
+.padd:hover{background:#f4eeff}.padd:active{transform:scale(.98)}
+.paddbig{border:2px dashed #cdbbe8;background:#faf7ff;color:var(--purple2);font-weight:800;font-size:14px;border-radius:12px;padding:16px;cursor:pointer;text-align:center}
+.paddbig:hover{background:#f4eeff;border-color:var(--accent)}
 /* Farrah voice caption + tiered bus map */
 .farrah-say{background:#2a1b3d;color:#f3ece0;border-left:3px solid var(--gold);border-radius:9px;padding:9px 12px;font-size:13px;line-height:1.45;margin-bottom:12px}
 .farrah-say b{color:var(--gold)}
