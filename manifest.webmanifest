@@ -1,17 +1,17 @@
 {
-  "name": "Shakedown Street",
-  "short_name": "Shakedown St",
-  "description": "The free social network + Shakedown Street market for the Grateful Dead / Jerry world. Chapters, shows, tapes & art, the live Archive, and the badge that counts your shows.",
+  "name": "DeadDance",
+  "short_name": "DeadDance",
+  "description": "Deadheads, tribute bands, and the venues that host them — one national community. A Facebook enhancement: your calendar, your store, your family, all in one place.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3ece0",
+  "background_color": "#2a1b3d",
   "theme_color": "#2a1b3d",
   "icons": [
-    { "src": "rosebud-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "rosebud-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "rosebud.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "dd-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "dd-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "dd-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ],
   "share_target": {
     "action": "./",
