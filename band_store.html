@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Store — DeadDance</title>
+<meta name="theme-color" content="#f6f4fa">
+<link rel="stylesheet" href="dd_theme.css">
+<style>
+.wrap{max-width:1060px}
+.fulfil{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#fff;border:1px solid var(--dd-line);border-radius:12px;padding:12px 14px;margin:8px 0 6px;box-shadow:var(--dd-shadow)}
+.fulfil b{font-weight:700}.fulfil .seg{margin-left:auto;display:flex;gap:6px;background:#f1ecf7;border-radius:999px;padding:3px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:999px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--dd-muted)}
+.seg button.on{background:#fff;color:var(--dd-ink);box-shadow:0 1px 4px rgba(27,18,38,.12)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin:16px 0}
+.prod{background:#fff;border:1px solid var(--dd-line);border-radius:14px;overflow:hidden;box-shadow:var(--dd-shadow);transition:transform .15s,box-shadow .15s;cursor:pointer}
+.prod:hover{transform:translateY(-4px);box-shadow:0 10px 26px rgba(27,18,38,.12)}
+.mock{aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative}
+.mock .logo{width:46%;height:46%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;letter-spacing:.5px}
+.mock .ptype{position:absolute;bottom:8px;left:10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#0006}
+.pinfo{padding:11px 13px}
+.pinfo .pn{font-weight:700;font-size:14px}
+.pinfo .pr{color:var(--dd-muted);font-size:13px;margin-top:1px}
+.add{margin-top:9px;width:100%;background:var(--dd-ink);color:#fff;border:0;border-radius:9px;padding:9px;font-weight:800;font-size:13px;cursor:pointer}
+.cartbar{position:sticky;top:0;z-index:10;display:flex;justify-content:flex-end}
+.cart{background:var(--dd-rose-deep);color:#fff;border-radius:999px;padding:7px 14px;font-weight:800;font-size:13px}
+</style></head>
+<body class="dd-body">
+<div class="dd-wrap wrap">
+  <div class="dd-top"><img src="dd-32.png" alt="DeadDance"><span class="dd-brand">DeadDance</span>
+    <span class="cartbar" style="margin-left:auto"><span class="cart" id="cart">Cart · 0</span></span></div>
+
+  <h1 class="dd-h1" id="bname">Jerry's Middle Finger</h1>
+  <p class="dd-tag">The store. Your logo, on the goods — printed &amp; shipped on demand. No inventory, nothing upfront.</p>
+  <div class="dd-rule"></div>
+
+  <div class="fulfil">
+    <span><b>Printed &amp; shipped by</b> <span id="fdesc">Custom Ink — on demand, nationwide</span></span>
+    <div class="seg" id="seg">
+      <button class="on" data-f="ci" onclick="setFul('ci')">Custom Ink</button>
+      <button data-f="local" onclick="setFul('local')">Local printer</button>
+    </div>
+  </div>
+  <div class="dd-hint" id="fnote">Turnkey and consistent — Custom Ink presses and ships each order. You never touch a box.</div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="dd-hint" style="margin-top:14px">Every claimed band gets this store the day they claim — pre-loaded with your logo on a full line. You choose which items to sell; nothing prints until it's ordered, and you take a cut on every sale. <b class="dd-locked">Honest-state: nothing sells until rights + payments are live.</b></div>
+  <div class="dd-foot" id="bfoot"></div>
+</div>
+
+<script src="dd_back.js"></script>
+<script>
+function band(){ try{ return new URLSearchParams(location.search).get('band')||"Jerry's Middle Finger"; }catch(e){ return "Jerry's Middle Finger"; } }
+function monogram(n){ return (n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'DD'; }
+// a real merch line — garment color grounds the mockup; the band's logo sits on top of each.
+var PRODUCTS=[
+  {n:'Classic Tee',price:28,bg:'#1b1226',fg:'#fff'},
+  {n:'Premium Tee',price:32,bg:'#3a1f57',fg:'#fff'},
+  {n:'Long Sleeve',price:36,bg:'#0e2a24',fg:'#fff'},
+  {n:'Pullover Hoodie',price:54,bg:'#20242b',fg:'#fff'},
+  {n:'Crewneck',price:48,bg:'#6a3d1a',fg:'#fff'},
+  {n:'Tank Top',price:26,bg:'#7a1020',fg:'#fff'},
+  {n:'Show Poster (18×24)',price:22,bg:'#f2eee7',fg:'#1b1226'},
+  {n:'Sticker Pack',price:8,bg:'#e6e0f0',fg:'#1b1226'},
+  {n:'Tote Bag',price:24,bg:'#e8e2d4',fg:'#1b1226'},
+  {n:'Dad Hat',price:30,bg:'#243b2a',fg:'#fff'},
+  {n:'Beanie',price:28,bg:'#161616',fg:'#fff'},
+  {n:'Coffee Mug',price:18,bg:'#ffffff',fg:'#1b1226'}
+];
+var CART=0;
+function setFul(f){ [].forEach.call(document.querySelectorAll('#seg button'),function(b){ b.classList.toggle('on',b.getAttribute('data-f')===f); });
+  if(f==='ci'){ fdesc.textContent='Custom Ink — on demand, nationwide'; fnote.innerHTML='Turnkey and consistent — Custom Ink presses and ships each order. You never touch a box.'; }
+  else{ fdesc.textContent='a local printer, arranged by your Ambassador'; fnote.innerHTML='Community option: your patch’s Ambassador can route orders to a <b>local shop</b> — keeps the money in the scene. Turnaround and finish vary by shop (not as consistent as Custom Ink).'; }
+}
+function render(){
+  var name=band(), mono=monogram(name);
+  document.getElementById('bname').textContent=name;
+  document.getElementById('bfoot').textContent='© '+(new Date().getFullYear())+' '+name+' · a DeadDance store — powered by Custom Ink, or your Ambassador’s local shop.';
+  document.getElementById('grid').innerHTML=PRODUCTS.map(function(p,i){
+    return '<div class="prod" onclick="add('+i+')">'+
+      '<div class="mock" style="background:'+p.bg+'">'+
+        '<div class="logo" style="background:'+(p.fg==='#fff'?'#ffffff22':'#00000010')+';color:'+p.fg+';border:1.5px solid '+(p.fg==='#fff'?'#ffffff55':'#00000022')+'">'+mono+'</div>'+
+        '<span class="ptype" style="color:'+(p.fg==='#fff'?'#ffffff88':'#0006')+'">'+p.n.split(' ')[0]+'</span>'+
+      '</div>'+
+      '<div class="pinfo"><div class="pn">'+p.n+'</div><div class="pr">$'+p.price.toFixed(2)+'</div>'+
+      '<button class="add" onclick="event.stopPropagation();add('+i+')">Add to cart</button></div></div>';
+  }).join('');
+}
+function add(i){ CART++; document.getElementById('cart').textContent='Cart · '+CART; }
+render();
+</script>
+</body></html>

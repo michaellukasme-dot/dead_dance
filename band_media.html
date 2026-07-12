@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Media — DeadDance</title>
+<style>
+:root{--bg:#f6f4fa;--panel:#ffffff;--line:#e6e0f0;--ink:#1b1226;--muted:#6a6280;--gold:#b07d17;--rose:#e01f45;--ddm-ink:#1b1226;--ddm-muted:#6a6280}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:26px 20px 80px}
+.top{display:flex;align-items:center;gap:12px;padding:6px 0 18px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.top img{width:34px;height:34px;border-radius:9px}
+.brand{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+h1{font-size:40px;line-height:1.05;font-weight:800;letter-spacing:-.5px;margin:24px 0 4px}
+.tag{color:var(--muted);font-size:15px;margin:0 0 8px}
+.rule{height:3px;width:70px;background:var(--rose);border-radius:3px;margin:14px 0 6px}
+.nav{display:flex;gap:18px;flex-wrap:wrap;margin:14px 0 6px}
+.nav a{color:var(--muted);text-decoration:none;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.nav a:hover{color:var(--ink)}
+.editbar{display:flex;justify-content:flex-end;margin-top:10px}
+.gear{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;font-weight:700;font-size:12px;cursor:pointer}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0;display:none}
+.panel.on{display:block}
+.panel label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.panel input,.panel textarea{width:100%;background:#ffffff;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px 12px;font:inherit;font-size:14px}
+.panel .save{margin-top:12px;background:var(--rose);color:#fff;border:0;border-radius:11px;padding:11px 18px;font-weight:800;cursor:pointer}
+.hint{color:var(--muted);font-size:12px;margin-top:4px}
+/* the media embeds sit in clean framed cards, like JMF */
+.ddm-listen .ddm-sp,.ddm-watch .ddm-yt,.ddm-watch .ddm-ch{border:1px solid var(--line);background:var(--panel);box-shadow:0 2px 12px rgba(27,18,38,.08)}
+.foot{color:var(--muted);font-size:12px;margin-top:34px;border-top:1px solid var(--line);padding-top:16px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top"><img src="dd-32.png" alt="DeadDance"><span class="brand">DeadDance</span></div>
+
+  <h1 id="bname">Jerry's Middle Finger</h1>
+  <p class="tag" id="btag">Jerry Garcia Band, done right.</p>
+  <div class="rule"></div>
+  <div class="nav" id="bnav"></div>
+
+  <div class="editbar"><button class="gear" onclick="toggleEdit()">✎ Edit media</button></div>
+  <div class="panel" id="edit">
+    <label>Band name</label><input id="e_name" placeholder="Your band">
+    <label>Tagline</label><input id="e_tag" placeholder="What you do, in a line">
+    <label>Spotify links <span style="font-weight:400;text-transform:none">— album / artist / track / playlist, one per line</span></label>
+    <textarea id="e_sp" rows="4" placeholder="https://open.spotify.com/album/…"></textarea>
+    <label>YouTube links <span style="font-weight:400;text-transform:none">— video / playlist / channel, one per line</span></label>
+    <textarea id="e_yt" rows="3" placeholder="https://www.youtube.com/…"></textarea>
+    <label>“Watch” label (optional)</label><input id="e_wl" placeholder="e.g. Fingerhead Fridays on YouTube">
+    <button class="save" onclick="saveMedia()">Save my media →</button>
+    <div class="hint">Paste and go — we render clean embeds. Nothing to design, no Squarespace bill. 🌹</div>
+  </div>
+
+  <div id="media"></div>
+  <div class="foot" id="bfoot"></div>
+</div>
+
+<script src="dd_media.js"></script>
+<script src="dd_back.js"></script>
+<script>
+// Demo default = Jerry's Middle Finger (their real Spotify albums + YouTube). A band's own data overrides.
+var DEMO={
+  name:"Jerry's Middle Finger", tag:"Jerry Garcia Band, done right.",
+  spotify:[
+    "https://open.spotify.com/album/0eGBtrPWorPrKNwd1g5B35",
+    "https://open.spotify.com/album/6YN3rbmL45v6dOsVVfPIOE",
+    "https://open.spotify.com/album/6PLk1M0ERwPcwbQMKPFZ65",
+    "https://open.spotify.com/album/4wuHWNGSG3RGVjlzwR1n3K"
+  ],
+  youtube:["https://www.youtube.com/channel/UCafq5ZLYZVGXkJZVKmVNpTQ"],
+  watchLabel:"Fingerhead Fridays on YouTube",
+  links:{Instagram:"https://www.instagram.com/jerrys_middle_finger",Facebook:"http://facebook.com/jerrysmiddlefingerband",YouTube:"https://www.youtube.com/channel/UCafq5ZLYZVGXkJZVKmVNpTQ",Site:"https://jerrysmiddlefinger.com"}
+};
+function key(){ try{ var b=new URLSearchParams(location.search).get('band'); return 'dd.media.'+(b||'demo'); }catch(e){ return 'dd.media.demo'; } }
+function load(){ try{ var s=JSON.parse(localStorage.getItem(key())||'null'); return s||DEMO; }catch(e){ return DEMO; } }
+function draw(){
+  var m=load();
+  document.getElementById('bname').textContent=m.name||'Your band';
+  document.getElementById('btag').textContent=m.tag||'';
+  var nav=document.getElementById('bnav'); nav.innerHTML=''; var L=m.links||{};
+  Object.keys(L).forEach(function(k){ var a=document.createElement('a'); a.href=L[k]; a.target='_blank'; a.rel='noopener'; a.textContent=k; nav.appendChild(a); });
+  DDMedia.render(document.getElementById('media'), {spotify:m.spotify,youtube:m.youtube,watchLabel:m.watchLabel});
+  document.getElementById('bfoot').textContent='© '+(new Date().getFullYear())+' '+(m.name||'')+' · a DeadDance page — Listen, Watch, Tour, Store, all in one place.';
+}
+function toggleEdit(){ var p=document.getElementById('edit'); p.classList.toggle('on'); if(p.classList.contains('on')){ var m=load();
+  e_name.value=m.name||''; e_tag.value=m.tag||''; e_sp.value=(m.spotify||[]).join('\n'); e_yt.value=(m.youtube||[]).join('\n'); e_wl.value=m.watchLabel||''; } }
+function saveMedia(){ var m=load();
+  var out={ name:(e_name.value.trim()||m.name), tag:(e_tag.value.trim()||m.tag),
+    spotify:e_sp.value.split('\n').map(function(s){return s.trim();}).filter(Boolean),
+    youtube:e_yt.value.split('\n').map(function(s){return s.trim();}).filter(Boolean),
+    watchLabel:e_wl.value.trim(), links:m.links };
+  try{ localStorage.setItem(key(),JSON.stringify(out)); }catch(e){}
+  document.getElementById('edit').classList.remove('on'); draw();
+}
+draw();
+</script>
+</body></html>

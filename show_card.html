@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Show — DeadDance</title>
+<meta name="theme-color" content="#140b1f">
+<link rel="stylesheet" href="dd_theme.css">
+<style>
+.wrap{max-width:640px}
+.showhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.when{font-size:15px;color:var(--dd-gold);font-weight:700;margin:2px 0}
+.venue{color:var(--dd-muted);font-size:14px}
+.state{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:5px 11px;border-radius:999px;white-space:nowrap}
+.state.up{background:#efeaf7;color:#5a2e86}
+.state.hist{background:#fdeaee;color:#b8002e}
+.set{list-style:none;margin:10px 0 0;padding:0;counter-reset:s}
+.set li{counter-increment:s;display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--dd-line);font-size:15px}
+.set li:last-child{border-bottom:0}
+.set li::before{content:counter(s);color:var(--dd-faint);font-variant-numeric:tabular-nums;min-width:22px;font-weight:700}
+.set .setbreak{color:var(--dd-muted);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding-top:12px;border-bottom:0}
+.set .setbreak::before{content:''}
+.actions{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.a-primary{background:var(--dd-rose-deep);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:15px;cursor:pointer}
+.a-hp{background:var(--dd-purple);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;cursor:pointer}
+.a-ghost{background:none;border:1px solid var(--dd-line);color:var(--dd-muted);border-radius:12px;padding:12px;font-weight:700;cursor:pointer}
+.free{color:var(--dd-gold);font-weight:700;font-size:12px}
+.toggle{margin:18px 0;display:flex;gap:8px}
+</style></head>
+<body class="dd-body">
+<div class="dd-wrap wrap">
+  <div class="dd-top"><img src="dd-32.png" alt="DeadDance"><span class="dd-brand">DeadDance</span></div>
+
+  <div class="dd-panel-box" id="card"></div>
+
+  <div class="toggle">
+    <button class="dd-btn" onclick="setState('upcoming')">▶ Upcoming</button>
+    <button class="dd-btn" onclick="setState('played')">⬇ After the show</button>
+  </div>
+  <div class="dd-hint">Same card, one record. Upcoming: the setlist gets teased out. Played &amp; uploaded: it becomes a download for the folks who were there.</div>
+</div>
+
+<script src="dd_back.js"></script>
+<script>
+// One show record drives the whole lifecycle.
+var SHOW={
+  band:"DEAL", venue:"The Lost Tavern", city:"Hellertown, PA", date:"Tomorrow", time:"8:00 PM",
+  status:"upcoming",                 // 'upcoming' -> 'played'
+  ticketUrl:"#", price:"9.99",
+  setlist:[
+    "Jack Straw","They Love Each Other","Cassidy","Loser","Bird Song","Deal",
+    "__Set II__",
+    "Help on the Way","Slipknot!","Franklin's Tower","Estimated Prophet","Eyes of the World","Morning Dew",
+    "__Encore__","Ripple"
+  ],
+  recording:null                     // set when the band uploads: {tracks, price, ticketFree:true}
+};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function setlistHTML(list){
+  return '<ol class="set">'+list.map(function(x){
+    var m=String(x).match(/^__(.+)__$/); if(m) return '<li class="setbreak">'+esc(m[1])+'</li>';
+    return '<li>'+esc(x)+'</li>';
+  }).join('')+'</ol>';
+}
+function render(){
+  var s=SHOW, played=(s.status==='played'), c=document.getElementById('card');
+  var head='<div class="showhead"><div>'+
+      '<div class="dd-h1" style="font-size:30px;margin:0">'+esc(s.band)+'</div>'+
+      '<div class="when">'+esc(s.date)+' · '+esc(s.time)+'</div>'+
+      '<div class="venue">'+esc(s.venue)+' · '+esc(s.city)+'</div></div>'+
+      '<span class="state '+(played?'hist':'up')+'">'+(played?'Live recording':'Upcoming')+'</span></div>';
+  var setTitle=played?'Tracklist':'Setlist <span class="dd-sub">tease it out before the show</span>';
+  var body='<div class="dd-h" style="margin:18px 0 4px;font-size:18px">'+setTitle+'</div>'+setlistHTML(s.setlist);
+  var actions;
+  if(!played){
+    actions='<div class="actions">'+
+      '<button class="a-hp" onclick="hp()">📡 Send the setlist — HyperPost the teaser</button>'+
+      '<button class="a-primary" onclick="tix()">🎟️ Get tickets</button>'+
+      '<button class="a-ghost" onclick="cal()">📅 Add to my calendar</button></div>';
+  } else {
+    actions='<div class="actions">'+
+      '<button class="a-primary" onclick="dl(true)">⬇️ Download the show <span class="free">— free if you were there</span></button>'+
+      '<button class="a-hp" onclick="dl(false)">Buy the download · $'+esc(s.price)+'</button>'+
+      '<button class="a-ghost" onclick="tip()">▶ Listen / Print the Vinyl</button></div>'+
+      '<div class="dd-hint" style="margin-top:10px">Your show QR from that night is how we know you had a ticket — ticket-holders download free. 🌹</div>';
+  }
+  c.innerHTML=head+body+actions;
+}
+function setState(st){ SHOW.status=st; if(st==='played'&&!SHOW.recording) SHOW.recording={tracks:SHOW.setlist.filter(function(x){return !/^__/.test(x);}).length,ticketFree:true}; render(); }
+function toast(m){ /* simple */ alert(m); }
+function hp(){ toast('📡 Setlist teaser drafted in your voice — one tap sends it back to Facebook and every network. (Demo)'); }
+function tix(){ toast('🎟️ Tickets — secure checkout. (Demo)'); }
+function cal(){ toast('📅 Added to your calendar. (Demo)'); }
+function dl(free){ toast(free?'⬇️ Verifying your ticket QR for this show, then your download starts. (Demo)':'💳 Purchase the download · secure checkout. (Demo)'); }
+function tip(){ toast('▶ Listen in-app, or order the pressed LP via Print the Vinyl. (Demo)'); }
+render();
+</script>
+</body></html>

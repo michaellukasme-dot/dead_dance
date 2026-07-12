@@ -1,63 +1,57 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Shakedown Records — Shakedown Street</title>
-<meta name="theme-color" content="#1a1030">
+<title>Records — DeadDance</title>
+<meta name="theme-color" content="#140b1f">
+<link rel="stylesheet" href="dd_theme.css">
 <style>
-:root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#20121f;--muted:#9a8fb0;--cream:#f7f2ea;--line:#e7e0d2}
+:root{--purple:#5a2e86;--gold:#b07d17;--rose:#e01f45;--rose-deep:#b8002e;--muted:#6a6280;--line:#e6e0f0;--panel:#ffffff;--bg:#f6f4fa}
 *{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
-body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 70%,#b8002e);padding:16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 16px #0008}
-.top .logo{font-weight:900;font-size:22px;letter-spacing:.5px}.top .logo span{color:#ffd76a}
-.top .tag{font-size:12px;color:#e0cdf5;letter-spacing:1px;text-transform:uppercase}
-.ctrl{display:flex;gap:8px;flex-wrap:wrap;padding:14px 16px;background:#1e1430;position:sticky;top:64px;z-index:15;border-bottom:1px solid #2e2148}
-.ctrl select,.ctrl input{font:inherit;background:#2a1c40;color:#fff;border:1px solid #43305f;border-radius:10px;padding:9px 12px}
-.ctrl input{flex:1;min-width:140px}
-.crate{display:flex;gap:14px;overflow-x:auto;padding:26px 16px 30px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.crate::-webkit-scrollbar{height:8px}.crate::-webkit-scrollbar-thumb{background:#43305f;border-radius:8px}
-.sleeve{scroll-snap-align:center;flex:none;width:210px;cursor:pointer;transition:transform .18s;transform:rotate(-1.4deg)}
-.sleeve:nth-child(even){transform:rotate(1.6deg)}
-.sleeve:hover{transform:rotate(0) translateY(-8px) scale(1.03)}
-.cover{width:210px;height:210px;border-radius:6px;box-shadow:0 10px 26px #000a, inset 0 0 0 1px #ffffff22;display:flex;flex-direction:column;justify-content:space-between;padding:16px;position:relative;overflow:hidden}
-.cover .hole{position:absolute;top:50%;left:50%;width:34px;height:34px;border-radius:50%;background:#141018;transform:translate(-50%,-50%);box-shadow:0 0 0 40px #0000000d, inset 0 0 0 4px #ffffff33;opacity:.28}
-.cover .ttl{font-weight:900;font-size:19px;line-height:1.12;text-shadow:0 1px 6px #0006;z-index:1}
-.cover .art{font-size:12.5px;opacity:.92;font-weight:700;z-index:1}
-.cover .yr{position:absolute;top:10px;right:12px;font-size:11px;font-weight:800;background:#00000040;padding:2px 7px;border-radius:999px}
-.badge{position:absolute;bottom:10px;left:12px;font-size:10px;font-weight:900;letter-spacing:.5px;background:#ffd76a;color:#3a1d00;padding:3px 7px;border-radius:999px}
-.smeta{padding:8px 4px 0;text-align:center}.smeta .st{font-weight:800;font-size:13.5px}.smeta .sa{font-size:12px;color:var(--muted)}
-.empty{padding:40px 16px;text-align:center;color:var(--muted)}
-/* detail */
-.ov{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
-.ov.on{display:flex}
-.rec{background:#211533;border:1px solid #3a2a55;border-radius:16px;max-width:420px;width:100%;padding:20px;text-align:center}
-.rec .bigcover{width:220px;height:220px;margin:0 auto 14px;border-radius:8px;box-shadow:0 14px 40px #000b, inset 0 0 0 1px #ffffff22;display:flex;flex-direction:column;justify-content:space-between;padding:18px;position:relative;overflow:hidden}
-.rec h3{margin:6px 0 2px;font-size:20px}.rec .ra{color:var(--muted);font-size:14px}
-.rec .btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.rec .buy{background:#ffd76a;color:#3a1d00;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:15px;cursor:pointer}
-.rec .vinyl{background:#5a2e86;color:#fff;border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}
-.rec .listen{background:none;border:1px solid #43305f;color:#e0cdf5;border-radius:12px;padding:11px;font-weight:800;cursor:pointer;text-decoration:none;display:block}
-.rec .x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:6px}
-.honest{margin:0 16px 30px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;font-size:12px;color:#c9bde0}
+body{margin:0;background:var(--bg);color:#1b1226;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+.top{display:flex;align-items:center;gap:12px;padding:14px 18px;position:sticky;top:0;z-index:20;background:#ffffffe6;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .logo{font-weight:800;font-size:20px;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.top .logo img{width:30px;height:30px;border-radius:8px}
+.top .logo span{color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.top .tag{display:none}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;position:sticky;top:60px;z-index:15;background:var(--bg);border-bottom:1px solid var(--line)}
+.ctrl select,.ctrl input{font:inherit;background:#ffffff;color:#1b1226;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.ctrl input{flex:1;min-width:140px}.ctrl input:focus,.ctrl select:focus{outline:none;border-color:var(--purple)}
+.crate{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px;padding:24px 18px 30px;max-width:1060px;margin:0 auto}
+.sleeve{cursor:pointer;transition:transform .18s}
+.sleeve:hover{transform:translateY(-6px)}
+.cover{aspect-ratio:1;width:100%;border-radius:8px;box-shadow:0 8px 24px #0007;display:flex;flex-direction:column;justify-content:space-between;padding:16px;position:relative;overflow:hidden;border:1px solid #ffffff14}
+.cover .hole{display:none}
+.cover .ttl{font-weight:800;font-size:18px;line-height:1.15;text-shadow:0 1px 6px #0007;z-index:1}
+.cover .art{font-size:12.5px;opacity:.9;font-weight:600;z-index:1}
+.cover .yr{position:absolute;top:10px;right:12px;font-size:11px;font-weight:700;background:#00000055;padding:2px 8px;border-radius:999px}
+.badge{position:absolute;bottom:10px;left:12px;font-size:10px;font-weight:800;letter-spacing:.4px;background:#fff;color:#1a0d10;padding:3px 8px;border-radius:6px}
+.smeta{padding:10px 2px 0}.smeta .st{font-weight:700;font-size:14px}.smeta .sa{font-size:12.5px;color:var(--muted)}
+.empty{padding:48px 16px;text-align:center;color:var(--muted)}
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.rec{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:440px;width:100%;padding:22px;text-align:center}
+.rec .bigcover{width:230px;height:230px;margin:0 auto 16px;border-radius:10px;box-shadow:0 14px 40px #000b;display:flex;flex-direction:column;justify-content:space-between;padding:18px;position:relative;overflow:hidden;border:1px solid #ffffff18}
+.rec h3{margin:8px 0 2px;font-size:21px;font-weight:800}.rec .ra{color:var(--muted);font-size:14px}
+.rec .btns{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.rec .buy{background:var(--rose-deep);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:15px;cursor:pointer}
+.rec .vinyl{background:none;border:1px solid var(--purple);color:#d9c9f2;border-radius:12px;padding:13px;font-weight:800;cursor:pointer}
+.rec .listen{background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:11px;font-weight:700;cursor:pointer;text-decoration:none;display:block}
+.rec .x{background:none;border:0;color:var(--muted);font-weight:700;cursor:pointer;margin-top:8px}
+.honest{margin:0 auto 30px;max-width:1024px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:12px 16px;font-size:12.5px;color:var(--muted)}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80}#toast.on{opacity:1}
-/* market tiles */
-.mktiles{display:flex;gap:12px;flex-wrap:wrap;padding:16px 16px 4px}
-.mktile{display:flex;align-items:center;gap:12px;flex:1;min-width:240px;text-align:left;cursor:pointer;border:1px solid #43305f;border-radius:14px;padding:14px 16px;color:#f2ecff;background:linear-gradient(120deg,#241041,#3a1d5e);transition:transform .15s,box-shadow .15s}
-.mktile:hover{transform:translateY(-2px);box-shadow:0 10px 26px #0007}
-.mktile.kar{border-color:#ffd76a}
-.mktile .mkic{font-size:30px;flex:none}
-.mktile .mkbody{display:flex;flex-direction:column;flex:1}
-.mktile .mkbody b{font-size:16px}.mktile .mkbody small{font-size:12px;color:#c9bde0}
-.mktile .mkgo{margin-left:auto;font-weight:900;color:#ffd76a;font-size:13px;white-space:nowrap}
-/* karaoke iframe modal */
-#karov{position:fixed;inset:0;z-index:130;display:none}
-#karov.on{display:block}
-#karov .kbg{position:absolute;inset:0;background:#160c28e6}
+.mktiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:16px 18px 4px;max-width:1060px;margin:0 auto}
+.mktile{display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;border:1px solid var(--line);border-radius:14px;padding:14px 16px;color:#f2ecff;background:var(--panel);transition:transform .15s,border-color .15s}
+.mktile:hover{transform:translateY(-2px);border-color:var(--purple)}.mktile.kar{border-color:var(--gold)}
+.mktile .mkic{font-size:26px;flex:none}.mktile .mkbody{display:flex;flex-direction:column;flex:1}
+.mktile .mkbody b{font-size:15px;font-weight:700}.mktile .mkbody small{font-size:12px;color:var(--muted)}
+.mktile .mkgo{margin-left:auto;font-weight:800;color:var(--gold);font-size:13px;white-space:nowrap}
+#karov{position:fixed;inset:0;z-index:130;display:none}#karov.on{display:block}
+#karov .kbg{position:absolute;inset:0;background:#140b1fe6}
 #karov .kpanel{position:absolute;inset:0;top:max(10px,env(safe-area-inset-top));display:flex;flex-direction:column;max-width:1000px;margin:0 auto;left:0;right:0}
-#karov .khead{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(120deg,#0e0716,#3a1d5e 60%,#b8002e);color:#f3ecff;font-weight:800;border-radius:14px 14px 0 0}
-#karov .kx{border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer}
+#karov .khead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--panel);color:#f3ecff;font-weight:800;border-radius:14px 14px 0 0;border:1px solid var(--line);border-bottom:0}
+#karov .kx{border:0;background:#ffffff18;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer}
 #karov iframe{flex:1;width:100%;border:0;background:#140b22;border-radius:0 0 14px 14px}
 </style></head>
 <body>
-<div class="top"><div class="logo">🌹 SHAKEDOWN <span>RECORDS</span></div><div class="tag">the crate that never ends · flip through the whole collection</div></div>
+<div class="top"><div class="logo"><img src="dd-32.png" alt="DeadDance">Records <span>DeadDance Publishing</span></div></div>
 
 <!-- ===== The Dealer's market tiles: Karaoke opens the whole show in a modal ===== -->
 <div class="mktiles">

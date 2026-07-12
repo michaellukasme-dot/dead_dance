@@ -1,0 +1,43 @@
+/* dd_theme.css — DeadDance's one clean look. LIGHT/WHITE: clean, professional, publishing-grade.
+   Link this on any page and use the classes below so every surface (Media, Store, Host, Records)
+   feels like the same app. White paper, dark ink, one rose accent. */
+:root{
+  --dd-bg:#f6f4fa; --dd-panel:#ffffff; --dd-panel2:#f1ecf7; --dd-line:#e6e0f0; --dd-line-2:#d8d0e6;
+  --dd-ink:#1b1226; --dd-muted:#6a6280; --dd-faint:#9a90ad;
+  --dd-rose:#e01f45; --dd-rose-deep:#b8002e; --dd-gold:#b07d17; --dd-purple:#5a2e86;
+  --dd-radius:14px; --dd-shadow:0 2px 14px rgba(27,18,38,.07);
+}
+.dd-body{margin:0;background:var(--dd-bg);color:var(--dd-ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+.dd-wrap{max-width:1040px;margin:0 auto;padding:26px 20px 90px}
+.dd-top{display:flex;align-items:center;gap:12px;padding:6px 0 18px;border-bottom:1px solid var(--dd-line);margin-bottom:8px}
+.dd-top img{width:34px;height:34px;border-radius:9px}
+.dd-brand{font-size:13px;font-weight:700;color:var(--dd-muted);letter-spacing:.06em;text-transform:uppercase}
+.dd-h1{font-size:40px;line-height:1.05;font-weight:800;letter-spacing:-.5px;margin:24px 0 4px;color:var(--dd-ink)}
+.dd-tag{color:var(--dd-muted);font-size:15px;margin:0 0 8px}
+.dd-rule{height:3px;width:70px;background:var(--dd-rose);border-radius:3px;margin:14px 0 6px}
+.dd-h{font-size:22px;font-weight:800;letter-spacing:.01em;margin:26px 0 12px;color:var(--dd-ink)}
+.dd-sub{font-size:13px;font-weight:600;color:var(--dd-muted);margin-left:6px}
+.dd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.dd-card{background:var(--dd-panel);border:1px solid var(--dd-line);border-radius:var(--dd-radius);
+  padding:16px 18px;box-shadow:var(--dd-shadow)}
+.dd-card h3{margin:0 0 4px;font-size:17px;font-weight:800}
+.dd-card p{margin:0;color:var(--dd-muted);font-size:14px}
+.dd-panel-box{background:var(--dd-panel);border:1px solid var(--dd-line);border-radius:var(--dd-radius);padding:18px;margin:14px 0;box-shadow:var(--dd-shadow)}
+.dd-label{display:block;font-size:12px;font-weight:700;color:var(--dd-muted);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.dd-input,.dd-textarea,.dd-select{width:100%;background:#fff;border:1px solid var(--dd-line-2);border-radius:10px;
+  color:var(--dd-ink);padding:10px 12px;font:inherit;font-size:14px}
+.dd-input:focus,.dd-textarea:focus,.dd-select:focus{outline:none;border-color:var(--dd-purple)}
+.dd-hint{color:var(--dd-muted);font-size:12px;margin-top:6px}
+.dd-btn{background:#fff;border:1px solid var(--dd-line-2);color:var(--dd-ink);border-radius:999px;
+  padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.dd-btn:hover{border-color:var(--dd-purple);color:var(--dd-purple)}
+.dd-btn-primary{background:var(--dd-rose-deep);color:#fff;border:0;border-radius:11px;padding:12px 20px;
+  font-weight:800;font-size:15px;cursor:pointer}
+.dd-btn-primary:active{transform:translateY(1px)}
+.dd-drop{border:1.5px dashed var(--dd-purple);color:var(--dd-purple);border-radius:var(--dd-radius);
+  padding:22px;text-align:center;font-weight:800;cursor:pointer;background:#faf8fd}
+.dd-pill{display:inline-block;background:var(--dd-panel2);color:var(--dd-ink);border-radius:999px;
+  padding:4px 11px;font-size:12px;font-weight:700}
+.dd-foot{color:var(--dd-faint);font-size:12px;margin-top:34px;border-top:1px solid var(--dd-line);padding-top:16px}
+.dd-locked{color:var(--dd-gold);font-size:12px;font-weight:700}
