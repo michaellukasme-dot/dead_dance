@@ -223,7 +223,7 @@
 
   /* ---- 5. Render ---- */
   function render(host) {
-    var level = "nation", curVB = FULL_VB.slice(), rafId = 0;
+    var level = "nation", curVB = FULL_VB.slice(), rafId = 0, fallbackT = 0;
 
     host.innerHTML =
       '<div class="showmap-card">' +
@@ -337,17 +337,25 @@
     function animateTo(target, ms, chapterName, onDone) {
       hidePop();
       if (rafId) cancelAnimationFrame(rafId);
-      var start = curVB.slice(), t0 = null;
+      if (fallbackT) clearTimeout(fallbackT);
+      var start = curVB.slice(), t0 = null, done = false;
       drawDots(target[2], chapterName);
+      function finish() {                              // guaranteed destination (works even if rAF is paused/throttled)
+        if (done) return; done = true;
+        if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+        curVB = target.slice(); svg.setAttribute("viewBox", curVB.join(" ")); drawDots(curVB[2], chapterName);
+        if (onDone) onDone();
+      }
       function step(ts) {
+        if (done) return;
         if (t0 === null) t0 = ts;
         var k = Math.min(1, (ts - t0) / ms), e = easeIO(k);
         var vb = start.map(function (v, idx) { return v + (target[idx] - v) * e; });
         svg.setAttribute("viewBox", vb.join(" "));
-        if (k < 1) rafId = requestAnimationFrame(step);
-        else { curVB = target.slice(); svg.setAttribute("viewBox", curVB.join(" ")); drawDots(curVB[2], chapterName); if (onDone) onDone(); }
+        if (k < 1) rafId = requestAnimationFrame(step); else finish();
       }
       rafId = requestAnimationFrame(step);
+      fallbackT = setTimeout(finish, ms + 250);        // safety net: if no frames tick, snap to the zoomed view
     }
 
     function clearYou() { youG.innerHTML = ""; }
