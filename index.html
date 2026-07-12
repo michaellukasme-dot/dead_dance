@@ -1354,7 +1354,7 @@ function calHover(ev,iso){ var list=SHOWLIST.filter(function(s){return s.iso===i
  b.style.top=Math.max(8, r.top-10)+'px';
  b.classList.add('on');
 }
-function calHoverOut(){ setTimeout(function(){ var b=document.getElementById('buy'); if(b && !b.matches(':hover')) b.classList.remove('on'); },160); }
+function calHoverOut(){ setTimeout(function(){ var b=document.getElementById('buy'); if(b && !b.matches(':hover')) b.classList.remove('on'); },600); }
 /* 📆 Add to my calendar — universal .ics (Apple / Google / Outlook), in addition to Buy Now */
 var CAL_HOVER_I=-1;
 function _p2(n){return (n<10?'0':'')+n;}
