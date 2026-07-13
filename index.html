@@ -2596,12 +2596,31 @@ function ddFeedPostHTML(p){
   var nm=String(p.author_name||'A head').replace(/</g,'&lt;');
   var body=String(p.body||'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
   var tag=ddFeedRoleTag(p.role); var av=(nm.trim()[0]||'🌹').toUpperCase();
-  return '<div class="post"><div class="posthead"><div class="pav">'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
+  var pid=p.id||'';
+  return '<div class="post"'+(pid?(' data-pid="'+pid+'"'):'')+'><div class="posthead"><div class="pav">'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
     '<span>'+(tag?('<span class="grp">'+tag+'</span> · '):'')+ddFeedRelTime(p.created_at)+(p._me?' · you':'')+'</span></div></div>'+
     '<div class="txt">'+body+'</div>'+
-    '<div class="acts"><button class="act" onclick="like(this)">👍 <span>0</span></button>'+
+    '<div class="acts"><button class="act ddlike"'+(pid?(' onclick="ddLike(this,\''+pid+'\')"'):' onclick="like(this)"')+'>👍 <span>0</span></button>'+
     '<button class="act" onclick="reactPop(this)">😊 React</button>'+
     '<button class="act reply" onclick="hyperConsole(\'the family · '+nm.replace(/\x27/g,'')+'\')">💬 Comment</button></div></div>';
+}
+/* REAL like: toggle persists to Supabase; the count is the true count from the server */
+function ddLike(btn,pid){
+  if(!(window.DDFeed&&DDFeed.react)){ if(typeof like==='function')like(btn); return; }
+  var on=!btn.classList.contains('on'); btn.classList.toggle('on',on);
+  var span=btn.querySelector('span'); var cur=parseInt(span&&span.textContent||'0',10)||0;
+  if(span) span.textContent=Math.max(0,cur+(on?1:-1));  // optimistic
+  DDFeed.react(pid,on).then(function(n){ if(span) span.textContent=n; })
+    .catch(function(){ btn.classList.toggle('on',!on); if(span) span.textContent=cur; });
+}
+/* pull true like counts for all real posts currently in the feed */
+function ddFeedLoadLikes(){
+  if(!(window.DDFeed&&DDFeed.reactCounts))return;
+  var els=[].slice.call(document.querySelectorAll('#ddFeed .post[data-pid]'));
+  var ids=els.map(function(e){return e.getAttribute('data-pid');}); if(!ids.length)return;
+  DDFeed.reactCounts(ids).then(function(map){
+    els.forEach(function(e){ var pid=e.getAttribute('data-pid'), s=e.querySelector('.ddlike span'); if(s) s.textContent=(map[pid]||0); });
+  });
 }
 function ddFeedPrepend(p){ var host=document.getElementById('ddFeed'); if(!host)return;
   var key=p.id||(p.author_id+'|'+p.body+'|'+(p.created_at||'')); if(p.id&&DDFEED_SEEN[p.id])return; if(p.id)DDFEED_SEEN[p.id]=1;
@@ -2610,7 +2629,7 @@ function ddFeedRender(){ if(!(window.DDFeed&&DDFeed.feed))return;
   DDFeed.feed(40).then(function(rows){ var host=document.getElementById('ddFeed'); if(!host||!rows||!rows.length)return;
     host.innerHTML=''; DDFEED_SEEN={};
     rows.forEach(function(p){ if(p.id)DDFEED_SEEN[p.id]=1; });
-    host.innerHTML=rows.map(ddFeedPostHTML).join(''); }); }
+    host.innerHTML=rows.map(ddFeedPostHTML).join(''); ddFeedLoadLikes(); }); }
 (function(){ function go(){ try{ if(window.DDFeed&&DDFeed.ready()){ ddFeedRender(); DDFeed.subscribe(function(np){ if(np)ddFeedPrepend(np); }); } }catch(e){} }
   setTimeout(go,1600); setTimeout(go,4200); })();
 

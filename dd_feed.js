@@ -35,6 +35,21 @@
       .catch(function () { return []; });
   }
 
+  // toggle a like on/off; resolves the true new count
+  function react(postId, on, kind) {
+    var c = client(), id = myId();
+    if (!c || !id || !postId) return Promise.reject('no-backend');
+    return c.rpc('dd_post_react', { p_post_id: postId, p_member_id: id, p_kind: kind || 'like', p_on: !!on })
+      .then(function (r) { if (r && r.error) throw r.error; return Number((r && r.data) || 0); });
+  }
+  // { postId: count } for a batch of post ids (like kind only)
+  function reactCounts(ids) {
+    var c = client(); if (!c || !ids || !ids.length) return Promise.resolve({});
+    return c.rpc('dd_post_react_counts', { p_ids: ids })
+      .then(function (r) { var out = {}; ((r && r.data) || []).forEach(function (row) { if (row.kind === 'like') out[row.post_id] = Number(row.n || 0); }); return out; })
+      .catch(function () { return {}; });
+  }
+
   var chan = null;
   function subscribe(onChange) {
     var c = client(); if (!c || chan) return;
@@ -47,5 +62,5 @@
   }
   function unsubscribe() { try { if (chan) client().removeChannel(chan); } catch (e) {} chan = null; }
 
-  root.DDFeed = { ready: ready, post: post, feed: feed, subscribe: subscribe, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
+  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, subscribe: subscribe, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
 })(typeof window !== 'undefined' ? window : this);
