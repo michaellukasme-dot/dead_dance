@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sales Console — dead.dance</title>
+<meta name="theme-color" content="#2a1b3d">
+<!-- Autonomous Sales cockpit: Accounts · Contacts (org-chart) · Pipeline · live Deal-Health ·
+     Next-Best-Action (guided selling) · Activity auto-capture · outreach Cadence (shared engine).
+     External sends = one human tap (CAN-SPAM/TCPA). Pricing/payment gated on Stripe. Rule Zero:
+     never charge the band; 15% on the room; overrides on revenue, never equity. -->
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--ink:#241a2b;--muted:#6b6475;--line:#ece4f2;
+  --gold:#d8a24a;--rose:#b5384e;--green:#1f7a4d;--blue:#3f6fb0;--amber:#c9871f;--card:#fff;--bg:#f6f2fa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 'Helvetica Neue',Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.top{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,var(--purple),var(--purple2));color:#fff;display:flex;align-items:center;gap:10px;padding:11px 14px}
+.top b{font-size:15px}.top .sp{flex:1}.top .chan{font-size:10px;color:#c9b9dc;font-weight:700}
+.top a{color:#e9dff5;text-decoration:none;font-size:12.5px;border:1px solid #ffffff33;border-radius:8px;padding:5px 9px}
+.wrap{max-width:760px;margin:0 auto;padding:14px 14px 70px}
+.farrah{background:#efe7f6;border:1px solid #e0d3ee;border-radius:13px;padding:12px 14px;font-size:13px;color:#3a2350;margin-bottom:14px}
+.farrah b{color:var(--rose)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+.kpi .n{font-size:19px;font-weight:900;color:var(--purple)}.kpi .l{font-size:10px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(40,20,60,.05)}
+.card h2{font-size:16px;margin:0 0 3px}.sub{color:var(--muted);font-size:12.5px;margin-bottom:11px}
+label{display:block;font-size:12px;font-weight:800;margin:8px 0 4px}
+input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;background:#fff}
+input:focus,select:focus{outline:none;border-color:var(--rose)}
+.row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:900;font-size:13.5px;cursor:pointer;background:var(--rose);color:#fff}
+.btn.ghost{background:#f3edf8;color:var(--purple)}.btn.gold{background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.acct{border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:10px;background:#fff}
+.acct .ah{display:flex;align-items:center;gap:10px;cursor:pointer}
+.acct .nm{font-weight:900;font-size:15px}.acct .mt{font-size:12px;color:var(--muted)}
+.stage{font-size:10px;font-weight:800;border-radius:999px;padding:3px 9px;text-transform:uppercase;letter-spacing:.03em}
+.s-prospect{background:#eee;color:#555}.s-contacted{background:#e7eefb;color:#3f6fb0}.s-meeting{background:#fdf1dd;color:#c9871f}
+.s-proposal{background:#efe7f6;color:#7d3aa8}.s-won{background:#e8f4ee;color:#1f7a4d}.s-lost{background:#fbe9e9;color:#b5384e}
+.health{margin-left:auto;text-align:right;min-width:56px}
+.health .hn{font-weight:900;font-size:15px}.health .hl{font-size:9px;color:var(--muted)}
+.bar{height:6px;border-radius:4px;background:#eee;overflow:hidden;margin-top:9px}.bar i{display:block;height:100%}
+.nba{margin-top:10px;background:#fbf7ef;border:1px solid #f0e4cd;border-radius:10px;padding:9px 11px;font-size:12.5px}
+.nba.urgent{background:#fdeeee;border-color:#f3d3d3}.nba b{color:var(--amber)}.nba.urgent b{color:var(--rose)}
+.drill{margin-top:11px;border-top:1px dashed var(--line);padding-top:10px;display:none}.drill.open{display:block}
+.qa{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.mini{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 5px}
+.ct{display:flex;align-items:center;gap:8px;font-size:13px;padding:5px 0;border-bottom:1px solid #f4eff8}
+.ct .dm{font-size:10px;font-weight:800;color:#fff;background:var(--green);border-radius:5px;padding:2px 5px}
+.tl{font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px solid #f7f3fa}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:22px}
+.honest{font-size:11.5px;color:var(--muted);background:#faf7fd;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#120b1c;color:#fff;border-radius:11px;padding:11px 17px;font-size:13px;max-width:88%;text-align:center;display:none;z-index:9}
+@media(max-width:520px){.kpis{grid-template-columns:1fr 1fr}.row3{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="top"><b>📇 Sales Console</b><span class="chan">· autonomous field CRM</span><span class="sp"></span>
+  <a href="console_directory.html">🗺 Map</a><a href="index.html">Home</a></div>
+
+<div class="wrap">
+  <div class="farrah">🌹 <b>Farrah here.</b> This is your book. I score every deal on real activity — not what you type — surface the one next move that matters, and log every touch for you. Add an account and I'll start the cadence. External sends wait for your tap; pricing goes live when the payment keys go in.</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="kOpen">0</div><div class="l">open deals</div></div>
+    <div class="kpi"><div class="n" id="kVal">$0</div><div class="l">pipeline / mo</div></div>
+    <div class="kpi"><div class="n" id="kHealth">0</div><div class="l">avg health</div></div>
+    <div class="kpi"><div class="n" id="kRisk">0</div><div class="l">at risk</div></div>
+  </div>
+
+  <div class="card">
+    <h2>➕ Add an account</h2>
+    <div class="sub">Venue, band, vendor, or group leader. The cadence starts the moment you add it.</div>
+    <label for="aname">Name</label><input id="aname" type="text" placeholder="Ardmore Music Hall">
+    <div class="row3">
+      <div><label for="acity">City</label><input id="acity" type="text" placeholder="Ardmore, PA"></div>
+      <div><label for="atype">Type</label><select id="atype"><option value="venue">Venue</option><option value="band">Band</option><option value="vendor">Vendor</option><option value="leader">Group leader</option></select></div>
+      <div><label for="aval">$/mo</label><input id="aval" type="number" min="0" step="1" placeholder="166"></div>
+    </div>
+    <label class="mini" style="margin-top:9px"><input type="checkbox" id="acad" checked style="width:auto;margin-right:6px">Auto-build the outreach cadence</label>
+    <button class="btn gold" style="width:100%;margin-top:10px" onclick="addAccount()">📇 Add + start cadence</button>
+  </div>
+
+  <div class="card">
+    <h2>📊 Pipeline</h2>
+    <div class="sub">Sorted by deal-health. The nudge under each is your next best move.</div>
+    <div id="pipe"><div class="empty">No accounts yet — add one above.</div></div>
+    <div class="honest">Health is computed from real signals (stage · days since touch · activity), not typed stage. Emails/DMs draft here and wait for your one tap (CAN-SPAM/TCPA). Pricing + payment turn on with your Stripe keys. Rule Zero: never the band, 15% on the room, overrides on revenue not equity.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid', v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v); } return {id:v}; }catch(e){ return {id:null}; } };
+  window.ME={name:(localStorage.getItem('dd.myname')||'You'),role:'ambassador'};
+})();
+</script>
+<script src="dd_attrib.js"></script>
+<script src="dd_join.js"></script>
+<script src="dd_feed.js"></script>
+<script src="dd_gigs.js"></script>
+<script src="dd_sales.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function slug(s){return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3000);}
+function money(n){ n=Number(n)||0; return '$'+(n>=1000?(Math.round(n/100)/10)+'k':Math.round(n)); }
+function healthColor(h){ return h>=70?'#1f7a4d':(h>=40?'#c9871f':'#b5384e'); }
+var OPEN={};
+
+function loadPipe(){
+  if(!(window.DDSales&&DDSales.ready())){ setTimeout(loadPipe,1200); return; }
+  DDSales.pipeline().then(function(rows){
+    var s=DDSales.summary(rows);
+    document.getElementById('kOpen').textContent=s.open;
+    document.getElementById('kVal').textContent=money(s.value_mo);
+    document.getElementById('kHealth').textContent=s.avg_health;
+    document.getElementById('kRisk').textContent=s.at_risk;
+    renderPipe(rows);
+  });
+}
+function renderPipe(rows){
+  var host=document.getElementById('pipe'); rows=rows||[];
+  if(!rows.length){ host.innerHTML='<div class="empty">No accounts yet — add one above.</div>'; return; }
+  host.innerHTML=rows.map(acctHTML).join('');
+  Object.keys(OPEN).forEach(function(id){ if(OPEN[id]) openDrill(id); });
+}
+function acctHTML(a){
+  var nba=DDSales.nextAction(a), h=a.health||0;
+  return '<div class="acct" data-a="'+a.id+'"><div class="ah" onclick="toggle(\''+a.id+'\')">'+
+    '<div><div class="nm">'+esc(a.name)+'</div><div class="mt">'+esc(a.type)+(a.city?(' · '+esc(a.city)):'')+(a.value_mo?(' · '+money(a.value_mo)+'/mo'):'')+'</div></div>'+
+    '<span class="stage s-'+a.stage+'">'+a.stage+'</span>'+
+    '<div class="health"><div class="hn" style="color:'+healthColor(h)+'">'+h+'</div><div class="hl">HEALTH</div></div></div>'+
+    '<div class="bar"><i style="width:'+h+'%;background:'+healthColor(h)+'"></i></div>'+
+    '<div class="nba'+(nba.urgent?' urgent':'')+'">'+(nba.urgent?'⚡ ':'👉 ')+'<b>Next:</b> '+esc(nba.why)+'</div>'+
+    '<div class="drill" id="drill-'+a.id+'"></div></div>';
+}
+function toggle(id){ OPEN[id]=!OPEN[id]; var d=document.getElementById('drill-'+id); if(!d)return;
+  if(OPEN[id]){ d.classList.add('open'); openDrill(id); } else { d.classList.remove('open'); } }
+function stageBtns(id,cur){
+  return ['prospect','contacted','meeting','proposal','won','lost'].map(function(s){
+    return '<button class="btn '+(s===cur?'':'ghost')+' sm" onclick="move(\''+id+'\',\''+s+'\')">'+s+'</button>'; }).join('');
+}
+function openDrill(id){
+  var d=document.getElementById('drill-'+id); if(!d)return; d.classList.add('open');
+  Promise.all([DDSales.contacts(id), DDSales.activities(id)]).then(function(res){
+    var cts=res[0]||[], acts=res[1]||[];
+    d.innerHTML=
+      '<div class="mini">Move stage</div><div class="qa">'+stageBtns(id,'')+'</div>'+
+      '<div class="mini">Log a touch (auto-captured)</div><div class="qa">'+
+        '<button class="btn ghost sm" onclick="log(\''+id+'\',\'call\')">📞 Call</button>'+
+        '<button class="btn ghost sm" onclick="log(\''+id+'\',\'email\')">✉️ Email</button>'+
+        '<button class="btn ghost sm" onclick="log(\''+id+'\',\'meeting\')">🤝 Meeting</button>'+
+        '<button class="btn ghost sm" onclick="note(\''+id+'\')">📝 Note</button></div>'+
+      '<div class="mini">Decision-makers (org chart)</div>'+
+        (cts.length?cts.map(function(c){return '<div class="ct">'+(c.decision_maker?'<span class="dm">DM</span>':'')+'<b>'+esc(c.name)+'</b> <span style="color:var(--muted)">'+esc(c.role||'')+'</span></div>';}).join(''):'<div class="tl">None mapped — who says yes here?</div>')+
+        '<div class="qa"><button class="btn ghost sm" onclick="addCt(\''+id+'\')">＋ Add contact</button></div>'+
+      '<div class="mini">Activity</div>'+
+        (acts.length?acts.slice(0,6).map(function(x){return '<div class="tl">'+esc(x.kind)+(x.note?(' — '+esc(x.note)):'')+'</div>';}).join(''):'<div class="tl">No activity yet.</div>');
+  });
+}
+function move(id,stage){ DDSales.setStage(id,stage).then(function(){ toast('→ '+stage); loadPipe(); }); }
+function log(id,kind){ DDSales.logActivity(id,kind,null).then(function(){ toast('✓ logged '+kind); loadPipe(); }); }
+function note(id){ var n=prompt('Note:'); if(n==null||!n.trim())return; DDSales.logActivity(id,'note',n.trim()).then(function(){ toast('✓ noted'); loadPipe(); }); }
+function addCt(id){
+  var name=prompt('Contact name:'); if(name==null||!name.trim())return;
+  var role=prompt('Their role (Owner / Booker / GM):','Booker')||'';
+  var dm=confirm('Are they the decision-maker (the yes)?');
+  DDSales.addContact(id,{name:name.trim(),role:role.trim(),decision_maker:dm}).then(function(){ toast('✓ contact added'); loadPipe(); });
+}
+function addAccount(){
+  if(!(window.DDSales&&DDSales.ready())){ toast('Connecting…'); return; }
+  var name=(document.getElementById('aname').value||'').trim();
+  if(!name){ toast('Name the account.'); return; }
+  var type=document.getElementById('atype').value;
+  var city=(document.getElementById('acity').value||'').trim();
+  var val=parseFloat(document.getElementById('aval').value||'')||null;
+  var cad=document.getElementById('acad').checked;
+  DDSales.upsertAccount({name:name,type:type,city:city,value_mo:val}).then(function(aid){
+    document.getElementById('aname').value='';document.getElementById('acity').value='';document.getElementById('aval').value='';
+    if(cad && window.DDGigs){ DDGigs.createGig({template:'sales',band:name,slug:aid,venue:name,city:city}).catch(function(){}); }
+    toast('📇 Added'+(cad?' + cadence started':'')); loadPipe();
+  }).catch(function(){ toast('Could not add (backend).'); });
+}
+
+(function(){ function go(){ try{ if(window.DDSales&&DDSales.ready()){ loadPipe(); } else setTimeout(go,1000); }catch(e){} } setTimeout(go,900); })();
+</script>
+</body></html>
