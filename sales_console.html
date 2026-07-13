@@ -85,6 +85,19 @@ input:focus,select:focus{outline:none;border-color:var(--rose)}
     <div id="pipe"><div class="empty">No accounts yet — add one above.</div></div>
     <div class="honest">Health is computed from real signals (stage · days since touch · activity), not typed stage. Emails/DMs draft here and wait for your one tap (CAN-SPAM/TCPA). Pricing + payment turn on with your Stripe keys. Rule Zero: never the band, 15% on the room, overrides on revenue not equity.</div>
   </div>
+
+  <div class="card">
+    <h2>📚 Knowledge base</h2>
+    <div class="sub">Objections, pricing, playbooks — add once, every draft gets smarter. Grounds the agent's answers.</div>
+    <div class="row2">
+      <div><label for="kbcat">Category</label><select id="kbcat"><option value="objection">Objection</option><option value="pricing">Pricing</option><option value="playbook">Playbook</option><option value="faq">FAQ</option></select></div>
+      <div><label for="kbtitle">Title</label><input id="kbtitle" type="text" placeholder="&quot;We already use Facebook&quot;"></div>
+    </div>
+    <label for="kbbody">Answer / knowledge</label><input id="kbbody" type="text" placeholder="We enhance Facebook, never replace it…">
+    <button class="btn ghost sm" style="margin-top:10px" onclick="kbAdd()">＋ Add knowledge</button>
+    <div style="margin-top:10px"><input id="kbq" type="text" placeholder="🔎 Search the knowledge base…" oninput="kbSearch()"></div>
+    <div id="kbList" style="margin-top:8px"></div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -183,6 +196,69 @@ function addAccount(){
   }).catch(function(){ toast('Could not add (backend).'); });
 }
 
-(function(){ function go(){ try{ if(window.DDSales&&DDSales.ready()){ loadPipe(); } else setTimeout(go,1000); }catch(e){} } setTimeout(go,900); })();
+/* ---- Knowledge base ---- */
+function kbAdd(){
+  var cat=document.getElementById('kbcat').value, t=(document.getElementById('kbtitle').value||'').trim(), b=(document.getElementById('kbbody').value||'').trim();
+  if(!t||!b){ toast('Title + answer, please.'); return; }
+  DDSales.kbAdd(cat,t,b).then(function(){ document.getElementById('kbtitle').value='';document.getElementById('kbbody').value=''; toast('📚 Added to the KB'); kbRender(); }).catch(function(){ toast('Could not add.'); });
+}
+function kbRender(rows){
+  var host=document.getElementById('kbList'); if(!host)return;
+  var p= rows? Promise.resolve(rows) : DDSales.kbList(null);
+  p.then(function(list){ list=list||[];
+    host.innerHTML=list.slice(0,8).map(function(k){
+      return '<div style="border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-top:6px"><div style="font-size:10px;font-weight:800;color:var(--amber);text-transform:uppercase">'+esc(k.category)+'</div><div style="font-weight:800;font-size:13px">'+esc(k.title)+'</div><div style="font-size:12.5px;color:var(--muted);margin-top:2px">'+esc(k.body)+'</div></div>';
+    }).join(''); });
+}
+function kbSearch(){ var q=(document.getElementById('kbq').value||'').trim(); if(!q){ kbRender(); return; } DDSales.kbSearch(q).then(kbRender); }
+
+/* ---- Quote builder + collateral, injected into the account drill ---- */
+function money2(n){ n=Number(n)||0; return '$'+Math.round(n); }
+function quoteBlock(id, acct){
+  return '<div class="mini">Quote → pay (CPQ)</div>'+
+    '<div class="qa"><select id="qt-'+id+'" style="max-width:130px"><option value="venue">Venue</option><option value="venue_plus">Venue+</option></select>'+
+    '<input id="qp-'+id+'" type="number" placeholder="$/mo" style="max-width:90px" value="'+(acct.value_mo||'')+'">'+
+    '<button class="btn sm" onclick="buildQuote(\''+id+'\')">Build quote</button></div>'+
+    '<div id="quotes-'+id+'"></div>';
+}
+function buildQuote(id){
+  var tier=document.getElementById('qt-'+id).value, price=parseFloat(document.getElementById('qp-'+id).value||'')||0;
+  if(!price){ toast('Set a monthly price.'); return; }
+  DDSales.quoteCreate(id,tier,price).then(function(){ toast('🧾 Quote built'); renderQuotes(id); loadPipe(); }).catch(function(){ toast('Could not build quote.'); });
+}
+function renderQuotes(id){
+  DDSales.quotesFor(id).then(function(qs){ var host=document.getElementById('quotes-'+id); if(!host)return; qs=qs||[];
+    host.innerHTML=qs.map(function(q){ var fm=DDSales.feeMath(Number(q.price_mo),Number(q.fee_pct));
+      var pay = q.status==='paid' ? '<span class="chan">✓ paid</span>'
+        : '<button class="btn ghost sm" onclick="collect(\''+id+'\',\''+q.id+'\')">💳 Collect</button>';
+      var send = (q.status==='draft') ? '<button class="btn sm" onclick="sendQuote(\''+id+'\',\''+q.id+'\')">Send</button>' : '<span class="chan">'+esc(q.status)+'</span>';
+      return '<div style="border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-top:6px;font-size:12.5px">'+
+        '<b>'+esc(q.tier)+'</b> · '+money2(q.price_mo)+'/mo — house keeps '+money2(fm.house_mo)+' ('+fm.fee_pct+'%), room keeps '+money2(fm.room_keeps)+
+        '<div class="qa" style="margin-top:6px">'+send+' '+pay+'</div></div>';
+    }).join(''); });
+}
+function sendQuote(id,qid){ DDSales.quoteStatus(qid,'sent').then(function(){ toast('📤 Quote sent (log)'); renderQuotes(id); }); }
+function collect(id,qid){ toast('💳 Payment opens when your Stripe keys are live — nothing charged. Quote saved.'); }
+
+/* extend the drill to include collateral suggestions + the quote block */
+var _openDrill=openDrill;
+openDrill=function(id){
+  _openDrill(id);
+  setTimeout(function(){
+    var d=document.getElementById('drill-'+id); if(!d)return;
+    // find this account's stage from the rendered badge
+    var acctEl=document.querySelector('.acct[data-a="'+id+'"] .stage'); var stage=acctEl?acctEl.textContent.trim():'prospect';
+    var acctName=document.querySelector('.acct[data-a="'+id+'"] .nm');
+    var sug=DDSales.suggestCollateral(stage);
+    var col='<div class="mini">Collateral for this stage</div>'+
+      (sug.length?sug.map(function(c){return '<div class="qa" style="margin-bottom:4px"><button class="btn ghost sm" onclick="sendCol(\''+id+'\',\''+esc(c.name).replace(/\x27/g,'')+'\')">📎 '+esc(c.name)+'</button></div>';}).join(''):'<div class="tl">No stage-specific piece — send the market brief.</div>');
+    var wrap=document.createElement('div'); wrap.innerHTML=col+quoteBlock(id,{value_mo:(document.getElementById('qp-'+id)?null:'')});
+    d.appendChild(wrap);
+    renderQuotes(id);
+  }, 60);
+};
+function sendCol(id,name){ DDSales.sendCollateral(id,name).then(function(){ toast('📎 Logged: sent '+name); loadPipe(); }); }
+
+(function(){ function go(){ try{ if(window.DDSales&&DDSales.ready()){ loadPipe(); kbRender(); } else setTimeout(go,1000); }catch(e){} } setTimeout(go,900); })();
 </script>
 </body></html>

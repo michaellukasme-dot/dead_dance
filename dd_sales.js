@@ -70,9 +70,57 @@
     return { open: open.length, value_mo: val, avg_health: health, at_risk: atRisk, won: won };
   }
 
+  // ---- module 3: knowledge base (add-to; grounds drafted answers) ----
+  function kbAdd(category, title, body) {
+    var c = client(), id = myId(); if (!c) return Promise.reject('no-backend');
+    return c.rpc('dd_kb_add', { p_member_id: id, p_category: category || 'playbook', p_title: title || '', p_body: body || '' })
+      .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+  }
+  function kbList(category) {
+    var c = client(); if (!c) return Promise.resolve([]);
+    return c.rpc('dd_kb_list', { p_category: category || null }).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
+  }
+  function kbSearch(q) {
+    var c = client(); if (!c) return Promise.resolve([]);
+    return c.rpc('dd_kb_search', { p_q: q || null }).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
+  }
+
+  // ---- module 4: collateral shelf (real assets; auto-suggest by stage) ----
+  var COLLATERAL = [
+    { id: 'board', name: 'THE BOARD — map exhibit', file: 'THE_BOARD_rhino_exhibit.pdf', stages: ['prospect', 'contacted'] },
+    { id: 'opportunity', name: 'The Opportunity — market brief', file: 'BRIEF_The_Opportunity_market.pdf', stages: ['contacted', 'meeting'] },
+    { id: 'built', name: "What We've Built — features", file: 'BRIEF_What_Weve_Built_features.pdf', stages: ['meeting', 'proposal'] },
+    { id: 'positioning', name: 'Network positioning', file: 'RHINO_POSITIONING_network_karaoke.pdf', stages: ['meeting', 'proposal'] },
+    { id: 'whitebox', name: 'White Box — standalone', file: 'WHITE_BOX_network_karaoke_any_catalogue.pdf', stages: ['proposal'] }
+  ];
+  function collateral() { return COLLATERAL.slice(); }
+  function suggestCollateral(stage) { return COLLATERAL.filter(function (c) { return c.stages.indexOf(stage) >= 0; }); }
+  function sendCollateral(accountId, name) { return logActivity(accountId, 'email', 'Sent collateral: ' + name); }
+
+  // ---- module 5: quote -> pay (CPQ-lite; payment gated on Stripe) ----
+  function quoteCreate(accountId, tier, priceMo) {
+    var c = client(), id = myId(); if (!c || !id) return Promise.reject('no-backend');
+    return c.rpc('dd_quote_create', { p_account_id: accountId, p_member_id: id, p_tier: tier || 'venue', p_price_mo: (priceMo != null ? priceMo : 0) })
+      .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+  }
+  function quoteStatus(quoteId, status) {
+    var c = client(), id = myId(); if (!c || !id) return Promise.reject('no-backend');
+    return c.rpc('dd_quote_status', { p_quote_id: quoteId, p_member_id: id, p_status: status })
+      .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+  }
+  function quotesFor(accountId) {
+    var c = client(), id = myId(); if (!c || !id) return Promise.resolve([]);
+    return c.rpc('dd_quotes_for', { p_account_id: accountId, p_member_id: id }).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
+  }
+  // the fee math — Rule Zero: 15% on the room, never the band
+  function feeMath(priceMo, pct) { pct = (pct == null ? 15 : pct); var house = Math.round(priceMo * pct) / 100; return { price_mo: priceMo, fee_pct: pct, house_mo: house, room_keeps: Math.round((priceMo - house) * 100) / 100 }; }
+
   root.DDSales = {
     ready: ready, upsertAccount: upsertAccount, setStage: setStage, addContact: addContact,
     logActivity: logActivity, pipeline: pipeline, contacts: contacts, activities: activities,
-    nextAction: nextAction, summary: summary, myId: myId
+    nextAction: nextAction, summary: summary, myId: myId,
+    kbAdd: kbAdd, kbList: kbList, kbSearch: kbSearch,
+    collateral: collateral, suggestCollateral: suggestCollateral, sendCollateral: sendCollateral,
+    quoteCreate: quoteCreate, quoteStatus: quoteStatus, quotesFor: quotesFor, feeMath: feeMath
   };
 })(typeof window !== 'undefined' ? window : this);
