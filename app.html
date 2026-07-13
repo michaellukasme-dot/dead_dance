@@ -2,7 +2,7 @@
 <!-- dead_dance · v1 (2026-06-24) · familiar/easy social network + market-of-markets for the Grateful Dead / Jerry world.
      Frameworkless offline PWA. HONEST-STATE: demo data; NO real auth / payments / marketplace (counsel-gated); NO
      audio served until LICENSED (JGB/GD — default-deny). Shakedown Street market, the live Archive (cassette + JGB
-     catalog), the show-attendance badge, chapters, events, Farrah. H&F design — lot-culture-at-dusk palette. -->
+     catalog), the show-attendance badge, chapters, events, Rosebud. H&F design — lot-culture-at-dusk palette. -->
 <html lang="en" data-theme="light"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>dead_dance</title>
@@ -133,7 +133,7 @@ a{color:inherit}
 </div>
 <div class="nearpanel" id="nearPanel" style="display:none"></div>
 <div class="wrap"><div id="view"></div><div id="archivepanel" style="display:none"></div></div>
-<button class="farrah" title="Farrah" onclick="farrah()">🎙️</button>
+<button class="farrah" title="Rosebud" onclick="farrah()">🎙️</button>
 <div class="nav" id="nav"></div>
 <div class="ovl" id="ovl" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
 
@@ -1059,7 +1059,7 @@ function calBar(){
  return head+grid+detail;
 }
 
-/* ---- ⚖️ LEGAL (the Chapter Head's hardest job) + 🗺️ event location REVEAL with Farrah nav ----
+/* ---- ⚖️ LEGAL (the Chapter Head's hardest job) + 🗺️ event location REVEAL with Rosebud nav ----
    NOT legal advice: a compliance CHECKLIST the Chapter Head takes to local authorities/counsel. */
 var LEGAL_ITEMS=[
  "🪪 Land permission — written OK from the owner/manager, OR a county/state-park permit (Greyhound Rock is a county coastal park).",
@@ -1090,7 +1090,7 @@ if(!EVENTS.length){
 function saveEvents(){try{localStorage.setItem("dd.events",JSON.stringify(EVENTS.slice(0,50)));}catch(e){}}
 function fmtCountdown(ms){ms=Math.max(0,ms);var m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);return m+"m "+(s<10?"0":"")+s+"s";}
 function planEvent(){
- document.getElementById("sheet").innerHTML='<h3>🌹 Schedule a dead_dance</h3><div class="sb"><b>Our namesake event</b> — the circle of lights. It schedules like any event (date, reveal, Farrah guides everyone in) but it\'s <b>special</b>: it lands in the family\'s feed and bursts into the top-right widget with the dancers. Location can be fixed or fluid. <b>Legal first:</b> you can\'t publish without confirming you\'ve secured the arrangements.</div>'+
+ document.getElementById("sheet").innerHTML='<h3>🌹 Schedule a dead_dance</h3><div class="sb"><b>Our namesake event</b> — the circle of lights. It schedules like any event (date, reveal, Rosebud guides everyone in) but it\'s <b>special</b>: it lands in the family\'s feed and bursts into the top-right widget with the dancers. Location can be fixed or fluid. <b>Legal first:</b> you can\'t publish without confirming you\'ve secured the arrangements.</div>'+
   '<div style="margin-bottom:9px"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Location (kept hidden until reveal)</div><input id="evLoc" placeholder="e.g., the north lot at Greyhound Rock" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div>'+
   '<div class="row" style="gap:8px;margin-bottom:9px"><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Starts in (min)</div><input id="evStart" type="number" value="120" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div><div style="flex:1"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Reveal (min before)</div><input id="evReveal" type="number" value="60" style="width:100%;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px"></div></div>'+
   '<div id="ddProgram"></div>'+
@@ -1163,15 +1163,15 @@ function eventsView(){
    '<div style="font-size:14px;margin-top:7px"><b>dead_dance</b> · starts in ~'+startsIn+' min</div>'+
    (e.program?'<div class="muted" style="font-size:12px;margin-top:4px">🎶 '+esc(e.program.show)+(e.program.bonus&&e.program.bonus.length?' + '+e.program.bonus.length+' bonus set'+(e.program.bonus.length>1?'s':''):'')+' · ~'+e.program.filled+'/'+e.program.programMin+' min</div>':'')+
    (revealed
-     ? '<div style="font-size:14px;margin-top:5px">📍 '+esc(e.location)+'</div><button class="btn gold sm" style="margin-top:8px" onclick="farrahGuide(\''+e.id+'\')">🎙️ Farrah, guide me there</button> <button class="btn ghost sm" style="margin-top:8px" onclick="checkInEvent(\''+e.id+'\')">✅ I\'m here (GPS)</button>'
-     : '<div class="muted" style="font-size:12.5px;margin-top:5px">Location reveals in <b class="ddcd" data-at="'+revealAt+'">'+fmtCountdown(revealAt-now)+'</b> — Farrah will guide you in.</div>')+
+     ? '<div style="font-size:14px;margin-top:5px">📍 '+esc(e.location)+'</div><button class="btn gold sm" style="margin-top:8px" onclick="farrahGuide(\''+e.id+'\')">🎙️ Rosebud, guide me there</button> <button class="btn ghost sm" style="margin-top:8px" onclick="checkInEvent(\''+e.id+'\')">✅ I\'m here (GPS)</button>'
+     : '<div class="muted" style="font-size:12.5px;margin-top:5px">Location reveals in <b class="ddcd" data-at="'+revealAt+'">'+fmtCountdown(revealAt-now)+'</b> — Rosebud will guide you in.</div>')+
    '</div>';
  }).join("");
 }
 function farrahGuide(id){var e=null;for(var i=0;i<EVENTS.length;i++)if(EVENTS[i].id===id)e=EVENTS[i];if(!e)return;
  var line="Routing you to "+e.location+". Follow the lights.";
  try{if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(line);u.rate=.96;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(x){}
- toast("🎙️ Farrah: routing you to "+e.location+"…");
+ toast("🎙️ Rosebud: routing you to "+e.location+"…");
 }
 /* GPS-confirmed attendance: at the show, geolocation proximity + your tap → a VERIFIED badge count */
 function checkInEvent(id){
@@ -1696,14 +1696,14 @@ function viewYou(){
   (function(){var ids=Object.keys(ATTENDED).filter(function(k){return ATTENDED[k];});
    if(!ids.length)return '<div class="note">No rooms yet — open the <b>Archive</b> and tap “I was there” on a show you caught.</div>';
    return '<div class="card">'+ids.map(function(id){var s=showById(id);if(!s)return"";return '<div class="show"><div class="ic">✓</div><div class="nm"><b>'+esc(s.venue)+'</b><div class="s">'+esc(s.date)+" · "+esc(s.city)+", "+esc(s.state||s.country)+'</div></div><button class="minib" onclick="room(\''+id+'\')">👥 who else</button></div>';}).join("")+'</div>';})()+
-  '<div class="card list"><div class="it" onclick="farrah()"><div class="ic">🎙️</div><div class="nm"><b>Farrah</b><div class="s">Voice — route me to the show, hands-free</div></div></div>'+
+  '<div class="card list"><div class="it" onclick="farrah()"><div class="ic">🎙️</div><div class="nm"><b>Rosebud</b><div class="s">Voice — route me to the show, hands-free</div></div></div>'+
    '<div class="it" onclick="if(window.lukasA2HS)lukasA2HS.show();else toast(\'Install: tap Share, then Add to Home Screen.\')"><div class="ic">📲</div><div class="nm"><b>Add to Home Screen</b><div class="s">Install dead_dance — full-screen, works offline</div></div></div>'+
    '<div class="it" onclick="toast(\'Settings (demo)\')"><div class="ic">⚙️</div><div class="nm"><b>Settings</b><div class="s">Notifications · privacy</div></div></div></div>';
 }
 function farrah(){
  var line="Saturday's tribute is at the Ardmore Music Hall — Kristen's got grilled cheese on the lot. Want me to route you there?";
  try{if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(line);u.rate=.96;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}
- toast("🎙️ Farrah: routing you to the show…");
+ toast("🎙️ Rosebud: routing you to the show…");
 }
 /* ===================== "I Was There" — every show is a room ======================
    The viral core: mark the shows you caught → they roll into your badge → see who else
@@ -1806,7 +1806,7 @@ function nearParties(){
      '<span class="star" style="top:6px;left:26%">✨</span><span class="star" style="top:22px;right:16%;animation-delay:.5s">🌟</span><span class="star" style="bottom:8px;left:60%;animation-delay:1s">✨</span><span class="star" style="top:9px;left:8%;animation-delay:.8s">⭐</span><span class="star" style="bottom:10px;right:34%;animation-delay:1.3s">💫</span>'+
      '<div class="dancers"><span>🕺</span><span>💃</span><span>🕺</span><span>💃</span></div>'+
      '<div class="dd-h">🌹 <b>dead_dance</b> — '+esc(e.by||"a circle of lights")+'</div>'+
-     '<div class="dd-s">starts in '+when+' · '+(revealed?('📍 '+esc(e.location)):'🔒 location reveals soon — Farrah guides you in')+'</div>'+
+     '<div class="dd-s">starts in '+when+' · '+(revealed?('📍 '+esc(e.location)):'🔒 location reveals soon — Rosebud guides you in')+'</div>'+
    '</div>';
  }).join("");
 }

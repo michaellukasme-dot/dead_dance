@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Venue Pitch Kit — dead.dance</title>
+<meta name="theme-color" content="#2a1b3d">
+<!-- The autonomous CRM's PRESALES brick: a simple interview → the full customized offering for THAT
+     venue — real ROI night-math, a tailored value proposition, and a downloadable .pptx leave-behind.
+     The rep walks in warm and closes. External send + calendar booking stay one human tap (CAN-SPAM /
+     until Zoom/Gmail OAuth is connected); the OFFERING itself is generated for real from their numbers. -->
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--ink:#241a2b;--muted:#6b6475;--line:#ece4f2;--gold:#d8a24a;--rose:#b5384e;--green:#1f7a4d;--blue:#3f6fb0;--card:#fff;--bg:#f6f2fa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 'Helvetica Neue',Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.top{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,var(--purple),var(--purple2));color:#fff;display:flex;align-items:center;gap:10px;padding:11px 14px}
+.top b{font-size:15px}.top .sp{flex:1}.top .chan{font-size:10px;color:#c9b9dc;font-weight:700}
+.top a{color:#e9dff5;text-decoration:none;font-size:12.5px;border:1px solid #ffffff33;border-radius:8px;padding:5px 9px}
+.wrap{max-width:760px;margin:0 auto;padding:14px 14px 70px}
+.farrah{background:#efe7f6;border:1px solid #e0d3ee;border-radius:13px;padding:12px 14px;font-size:13px;color:#3a2350;margin-bottom:14px}
+.farrah b{color:var(--rose)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 8px 22px rgba(40,20,60,.05)}
+.card h2{font-size:17px;margin:0 0 3px}.sub{color:var(--muted);font-size:13px;margin-bottom:13px}
+label{display:block;font-size:12px;font-weight:800;margin:9px 0 4px}
+input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 11px;font:inherit;background:#fff}
+input:focus{outline:none;border-color:var(--rose)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.btn{border:0;border-radius:11px;padding:13px 16px;font-weight:900;font-size:14px;cursor:pointer;background:var(--rose);color:#fff;width:100%;margin-top:14px}
+.btn.gold{background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00}
+.btn.ghost{background:#f3edf8;color:var(--purple)}
+.btn.sm{width:auto;padding:9px 13px;font-size:13px;margin-top:0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 12px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:13px;text-align:center;background:#fbf9fd}
+.kpi .n{font-size:21px;font-weight:900;color:var(--green)}.kpi .l{font-size:10.5px;color:var(--muted);margin-top:2px}
+.vp{background:#fbf7ef;border:1px solid #f0e4cd;border-radius:12px;padding:14px;font-size:13.5px;line-height:1.6}
+.vp b{color:var(--ink)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.honest{font-size:11.5px;color:var(--muted);background:#faf7fd;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:13px}
+.hidden{display:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#120b1c;color:#fff;border-radius:11px;padding:11px 17px;font-size:13px;max-width:88%;text-align:center;display:none;z-index:9}
+@media(max-width:560px){.grid,.grid3{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="top"><b>🎯 Venue Pitch Kit</b><span class="chan">· the offering, built for them</span><span class="sp"></span>
+  <a href="sales_console.html">📇 CRM</a><a href="index.html">Home</a></div>
+
+<div class="wrap">
+  <div class="farrah">🌹 <b>Rosebud here.</b> Give me six answers about the room and I’ll build the whole offering — their real ROI, a value proposition in their own numbers, and a deck you can leave on the bar. Autonomous CRM does the rest: sends it, and books your face-to-face. You just walk in and close.</div>
+
+  <div class="card">
+    <h2>The interview</h2>
+    <div class="sub">Six quick questions. Everything downstream is built from these.</div>
+    <label for="vname">Venue</label><input id="vname" type="text" placeholder="Ardmore Music Hall">
+    <div class="grid">
+      <div><label for="vcity">City</label><input id="vcity" type="text" placeholder="Ardmore, PA"></div>
+      <div><label for="vcap">Capacity (seats)</label><input id="vcap" type="number" min="0" placeholder="300"></div>
+    </div>
+    <div class="grid3">
+      <div><label for="vcover">Cover / ticket ($)</label><input id="vcover" type="number" min="0" placeholder="20"></div>
+      <div><label for="vbar">Bar spend / head ($)</label><input id="vbar" type="number" min="0" placeholder="18"></div>
+      <div><label for="vfill">Slow-night fill (%)</label><input id="vfill" type="number" min="0" max="100" placeholder="35"></div>
+    </div>
+    <div class="grid3">
+      <div><label for="vband">Band cost ($)</label><input id="vband" type="number" min="0" placeholder="600"></div>
+      <div><label for="vsound">Sound / staff ($)</label><input id="vsound" type="number" min="0" placeholder="250"></div>
+      <div><label for="vnights">Slow nights / mo</label><input id="vnights" type="number" min="0" placeholder="4"></div>
+    </div>
+    <button class="btn gold" onclick="buildOffering()">🎯 Build the offering</button>
+  </div>
+
+  <div class="card hidden" id="out">
+    <h2>The offering — <span id="oname"></span></h2>
+    <div class="sub">Filled-night math, in their numbers. A dead-Tuesday, booked from the calendar of 900+ acts.</div>
+    <div class="kpis">
+      <div class="kpi"><div class="n" id="kNight">$0</div><div class="l">net per filled night</div></div>
+      <div class="kpi"><div class="n" id="kLift">$0</div><div class="l">lift vs their slow night</div></div>
+      <div class="kpi"><div class="n" id="kYear">$0</div><div class="l">added / year</div></div>
+    </div>
+    <div class="vp" id="vp"></div>
+    <div class="acts">
+      <button class="btn gold sm" onclick="downloadDeck()">📊 Download the deck (.pptx)</button>
+      <button class="btn sm" onclick="draftEmail()">✉️ Draft the offering email</button>
+      <button class="btn ghost sm" onclick="bookF2F()">📅 Propose the face-to-face</button>
+    </div>
+    <div class="honest">The ROI and deck are real, built from the numbers they gave. Per the guardrails, the <b>send</b> and the <b>booking</b> are one human tap for now (CAN-SPAM; silent auto-send + calendar booking switch on when the email/OAuth connections are live). Then it’s fully hands-off: the CRM sends and books, the rep just closes.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script>
+function $(id){return document.getElementById(id);}
+function num(id){return parseFloat(($(id).value||'').replace(/[^0-9.]/g,''))||0;}
+function money(n){ n=Math.round(n); return '$'+n.toLocaleString(); }
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3200);}
+var OFFER=null;
+
+function compute(){
+  var cap=num('vcap'), cover=num('vcover'), bar=num('vbar'), fill=Math.min(100,num('vfill'))/100 || 0,
+      band=num('vband'), sound=num('vsound'), nights=num('vnights')||4;
+  var full = cap*(cover+bar) - band - sound;              // net on a FILLED night
+  var slow = cap*fill*(cover+bar) - band - sound;         // net on their typical slow night
+  var lift = full - slow;
+  var year = lift*nights*12;
+  return {cap:cap,cover:cover,bar:bar,fill:fill,band:band,sound:sound,nights:nights,full:full,slow:slow,lift:lift,year:year};
+}
+function valueProp(v,name,city){
+  var pct=Math.round(v.fill*100);
+  return 'Right now <b>'+ (name||'your room') +'</b>’s slow nights run about <b>'+pct+'% full</b> — the stage is dark or half-lit, and the bar with it. '+
+    'DeadDance fills those nights from a <b>bookable calendar of 900+ tribute acts</b> and their built-in crowds, with the show’s ad <b>written and targeted for you at $0 ad spend</b>. '+
+    'Fill one slow night and the room nets <b>'+money(v.full)+'</b> instead of '+money(v.slow)+' — a <b>'+money(v.lift)+' lift</b>. '+
+    'Do that '+v.nights+' nights a month and it’s <b>'+money(v.year)+' a year</b> the room isn’t leaving on the table. '+
+    'You pay nothing on your door, bar, or kitchen — the small fee sits with the ticket buyer. Your only cost is a simple monthly subscription, and one booked night covers it many times over.';
+}
+function buildOffering(){
+  var name=($('vname').value||'').trim(); if(!name){ toast('Which venue?'); return; }
+  var city=($('vcity').value||'').trim();
+  var v=compute(); OFFER={name:name,city:city,v:v};
+  $('oname').textContent=name;
+  $('kNight').textContent=money(v.full);
+  $('kLift').textContent=money(v.lift);
+  $('kYear').textContent=money(v.year);
+  $('vp').innerHTML=valueProp(v,name,city);
+  $('out').classList.remove('hidden');
+  $('out').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function draftEmail(){
+  if(!OFFER)return; var v=OFFER.v;
+  var subj=encodeURIComponent('A full house on your slow nights — '+OFFER.name);
+  var body=encodeURIComponent('Hi — quick one for '+OFFER.name+'.\n\nWe fill dead nights from a calendar of 900+ tribute acts with their own crowds, $0 ad spend, and you never pay on your door, bar, or kitchen.\n\nIn your numbers: a filled slow night nets about '+money(v.full)+' vs '+money(v.slow)+' now — a '+money(v.lift)+' lift, ~'+money(v.year)+'/yr across '+v.nights+' nights a month.\n\nDeck attached. Could I grab 20 minutes in person this week?\n\n— DeadDance');
+  toast('✉️ Opening your mail — attach the deck, one tap to send.');
+  location.href='mailto:?subject='+subj+'&body='+body;
+}
+function bookF2F(){
+  if(!OFFER)return;
+  var t=new Date(Date.now()+3*864e5); t.setHours(15,0,0,0);
+  var dt=t.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  var end=new Date(t.getTime()+30*60000).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  var url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('DeadDance × '+OFFER.name+' — close')+'&dates='+dt+'/'+end+'&details='+encodeURIComponent('Walk '+OFFER.name+' through the offering and close the subscription.');
+  toast('📅 Proposing the face-to-face — one tap to put it on the calendar.');
+  window.open(url,'_blank');
+}
+function downloadDeck(){
+  if(!OFFER || !window.PptxGenJS){ toast('Deck engine still loading — try again in a second.'); return; }
+  var v=OFFER.v, name=OFFER.name, city=OFFER.city;
+  var P=new PptxGenJS(); P.defineLayout({name:'DD',width:10,height:5.63}); P.layout='DD';
+  var PURP='2a1b3d', GOLD='d8a24a', GREEN='1f7a4d', INK='241a2b', MUT='6b6475';
+  // 1 — title
+  var s=P.addSlide(); s.background={color:PURP};
+  s.addText('DeadDance × '+name, {x:0.6,y:1.7,w:8.8,h:1,fontFace:'Arial',fontSize:34,bold:true,color:'FFFFFF'});
+  s.addText('Fill your slow nights. Keep every dollar of your door.', {x:0.6,y:2.7,w:8.8,h:0.6,fontSize:16,color:'e9dff4'});
+  s.addText((city||'')+'  ·  a proposal for your room', {x:0.6,y:4.6,w:8.8,h:0.4,fontSize:11,color:'b7a6d1'});
+  // 2 — the problem
+  s=P.addSlide();
+  s.addText('The problem', {x:0.6,y:0.5,w:8.8,h:0.6,fontSize:24,bold:true,color:PURP});
+  s.addText([
+    {text:'Your slow nights run ~'+Math.round(v.fill*100)+'% full — dark stage, quiet bar.\n',options:{fontSize:16,color:INK,bullet:true}},
+    {text:'More stages want music than there are acts to fill them.\n',options:{fontSize:16,color:INK,bullet:true}},
+    {text:'The draw and the marketing are the missing piece — not the room.',options:{fontSize:16,color:INK,bullet:true}}
+  ],{x:0.8,y:1.5,w:8.4,h:2.5,lineSpacingMultiple:1.3});
+  // 3 — the offering
+  s=P.addSlide();
+  s.addText('What DeadDance brings', {x:0.6,y:0.5,w:8.8,h:0.6,fontSize:24,bold:true,color:PURP});
+  s.addText([
+    {text:'A bookable calendar of 900+ tribute acts — with their own crowds.\n',options:{fontSize:15,color:INK,bullet:true}},
+    {text:'The show’s ad written & targeted for you — $0 ad spend.\n',options:{fontSize:15,color:INK,bullet:true}},
+    {text:'Tickets, a demand waitlist, and an optional venue store.\n',options:{fontSize:15,color:INK,bullet:true}},
+    {text:'You never pay on your door, bar, or kitchen.',options:{fontSize:15,color:GREEN,bullet:true,bold:true}}
+  ],{x:0.8,y:1.5,w:8.4,h:2.6,lineSpacingMultiple:1.3});
+  // 4 — the ROI (their numbers)
+  s=P.addSlide();
+  s.addText('Your numbers', {x:0.6,y:0.5,w:8.8,h:0.6,fontSize:24,bold:true,color:PURP});
+  var rows=[
+    [{text:'Filled slow night — net',options:{bold:true}},{text:money(v.full),options:{align:'right',bold:true,color:GREEN}}],
+    [{text:'Your typical slow night'},{text:money(v.slow),options:{align:'right'}}],
+    [{text:'Lift per night',options:{bold:true}},{text:money(v.lift),options:{align:'right',bold:true}}],
+    [{text:v.nights+' nights/mo × 12'},{text:money(v.year)+' / yr',options:{align:'right',bold:true,color:GREEN}}]
+  ];
+  s.addTable(rows,{x:0.8,y:1.6,w:8.4,fontSize:16,color:INK,border:{type:'solid',color:'e6e0f0',pt:1},rowH:0.55,valign:'middle'});
+  s.addText('Door + bar, minus band + sound, across your capacity. One filled night covers the subscription many times over.',{x:0.8,y:4.4,w:8.4,h:0.6,fontSize:11,italic:true,color:MUT});
+  // 5 — the ask
+  s=P.addSlide(); s.background={color:PURP};
+  s.addText('The ask', {x:0.6,y:0.7,w:8.8,h:0.6,fontSize:24,bold:true,color:GOLD});
+  s.addText('A simple monthly subscription — and we start filling your dark nights.\n\nNever a charge to the band. Never a fee on your door.\n\nLet’s find one Tuesday to prove it.',{x:0.6,y:1.7,w:8.8,h:2.5,fontSize:18,color:'FFFFFF',lineSpacingMultiple:1.3});
+  s.addText('🌹 DeadDance · deaddance.app',{x:0.6,y:4.8,w:8.8,h:0.4,fontSize:12,bold:true,color:'d8a24a'});
+  P.writeFile({fileName:'DeadDance_'+name.replace(/[^a-z0-9]+/gi,'_')+'_offering.pptx'});
+  toast('📊 Building your deck…');
+}
+</script>
+</body></html>

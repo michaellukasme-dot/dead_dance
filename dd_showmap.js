@@ -1,4 +1,4 @@
-/* dead_dance — Show Map (home page). MERGED with the TCTP/Farrah "bus map" brain.
+/* dead_dance — Show Map (home page). MERGED with the TCTP/Rosebud "bus map" brain.
    Honest-state: plots UPCOMING shows on a real projected US map by venue city.
    Data = real headliner tour dates (cross-checked to seeded venues). Sample rows labeled.
 
@@ -6,7 +6,7 @@
      • NATIONAL — real map (state borders) + 11 CHAPTER badges. Lit = show count.
        DIM (dashed "+") = a chapter waiting — tap to post the first date (the growth loop).
      • CHAPTER — geographic zoom into the chapter + its show list / festivals / tickets /
-       "add a date". Farrah narrates every level.
+       "add a date". Rosebud narrates every level.
    "Near me" zooms to the viewer's chapter (GPS or picked). Framework-less. Nothing sells here. */
 (function () {
   "use strict";
@@ -164,7 +164,7 @@
   ];
   var STATE_PATH = STATE_LINES.map(function (ln) { return toPath(ln, false); }).join(" ");
 
-  /* ---- 4c. Chapters (= Ambassador patches / Farrah regions). centroid + festival key. ---- */
+  /* ---- 4c. Chapters (= Ambassador patches / Rosebud regions). centroid + festival key. ---- */
   var CHAPTERS = [
     { name: "Bay Area",                c: [37.9, -122.3], fk: "bayarea" },
     { name: "Pacific Northwest",       c: [46.2, -122.3], fk: "pnw" },
@@ -418,7 +418,7 @@
       if (window.toast) window.toast("🎟️ " + s.band + " — secure checkout. (Demo)");
     }
 
-    /* --- the drill panel (Farrah show list) --- */
+    /* --- the drill panel (Rosebud show list) --- */
     function renderPanel(ch) {
       var fests = festsFor(ch);
       var rows = ch.shows.map(function (s) {
