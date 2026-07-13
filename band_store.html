@@ -9,12 +9,17 @@
 .fulfil b{font-weight:700}.fulfil .seg{margin-left:auto;display:flex;gap:6px;background:#f1ecf7;border-radius:999px;padding:3px}
 .seg button{border:0;background:none;padding:6px 12px;border-radius:999px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--dd-muted)}
 .seg button.on{background:#fff;color:var(--dd-ink);box-shadow:0 1px 4px rgba(27,18,38,.12)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:16px;margin:6px 0 4px}
+.sect{margin:24px 0 2px;display:flex;align-items:center;gap:12px}
+.sect h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--dd-ink);margin:0;font-weight:800;white-space:nowrap}
+.sect .ln{flex:1;height:2px;border-radius:2px}
+.sect .ct{font-size:11px;color:var(--dd-muted);font-weight:700}
 .prod{background:#fff;border:1px solid var(--dd-line);border-radius:14px;overflow:hidden;box-shadow:var(--dd-shadow);transition:transform .15s,box-shadow .15s;cursor:pointer}
 .prod:hover{transform:translateY(-4px);box-shadow:0 10px 26px rgba(27,18,38,.12)}
 .mock{aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative}
-.mock .logo{width:46%;height:46%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;letter-spacing:.5px}
+.mock .logo{width:44%;height:44%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;letter-spacing:.5px}
 .mock .ptype{position:absolute;bottom:8px;left:10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#0006}
+.mock .fav{position:absolute;top:8px;right:8px;font-size:9.5px;font-weight:800;color:#fff;border-radius:999px;padding:2px 8px;box-shadow:0 2px 6px rgba(27,18,38,.25)}
 .pinfo{padding:11px 13px}
 .pinfo .pn{font-weight:700;font-size:14px}
 .pinfo .pr{color:var(--dd-muted);font-size:13px;margin-top:1px}
@@ -40,7 +45,7 @@
   </div>
   <div class="dd-hint" id="fnote">Turnkey and consistent — Custom Ink presses and ships each order. You never touch a box.</div>
 
-  <div class="grid" id="grid"></div>
+  <div id="store"></div>
 
   <div class="dd-hint" style="margin-top:14px">Every claimed band gets this store the day they claim — pre-loaded with your logo on a full line. You choose which items to sell; nothing prints until it's ordered, and you take a cut on every sale. <b class="dd-locked">Honest-state: nothing sells until rights + payments are live.</b></div>
   <div class="dd-foot" id="bfoot"></div>
@@ -50,39 +55,81 @@
 <script>
 function band(){ try{ return new URLSearchParams(location.search).get('band')||"Jerry's Middle Finger"; }catch(e){ return "Jerry's Middle Finger"; } }
 function monogram(n){ return (n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'DD'; }
-// a real merch line — garment color grounds the mockup; the band's logo sits on top of each.
-var PRODUCTS=[
-  {n:'Classic Tee',price:28,bg:'#1b1226',fg:'#fff'},
-  {n:'Premium Tee',price:32,bg:'#3a1f57',fg:'#fff'},
-  {n:'Long Sleeve',price:36,bg:'#0e2a24',fg:'#fff'},
-  {n:'Pullover Hoodie',price:54,bg:'#20242b',fg:'#fff'},
-  {n:'Crewneck',price:48,bg:'#6a3d1a',fg:'#fff'},
-  {n:'Tank Top',price:26,bg:'#7a1020',fg:'#fff'},
-  {n:'Show Poster (18×24)',price:22,bg:'#f2eee7',fg:'#1b1226'},
-  {n:'Sticker Pack',price:8,bg:'#e6e0f0',fg:'#1b1226'},
-  {n:'Tote Bag',price:24,bg:'#e8e2d4',fg:'#1b1226'},
-  {n:'Dad Hat',price:30,bg:'#243b2a',fg:'#fff'},
-  {n:'Beanie',price:28,bg:'#161616',fg:'#fff'},
-  {n:'Coffee Mug',price:18,bg:'#ffffff',fg:'#1b1226'}
+/* The catalogue (Custom Ink / Vista-style range). In PRODUCTION a print-on-demand API
+   (Printful / Printify) composites the band's uploaded logo onto real product photos and
+   dropships each order — the band toggles which items to sell. Here we mock the mockups.
+   `core` items every store carries; the rest are picked per band, so no two look the same. */
+var POOL=[
+  {n:'Classic Tee',price:28,cat:'Tops',bg:'#1b1226',fg:'#fff',core:1},
+  {n:'Pullover Hoodie',price:54,cat:'Tops',bg:'#20242b',fg:'#fff',core:1},
+  {n:'Premium Tri-Blend Tee',price:32,cat:'Tops',bg:'#3a1f57',fg:'#fff'},
+  {n:'Long Sleeve Tee',price:36,cat:'Tops',bg:'#0e2a24',fg:'#fff'},
+  {n:'Baseball Raglan',price:34,cat:'Tops',bg:'#f2eee7',fg:'#1b1226'},
+  {n:'Tank Top',price:26,cat:'Tops',bg:'#7a1020',fg:'#fff'},
+  {n:'Zip Hoodie',price:58,cat:'Tops',bg:'#161616',fg:'#fff'},
+  {n:'Crewneck Sweatshirt',price:48,cat:'Tops',bg:'#6a3d1a',fg:'#fff'},
+  {n:'Flannel Shirt',price:62,cat:'Tops',bg:'#3b1414',fg:'#fff'},
+  {n:'Dad Hat',price:30,cat:'Headwear',bg:'#243b2a',fg:'#fff'},
+  {n:'Trucker Cap',price:28,cat:'Headwear',bg:'#20242b',fg:'#fff'},
+  {n:'Snapback',price:32,cat:'Headwear',bg:'#1b1226',fg:'#fff'},
+  {n:'Beanie',price:26,cat:'Headwear',bg:'#3a1f57',fg:'#fff'},
+  {n:'Bucket Hat',price:30,cat:'Headwear',bg:'#0e2a24',fg:'#fff'},
+  {n:'Show Poster (18×24)',price:22,cat:'Home & Extras',bg:'#f2eee7',fg:'#1b1226',core:1},
+  {n:'Sticker Pack',price:8,cat:'Home & Extras',bg:'#e6e0f0',fg:'#1b1226',core:1},
+  {n:'Coffee Mug',price:18,cat:'Home & Extras',bg:'#ffffff',fg:'#1b1226'},
+  {n:'Pint Glass',price:14,cat:'Home & Extras',bg:'#e8e2d4',fg:'#1b1226'},
+  {n:'Tote Bag',price:24,cat:'Home & Extras',bg:'#e8e2d4',fg:'#1b1226'},
+  {n:'Enamel Pin',price:12,cat:'Home & Extras',bg:'#161616',fg:'#fff'},
+  {n:'Woven Patch',price:10,cat:'Home & Extras',bg:'#243b2a',fg:'#fff'},
+  {n:'Koozie',price:9,cat:'Home & Extras',bg:'#7a1020',fg:'#fff'},
+  {n:'Bandana',price:16,cat:'Home & Extras',bg:'#3a1f57',fg:'#fff'},
+  {n:'Wall Tapestry',price:45,cat:'Home & Extras',bg:'#20242b',fg:'#fff'},
+  {n:'Water Bottle',price:26,cat:'Home & Extras',bg:'#0e2a24',fg:'#fff'},
+  {n:'Crew Socks',price:15,cat:'Home & Extras',bg:'#6a3d1a',fg:'#fff'}
 ];
-var CART=0;
+var ACCENTS=['#e01f45','#5a2e86','#b07d17','#0d9488','#d85a30','#378add','#2a6b46','#b8002e'];
+var CATS=['Tops','Headwear','Home & Extras'];
+function hashName(s){ var h=2166136261; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function rng(seed){ return function(){ seed=(Math.imul(seed,1664525)+1013904223)>>>0; return seed/4294967296; }; }
+function pickProducts(name){
+  var seed=hashName(name), r=rng(seed);
+  var core=POOL.filter(function(p){return p.core;});
+  var opt=POOL.filter(function(p){return !p.core;}).slice();
+  for(var i=opt.length-1;i>0;i--){ var j=Math.floor(r()*(i+1)); var t=opt[i]; opt[i]=opt[j]; opt[j]=t; }
+  var n=7+Math.floor(r()*5);                       // 7–11 optional → each store curated & distinct
+  var chosen=core.concat(opt.slice(0,n));
+  if(!chosen.some(function(p){return p.cat==='Headwear';})){ var hw=POOL.filter(function(p){return p.cat==='Headwear';}); chosen.push(hw[Math.floor(r()*hw.length)]); }
+  return { items:chosen, accent:ACCENTS[seed%ACCENTS.length] };
+}
+var CART=0, SHOWN=[];
 function setFul(f){ [].forEach.call(document.querySelectorAll('#seg button'),function(b){ b.classList.toggle('on',b.getAttribute('data-f')===f); });
   if(f==='ci'){ fdesc.textContent='Custom Ink — on demand, nationwide'; fnote.innerHTML='Turnkey and consistent — Custom Ink presses and ships each order. You never touch a box.'; }
   else{ fdesc.textContent='a local printer, arranged by your Ambassador'; fnote.innerHTML='Community option: your patch’s Ambassador can route orders to a <b>local shop</b> — keeps the money in the scene. Turnaround and finish vary by shop (not as consistent as Custom Ink).'; }
 }
+function card(p,i,mono,accent,fav){
+  var light=(p.fg==='#fff');
+  return '<div class="prod" onclick="add('+i+')">'+
+    '<div class="mock" style="background:'+p.bg+'">'+
+      (fav?'<span class="fav" style="background:'+accent+'">★ signature</span>':'')+
+      '<div class="logo" style="background:'+(light?'#ffffff22':'#00000010')+';color:'+p.fg+';border:1.5px solid '+(light?'#ffffff55':'#00000022')+'">'+mono+'</div>'+
+      '<span class="ptype" style="color:'+(light?'#ffffff88':'#0006')+'">'+p.n.split(' ')[0]+'</span>'+
+    '</div>'+
+    '<div class="pinfo"><div class="pn">'+p.n+'</div><div class="pr">$'+p.price.toFixed(2)+'</div>'+
+    '<button class="add" onclick="event.stopPropagation();add('+i+')">Add to cart</button></div></div>';
+}
 function render(){
-  var name=band(), mono=monogram(name);
+  var name=band(), mono=monogram(name), sel=pickProducts(name), accent=sel.accent;
+  SHOWN=sel.items;
   document.getElementById('bname').textContent=name;
-  document.getElementById('bfoot').textContent='© '+(new Date().getFullYear())+' '+name+' · a DeadDance store — powered by Custom Ink, or your Ambassador’s local shop.';
-  document.getElementById('grid').innerHTML=PRODUCTS.map(function(p,i){
-    return '<div class="prod" onclick="add('+i+')">'+
-      '<div class="mock" style="background:'+p.bg+'">'+
-        '<div class="logo" style="background:'+(p.fg==='#fff'?'#ffffff22':'#00000010')+';color:'+p.fg+';border:1.5px solid '+(p.fg==='#fff'?'#ffffff55':'#00000022')+'">'+mono+'</div>'+
-        '<span class="ptype" style="color:'+(p.fg==='#fff'?'#ffffff88':'#0006')+'">'+p.n.split(' ')[0]+'</span>'+
-      '</div>'+
-      '<div class="pinfo"><div class="pn">'+p.n+'</div><div class="pr">$'+p.price.toFixed(2)+'</div>'+
-      '<button class="add" onclick="event.stopPropagation();add('+i+')">Add to cart</button></div></div>';
-  }).join('');
+  document.getElementById('bfoot').textContent='© '+(new Date().getFullYear())+' '+name+' · a DeadDance store — your logo on demand via Custom Ink, or your Ambassador’s local shop.';
+  var html='';
+  CATS.forEach(function(cat){
+    var items=SHOWN.filter(function(p){return p.cat===cat;});
+    if(!items.length) return;
+    html+='<div class="sect"><h3>'+cat+'</h3><span class="ln" style="background:'+accent+'33"></span><span class="ct">'+items.length+' item'+(items.length>1?'s':'')+'</span></div>';
+    html+='<div class="grid">'+items.map(function(p){ return card(p,SHOWN.indexOf(p),mono,accent, p.n==='Classic Tee'); }).join('')+'</div>';
+  });
+  document.getElementById('store').innerHTML=html;
 }
 function add(i){ CART++; document.getElementById('cart').textContent='Cart · '+CART; }
 render();

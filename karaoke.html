@@ -143,6 +143,8 @@ h2{font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted
 @media(max-width:560px){.sells{grid-template-columns:1fr}}
 .sell{background:#1b1030;border:1px solid #362552;border-radius:14px;padding:14px;text-align:center}
 .sell .ic{font-size:26px}.sell h4{margin:6px 0 3px;font-size:14px}.sell p{font-size:11.5px;color:var(--muted);margin:0 0 8px;min-height:44px}
+.sell .tourart{aspect-ratio:1;width:62px;margin:0 auto;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 14px #0007}
+.sell .tourart span{font-weight:900;font-size:20px;line-height:1}.sell .tourart small{font-size:8.5px;letter-spacing:2px;opacity:.85;margin-top:2px}
 .sell button{width:100%;border:0;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;background:#241638;color:#e9d8ff}
 /* songbook */
 .sb-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
@@ -263,20 +265,8 @@ h2{font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted
 
 <!-- EVERY NIGHT SELLS THE NIGHT -->
 <h2>🛍️ Every night sells the night <span class="gate lg">🔒 licensed</span></h2>
-<div class="sells">
-  <div class="sell gatedbox">
-    <div class="ic">👕</div><h4>The show's tour tee</h4><p>The genuine licensed artwork from <span id="teeShow">this show's</span> tour — printed on demand.</p>
-    <button onclick="lockedMerch('the licensed tour tee')">Prints with the license</button>
-  </div>
-  <div class="sell gatedbox">
-    <div class="ic">💿</div><h4>The Rhino record</h4><p>The genuine Rhino release / archive file of tonight's show, to download.</p>
-    <button onclick="lockedMerch('the Rhino download')">Downloads with the license</button>
-  </div>
-  <div class="sell gatedbox">
-    <div class="ic">🎶</div><h4>Print me the Vinyl</h4><p>Premium: press tonight's show to a real record, shipped to your door.</p>
-    <button onclick="lockedMerch('Print the Vinyl')">Presses with the license</button>
-  </div>
-</div>
+<div class="sells" id="sellsStrip"></div>
+<div class="note" style="color:var(--muted);margin-top:6px">The store follows the night — sing <b>Cornell ’77</b>, the <b>’77 tour print</b> surfaces. Genuine licensed reprints (not bootlegs), print-on-demand. It's the shirt fans already hunt for — matched to the moment they want it most. 🔒 lights up with the license.</div>
 
 <h2>📖 The Songbook <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— they never have Kimock. We do.</span> <span class="gate">🔒 playback licensed</span></h2>
 <div class="sb-ctrl">
@@ -352,8 +342,24 @@ function renderShow(){
    '</div>'+
    '<div class="note" style="margin-top:10px;color:#c9bce9"><b>The show is the unit:</b> '+s.mics+' mics × '+songs+' songs = '+singers+' turns on the mic. The setlist below <b>is</b> tonight\'s running order.</div>'+
    '<div class="setlist">'+setHtml+'</div>';
- var tee=document.getElementById('teeShow'); if(tee) tee.textContent=s.v+' ('+s.d+')';
+ renderSells();
  renderVox();
+}
+
+/* ---- the store follows the night: tour tee = the show's year/tour (gated) ---- */
+function showYear(){ return (String((curShow&&curShow.d)||'').match(/\d{4}/)||['1977'])[0]; }
+function eraTint(yr){ yr=+yr; return yr<=1971?'linear-gradient(135deg,#7a1020,#160c28)': yr<1979?'linear-gradient(135deg,#b8002e,#160c28)': yr<1990?'linear-gradient(135deg,#3a1d5e,#160c28)':'linear-gradient(135deg,#0e2a24,#160c28)'; }
+function renderSells(){
+ var host=document.getElementById('sellsStrip'); if(!host) return;
+ var s=curShow||SHOWS[0], yr=showYear();
+ host.innerHTML=
+   '<div class="sell gatedbox"><div class="tourart" style="background:'+eraTint(yr)+'"><span>'+yr+'</span><small>TOUR</small></div>'+
+     '<h4>The '+esc(yr)+' tour tee</h4><p>Genuine licensed print from the '+esc(s.v)+' run — '+esc(s.d)+'. Print-on-demand.</p>'+
+     '<button onclick="lockedMerch(\'the '+esc(yr)+' tour tee\')">Prints with the license</button></div>'+
+   '<div class="sell gatedbox"><div class="ic">💿</div><h4>The Rhino record · '+esc(yr)+'</h4><p>The official Rhino release / archive file of '+esc(s.v)+', '+esc(s.d)+'.</p>'+
+     '<button onclick="lockedMerch(\'the Rhino '+esc(yr)+' download\')">Downloads with the license</button></div>'+
+   '<div class="sell gatedbox"><div class="ic">🎶</div><h4>Print me the Vinyl</h4><p>Press '+esc(s.v)+' · '+esc(s.d)+' to a real record, shipped to your door.</p>'+
+     '<button onclick="lockedMerch(\'Print the Vinyl\')">Presses with the license</button></div>';
 }
 
 /* ===== VOCAL ROSTER — who sings what, verse by verse, by the night's lineup =====
