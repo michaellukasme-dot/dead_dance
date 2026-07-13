@@ -949,6 +949,11 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('band_onboard.html','🌹 Band Install')})"><span>🎤</span><div><b>Band Install</b><i>Claim your band. 963 seeded.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('venue_console.html','🗓️ Venue Console')})"><span>🗓️</span><div><b>Venue Console</b><i>Find an act. Your store. Night math.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('poster_maker.html','🖼️ Create a Show Poster')})"><span>🖼️</span><div><b>Show Poster</b><i>Your look, the show, QR baked in.</i></div></a>
+    <div class="asec">Consoles — the Oz behind the curtain</div>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('band_console.html','🎸 Band Console')})"><span>🎸</span><div><b>Band Console</b><i>Autonomous gig management.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('venue_ops.html','🏛 Venue Console')})"><span>🏛</span><div><b>Venue Console</b><i>Autonomous event marketing.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('influencer_console.html','📡 Influencer Console')})"><span>📡</span><div><b>Influencer Console</b><i>Member drives + forward to DD.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('sales_console.html','📇 Sales Console')})"><span>📇</span><div><b>Sales Console</b><i>Pipeline, deal-health, cadence.</i></div></a>
     <div class="asec">Shop</div>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shakedown</b><i>The lot.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.openMiracle&&openMiracle()})"><span>🍀</span><div><b>Miracle Bucket</b><i>Free tickets.</i></div></a>
@@ -988,9 +993,21 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="citem" href="curator.html"><span>👑</span>Group Leader Console</a>
     <a class="citem" onclick="coGo('appsov',function(){openGig('feature')})"><span>💡</span>Add a feature</a>
    </div>
+   <div id="ddVer" style="text-align:center;font-size:11px;color:var(--muted,#9a8fb0);padding:10px 0 2px;letter-spacing:.03em">DeadDance · deaddance.app</div>
   </div>
  </div>
 </div>
+<script>
+/* show the LIVE deployed version, read from the active service-worker cache
+   (deaddance-vNNN-YYYY-MM-DD) so it's always what's actually running — never a guess. */
+(function(){
+  function paint(v){ var el=document.getElementById('ddVer'); if(el) el.innerHTML='DeadDance <b>'+v+'</b> · deaddance.app'; }
+  function pick(keys){ var best=null; (keys||[]).forEach(function(k){ var m=/deaddance-v(\d+)/.exec(k); if(m){ var n=+m[1]; if(!best||n>best.n) best={n:n,s:'v'+m[1]}; } }); return best?best.s:null; }
+  try{
+    if(window.caches&&caches.keys){ caches.keys().then(function(ks){ var v=pick(ks); if(v)paint(v); }); }
+  }catch(e){}
+})();
+</script>
 
 <!-- ===== Corner: ＋ Create (discoverable) ===== -->
 <div class="cornerov" id="createov" onclick="if(event.target===this)coClose('createov')">

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Venue Console — dead.dance</title>
+<meta name="theme-color" content="#2a1b3d">
+<!-- Venue cockpit: Autonomous Event Management. Book a show → the whole outbound marketing plan
+     auto-generates (announce → tickets → reminder → doors → recap → settle). In-app posts fire
+     real; ticket push takes one human tap. Nothing charges, nothing SMS. -->
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--ink:#241a2b;--muted:#6b6475;--line:#ece4f2;
+  --gold:#d8a24a;--rose:#b5384e;--green:#1f7a4d;--blue:#3f6fb0;--card:#fff;--bg:#f6f2fa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 'Helvetica Neue',Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.top{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,var(--purple),var(--purple2));color:#fff;display:flex;align-items:center;gap:10px;padding:11px 14px}
+.top b{font-size:15px}.top .sp{flex:1}.top .chan{font-size:10px;color:#c9b9dc;font-weight:700}
+.top a{color:#e9dff5;text-decoration:none;font-size:12.5px;border:1px solid #ffffff33;border-radius:8px;padding:5px 9px}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 70px}
+.farrah{background:#efe7f6;border:1px solid #e0d3ee;border-radius:13px;padding:12px 14px;font-size:13px;color:#3a2350;margin-bottom:14px}
+.farrah b{color:var(--rose)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px;text-align:center}
+.kpi .n{font-size:22px;font-weight:900;color:var(--purple)}.kpi .l{font-size:11px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:14px;box-shadow:0 8px 22px rgba(40,20,60,.05)}
+.card h2{font-size:17px;margin:0 0 3px}.sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+label{display:block;font-size:12px;font-weight:800;margin:9px 0 4px}
+input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 11px;font:inherit}
+input:focus{outline:none;border-color:var(--rose)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:11px;padding:12px 15px;font-weight:900;font-size:14px;cursor:pointer;background:var(--rose);color:#fff}
+.btn.ghost{background:#f3edf8;color:var(--purple)}.btn.gold{background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00}.btn.sm{padding:7px 11px;font-size:12px;border-radius:9px}
+.gig{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px;background:#fff}
+.gig .gh{display:flex;align-items:center;gap:9px;cursor:pointer}
+.gig .gh .v{font-weight:900;font-size:15px}.gig .gh .d{color:var(--muted);font-size:12.5px}
+.gig .gh .prog{margin-left:auto;font-size:11px;font-weight:800;color:var(--green);background:#e8f4ee;border-radius:999px;padding:3px 9px}
+.plan{margin-top:12px;border-top:1px dashed var(--line);padding-top:11px;display:none}.plan.open{display:block}
+.task{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid #f4eff8}.task:last-child{border-bottom:0}
+.task .when{font-size:10px;font-weight:800;color:#fff;border-radius:6px;padding:3px 6px;white-space:nowrap;margin-top:2px}
+.w-feed{background:var(--rose)}.w-external{background:var(--blue)}.w-ops{background:#8a7f97}
+.task .tx{flex:1;min-width:0}.task .tt{font-weight:800;font-size:13px}.task .tb{font-size:12px;color:var(--muted);margin-top:2px}
+.task .act{margin-top:6px;display:flex;gap:6px}.task.done{opacity:.55}.task.done .tt{text-decoration:line-through}
+.chan{font-size:10px;color:var(--muted);font-weight:700}
+.honest{font-size:11.5px;color:var(--muted);background:#faf7fd;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:12px}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:20px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#120b1c;color:#fff;border-radius:11px;padding:11px 17px;font-size:13px;max-width:88%;text-align:center;display:none;z-index:9}
+</style></head>
+<body>
+<div class="top"><b>🏛 Venue Console</b><span class="chan">· autonomous event mgmt</span><span class="sp"></span>
+  <a href="venue_console.html">Booking Agent</a><a href="console_directory.html">🗺 Map</a><a href="index.html">Home</a></div>
+
+<div class="wrap">
+  <div class="farrah">🌹 <b>Farrah here.</b> Book a show and I'll run the whole marketing calendar for your room — announce, tickets, reminders, doors, recap, settle. I fire the in-app posts for real; the ticket push waits for your one tap. You just fill the room.</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="kShows">0</div><div class="l">booked shows</div></div>
+    <div class="kpi"><div class="n" id="kNext">—</div><div class="l">next up</div></div>
+    <div class="kpi"><div class="n" id="kDone">0</div><div class="l">promo steps fired</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Your room</h2>
+    <div class="row2">
+      <div><label for="vname">Venue name</label><input id="vname" type="text" placeholder="Ardmore Music Hall"></div>
+      <div><label for="vcity">City</label><input id="vcity" type="text" placeholder="Ardmore, PA"></div>
+    </div>
+    <button class="btn ghost sm" style="margin-top:10px" onclick="saveVenue()">Save venue</button>
+  </div>
+
+  <div class="card">
+    <h2>➕ Book a show</h2>
+    <div class="sub">Confirm a band + date and the outbound marketing plan builds itself.</div>
+    <label for="gband">Band</label><input id="gband" type="text" placeholder="Splintered Sunlight">
+    <div class="row2">
+      <div><label for="gdate">Date</label><input id="gdate" type="date"></div>
+      <div><label for="gdoor">Doors / set</label><input id="gdoor" type="text" placeholder="Doors 8, set 9"></div>
+    </div>
+    <button class="btn gold" style="width:100%;margin-top:12px" onclick="addShow()">🎟️ Book + build the marketing</button>
+  </div>
+
+  <div class="card">
+    <h2>🤖 Autonomous Event Management</h2>
+    <div class="sub">Each booked show runs its own marketing calendar. Fire a step, or auto-run the in-app posts.</div>
+    <div id="gigs"><div class="empty">No shows booked yet — book one above.</div></div>
+    <div class="honest">In-app posts fire for real to the family feed. The ticket push opens the share sheet for your one tap. Ops steps are your checklist. Nothing charges, nothing texts.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid', v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v); } return {id:v}; }catch(e){ return {id:null}; } };
+  window.ME={name:(localStorage.getItem('dd.myname')||'You'),role:'venue'};
+})();
+</script>
+<script src="dd_attrib.js"></script>
+<script src="dd_join.js"></script>
+<script src="dd_feed.js"></script>
+<script src="dd_gigs.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function slug(s){return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3000);}
+var VEN={name:'',city:'',slug:''}, FIRED=0;
+try{ var v=JSON.parse(localStorage.getItem('dd.venue.console')||'null'); if(v){ VEN=v; } }catch(e){}
+document.getElementById('vname').value=VEN.name||''; document.getElementById('vcity').value=VEN.city||'';
+function saveVenue(){ VEN.name=(document.getElementById('vname').value||'').trim(); VEN.city=(document.getElementById('vcity').value||'').trim(); VEN.slug=slug(VEN.name);
+  try{ localStorage.setItem('dd.venue.console',JSON.stringify(VEN)); }catch(e){} toast('🌹 Saved — '+(VEN.name||'your room')); }
+function whenLabel(due){ if(!due)return'TBD'; try{ return new Date(due+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'}); }catch(e){ return due; } }
+function loadKPIs(){
+  if(!(window.DDGigs&&DDGigs.ready())){ setTimeout(loadKPIs,1200); return; }
+  DDGigs.listGigs('venue').then(function(gs){ gs=gs||[];
+    document.getElementById('kShows').textContent=gs.filter(function(g){return g.status!=='canceled';}).length;
+    var up=gs.filter(function(g){return g.gig_date;}).sort(function(a,b){return (a.gig_date>b.gig_date)?1:-1;})[0];
+    document.getElementById('kNext').textContent=up?whenLabel(up.gig_date):'—';
+    document.getElementById('kDone').textContent=FIRED; renderGigs(gs); });
+}
+function addShow(){
+  if(!VEN.name){ toast('Name your room first (top card) 🌹'); return; }
+  var band=(document.getElementById('gband').value||'').trim();
+  var date=document.getElementById('gdate').value||null; var door=(document.getElementById('gdoor').value||'').trim();
+  if(!band){ toast('Which band?'); return; }
+  if(!(window.DDGigs&&DDGigs.ready())){ toast('Connecting…'); return; }
+  toast('🤖 Building the marketing…');
+  DDGigs.createGig({template:'venue',band:band,slug:VEN.slug,venue:VEN.name,city:VEN.city,date:date,door:door})
+    .then(function(){ document.getElementById('gband').value='';document.getElementById('gdate').value='';document.getElementById('gdoor').value='';
+      toast('✅ Booked — the marketing plan is live below.'); loadKPIs(); })
+    .catch(function(){ toast('Could not book (backend).'); });
+}
+var OPEN={};
+function renderGigs(gs){
+  var host=document.getElementById('gigs'); gs=gs||[];
+  if(!gs.length){ host.innerHTML='<div class="empty">No shows booked yet — book one above.</div>'; return; }
+  host.innerHTML=gs.map(function(g){
+    return '<div class="gig" data-gig="'+g.id+'"><div class="gh" onclick="toggleGig(\''+g.id+'\')">'+
+      '<div><div class="v">'+esc(g.band||'Band')+'</div><div class="d">'+esc(g.venue||VEN.name)+(g.gig_date?(' · '+whenLabel(g.gig_date)):'')+'</div></div>'+
+      '<span class="prog" id="prog-'+g.id+'">plan</span></div><div class="plan" id="plan-'+g.id+'"></div></div>';
+  }).join('');
+  Object.keys(OPEN).forEach(function(id){ if(OPEN[id]) openPlan(id); });
+}
+function toggleGig(id){ OPEN[id]=!OPEN[id]; var p=document.getElementById('plan-'+id); if(!p)return; if(OPEN[id]){ p.classList.add('open'); openPlan(id); } else { p.classList.remove('open'); } }
+function openPlan(id){
+  var p=document.getElementById('plan-'+id); if(!p)return; p.classList.add('open');
+  DDGigs.tasksFor(id).then(function(tasks){
+    var done=tasks.filter(function(t){return t.status==='done';}).length; var pr=document.getElementById('prog-'+id); if(pr)pr.textContent=done+'/'+tasks.length+' done';
+    var feedPending=tasks.some(function(t){return t.channel==='feed'&&t.status==='pending';});
+    p.innerHTML=(feedPending?'<button class="btn sm" style="margin-bottom:10px" onclick="runPlan(\''+id+'\')">🤖 Auto-run the in-app posts</button>':'')+tasks.map(function(t){ return taskHTML(id,t); }).join('');
+  });
+}
+function taskHTML(gid,t){
+  var wc='w-'+t.channel, cl=(t.status==='done'?' done':''); var btn='';
+  if(t.status==='pending'){
+    if(t.channel==='feed') btn='<button class="btn sm" onclick="fire(\''+gid+'\',\''+t.id+'\')">📡 Post now</button>';
+    else if(t.channel==='external') btn='<button class="btn sm" style="background:var(--blue)" onclick="fire(\''+gid+'\',\''+t.id+'\')">↗ Push (1 tap)</button>';
+    else btn='<button class="btn ghost sm" onclick="fire(\''+gid+'\',\''+t.id+'\')">✓ Mark done</button>';
+    btn+='<button class="btn ghost sm" onclick="skip(\''+gid+'\',\''+t.id+'\')">Skip</button>';
+  } else { btn='<span class="chan">'+(t.status==='done'?'✓ done':'skipped')+'</span>'; }
+  var chan=t.channel==='feed'?'in-app · real':(t.channel==='external'?'tickets · your tap':'checklist');
+  return '<div class="task'+cl+'"><span class="when '+wc+'">'+whenLabel(t.due_date)+'</span>'+
+    '<div class="tx"><div class="tt">'+esc(t.title||t.kind)+'</div><div class="tb">'+esc((t.body||'').replace('{invite_link}','your ticket link'))+'</div>'+
+    '<div class="chan">'+chan+'</div><div class="act">'+btn+'</div></div></div>';
+}
+function fire(gid,tid){ DDGigs.tasksFor(gid).then(function(tasks){ var t=tasks.filter(function(x){return x.id===tid;})[0]; if(!t)return;
+  DDGigs.fireTask(t,{slug:VEN.slug}).then(function(r){
+    if(r.status==='done'){ FIRED++; toast(t.channel==='feed'?'📡 Posted to the family feed.':(t.channel==='external'?'↗ Opened to push tickets — one tap.':'✓ Done.')); }
+    else if(r.status==='nobackend'){ toast('Sign in / connect to post to the family.'); } else { toast('Could not fire that step.'); }
+    openPlan(gid); loadKPIs(); }); }); }
+function skip(gid,tid){ DDGigs.tasksFor(gid).then(function(tasks){ var t=tasks.filter(function(x){return x.id===tid;})[0]; if(!t)return; DDGigs.skipTask(t).then(function(){ openPlan(gid); }); }); }
+function runPlan(gid){ toast('🤖 Running the in-app posts…'); DDGigs.runPlan(gid,{slug:VEN.slug},false).then(function(r){ FIRED+=r.fired; toast('✅ Fired '+r.fired+' post'+(r.fired===1?'':'s')+'.'); openPlan(gid); loadKPIs(); }); }
+VEN.slug=VEN.slug||slug(VEN.name);
+(function(){ function go(){ try{ if(window.DDGigs&&DDGigs.ready()){ loadKPIs(); } else setTimeout(go,1200); }catch(e){} } setTimeout(go,1000); })();
+</script>
+</body></html>
