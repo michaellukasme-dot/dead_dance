@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Print Shop · DeadDance — build your poster store</title>
+<style>
+  :root{
+    --ink:#1a1420; --muted:#6b6475; --line:#ece4f2; --card:#ffffff; --bg:#f6f2fa;
+    --rose:#b21e46; --rose2:#7d1533; --gold:#b8892b; --green:#1f7a4d; --purple:#3a2350;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+    background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:18px 16px 90px}
+  a{color:var(--rose);text-decoration:none}
+
+  /* ---- watermark overlay (this is a PREVIEW) ---- */
+  .wm{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden;opacity:.10}
+  .wm div{position:absolute;white-space:nowrap;font-weight:900;font-size:34px;letter-spacing:2px;
+    color:#3a2350;transform:rotate(-30deg);text-transform:uppercase}
+  .wmbadge{position:fixed;top:12px;right:12px;z-index:61;background:var(--purple);color:#fff;
+    font-weight:800;font-size:11px;letter-spacing:1px;padding:6px 11px;border-radius:999px;
+    box-shadow:0 6px 20px rgba(58,35,80,.35)}
+
+  /* ---- hero ---- */
+  .hero{background:linear-gradient(135deg,var(--purple),#241535);color:#fff;border-radius:20px;
+    padding:26px 22px;position:relative;overflow:hidden;box-shadow:0 16px 44px rgba(36,21,53,.28)}
+  .hero .rose{position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,#d93a63,#7d1533);opacity:.55}
+  .kick{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#e9c7d6;font-weight:800}
+  .hero h1{margin:8px 0 6px;font-size:29px;line-height:1.12;font-weight:900}
+  .hero p{margin:0;color:#e8dff0;font-size:15px;max-width:560px}
+  .hero .who{margin-top:14px;display:inline-block;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:9px 13px;font-size:13px}
+  .hero .who b{color:#fff}
+
+  /* ---- section ---- */
+  .sec{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:16px;
+    box-shadow:0 8px 24px rgba(40,20,60,.05)}
+  .sec h2{margin:0 0 4px;font-size:19px;font-weight:900}
+  .sec .lead{color:var(--muted);margin:0 0 14px;font-size:13.5px}
+  .eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:900}
+
+  /* ---- poster grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px}
+  .poster{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;position:relative}
+  .art{aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;
+    color:#fff;position:relative;overflow:hidden}
+  .art::after{content:"PREVIEW";position:absolute;inset:0;display:grid;place-items:center;
+    font-weight:900;font-size:15px;letter-spacing:3px;color:rgba(255,255,255,.28);transform:rotate(-18deg)}
+  .art .vh{font-weight:900;font-size:15px;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.5);position:relative;z-index:1}
+  .art .vd{font-size:11px;opacity:.92;text-shadow:0 1px 5px rgba(0,0,0,.6);position:relative;z-index:1}
+  .meta{padding:10px 11px}
+  .meta .t{font-weight:800;font-size:13px}
+  .meta .by{color:var(--muted);font-size:11.5px;margin-top:1px}
+  .meta .p{color:var(--green);font-weight:900;font-size:14px;margin-top:5px}
+  .pill{display:inline-block;font-size:10px;font-weight:800;color:var(--purple);background:#efe7f6;
+    border-radius:999px;padding:2px 8px;margin-top:6px}
+
+  /* ---- build panel ---- */
+  label{display:block;font-size:12px;font-weight:800;color:var(--ink);margin:10px 0 4px}
+  input[type=text],input[type=number],textarea,select{width:100%;border:1.5px solid var(--line);border-radius:10px;
+    padding:10px 11px;font:inherit;color:var(--ink);background:#fff}
+  input:focus,textarea:focus{outline:none;border-color:var(--rose)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
+  .chk input{width:18px;height:18px;accent-color:var(--rose)}
+  .btn{border:0;border-radius:11px;padding:12px 16px;font-weight:900;font-size:14px;cursor:pointer;
+    background:var(--rose);color:#fff;width:100%;margin-top:14px}
+  .btn.ghost{background:#f3edf8;color:var(--purple)}
+  .btn.gold{background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00}
+  .dropzone{border:2px dashed #d9cbe6;border-radius:12px;padding:18px;text-align:center;color:var(--muted);
+    font-size:13px;cursor:pointer;background:#faf7fd}
+  .dropzone.on{border-color:var(--rose);color:var(--rose)}
+  .prev{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;margin-top:10px;display:none}
+
+  .band{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .bcard{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fbf9fd}
+  .bcard h3{margin:0 0 4px;font-size:15px}
+  .bcard p{margin:0;color:var(--muted);font-size:12.5px}
+  .bcard .em{font-size:26px}
+
+  .sell{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sc{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff}
+  .sc .h{font-weight:900;font-size:14px;display:flex;gap:7px;align-items:center}
+  .sc p{margin:5px 0 0;color:var(--muted);font-size:12.5px}
+  .note{font-size:12px;color:var(--muted);background:#faf7fd;border:1px solid var(--line);
+    border-radius:10px;padding:11px 13px;margin-top:14px}
+  .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:26px}
+  .foot b{color:var(--ink)}
+  @media(max-width:560px){.band,.sell{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- PREVIEW watermark -->
+<div class="wm" id="wm"></div>
+<div class="wmbadge">🌹 PREVIEW · NOT LIVE</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="rose"></div>
+    <div class="kick">DeadDance · The Print Shop</div>
+    <h1 id="heroTitle">Your poster store — we already built the first draft.</h1>
+    <p id="heroLead">This is a working preview of your storefront inside DeadDance. You upload the art, you set every price, and every band on the network can pick your poster for their show — or ask you to make an original. You dream it up, we put it in front of the whole family.</p>
+    <div class="who" id="whoLine">Built as a preview for <b>the poster people</b> · claim it to make it real.</div>
+  </div>
+
+  <!-- DEMO STOREFRONT -->
+  <div class="sec">
+    <div class="eyebrow">What your store looks like</div>
+    <h2>Your storefront, live on DeadDance</h2>
+    <p class="lead">A clean shop page — your name on it, your prices, one-tap buy. (Placeholder art below; your real work replaces it the day you claim.)</p>
+    <div class="grid" id="demoGrid"></div>
+  </div>
+
+  <!-- BUILD YOUR STORE -->
+  <div class="sec">
+    <div class="eyebrow">Build it — you set the price</div>
+    <h2>Add a poster · name your price</h2>
+    <p class="lead">Upload a piece, title it, and set what it sells for. Turn on "open to originals" and bands can commission you directly.</p>
+
+    <div class="dropzone" id="drop" onclick="document.getElementById('pfile').click()">📤 Tap to upload your poster art (JPG / PNG)</div>
+    <input id="pfile" type="file" accept="image/*" style="display:none" onchange="onFile(this)">
+    <img id="prev" class="prev" alt="preview">
+
+    <label for="ptitle">Poster title</label>
+    <input id="ptitle" type="text" placeholder="e.g. Greyhound Rock — Summer '76">
+    <div class="row2">
+      <div>
+        <label for="pprice">Price each ($)</label>
+        <input id="pprice" type="number" min="0" step="1" placeholder="28">
+      </div>
+      <div>
+        <label for="pkind">Type</label>
+        <select id="pkind">
+          <option>Show poster</option>
+          <option>Art print</option>
+          <option>Original / one-of-one</option>
+          <option>Sticker / small good</option>
+        </select>
+      </div>
+    </div>
+    <label class="chk"><input type="checkbox" id="porig" checked> Open to <b>&nbsp;original commissions</b>&nbsp; — let bands request custom art</label>
+    <button class="btn" onclick="addPoster()">➕ Add to my store</button>
+    <div id="myShop" style="margin-top:16px"></div>
+  </div>
+
+  <!-- HOW BANDS USE IT -->
+  <div class="sec">
+    <div class="eyebrow">Where the money comes from</div>
+    <h2>Every band on DeadDance can pick your work</h2>
+    <p class="lead">When a band posts a show, your catalog is right there. Two ways they buy:</p>
+    <div class="band">
+      <div class="bcard">
+        <div class="em">🖼️</div>
+        <h3>Pick your poster for their show</h3>
+        <p>A band grabs one of your existing pieces as their show poster — printed, sold to their fans, you get paid per print.</p>
+      </div>
+      <div class="bcard">
+        <div class="em">✍️</div>
+        <h3>Request an original</h3>
+        <p>"Make us something for the Ardmore run." They brief you, you dream it up, you set the commission price. One-of-one or a whole print run.</p>
+      </div>
+    </div>
+    <div class="note">On the backend this catalog is offered to <b>every band on DeadDance</b> the moment they build a show poster — you don't chase the work, the work finds you.</div>
+  </div>
+
+  <!-- THE SELL -->
+  <div class="sec">
+    <div class="eyebrow">The deal</div>
+    <h2>Why put your store here</h2>
+    <div class="sell">
+      <div class="sc"><div class="h">💸 You set every price</div><p>Per poster, per print, per commission. We never touch your pricing.</p></div>
+      <div class="sc"><div class="h">🆓 Free to list</div><p>No fee to build your store or hold your catalog. The house takes a small share of a sale — only when you actually sell.</p></div>
+      <div class="sc"><div class="h">🎸 A built-in audience</div><p>Every band and every fan on the network — people who buy posters — see your work in context, at the show.</p></div>
+      <div class="sc"><div class="h">🖨️ Print-on-demand ready</div><p>We handle the print/ship plumbing (Printful / Custom Ink) so you ship art, not boxes — or fulfill it yourself.</p></div>
+      <div class="sc"><div class="h">✍️ Commissions on tap</div><p>"Open to originals" turns every show into a possible custom job. You dream it up.</p></div>
+      <div class="sc"><div class="h">🌹 Your name, your store</div><p>It's your storefront and your brand — DeadDance just sets the table and sends the crowd.</p></div>
+    </div>
+    <button class="btn gold" onclick="claim()">🌹 Claim my store — make it real</button>
+    <button class="btn ghost" onclick="pickForShow()">🎸 See the band's-eye view</button>
+    <div class="note">This page is a <b>preview</b> — nothing here is public or charging yet. Claiming tells us to stand up your real store; a human (Michael or your Ambassador) walks you through it.</div>
+  </div>
+
+  <div class="foot">
+    🌹 <b>DeadDance</b> · The Print Shop preview<br>
+    Deadheads · Bands · Venues — one community. A Facebook enhancement.
+  </div>
+</div>
+
+<script src="qr.js"></script>
+<script>
+/* ---------- watermark tiling ---------- */
+(function(){var wm=document.getElementById('wm');if(!wm)return;var s='';for(var y=-1;y<14;y++){for(var x=-1;x<6;x++){s+='<div style="top:'+(y*120-20)+'px;left:'+(x*300-40)+'px">DeadDance · Preview</div>';}}wm.innerHTML=s;})();
+
+/* ---------- mode: vendor (default) vs band ---------- */
+var Q=new URLSearchParams(location.search);
+var VENDOR=Q.get('shop')||Q.get('vendor')||''; // e.g. ?shop=Kara%27s%20Prints
+var MODE=Q.get('mode')||'vendor';
+if(VENDOR){
+  document.getElementById('whoLine').innerHTML='Built as a preview for <b>'+esc(VENDOR)+'</b> · claim it to make it real.';
+  document.getElementById('heroTitle').textContent=VENDOR+' — your poster store, already drafted.';
+}
+
+/* ---------- demo storefront (placeholder posters, clearly PREVIEW) ---------- */
+var DEMO=[
+  {t:"Greyhound Rock — Sunset",by:VENDOR||"You",p:28,g:"linear-gradient(160deg,#e0662f,#7d1533)",vh:"GREYHOUND ROCK",vd:"Summer run · '76"},
+  {t:"Steal Your Face — Study",by:VENDOR||"You",p:35,g:"linear-gradient(160deg,#2a2350,#0a0716)",vh:"STEAL YOUR FACE",vd:"Screenprint · 3 color"},
+  {t:"Terrapin Dreams",by:VENDOR||"You",p:22,g:"linear-gradient(160deg,#1f7a4d,#123b28)",vh:"TERRAPIN",vd:"Limited · signed"},
+  {t:"Lot at Dusk",by:VENDOR||"You",p:24,g:"linear-gradient(160deg,#b8892b,#5a3d0c)",vh:"THE LOT",vd:"at dusk"},
+  {t:"Bertha in Bloom",by:VENDOR||"You",p:30,g:"linear-gradient(160deg,#b21e46,#3a2350)",vh:"BERTHA",vd:"in bloom"},
+  {t:"Cosmic Charlie",by:VENDOR||"You",p:26,g:"linear-gradient(160deg,#3a2350,#0e5a63)",vh:"COSMIC CHARLIE",vd:"foil edition"}
+];
+function posterCard(a,tag){
+  return '<div class="poster"><div class="art" style="background:'+a.g+'">'+
+    '<div class="vh">'+esc(a.vh||a.t)+'</div><div class="vd">'+esc(a.vd||'')+'</div></div>'+
+    '<div class="meta"><div class="t">'+esc(a.t)+'</div><div class="by">by '+esc(a.by)+'</div>'+
+    '<div class="p">$'+a.p+'</div>'+(tag?'<span class="pill">'+tag+'</span>':(a.orig?'<span class="pill">open to originals</span>':''))+'</div></div>';
+}
+document.getElementById('demoGrid').innerHTML=DEMO.map(function(a){return posterCard(a);}).join('');
+
+/* ---------- build: upload + price, saved to this device (preview) ---------- */
+var LASTIMG=null;
+function onFile(inp){
+  var f=inp&&inp.files&&inp.files[0]; if(!f)return;
+  var r=new FileReader();
+  r.onload=function(e){ LASTIMG=e.target.result; var p=document.getElementById('prev'); p.src=LASTIMG; p.style.display='block';
+    document.getElementById('drop').classList.add('on'); document.getElementById('drop').textContent='✓ Art loaded — add a title and price'; };
+  r.readAsDataURL(f);
+}
+function myShop(){ try{ return JSON.parse(localStorage.getItem('dd.printshop')||'[]'); }catch(e){ return []; } }
+function saveShop(a){ try{ localStorage.setItem('dd.printshop',JSON.stringify(a.slice(-60))); }catch(e){} }
+function addPoster(){
+  var t=(document.getElementById('ptitle').value||'').trim();
+  var p=parseFloat(document.getElementById('pprice').value||'0')||0;
+  var kind=document.getElementById('pkind').value;
+  var orig=document.getElementById('porig').checked;
+  if(!t){ alert('Give your poster a title.'); return; }
+  var item={t:t,by:VENDOR||'You',p:p,kind:kind,orig:orig,img:LASTIMG||null,
+    g:'linear-gradient(160deg,#3a2350,#7d1533)',vh:t.toUpperCase().slice(0,16),vd:kind,at:Date.now()};
+  var arr=myShop(); arr.push(item); saveShop(arr);
+  renderShop();
+  document.getElementById('ptitle').value=''; document.getElementById('pprice').value='';
+  var p2=document.getElementById('prev'); p2.style.display='none'; LASTIMG=null;
+  document.getElementById('drop').classList.remove('on'); document.getElementById('drop').textContent='📤 Tap to upload your poster art (JPG / PNG)';
+}
+function renderShop(){
+  var arr=myShop(), host=document.getElementById('myShop');
+  if(!arr.length){ host.innerHTML=''; return; }
+  host.innerHTML='<div class="eyebrow" style="margin-bottom:8px">Your store ('+arr.length+')</div><div class="grid">'+
+    arr.map(function(a){
+      var art=a.img?('<div class="art" style="background:#000;padding:0"><img src="'+a.img+'" style="width:100%;height:100%;object-fit:cover">'+
+        '<div class="vh" style="position:absolute;left:12px;bottom:34px">'+esc(a.vh)+'</div></div>')
+        :('<div class="art" style="background:'+a.g+'"><div class="vh">'+esc(a.vh)+'</div><div class="vd">'+esc(a.vd||'')+'</div></div>');
+      return '<div class="poster">'+art+'<div class="meta"><div class="t">'+esc(a.t)+'</div>'+
+        '<div class="by">'+esc(a.kind)+'</div><div class="p">$'+a.p+'</div>'+
+        (a.orig?'<span class="pill">open to originals</span>':'')+'</div></div>';
+    }).join('')+'</div>'+
+    '<div class="note">Saved to this device for the preview. When you <b>claim your store</b>, this catalog goes live for every band on DeadDance.</div>';
+}
+renderShop();
+
+/* ---------- CTAs ---------- */
+function claim(){
+  var subj=encodeURIComponent('Claim my DeadDance Print Shop'+(VENDOR?(' — '+VENDOR):''));
+  var body=encodeURIComponent('Hi Michael,\n\nI want to claim my store on DeadDance. Here are my details:\n\nStudio / artist name:\nWhat I make (posters / prints / originals):\nWebsite or IG:\n\nThanks!');
+  location.href='mailto:michaellukas.me@gmail.com?subject='+subj+'&body='+body;
+}
+function pickForShow(){
+  alert("BAND'S-EYE VIEW\n\nWhen a band builds their show poster on DeadDance, your catalog appears:\n\n• Pick a poster → printed & sold to their fans, you’re paid per print.\n• Request an original → they brief you, you set the price, you dream it up.\n\nThat’s the backend we’re wiring your store into.");
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

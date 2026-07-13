@@ -85,9 +85,17 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* real Supabase client for this page (anon) + a stable device id, so a claim PERSISTS */
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid', v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v); } return {id:v}; }catch(e){ return {id:null}; } };
+})();
+</script>
 <script src="band_seed.js"></script>
 <script src="dd_attrib.js"></script>
 <script src="dd_refer.js"></script>
+<script src="dd_join.js"></script>
 <script>
 /* ---------- DEMO/TEST band — injected ONLY when the URL has ?demo (or ?test).
    Never ships in the public 963-band directory; lets you run the whole Band Install
@@ -473,8 +481,19 @@ function render(){
 }
 window.go=function(d){ if(d>0&&!canNext())return; S.step=Math.max(0,Math.min(STEPS.length-1,S.step+d)); save(); render(); };
 window.finish=function(){
+  /* PERSIST THE CLAIM FIRST — a real row Michael/the Ambassador can see (was: saved to nothing). */
+  try{
+    var b=S.band||{}, at=S.attrib||{};
+    var note=[b.city,b.state].filter(Boolean).join(', ');
+    if(window.DDJoin && DDJoin.claimBand){
+      DDJoin.claimBand({ band:b.name||'(unnamed band)', ref:at.ref_band||at.claim_band||null,
+        src:at.src||'claim', region:b.chapterName||b.chapter||null, note:note||null })
+        .then(function(id){ try{ localStorage.setItem('dd.claim.id', id||''); }catch(e){} })
+        .catch(function(){});
+    }
+  }catch(e){}
   S.lists={email:'',fbpage:'',fbgroups:''}; S.listOK=false; S.logo=null; save();   // don't leave PII sitting on the device
-  toast('🌹 Installed. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };
+  toast('🌹 Installed — your claim is in. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };
 
 /* ---------- region: stamp the origination chapter so support/referrals route to the right Ambassador ---------- */
 function persistRegion(b){ try{ if(b&&b.chapter){ localStorage.setItem('dd.chapter',b.chapter); if(b.chapterName)localStorage.setItem('dd.chapterName',b.chapterName); } }catch(e){} }

@@ -1696,12 +1696,21 @@ function bandView(i,tab){ var b=BANDS[i]; if(!b)return; tab=tab||'card'; var bod
      : '<div class="note" style="margin-top:6px">No dates posted yet — the band adds them in one tap.</div>';
    h=top+tabs+bandImgHTML(b,true)+
      '<div class="bvName">'+b.name+'</div><div class="bvReg">🎸 '+b.region+'</div>'+
+     '<div id="bvJoins" style="display:none;font-size:12.5px;font-weight:800;color:#1f7a4d;margin:2px 0 4px"></div>'+
      '<button class="btn" style="margin:8px 0" onclick="toast(\'🔔 Following '+safe+' — heads-up when they play near you.\')">🔔 Follow</button>'+
      '<div class="bvDesc">'+b.story+'</div>'+
      '<div class="bvSec">📅 '+b.name+' — calendar</div>'+cal;
  }
  body.innerHTML=h;
+ /* REAL: show how many people joined from this band's invite (hidden until >0) */
+ if(tab!=='merch' && window.DDJoin && DDJoin.bandJoinCount){
+   try{ DDJoin.bandJoinCount(ddSlug(b.name)).then(function(n){
+     var el=document.getElementById('bvJoins'); if(el && n>0){ el.textContent='🌹 '+n+' '+(n===1?'head has':'heads have')+' joined from your invite'; el.style.display='block'; }
+   }); }catch(e){}
+ }
 }
+/* one slug convention shared by invite links (utm_content / ref) and the join count */
+function ddSlug(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 
 /* ---------------- groups mirror strip ---------------- */
 function mirrorBuild(){
@@ -2968,6 +2977,8 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="dd_hyperpost.js" defer></script>
 <script src="dd_showmap.js" defer></script>
 <script src="dd_friends.js" defer></script>
+<script src="dd_attrib.js" defer></script>
+<script src="dd_join.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
