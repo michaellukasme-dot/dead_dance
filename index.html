@@ -1013,11 +1013,26 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
   <div class="nitem"><span>🎸</span><div><b>The China Cats</b> posted a new date: Vets Hall, Jul 18.<i>5h</i></div></div>
   <div class="nitem"><span>🍀</span><div>A <b>Miracle ticket</b> just dropped in your chapter bucket.<i>6h</i></div></div>
   <div class="asec">Earlier</div>
-  <div class="nitem"><span>🌹</span><div><b>Jen Rund</b> sent you a friend request.<i>1d</i></div></div>
+  <div class="nitem" id="nfrJen"><span>🌹</span><div><b>Jen Rund</b> sent you a friend request.<i>1d</i>
+    <div style="display:flex;gap:8px;margin-top:7px">
+      <button onclick="acceptFriend('Jen Rund')" style="border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">✓ Accept</button>
+      <button onclick="declineFriend()" style="border:0;background:#ece7db;color:#555;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">Decline</button>
+    </div></div></div>
   <div class="nitem"><span>📰</span><div>Your <b>Daily Synthesis</b> is ready — the whole bus in one read.<i>1d</i></div></div>
   <div class="nitem"><span>🐝</span><div><b>Michele</b> welcomed you to the family.<i>2d</i></div></div>
  </div>
 </div>
+
+<script>
+/* friend requests — accept / decline (demo: marks locally + confirms) */
+function acceptFriend(name){
+  var el=document.getElementById('nfrJen');
+  if(el) el.innerHTML='<span>🌹</span><div><b>'+name+'</b> and you are family now — say hi in the feed! 🎸<i>just now</i></div>';
+  try{ var f=JSON.parse(localStorage.getItem('dd.friends')||'[]'); if(f.indexOf(name)<0){ f.push(name); } localStorage.setItem('dd.friends',JSON.stringify(f)); }catch(e){}
+  if(typeof toast==='function') toast('🌹 You and '+name+' are family now.');
+}
+function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.innerHTML='<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; }
+</script>
 
 <!-- ===== Corner: profile dropdown ===== -->
 <div class="profmenu" id="profmenu">
@@ -1153,6 +1168,7 @@ var REGIONS = {
    {date:"2026-08-12",band:"Melvin Seals & JGB",venue:"Lewes Ferry Grounds, Lewes DE",price:"Tix →",type:"grateful_dead",url:"https://rockingthedocks.ticketspice.com/melvin-night1"},
    {date:"2026-08-13",band:"Melvin Seals & JGB",venue:"Lewes Ferry Grounds, Lewes DE",price:"Tix →",type:"grateful_dead",url:"https://rockingthedocks.ticketspice.com/melvin-night2"},
    {date:"2026-08-15",band:"Melvin Seals & JGB",venue:"Tropicana Ballroom, Atlantic City NJ",price:"Onsale soon",type:"grateful_dead",url:"https://www.melvinsealsandjgb.com/tour-dates/"},
+   {date:"2026-08-28",band:"Jerry Garcia Symphonic Celebration (feat. John Kimock) · The Philly Pops",venue:"TD Pavilion at Highmark Mann, Philadelphia PA",price:"Tix →",type:"grateful_dead",url:"https://highmarkmann.org/events/2026-08-28/jerry-garcia-symphonic-celebration"},
    {date:"2026-10-22",band:"Oteil Burbridge w/ John Scofield",venue:"Hamilton Live, Washington DC",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-the-hamilton-20261022"},
    {date:"2026-11-13",band:"Oteil Burbridge w/ John Scofield",venue:"Ardmore Music Hall, Ardmore PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-ardmore-music-hall-20261113"},
    {date:"2026-11-15",band:"Oteil Burbridge w/ John Scofield",venue:"Ardmore Music Hall, Ardmore PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/john-scofield-ardmore-music-hall-20261115"},
