@@ -732,6 +732,9 @@ body{padding-bottom:64px}
       <button class="ft-opt" id="sgNat" onclick="feedScope('national')">🌎 National</button>
     </div>
 
+    <!-- REAL posts from the family (dd_feed.js) render here, newest first. Seed posts below stay so the feed is never empty. -->
+    <div id="ddFeed"></div>
+
     <div class="sec">📚 FROM YOUR GROUPS — SHARED IN</div>
     <div class="post">
       <div class="posthead"><div class="pav">🐝</div><div class="pwho"><b>Michele Murphy</b><span><span class="grp">Santa Cruz Music Scene</span> · with the Blues Trio · 5h</span></div><button class="pmore" onclick="postMenu(this)">⋯</button></div>
@@ -2566,15 +2569,50 @@ function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.v
   if(!txt){ toast('Say something first 🌹'); return; }
   var def=cmpDefaults(); var ext=def.filter(function(id){return id!=='dd';});
   var extNames=ext.map(function(id){var f=CMP_NETS.filter(function(c){return c.id===id;})[0];return f?f.n.replace(/^\S+\s/,''):id;});
-  // 1) dead.dance feed — our platform, posts for real (wires to feed RPC on deploy)
-  try{ var c=ddClient&&ddClient(), id=ddId&&ddId();
-    if(c&&id){ c.rpc('chat_post_create',{p_body:txt,p_scene:'grateful_dead'}).catch(function(){}); } }catch(e){}
-  // 2) external networks — one human handoff (share sheet); nothing silent
+  // 1) dead.dance feed — posts FOR REAL (persists to Supabase; everyone's feed reads it back, live)
+  var posted=false;
+  try{
+    if(window.DDFeed && DDFeed.ready()){
+      posted=true;
+      var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:(DDFeed.myName?DDFeed.myName():'Stagger Lee');
+      ddFeedPrepend({author_name:nm, role:(DDFeed.myRole&&DDFeed.myRole()), body:txt, created_at:new Date().toISOString(), _me:true}); // optimistic
+      DDFeed.post(txt).then(function(){ /* realtime will confirm for others */ })
+        .catch(function(){ toast('Saved on this device — sign in to post to the family.'); });
+    }
+  }catch(e){}
+  // 2) external networks — one human handoff (share sheet); nothing silent, nothing auto-sent
   if(ext.length && navigator.share){
     navigator.share({ title:'dead.dance', text:txt, url:(typeof inviteLink==='function'?inviteLink():DD_HOME) }).catch(function(){}); }
-  toast('📡 HyperPosted to dead.dance'+(ext.length?(' — and opened '+extNames.join(', ')+' to confirm'):'')+'.');
+  toast('📡 HyperPosted to dead.dance'+(ext.length?(' — and opened '+extNames.join(', ')+' to confirm'):'')+(posted?'':' (this device — sign in to reach the family)')+'.');
   if(t) t.value='';
 }
+
+/* ---------------- REAL feed (dd_feed.js): render + live prepend ---------------- */
+var DDFEED_SEEN={};
+function ddFeedRoleTag(role){ var m={band:'🎸 Band',venue:'🏛 Venue',ambassador:'📇 Ambassador',influencer:'📡 Group leader'}; return m[role]||''; }
+function ddFeedRelTime(iso){ try{ var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  if(s<60)return'now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }catch(e){ return 'now'; } }
+function ddFeedPostHTML(p){
+  var nm=String(p.author_name||'A head').replace(/</g,'&lt;');
+  var body=String(p.body||'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+  var tag=ddFeedRoleTag(p.role); var av=(nm.trim()[0]||'🌹').toUpperCase();
+  return '<div class="post"><div class="posthead"><div class="pav">'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
+    '<span>'+(tag?('<span class="grp">'+tag+'</span> · '):'')+ddFeedRelTime(p.created_at)+(p._me?' · you':'')+'</span></div></div>'+
+    '<div class="txt">'+body+'</div>'+
+    '<div class="acts"><button class="act" onclick="like(this)">👍 <span>0</span></button>'+
+    '<button class="act" onclick="reactPop(this)">😊 React</button>'+
+    '<button class="act reply" onclick="hyperConsole(\'the family · '+nm.replace(/\x27/g,'')+'\')">💬 Comment</button></div></div>';
+}
+function ddFeedPrepend(p){ var host=document.getElementById('ddFeed'); if(!host)return;
+  var key=p.id||(p.author_id+'|'+p.body+'|'+(p.created_at||'')); if(p.id&&DDFEED_SEEN[p.id])return; if(p.id)DDFEED_SEEN[p.id]=1;
+  var d=document.createElement('div'); d.innerHTML=ddFeedPostHTML(p); host.insertBefore(d.firstChild, host.firstChild); }
+function ddFeedRender(){ if(!(window.DDFeed&&DDFeed.feed))return;
+  DDFeed.feed(40).then(function(rows){ var host=document.getElementById('ddFeed'); if(!host||!rows||!rows.length)return;
+    host.innerHTML=''; DDFEED_SEEN={};
+    rows.forEach(function(p){ if(p.id)DDFEED_SEEN[p.id]=1; });
+    host.innerHTML=rows.map(ddFeedPostHTML).join(''); }); }
+(function(){ function go(){ try{ if(window.DDFeed&&DDFeed.ready()){ ddFeedRender(); DDFeed.subscribe(function(np){ if(np)ddFeedPrepend(np); }); } }catch(e){} }
+  setTimeout(go,1600); setTimeout(go,4200); })();
 
 /* ---------------- blog Local / National toggle ---------------- */
 function feedScope(which){
@@ -2979,6 +3017,7 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="dd_friends.js" defer></script>
 <script src="dd_attrib.js" defer></script>
 <script src="dd_join.js" defer></script>
+<script src="dd_feed.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}

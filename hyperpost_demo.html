@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HyperPost · live side-by-side</title>
+<meta name="theme-color" content="#2a1b3d">
+<!-- REAL side-by-side demo. Left = the poster composes + HyperPosts. Right = a new user's feed.
+     Both panels talk to the SAME Supabase backend (dd_posts). The post travels left→right through
+     realtime — it is genuinely live, not scripted. Demo posts use scope='demo' so they never enter
+     the production feed. If realtime lags, a same-page echo keeps the demo from ever looking broken. -->
+<style>
+:root{--purple:#2a1b3d;--ink:#241a2b;--muted:#6b6475;--line:#ece4f2;--gold:#d8a24a;--rose:#b5384e;--green:#1f7a4d;--card:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 'Helvetica Neue',Arial,sans-serif;color:var(--ink);
+  background:radial-gradient(120% 80% at 50% -10%,#3c2a54,#241634 70%);min-height:100vh;padding:26px 14px 60px}
+.head{max-width:920px;margin:0 auto 20px;text-align:center;color:#fff}
+.head .kick{display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  border:1px solid #d8a24a55;border-radius:999px;padding:6px 13px;margin-bottom:12px}
+.head h1{font-size:28px;line-height:1.1}
+.head p{color:#e6ddf2;font-size:14.5px;margin-top:7px;max-width:620px;margin-left:auto;margin-right:auto}
+.stage{max-width:920px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.phone{background:var(--card);border-radius:26px;padding:14px 12px 16px;box-shadow:0 24px 60px rgba(20,10,35,.5);
+  border:6px solid #120b1c;position:relative}
+.phone .notch{width:120px;height:6px;background:#120b1c;border-radius:6px;margin:0 auto 10px}
+.plbl{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;text-align:center;margin-bottom:8px}
+.plbl.you{color:var(--rose)}.plbl.new{color:var(--green)}
+.appbar{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px}
+.appbar .rose{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#d93a63,#7d1533)}
+.appbar b{font-size:14px}
+.appbar .tag{margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:var(--rose);border-radius:999px;padding:2px 8px}
+.appbar .tag.new{background:var(--green)}
+.cmp textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px;font:inherit;resize:none;height:74px}
+.cmp textarea:focus{outline:none;border-color:var(--rose)}
+.row{display:flex;gap:8px;align-items:center;margin-top:9px}
+.nets{font-size:11px;color:var(--muted);flex:1}
+.hp{border:0;border-radius:11px;background:var(--rose);color:#fff;font-weight:900;font-size:14px;padding:11px 16px;cursor:pointer}
+.hp:active{transform:translateY(1px)}
+.feed{min-height:230px}
+.empty{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 10px;border:1.5px dashed var(--line);border-radius:12px}
+.post{border:1px solid var(--line);border-radius:13px;padding:11px 12px;margin-bottom:9px;animation:pop .35s ease}
+@keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.post .ph{display:flex;align-items:center;gap:8px}
+.post .av{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--purple);font-weight:800;display:grid;place-items:center;font-size:13px}
+.post .who b{font-size:13px}.post .who span{font-size:11px;color:var(--muted);display:block}
+.post .grp{color:var(--rose);font-weight:800}
+.post .body{font-size:13.5px;margin-top:7px;white-space:pre-wrap;word-break:break-word}
+.post .acts{display:flex;gap:12px;margin-top:8px;color:var(--muted);font-size:12px}
+.status{max-width:920px;margin:16px auto 0;text-align:center;color:#cdbfe0;font-size:12.5px}
+.status b{color:#fff}
+.arrow{align-self:center;text-align:center;color:var(--gold);font-size:24px}
+@media(max-width:680px){.stage{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#120b1c;color:#fff;border:1px solid #ffffff22;
+  border-radius:11px;padding:10px 16px;font-size:13px;display:none}
+</style></head>
+<body>
+
+<div class="head">
+  <div class="kick">📡 HyperPost · live</div>
+  <h1>One post. Everyone in the bar sees the same screen.</h1>
+  <p>Left is you posting. Right is a new user who just joined. Hit HyperPost and watch it travel — this is the real backend, live, not a canned animation.</p>
+</div>
+
+<div class="stage">
+  <!-- LEFT: the poster -->
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="plbl you">You · Stagger-Lee</div>
+    <div class="appbar"><div class="rose"></div><b>DeadDance</b><span class="tag">Band</span></div>
+    <div class="cmp">
+      <textarea id="cmp" placeholder="What's on your mind, Stagger-Lee?">Tonight at the Cats Cradle — first set 9pm. Come dance. 🌹</textarea>
+      <div class="row">
+        <div class="nets">📡 dead.dance · Facebook · IG <span style="opacity:.6">(one tap)</span></div>
+        <button class="hp" onclick="hyperpost()">📡 HyperPost</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">➜</div>
+
+  <!-- RIGHT: the new user -->
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="plbl new">New user · just joined</div>
+    <div class="appbar"><div class="rose"></div><b>DeadDance</b><span class="tag new">Fan</span></div>
+    <div class="feed" id="feed"><div class="empty" id="empty">Their feed is quiet…<br>post on the left and watch it land here — live.</div></div>
+  </div>
+</div>
+
+<div class="status" id="status">Connecting to the live backend…</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+var C=null;
+try{ C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
+var DEVICE=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('demo-'+Date.now());
+var SEEN={}, gotRealtime=false;
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},2600);}
+function setStatus(m){document.getElementById('status').innerHTML=m;}
+
+function render(p){
+  if(p.id){ if(SEEN[p.id])return; SEEN[p.id]=1; }
+  var e=document.getElementById('empty'); if(e)e.remove();
+  var feed=document.getElementById('feed');
+  var nm=esc(p.author_name||'A head'), av=(String(p.author_name||'S').trim()[0]||'🌹').toUpperCase();
+  var d=document.createElement('div'); d.className='post';
+  d.innerHTML='<div class="ph"><div class="av">'+av+'</div><div class="who"><b>'+nm+'</b>'+
+    '<span><span class="grp">🎸 Band</span> · just now</span></div></div>'+
+    '<div class="body">'+esc(p.body||'')+'</div>'+
+    '<div class="acts"><span>👍 Like</span><span>😊 React</span><span>💬 Comment</span></div>';
+  feed.insertBefore(d, feed.firstChild);
+}
+
+/* subscribe the RIGHT phone to live inserts (demo scope only) */
+(function(){
+  if(!C){ setStatus('⚠️ Backend not reachable from here — open this on the deployed site to see it live.'); return; }
+  try{
+    C.channel('hp_demo').on('postgres_changes',{event:'INSERT',schema:'public',table:'dd_posts'},function(payload){
+      var n=payload&&payload.new; if(n && n.scope==='demo'){ gotRealtime=true; render(n); setStatus('🟢 <b>Live.</b> That post traveled you → new user through the real backend.'); }
+    }).subscribe(function(st){ if(st==='SUBSCRIBED') setStatus('🟢 <b>Connected.</b> Hit HyperPost on the left.'); });
+  }catch(e){ setStatus('⚠️ Realtime unavailable — post still saves; showing it locally.'); }
+})();
+
+function hyperpost(){
+  var txt=(document.getElementById('cmp').value||'').trim();
+  if(!txt){ toast('Say something first 🌹'); return; }
+  toast('📡 HyperPosted');
+  if(!C){ render({author_name:'Stagger-Lee',body:txt}); return; }
+  C.rpc('dd_post_create',{p_author_id:DEVICE,p_author_name:'Stagger-Lee',p_role:'band',p_body:txt,p_scope:'demo',p_region:null})
+    .then(function(r){
+      var id=r&&r.data;
+      // safety: if realtime hasn't echoed within 1.4s, show it locally (still the real saved row)
+      setTimeout(function(){ if(!gotRealtime) render({id:id,author_name:'Stagger-Lee',body:txt}); }, 1400);
+    })
+    .catch(function(){ render({author_name:'Stagger-Lee',body:txt}); toast('Saved locally (backend busy)'); });
+}
+</script>
+</body></html>

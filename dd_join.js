@@ -12,6 +12,17 @@
   function myName() { try { return (root.ME && root.ME.name && root.ME.name !== 'You') ? root.ME.name : null; } catch (e) { return null; } }
   function attrib() { try { return (root.DDAttrib && root.DDAttrib.stamp && root.DDAttrib.stamp()) || {}; } catch (e) { return {}; } }
   function chapter() { try { return (root.ME && root.ME.chapter) || (root.localStorage && (localStorage.getItem('dd.chapterName') || localStorage.getItem('dd.chapter'))) || null; } catch (e) { return null; } }
+  var ROLES = ['band', 'venue', 'ambassador', 'influencer', 'fan'];
+  function role() {
+    try {
+      var p = new (root.URLSearchParams || URLSearchParams)((root.location && root.location.search) || '');
+      var r = (p.get('role') || p.get('as') || '').toLowerCase();
+      if (r === 'crm' || r === 'sales') r = 'ambassador';
+      if (r === 'fb' || r === 'influ') r = 'influencer';
+      if (ROLES.indexOf(r) >= 0) { try { localStorage.setItem('dd.role', r); } catch (e) {} return r; }
+      return (root.localStorage && localStorage.getItem('dd.role')) || (root.ME && root.ME.role) || null;
+    } catch (e) { return null; }
+  }
   function ready() { return !!(client() && myId()); }
 
   var DONE = false;
@@ -25,6 +36,7 @@
       return c.rpc('dd_member_upsert', {
         p_id: id,
         p_name: myName(),
+        p_role: role(),
         p_ref_band: a.ref_band || null,
         p_ref_group: a.claim_band || null,     // hop-1 group/band the invite pointed at
         p_src: a.src || 'organic',
@@ -71,5 +83,5 @@
   function boot() { track(); setTimeout(track, 1800); setTimeout(track, 4500); }
   if (root.addEventListener) root.addEventListener('load', boot); else boot();
 
-  root.DDJoin = { ready: ready, track: track, bandJoins: bandJoins, bandJoinCount: bandJoinCount, claimBand: claimBand, myId: myId };
+  root.DDJoin = { ready: ready, track: track, role: role, bandJoins: bandJoins, bandJoinCount: bandJoinCount, claimBand: claimBand, myId: myId };
 })(typeof window !== 'undefined' ? window : this);

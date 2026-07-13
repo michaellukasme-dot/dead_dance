@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Welcome · DeadDance</title>
+<meta name="theme-color" content="#2a1b3d">
+<!-- Role-aware invite landing. ?role=band|venue|ambassador|influencer|fan (aliases: crm→ambassador, fb→influencer).
+     Reads attribution (dd_attrib) + records a real member row WITH role (dd_join), then routes into the matching
+     REAL surface. A new user NEVER sees a failure as their first screen — everything here is best-effort. -->
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--ink:#241a2b;--muted:#6b6475;--line:#ece4f2;
+  --gold:#d8a24a;--rose:#b5384e;--green:#1f7a4d;--card:#fff;--body:'Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);background:#f6f2fa;min-height:100vh}
+.hero{background:radial-gradient(120% 90% at 80% -10%,#5a3b86,#2a1b3d 60%,#190f26);color:#fff;
+  padding:34px 20px 28px;text-align:center}
+.kick{display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  border:1px solid #d8a24a55;border-radius:999px;padding:6px 13px;margin-bottom:14px}
+.emoji{font-size:54px;line-height:1;margin-bottom:6px}
+.hero h1{font-size:32px;line-height:1.08;letter-spacing:-.01em;margin-bottom:8px}
+.hero p{font-size:15.5px;line-height:1.55;color:#e9e1f4;max-width:520px;margin:0 auto}
+.wrap{max-width:620px;margin:-16px auto 0;padding:0 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:16px;
+  box-shadow:0 10px 30px rgba(40,20,60,.08)}
+.eyebrow{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);font-weight:900}
+.card h2{font-size:18px;margin:4px 0 3px}
+.lead{color:var(--muted);font-size:13.5px;margin-bottom:14px}
+.trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fc{border:1px solid var(--line);border-radius:13px;padding:14px 8px;text-align:center;background:#fbf9fd}
+.fc .i{font-size:24px}.fc b{display:block;font-size:12.5px;margin-top:5px}.fc span{font-size:11px;color:var(--muted)}
+label{display:block;font-size:12px;font-weight:800;margin:12px 0 4px}
+input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit}
+input:focus{outline:none;border-color:var(--rose)}
+.btn{display:block;width:100%;text-align:center;text-decoration:none;border:0;border-radius:12px;
+  padding:14px 16px;font-weight:900;font-size:15px;cursor:pointer;margin-top:14px;
+  background:var(--gold);color:var(--purple)}
+.btn.ghost{background:#f3edf8;color:var(--purple);font-size:13px;padding:11px}
+.note{font-size:11.5px;color:var(--muted);line-height:1.6;background:#faf7fd;border:1px solid var(--line);
+  border-radius:11px;padding:11px 13px;margin-top:14px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:22px}
+.pick{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.pick a{font-size:12px;color:var(--purple);background:#efe7f6;border-radius:999px;padding:5px 11px;text-decoration:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#120b1c;color:#fff;
+  border-radius:11px;padding:11px 17px;font-size:13px;max-width:88%;text-align:center;display:none;z-index:9}
+@media(max-width:480px){.hero h1{font-size:27px}}
+</style></head>
+<body>
+
+<div class="hero">
+  <div class="kick" id="kick">🌹 DeadDance</div>
+  <div class="emoji" id="emoji">🌹</div>
+  <h1 id="h1">Welcome, family.</h1>
+  <p id="lead">Deadheads, bands, and venues — one community.</p>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="eyebrow" id="eyebrow">What you get</div>
+    <h2 id="whatH">Your home on DeadDance</h2>
+    <div class="lead" id="whatLead">A quick look, then you're in.</div>
+    <div class="trio" id="trio"></div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Set up your profile</div>
+    <h2 id="pH">Two seconds — then you're in</h2>
+    <div class="lead">We prefill what we can. Nothing here is public until you say so.</div>
+    <label id="nameLbl" for="pname">Your name</label>
+    <input id="pname" type="text" placeholder="">
+    <label id="orgLbl" for="porg">—</label>
+    <input id="porg" type="text" placeholder="">
+    <button class="btn" id="cta" onclick="go()">Continue →</button>
+    <div class="note" id="note"></div>
+  </div>
+
+  <div class="foot">
+    Not you? Pick your lane:
+    <div class="pick">
+      <a href="?role=fan">🌹 Fan</a><a href="?role=band">🎸 Band</a><a href="?role=venue">🏛 Venue</a>
+      <a href="?role=ambassador">📇 Ambassador</a><a href="?role=influencer">📡 Group leader</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* real client + stable device id (so the join + role record persist) */
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid', v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v); } return {id:v}; }catch(e){ return {id:null}; } };
+})();
+</script>
+<script src="dd_attrib.js"></script>
+<script src="dd_join.js"></script>
+<script>
+var Q=new URLSearchParams(location.search);
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3200);}
+
+/* ---- role config: the demo + profile + real surface each type routes into ---- */
+var R={
+  fan:{ emoji:'🌹', kick:'🌹 DeadDance', h1:'Welcome, family.',
+    lead:'Deadheads, bands, and venues — one community, in your pocket.',
+    whatH:'Your home on DeadDance', whatLead:'Shows near you, your people, every note.',
+    trio:[['🎟','Shows near you','the map + calendar'],['👥','Your people','friends & family'],['🎵','Every show','the live archive']],
+    org:null, cta:'Enter DeadDance →', to:'index.html',
+    note:'You’re a fan of the music — that’s the whole password.' },
+  band:{ emoji:'🎸', kick:'🎸 For the band', h1:'Your band, claimed.',
+    lead:'A page of your own — calendar, store, and karaoke night. Free, always. We never charge the band.',
+    whatH:'Everything a band gets', whatLead:'Built the day you claim it.',
+    trio:[['📅','Your calendar','post a date in one tap'],['🛍','Your store','merch, your prices'],['🎤','Karaoke night','the show is the act']],
+    org:'Band name', cta:'Claim your band →', to:'band_onboard.html',
+    note:'Claiming is free and owes nothing. Nothing sends or sells until you sign and click.' },
+  venue:{ emoji:'🏛', kick:'🏛 For the venue', h1:'Fill your calendar.',
+    lead:'Find any act by genre, budget, and vibe — book them direct. The house sets the table.',
+    whatH:'Your venue console', whatLead:'Every act on the network, sorted for you.',
+    trio:[['🔎','Find any act','by genre & budget'],['🤝','Book direct','you and the act'],['📊','Your room','dates & demand']],
+    org:'Venue name', cta:'Open your venue console →', to:'venue_console.html',
+    note:'Booking is direct, venue-to-act. The house takes a small share — never the band.' },
+  ambassador:{ emoji:'📇', kick:'📇 For the ambassador', h1:'Your territory. Your override.',
+    lead:'Sign every act in your patch — country club to dive bar to the piano-bar player. More you sign, more you make.',
+    whatH:'Your CRM & pipeline', whatLead:'The book of business you’re building.',
+    trio:[['🎯','Your pipeline','leads to signed'],['💸','Overrides & quota','you get paid'],['🗺','Your patch','the whole territory']],
+    org:'Your name', cta:'Open your CRM →', to:'sales_crm.html',
+    note:'Overrides ride on revenue, never equity. Bands are artists — you bring them home, you don’t bill them.' },
+  influencer:{ emoji:'📡', kick:'📡 For the group leader', h1:'Bring your group home.',
+    lead:'Lead a Dead group on Facebook? Own the same room here — your store, your badge, traffic back to you. We enhance Facebook, never replace it.',
+    whatH:'Your group, mirrored', whatLead:'Yours to run — we never scrape or touch your members.',
+    trio:[['👥','Your group','mirrored, not moved'],['📡','HyperPost','one post, everywhere'],['🌹','Traffic home','credit back to you']],
+    org:'Your group or page', cta:'Bring your group →', to:'curator.html',
+    note:'We never scrape or message your members. This is you introducing your group — a link and credit, nothing taken.' }
+};
+
+var role=(Q.get('role')||Q.get('as')||'fan').toLowerCase();
+if(role==='crm'||role==='sales')role='ambassador';
+if(role==='fb'||role==='influ')role='influencer';
+if(!R[role])role='fan';
+var cfg=R[role];
+
+/* paint the role experience */
+document.getElementById('kick').textContent=cfg.kick;
+document.getElementById('emoji').textContent=cfg.emoji;
+document.getElementById('h1').textContent=cfg.h1;
+document.getElementById('lead').textContent=cfg.lead;
+document.getElementById('whatH').textContent=cfg.whatH;
+document.getElementById('whatLead').textContent=cfg.whatLead;
+document.getElementById('trio').innerHTML=cfg.trio.map(function(t){
+  return '<div class="fc"><div class="i">'+t[0]+'</div><b>'+esc(t[1])+'</b><span>'+esc(t[2])+'</span></div>';}).join('');
+document.getElementById('cta').textContent=cfg.cta;
+document.getElementById('note').textContent=cfg.note;
+
+/* profile fields: name + one role-specific field (hide org for fans) */
+var who=Q.get('who')||Q.get('u')||'';
+if(who) document.getElementById('pname').value=who.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+document.getElementById('pname').placeholder=(role==='ambassador'||role==='fan')?'Your name':'Your name (contact)';
+var orgLbl=document.getElementById('orgLbl'), orgIn=document.getElementById('porg');
+if(cfg.org){ orgLbl.textContent=cfg.org; orgIn.placeholder=cfg.org; }
+else { orgLbl.style.display='none'; orgIn.style.display='none'; }
+
+/* record the member WITH role immediately (best-effort, silent) */
+try{ if(window.DDJoin&&DDJoin.track) DDJoin.track(); }catch(e){}
+
+/* continue → save name/role, then route into the REAL surface (attribution preserved) */
+function go(){
+  var name=(document.getElementById('pname').value||'').trim();
+  var org=(orgIn.value||'').trim();
+  try{ if(name) localStorage.setItem('dd.myname',name); localStorage.setItem('dd.role',role); if(org) localStorage.setItem('dd.myorg',org); }catch(e){}
+  /* update the member row with the real name (best-effort) */
+  try{ var c=window.ddClient&&ddClient(), id=window.ddId&&ddId().id;
+    if(c&&id){ c.rpc('dd_member_upsert',{p_id:id,p_name:name||null,p_role:role,
+      p_ref_band:null,p_ref_group:null,p_src:(Q.get('src')||'invite'),p_chapter:null}).catch(function(){}); }
+  }catch(e){}
+  /* carry attribution forward so the destination + join stay linked */
+  var keep=['ref','src','w','b','claim','utm_source','utm_campaign','utm_content'];
+  var qs=keep.map(function(k){var v=Q.get(k);return v?(k+'='+encodeURIComponent(v)):null;}).filter(Boolean);
+  qs.push('role='+role);
+  var url=cfg.to+(qs.length?('?'+qs.join('&')):'');
+  toast('🌹 You’re in — setting up your '+role+' view…');
+  setTimeout(function(){ location.href=url; }, 500);
+}
+</script>
+</body></html>
