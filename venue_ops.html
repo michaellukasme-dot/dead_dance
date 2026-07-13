@@ -126,9 +126,11 @@ function addShow(){
       toast('✅ Booked — the marketing plan is live below.'); loadKPIs(); })
     .catch(function(){ toast('Could not book (backend).'); });
 }
-var OPEN={};
+var OPEN={}, GAUTO={};
+function toggleAuto(id,on){ GAUTO[id]=on; if(window.DDGigs&&DDGigs.setAutopilot){ DDGigs.setAutopilot(id,on).then(function(v){ toast(v?'🤖 Autopilot ON — in-app posts fire on their own at due time.':'Autopilot off.'); }).catch(function(){ toast('Could not change autopilot.'); }); } }
+function autoToggleHTML(id){ return '<label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;margin-bottom:10px;color:#3a2350"><input type="checkbox" '+(GAUTO[id]?'checked':'')+' onchange="toggleAuto(\''+id+'\',this.checked)" style="width:17px;height:17px;accent-color:#b21e46"> 🤖 Autopilot — fire the in-app posts on their own at due time</label>'; }
 function renderGigs(gs){
-  var host=document.getElementById('gigs'); gs=gs||[];
+  var host=document.getElementById('gigs'); gs=gs||[]; gs.forEach(function(g){ GAUTO[g.id]=!!g.autopilot; });
   if(!gs.length){ host.innerHTML='<div class="empty">No shows booked yet — book one above.</div>'; return; }
   host.innerHTML=gs.map(function(g){
     return '<div class="gig" data-gig="'+g.id+'"><div class="gh" onclick="toggleGig(\''+g.id+'\')">'+
@@ -143,7 +145,7 @@ function openPlan(id){
   DDGigs.tasksFor(id).then(function(tasks){
     var done=tasks.filter(function(t){return t.status==='done';}).length; var pr=document.getElementById('prog-'+id); if(pr)pr.textContent=done+'/'+tasks.length+' done';
     var feedPending=tasks.some(function(t){return t.channel==='feed'&&t.status==='pending';});
-    p.innerHTML=(feedPending?'<button class="btn sm" style="margin-bottom:10px" onclick="runPlan(\''+id+'\')">🤖 Auto-run the in-app posts</button>':'')+tasks.map(function(t){ return taskHTML(id,t); }).join('');
+    p.innerHTML=autoToggleHTML(id)+(feedPending?'<button class="btn sm" style="margin-bottom:10px" onclick="runPlan(\''+id+'\')">🤖 Auto-run the in-app posts now</button>':'')+tasks.map(function(t){ return taskHTML(id,t); }).join('');
   });
 }
 function taskHTML(gid,t){

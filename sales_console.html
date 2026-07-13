@@ -156,10 +156,12 @@ function stageBtns(id,cur){
 }
 function openDrill(id){
   var d=document.getElementById('drill-'+id); if(!d)return; d.classList.add('open');
+  var stageEl=document.querySelector('.acct[data-a="'+id+'"] .stage'); var stage=stageEl?stageEl.textContent.trim():'prospect';
   Promise.all([DDSales.contacts(id), DDSales.activities(id)]).then(function(res){
     var cts=res[0]||[], acts=res[1]||[];
+    var sug=DDSales.suggestCollateral(stage);
     d.innerHTML=
-      '<div class="mini">Move stage</div><div class="qa">'+stageBtns(id,'')+'</div>'+
+      '<div class="mini">Move stage</div><div class="qa">'+stageBtns(id,stage)+'</div>'+
       '<div class="mini">Log a touch (auto-captured)</div><div class="qa">'+
         '<button class="btn ghost sm" onclick="log(\''+id+'\',\'call\')">📞 Call</button>'+
         '<button class="btn ghost sm" onclick="log(\''+id+'\',\'email\')">✉️ Email</button>'+
@@ -168,8 +170,12 @@ function openDrill(id){
       '<div class="mini">Decision-makers (org chart)</div>'+
         (cts.length?cts.map(function(c){return '<div class="ct">'+(c.decision_maker?'<span class="dm">DM</span>':'')+'<b>'+esc(c.name)+'</b> <span style="color:var(--muted)">'+esc(c.role||'')+'</span></div>';}).join(''):'<div class="tl">None mapped — who says yes here?</div>')+
         '<div class="qa"><button class="btn ghost sm" onclick="addCt(\''+id+'\')">＋ Add contact</button></div>'+
+      '<div class="mini">Collateral for this stage</div>'+
+        (sug.length?sug.map(function(c){return '<div class="qa" style="margin-bottom:4px"><button class="btn ghost sm" onclick="sendCol(\''+id+'\',\''+esc(c.name).replace(/\x27/g,'')+'\')">📎 '+esc(c.name)+'</button></div>';}).join(''):'<div class="tl">Send the market brief.</div>')+
+      quoteBlock(id,{})+
       '<div class="mini">Activity</div>'+
         (acts.length?acts.slice(0,6).map(function(x){return '<div class="tl">'+esc(x.kind)+(x.note?(' — '+esc(x.note)):'')+'</div>';}).join(''):'<div class="tl">No activity yet.</div>');
+    renderQuotes(id);
   });
 }
 function move(id,stage){ DDSales.setStage(id,stage).then(function(){ toast('→ '+stage); loadPipe(); }); }
@@ -240,23 +246,6 @@ function renderQuotes(id){
 function sendQuote(id,qid){ DDSales.quoteStatus(qid,'sent').then(function(){ toast('📤 Quote sent (log)'); renderQuotes(id); }); }
 function collect(id,qid){ toast('💳 Payment opens when your Stripe keys are live — nothing charged. Quote saved.'); }
 
-/* extend the drill to include collateral suggestions + the quote block */
-var _openDrill=openDrill;
-openDrill=function(id){
-  _openDrill(id);
-  setTimeout(function(){
-    var d=document.getElementById('drill-'+id); if(!d)return;
-    // find this account's stage from the rendered badge
-    var acctEl=document.querySelector('.acct[data-a="'+id+'"] .stage'); var stage=acctEl?acctEl.textContent.trim():'prospect';
-    var acctName=document.querySelector('.acct[data-a="'+id+'"] .nm');
-    var sug=DDSales.suggestCollateral(stage);
-    var col='<div class="mini">Collateral for this stage</div>'+
-      (sug.length?sug.map(function(c){return '<div class="qa" style="margin-bottom:4px"><button class="btn ghost sm" onclick="sendCol(\''+id+'\',\''+esc(c.name).replace(/\x27/g,'')+'\')">📎 '+esc(c.name)+'</button></div>';}).join(''):'<div class="tl">No stage-specific piece — send the market brief.</div>');
-    var wrap=document.createElement('div'); wrap.innerHTML=col+quoteBlock(id,{value_mo:(document.getElementById('qp-'+id)?null:'')});
-    d.appendChild(wrap);
-    renderQuotes(id);
-  }, 60);
-};
 function sendCol(id,name){ DDSales.sendCollateral(id,name).then(function(){ toast('📎 Logged: sent '+name); loadPipe(); }); }
 
 (function(){ function go(){ try{ if(window.DDSales&&DDSales.ready()){ loadPipe(); kbRender(); } else setTimeout(go,1000); }catch(e){} } setTimeout(go,900); })();

@@ -146,10 +146,12 @@ function addDrive(){
     .catch(function(){ toast('Could not start the drive (backend).'); });
 }
 
-var OPEN={};
+var OPEN={}, GAUTO={};
+function toggleAuto(id,on){ GAUTO[id]=on; if(window.DDGigs&&DDGigs.setAutopilot){ DDGigs.setAutopilot(id,on).then(function(v){ toast(v?'🤖 Autopilot ON — in-app posts fire on their own at due time.':'Autopilot off.'); }).catch(function(){ toast('Could not change autopilot.'); }); } }
+function autoToggleHTML(id){ return '<label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;margin-bottom:10px;color:#3a2350"><input type="checkbox" '+(GAUTO[id]?'checked':'')+' onchange="toggleAuto(\''+id+'\',this.checked)" style="width:17px;height:17px;accent-color:#b21e46"> 🤖 Autopilot — fire the in-app posts on their own at due time</label>'; }
 function whenLabel(due){ if(!due)return'—'; try{ var d=new Date(due+'T00:00:00'); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }catch(e){ return due; } }
 function renderGigs(gs){
-  var host=document.getElementById('gigs'); gs=gs||[];
+  var host=document.getElementById('gigs'); gs=gs||[]; gs.forEach(function(g){ GAUTO[g.id]=!!g.autopilot; });
   if(!gs.length){ host.innerHTML='<div class="empty">No drives yet — start one above.</div>'; return; }
   host.innerHTML=gs.map(function(g){
     return '<div class="gig" data-gig="'+g.id+'"><div class="gh" onclick="toggleGig(\''+g.id+'\')">'+
@@ -166,7 +168,7 @@ function openPlan(id){
     var done=tasks.filter(function(t){return t.status==='done';}).length;
     var pr=document.getElementById('prog-'+id); if(pr)pr.textContent=done+'/'+tasks.length+' done';
     var feedPending=tasks.some(function(t){return t.channel==='feed'&&t.status==='pending'&&String(t.body||'').indexOf('{group_post}')<0;});
-    p.innerHTML=(feedPending?'<button class="btn sm" style="margin-bottom:10px" onclick="runPlan(\''+id+'\')">🤖 Auto-run this week\'s posts</button>':'')+
+    p.innerHTML=autoToggleHTML(id)+(feedPending?'<button class="btn sm" style="margin-bottom:10px" onclick="runPlan(\''+id+'\')">🤖 Auto-run this week\'s posts now</button>':'')+
       tasks.map(function(t){ return taskHTML(id,t); }).join('');
   });
 }

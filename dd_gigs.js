@@ -56,6 +56,13 @@
   }
   function skipTask(task) { return setTask(task && task.id, 'skipped', null); }
 
+  // per-gig autopilot opt-in: when on, pg_cron fires this gig's due in-app posts unattended
+  function setAutopilot(gigId, on) {
+    var c = client(), id = myId(); if (!c || !id) return Promise.reject('no-backend');
+    return c.rpc('dd_gig_autopilot', { p_gig_id: gigId, p_member_id: id, p_on: !!on })
+      .then(function (r) { if (r && r.error) throw r.error; return !!(r && r.data); });
+  }
+
   // autopilot: fire all still-pending IN-APP (feed) posts that are due (or all)
   function runPlan(gigId, ctx, dueOnly) {
     return tasksFor(gigId).then(function (tasks) {
@@ -73,5 +80,5 @@
     });
   }
 
-  root.DDGigs = { ready: ready, createGig: createGig, listGigs: listGigs, tasksFor: tasksFor, fireTask: fireTask, skipTask: skipTask, runPlan: runPlan, inviteLink: inviteLink, myId: myId };
+  root.DDGigs = { ready: ready, createGig: createGig, listGigs: listGigs, tasksFor: tasksFor, fireTask: fireTask, skipTask: skipTask, setAutopilot: setAutopilot, runPlan: runPlan, inviteLink: inviteLink, myId: myId };
 })(typeof window !== 'undefined' ? window : this);
