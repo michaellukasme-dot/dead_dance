@@ -27,6 +27,7 @@ input:focus,select:focus{outline:none;border-color:var(--gold)}
 .badge{font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;white-space:nowrap}
 .b-free{background:#e6f4ec;color:var(--ok)}.b-unk{background:#f3eede;color:#8a7a3a}.b-booked{background:#f7e3e3;color:var(--warn)}
 .b-pend{background:#fff4d6;color:#8a6d12}.b-conf{background:#e6f4ec;color:var(--ok)}
+.b-dead{background:#f7e3e3;color:var(--rose)}.b-genre{background:#eae6f7;color:#5a2e86}.b-star{background:#fff0d0;color:#8a6d12}
 .btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;font-size:14px;cursor:pointer}
 .btn.go{background:var(--gold);color:#2a2100}.btn.nav{background:var(--navy);color:#fff}
 .btn.sm{padding:8px 12px;font-size:13px}.btn:disabled{opacity:.45;cursor:not-allowed}
@@ -52,6 +53,7 @@ input:focus,select:focus{outline:none;border-color:var(--gold)}
 <div class="wrap">
   <div class="tabs">
     <div class="tab on" data-t="find" onclick="tab('find')">🎪 Find an Act</div>
+    <div class="tab" data-t="agent" onclick="tab('agent')">🤖 Booking Agent</div>
     <div class="tab" data-t="store" onclick="tab('store')">🛍️ Venue Store</div>
     <div class="tab" data-t="roi" onclick="tab('roi')">📊 Night Math</div>
   </div>
@@ -60,18 +62,29 @@ input:focus,select:focus{outline:none;border-color:var(--gold)}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="band_seed.js"></script>
+<script src="acts_seed.js"></script>
 <script src="deal_shows.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3600);}
 var BANDS=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
+/* ---------- the ANY-ACT registry: Grateful Dead acts (band_seed) + all other genres (acts_seed) ---------- */
+function slug(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'act';}
+function monoOf(n){ return (n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'DD'; }
+function allActs(){
+  var out=BANDS.map(function(b){ return {id:b.id||slug(b.name), name:b.name, mono:b.mono||monoOf(b.name), genre:'Grateful Dead', style:'', dead:true, city:b.city, state:b.state, chapter:b.chapter, chapterName:b.chapterName, size:'Band', fit:'Any', energy:'Mid', fee:b.fee||600}; });
+  (window.DDActs||[]).forEach(function(a){ out.push({id:slug(a.name), name:a.name, mono:a.mono||monoOf(a.name), genre:a.genre, style:a.style||'', dead:false, city:a.city, state:a.state, chapter:null, chapterName:null, size:a.size, fit:a.fit, energy:a.energy, fee:a.fee||700}); });
+  return out;
+}
+var ACTS=allActs();
+function genreList(){ var g={}; ACTS.forEach(function(a){g[a.genre]=1;}); return Object.keys(g).sort(); }
 
 /* ---------- state ---------- */
 var DEF={venue:{name:'',city:'',state:'',cap:150,ticket:15,barHead:22,soundStaff:250,hasStore:false,storeOpen:false},
-  find:{date:'',chapter:'',genre:'grateful_dead'}, requests:{} };
+  find:{date:'',chapter:'',genre:''}, agent:{genre:'',date:'',fit:'',budget:1000,vibe:'',run:false}, requests:{} };
 var S=JSON.parse(JSON.stringify(DEF));
 try{var sv=JSON.parse(localStorage.getItem('dd.venueconsole')||'null'); if(sv&&typeof sv==='object'&&!Array.isArray(sv)) S=Object.assign(JSON.parse(JSON.stringify(DEF)),sv);}catch(e){}
-(function(){ ['venue','find','requests'].forEach(function(k){ if(!S[k]||typeof S[k]!=='object') S[k]=JSON.parse(JSON.stringify(DEF[k])); }); })();
+(function(){ ['venue','find','agent','requests'].forEach(function(k){ if(!S[k]||typeof S[k]!=='object') S[k]=JSON.parse(JSON.stringify(DEF[k])); }); })();
 function save(){ try{localStorage.setItem('dd.venueconsole',JSON.stringify(S));}catch(e){} }
 
 /* ---------- AVAILABILITY ENGINE ----------
@@ -109,52 +122,106 @@ window.simConfirm=function(bandId,date){ var k=reqKey(bandId,date); if(S.request
 
 /* ---------- tabs ---------- */
 function tab(t){ document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-t')===t);});
-  if(t==='find')renderFind(); else if(t==='store')renderStore(); else renderROI(); }
+  if(t==='find')renderFind(); else if(t==='agent')renderAgent(); else if(t==='store')renderStore(); else renderROI(); }
 
 /* ---------- TAB 1 · FIND AN ACT ---------- */
-function bandsForFinder(){
-  var chap=S.find.chapter, q=(S.find.date||'');
-  var list=BANDS.slice();
-  if(chap) list=list.filter(function(b){return b.chapter===chap;});
-  // rank: free first, then unknown; NEVER show booked-that-night as invitable
-  var out=list.map(function(b){ return {b:b, st:bandStatus(b.id,q), rq:reqStatus(b.id,q)}; });
+function actsForFinder(){
+  var g=S.find.genre, chap=S.find.chapter, q=(S.find.date||'');
+  var list=ACTS.slice();
+  if(g) list=list.filter(function(a){return a.genre===g;});
+  if(chap) list=list.filter(function(a){return a.chapter===chap;});
+  var out=list.map(function(a){ return {b:a, st:bandStatus(a.id,q), rq:reqStatus(a.id,q)}; });
   var order={free:0,unknown:1,booked:2};
-  out.sort(function(a,b){ return (order[a.st]-order[b.st]) || a.b.name.localeCompare(b.b.name); });
+  out.sort(function(x,y){ return (order[x.st]-order[y.st]) || x.b.name.localeCompare(y.b.name); });
   return out;
 }
 function renderFind(){
-  var chapters={}; BANDS.forEach(function(b){ if(b.chapter) chapters[b.chapter]=b.chapterName||b.chapter; });
+  var chapters={}; ACTS.forEach(function(a){ if(a.dead&&a.chapter) chapters[a.chapter]=a.chapterName||a.chapter; });
   var chOpts='<option value="">All regions</option>'+Object.keys(chapters).sort().map(function(k){return '<option value="'+esc(k)+'"'+(S.find.chapter===k?' selected':'')+'>'+esc(chapters[k])+'</option>';}).join('');
-  var rows=bandsForFinder();
+  var gOpts='<option value="">All genres</option>'+genreList().map(function(k){return '<option value="'+esc(k)+'"'+(S.find.genre===k?' selected':'')+'>'+esc(k)+'</option>';}).join('');
+  var rows=actsForFinder();
   var freeCount=rows.filter(function(r){return r.st==='free';}).length;
-  var shown=rows.filter(function(r){return r.st!=='booked';}).slice(0,40);   // hide the booked from the invite list
+  var shown=rows.filter(function(r){return r.st!=='booked';}).slice(0,80);
   var bookedCount=rows.filter(function(r){return r.st==='booked';}).length;
   var body=
-    '<h2>Find an act for a night</h2><div class="sub">Pick a date. We show who’s open — and we <b>never invite a band that’s already booked that night.</b></div>'+
+    '<h2>Find an act for a night</h2><div class="sub">Every act in the exchange — <b>any genre, any size,</b> from the headliner to the piano-bar player. We <b>never</b> invite an act already booked that night.</div>'+
+    '<div class="firewall">🔒 <b>Firewall:</b> the fan app (deaddance.app) shows <b>Grateful Dead acts only</b> — the Deadhead crowd never sees the rest. This console is where <b>every</b> genre lives.</div>'+
     '<div class="card"><div class="row">'+
-      '<div><label for="fd">Date you want to fill</label><input type="date" id="fd" value="'+esc(S.find.date)+'" onchange="S.find.date=this.value;save();renderFind()"></div>'+
-      '<div><label for="fc">Region</label><select id="fc" onchange="S.find.chapter=this.value;save();renderFind()">'+chOpts+'</select></div>'+
+      '<div><label for="fd">Date to fill</label><input type="date" id="fd" value="'+esc(S.find.date)+'" onchange="S.find.date=this.value;save();renderFind()"></div>'+
+      '<div><label for="fg">Genre</label><select id="fg" onchange="S.find.genre=this.value;save();renderFind()">'+gOpts+'</select></div>'+
     '</div>'+
-    (S.find.date?'<div class="mini" style="margin-top:8px">For <b>'+esc(fmt(S.find.date))+'</b>: <b style="color:var(--ok)">'+freeCount+'</b> confirmed-free · the rest unconfirmed · <b style="color:var(--warn)">'+bookedCount+'</b> already booked (hidden).</div>':'<div class="firewall">Pick a date to see who’s available. Until then, availability is unknown.</div>')+
+    '<div style="margin-top:10px"><label for="fc">Region (Grateful Dead acts)</label><select id="fc" onchange="S.find.chapter=this.value;save();renderFind()">'+chOpts+'</select></div>'+
+    (S.find.date?'<div class="mini" style="margin-top:8px">For <b>'+esc(fmt(S.find.date))+'</b>: <b style="color:var(--ok)">'+freeCount+'</b> confirmed-free · rest unconfirmed · <b style="color:var(--warn)">'+bookedCount+'</b> already booked (hidden).</div>':'<div class="mini" style="margin-top:8px">Pick a date to see who’s open. Filter by genre to match your room. <b>'+ACTS.length+'</b> acts in the exchange.</div>')+
     '</div>';
-  if(S.find.date){
-    body+='<div class="card">'+(shown.map(function(r){
-      var b=r.b, loc=[b.city,b.state].filter(Boolean).join(', ');
-      var badge = r.st==='free' ? '<span class="badge b-free">✓ Free that night</span>'
-                : '<span class="badge b-unk">availability unconfirmed</span>';
-      var action;
-      if(r.rq==='confirmed') action='<span class="badge b-conf">✅ Confirmed</span>';
-      else if(r.rq==='pending') action='<span class="badge b-pend">⏳ Pending band</span> <button class="btn ghost sm" onclick="simConfirm(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">demo: accept</button> <button class="btn sm" style="background:#f0ece2" onclick="cancelRequest(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">✕</button>';
-      else action='<button class="btn go sm" onclick="sendRequest(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">Request →</button>';
-      return '<div class="act"><div class="mono">'+esc(b.mono)+'</div>'+
-        '<div style="flex:1"><div class="nm">'+esc(b.name)+'</div><div class="mt">'+esc(loc||'—')+' · '+badge+'</div></div>'+
-        '<div style="text-align:right">'+action+'</div></div>';
-    }).join('')||'<div class="sub">No acts in this region yet.</div>')+'</div>';
-    body+='<div class="honest"><b>How this works:</b> you send a request, the <b>band confirms or declines from their own console</b> — a request is never a booking. We only surface acts with no show that night; anyone already playing elsewhere is hidden, so <b>you can’t double-book and neither can they.</b> Bands marked “unconfirmed” haven’t loaded their calendar yet, so we ask them directly. <b>We don’t charge you to book, and a human clicks send on both sides.</b></div>';
-  }
+  body+='<div class="card">'+(shown.map(function(r){
+    var b=r.b, loc=[b.city,b.state].filter(Boolean).join(', ');
+    var tag=b.dead?'<span class="badge b-dead">🌹 Grateful Dead</span>':'<span class="badge b-genre">'+esc(b.genre)+'</span>';
+    var meta=esc(loc||'—')+' · '+esc(b.size||'Band')+(b.style?' · '+esc(b.style):'')+(b.dead?'':' · fits '+esc(b.fit||'Any'));
+    var avail = !S.find.date ? '' : (r.st==='free' ? ' · <span class="badge b-free">✓ Free</span>' : ' · <span class="badge b-unk">unconfirmed</span>');
+    var action;
+    if(!S.find.date) action='<span class="mini">pick a date</span>';
+    else if(r.rq==='confirmed') action='<span class="badge b-conf">✅ Confirmed</span>';
+    else if(r.rq==='pending') action='<span class="badge b-pend">⏳ Pending</span> <button class="btn ghost sm" onclick="simConfirm(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">demo: accept</button> <button class="btn sm" style="background:#f0ece2" onclick="cancelRequest(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">✕</button>';
+    else action='<button class="btn go sm" onclick="sendRequest(\''+esc(b.id)+'\',\''+esc(S.find.date)+'\')">Request →</button>';
+    return '<div class="act"><div class="mono">'+esc(b.mono)+'</div>'+
+      '<div style="flex:1"><div class="nm">'+esc(b.name)+' '+tag+'</div><div class="mt">'+meta+avail+'</div></div>'+
+      '<div style="text-align:right">'+action+'</div></div>';
+  }).join('')||'<div class="sub">No acts match — widen the genre or region.</div>')+'</div>';
+  body+='<div class="honest"><b>Ambassador upside:</b> every act you sign in your patch — the country-club jazz trio, the dive-bar punk band, the Tuesday piano player — is inventory the exchange can book. More acts + more venues = <b>more quota, more bookings, more override.</b> A request is never a booking; the act confirms from their own console, and a human clicks send on both sides.</div>';
   document.getElementById('view').innerHTML=body;
 }
 function fmt(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
+
+/* ---------- TAB · AI BOOKING AGENT (Claude interviews the room, picks any act) ---------- */
+function matchActs(c){
+  var picks=[];
+  ACTS.forEach(function(a){
+    var score=0, why=[];
+    if(c.genre){ if(a.genre!==c.genre) return; score+=40; why.push(a.style||a.genre); }
+    else { why.push(a.style||a.genre); }
+    if(c.budget){ if(a.fee<=c.budget){ score+=25; why.push('within $'+c.budget); } else { score-=30; } }
+    if(c.fit){ if(a.fit===c.fit||a.fit==='Any'){ score+=20; why.push('right for a '+c.fit.toLowerCase()+' room'); } else { score-=12; } }
+    if(c.vibe){ if(a.energy===c.vibe){ score+=15; why.push(c.vibe.toLowerCase()+' energy'); } }
+    if(c.date){ var st=bandStatus(a.id,c.date); if(st==='booked') return; if(st==='free'){ score+=15; why.push('open that night'); } }
+    picks.push({a:a,score:score,why:why});
+  });
+  picks.sort(function(x,y){ return y.score-x.score || x.a.fee-y.a.fee || x.a.name.localeCompare(y.a.name); });
+  return picks.slice(0,6);
+}
+function renderAgent(){
+  var a=S.agent;
+  var gOpts='<option value="">Any — surprise me</option>'+genreList().map(function(k){return '<option value="'+esc(k)+'"'+(a.genre===k?' selected':'')+'>'+esc(k)+'</option>';}).join('');
+  function opt(v,cur,lbl){return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+lbl+'</option>';}
+  var fitOpts=opt('',a.fit,'Any room')+opt('Upscale',a.fit,'Upscale — country club / hotel')+opt('Neighborhood',a.fit,'Neighborhood bar')+opt('Dive',a.fit,'Dive / sleaze bar');
+  var vibeOpts=opt('',a.vibe,'Any energy')+opt('Chill',a.vibe,'Chill — dinner / background')+opt('Mid',a.vibe,'Mid — lively')+opt('High',a.vibe,'High — pack the floor');
+  var body=
+    '<h2>🤖 Booking Agent</h2><div class="sub">Tell me about the night. I read the whole exchange and bring back the acts that fit your room — <b>any genre, any size.</b></div>'+
+    '<div class="card">'+
+      '<div class="row"><div><label>Date</label><input type="date" value="'+esc(a.date)+'" onchange="S.agent.date=this.value;save()"></div>'+
+      '<div><label>Genre</label><select onchange="S.agent.genre=this.value;save()">'+gOpts+'</select></div></div>'+
+      '<div class="row"><div><label>Your room</label><select onchange="S.agent.fit=this.value;save()">'+fitOpts+'</select></div>'+
+      '<div><label>Max act budget $</label><input type="number" min="0" value="'+(+a.budget||0)+'" oninput="S.agent.budget=+this.value||0;save()"></div></div>'+
+      '<div style="margin-top:10px"><label>Vibe</label><select onchange="S.agent.vibe=this.value;save()">'+vibeOpts+'</select></div>'+
+      '<button class="btn go" style="width:100%;margin-top:14px" onclick="S.agent.run=true;save();renderAgent()">🤖 Ask the Booking Agent</button>'+
+    '</div>';
+  if(a.run){
+    var picks=matchActs(a);
+    body+='<h2 style="margin-top:16px">The agent recommends</h2>';
+    if(!picks.length){ body+='<div class="card sub">Nothing clears those filters — widen the budget or genre.</div>'; }
+    else body+='<div class="card">'+picks.map(function(p,i){
+      var b=p.a, loc=[b.city,b.state].filter(Boolean).join(', ');
+      var tag=b.dead?'<span class="badge b-dead">🌹 GD</span>':'<span class="badge b-genre">'+esc(b.genre)+'</span>';
+      var star=i===0?'<span class="badge b-star">⭐ top pick</span> ':'';
+      var why='Claude’s read: '+(p.why.length?p.why.join(' · '):(b.genre));
+      var action = a.date ? '<button class="btn go sm" onclick="sendRequest(\''+esc(b.id)+'\',\''+esc(a.date)+'\')">Request →</button>' : '<span class="mini">add a date to request</span>';
+      return '<div class="act"><div class="mono">'+esc(b.mono)+'</div>'+
+        '<div style="flex:1"><div class="nm">'+star+esc(b.name)+' '+tag+'</div><div class="mt">'+esc(loc)+' · '+esc(b.size)+' · ~'+money(b.fee)+' · <span style="color:var(--muted)">'+esc(why)+'</span></div></div>'+
+        '<div style="text-align:right">'+action+'</div></div>';
+    }).join('')+'</div>';
+    body+='<div class="honest">This is the Booking Agent as a demo — a rule-based match standing in for <b>Claude</b>. In production Claude runs the interview and the selection, learning your room over time. A request is never a booking; the act confirms, and a human clicks send on both sides.</div>';
+  }
+  document.getElementById('view').innerHTML=body;
+}
 
 /* ---------- TAB 2 · VENUE STORE ---------- */
 function renderStore(){

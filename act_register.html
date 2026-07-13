@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Register an Act — DeadDance</title>
+<meta name="theme-color" content="#f6f4fa">
+<link rel="stylesheet" href="dd_theme.css">
+<style>
+.wrap{max-width:640px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:11.5px;color:var(--dd-muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:12px 0 4px}
+input,select{width:100%;font:inherit;font-size:15px;border:1px solid var(--dd-line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--dd-ink)}
+input:focus,select:focus{outline:none;border-color:var(--dd-gold)}
+.deadrow{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--dd-line);border-radius:12px;padding:12px 14px;margin-top:14px;cursor:pointer}
+.deadrow input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--dd-rose)}
+.firewall{background:#faf7ff;border:1px solid #efe9f6;border-left:3px solid var(--dd-gold);border-radius:0 10px 10px 0;padding:10px 13px;font-size:12.5px;color:#4a4356;margin:14px 0}
+#done{display:none;background:#f2fbf6;border:1px solid #bfe6cf;border-radius:12px;padding:14px 16px;margin-top:14px}
+#done.on{display:block}
+</style></head>
+<body class="dd-body">
+<div class="dd-wrap wrap">
+  <div class="dd-top"><img src="dd-32.png" alt="DeadDance"><span class="dd-brand">DeadDance</span></div>
+  <h1 class="dd-h1">Register an act</h1>
+  <p class="dd-tag">Any act, any genre — from a headlining band to the Tuesday piano player. Ambassadors: this is how you sign your whole patch.</p>
+  <div class="dd-rule"></div>
+
+  <div class="dd-card">
+    <label for="an">Act name</label>
+    <input id="an" placeholder="e.g., The Velvet Trio">
+    <div class="grid">
+      <div><label for="ag">Genre</label><select id="ag"></select></div>
+      <div><label for="ast">Style (how they'd describe it)</label><input id="ast" placeholder="e.g., jazz trio, Beatles tribute"></div>
+    </div>
+    <div class="grid">
+      <div><label for="asz">Size</label><select id="asz"><option>Solo</option><option>Duo</option><option>Trio</option><option>Quartet</option><option selected>Band</option><option>DJ</option></select></div>
+      <div><label for="afit">Best room</label><select id="afit"><option value="Any" selected>Any room</option><option value="Upscale">Upscale — country club / hotel</option><option value="Neighborhood">Neighborhood bar</option><option value="Dive">Dive / sleaze bar</option></select></div>
+    </div>
+    <div class="grid">
+      <div><label for="aen">Energy</label><select id="aen"><option>Chill</option><option selected>Mid</option><option>High</option></select></div>
+      <div><label for="afee">Typical fee $ (their ask)</label><input id="afee" type="number" min="0" value="600"></div>
+    </div>
+    <div class="grid">
+      <div><label for="ac">City</label><input id="ac" placeholder="Santa Cruz"></div>
+      <div><label for="ast2">State</label><input id="ast2" placeholder="CA" maxlength="2"></div>
+    </div>
+    <div class="grid">
+      <div><label for="acn">Contact name (private)</label><input id="acn" placeholder="Booking contact"></div>
+      <div><label for="ace">Contact email (private)</label><input id="ace" type="email" placeholder="name@email.com"></div>
+    </div>
+
+    <label class="deadrow"><input type="checkbox" id="adead"><span><b>This is a Grateful Dead act.</b> Check this and the act appears in the fan app (deaddance.app) too. Leave it unchecked and the act lives in the <b>booking exchange only</b> — venues and the AI agent see it; the Deadhead crowd never does.</span></label>
+
+    <div class="firewall">🔒 <b>The firewall:</b> non-Dead acts are booked, ticketed, and merch-enabled through the exchange — but they’re kept out of the deaddance.app community. Contact details are <b>private CRM</b>, never shipped in the public app.</div>
+
+    <button class="dd-btn-primary" style="width:100%;margin-top:6px" onclick="reg()">➕ Register this act</button>
+  </div>
+
+  <div id="done"></div>
+  <div class="dd-hint" style="margin-top:12px">Honest-state: this demo captures the act locally and shows what registering does. In production it writes to the private CRM, drops the act into the exchange, and (if Grateful Dead) onto the fan calendar. Nothing books or charges until a human confirms.</div>
+</div>
+
+<script src="acts_seed.js"></script>
+<script src="dd_back.js"></script>
+<script>
+(function(){
+  var sel=document.getElementById('ag');
+  var GEN=(window.DD_GENRES||['Grateful Dead','Rock','Pop','Country','Jazz']);
+  sel.innerHTML=GEN.map(function(g){return '<option value="'+g.replace(/"/g,'&quot;')+'">'+g+'</option>';}).join('');
+  // default genre to Rock (not Grateful Dead) so the "is GD?" gate is a deliberate choice
+  var r=GEN.indexOf('Rock'); if(r>=0) sel.selectedIndex=r;
+})();
+function val(id){ return (document.getElementById(id).value||'').trim(); }
+function reg(){
+  var name=val('an'); if(!name){ document.getElementById('an').focus(); return; }
+  var dead=document.getElementById('adead').checked;
+  var genre=dead?'Grateful Dead':val('ag');
+  var act={ name:name, genre:genre, style:val('ast'), size:val('asz')||'Band', fit:document.getElementById('afit').value,
+    energy:val('aen'), fee:+val('afee')||0, city:val('ac'), state:val('ast2').toUpperCase(), dead:dead,
+    contact:{name:val('acn'), email:val('ace')} };
+  // demo: keep locally + honest-state confirmation
+  try{ var q=JSON.parse(localStorage.getItem('dd.acts.registered')||'[]'); q.push(Object.assign({ts:Date.now()},act)); localStorage.setItem('dd.acts.registered',JSON.stringify(q)); }catch(e){}
+  var where = dead
+    ? 'It’s a <b>Grateful Dead act</b>, so it goes onto the <b>fan calendar</b> and into the booking exchange.'
+    : '<b>'+genre+'</b> — it goes into the <b>booking exchange only</b> (venues + the AI agent). The Deadhead crowd never sees it.';
+  var d=document.getElementById('done');
+  d.innerHTML='<div style="font-weight:800;color:#15502f;margin-bottom:4px">✅ '+name.replace(/</g,'&lt;')+' registered.</div>'+
+    '<div style="font-size:13px;color:#2a2233">'+where+' Contact details stay private. A human confirms before anything books.</div>';
+  d.className='on'; try{ d.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+}
+</script>
+</body></html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill — get your act booked</title>
+<meta name="theme-color" content="#0f1620">
+<style>
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.top{background:var(--ink2);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:20px;letter-spacing:-.4px;display:flex;align-items:center;gap:8px}
+.top .logo .b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:15px}
+.top .logo span{color:var(--teal)}
+.top .vlink{margin-left:auto;color:#c7d0dc;text-decoration:none;font-size:13.5px;font-weight:700}
+.top .vlink:hover{color:#fff}
+.hero{background:radial-gradient(120% 120% at 80% -10%,#153042,#0f1620);color:#fff;padding:44px 18px 40px}
+.hero .wrap{max-width:820px;margin:0 auto}
+.hero h1{font-size:40px;line-height:1.05;margin:0 0 12px;letter-spacing:-1px}
+.hero h1 .g{color:var(--teal)}
+.hero p{font-size:17px;color:#c7d0dc;max-width:600px;margin:0 0 22px}
+.hero .cta{display:inline-block;background:var(--amber);color:#2a1c00;font-weight:900;font-size:16px;border:0;border-radius:12px;padding:14px 22px;cursor:pointer;text-decoration:none}
+.hero .cta:hover{filter:brightness(1.05)}
+.hero .trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px;color:#9fb0c2;font-size:13.5px;font-weight:600}
+.hero .trust b{color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 18px}
+.sec{padding:34px 18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:820px;margin:0 auto}
+@media(max-width:640px){.grid3{grid-template-columns:1fr}.hero h1{font-size:32px}}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.feat .ic{font-size:24px}.feat h3{margin:8px 0 4px;font-size:16px}.feat p{margin:0;font-size:13.5px;color:var(--muted)}
+.form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:720px;margin:0 auto;box-shadow:0 6px 24px rgba(20,26,34,.06)}
+.form h2{margin:0 0 4px;font-size:22px}
+.form .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+label{display:block;font-size:11.5px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:13px 0 4px}
+input,select{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--teal)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+.go{width:100%;margin-top:18px;background:var(--teal);color:#fff;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:16px;cursor:pointer}
+.go:hover{background:var(--teal-d)}
+.bridge{background:#eef7ff;border:1px solid #d3e6f7;border-radius:12px;padding:13px 15px;margin:18px auto 0;max-width:720px;font-size:14px;color:#1a3a52}
+.bridge a{color:#0b6cb0;font-weight:800;text-decoration:none}
+.note{font-size:12px;color:var(--muted);line-height:1.6;max-width:720px;margin:14px auto 0}
+#done{display:none;background:#e9faf4;border:1px solid #b7ead9;border-radius:12px;padding:16px 18px;max-width:720px;margin:16px auto 0}
+#done.on{display:block}
+footer{background:var(--ink2);color:#8a97a7;padding:22px 18px;font-size:12.5px;text-align:center}
+footer b{color:#c7d0dc}
+</style></head>
+<body>
+<div class="top">
+  <div class="logo"><span class="b">◢</span>Stage<span>Fill</span></div>
+  <a class="vlink" href="venue_console.html">I'm a venue → book acts</a>
+</div>
+
+<div class="hero"><div class="wrap">
+  <h1>Get your act <span class="g">booked.</span></h1>
+  <p>List your act once. Venues near you find you, book you, and pay you — <b>any genre, any room</b>, from the country club to the corner bar.</p>
+  <a class="cta" href="#list">List my act — free</a>
+  <div class="trust"><span><b>$0</b> to list</span><span>you keep <b>your cut</b></span><span><b>one</b> calendar, no double-booking</span><span>booked by <b>real venues</b></span></div>
+</div></div>
+
+<div class="sec"><div class="grid3">
+  <div class="feat"><div class="ic">🎯</div><h3>Booked, not just listed</h3><p>Venues search by genre, room, budget, and date — and our booking agent brings you to them.</p></div>
+  <div class="feat"><div class="ic">🗓️</div><h3>One calendar</h3><p>Your availability lives in one place. No double-books, no scribbled notebook, no phone tag.</p></div>
+  <div class="feat"><div class="ic">💵</div><h3>Your money</h3><p>You set your fee and keep the lion's share. Tickets, and a merch store with your logo, on demand.</p></div>
+</div></div>
+
+<div class="sec" id="list">
+  <div class="form">
+    <h2>List your act</h2>
+    <p class="sub">Takes a minute. Nothing books until you confirm.</p>
+    <label for="an">Act name</label>
+    <input id="an" placeholder="e.g., The Velvet Trio">
+    <div class="grid2">
+      <div><label for="ag">Genre</label><select id="ag"></select></div>
+      <div><label for="ast">Style</label><input id="ast" placeholder="e.g., jazz trio, honky-tonk, open-format DJ"></div>
+    </div>
+    <div class="grid2">
+      <div><label for="asz">Size</label><select id="asz"><option>Solo</option><option>Duo</option><option>Trio</option><option>Quartet</option><option selected>Band</option><option>DJ</option></select></div>
+      <div><label for="afit">Best room</label><select id="afit"><option value="Any" selected>Any room</option><option value="Upscale">Upscale — country club / hotel</option><option value="Neighborhood">Neighborhood bar</option><option value="Dive">Dive bar</option></select></div>
+    </div>
+    <div class="grid2">
+      <div><label for="aen">Energy</label><select id="aen"><option>Chill</option><option selected>Mid</option><option>High</option></select></div>
+      <div><label for="afee">Typical fee $</label><input id="afee" type="number" min="0" value="600"></div>
+    </div>
+    <div class="grid2">
+      <div><label for="ac">City</label><input id="ac" placeholder="Austin"></div>
+      <div><label for="ast2">State</label><input id="ast2" placeholder="TX" maxlength="2"></div>
+    </div>
+    <div class="grid2">
+      <div><label for="acn">Booking contact (private)</label><input id="acn" placeholder="Your name"></div>
+      <div><label for="ace">Email (private)</label><input id="ace" type="email" placeholder="you@email.com"></div>
+    </div>
+    <button class="go" onclick="reg()">List my act →</button>
+  </div>
+
+  <div class="bridge">🌹 <b>Play the Grateful Dead?</b> You've got a dedicated home built just for you — the whole community, calendar, and store — over at <a href="index.html">deaddance.app</a>. Head there instead.</div>
+  <div id="done"></div>
+  <div class="note">Your contact details are <b>private</b> — used only to reach you about bookings, never shown publicly or sold. Honest-state: this demo captures your act locally; in production it lists you to venues and the booking agent. Nothing books or charges until a human confirms on both sides.</div>
+</div>
+
+<footer>StageFill — live music booking, any genre. <b>A DeadDance company.</b></footer>
+
+<script src="acts_seed.js"></script>
+<script src="dd_back.js"></script>
+<script>
+(function(){
+  var sel=document.getElementById('ag');
+  var GEN=(window.DD_GENRES||['Rock','Pop','Country','Jazz']).filter(function(g){return g!=='Grateful Dead';});
+  sel.innerHTML=GEN.map(function(g){return '<option value="'+g.replace(/"/g,'&quot;')+'">'+g+'</option>';}).join('');
+  var r=GEN.indexOf('Rock'); if(r>=0) sel.selectedIndex=r;
+})();
+function val(id){ return (document.getElementById(id).value||'').trim(); }
+function reg(){
+  var name=val('an'); if(!name){ document.getElementById('an').focus(); return; }
+  var act={ name:name, genre:val('ag'), style:val('ast'), size:val('asz')||'Band', fit:document.getElementById('afit').value,
+    energy:val('aen'), fee:+val('afee')||0, city:val('ac'), state:val('ast2').toUpperCase(), dead:false, source:'stagefill',
+    contact:{name:val('acn'), email:val('ace')} };
+  try{ var q=JSON.parse(localStorage.getItem('dd.acts.registered')||'[]'); q.push(Object.assign({ts:Date.now()},act)); localStorage.setItem('dd.acts.registered',JSON.stringify(q)); }catch(e){}
+  var d=document.getElementById('done');
+  d.innerHTML='<div style="font-weight:800;color:#0b6b4e;margin-bottom:4px">✅ '+name.replace(/</g,'&lt;')+' is listed.</div>'+
+    '<div style="font-size:13.5px;color:#173">You’re in the booking exchange — venues and the agent can find you now. We’ll reach out the moment a room wants you. Your contact stays private, and nothing books until you say yes.</div>';
+  d.className='on'; try{ d.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+}
+</script>
+</body></html>
