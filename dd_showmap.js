@@ -89,6 +89,11 @@
     });
   } catch (e) {}
 
+  /* ---- clear-to-history: a show that's already happened drops off the map automatically.
+     Any show dated before today is "history" — last night's gig is gone this morning, no upkeep. ---- */
+  var TODAY_ISO = (function () { var d = new Date(); function p(n) { return (n < 10 ? "0" : "") + n; } return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); })();
+  SHOWS = SHOWS.filter(function (s) { return !s.date || s.date >= TODAY_ISO; });
+
   /* ---- 3. Projection lat/lng → viewBox (0..960 x 0..600) ---- */
   function project(lat, lng) {
     var x = (lng - (-125)) / ((-66) - (-125)) * (915 - 40) + 40;

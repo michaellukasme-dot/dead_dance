@@ -1267,6 +1267,7 @@ function buildShowlist(){ dealMergeOnce(); var t0=cMid(); var src;
  else { var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; src=r.shows||[]; }
  SHOWLIST=src.map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
    return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', deal:!!s.deal}; })
+   .filter(function(s){ return s.iso >= cIso(t0); })   /* clear-to-history: a show that already played drops off the calendar */
    .sort(function(a,b){return a.iso<b.iso?-1:(a.iso>b.iso?1:0);}); }
 function setLocalShows(region){ REG=region||"Mid-Atlantic"; buildShowlist(); renderCal();
  var mt=document.getElementById('myTix'), nx=SHOWLIST[0];
