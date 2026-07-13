@@ -662,13 +662,8 @@ body{padding-bottom:64px}
       <div class="findshow">🎟️ <b>Find a Show</b><span>tap a date or scan what's coming up — always current. The bus is always rolling.</span><button class="mfab-mini" id="mfabMini" onclick="openMiracle()" title="The Miracle Bucket — free tickets from the family">🍀 Miracle<span class="mm-badge" id="mfabBadge" style="display:none">0</span></button><button class="calx" onclick="calExpand()" title="Expand calendar" aria-label="Expand calendar">⤢</button></div>
       <div class="ch">
         <span class="viewseg"><button id="vwGrid" class="on" onclick="calView('grid')">▦ Month</button><button id="vwList" onclick="calView('list')">📋 Upcoming</button></span>
-        <select id="calType" class="caltype" onchange="calType(this.value)" title="Filter by type (calendar only — the family feed stays Dead)">
-          <option value="all">🎟️ All</option>
-          <option value="grateful_dead">🌹 Grateful Dead</option>
-          <option value="phish">🐟 Phish</option>
-          <option value="comedy">🎤 Comedy</option>
-          <option value="dj">🎧 DJ</option>
-          <option value="original">🎸 Originals</option>
+        <select id="calType" class="caltype" onchange="calType(this.value)" title="The Dead calendar — Grateful Dead only. Other genres live on StageFill.">
+          <option value="all">🌹 Grateful Dead</option>
         </select>
       </div>
       <div class="ch" id="calNavRow">
@@ -1149,13 +1144,9 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 var REGIONS = {
  "Mid-Atlantic": { shows:[
    {off:2,band:"Splintered Sunlight",venue:"Ardmore Music Hall · 8:00 PM",price:"$30",type:"grateful_dead"},
-   {off:5,band:"Strange Design (Phish tribute)",venue:"Ardmore Music Hall · 8:00 PM",price:"$28",type:"phish"},
    {off:8,band:"Dark Star Orchestra",venue:"Ardmore Music Hall · 8:00 PM",price:"$42",type:"grateful_dead"},
-   {off:14,band:"Laffs McGee (comedy night)",venue:"Sellersville Theater · 8:00 PM",price:"$22",type:"comedy"},
    {off:18,band:"Melvin Seals & JGB",venue:"Sellersville Theater · 8:00 PM",price:"$45",type:"grateful_dead"},
-   {off:22,band:"DJ Terrapin (late dance set)",venue:"The Met, Philadelphia · 10:00 PM",price:"$15",type:"dj"},
    {off:27,band:"Joe Russo's Almost Dead",venue:"The Met, Philadelphia · 7:30 PM",price:"$59",type:"grateful_dead"},
-   {off:33,band:"Cris Jacobs Band",venue:"Ardmore Music Hall · 8:00 PM",price:"$26",type:"original"},
    {date:"2026-07-14",band:"John Kadlecik (solo)",venue:"Jammin' Java, Vienna VA · 8:00 PM",price:"Tix →",type:"grateful_dead",url:"https://www.johnkmusic.net/schedule.html"},
    {date:"2026-07-19",band:"Joe Russo's Almost Dead",venue:"Riverfront Park, Harrisburg PA",price:"Tix →",type:"grateful_dead",url:"https://www.jambase.com/show/joe-russos-almost-dead-riverfront-park-20260719"},
    {date:"2026-08-05",band:"John K's Furthurmore",venue:"Hamilton Live, Washington DC · 8:00 PM",price:"Tix →",type:"grateful_dead",url:"https://wl.eventim.us/event/john-ks-furthurmore/688283"},

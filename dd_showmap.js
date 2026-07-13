@@ -223,7 +223,7 @@
 
   /* ---- 5. Render ---- */
   function render(host) {
-    var level = "nation", curVB = FULL_VB.slice(), rafId = 0, fallbackT = 0;
+    var level = "nation", curVB = FULL_VB.slice(), rafId = 0, fallbackT = 0, userLoc = null, radiusMi = 50;
 
     host.innerHTML =
       '<div class="showmap-card">' +
@@ -242,6 +242,9 @@
           '<select class="showmap-select" aria-label="Pick a chapter">' +
             '<option value="">Pick a chapter…</option>' +
             CHAPTERS.map(function (ch) { return '<option value="' + esc(ch.name) + '">' + esc(shortName(ch.name)) + '</option>'; }).join('') +
+          '</select>' +
+          '<select class="showmap-radius" hidden aria-label="Radius (miles)">' +
+            [25,50,100,200,300].map(function(m){ return '<option value="'+m+'"'+(m===50?' selected':'')+'>'+m+' mi</option>'; }).join('') +
           '</select>' +
           '<span class="showmap-near"></span>' +
         '</div>' +
@@ -274,6 +277,8 @@
     var wrap = host.querySelector(".showmap-wrap");
     var regionRow = host.querySelector(".showmap-region");
     var nearEl = host.querySelector(".showmap-near");
+    var radiusSel = host.querySelector(".showmap-radius");
+    function showRadius(on){ if (radiusSel) radiusSel.hidden = !on; }
     var sel = host.querySelector(".showmap-select");
     var backBtn = host.querySelector(".showmap-back");
     var farrahEl = host.querySelector("#farrahMap");
@@ -289,7 +294,7 @@
       var html = "";
       SHOWS.forEach(function (s, i) {
         var ll = s._ll; if (!ll) return;
-        if (isCh && s._chapter !== chapterName) return;      // chapter view shows only that chapter
+        if (isCh && chapterName !== '*' && s._chapter !== chapterName) return;   // chapter view filters; '*' = radius (all)
         var p = project(ll[0], ll[1]);
         var cls = "smdot " + (s.sample ? "sample" : "real") + (isCh ? "" : " faint");
         html += '<g class="' + cls + '" data-i="' + i + '"' + (isCh ? ' tabindex="0" role="button"' : '') +
@@ -439,7 +444,7 @@
     function toNation() {
       level = "nation"; clearYou();
       host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "national"); });
-      backBtn.hidden = true; regionRow.hidden = true; panel.hidden = true;
+      backBtn.hidden = true; regionRow.hidden = true; panel.hidden = true; showRadius(false);
       animateTo(FULL_VB.slice(), 560, null, function () { drawBadges(true); });
       var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
       lit.forEach(function (c) { tot += c.shows.length; });
@@ -450,7 +455,7 @@
       var ch = chapterByName(chapterName); if (!ch) return;
       level = chapterName;
       host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
-      drawBadges(false); clearYou();
+      drawBadges(false); clearYou(); showRadius(false);
       regionRow.hidden = false; backBtn.hidden = false; sel.value = ch.name;
       nearEl.textContent = ch.shows.length ? (ch.shows.length + (ch.shows.length === 1 ? " show" : " shows")) : "waiting — seed it";
       animateTo(chapterVB(ch), 620, chapterName);
@@ -461,32 +466,45 @@
       try { localStorage.setItem("dd.showmap.chapter", ch.name); } catch (e) {}
     }
 
+    /* zoom to a mile-radius around the viewer (default 50 mi, up to 300) and count shows inside it */
+    function zoomToRadius(mi) {
+      if (!userLoc) return;
+      radiusMi = mi;
+      var lat = userLoc[0], lng = userLoc[1];
+      var latSpan = mi / 69, lngSpan = mi / (69 * Math.max(0.25, Math.cos(lat * Math.PI / 180)));
+      var tvb = boxToVB({ latMin: lat - latSpan, latMax: lat + latSpan, lngMin: lng - lngSpan, lngMax: lng + lngSpan });
+      level = "radius";
+      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
+      drawBadges(false); regionRow.hidden = false; backBtn.hidden = false; showRadius(true);
+      animateTo(tvb, 600, "*");                 // '*' = show every dot inside the radius view
+      markYou(lat, lng, tvb[2]);
+      var n = SHOWS.filter(function (s) { return s._ll && haversineMi(lat, lng, s._ll[0], s._ll[1]) <= mi; }).length;
+      nearEl.textContent = n + (n === 1 ? " show" : " shows") + " within " + mi + " mi";
+      if (radiusSel) radiusSel.value = String(mi);
+    }
     function useLocation() {
       if (!navigator.geolocation) { nearEl.textContent = "Location off — pick a chapter"; return; }
       nearEl.textContent = "📍 Locating…";
       navigator.geolocation.getCurrentPosition(function (pos) {
-        var lat = pos.coords.latitude, lng = pos.coords.longitude, ch = nearestChapter(lat, lng);
-        drill(ch.name);
-        markYou(lat, lng, curVB[2]);
-        var n = SHOWS.filter(function (s) { return s._ll && haversineMi(lat, lng, s._ll[0], s._ll[1]) <= 300; }).length;
-        nearEl.textContent = n + (n === 1 ? " show" : " shows") + " within 300 mi";
+        userLoc = [pos.coords.latitude, pos.coords.longitude];
+        zoomToRadius(radiusMi);              // default 50 mi
       }, function () { nearEl.textContent = "Location blocked — pick a chapter"; }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
     }
 
     function setMode(m) {
       if (m === "national") { toNation(); return; }
-      // Near me
+      // Near me → GPS radius (default 50 mi). The chapter dropdown still drills a chapter manually.
       host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
       regionRow.hidden = false; backBtn.hidden = false; drawBadges(false);
-      var saved = null; try { saved = localStorage.getItem("dd.showmap.chapter"); } catch (e) {}
-      if (saved && chapterByName(saved)) drill(saved); else useLocation();
+      useLocation();
     }
 
     /* --- controls --- */
     host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); }); });
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
-    sel.addEventListener("change", function () { if (sel.value) drill(sel.value); });
+    if (radiusSel) radiusSel.addEventListener("change", function () { zoomToRadius(+radiusSel.value || 50); });
+    sel.addEventListener("change", function () { if (sel.value) { showRadius(false); drill(sel.value); } });
     wrap.addEventListener("mouseleave", hidePop);
     document.addEventListener("click", function (e) {
       if (pop.hidden) return;
