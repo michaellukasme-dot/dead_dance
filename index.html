@@ -1008,23 +1008,64 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 <div class="cornerov" id="notifov" onclick="if(event.target===this)coClose('notifov')">
  <div class="cpanel notifs">
   <div class="cphd">Notifications <button class="shx" onclick="coClose('notifov')">×</button></div>
+  <div id="frReqs"></div>
   <div class="asec">New</div>
-  <div class="nitem"><span>🎟️</span><div><b>Splintered Sunlight</b> plays Ardmore tomorrow — 11 mi from you.<i>2h</i></div></div>
-  <div class="nitem"><span>🎸</span><div><b>The China Cats</b> posted a new date: Vets Hall, Jul 18.<i>5h</i></div></div>
-  <div class="nitem"><span>🍀</span><div>A <b>Miracle ticket</b> just dropped in your chapter bucket.<i>6h</i></div></div>
+  <div class="nitem nclk" onclick="notifGo(openMap)" title="Open the show"><span>🎟️</span><div><b>Splintered Sunlight</b> plays Ardmore tomorrow — 11 mi from you.<i>2h</i></div><em class="nchev">›</em></div>
+  <div class="nitem nclk" onclick="notifGo(openMap)" title="See the calendar"><span>🎸</span><div><b>The China Cats</b> posted a new date: Vets Hall, Jul 18.<i>5h</i></div><em class="nchev">›</em></div>
+  <div class="nitem nclk" onclick="notifGo(function(){window.openMiracle&&openMiracle();})" title="Open the Miracle bucket"><span>🍀</span><div>A <b>Miracle ticket</b> just dropped in your chapter bucket.<i>6h</i></div><em class="nchev">›</em></div>
   <div class="asec">Earlier</div>
   <div class="nitem" id="nfrJen"><span>🌹</span><div><b>Jen Rund</b> sent you a friend request.<i>1d</i>
     <div style="display:flex;gap:8px;margin-top:7px">
       <button onclick="acceptFriend('Jen Rund')" style="border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">✓ Accept</button>
       <button onclick="declineFriend()" style="border:0;background:#ece7db;color:#555;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">Decline</button>
     </div></div></div>
-  <div class="nitem"><span>📰</span><div>Your <b>Daily Synthesis</b> is ready — the whole bus in one read.<i>1d</i></div></div>
-  <div class="nitem"><span>🐝</span><div><b>Michele</b> welcomed you to the family.<i>2d</i></div></div>
+  <div class="nitem nclk" onclick="notifGo(openSynth)" title="Read the Daily Synthesis"><span>📰</span><div>Your <b>Daily Synthesis</b> is ready — the whole bus in one read.<i>1d</i></div><em class="nchev">›</em></div>
+  <div class="nitem nclk" onclick="notifGo(function(){profile('me');})" title="Open your profile"><span>🐝</span><div><b>Michele</b> welcomed you to the family.<i>2d</i></div><em class="nchev">›</em></div>
  </div>
 </div>
 
+<style>
+.nitem.nclk{cursor:pointer;transition:background .12s;position:relative}
+.nitem.nclk:hover{background:rgba(0,0,0,.035)}
+.nitem .nchev{margin-left:auto;align-self:center;color:var(--muted,#9a9aab);font-size:18px;font-weight:800;opacity:.45;padding-left:6px;font-style:normal}
+.nitem.nclk:hover .nchev{opacity:.9;color:var(--rose,#c0392b)}
+</style>
 <script>
-/* friend requests — accept / decline (demo: marks locally + confirms) */
+/* close the notifications panel, then jump to the source of the notice */
+function notifGo(fn){ try{ coClose('notifov'); }catch(e){} setTimeout(function(){ try{ fn&&fn(); }catch(e){} }, 130); }
+/* ===== friend requests — real-time backend (dd_friends.js) with demo fallback ===== */
+function frItemHTML(req){
+  var nm=String(req.from_name||'A friend').replace(/</g,'&lt;'), rid=req.id, sn=String(req.from_name||'A friend').replace(/\x27/g,'');
+  return '<div class="nitem" data-fr="'+rid+'"><span>🌹</span><div><b>'+nm+'</b> sent you a friend request.<i>new</i>'
+    +'<div style="display:flex;gap:8px;margin-top:7px">'
+    +'<button onclick="frRespond(\''+rid+'\',\''+sn+'\',true,this)" style="border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">✓ Accept</button>'
+    +'<button onclick="frRespond(\''+rid+'\',\''+sn+'\',false,this)" style="border:0;background:#ece7db;color:#555;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">Decline</button>'
+    +'</div></div></div>';
+}
+function loadFriendReqs(){
+  try{
+    if(!(window.DDFriends&&DDFriends.ready())) return;          // no backend/identity -> keep the demo item
+    var host=document.getElementById('frReqs'); if(!host) return;
+    DDFriends.incoming().then(function(rows){
+      if(!rows||!rows.length){ host.innerHTML=''; return; }
+      var demo=document.getElementById('nfrJen'); if(demo) demo.style.display='none';   // real requests supersede the sample
+      host.innerHTML='<div class="asec">Friend requests</div>'+rows.map(frItemHTML).join('');
+      var b=document.getElementById('notifBadge'); if(b){ b.textContent=rows.length; b.style.display='grid'; }
+    });
+  }catch(e){}
+}
+function frRespond(reqId,name,accept,btn){
+  var row=(btn&&btn.closest)?btn.closest('.nitem'):null;
+  function done(){ if(!row)return; row.innerHTML= accept
+      ? '<span>🌹</span><div><b>'+name+'</b> and you are family now — say hi in the feed! 🎸<i>just now</i></div>'
+      : '<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; }
+  var msg=accept?('🌹 You and '+name+' are family now.'):'Request dismissed.';
+  if(window.DDFriends&&DDFriends.ready()){
+    DDFriends.respond(reqId,accept).then(function(){ done(); if(typeof toast==='function')toast(msg); })
+      .catch(function(){ done(); if(typeof toast==='function')toast(msg); });
+  } else { done(); if(typeof toast==='function')toast(msg); }
+}
+/* demo Jen item — used only until the backend is wired */
 function acceptFriend(name){
   var el=document.getElementById('nfrJen');
   if(el) el.innerHTML='<span>🌹</span><div><b>'+name+'</b> and you are family now — say hi in the feed! 🎸<i>just now</i></div>';
@@ -1032,6 +1073,8 @@ function acceptFriend(name){
   if(typeof toast==='function') toast('🌹 You and '+name+' are family now.');
 }
 function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.innerHTML='<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; }
+/* boot: load real requests + subscribe for realtime once the client is up */
+(function(){ function go(){ try{ if(window.DDFriends&&DDFriends.ready()){ loadFriendReqs(); DDFriends.subscribe(function(){ loadFriendReqs(); }); } }catch(e){} } setTimeout(go,1500); setTimeout(go,4000); })();
 </script>
 
 <!-- ===== Corner: profile dropdown ===== -->
@@ -2425,7 +2468,7 @@ function moreToggle(b){ var t=b.previousElementSibling; if(!t)return; var clampe
 /* top-right corner: ▦ menu · 🔔 notifications · profile */
 function openApps(){ var e=document.getElementById('appsov'); if(e)e.classList.add('on'); }
 function openCreate(){ var e=document.getElementById('createov'); if(e)e.classList.add('on'); }
-function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; }
+function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); if(typeof loadFriendReqs==='function')loadFriendReqs(); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; }
 function coClose(id){ var e=document.getElementById(id); if(e)e.classList.remove('on'); }
 function coGo(id,fn){ coClose(id); try{fn();}catch(e){} }
 function openProfMenu(){ var e=document.getElementById('profmenu'); if(e)e.classList.toggle('on'); }
@@ -2924,6 +2967,7 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
 <script src="dd_spread.js" defer></script>
 <script src="dd_hyperpost.js" defer></script>
 <script src="dd_showmap.js" defer></script>
+<script src="dd_friends.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
