@@ -712,4 +712,28 @@ try{ HelpTest.set('karaoke',{ic:'🎤',name:'DeadDance Karaoke',tasks:[
 ]}); }catch(e){}
 </script>
 <script src="dd_back.js"></script>
+<script>
+/* ===== SHARED KARAOKE QUEUE (real, multi-device via dd_karaoke_queue) =====
+   Additive: your own entry still pushes locally & instantly; OTHER phones' entries
+   arrive live via realtime and drop into the same Wheel. The party is now real. */
+(function(){
+  window.ddId=window.ddId||function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:null}; } };
+  var Q=new URLSearchParams(location.search);
+  window.KQ_STAGE=Q.get('stage')||'main-stage';
+  function myId(){ try{ return ddId().id; }catch(e){ return null; } }
+  window.kqJoin=function(singer,song){ try{ var c=window.ddClient&&ddClient(); if(!c)return;
+    c.rpc('dd_kq_join',{p_stage:KQ_STAGE,p_show:(window.SHOW_NAME||'tonight'),p_singer:singer,p_song:song,p_member:myId()}).catch(function(){}); }catch(e){} };
+  // wrap doQueue: keep local behavior, add real persistence
+  if(typeof window.doQueue==='function'){
+    var _dq=window.doQueue;
+    window.doQueue=function(title){ var n=((document.getElementById('who')||{}).value||'').trim()||'A friend'; _dq(title); kqJoin(n,title); };
+  }
+  // realtime: other devices' entries flow into the Wheel
+  (function sub(){ try{ var c=window.ddClient&&ddClient(); if(!c){ return setTimeout(sub,1500);}
+    c.channel('kq_'+KQ_STAGE).on('postgres_changes',{event:'INSERT',schema:'public',table:'dd_karaoke_queue',filter:'stage_id=eq.'+KQ_STAGE},function(p){
+      var r=p&&p.new; if(!r||r.member_id===myId())return; // skip my own (already local)
+      try{ if(typeof WHEEL!=='undefined'){ WHEEL.push({n:r.singer,s:r.song}); if(typeof renderWheel==='function')renderWheel(); if(typeof toast==='function')toast('🎡 '+r.singer+' joined the Wheel from their phone'); } }catch(e){}
+    }).subscribe(); }catch(e){} })();
+})();
+</script>
 </body></html>

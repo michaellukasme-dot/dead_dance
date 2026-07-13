@@ -484,10 +484,11 @@ window.finish=function(){
   /* PERSIST THE CLAIM FIRST — a real row Michael/the Ambassador can see (was: saved to nothing). */
   try{
     var b=S.band||{}, at=S.attrib||{};
-    var note=[b.city,b.state].filter(Boolean).join(', ');
+    var note=[[b.city,b.state].filter(Boolean).join(', '), (S.homepage?('site: '+S.homepage):''), (S.payout?('payout: '+S.payout):'')].filter(Boolean).join(' · ');
     if(window.DDJoin && DDJoin.claimBand){
       DDJoin.claimBand({ band:b.name||'(unnamed band)', ref:at.ref_band||at.claim_band||null,
-        src:at.src||'claim', region:b.chapterName||b.chapter||null, note:note||null })
+        src:at.src||'claim', region:b.chapterName||b.chapter||null,
+        contactName:b.name||null, contactEmail:(S.email||null), note:note||null })
         .then(function(id){ try{ localStorage.setItem('dd.claim.id', id||''); }catch(e){} })
         .catch(function(){});
     }

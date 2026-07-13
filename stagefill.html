@@ -100,6 +100,12 @@ footer b{color:#c7d0dc}
 
 <footer>StageFill — live music booking, any genre. <b>A DeadDance company.</b></footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=window.ddId||function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:null}; } };
+})();
+</script>
 <script src="acts_seed.js"></script>
 <script src="dd_back.js"></script>
 <script>
@@ -116,6 +122,9 @@ function reg(){
     energy:val('aen'), fee:+val('afee')||0, city:val('ac'), state:val('ast2').toUpperCase(), dead:false, source:'stagefill',
     contact:{name:val('acn'), email:val('ace')} };
   try{ var q=JSON.parse(localStorage.getItem('dd.acts.registered')||'[]'); q.push(Object.assign({ts:Date.now()},act)); localStorage.setItem('dd.acts.registered',JSON.stringify(q)); }catch(e){}
+  try{ var c=window.ddClient&&ddClient(), id=window.ddId&&ddId();
+    if(c){ c.rpc('dd_act_register',{p_member_id:(id&&id.id)||null,p_name:name,p_genre:act.genre,p_is_dead:false,p_source:'stagefill',p_note:[act.city,act.state].filter(Boolean).join(', ')||null}).catch(function(){}); }
+  }catch(e){}
   var d=document.getElementById('done');
   d.innerHTML='<div style="font-weight:800;color:#0b6b4e;margin-bottom:4px">✅ '+name.replace(/</g,'&lt;')+' is listed.</div>'+
     '<div style="font-size:13.5px;color:#173">You’re in the booking exchange — venues and the agent can find you now. We’ll reach out the moment a room wants you. Your contact stays private, and nothing books until you say yes.</div>';

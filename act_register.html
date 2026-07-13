@@ -58,6 +58,12 @@ input:focus,select:focus{outline:none;border-color:var(--dd-gold)}
   <div class="dd-hint" style="margin-top:12px">Honest-state: this demo captures the act locally and shows what registering does. In production it writes to the private CRM, drops the act into the exchange, and (if Grateful Dead) onto the fan calendar. Nothing books or charges until a human confirms.</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid', v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v); } return {id:v}; }catch(e){ return {id:null}; } };
+})();
+</script>
 <script src="acts_seed.js"></script>
 <script src="dd_back.js"></script>
 <script>
@@ -76,8 +82,11 @@ function reg(){
   var act={ name:name, genre:genre, style:val('ast'), size:val('asz')||'Band', fit:document.getElementById('afit').value,
     energy:val('aen'), fee:+val('afee')||0, city:val('ac'), state:val('ast2').toUpperCase(), dead:dead,
     contact:{name:val('acn'), email:val('ace')} };
-  // demo: keep locally + honest-state confirmation
+  // keep a local copy AND persist for real (dd_act_register)
   try{ var q=JSON.parse(localStorage.getItem('dd.acts.registered')||'[]'); q.push(Object.assign({ts:Date.now()},act)); localStorage.setItem('dd.acts.registered',JSON.stringify(q)); }catch(e){}
+  try{ var c=window.ddClient&&ddClient(), id=window.ddId&&ddId();
+    if(c){ c.rpc('dd_act_register',{p_member_id:(id&&id.id)||null,p_name:name,p_genre:genre,p_is_dead:dead,p_source:'deaddance',p_note:[act.city,act.state].filter(Boolean).join(', ')||null}).catch(function(){}); }
+  }catch(e){}
   var where = dead
     ? 'It’s a <b>Grateful Dead act</b>, so it goes onto the <b>fan calendar</b> and into the booking exchange.'
     : '<b>'+genre+'</b> — it goes into the <b>booking exchange only</b> (venues + the AI agent). The Deadhead crowd never sees it.';

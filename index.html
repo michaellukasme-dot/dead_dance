@@ -1366,7 +1366,7 @@ function wantSave(w){ try{localStorage.setItem('dd.want',JSON.stringify(w));}cat
 function wantHas(s){ return !!wantState()[s.band+'|'+s.iso]; }
 function wantTix(s){ var k=s.band+'|'+s.iso, w=wantState();
  if(!w[k]){ w[k]={band:s.band,venue:s.venue,iso:s.iso,at:Date.now()}; wantSave(w);
-   var c=ddClient&&ddClient(),id=ddId&&ddId(); if(c&&id){ try{ c.rpc('chat_ticket_want',{p_band:s.band,p_venue:s.venue,p_date:s.iso}).catch(function(){}); }catch(e){} } }
+   var c=ddClient&&ddClient(),id=ddId&&ddId(); if(c){ try{ c.rpc('chat_ticket_want',{p_band:s.band,p_venue:s.venue,p_date:s.iso,p_id:(id&&id.id)||null}).catch(function(){}); }catch(e){} } }
  if(typeof toast==='function')toast('🔔 You’re on the list — we’re bringing '+s.band+' tickets right here. We’ll tell you the second they’re live. 🌹');
  renderCal(); }
 function buyTix(i){ var s=SHOWLIST[i]; if(!s)return;
