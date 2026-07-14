@@ -5,6 +5,10 @@
    Data-driven: add a row to NETWORKS and it joins the spread. Render is browser-canvas; the PLAN
    (what each variant will say/look like) is pure + unit-tested. Needs qr.js (QRLite) for the code. */
 (function (root) {
+  // DeadDance mark for the center of the QR — start loading now (sw-cached, near-instant).
+  var _mark = null;
+  function markImg() { if (_mark) return _mark; try { _mark = root.document.createElement('img'); _mark.src = 'dd-512.png'; } catch (e) {} return _mark; }
+  try { markImg(); } catch (e) {}
   // ---- the per-network style spec: the "look and feel", dreamt up per platform ----
   var NETWORKS = [
     { id: 'tiktok', name: 'TikTok', w: 1080, h: 1920, ratio: '9:16', tone: 'punchy, trend-native, loud',
@@ -108,10 +112,16 @@
       var x = net.w - dim - Math.round(net.w * 0.03), y = net.h - dim - Math.round(net.h * 0.03);
       ctx.fillStyle = '#fff'; ctx.fillRect(x, y, dim, dim); ctx.fillStyle = '#000';
       for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (m[r][c]) ctx.fillRect(x + (c + 4) * cell, y + (r + 4) * cell, cell, cell);
-      // the QR IS our logo — the Rose sits in the center (conservative size for ECC-M scannability)
-      var cx = x + dim / 2, cy = y + dim / 2, ls = Math.round(dim * 0.20);
-      ctx.fillStyle = '#fff'; ctx.fillRect(cx - ls / 2 - 2, cy - ls / 2 - 2, ls + 4, ls + 4);
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = Math.round(ls * 0.82) + 'px serif'; ctx.fillText('🌹', cx, cy + Math.round(ls * 0.06));
+      // the QR IS our logo — the DeadDance MARK sits in the center (conservative size for ECC-M scannability)
+      var cx = x + dim / 2, cy = y + dim / 2, ls = Math.round(dim * 0.20), rr = Math.round(ls * 0.2);
+      var mk = markImg();
+      ctx.fillStyle = '#fff';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(cx - ls / 2 - 2, cy - ls / 2 - 2, ls + 4, ls + 4, rr + 2); ctx.fill(); }
+      else ctx.fillRect(cx - ls / 2 - 2, cy - ls / 2 - 2, ls + 4, ls + 4);
+      if (mk && mk.complete && mk.naturalWidth) {
+        ctx.save(); if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(cx - ls / 2, cy - ls / 2, ls, ls, rr); ctx.clip(); }
+        ctx.drawImage(mk, cx - ls / 2, cy - ls / 2, ls, ls); ctx.restore();
+      } else { ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = Math.round(ls * 0.82) + 'px serif'; ctx.fillText('🌹', cx, cy + Math.round(ls * 0.06)); }
     } catch (e) {}
   }
   function render(source, meta, netId) {

@@ -194,6 +194,13 @@
 </div>
 
 <script src="qr.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+})();
+</script>
+<script src="dd_art.js"></script>
 <script>
 /* ---------- watermark tiling ---------- */
 (function(){var wm=document.getElementById('wm');if(!wm)return;var s='';for(var y=-1;y<14;y++){for(var x=-1;x<6;x++){s+='<div style="top:'+(y*120-20)+'px;left:'+(x*300-40)+'px">DeadDance · Preview</div>';}}wm.innerHTML=s;})();
@@ -244,24 +251,39 @@ function addPoster(){
   var item={t:t,by:VENDOR||'You',p:p,kind:kind,orig:orig,img:LASTIMG||null,
     g:'linear-gradient(160deg,#3a2350,#7d1533)',vh:t.toUpperCase().slice(0,16),vd:kind,at:Date.now()};
   var arr=myShop(); arr.push(item); saveShop(arr);
-  renderShop();
+  /* PERSIST to the real shared store — one upload, both fronts (fans buy prints, bands license). */
+  if(window.DDArt&&LASTIMG){ DDArt.add({ vendor_slug:DDArt.slugify(VENDOR||'artist'), vendor_name:VENDOR||'', title:t, price_print:p, price_license:p, image:LASTIMG, open_originals:orig })
+     .then(function(){ renderShop(); }).catch(function(){ renderShop(); }); }
+  else renderShop();
   document.getElementById('ptitle').value=''; document.getElementById('pprice').value='';
   var p2=document.getElementById('prev'); p2.style.display='none'; LASTIMG=null;
   document.getElementById('drop').classList.remove('on'); document.getElementById('drop').textContent='📤 Tap to upload your poster art (JPG / PNG)';
 }
-function renderShop(){
-  var arr=myShop(), host=document.getElementById('myShop');
+function drawShop(arr,live){
+  var host=document.getElementById('myShop'); if(!host)return;
   if(!arr.length){ host.innerHTML=''; return; }
   host.innerHTML='<div class="eyebrow" style="margin-bottom:8px">Your store ('+arr.length+')</div><div class="grid">'+
     arr.map(function(a){
       var art=a.img?('<div class="art" style="background:#000;padding:0"><img src="'+a.img+'" style="width:100%;height:100%;object-fit:cover">'+
-        '<div class="vh" style="position:absolute;left:12px;bottom:34px">'+esc(a.vh)+'</div></div>')
-        :('<div class="art" style="background:'+a.g+'"><div class="vh">'+esc(a.vh)+'</div><div class="vd">'+esc(a.vd||'')+'</div></div>');
+        '<div class="vh" style="position:absolute;left:12px;bottom:34px">'+esc(a.vh||a.t)+'</div></div>')
+        :('<div class="art" style="background:'+(a.g||'linear-gradient(160deg,#3a2350,#7d1533)')+'"><div class="vh">'+esc(a.vh||a.t)+'</div><div class="vd">'+esc(a.vd||'')+'</div></div>');
       return '<div class="poster">'+art+'<div class="meta"><div class="t">'+esc(a.t)+'</div>'+
-        '<div class="by">'+esc(a.kind)+'</div><div class="p">$'+a.p+'</div>'+
+        '<div class="by">'+esc(a.kind||'')+'</div><div class="p">$'+(a.p||0)+'</div>'+
         (a.orig?'<span class="pill">open to originals</span>':'')+'</div></div>';
     }).join('')+'</div>'+
-    '<div class="note">Saved to this device for the preview. When you <b>claim your store</b>, this catalog goes live for every band on DeadDance.</div>';
+    (live?'<div class="note">✓ <b>Live in your store</b> — saved to DeadDance, not just this device. Fans can buy prints and every band can license your work for a show. Upload once; it shows everywhere.</div>'
+        :'<div class="note">Saving… your store goes live for every fan and band on DeadDance.</div>');
+}
+function renderShop(){
+  var local=myShop();
+  if(window.DDArt && VENDOR){
+    DDArt.list(DDArt.slugify(VENDOR),200).then(function(rows){
+      var server=(rows||[]).map(function(r){ return {t:r.title||'Untitled',by:r.vendor_name||VENDOR,p:r.price_print||0,kind:'',orig:!!r.open_originals,img:r.image,vh:String(r.title||'').toUpperCase().slice(0,16)}; });
+      var have={}; server.forEach(function(s){ have[String(s.t).toLowerCase()]=1; });
+      var merged=server.concat(local.filter(function(l){ return !have[String(l.t).toLowerCase()]; }));
+      drawShop(merged,true);
+    }).catch(function(){ drawShop(local,false); });
+  } else { drawShop(local,false); }
 }
 renderShop();
 

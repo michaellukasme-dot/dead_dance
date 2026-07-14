@@ -97,6 +97,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 <script src="dd_refer.js"></script>
 <script src="dd_autofill.js"></script>
 <script src="dd_join.js"></script>
+<script src="dd_bands.js"></script>
 <script>
 /* ---------- DEMO/TEST band — injected ONLY when the URL has ?demo (or ?test).
    Never ships in the public 963-band directory; lets you run the whole Band Install
@@ -511,6 +512,9 @@ window.finish=function(){
         .then(function(id){ try{ localStorage.setItem('dd.claim.id', id||''); }catch(e){} })
         .catch(function(){});
     }
+    /* PERSIST THE BAND + LOGO to the real directory, so it shows in the Bands tab for everyone (dd_bands). */
+    try{ if(window.DDBands){ DDBands.upsert({ name:b.name, city:b.city, state:b.state,
+        region:b.chapterName||b.chapter||null, about:S.about||null, links:S.homepage||null, logo:S.logo||null }); } }catch(e){}
   }catch(e){}
   S.lists={email:'',fbpage:'',fbgroups:''}; S.listOK=false; S.logo=null; save();   // don't leave PII sitting on the device
   toast('🌹 Installed — your claim is in. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };

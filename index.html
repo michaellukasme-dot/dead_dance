@@ -723,7 +723,7 @@ body{padding-bottom:64px}
     <div class="card" id="composer">
       <div style="display:flex;gap:10px;align-items:flex-start">
         <div class="cmp-av">🌹</div>
-        <textarea id="cmpText" class="cmp-text" placeholder="What's on your mind, Stagger Lee?"></textarea>
+        <textarea id="cmpText" class="cmp-text" placeholder="What's on your mind?"></textarea>
       </div>
       <div id="cmpNets" class="cmp-nets"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap">
@@ -1110,7 +1110,7 @@ function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.in
 
 <!-- ===== Corner: profile dropdown ===== -->
 <div class="profmenu" id="profmenu">
- <div class="pmhead"><div class="pmav">🌹</div><div><b>Stagger Lee</b><span>Santa Cruz · Founder</span></div></div>
+ <div class="pmhead"><div class="pmav">🌹</div><div><b id="pmMeName">You</b><span>deaddance</span></div></div>
  <button class="pmi" onclick="coGo('profmenu',function(){profile('me')})">🪪 My QR profile</button>
  <button class="pmi" onclick="coGo('profmenu',function(){toast('⚙ Settings &amp; privacy — coming.')})">⚙ Settings &amp; privacy</button>
  <button class="pmi" onclick="coGo('profmenu',function(){toast('❓ Help &amp; support — coming.')})">❓ Help &amp; support</button>
@@ -1337,6 +1337,7 @@ function toast(m){var t=document.createElement('div');t.className='dd-toast';t.s
 var CMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var CDOW=['S','M','T','W','T','F','S'], CDOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='mine';
+var POSTED_SHOWS=[];   /* REAL dates posted by bands (dd_shows) — merged into the calendar so they display + persist */
 /* DEAL — band #1, real schedule from John Smith (deal_shows.js). Merged lazily (once), because
    deal_shows.js loads later in the body than this inline block. */
 var _dealMerged=false;
@@ -1355,6 +1356,7 @@ function cIso(d){return d.getFullYear()+'-'+cpad(d.getMonth()+1)+'-'+cpad(d.getD
 function buildShowlist(){ dealMergeOnce(); var t0=cMid(); var src;
  if(CAL_SCOPE==='nat'){ src=[]; for(var k in REGIONS){ if(REGIONS.hasOwnProperty(k)&&REGIONS[k].shows) src=src.concat(REGIONS[k].shows); } }
  else { var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; src=r.shows||[]; }
+ try{ if(POSTED_SHOWS&&POSTED_SHOWS.length) src=src.concat(POSTED_SHOWS); }catch(e){}   /* REAL posted dates merge in */
  SHOWLIST=src.map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
    return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', deal:!!s.deal}; })
    .filter(function(s){ return s.iso >= cIso(t0); })   /* clear-to-history: a show that already played drops off the calendar */
@@ -1506,6 +1508,21 @@ function qrBuild(){drawQR(document.getElementById('qr'),ME.img);var nq=document.
 /* ---------------- the QR PROFILE — portable, shareable, Facebook-style ---------------- */
 function friendsBuild(){var el=document.getElementById('friendsRow');if(!el)return;
  el.innerHTML=MYFRIENDS.map(function(fr,i){return '<div class="fchip" onclick="profile('+i+')"><div class="fav">'+fr.ic+'</div><div class="fnm">'+fr.name.split(' ')[0]+'</div></div>';}).join("");}
+/* REAL friends — merge accepted friendships (dd_friends) into the list so they show + persist */
+function ddRefreshFriends(){ try{ if(!(window.DDFriends&&DDFriends.friends)) return;
+  DDFriends.friends().then(function(rows){ if(!rows||!rows.length){ return; }
+    var have={}; MYFRIENDS.forEach(function(f){ have[String(f.id||f.name||'').toLowerCase()]=1; have[String(f.name||'').toLowerCase()]=1; });
+    var added=0;
+    rows.forEach(function(r){ var nm=r.name||r.friend_name||r.display_name||'A friend'; var fid=r.friend_id||r.id||r.member_id||nm;
+      var k1=String(fid).toLowerCase(), k2=String(nm).toLowerCase(); if(have[k1]||have[k2]) return; have[k1]=1; have[k2]=1;
+      MYFRIENDS.push({ id:fid, name:nm, ic:'🌹', real:true, preJerry:0, postJerry:0, stubs:0, chapter:'', img:'', story:'A friend on dead.dance.', posts:[], photos:[] }); added++;
+    });
+    if(added){ try{ friendsBuild(); }catch(e){} }
+  }).catch(function(){});
+}catch(e){} }
+(function(){ function go(){ try{ if(window.DDFriends&&DDFriends.ready&&DDFriends.ready()){ ddRefreshFriends();
+   if(DDFriends.subscribe) DDFriends.subscribe(function(){ setTimeout(ddRefreshFriends,400); }); } else setTimeout(go,1400); }catch(e){} }
+ setTimeout(go,1800); })();
 function profile(who){
  var me=(who==='me'); var f=me?ME:MYFRIENDS[who];
  if(me)ME.stubs=STUBS.length;
@@ -1677,8 +1694,34 @@ var BANDS=[
   story:"Keeps Jerry's sound alive in the East Bay — Phil Lesh & Friends, Stu Allen & Mars Hotel (Ashkenaz), and years fronting Melvin Seals' JGB.",
   members:["Stu Allen · guitar · vocals"]}
 ];
+var REAL_BANDS=[];   /* REAL claimed bands (dd_bands) — with their logos — merged into the Bands tab */
 function bandsBuild(){var el=document.getElementById('bandsRow');if(!el)return;
- el.innerHTML=BANDS.map(function(b,i){return '<div class="fchip" onclick="bandProfile('+i+')"><div class="fav" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">'+b.ic+'</div><div class="fnm">'+b.name.split(' ')[0]+'</div></div>';}).join("");}
+ var real=(REAL_BANDS||[]).map(function(b,i){
+   var av=b.logo?('<div class="fav" style="overflow:hidden;padding:0;background:#fff"><img src="'+b.logo+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>')
+                :('<div class="fav" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">'+((b.name||'?').trim()[0]||'?').toUpperCase()+'</div>');
+   return '<div class="fchip" onclick="realBandProfile('+i+')">'+av+'<div class="fnm">'+ddSE(String(b.name||'').split(' ')[0])+'</div></div>';
+ }).join('');
+ var seed=BANDS.map(function(b,i){return '<div class="fchip" onclick="bandProfile('+i+')"><div class="fav" style="background:linear-gradient(135deg,#5a2e86,#c79a3a)">'+b.ic+'</div><div class="fnm">'+b.name.split(' ')[0]+'</div></div>';}).join("");
+ el.innerHTML=real+seed;}
+/* a claimed band's real profile — its uploaded logo, about, and its posted shows */
+function realBandProfile(i){ var b=(REAL_BANDS||[])[i]; if(!b)return; var safe=String(b.name||'').replace(/'/g,"");
+ var shows=(POSTED_SHOWS||[]).filter(function(s){return s.band===b.name;});
+ document.getElementById('profBody').innerHTML=
+  (b.logo?'<img src="'+b.logo+'" alt="" style="width:96px;height:96px;border-radius:18px;object-fit:cover;display:block;margin:0 auto 10px">':'<svg id="profQR" class="pqr" viewBox="0 0 100 100"></svg>')+
+  '<div class="pname">'+ddSE(b.name)+'</div><div class="pchap">🎸 '+ddSE(b.region||b.city||'')+' · '+shows.length+' show'+(shows.length===1?'':'s')+' on the board</div>'+
+  '<div class="prow"><button class="btn" onclick="toast(\'🔔 Following '+safe+' — heads-up when they play near you.\')">🔔 Follow</button><button class="btn ghost" onclick="hyperConsole(\''+safe+'\')">📡 HyperPost</button></div>'+
+  (b.about?('<div class="psec">📖 About</div><div class="pstory">'+ddSE(b.about)+'</div>'):'')+
+  (shows.length?('<div class="psec">📅 Upcoming</div>'+shows.map(function(s){return '<div class="ppost">'+ddSE(s.venue)+' · '+ddSE(s.date)+(s.city?(' · '+ddSE(s.city)):'')+'</div>';}).join('')):'')+
+  '<div class="pfoot">Claimed band — its real home on dead.dance. Logo, story, and dates are theirs.</div>';
+ document.getElementById('profile').classList.add('on');
+}
+/* boot: pull the REAL bands directory (with logos) and render them, live */
+(function(){ function map(rows){ return (rows||[]).map(function(r){ return {name:r.name,city:r.city,state:r.state,region:r.region,about:r.about,links:r.links,logo:r.logo,slug:r.slug}; }); }
+ function go(){ try{ if(!window.DDBands) return;
+   DDBands.list(null,500).then(function(rows){ REAL_BANDS=map(rows); try{ bandsBuild(); }catch(e){} });
+   if(DDBands.subscribe) DDBands.subscribe(function(){ DDBands.list(null,500).then(function(rows){ REAL_BANDS=map(rows); try{ bandsBuild(); }catch(e){} }); });
+ }catch(e){} }
+ setTimeout(go,1600); setTimeout(go,4400); })();
 function bandProfile(i){ var b=BANDS[i]; if(!b)return; var safe=b.name.replace(/'/g,"");
  document.getElementById('profBody').innerHTML=
   '<svg id="profQR" class="pqr" viewBox="0 0 100 100"></svg>'+
@@ -2052,7 +2095,7 @@ function ddFirstMedia(f){ ddfMediaCount=(f&&f.length)||0; ddFirstChips();
 function ddFirstMsg(){
   var n=ddFirstSpread(), m=ddfMediaCount, el=document.getElementById('ddfMsg'), nn=document.getElementById('ddfN');
   if(nn)nn.textContent=n; if(!el)return;
-  var nm=ddfEsc((window.ME&&ME.name&&ME.name!=='You')?ME.name:'Stagger Lee');
+  var nm=ddfEsc((window.ME&&ME.name&&ME.name!=='You')?ME.name:'You');
   if(n===0) el.innerHTML='Pick a network. I write one post per network — each in its own voice.';
   else if(m>=n) el.innerHTML='✓ <b>'+n+'</b> posts, <b>'+n+'</b> images, one per network. I write each for its audience.';
   else if(m>0) el.innerHTML='Take <b>'+(n-m)+'</b> more, '+nm+', and every network gets its own image. <b>Or HyperPost right now</b> — I\'ll rotate the '+m+' you gave me across all '+n+'. Get more later? <b>I already know where they go.</b>';
@@ -2310,14 +2353,36 @@ function gv(id){var e=document.getElementById(id);return e?e.value.trim():"";}
 function gigAddDate(){
  var band=gv('gd_band'),venue=gv('gd_venue'),date=gv('gd_date');
  if(!band||!venue||!date){ toast('Add at least band, venue, and a date.'); return; }
- var payload={p_band_id:GIGBANDID||null,p_band_name:band,p_venue:venue,p_address:null,
-   p_city:gv('gd_city')||null,p_state:gv('gd_state')||null,p_region:gv('gd_region')||null,
-   p_date:date,p_time:gv('gd_time')||null,p_gig_info:gv('gd_info')||null,p_scene:gv('gd_scene')||'grateful_dead'};
- var c=ddClient(),id=ddId(); closeGig();
- var done=function(showId){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); promptVendorSlots(showId||null,venue); };
- if(c&&id){ try{ c.rpc('chat_show_submit',payload).then(function(r){ if(r&&r.error){ toast('Saved locally — sign in to radiate to the chapter.'); done(null); } else done(r&&r.data); }).catch(function(){ done(null); }); }catch(e){ done(null); } }
- else { done(null); }
+ var show={band_id:GIGBANDID||null,band_name:band,band:band,venue:venue,
+   city:gv('gd_city')||'',state:gv('gd_state')||'',region:gv('gd_region')||REG,
+   date:date,time:gv('gd_time')||'',gig_info:gv('gd_info')||'',scene:gv('gd_scene')||'grateful_dead'};
+ closeGig();
+ ddAddPostedShow(show);   /* optimistic — it shows on the calendar this instant */
+ if(window.DDShows){
+   DDShows.submit(show).then(function(sid){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); promptVendorSlots(sid||null,venue); })
+     .catch(function(){ toast('📅 On your board — connect to share it with the chapter.'); promptVendorSlots(null,venue); });
+ } else { toast('📅 On your board.'); promptVendorSlots(null,venue); }
 }
+/* add a posted date to the live calendar (optimistic + on realtime insert) */
+function ddAddPostedShow(s){
+ try{ var iso=(s.date||s.show_date||''); if(!iso) return;
+   POSTED_SHOWS.push({ band:s.band_name||s.band, venue:s.venue, city:s.city, state:s.state,
+     region:s.region, date:iso, time:s.time||s.show_time, type:s.scene||'grateful_dead', url:s.gig_info||'', _posted:true });
+   buildShowlist(); renderCal();
+ }catch(e){}
+}
+/* boot: pull the REAL posted dates into the calendar + go live */
+(function(){ function go(){ try{ if(!window.DDShows) return;
+   DDShows.upcoming(400).then(function(rows){ if(!rows||!rows.length) return;
+     var seen={}; POSTED_SHOWS.forEach(function(p){ seen[(p.band||'')+'|'+(p.date||'')+'|'+(p.venue||'')]=1; });
+     rows.forEach(function(r){ var k=(r.band_name||'')+'|'+(r.show_date||'')+'|'+(r.venue||''); if(seen[k])return; seen[k]=1;
+       POSTED_SHOWS.push({ band:r.band_name, venue:r.venue, city:r.city, state:r.state, region:r.region,
+         date:r.show_date, time:r.show_time, type:r.scene||'grateful_dead', url:r.gig_info||'', _posted:true }); });
+     try{ buildShowlist(); renderCal(); }catch(e){}
+   });
+   if(DDShows.subscribe) DDShows.subscribe(function(np){ if(np) ddAddPostedShow(np); });
+ }catch(e){} }
+ setTimeout(go,1500); setTimeout(go,4200); })();
 /* venue books a band → set 4×4 vendor tables; the Chaperone fills them */
 var VENDSHOW=null, VENDSD=8, VENDAR=4;
 function promptVendorSlots(showId,venue){ VENDSHOW=showId; VENDSD=8; VENDAR=4;
@@ -2633,7 +2698,7 @@ function hpManage(){toast('⚙️ Connect your networks once — Facebook, Insta
 var hpMediaCount=0;
 function hpSpreadSize(){return HPCH.filter(function(c){return c.on&&!c.lock;}).length;}
 function hpSpread(){var el=document.getElementById('hpspread');if(!el)return;
-  var n=hpSpreadSize(),m=hpMediaCount,name=(window.ME&&ME.name)?ME.name:'Stagger Lee',msg;
+  var n=hpSpreadSize(),m=hpMediaCount,name=(window.ME&&ME.name)?ME.name:'You',msg;
   if(n===0){msg='Pick a network — a <b>full spread</b> writes one post per network, each with its own photo/video. I write every one.';}
   else if(m>=n){msg='✓ <b>Full spread ready</b> — <b>'+n+'</b> posts, <b>'+n+'</b> images/videos, one per network, rotated. I write each one for its audience.';}
   else if(m>0){var need=n-m;msg='🖼️ <b>Full spread = '+n+'</b> (one image per network — I write each post). You\'ve got <b>'+m+'</b>. “Take '+need+' more, '+name+', and I\'ll send a full spread” — <b>or just HyperPost now</b> and I\'ll spread the '+m+' you gave me across all '+n+', rotated. <b>Get more later? I already know where they go</b> — straight to the '+need+' still sharing.';}
@@ -2653,8 +2718,8 @@ var CMP_NETS=[{id:'dd',n:'🌹 dead.dance',lock:true},{id:'fb',n:'f Facebook'},{
 function cmpDefaults(){ var d; try{d=JSON.parse(localStorage.getItem('dd.hpdef')||'null');}catch(e){d=null;}
   if(!d||!d.length){ d=['dd']; } if(d.indexOf('dd')<0) d.unshift('dd'); return d; }
 function cmpSaveDefaults(arr){ try{localStorage.setItem('dd.hpdef',JSON.stringify(arr));}catch(e){} }
-function cmpInit(){ var t=document.getElementById('cmpText'); if(t){ var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:'Stagger Lee';
-    t.placeholder="What's on your mind, "+nm+"?"; }
+function cmpInit(){ var t=document.getElementById('cmpText'); if(t){ var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:'';
+    t.placeholder=nm?("What's on your mind, "+nm+"?"):"What's on your mind?"; }
   cmpRenderNets(); cmpNote(); }
 function cmpRenderNets(){ var box=document.getElementById('cmpNets'); if(!box)return; var def=cmpDefaults();
   box.innerHTML=CMP_NETS.map(function(c){ var on=def.indexOf(c.id)>=0;
@@ -2674,7 +2739,7 @@ function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.v
   try{
     if(window.DDFeed && DDFeed.ready()){
       posted=true;
-      var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:(DDFeed.myName?DDFeed.myName():'Stagger Lee');
+      var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:(DDFeed.myName?DDFeed.myName():'You');
       ddFeedPrepend({author_id:ddMyIdSafe(), author_name:nm, role:(DDFeed.myRole&&DDFeed.myRole()), body:txt, created_at:new Date().toISOString(), _me:true}); // optimistic — carries my id so my face + name render
       DDFeed.post(txt).then(function(){ /* realtime will confirm for others */ })
         .catch(function(){ toast('Saved on this device — sign in to post to the family.'); });
@@ -2863,7 +2928,7 @@ var QA_TASKS=[
   steps:[{t:'Tap <b>▦ Month</b>.'},{t:'Use ‹ › to jump to next month; tap a highlighted date.'}],
   q:{prompt:'Did the dates look correct & current?',opts:['Yes, spot on','Mostly','Something’s off']}},
  {key:'qa_hyperpost',kind:'qa',ic:'📡',title:'Try HyperPost (the one new thing)',
-  steps:[{t:'Find “What’s on your mind, Stagger Lee?” in the feed.'},{t:'Type a hello and tap <b>📡 HyperPost</b>.'}],
+  steps:[{t:'Find “What’s on your mind?” in the feed.'},{t:'Type a hello and tap <b>📡 HyperPost</b>.'}],
   q:{prompt:'Did you understand what HyperPost did?',opts:['Totally','Sort of','Not really']}},
  {key:'qa_default_nets',kind:'qa',ic:'⚙',title:'Set your default networks',
   steps:[{t:'In the composer, tap <b>⚙ Networks</b>.'},{t:'Turn Facebook on; HyperPost again.'}],
@@ -3286,6 +3351,8 @@ function ddAddFriend(id,name,btn){
 <script src="dd_autofill.js" defer></script>
 <script src="dd_join.js" defer></script>
 <script src="dd_feed.js" defer></script>
+<script src="dd_shows.js" defer></script>
+<script src="dd_bands.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
   /* ===== PWA update prompt — "🌹 There's an update to DeadDance" when a new version ships ===== */

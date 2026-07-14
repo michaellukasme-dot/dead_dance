@@ -54,6 +54,9 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid #3a2a55;backgr
 
 <script src="qr.js"></script>
 <script src="deal_shows.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}</script>
+<script src="dd_art.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3200);}
@@ -149,13 +152,36 @@ function renderLeft(){
         '<div class="tier'+(S.tier==='artist'?' on':'')+'" onclick="S.tier=\'artist\';regen();renderLeft()"><b>🎨 Commission an artist</b><div class="p">Buy a show poster from a dead.dance artist. We still drop the QR on it.</div></div>'+
       '</div>'+
       (S.tier==='artist'
-        ? '<button class="btn rose" style="width:100%;margin-top:8px" onclick="goArtist()">Browse the Poster Shop →</button>'+
+        ? '<button class="btn rose" style="width:100%;margin-top:8px" onclick="goArtist()">Browse the full Poster Shop →</button>'+
+          '<div class="mini" style="margin-top:10px;font-weight:800;color:#ffd76a">License an artist\'s work for this show</div>'+
+          '<div id="artCat"></div>'+
           '<div class="drop" style="margin-top:8px" tabindex="0" role="button" onclick="document.getElementById(\'ap\').click()" onkeydown="if(event.key===\'Enter\'){document.getElementById(\'ap\').click();}"><div style="font-size:13px;font-weight:800">Already have your artist poster? Upload it</div><div class="mini">we place your QR bottom-right and you\'re done</div></div>'+
           '<input type="file" id="ap" accept="image/*" style="display:none" onchange="onArtist(this.files)">'
         : '');
   }
   L.innerHTML=html;
+  if(!fr && S.tier==='artist') loadArtCatalog();
 }
+/* BAND front of the 2-front store: bands license real dd_art uploads for a show. */
+var ART_ROWS=[];
+function loadArtCatalog(){
+  var host=document.getElementById('artCat'); if(!host||!window.DDArt) return;
+  host.innerHTML='<div class="mini" style="padding:6px 0">Loading artists\' work…</div>';
+  DDArt.list(null,120).then(function(rows){
+    ART_ROWS=rows||[];
+    if(!ART_ROWS.length){ host.innerHTML='<div class="mini" style="padding:6px 0">No artist posters yet — invite one and their work shows up here.</div>'; return; }
+    host.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
+      ART_ROWS.map(function(r,i){ var lic=(r.price_license!=null?('$'+r.price_license+' license'):'ask'); return
+        '<div onclick="licenseArt('+i+')" style="cursor:pointer;border:1px solid rgba(255,255,255,.14);border-radius:10px;overflow:hidden;background:#000">'+
+        '<div style="aspect-ratio:3/4;background:#000"><img src="'+esc(r.image)+'" style="width:100%;height:100%;object-fit:cover;display:block"></div>'+
+        '<div style="padding:6px 8px"><b style="font-size:12px;display:block">'+esc(r.title||'Untitled')+'</b>'+
+        '<span class="mini">'+esc(r.vendor_name||'Artist')+' · '+esc(lic)+'</span></div></div>'; }).join('')+'</div>';
+  }).catch(function(){ host.innerHTML=''; });
+}
+window.licenseArt=function(i){ var r=ART_ROWS[i]; if(!r)return;
+  var img=new Image(); img.onload=function(){ S.artistPoster=img; regen();
+    toast('🎨 Licensed "'+(r.title||'poster')+'" from '+(r.vendor_name||'the artist')+(r.price_license!=null?(' — $'+r.price_license):'')+'. QR placed. (Nothing charges yet.)'); };
+  img.src=r.image; };
 function seg(v,t){return '<button class="'+(S.font===v?'on':'')+'" onclick="S.font=\''+v+'\';saveStyle();regen()">'+t+'</button>';}
 function segP(v,t){return '<button class="'+(S.placement===v?'on':'')+'" onclick="S.placement=\''+v+'\';saveStyle();regen()">'+t+'</button>';}
 function fmtDate(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}); }
@@ -202,6 +228,7 @@ function drawPoster(){
 }
 function nameSize(ctx,txt,maxW,font){ var fs=120; do{ ctx.font='700 '+fs+'px '+font; if(ctx.measureText(txt).width<=maxW) break; fs-=2; }while(fs>28); return fs; }
 function fmtDateShort(iso){ if(!iso)return''; var d=new Date(iso+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase(); }
+var DDMARK=new Image(); DDMARK.onload=function(){ try{ if(!firstRun()) regen(); }catch(e){} }; DDMARK.src='dd-512.png';
 function drawQR(ctx,W,H){
   var q; try{ q=window.QRLite.matrix(showUrl()); }catch(e){ return; }
   var plate=Math.round(W*0.20), pad=Math.round(W*0.02), x=W-plate-pad*1.4, y=H-plate-pad*1.4;
@@ -209,6 +236,13 @@ function drawQR(ctx,W,H){
   var px=Math.floor(plate/(q.size+2)), off=Math.round((plate-px*q.size)/2);
   ctx.fillStyle='#000';
   for(var r=0;r<q.size;r++)for(var c=0;c<q.size;c++) if(q.modules[r][c]) ctx.fillRect(x+off+c*px, y+off+r*px, px, px);
+  // DeadDance mark, center — that's US. Small enough to stay inside ECC-M headroom.
+  try{ if(DDMARK.complete && DDMARK.naturalWidth){
+    var ms=Math.round(plate*0.22), cx=x+plate/2, cy=y+plate/2, rr=Math.round(ms*0.2);
+    ctx.fillStyle='#fff'; roundRect(ctx, cx-ms/2-3, cy-ms/2-3, ms+6, ms+6, rr+3); ctx.fill();
+    ctx.save(); roundRect(ctx, cx-ms/2, cy-ms/2, ms, ms, rr); ctx.clip();
+    ctx.drawImage(DDMARK, cx-ms/2, cy-ms/2, ms, ms); ctx.restore();
+  } }catch(e){}
 }
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function updateHonest(){ document.getElementById('honest').innerHTML=

@@ -213,6 +213,7 @@ function renderRoster(){
   $('roster').innerHTML=ROSTER.map(function(b,i){
     return '<div class="band"><div class="bn">'+esc(b.n)+'</div><div class="bt">'+b.t+'</div><div class="bl">'+b.b+'</div>'+
       '<div class="acts"><button class="btn ghost sm" onclick="bandHome('+i+')">🏠 Home</button>'+
+      '<button class="btn ghost sm" onclick="bandMedia('+i+')">🎬 Media</button>'+
       '<button class="btn ghost sm" onclick="promoteFor('+i+')">📡 Promote</button></div></div>';
   }).join('');
   $('rosterN').textContent=ROSTER.length; $('kBands').textContent=ROSTER.length;
@@ -292,6 +293,7 @@ function openSocials(){
 
 /* ---- band home (opens the band's dead.dance flow) ---- */
 function bandHome(i){ toast('🏠 '+ROSTER[i].n+' — opening their dead.dance home.'); try{ location.href='band_console.html?band='+encodeURIComponent(ROSTER[i].n); }catch(e){} }
+function bandMedia(i){ toast('🎬 '+ROSTER[i].n+' — add a video (paste the YouTube link).'); try{ location.href='band_media.html?band='+encodeURIComponent(ROSTER[i].n); }catch(e){} }
 
 /* ---- boot ---- */
 renderRoster(); renderCal(); renderSvc(); draftPromo();

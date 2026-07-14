@@ -1,0 +1,168 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DeadDance</title>
+<link rel="stylesheet" href="dd_theme.css">
+<style>
+:root{--purple:#2a1b3d;--rose:#b8002e;--muted:#8a7f97;--ink:#1a1320}
+*{box-sizing:border-box}
+body{margin:0;background:#0e0716;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 60px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);border-radius:22px;padding:22px;position:relative;overflow:hidden;text-align:center}
+.hero .mark{position:absolute;right:-24px;top:-24px;width:120px;opacity:.14}
+.badge{display:inline-block;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#e9def5}
+.logo{width:104px;height:104px;border-radius:24px;object-fit:contain;background:#fff;margin:12px auto 8px;display:block}
+.mono{width:104px;height:104px;border-radius:24px;margin:12px auto 8px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;background:linear-gradient(150deg,#b8002e,#5a2e86);color:#fff}
+h1{font-size:26px;margin:4px 0 2px;font-weight:900}
+.loc{color:#cdbfe0;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.tile{background:#1a1226;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+.tile .n{font-size:26px;font-weight:900;line-height:1}
+.tile .k{color:var(--muted);font-size:12px;margin-top:5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.tile.claim .n{font-size:15px;color:#e0a3b4}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;margin-top:10px}
+.btn.rose{background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff}
+.sec{margin-top:22px} .sec h2{font-size:15px;color:#cdbfe0;margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em}
+.show{background:#160f22;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px}
+.show .d{font-weight:800} .show .v{color:var(--muted);font-size:13px}
+.empty{color:var(--muted);font-size:13px;padding:6px 0}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+.foot img{width:26px;vertical-align:middle;margin-right:6px;opacity:.85}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:#fff;color:#1a1320;padding:12px 18px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;z-index:50;max-width:90%;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.claimline{margin-top:8px;font-size:12px;color:var(--muted);text-align:center}
+.claimline a{color:#e0a3b4}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <img class="mark" src="dd-512.png" alt="">
+    <span class="badge" id="typeBadge">DeadDance</span>
+    <div id="logoSlot"></div>
+    <h1 id="name">DeadDance</h1>
+    <div class="loc" id="loc"></div>
+  </div>
+  <div class="grid" id="scorecard"></div>
+  <a class="btn rose" id="fanDoor" href="#">Loading…</a>
+  <div class="claimline" id="ownerDoor"></div>
+
+  <div class="sec" id="showsSec" style="display:none">
+    <h2 id="showsTitle">Upcoming shows</h2>
+    <div id="shows"></div>
+  </div>
+
+  <div class="foot"><img src="dd-512.png" alt="">Every band, venue, artist and group on DeadDance has its own code. This is one of them.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="band_seed.js"></script>
+<script src="dd_join.js"></script>
+<script src="dd_shows.js"></script>
+<script src="dd_bands.js"></script>
+<script src="dd_art.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3200);}
+function qp(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return'';}}
+function mono(n){return String(n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'🌹';}
+
+var T=(qp('t')||'band').toLowerCase();
+var ID=qp('id');
+var NAME=qp('name');
+var SEED=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
+var ENT=null;
+if(T==='band'){ ENT=SEED.filter(function(b){return b.id===ID;})[0]||null; if(ENT&&!NAME)NAME=ENT.name; }
+if(!NAME) NAME=ID||'DeadDance';
+var CITY=(ENT&&[ENT.city,ENT.state].filter(Boolean).join(', '))||'';
+
+/* ---- per-type config: badge, tiles, fan door, owner door ---- */
+var TYPES={
+  band:{ badge:'Band · Grateful Dead', showsFor:'band',
+    tiles:[['shows','Shows on record'],['members','In the group'],['setlists','Setlists'],['tickets','Tickets sold']],
+    fan:{label:'🌹 Join the '+NAME+' group', act:'joinBand'},
+    owner:{label:'Is this your band?', to:'band_onboard.html?claim='+encodeURIComponent(ID||''), cta:'Claim &amp; manage it'} },
+  venue:{ badge:'Venue', showsFor:'venue',
+    tiles:[['shows','Shows hosted'],['bands','Bands played'],['tickets','Tickets sold'],['next','Next show']],
+    fan:{label:'🌹 Follow '+NAME, act:'followVenue'},
+    owner:{label:'Is this your venue?', to:'venue_console.html?claim='+encodeURIComponent(NAME), cta:'Claim your calendar'} },
+  artist:{ badge:'Artist · Poster Shop', showsFor:null,
+    tiles:[['pieces','Pieces'],['prints','Prints sold'],['licenses','Band licenses'],['fans','Fans']],
+    fan:{label:'🌹 Shop '+NAME+"'s posters", act:'shopArtist'},
+    owner:{label:'Is this your art?', to:'poster_studio.html?shop='+encodeURIComponent(NAME), cta:'Claim your store'} },
+  group:{ badge:'Group · Influencer', showsFor:null,
+    tiles:[['members','Members'],['posts','Posts'],['shows','Shows shared'],['bands','Bands']],
+    fan:{label:'🌹 Join '+NAME, act:'joinBand'},
+    owner:{label:'Run this group?', to:'band_manager.html', cta:'Open your console'} }
+};
+var CFG=TYPES[T]||TYPES.band;
+
+/* ---- header ---- */
+document.getElementById('typeBadge').textContent=CFG.badge;
+document.getElementById('name').textContent=NAME;
+document.getElementById('loc').textContent=CITY;
+document.title=NAME+' · DeadDance';
+(function(){ var slot=document.getElementById('logoSlot');
+  slot.innerHTML='<div class="mono" id="mono">'+esc(mono(NAME))+'</div>'; })();
+
+/* ---- scorecard tiles (start as — ; fill the real ones as reads land) ---- */
+var STAT={};
+function drawScore(){
+  document.getElementById('scorecard').innerHTML=CFG.tiles.map(function(t){
+    var key=t[0], v=STAT[key];
+    var claim=(v==null);
+    return '<div class="tile'+(claim?' claim':'')+'"><div class="n">'+(claim?'Claim to add':esc(String(v)))+'</div><div class="k">'+esc(t[1])+'</div></div>';
+  }).join('');
+}
+drawScore();
+
+/* ---- fan door ---- */
+var fan=document.getElementById('fanDoor');
+fan.textContent=CFG.fan.label;
+fan.onclick=function(e){ e.preventDefault(); window[CFG.fan.act] && window[CFG.fan.act](); };
+
+/* ---- owner door ---- */
+document.getElementById('ownerDoor').innerHTML=CFG.owner.label+' <a href="'+CFG.owner.to+'">'+CFG.owner.cta+' &rarr;</a>';
+
+/* ---- fan actions ---- */
+window.joinBand=function(){ try{ if(window.DDJoin&&DDJoin.track){ DDJoin.track({band:NAME,src:'qr',role:'fan'}); } }catch(e){}
+  toast("🌹 You're in the "+NAME+" group. Shows, setlists and posts will find you."); loadMembers(); };
+window.followVenue=function(){ try{ if(window.DDJoin&&DDJoin.track){ DDJoin.track({band:NAME,src:'qr',role:'venue-follow'}); } }catch(e){}
+  toast("🌹 Following "+NAME+". You'll see every show they book."); };
+window.shopArtist=function(){ location.href='poster_shop.html'; };
+
+/* ---- real reads: shows (dd_shows), members (dd_join), pieces (dd_art) ---- */
+function loadMembers(){ try{ if(window.DDJoin&&DDJoin.bandJoinCount){ DDJoin.bandJoinCount(NAME).then(function(n){ if(n!=null){ STAT.members=n; drawScore(); } }); } }catch(e){} }
+function loadShows(){
+  if(!CFG.showsFor||!window.DDShows||!DDShows.upcoming) return;
+  DDShows.upcoming(400).then(function(rows){
+    rows=rows||[];
+    var mine=rows.filter(function(r){
+      if(CFG.showsFor==='band') return String(r.band_name||'').toLowerCase()===NAME.toLowerCase();
+      return String(r.venue||'').toLowerCase()===NAME.toLowerCase();
+    });
+    STAT.shows=mine.length;
+    if(CFG.showsFor==='venue'){ var bands={}; mine.forEach(function(r){bands[r.band_name]=1;}); STAT.bands=Object.keys(bands).length; STAT.next=mine.length?fmtDate(mine[0].show_date):0; }
+    drawScore();
+    var sec=document.getElementById('showsSec'), host=document.getElementById('shows');
+    document.getElementById('showsTitle').textContent=(CFG.showsFor==='venue'?'Upcoming at '+NAME:'Upcoming shows');
+    if(mine.length){ sec.style.display='block';
+      host.innerHTML=mine.slice(0,12).map(function(r){
+        var right=CFG.showsFor==='venue'?esc(r.band_name||''):esc([r.venue,r.city].filter(Boolean).join(' · '));
+        return '<div class="show"><div><div class="d">'+esc(fmtDate(r.show_date))+'</div><div class="v">'+right+'</div></div></div>';
+      }).join('');
+    }
+  }).catch(function(){});
+}
+function loadArt(){ if(T!=='artist'||!window.DDArt||!DDArt.list) return;
+  DDArt.list(DDArt.slugify(NAME),200).then(function(rows){ STAT.pieces=(rows||[]).length; drawScore(); }).catch(function(){}); }
+function fmtDate(iso){ if(!iso)return''; try{ var d=new Date(String(iso).slice(0,10)+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return iso; } }
+
+loadMembers(); loadShows(); loadArt();
+</script>
+<script src="dd_back.js"></script>
+</body></html>

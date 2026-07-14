@@ -45,6 +45,7 @@ body{margin:0;background:#17101f;color:#eee;font:16px/1.5 -apple-system,BlinkMac
 <div class="ov" id="ov"><div class="rec" id="rec"></div></div>
 <div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="dd_art.js"></script>
 <script>
 try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2800);}
@@ -64,7 +65,7 @@ var POSTERS=[
 ];
 function fillArtists(){var sel=document.getElementById('fArtist');var arts=['All artists'].concat(POSTERS.map(function(p){return p.a;}).filter(function(v,i,x){return x.indexOf(v)===i;}));sel.innerHTML=arts.map(function(a){return '<option>'+esc(a)+'</option>';}).join('');}
 function filtered(){var ar=document.getElementById('fArtist').value,st=document.getElementById('fStyle').value;return POSTERS.filter(function(p){if(ar&&ar!=='All artists'&&p.a!==ar)return false;if(st&&p.s!==st)return false;return true;});}
-function inner(p){var c=pal(p.t+p.a);return 'style="background:linear-gradient(160deg,'+c[0]+','+c[1]+')"><span class="rays"></span><div class="ttl">'+esc(p.t)+'</div><div class="by">'+esc(p.a)+' · '+esc(p.s)+'</div>';}
+function inner(p){ if(p.img){ return 'style="background:#000;padding:0"><img src="'+esc(p.img)+'" style="width:100%;height:100%;object-fit:cover;display:block"><div class="by" style="position:absolute;left:8px;bottom:8px;text-shadow:0 1px 3px #000">'+esc(p.a)+'</div>'; } var c=pal(p.t+p.a);return 'style="background:linear-gradient(160deg,'+c[0]+','+c[1]+')"><span class="rays"></span><div class="ttl">'+esc(p.t)+'</div><div class="by">'+esc(p.a)+' · '+esc(p.s)+'</div>';}
 function render(){var g=document.getElementById('grid');var a=filtered();if(!a.length){g.innerHTML='<div style="color:var(--muted);padding:20px">No posters in that bin. 🌹</div>';return;}
  g.innerHTML=a.map(function(p){var i=POSTERS.indexOf(p);return '<div class="p" onclick="open_('+i+')"><div class="pimg" '+inner(p)+'</div><div class="pm">$'+esc(p.p)+' · tap to view</div></div>';}).join('');}
 function open_(i){var p=POSTERS[i];var r=document.getElementById('rec');
@@ -78,6 +79,15 @@ document.getElementById('ov').onclick=function(e){if(e.target===this)close_();};
 function buy(t){toast('🛒 "'+t+'" — you license the poster (+ optional print). Artist keeps the majority. Demo: nothing charges yet.');}
 function modf(a){toast('✏️ Commission '+a+' to modify it — your date, venue, colors. Artist sets the price + keeps credit. Demo only.');}
 fillArtists(); render();
+/* Real artist uploads (dd_art) lead the wall — the fan front of the 2-front store. */
+var SEED_POSTERS=POSTERS.slice();
+function loadRealArt(){ if(!window.DDArt) return; DDArt.list(null,300).then(function(rows){
+  var real=(rows||[]).map(function(r){ return {t:r.title||'Untitled', a:r.vendor_name||'Artist', s:'Photo',
+    p:(r.price_print!=null?String(r.price_print):'29'), img:r.image, lic:r.price_license, real:true }; });
+  POSTERS=real.concat(SEED_POSTERS); fillArtists(); render();
+}).catch(function(){}); }
+loadRealArt();
+try{ if(window.DDArt&&DDArt.subscribe) DDArt.subscribe(function(){ loadRealArt(); }); }catch(e){}
 </script>
 <script src="helptest.js"></script>
 <script>
