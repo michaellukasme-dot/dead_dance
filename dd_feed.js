@@ -42,11 +42,20 @@
     return c.rpc('dd_post_react', { p_post_id: postId, p_member_id: id, p_kind: kind || 'like', p_on: !!on })
       .then(function (r) { if (r && r.error) throw r.error; return Number((r && r.data) || 0); });
   }
-  // { postId: count } for a batch of post ids (like kind only)
+  // { postId: { kind: count, ... } } for a batch of post ids — EVERY emotion, its own counter
   function reactCounts(ids) {
     var c = client(); if (!c || !ids || !ids.length) return Promise.resolve({});
     return c.rpc('dd_post_react_counts', { p_ids: ids })
-      .then(function (r) { var out = {}; ((r && r.data) || []).forEach(function (row) { if (row.kind === 'like') out[row.post_id] = Number(row.n || 0); }); return out; })
+      .then(function (r) { var out = {}; ((r && r.data) || []).forEach(function (row) {
+        var p = row.post_id; (out[p] || (out[p] = {}))[row.kind] = Number(row.n || 0); }); return out; })
+      .catch(function () { return {}; });
+  }
+  // { postId: { kind: true } } — THIS device's own reactions (so chips highlight + toggle off after reload)
+  function myReactions(ids) {
+    var c = client(), id = myId(); if (!c || !id || !ids || !ids.length) return Promise.resolve({});
+    return c.rpc('dd_post_my_reactions', { p_ids: ids, p_member: id })
+      .then(function (r) { var out = {}; ((r && r.data) || []).forEach(function (row) {
+        var p = row.post_id; (out[p] || (out[p] = {}))[row.kind] = true; }); return out; })
       .catch(function () { return {}; });
   }
 
@@ -62,5 +71,17 @@
   }
   function unsubscribe() { try { if (chan) client().removeChannel(chan); } catch (e) {} chan = null; }
 
-  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, subscribe: subscribe, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
+  // live reactions: when ANY head reacts (or un-reacts), fire onChange so the feed re-pulls true counts
+  var rchan = null;
+  function subscribeReactions(onChange) {
+    var c = client(); if (!c || rchan) return;
+    try {
+      rchan = c.channel('dd_reacts_live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'dd_post_reactions' },
+          function (payload) { try { onChange && onChange(payload && (payload.new || payload.old)); } catch (e) {} })
+        .subscribe();
+    } catch (e) {}
+  }
+
+  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, myReactions: myReactions, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
 })(typeof window !== 'undefined' ? window : this);

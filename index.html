@@ -489,6 +489,13 @@ body{padding-bottom:64px}
 .act.reply{background:var(--accent);color:#fff}
 .reactpop{position:fixed;z-index:85;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 10px;box-shadow:0 8px 22px #0004;display:none;gap:6px;font-size:21px}
 .reactpop.on{display:flex}.reactpop span{cursor:pointer;transition:.1s}.reactpop span:hover{transform:scale(1.35)}
+/* per-emotion reaction counters — one chip per emotion, count = how many heads reacted */
+.rbar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.rchip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:#faf7fd;border-radius:999px;padding:3px 9px;font-size:13px;cursor:pointer;line-height:1.4;transition:.1s}
+.rchip:hover{transform:translateY(-1px)}
+.rchip span{font-weight:800;font-size:12px;color:var(--muted)}
+.rchip.on{background:#f3e7fb;border-color:#c9a5e6}
+.rchip.on span{color:var(--purple,#5a2e86)}
 .pmenu{position:fixed;z-index:88;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px #0005;padding:6px;width:252px;display:none;max-height:72vh;overflow:auto}
 .pmenu.on{display:block}
 .pmenu button{display:flex;gap:10px;align-items:flex-start;width:100%;background:none;border:0;text-align:left;padding:9px 8px;border-radius:9px;cursor:pointer;color:var(--ink)}
@@ -889,7 +896,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 </div>
 
 <!-- reaction popover (shared) -->
-<div class="reactpop" id="reactpop"><span onclick="react('👍')">👍</span><span onclick="react('❤️')">❤️</span><span onclick="react('🌹')">🌹</span><span onclick="react('🔥')">🔥</span><span onclick="react('😂')">😂</span><span onclick="react('🙌')">🙌</span><span onclick="react('💀')">💀</span></div>
+<div class="reactpop" id="reactpop"><span onclick="react('❤️')">❤️</span><span onclick="react('🌹')">🌹</span><span onclick="react('🔥')">🔥</span><span onclick="react('😂')">😂</span><span onclick="react('🙌')">🙌</span><span onclick="react('💀')">💀</span></div>
 
 <!-- Post ⋯ menu (dead.dance) -->
 <div class="pmenu" id="postmenu">
@@ -2498,7 +2505,74 @@ function stopPlay(){document.getElementById('nowplay').classList.remove('on');}
 function like(b){var s=b.querySelector('span');var on=b.classList.toggle('on');if(s)s.textContent=(+s.textContent)+(on?1:-1);}
 var _rb=null;
 function reactPop(b){var rp=document.getElementById('reactpop');_rb=b;var r=b.getBoundingClientRect();rp.style.left=Math.max(8,r.left)+'px';rp.style.top=(r.top-48)+'px';rp.classList.add('on');}
-function react(e){document.getElementById('reactpop').classList.remove('on');toast('Reacted '+e);}
+/* ---------- REAL per-emotion reactions: a counter per emotion, toggled per user, summed across users ---------- */
+var REACT_ORDER=['❤️','🌹','🔥','😂','🙌','💀'];
+var DD_MY_REACTS={};                                         // pid -> {emoji:true}  (this device's reactions)
+try{ DD_MY_REACTS=JSON.parse(localStorage.getItem('dd.myreacts')||'{}')||{}; }catch(e){ DD_MY_REACTS={}; }
+function saveMyReacts(){ try{ localStorage.setItem('dd.myreacts',JSON.stringify(DD_MY_REACTS)); }catch(e){} }
+function reactBarHTML(pid){ return '<div class="rbar" data-rbar="'+pid+'" style="display:none"></div>'; }
+function reactBarEl(pid){ return document.querySelector('.rbar[data-rbar="'+(pid||'').replace(/"/g,'')+'"]'); }
+function renderReactBar(pid,counts){
+  var bar=reactBarEl(pid); if(!bar)return; counts=counts||{};
+  var mine=DD_MY_REACTS[pid]||{};
+  var kinds=REACT_ORDER.slice();
+  Object.keys(counts).forEach(function(k){ if(k!=='like'&&kinds.indexOf(k)<0)kinds.push(k); });   // any future emoji
+  var chips=kinds.filter(function(k){ return (counts[k]||0)>0 || mine[k]; }).map(function(k){
+    var n=counts[k]||0; var safe=k.replace(/'/g,'');
+    return '<button class="rchip'+(mine[k]?' on':'')+'" onclick="ddReactTap(\''+pid+'\',\''+safe+'\')" title="'+(mine[k]?'You reacted — tap to remove':'React '+safe)+'">'+k+' <span>'+n+'</span></button>';
+  });
+  bar.innerHTML=chips.join(''); bar.style.display=chips.length?'flex':'none';
+}
+function setChipCount(pid,kind,n,on){
+  var bar=reactBarEl(pid); if(!bar)return;
+  var chip=[].slice.call(bar.querySelectorAll('.rchip')).filter(function(c){return c.textContent.indexOf(kind)===0;})[0];
+  if(!chip){                                                 // first of this emotion — add the chip
+    var counts={}; counts[kind]=n; DD_MY_REACTS[pid]=DD_MY_REACTS[pid]||{};
+    // rebuild from current chips + this one
+    var cur=readBarCounts(pid); cur[kind]=n; renderReactBar(pid,cur); return;
+  }
+  chip.classList.toggle('on',!!on);
+  var s=chip.querySelector('span'); if(s)s.textContent=n;
+  if(n<=0 && !on) chip.remove();                             // last one removed → drop the chip
+  var bar2=reactBarEl(pid); if(bar2) bar2.style.display=bar2.querySelector('.rchip')?'flex':'none';
+}
+function readBarCounts(pid){ var bar=reactBarEl(pid),out={}; if(!bar)return out;
+  [].slice.call(bar.querySelectorAll('.rchip')).forEach(function(c){ var em=(c.textContent.trim().split(' ')[0]||''); var n=parseInt((c.querySelector('span')||{}).textContent||'0',10)||0; if(em)out[em]=n; }); return out; }
+/* tap an emotion chip (or pick from the popup) — real toggle, true server count */
+function ddReactTap(pid,kind){
+  if(!pid){ return; }
+  var mine=DD_MY_REACTS[pid]||(DD_MY_REACTS[pid]={});
+  var on=!mine[kind];
+  if(on) mine[kind]=1; else delete mine[kind];
+  saveMyReacts();
+  // optimistic
+  var cur=readBarCounts(pid); cur[kind]=Math.max(0,(cur[kind]||0)+(on?1:-1)); renderReactBar(pid,cur);
+  if(window.DDFeed&&DDFeed.react){
+    DDFeed.react(pid,on,kind).then(function(n){ setChipCount(pid,kind,n,on); })
+      .catch(function(){ if(on){delete mine[kind];}else{mine[kind]=1;} saveMyReacts(); var c2=readBarCounts(pid); c2[kind]=Math.max(0,(c2[kind]||0)+(on?-1:1)); renderReactBar(pid,c2);
+        if(typeof toast==='function') toast('Sign in to react with the family.'); });
+  } else { if(typeof toast==='function') toast('Reacted '+kind); }
+}
+/* emoji picked from the ❤️🌹🔥 popup → apply to the post it was opened on */
+function react(e){
+  document.getElementById('reactpop').classList.remove('on');
+  var post=(_rb&&_rb.closest)?_rb.closest('.post'):null;
+  var pid=post&&post.getAttribute('data-pid');
+  if(pid){ ddReactTap(pid,e); return; }
+  // seeded/demo post (no server id) — local cosmetic counter so the UX still reads the same
+  localReact(post,e);
+}
+/* local-only reaction bar for the hardcoded sample posts */
+function localReact(post,e){
+  if(!post){ if(typeof toast==='function')toast('Reacted '+e); return; }
+  var bar=post.querySelector('.rbar');
+  if(!bar){ bar=document.createElement('div'); bar.className='rbar'; var acts=post.querySelector('.acts'); if(acts&&acts.parentNode) acts.parentNode.insertBefore(bar,acts.nextSibling); else post.appendChild(bar); }
+  var chip=[].slice.call(bar.querySelectorAll('.rchip')).filter(function(c){return c.textContent.indexOf(e)===0;})[0];
+  if(!chip){ chip=document.createElement('button'); chip.className='rchip on'; chip.innerHTML=e+' <span>1</span>'; chip.onclick=function(){ localReactToggle(chip,e); }; bar.appendChild(chip); }
+  else { localReactToggle(chip,e); }
+  bar.style.display='flex';
+}
+function localReactToggle(chip,e){ var on=!chip.classList.contains('on'); chip.classList.toggle('on',on); var s=chip.querySelector('span'); var n=(parseInt(s&&s.textContent||'0',10)||0)+(on?1:-1); if(n<=0){ chip.remove(); } else if(s){ s.textContent=n; } }
 function moreToggle(b){ var t=b.previousElementSibling; if(!t)return; var clamped=t.classList.toggle('clamp'); b.textContent=clamped?'See more…':'See less…'; }
 /* top-right corner: ▦ menu · 🔔 notifications · profile */
 function openApps(){ var e=document.getElementById('appsov'); if(e)e.classList.add('on'); }
@@ -2598,7 +2672,7 @@ function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.v
     if(window.DDFeed && DDFeed.ready()){
       posted=true;
       var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:(DDFeed.myName?DDFeed.myName():'Stagger Lee');
-      ddFeedPrepend({author_name:nm, role:(DDFeed.myRole&&DDFeed.myRole()), body:txt, created_at:new Date().toISOString(), _me:true}); // optimistic
+      ddFeedPrepend({author_id:ddMyIdSafe(), author_name:nm, role:(DDFeed.myRole&&DDFeed.myRole()), body:txt, created_at:new Date().toISOString(), _me:true}); // optimistic — carries my id so my face + name render
       DDFeed.post(txt).then(function(){ /* realtime will confirm for others */ })
         .catch(function(){ toast('Saved on this device — sign in to post to the family.'); });
     }
@@ -2615,17 +2689,26 @@ var DDFEED_SEEN={};
 function ddFeedRoleTag(role){ var m={band:'🎸 Band',venue:'🏛 Venue',ambassador:'📇 Ambassador',influencer:'📡 Group leader'}; return m[role]||''; }
 function ddFeedRelTime(iso){ try{ var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
   if(s<60)return'now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }catch(e){ return 'now'; } }
+function ddMyIdSafe(){ try{ return (window.ddId&&ddId().id)||''; }catch(e){ return ''; } }
+function ddMyNameSafe(){ try{ if(window.ME&&ME.name&&ME.name!=='You')return ME.name; return (localStorage.getItem('dd.myname')||'').trim(); }catch(e){ return ''; } }
 function ddFeedPostHTML(p){
-  var nm=String(p.author_name||'A head').replace(/</g,'&lt;');
+  var myid=ddMyIdSafe();
+  var mine=!!(p._me || (p.author_id && myid && String(p.author_id)===String(myid)));
+  var realMe=ddMyNameSafe();
+  var nm=String((mine&&realMe)?realMe:(p.author_name||'A head')).replace(/</g,'&lt;');
   var body=String(p.body||'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
-  var tag=ddFeedRoleTag(p.role); var av=(nm.trim()[0]||'🌹').toUpperCase();
+  var tag=ddFeedRoleTag(p.role);
+  // my own posts carry MY face; everyone else keeps the initial until they're a known head
+  var myPhoto=(mine&&window.ME&&ME.img)?ME.img:'';
+  var av=myPhoto?('<img src="'+myPhoto+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">'):((nm.trim()[0]||'🌹').toUpperCase());
   var pid=p.id||'';
-  return '<div class="post"'+(pid?(' data-pid="'+pid+'"'):'')+'><div class="posthead"><div class="pav">'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
+  return '<div class="post"'+(pid?(' data-pid="'+pid+'"'):'')+'><div class="posthead"><div class="pav"'+(mine?' data-me-av':'')+(myPhoto?' style="overflow:hidden;padding:0;background:#fff"':'')+'>'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
     '<span>'+(tag?('<span class="grp">'+tag+'</span> · '):'')+ddFeedRelTime(p.created_at)+(p._me?' · you':'')+'</span></div></div>'+
     '<div class="txt">'+body+'</div>'+
     '<div class="acts"><button class="act ddlike"'+(pid?(' onclick="ddLike(this,\''+pid+'\')"'):' onclick="like(this)"')+'>👍 <span>0</span></button>'+
     '<button class="act" onclick="reactPop(this)">😊 React</button>'+
-    '<button class="act reply" onclick="hyperConsole(\'the family · '+nm.replace(/\x27/g,'')+'\')">💬 Comment</button></div></div>';
+    '<button class="act reply" onclick="hyperConsole(\'the family · '+nm.replace(/\x27/g,'')+'\')">💬 Comment</button></div>'+
+    (pid?reactBarHTML(pid):'')+'</div>';
 }
 /* REAL like: toggle persists to Supabase; the count is the true count from the server */
 function ddLike(btn,pid){
@@ -2636,24 +2719,38 @@ function ddLike(btn,pid){
   DDFeed.react(pid,on).then(function(n){ if(span) span.textContent=n; })
     .catch(function(){ btn.classList.toggle('on',!on); if(span) span.textContent=cur; });
 }
-/* pull true like counts for all real posts currently in the feed */
+/* pull true counts for all real posts in the feed: the 👍 like number AND every emotion counter */
 function ddFeedLoadLikes(){
   if(!(window.DDFeed&&DDFeed.reactCounts))return;
   var els=[].slice.call(document.querySelectorAll('#ddFeed .post[data-pid]'));
   var ids=els.map(function(e){return e.getAttribute('data-pid');}); if(!ids.length)return;
-  DDFeed.reactCounts(ids).then(function(map){
-    els.forEach(function(e){ var pid=e.getAttribute('data-pid'), s=e.querySelector('.ddlike span'); if(s) s.textContent=(map[pid]||0); });
+  var pMine=(DDFeed.myReactions?DDFeed.myReactions(ids):Promise.resolve({}));
+  Promise.all([DDFeed.reactCounts(ids), pMine]).then(function(res){
+    var counts=res[0]||{}, mine=res[1]||{};
+    Object.keys(mine).forEach(function(pid){ DD_MY_REACTS[pid]=mine[pid]; });   // server is source of truth for MY chips
+    saveMyReacts();
+    els.forEach(function(e){ var pid=e.getAttribute('data-pid'); var c=counts[pid]||{};
+      var s=e.querySelector('.ddlike span'); if(s) s.textContent=(c.like||0);
+      renderReactBar(pid,c);
+    });
   });
 }
 function ddFeedPrepend(p){ var host=document.getElementById('ddFeed'); if(!host)return;
   var key=p.id||(p.author_id+'|'+p.body+'|'+(p.created_at||'')); if(p.id&&DDFEED_SEEN[p.id])return; if(p.id)DDFEED_SEEN[p.id]=1;
-  var d=document.createElement('div'); d.innerHTML=ddFeedPostHTML(p); host.insertBefore(d.firstChild, host.firstChild); }
+  var d=document.createElement('div'); d.innerHTML=ddFeedPostHTML(p); host.insertBefore(d.firstChild, host.firstChild);
+  try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){} }
 function ddFeedRender(){ if(!(window.DDFeed&&DDFeed.feed))return;
   DDFeed.feed(40).then(function(rows){ var host=document.getElementById('ddFeed'); if(!host||!rows||!rows.length)return;
     host.innerHTML=''; DDFEED_SEEN={};
     rows.forEach(function(p){ if(p.id)DDFEED_SEEN[p.id]=1; });
-    host.innerHTML=rows.map(ddFeedPostHTML).join(''); ddFeedLoadLikes(); }); }
-(function(){ function go(){ try{ if(window.DDFeed&&DDFeed.ready()){ ddFeedRender(); DDFeed.subscribe(function(np){ if(np)ddFeedPrepend(np); }); } }catch(e){} }
+    host.innerHTML=rows.map(ddFeedPostHTML).join(''); ddFeedLoadLikes();
+    try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){} }); }
+var _rReloadT=null;
+function ddReactsReloadSoon(){ if(_rReloadT)return; _rReloadT=setTimeout(function(){ _rReloadT=null; try{ ddFeedLoadLikes(); }catch(e){} },500); }
+(function(){ function go(){ try{ if(window.DDFeed&&DDFeed.ready()){ ddFeedRender();
+    DDFeed.subscribe(function(np){ if(np)ddFeedPrepend(np); });
+    if(DDFeed.subscribeReactions) DDFeed.subscribeReactions(function(){ ddReactsReloadSoon(); });   // a head reacted anywhere → re-pull true counts
+  } }catch(e){} }
   setTimeout(go,1600); setTimeout(go,4200); })();
 
 /* ---------------- blog Local / National toggle ---------------- */
