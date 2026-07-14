@@ -3285,7 +3285,31 @@ function ddAddFriend(id,name,btn){
 <script src="dd_feed.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+  /* ===== PWA update prompt — "🌹 There's an update to DeadDance" when a new version ships ===== */
+  var DD_SWREG=null;
+  function ddUpdateBanner(){
+    if(document.getElementById('ddUpd')) return;
+    var newv=''; try{ if(window.caches&&caches.keys){ caches.keys().then(function(ks){ var best=null; ks.forEach(function(k){ var m=/deaddance-v(\d+)/.exec(k); if(m){var n=+m[1]; if(!best||n>best)best=n;} }); var e=document.getElementById('ddUpdV'); if(best&&e)e.textContent='v'+best; }); } }catch(e){}
+    var b=document.createElement('div'); b.id='ddUpd';
+    b.style.cssText='position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#5a2e86,#b8002e);color:#fff;border-radius:14px;padding:11px 14px;box-shadow:0 14px 34px rgba(10,5,20,.55);display:flex;align-items:center;gap:11px;font-size:13.5px;font-weight:700;max-width:94%';
+    b.innerHTML='🌹 There’s an update to DeadDance <span id="ddUpdV" style="opacity:.75;font-weight:600"></span>'+
+      '<button id="ddUpdGo" style="border:0;border-radius:10px;padding:8px 14px;font-weight:900;background:#ffd76a;color:#3a1d00;cursor:pointer">Refresh</button>'+
+      '<span id="ddUpdX" style="cursor:pointer;opacity:.75;padding:0 4px;font-size:16px">×</span>';
+    document.body.appendChild(b);
+    document.getElementById('ddUpdGo').onclick=function(){ try{ if(DD_SWREG&&DD_SWREG.waiting) DD_SWREG.waiting.postMessage({type:'SKIP_WAITING'}); }catch(e){} location.reload(); };
+    document.getElementById('ddUpdX').onclick=function(){ b.remove(); };
+  }
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      if(!reg) return; DD_SWREG=reg;
+      if(reg.waiting && navigator.serviceWorker.controller) ddUpdateBanner();      // a build was already waiting
+      reg.addEventListener('updatefound', function(){ var nw=reg.installing; if(!nw) return;
+        nw.addEventListener('statechange', function(){ if(nw.state==='installed' && navigator.serviceWorker.controller) ddUpdateBanner(); }); });
+      setInterval(function(){ try{ reg.update(); }catch(e){} }, 60000);            // look for a new version every minute
+      window.addEventListener('focus', function(){ try{ reg.update(); }catch(e){} });
+      document.addEventListener('visibilitychange', function(){ if(!document.hidden){ try{ reg.update(); }catch(e){} } });
+    }).catch(function(){});
+  }
   try{ if(window.LukasChat && LukasChat.init) LukasChat.init({ app:"dead_dance", brand:{ name:"dead_dance", accent:"#b8002e", icon:"💬" }, launcher:false }); }catch(e){}
   setTimeout(function(){ try{ syncMyProfile(); }catch(e){} try{ if(window.ME&&ME.chapter) localStorage.setItem('dd.chapter',ME.chapter); }catch(e){} }, 2200);  /* pull my real profile + seed region for support/referral routing */
   /* returning from Stripe hosted checkout */
