@@ -259,8 +259,8 @@ function stepLogo(){
   return '<h2 tabindex="-1">Claim it — and add your mark</h2><div class="sub">This is how your logo gets here: <b>you upload it.</b> We never took it.</div>'+
     (S.logoLost?'<div class="skipbar">↺ <b>Your logo didn\'t save.</b> We keep artwork in memory only, never in this browser\'s storage — so if you reloaded, please add it again. Takes a second.</div>':'')+
     '<div class="logo-drop" tabindex="0" role="button" aria-label="Upload your logo" onclick="document.getElementById(\'lf\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();document.getElementById(\'lf\').click();}">'+
-      (S.logo?'<img src="'+esc(S.logo)+'" alt="Your logo">':'<div class="mono" style="width:64px;height:64px;font-size:22px;margin:0 auto 9px">'+esc(b?b.mono:'?')+'</div>')+
-      '<div style="font-weight:800;font-size:14px">'+(S.logo?'Looks good — tap to replace':'Tap to upload your logo')+'</div>'+
+      (S.logo?'<img src="'+esc(S.logo)+'" alt="Your logo">':(S.logoGuess?'<img src="'+esc(S.logoGuess)+'" alt="found on your page" style="width:64px;height:64px;object-fit:contain;border-radius:12px;background:#fff;opacity:.55;margin:0 auto 9px;display:block" onerror="this.style.display=\'none\'">':'<div class="mono" style="width:64px;height:64px;font-size:22px;margin:0 auto 9px">'+esc(b?b.mono:'?')+'</div>'))+
+      '<div style="font-weight:800;font-size:14px">'+(S.logo?'Looks good — tap to replace':(S.logoGuess?'Is this it? Tap to upload your logo to make it yours':'Tap to upload your logo'))+'</div>'+
       '<div style="font-size:12px;color:var(--muted);margin-top:3px">PNG or JPG. Square works best. Until then we show your initials.</div>'+
     '</div><input type="file" id="lf" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" onchange="upLogo(this.files)">'+
     '<div class="consent">🔒 <b>Your permission, your control.</b> By uploading, you confirm you own or control this artwork and give dead.dance permission to display it on your band page, show cards, and ads. <b>You can remove it at any time and we stop using it.</b> We will never take a logo from the internet.</div>'+
@@ -481,6 +481,36 @@ function stepDone(){
     (window.DDRefer?DDRefer.card(b.name,(b.id||'')):'')+
     '<button class="btn go" style="margin-top:16px" onclick="finish()">Finish install</button></div>';
 }
+/* ---------- Step 0.5 · "Is this your band / your logo?" — the claim opener ---------- */
+function claimHost(){ try{ var u=(S.band&&S.band.link)||S.homepage||''; if(!u)return''; if(u.indexOf('http')!==0)u='http://'+u; return new URL(u).hostname.replace(/^www\./,''); }catch(e){ return ''; } }
+function claimGuessUrl(){
+  try{ if(window.DDLogoGuess && S.band && DDLogoGuess[S.band.id]) return DDLogoGuess[S.band.id]; }catch(e){}
+  var h=claimHost(); if(h && h.indexOf('facebook.')<0 && h.indexOf('.')>0) return 'https://www.google.com/s2/favicons?domain='+encodeURIComponent(h)+'&sz=128';
+  return '';
+}
+function renderClaimConfirm(){
+  var b=S.band||{}, g=claimGuessUrl(), loc=[b.city,b.state].filter(Boolean).join(', ');
+  var pic = g ? '<img src="'+esc(g)+'" alt="logo" style="width:104px;height:104px;object-fit:contain;border-radius:20px;background:#fff;border:1px solid #ece7f2" onerror="this.style.display=\'none\';var m=document.getElementById(\'ccMono\');if(m)m.style.display=\'flex\'">' : '';
+  var html='<div style="text-align:center;padding:4px 0">'+
+    '<div style="color:#b8002e;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px">DeadDance · your band’s home</div>'+
+    '<h2 tabindex="-1" style="font-size:27px;margin:12px 0 4px">Is this your band?</h2>'+
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin:16px 0">'+
+      pic+
+      '<div id="ccMono" class="mono" style="width:104px;height:104px;'+(g?'display:none;':'display:flex;')+'align-items:center;justify-content:center;font-size:36px">'+esc(b.mono||'🌹')+'</div>'+
+      '<div><div style="font-weight:900;font-size:22px">'+esc(b.name||'Your band')+'</div>'+(loc?'<div class="sub" style="margin-top:2px">'+esc(loc)+'</div>':'')+'</div>'+
+    '</div>'+
+    (g?'<div class="honest" style="text-align:left">We found this on your public page. <b>Is this your logo?</b> Say yes and upload it in one tap to make it officially yours — <b>we never take artwork from the internet.</b></div>'
+      :'<div class="honest" style="text-align:left">We drafted a home for <b>'+esc(b.name||'your band')+'</b> — your calendar, a store, and a group your fans can join. Claim it and add your logo in one tap.</div>')+
+    '<button class="btn go" style="width:100%;margin-top:16px" onclick="claimYes()">🌹 Yes — that’s our band</button>'+
+    '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="claimNo()">Not our band →</button>'+
+  '</div>';
+  document.getElementById('right').innerHTML=html;
+  try{ var h=document.querySelector('#right h2'); if(h&&h.focus)h.focus(); }catch(e){}
+  window.scrollTo(0,0);
+}
+window.claimYes=function(){ S.claimSeen=true; var g=claimGuessUrl(); if(g)S.logoGuess=g; S.step=1; save(); render(); toast('🌹 Welcome, '+((S.band&&S.band.name)||'')+' — let’s make it yours.'); };
+window.claimNo=function(){ S.claimSeen=true; S.fromClaim=false; S.band=null; S.step=0; save(); render(); };
+
 var STEPS=[stepFind,stepLogo,stepCal,stepStore,stepPrice,stepPay,stepAuto,stepLists,stepHyper,stepDone];
 
 function canNext(){
@@ -489,6 +519,7 @@ function canNext(){
   return true;
 }
 function render(){
+  if(S.fromClaim && !S.claimSeen && S.band){ renderClaimConfirm(); return; }
   document.getElementById('right').innerHTML=STEPS[S.step]()+
     (S.step<STEPS.length-1?'<div class="nav">'+(S.step>0?'<button class="btn back" onclick="go(-1)">← Back</button>':'')+
       '<button class="btn go" id="nx" onclick="go(1)" '+(canNext()?'':'disabled')+'>'+(S.step===0?'That\'s my band →':'Continue →')+'</button></div>':'');
@@ -525,7 +556,7 @@ function persistRegion(b){ try{ if(b&&b.chapter){ localStorage.setItem('dd.chapt
 /* ---------- attribution: land an invited band on THEIR page, and remember where the claim came from ---------- */
 (function(){ try{
   var cid=new URLSearchParams(location.search).get('claim');            // HOP 1: our email → this band
-  if(cid){ var f=SEED.filter(function(b){return b.id===cid;})[0]; if(f && (!S.band || S.band.id!==f.id)){ S.band=f; if(S.step<1)S.step=0; } }
+  if(cid){ var f=SEED.filter(function(b){return b.id===cid;})[0]; if(f){ S.fromClaim=true; if(!S.band || S.band.id!==f.id){ S.band=f; S.claimSeen=false; if(S.step<1)S.step=0; } } }
   if(S.band) persistRegion(S.band);
   if(window.DDAttrib){ S.attrib=window.DDAttrib.stamp(); }              // stamp src/wave/batch (rides to server when claims record)
   save();
