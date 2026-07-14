@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DEADMAN — Karaoke, no machine · dead.dance</title>
+<meta name="theme-color" content="#180a22">
+<!-- DEADMAN prototype — HONEST STATE.
+     REAL now: your phone's mic → live monitor + reverb → mixed with a backing track → out to ANY speaker
+     your device is paired to (Bluetooth / USB-C / aux). Live output-latency readout + wired-vs-BT coach.
+     Real room presence over Supabase realtime (who's in the room, live).
+     GATED: the licensed Grateful Dead songbook + lyrics unlock with the PUBLISHING license
+     (Warner-Chappell / Ice Nine). Singing over the REAL live masters ("DEADMAN Picks") is the Rhino tier.
+     Nothing here ships a licensed lyric or master — you bring your own track/words to demo the engine.
+     Brand is honest-state "deaddance Karaoke"; "DEADMAN" is the product name pending Rhino marks. -->
+<style>
+:root{--bg:#140a1e;--bg2:#1d1030;--panel:#241436;--line:#3a2857;--ink:#f2ecf7;--muted:#a99cc4;
+  --gold:#e0b34a;--gold2:#b7842a;--rose:#c4324c;--rose2:#8f1f36;--green:#37b26b;--blue:#4f7fd0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(120% 80% at 50% -10%,#2a1442 0%,#140a1e 60%);color:var(--ink);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding-bottom:40px}
+.top{display:flex;align-items:center;gap:11px;padding:14px 16px;position:sticky;top:0;z-index:20;
+  background:linear-gradient(90deg,#0e0716,#3a1d5e 70%,#8f1f36);box-shadow:0 2px 16px #0008}
+.top .logo{font-weight:900;font-size:17px;letter-spacing:.02em}.top .logo b{color:var(--gold)}
+.top .sp{flex:1}.top a{color:#e9dff5;text-decoration:none;font-size:12.5px;border:1px solid #ffffff33;border-radius:9px;padding:6px 10px}
+.wrap{max-width:620px;margin:0 auto;padding:16px 15px 40px}
+.rose{background:#efe7f610;border:1px solid #ffffff1c;border-left:3px solid var(--rose);border-radius:12px;padding:12px 14px;font-size:13px;color:#e7dcf5;margin-bottom:16px;line-height:1.55}
+.rose b{color:var(--gold)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;margin-bottom:3px}.card .sub{color:var(--muted);font-size:12.5px;margin-bottom:12px;line-height:1.5}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-weight:900;font-size:17px;cursor:pointer;
+  background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;letter-spacing:.01em}
+.big.gold{background:linear-gradient(135deg,#e6c25a,#a9781f);color:#2a1c00}
+.big:disabled{opacity:.5;cursor:not-allowed}
+.hide{display:none!important}
+.meter{height:16px;border-radius:9px;background:#160c28;overflow:hidden;border:1px solid var(--line);margin:2px 0 4px}
+.meter i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--gold),var(--rose));transition:width .06s linear}
+.row{display:flex;align-items:center;gap:11px;margin:13px 0}
+.row label{flex:0 0 92px;font-size:12px;font-weight:800;color:#d6c9ee}
+.row input[type=range]{flex:1;accent-color:var(--rose)}
+.row .val{flex:0 0 40px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}
+.btn{border:1px solid var(--line);background:#2c1a44;color:#e9dff5;border-radius:11px;padding:11px;font-weight:800;font-size:13px;cursor:pointer}
+.btn.on{background:#3a2857;border-color:var(--gold2);color:var(--gold)}
+.lat{display:flex;align-items:center;gap:10px;background:#160c28;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:4px}
+.lat .dot{width:12px;height:12px;border-radius:50%;flex:none;background:var(--muted)}
+.lat .dot.good{background:var(--green)}.lat .dot.ok{background:var(--gold)}.lat .dot.bad{background:var(--rose)}
+.lat .t{flex:1;font-size:12.5px;line-height:1.45}.lat .ms{font-weight:900;font-variant-numeric:tabular-nums}
+select,input[type=text]{width:100%;background:#160c28;border:1px solid var(--line);border-radius:10px;color:#fff;padding:10px;font:inherit}
+textarea{width:100%;background:#160c28;border:1px solid var(--line);border-radius:10px;color:#fff;padding:10px;font:14px/1.6 inherit;resize:vertical}
+.prompter{background:#0e0716;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:96px;max-height:220px;overflow:hidden;position:relative;margin-top:8px}
+.prompter .ln{font-size:16px;color:#6a5c86;padding:3px 0;transition:.2s}
+.prompter .ln.on{color:#fff;font-weight:800;font-size:18px}
+.prompter .ln.done{color:#4a3d63}
+.room{display:flex;align-items:center;gap:13px}
+.room .qr{width:96px;height:96px;background:#fff;border-radius:10px;padding:6px;flex:none}
+.room .code{font-size:26px;font-weight:900;letter-spacing:.18em;color:var(--gold)}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#160c28;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;color:#d6c9ee;font-weight:700}
+.honest{font-size:11.5px;color:var(--muted);line-height:1.6;border-top:1px dashed var(--line);padding-top:11px;margin-top:6px}
+.honest b{color:#d6c9ee}
+.tag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:2px 7px;vertical-align:middle}
+.tag.real{background:#12331f;color:#7fe0a6;border:1px solid #1f7a4d66}
+.tag.gate{background:#3a1420;color:#f0a0b2;border:1px solid #8f1f3666}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:13px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:80;pointer-events:none}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">🎤 <b>DEADMAN</b> · deaddance Karaoke</div><div class="sp"></div><a href="index.html">Home</a></div>
+
+<div class="wrap">
+  <div class="rose">🌹 <b>Rosebud here.</b> No machine. No mics. Your phone is the microphone, and any speaker you're paired to — a boombox, a soundbar, a whole PA — becomes the stage. Pair a speaker, tap once, and sing. <span style="color:#b7a9cf">This demo runs the real engine on your own track; the licensed Dead songbook drops in when the publishing license clears.</span></div>
+
+  <!-- START -->
+  <div class="card" id="startCard">
+    <h2>Make this room a stage <span class="tag real">real</span></h2>
+    <div class="sub">Pair your phone/laptop to any speaker first (Bluetooth, USB-C, or aux). Then tap — we'll ask for the mic, and you're live.</div>
+    <button class="big" id="startBtn">🎤 Start DEADMAN</button>
+    <div class="honest" style="margin-top:12px"><b>What's real right now:</b> your voice → live monitor + reverb → mixed with a backing track → out to whatever speaker this device is on. It's the whole no-hardware karaoke rig, running in a web page.</div>
+  </div>
+
+  <!-- LIVE ENGINE -->
+  <div id="engine" class="hide">
+
+    <div class="card">
+      <h2>You're live <span class="tag real">real</span></h2>
+      <div class="sub">Sing. That bar moves with your voice — it's your mic, through this device, to the speaker.</div>
+      <div class="meter"><i id="micMeter"></i></div>
+      <div class="lat" id="latBox"><span class="dot" id="latDot"></span><div class="t" id="latTxt">Measuring output latency…</div><span class="ms" id="latMs">—</span></div>
+
+      <div class="row"><label>🎤 Voice</label><input type="range" id="vVoice" min="0" max="150" value="100"><span class="val" id="vVoiceV">100</span></div>
+      <div class="row"><label>🎶 Music</label><input type="range" id="vMusic" min="0" max="150" value="70"><span class="val" id="vMusicV">70</span></div>
+      <div class="row"><label>🌊 Reverb</label><input type="range" id="vVerb" min="0" max="100" value="28"><span class="val" id="vVerbV">28</span></div>
+      <div class="row"><label>🎚️ Key</label><input type="range" id="vKey" min="-5" max="5" value="0"><span class="val" id="vKeyV">0</span></div>
+      <div class="grid2">
+        <button class="btn" id="btnMon">🔈 Monitor: ON</button>
+        <button class="btn" id="btnStop">■ Stop</button>
+      </div>
+      <div class="honest" id="monHint" style="margin-top:10px"><b>Singer's tip:</b> if you hear yourself echo through a Bluetooth speaker, that's the wireless delay. Pop in wired earbuds (near-zero delay to <i>you</i>) or go USB-C/aux to the speaker — the room won't notice, but you will.</div>
+    </div>
+
+    <!-- BACKING TRACK -->
+    <div class="card">
+      <h2>The backing track <span class="tag real">real</span> <span class="tag gate">Dead beds = license</span></h2>
+      <div class="sub">Sing over the built-in practice groove, or load any track from this device. The licensed Dead karaoke beds arrive with the publishing license; the real live-show masters are the Rhino "Picks" tier.</div>
+      <div class="grid2">
+        <button class="btn" id="btnGroove">▶︎ Practice groove</button>
+        <button class="btn" id="btnLoad">📂 Load a track</button>
+      </div>
+      <input type="file" id="fileIn" accept="audio/*" class="hide">
+      <div class="sub" id="trackName" style="margin:10px 0 0"></div>
+      <div id="sinkWrap" class="hide" style="margin-top:12px">
+        <div class="sub" style="margin-bottom:5px">🔊 Send sound to:</div>
+        <select id="sinkSel"></select>
+      </div>
+    </div>
+
+    <!-- LYRICS PROMPTER -->
+    <div class="card">
+      <h2>Lyrics teleprompter <span class="tag real">engine real</span> <span class="tag gate">Dead words = license</span></h2>
+      <div class="sub">Paste any lyrics to demo the scroller — one line per line. With the publishing license, the whole Dead songbook loads here, synced verse by verse.</div>
+      <textarea id="lyrIn" rows="3" placeholder="Paste lyrics here — your own, or public-domain, to try the prompter…"></textarea>
+      <div class="grid2" style="margin-top:9px">
+        <button class="btn" id="btnRoll">▶︎ Roll lyrics</button>
+        <button class="btn" id="btnClearLyr">Clear</button>
+      </div>
+      <div class="prompter hide" id="prompter"></div>
+    </div>
+
+    <!-- THE ROOM -->
+    <div class="card">
+      <h2>Invite the room <span class="tag real">real presence</span></h2>
+      <div class="sub">Heads scan in and join this room. Who's here is live and real. (Every phone streaming its voice into the mix is the next hardening pass — presence + the stage is real today.)</div>
+      <div class="room">
+        <svg class="qr" id="roomQr" viewBox="0 0 100 100" aria-label="room QR"></svg>
+        <div>
+          <div class="sub" style="margin:0 0 4px">Room code</div>
+          <div class="code" id="roomCode">····</div>
+          <div style="margin-top:8px"><span class="pill">🌹 <b id="roomN">1</b>&nbsp;in the room</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="honest" style="border:0">
+    <b>DEADMAN honest-state.</b> <span class="tag real">real</span> the mic → any-speaker rig, latency coaching, and live room presence work now, on hardware you already own — no machine, no microphones. <span class="tag gate">license</span> the Grateful Dead songbook + on-screen lyrics unlock with the publishing license (Warner-Chappell / Ice Nine); singing over the actual live masters — <b>DEADMAN Picks</b>, riding Dave's Picks — is the Rhino tier. Nothing here plays a licensed lyric or master until the paper is signed.
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* anon Supabase client + stable device id (same pattern as the app's standalone pages) */
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+})();
+</script>
+<script src="qr.js"></script>
+<script>
+/* ======================= DEADMAN engine ======================= */
+(function(){
+  'use strict';
+  function $(id){return document.getElementById(id);}
+  function toast(m){var t=$('toast');if(!t)return;t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3200);}
+
+  /* ---- pure helpers (unit-tested; see window.DEADMAN) ---- */
+  function latencyClass(sec){
+    var ms=Math.round((sec||0)*1000);
+    if(!ms||ms<=0) return {ms:ms,tone:'ok',label:'Latency unknown — if you hear slapback, go wired.'};
+    if(ms<=45)  return {ms:ms,tone:'good',label:'Tight — wired-quality. Sing away.'};
+    if(ms<=120) return {ms:ms,tone:'ok',label:'Fine for a singalong; a hair of delay.'};
+    return {ms:ms,tone:'bad',label:'That\'s Bluetooth delay. Use wired earbuds for yourself, or go USB-C/aux.'};
+  }
+  function semitoneToRate(semi){ return Math.pow(2,(+semi||0)/12); }
+  function roomCode(){ var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s=''; for(var i=0;i<4;i++) s+=A[Math.floor(Math.random()*A.length)]; return s; }
+  window.DEADMAN={ latencyClass:latencyClass, semitoneToRate:semitoneToRate, roomCode:roomCode };
+
+  /* ---- audio state ---- */
+  var AC=null, mic=null, micStream=null, micGain=null, hp=null, verb=null, verbWet=null, verbDry=null,
+      musicGain=null, master=null, analyser=null, monOn=true, rafMeter=0, latTimer=0,
+      trackSrc=null, trackBuf=null, grooveStop=null, playingGroove=false, curRate=1;
+
+  function Ctx(){ return window.AudioContext||window.webkitAudioContext; }
+  function makeReverbIR(ctx, seconds, decay){
+    var rate=ctx.sampleRate, len=Math.max(1,Math.floor(rate*seconds)), buf=ctx.createBuffer(2,len,rate);
+    for(var ch=0;ch<2;ch++){ var d=buf.getChannelData(ch); for(var i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay); } }
+    return buf;
+  }
+
+  function buildGraph(){
+    master=AC.createGain(); master.gain.value=1;
+    analyser=AC.createAnalyser(); analyser.fftSize=1024;
+    // voice chain
+    micGain=AC.createGain(); micGain.gain.value=1.0;
+    hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=90;   // kill rumble/handling
+    verb=AC.createConvolver(); try{ verb.buffer=makeReverbIR(AC,2.2,2.6); }catch(e){}
+    verbWet=AC.createGain(); verbWet.gain.value=0.28;
+    verbDry=AC.createGain(); verbDry.gain.value=1.0;
+    // music chain
+    musicGain=AC.createGain(); musicGain.gain.value=0.7;
+    // wiring: mic -> hp -> [dry -> master] + [verb -> wet -> master]
+    hp.connect(verbDry); verbDry.connect(master);
+    hp.connect(verb); verb.connect(verbWet); verbWet.connect(master);
+    musicGain.connect(master);
+    master.connect(analyser);
+    master.connect(AC.destination);
+  }
+
+  function meter(){
+    if(!analyser) return;
+    var buf=new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(buf);
+    var sum=0; for(var i=0;i<buf.length;i++){ var v=(buf[i]-128)/128; sum+=v*v; }
+    var rms=Math.sqrt(sum/buf.length); var pct=Math.min(100,Math.round(rms*260));
+    var el=$('micMeter'); if(el) el.style.width=pct+'%';
+    rafMeter=requestAnimationFrame(meter);
+  }
+
+  function showLatency(){
+    var sec=0; try{ sec=(typeof AC.outputLatency==='number'?AC.outputLatency:0)||AC.baseLatency||0; }catch(e){}
+    var c=latencyClass(sec);
+    var dot=$('latDot'), txt=$('latTxt'), ms=$('latMs');
+    if(dot) dot.className='dot '+c.tone;
+    if(txt) txt.textContent=c.label;
+    if(ms) ms.textContent=c.ms?(c.ms+' ms'):'—';
+  }
+
+  async function start(){
+    try{
+      AC=new (Ctx())();
+      if(AC.state==='suspended'){ try{ await AC.resume(); }catch(e){} }
+      buildGraph();
+      // mic (best-effort — page still works without it)
+      try{
+        micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+        mic=AC.createMediaStreamSource(micStream); mic.connect(hp);
+      }catch(e){
+        toast('🎤 Mic blocked — you can still play a track. Allow the mic to sing.');
+      }
+      $('startCard').classList.add('hide'); $('engine').classList.remove('hide');
+      meter(); showLatency(); if(latTimer)clearInterval(latTimer); latTimer=setInterval(showLatency,2000);
+      setupSinks();
+      startRoom();
+    }catch(e){ toast('Audio couldn\'t start on this browser. Try Chrome or Safari.'); }
+  }
+
+  /* ---- output device picker (desktop Chrome; harmless where unsupported) ---- */
+  async function setupSinks(){
+    try{
+      if(!(AC && typeof AC.setSinkId==='function') || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+      var devs=await navigator.mediaDevices.enumerateDevices();
+      var outs=devs.filter(function(d){return d.kind==='audiooutput';});
+      if(outs.length<2) return;
+      var sel=$('sinkSel'); sel.innerHTML=outs.map(function(d,i){return '<option value="'+d.deviceId+'">'+(d.label||('Speaker '+(i+1)))+'</option>';}).join('');
+      sel.onchange=function(){ try{ AC.setSinkId(sel.value); toast('🔊 Sent to '+(sel.options[sel.selectedIndex].text)); }catch(e){} };
+      $('sinkWrap').classList.remove('hide');
+    }catch(e){}
+  }
+
+  /* ---- controls ---- */
+  function bindControls(){
+    var vV=$('vVoice'),vM=$('vMusic'),vR=$('vVerb'),vK=$('vKey');
+    vV.oninput=function(){ $('vVoiceV').textContent=vV.value; if(micGain) micGain.gain.value=vV.value/100; };
+    vM.oninput=function(){ $('vMusicV').textContent=vM.value; if(musicGain) musicGain.gain.value=vM.value/100; };
+    vR.oninput=function(){ $('vVerbV').textContent=vR.value; var w=vR.value/100; if(verbWet)verbWet.gain.value=w; if(verbDry)verbDry.gain.value=1-0.4*w; };
+    vK.oninput=function(){ $('vKeyV').textContent=(vK.value>0?'+':'')+vK.value; curRate=semitoneToRate(vK.value); if(trackSrc&&trackSrc.playbackRate){ try{trackSrc.playbackRate.value=curRate;}catch(e){} } };
+    $('btnMon').onclick=function(){ monOn=!monOn; if(micGain) micGain.gain.value=monOn?($('vVoice').value/100):0; this.textContent=monOn?'🔈 Monitor: ON':'🔇 Monitor: OFF'; this.classList.toggle('on',!monOn); };
+    $('btnStop').onclick=stopAll;
+    $('btnGroove').onclick=toggleGroove;
+    $('btnLoad').onclick=function(){ $('fileIn').click(); };
+    $('fileIn').onchange=loadFile;
+    $('btnRoll').onclick=rollLyrics; $('btnClearLyr').onclick=function(){ $('lyrIn').value=''; $('prompter').classList.add('hide'); stopRoll(); };
+  }
+
+  /* ---- built-in practice groove (generated — no licensed content) ---- */
+  function toggleGroove(){
+    if(playingGroove){ if(grooveStop)grooveStop(); playingGroove=false; $('btnGroove').classList.remove('on'); $('btnGroove').textContent='▶︎ Practice groove'; return; }
+    stopTrack();
+    playingGroove=true; $('btnGroove').classList.add('on'); $('btnGroove').textContent='⏸ Practice groove';
+    $('trackName').textContent='Built-in practice groove (generated) — bring your own for the real thing.';
+    var stopped=false, tempo=0.5; // seconds per beat (~120bpm feel, relaxed)
+    var bass=[110,110,146.83,164.81]; // A A D E — loose Dead-ish I-IV-V wander
+    var step=0, timer=null;
+    function hit(){
+      if(stopped||!AC) return;
+      var t=AC.currentTime, b=bass[step%bass.length];
+      // bass note
+      var o=AC.createOscillator(),g=AC.createGain(); o.type='triangle'; o.frequency.value=b;
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+tempo*0.9);
+      o.connect(g); g.connect(musicGain); o.start(t); o.stop(t+tempo);
+      // soft chord shimmer every 2 beats
+      if(step%2===0){ [b*2,b*2.5,b*3].forEach(function(f){ var oo=AC.createOscillator(),gg=AC.createGain(); oo.type='sine'; oo.frequency.value=f; gg.gain.setValueAtTime(0.0001,t); gg.gain.exponentialRampToValueAtTime(0.06,t+0.05); gg.gain.exponentialRampToValueAtTime(0.0001,t+tempo*1.6); oo.connect(gg); gg.connect(musicGain); oo.start(t); oo.stop(t+tempo*1.7); }); }
+      // backbeat tick
+      var nb=AC.createBufferSource(),buf=AC.createBuffer(1,AC.sampleRate*0.05,AC.sampleRate),d=buf.getChannelData(0);
+      for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,8);
+      nb.buffer=buf; var ng=AC.createGain(); ng.gain.value=(step%2===1)?0.28:0.12; nb.connect(ng); ng.connect(musicGain); nb.start(t);
+      step++;
+      timer=setTimeout(hit, tempo*1000);
+    }
+    hit();
+    grooveStop=function(){ stopped=true; if(timer)clearTimeout(timer); };
+  }
+
+  function stopTrack(){ try{ if(trackSrc){trackSrc.stop();} }catch(e){} trackSrc=null; }
+  function loadFile(e){
+    var f=e.target.files&&e.target.files[0]; if(!f) return;
+    if(playingGroove){ toggleGroove(); }
+    var rd=new FileReader();
+    rd.onload=function(){ AC.decodeAudioData(rd.result.slice(0), function(buf){
+        trackBuf=buf; playTrack(); $('trackName').textContent='▶︎ '+f.name+' — your track, looping. Sing over it.';
+      }, function(){ toast('Couldn\'t decode that audio file. Try MP3 or WAV.'); }); };
+    rd.onerror=function(){ toast('Couldn\'t read that file.'); };
+    rd.readAsArrayBuffer(f);
+  }
+  function playTrack(){
+    stopTrack(); if(!trackBuf) return;
+    trackSrc=AC.createBufferSource(); trackSrc.buffer=trackBuf; trackSrc.loop=true;
+    try{ trackSrc.playbackRate.value=curRate; }catch(e){}
+    trackSrc.connect(musicGain); trackSrc.start();
+  }
+
+  /* ---- lyrics prompter (line scroller; user content only) ---- */
+  var rollT=null;
+  function rollLyrics(){
+    var raw=($('lyrIn').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+    if(!raw.length){ toast('Paste a few lines first 🌹'); return; }
+    var p=$('prompter'); p.classList.remove('hide');
+    p.innerHTML=raw.map(function(l,i){return '<div class="ln" data-i="'+i+'">'+l.replace(/</g,'&lt;')+'</div>';}).join('');
+    stopRoll();
+    var i=0, lines=p.querySelectorAll('.ln');
+    function step(){
+      lines.forEach(function(el,k){ el.classList.toggle('on',k===i); el.classList.toggle('done',k<i); });
+      var on=lines[i]; if(on&&on.scrollIntoView) on.scrollIntoView({block:'center',behavior:'smooth'});
+      i++; if(i>lines.length){ stopRoll(); return; }
+      rollT=setTimeout(step, 2600);
+    }
+    step();
+    toast('▶︎ Rolling — with the license, real songs auto-time to the track.');
+  }
+  function stopRoll(){ if(rollT){clearTimeout(rollT);rollT=null;} }
+
+  /* ---- the room: REAL presence over Supabase realtime ---- */
+  var roomChan=null;
+  function startRoom(){
+    var code=roomCode(); $('roomCode').textContent=code;
+    try{ if(window.drawQR) drawQR($('roomQr'), location.origin+location.pathname+'?room='+code); }catch(e){}
+    try{
+      var c=window.ddClient&&window.ddClient(); var id=(window.ddId&&window.ddId().id)||'anon';
+      if(!c) return;
+      roomChan=c.channel('deadman-'+code,{config:{presence:{key:id}}});
+      roomChan.on('presence',{event:'sync'},function(){ try{ var st=roomChan.presenceState(); $('roomN').textContent=Object.keys(st).length||1; }catch(e){} })
+        .subscribe(function(status){ if(status==='SUBSCRIBED'){ try{ roomChan.track({at:Date.now()}); }catch(e){} } });
+    }catch(e){}
+  }
+
+  function stopAll(){
+    try{ if(rafMeter)cancelAnimationFrame(rafMeter); }catch(e){}
+    try{ if(latTimer)clearInterval(latTimer); latTimer=0; }catch(e){}
+    try{ if(grooveStop)grooveStop(); }catch(e){} playingGroove=false;
+    stopTrack(); stopRoll();
+    try{ if(micStream) micStream.getTracks().forEach(function(t){t.stop();}); }catch(e){}
+    try{ if(roomChan && window.ddClient) window.ddClient().removeChannel(roomChan); }catch(e){}
+    try{ if(AC && AC.state!=='closed') AC.close(); }catch(e){}
+    AC=null;
+    $('engine').classList.add('hide'); $('startCard').classList.remove('hide');
+    toast('■ Stopped. Tap Start to go again.');
+  }
+
+  /* ---- boot ---- */
+  $('startBtn').addEventListener('click',function(){ start().then(bindControls).catch(function(){ toast('Couldn\'t start audio.'); }); });
+  // clean up if the page is backgrounded/closed
+  window.addEventListener('pagehide',function(){ try{ if(micStream) micStream.getTracks().forEach(function(t){t.stop();}); }catch(e){} });
+})();
+</script>
+</body></html>
