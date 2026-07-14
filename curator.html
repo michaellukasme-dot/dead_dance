@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Group Leader Console — Shakedown Street</title>
+<title>Group Leader Console — DeadDance</title>
 <meta name="theme-color" content="#2a1b3d">
 <style>
 :root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#23202a;--muted:#6c6878;--cream:#faf7f2;--card:#fff;--line:#e7e0d2;--green:#2a6b46}
@@ -26,7 +26,7 @@ button{font:inherit;font-weight:800;cursor:pointer;border-radius:10px;border:0;p
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#23202a;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:50}#toast.on{opacity:1}
 </style></head>
 <body>
-<div class="top">🌹 Group Leader Console <b>· Shakedown Street</b></div>
+<div class="top">🌹 Group Leader Console <b>· DeadDance</b></div>
 <div class="wrap">
 
 <div class="deal">
@@ -78,7 +78,7 @@ function register(){ var n=(document.getElementById('c_name').value||'').trim(),
   if(!n){toast('Your name, please');return;} if(!C){toast('Offline — try again in a moment');return;}
   C.rpc('chat_leader_register',{p_name:n,p_contact:ct||null}).then(function(r){ if(r&&r.data){ setCode(r.data); toast('🌹 You\'re in — code: '+r.data); renderGate(); } else { toast('Hmm — try again'); } }).catch(function(){ toast('Connection hiccup — try again'); }); }
 
-function boot(code){ document.getElementById('reflink').textContent='https://shakedownstreet.app/curator?ref='+code;
+function boot(code){ document.getElementById('reflink').textContent='https://deaddance.app/curator?ref='+code;
   if(!C){ document.getElementById('recruit').innerHTML='<div style="padding:14px;color:var(--muted)">Offline — reconnect to load the Master List.</div>'; return; }
   C.rpc('chat_promo_status',{p_code:code}).then(function(r){ var d=(r&&r.data&&(r.data[0]||r.data))||{}; document.getElementById('promo').innerHTML=
     '<div class="s"><div class="k">'+(d.recruitable_left!=null?d.recruitable_left:'—')+'</div><div class="l">left to flip</div></div>'+

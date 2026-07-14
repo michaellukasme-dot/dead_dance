@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- dead_dance · v1 (2026-06-24) · familiar/easy social network + market-of-markets for the Grateful Dead / Jerry world.
      Frameworkless offline PWA. HONEST-STATE: demo data; NO real auth / payments / marketplace (counsel-gated); NO
-     audio served until LICENSED (JGB/GD — default-deny). Shakedown Street market, the live Archive (cassette + JGB
+     audio served until LICENSED (JGB/GD — default-deny). The Lot market, the live Archive (cassette + JGB
      catalog), the show-attendance badge, chapters, events, Rosebud. H&F design — lot-culture-at-dusk palette. -->
 <html lang="en" data-theme="light"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -715,7 +715,7 @@ function promote(i){
 function copyDraft(btn){var tx=btn.parentNode.querySelector(".tx").textContent;try{(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(tx):Promise.reject()).then(function(){toast("Copied — paste it where you want it.");}).catch(function(){toast("Select & copy the text.");});}catch(e){toast("Select & copy the text.");}}
 function closeModal(){document.getElementById("ovl").classList.remove("on");}
 function viewShakedown(){
- return '<div class="sec-h">🛍️ Shakedown Street · stalls → vendors → The Dealer</div>'+
+ return '<div class="sec-h">🛍️ The Lot · stalls → vendors → The Dealer</div>'+
   DEALERS.map(function(dl){return '<div class="card"><div class="pad row"><div class="ic">'+dl.em+'</div><div style="flex:1"><b>'+esc(dl.n)+'</b><div class="muted">'+esc(dl.kind)+'</div></div><span class="chip'+(dl.kind==="Chapter stall"?"":" purple")+'">'+(dl.kind==="Chapter stall"?"Chapter":dl.kind)+'</span></div>'+
    '<div class="list">'+dl.items.map(function(it){return '<div class="it"><div class="ic">📦</div><div class="nm"><b>'+esc(it[0])+'</b><div class="s">'+esc(dl.n)+'</div></div><div class="row" style="gap:8px"><b style="color:var(--purple)">'+esc(it[1])+'</b><button class="btn sm" onclick="gate(\'Buying from the seller\')">View</button></div></div>';}).join("")+'</div></div>';}).join("")+
   '<div class="row" style="gap:8px;margin:12px 0"><button class="btn gold sm" style="flex:1" onclick="vendorConsole()">🛍️ Vendor console</button><button class="btn ghost sm" style="flex:1" onclick="chapterShakedown()">📊 Chapter rollup</button></div>'+
@@ -740,7 +740,7 @@ function vendorConsole(name){
  var V=SHAKEDOWN.vendors, v=null; for(var i=0;i<V.length;i++){if(!name||V[i].name===name){v=V[i];break;}} if(!v)v=V[0];
  var take=Math.round(v.sales*SHAKEDOWN.share);
  document.getElementById("sheet").innerHTML='<h3>🛍️ '+esc(v.name)+' — vendor console</h3>'+
-  '<div class="sb">Shakedown Street · '+esc(_chName(v.chapter))+'. <b>Just what you need</b> — your sales, your orders, your booth. We hide the rest.</div>'+
+  '<div class="sb">The Lot · '+esc(_chName(v.chapter))+'. <b>Just what you need</b> — your sales, your orders, your booth. We hide the rest.</div>'+
   '<div class="card pad" style="background:var(--purple);color:#fff;margin-bottom:10px"><div class="row" style="justify-content:space-between;align-items:center"><div><div style="font-size:11.5px;opacity:.8">Your plan · Market</div><b style="font-size:19px">Free listing</b><div style="font-size:11px;opacity:.78">dead_dance takes a 10% share of sales — no monthly fee</div></div><button class="minib" onclick="toast(\'Manage payouts — counsel-gated in v1.\')">Payouts</button></div></div>'+
   '<div class="row" style="gap:10px;margin-bottom:10px"><div class="card pad" style="flex:1;text-align:center"><div style="font-size:30px;font-weight:800;color:var(--purple)">'+_sd$(v.sales)+'</div><div class="muted" style="font-size:12px;line-height:1.3">sales<br>this month</div></div><div class="card pad" style="flex:1;text-align:center"><div style="font-size:30px;font-weight:800;color:var(--purple)">'+v.orders+'</div><div class="muted" style="font-size:12px;line-height:1.3">orders<br>this month</div></div></div>'+
   '<div class="card pad" style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><span class="muted" style="font-size:12px">🔥 Top item</span><b>'+esc(v.top)+'</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">Booth QR scans · last show</span><b>'+v.scans+'</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">Rating</span><b>'+v.rating+'★</b></div><div class="row" style="justify-content:space-between;margin-top:7px"><span class="muted" style="font-size:12px">dead_dance share (10%)</span><b>'+_sd$(take)+'</b></div></div>'+

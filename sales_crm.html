@@ -705,7 +705,7 @@ function festPitch(f){
 function craftInvite(c){
  return "Hey "+c.n+" — dead.dance here, the home for the Dead family in "+RLABEL[c.region]+".\n\n"+
  "Your Chaperone is putting together the local craft scene for our shows. A free vendor listing gets you a 4×4 table at chapter events, "+
- "your booth on Shakedown Street in-app, and a payment-ready storefront when you want it.\n\n"+
+ "your booth on The Lot in-app, and a payment-ready storefront when you want it.\n\n"+
  "Want me to add "+c.n+" to the "+RLABEL[c.region]+" lot?\n\n— dead.dance";
 }
 /* ===== Outreach as a CALENDAR-CAPACITY routine ==============================
@@ -857,7 +857,7 @@ document.getElementById('bandtot').textContent=(DD_TARGET_BANDS||[]).length;
 renderTiers(); renderReps(); render();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>/* shared Shakedown Street client — anon key public by design; lets Help Test reach the DB */
+<script>/* shared DeadDance client — anon key public by design; lets Help Test reach the DB */
 (function(){ try{ var c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return c;}; }catch(e){} })();</script>
 <script src="helptest.js"></script>
 <script>

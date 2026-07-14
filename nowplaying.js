@@ -237,7 +237,7 @@
   // ── "Tap vinyl to own it" → OPEN the Record Store (ddSheet modal) + persistent license notice ──
   window.npOwnIt = function(){
     // 1) open the Record Store in the app's in-app sheet modal (same pattern as footnav)
-    if(window.ddSheet){ ddSheet('record_store.html','💿 Shakedown Records'); }
+    if(window.ddSheet){ ddSheet('record_store.html','💿 DeadDance Records'); }
     else { window.open('record_store.html','_blank','noopener'); }
     // 2) show the PERSISTENT, dismissible license notice (NOT a fast toast)
     showLicense();
@@ -256,7 +256,7 @@
     n.classList.add("on");
   }
   window.npLicClose = function(){ var n=document.getElementById("np_lic"); if(n) n.classList.remove("on"); };
-  window.npLicStore = function(){ npLicClose(); if(window.ddSheet) ddSheet('record_store.html','💿 Shakedown Records'); };
+  window.npLicStore = function(){ npLicClose(); if(window.ddSheet) ddSheet('record_store.html','💿 DeadDance Records'); };
 
   // ── skinny engagement bar: Claude-Gaude pre-fill + radiating HyperPost send ──
   // STUB (honest): live per-user voice GENERATION activates at Step 2 (needs the backend/AI call).

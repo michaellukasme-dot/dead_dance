@@ -57,7 +57,7 @@ body{margin:0;background:var(--bg);color:#1b1226;font:16px/1.55 -apple-system,Bl
 <div class="mktiles">
   <button class="mktile kar" onclick="openKaraoke()">
     <span class="mkic">🎤</span>
-    <span class="mkbody"><b>Shakedown Karaoke</b><small>the whole show — Live Room · soundboard · songbook · pricing</small></span>
+    <span class="mkbody"><b>DeadDance Karaoke</b><small>the whole show — Live Room · soundboard · songbook · pricing</small></span>
     <span class="mkgo">Open ▸</span>
   </button>
 </div>
@@ -71,7 +71,7 @@ body{margin:0;background:var(--bg);color:#1b1226;font:16px/1.55 -apple-system,Bl
 </div>
 
 <div class="crate" id="crate"></div>
-<div class="honest">Honest-state: <b>Shakedown Records</b> is the crate-digging front for the <i>Deal with the Dead</i> Reader/Store. Covers shown are original stylized sleeves — <b>no third-party album art is reproduced</b>. <b>Buy Now</b> and <b>Print Me the Vinyl</b> are real buttons, but <b>nothing charges until payments go live</b>, and each title is sold <b>only once its rights are cleared</b> (masters + mechanical + vinyl-manufacturing + cover art). First real release: <b>Zero — "Go Hear Nothin'"</b> (the market test). 🌹</div>
+<div class="honest">Honest-state: <b>DeadDance Records</b> is the crate-digging front for the <i>Deal with the Dead</i> Reader/Store. Covers shown are original stylized sleeves — <b>no third-party album art is reproduced</b>. <b>Buy Now</b> and <b>Print Me the Vinyl</b> are real buttons, but <b>nothing charges until payments go live</b>, and each title is sold <b>only once its rights are cleared</b> (masters + mechanical + vinyl-manufacturing + cover art). First real release: <b>Zero — "Go Hear Nothin'"</b> (the market test). 🌹</div>
 
 <div class="ov" id="ov"><div class="rec" id="rec"></div></div>
 
@@ -79,8 +79,8 @@ body{margin:0;background:var(--bg);color:#1b1226;font:16px/1.55 -apple-system,Bl
 <div id="karov">
   <div class="kbg" onclick="closeKaraoke()"></div>
   <div class="kpanel">
-    <div class="khead"><span>🎤 Shakedown Karaoke — the whole show</span><button class="kx" onclick="closeKaraoke()" aria-label="Close">✕</button></div>
-    <iframe id="karframe" title="Shakedown Karaoke" src="about:blank" loading="lazy"></iframe>
+    <div class="khead"><span>🎤 DeadDance Karaoke — the whole show</span><button class="kx" onclick="closeKaraoke()" aria-label="Close">✕</button></div>
+    <iframe id="karframe" title="DeadDance Karaoke" src="about:blank" loading="lazy"></iframe>
   </div>
 </div>
 
@@ -173,7 +173,7 @@ fillArtists(); render();
 </script>
 <script src="helptest.js"></script>
 <script>
-HelpTest.set('records',{ic:'🛍️',name:'Shakedown Records',tasks:[
+HelpTest.set('records',{ic:'🛍️',name:'DeadDance Records',tasks:[
  {key:'rec_flip',ic:'📀',title:'Flip through the crate',steps:[{t:'Scroll the crate sideways and tap a sleeve to pull it out.'}],q:{prompt:'Did it feel like digging through records?',opts:['Yes!','Sort of','No']}},
  {key:'rec_artist',ic:'🔎',title:'Find an artist',steps:[{t:'Use the <b>artist</b> dropdown (or the search box) to filter the crate.'}],q:{prompt:'Easy to find your artist?',opts:['Easy','OK','Hard']}},
  {key:'rec_buy',ic:'🛒',title:'Buy / Print the Vinyl',steps:[{t:'Open a record and try <b>Buy Now</b> and <b>Print Me the Vinyl</b>.'}],q:{prompt:'Clear what each button does?',opts:['Clear','Sort of','No']}},

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The Archive — Shakedown Street</title>
+<title>The Archive — DeadDance</title>
 <meta name="theme-color" content="#2a1b3d">
 <style>
 :root{--purple:#5a2e86;--purple2:#7a3cc0;--gold:#c08a2d;--rose:#b8002e;--ink:#23202a;--muted:#6c6878;--cream:#faf7f2;--card:#fff;--line:#e7e0d2}
@@ -38,7 +38,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-syst
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#23202a;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:50}#toast.on{opacity:1}
 </style></head>
 <body>
-<div class="top"><div class="logo">🌹 The Archive <b>· Shakedown Street</b></div></div>
+<div class="top"><div class="logo">🌹 The Archive <b>· The Lot</b></div></div>
 <div class="wrap">
 <p class="lede">Every show the family ever taped — made to <b>explore, argue about, and listen to together.</b> Pick a lens. 🌹</p>
 <div id="sotd"></div>
@@ -57,7 +57,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 -apple-syst
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-/* shared Shakedown Street client — anon key is public by design; reads open, writes via SECURITY DEFINER rpc */
+/* shared DeadDance client — anon key is public by design; reads open, writes via SECURITY DEFINER rpc */
 (function(){ try{ var c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return c;}; }catch(e){} })();
 function cli(){ try{ return window.ddClient?window.ddClient():null; }catch(e){ return null; } }
 </script>

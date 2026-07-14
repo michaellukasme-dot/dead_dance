@@ -88,7 +88,7 @@
     var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
     var rg=region();
     return { who:who, count:arr.length, region:rg,
-      text:'Shakedown Street — '+who+(rg?(' · '+rg):'')+' · '+(location&&location.pathname||'')+'\nregion: '+(rg||'—')+'\n'+arr.length+' line'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n') }; }
+      text:'The Lot — '+who+(rg?(' · '+rg):'')+' · '+(location&&location.pathname||'')+'\nregion: '+(rg||'—')+'\n'+arr.length+' line'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n') }; }
 
   /* ---- offline queue: cap by count, keep newest, and CHECK that the write actually succeeded (Claudine H1) ---- */
   function readQ(){ try{ return JSON.parse(localStorage.getItem('dd.qa.pending')||'[]'); }catch(e){ return []; } }
@@ -279,7 +279,7 @@
     if(!arr.length){ toast('Nothing yet — do a task first 🌹'); return; }
     var who=tester()||'tester';
     var lines=arr.map(function(r){ return '• '+(r.task||'')+(r.console?(' ('+r.console+')'):'')+' — '+(r.works===true?'👍 worked':(r.works===false?'👎 broke':'—'))+(r.choice?(' ['+r.choice+']'):'')+(r.note?(' : '+r.note):''); });
-    var text='Shakedown Street Help Test — '+who+'\n'+arr.length+' answer'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n');
+    var text='DeadDance Help Test — '+who+'\n'+arr.length+' answer'+(arr.length===1?'':'s')+'\n\n'+lines.join('\n');
     try{ if(root.navigator&&navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text); } else { var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } }catch(e){}
     var shots=(SHOTS&&SHOTS.length)?SHOTS:loadShots(); var n=0;
     shots.forEach(function(s,i){ if(!s||!s.url)return; n++; setTimeout(function(){ try{ var a=document.createElement('a'); a.href=s.url; a.download='qa_'+(i+1)+'_'+((s.task||'shot').replace(/[^\w]/g,'_'))+'.jpg'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }catch(e){} }, i*400); });

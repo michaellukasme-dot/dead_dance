@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
 
 function labelFor(o: any): string {
   if (o.kind === "ticket") return "dead.dance ticket";
-  if (o.kind === "shakedown") return "Shakedown Street booth";
+  if (o.kind === "shakedown") return "The Lot booth";
   if (o.kind === "art") return "dead.dance art";
   return "dead.dance order";
 }
