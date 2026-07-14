@@ -59,6 +59,15 @@
       .catch(function () { return {}; });
   }
 
+  // backfill: rewrite the author name on all of MY past posts (resolves rows changed)
+  function renameMine(name) {
+    var c = client(), id = myId(); name = String(name || '').trim();
+    if (!c || !id || !name) return Promise.resolve(0);
+    return c.rpc('dd_posts_rename_author', { p_author_id: id, p_new_name: name })
+      .then(function (r) { if (r && r.error) return 0; return Number((r && r.data) || 0); })
+      .catch(function () { return 0; });
+  }
+
   var chan = null;
   function subscribe(onChange) {
     var c = client(); if (!c || chan) return;
@@ -83,5 +92,5 @@
     } catch (e) {}
   }
 
-  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, myReactions: myReactions, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
+  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, myReactions: myReactions, renameMine: renameMine, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
 })(typeof window !== 'undefined' ? window : this);

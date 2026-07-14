@@ -2747,9 +2747,17 @@ function ddFeedRender(){ if(!(window.DDFeed&&DDFeed.feed))return;
     try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){} }); }
 var _rReloadT=null;
 function ddReactsReloadSoon(){ if(_rReloadT)return; _rReloadT=setTimeout(function(){ _rReloadT=null; try{ ddFeedLoadLikes(); }catch(e){} },500); }
+function ddBackfillMyName(){                                  // rewrite my past posts to my current name, once per name
+  try{ if(!(window.DDFeed&&DDFeed.renameMine))return; var nm=ddMyNameSafe(); if(!nm)return;
+    var last=''; try{ last=localStorage.getItem('dd.renamed.as')||''; }catch(e){}
+    if(last===nm)return;
+    DDFeed.renameMine(nm).then(function(n){ try{ localStorage.setItem('dd.renamed.as',nm); }catch(e){} if(n){ try{ ddFeedRender(); }catch(e){} } });
+  }catch(e){}
+}
 (function(){ function go(){ try{ if(window.DDFeed&&DDFeed.ready()){ ddFeedRender();
     DDFeed.subscribe(function(np){ if(np)ddFeedPrepend(np); });
     if(DDFeed.subscribeReactions) DDFeed.subscribeReactions(function(){ ddReactsReloadSoon(); });   // a head reacted anywhere → re-pull true counts
+    ddBackfillMyName();                                       // already-named heads: fix old posts' stored name for everyone
   } }catch(e){} }
   setTimeout(go,1600); setTimeout(go,4200); })();
 
@@ -3241,7 +3249,10 @@ function ddAddFriend(id,name,btn){
       try{ if(em&&window.DDAuto&&DDAuto.rememberEmail) DDAuto.rememberEmail(em); else if(em) localStorage.setItem('dd.email',em); }catch(e){}
       if(!nm&&em&&window.DDAuto){ nm=DDAuto.nameFromEmail(em); if(nm) inp.value=nm; }
       if(!nm){ try{inp.focus();}catch(e){} return; }
+      try{ if(window.ME) ME.name=nm; }catch(e){}
       try{ if(window.DDJoin&&DDJoin.setName) DDJoin.setName(nm); else localStorage.setItem('dd.myname',nm); }catch(e){}
+      try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){}
+      setTimeout(function(){ try{ if(typeof ddFeedRender==='function') ddFeedRender(); }catch(e){} },900);   // past posts flip to my name+face
       done(); if(typeof toast==='function') setTimeout(function(){ toast('🌹 Nice to meet you, '+nm+' — the family can find you now.'); },250);
     });
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('ddNameGo').click(); });

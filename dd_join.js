@@ -91,7 +91,11 @@
     var a = attrib();
     return c.rpc('dd_member_upsert', { p_id: id, p_name: name, p_role: role(),
       p_ref_band: a.ref_band || null, p_ref_group: a.claim_band || null, p_src: a.src || 'organic', p_chapter: chapter() })
-      .then(function (r) { return !(r && r.error); }).catch(function () { return false; });
+      .then(function (r) {
+        // backfill my past posts so EVERYONE sees my name (not the 'A head' a nameless post stored)
+        try { if (root.DDFeed && root.DDFeed.renameMine) root.DDFeed.renameMine(name); } catch (e) {}
+        return !(r && r.error);
+      }).catch(function () { return false; });
   }
 
   root.DDJoin = { ready: ready, track: track, role: role, setName: setName, myName: myName, bandJoins: bandJoins, bandJoinCount: bandJoinCount, claimBand: claimBand, myId: myId };
