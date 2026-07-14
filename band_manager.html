@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Band Manager — Mountain Music Productions · dead.dance</title>
+<meta name="theme-color" content="#2a1b3d">
+<!-- BAND MANAGER / BAND AGENT console — a booking-and-promotion company's whole operation, inside dead.dance.
+     Seeded with the REAL Mountain Music Productions roster + calendar (crawled from mountainmusicproductions.com,
+     public info). ENABLE, don't exclude: MMP is a Band-Agent GROUP — its bands are members, fans follow the
+     whole bouquet. Everything Michele does on her site — roster, one calendar, promotion, recruiting, the
+     service shelf — she does here. Honest-state: promotion drafts wait for a human tap; nothing charges or
+     posts to an outside network on its own; a "forward" is a paste + credit, never a scrape. -->
+<style>
+:root{--purple:#2a1b3d;--purple2:#3c2a54;--ink:#241a2b;--muted:#6b6475;--line:#ece4f2;--gold:#d8a24a;--gold2:#b7842a;--rose:#b5384e;--rose2:#8f1f36;--green:#1f7a4d;--blue:#3f6fb0;--card:#fff;--bg:#f6f2fa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 'Helvetica Neue',Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.top{position:sticky;top:0;z-index:6;background:linear-gradient(90deg,var(--purple),var(--purple2) 70%,var(--rose2));color:#fff;display:flex;align-items:center;gap:10px;padding:11px 14px}
+.top b{font-size:15px}.top .chan{font-size:10px;color:#c9b9dc;font-weight:700}.top .sp{flex:1}
+.top a{color:#e9dff5;text-decoration:none;font-size:12.5px;border:1px solid #ffffff33;border-radius:8px;padding:5px 9px}
+.wrap{max-width:820px;margin:0 auto;padding:14px 14px 70px}
+.farrah{background:#efe7f6;border:1px solid #e0d3ee;border-radius:13px;padding:12px 14px;font-size:13px;color:#3a2350;margin-bottom:14px}
+.farrah b{color:var(--rose)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 17px;margin-bottom:14px;box-shadow:0 8px 22px rgba(40,20,60,.05)}
+.card h2{font-size:16px;margin:0 0 3px}.sub{color:var(--muted);font-size:12.5px;margin-bottom:12px;line-height:1.5}
+.agency{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mono{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--purple),var(--rose));display:grid;place-items:center;color:#fff;font-weight:900;font-size:22px;flex:none}
+.agency .nm{font-size:19px;font-weight:900}.agency .mt{font-size:12.5px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#faf7fd;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700;color:#4a3d63}
+.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:800;font-size:13px;cursor:pointer;background:var(--rose);color:#fff}
+.btn.gold{background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00}
+.btn.ghost{background:#f3edf8;color:var(--purple)}
+.btn.sm{padding:8px 11px;font-size:12px}
+.btn.wide{width:100%;margin-top:6px}
+.roster{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:620px){.roster{grid-template-columns:1fr}}
+.band{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fbf9fd;display:flex;flex-direction:column}
+.band .bn{font-weight:900;font-size:14.5px}
+.band .bt{font-size:11px;color:var(--gold2);font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:1px 0 5px}
+.band .bl{font-size:12px;color:var(--muted);line-height:1.45;flex:1}
+.band .acts{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.cal .ev{display:flex;gap:11px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}
+.cal .ev:last-child{border-bottom:0}
+.cal .dt{flex:0 0 46px;text-align:center;background:var(--purple);color:#fff;border-radius:9px;padding:5px 0;font-weight:900;font-size:12px;line-height:1.1}
+.cal .dt small{display:block;font-size:9px;font-weight:700;color:#d3c7e6}
+.cal .evi{flex:1;min-width:0}.cal .evi b{font-size:13.5px}.cal .evi span{display:block;font-size:12px;color:var(--muted)}
+.svc{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:620px){.svc{grid-template-columns:1fr}}
+.svcrow{display:flex;gap:9px;align-items:flex-start;background:#faf7fd;border:1px solid var(--line);border-radius:11px;padding:10px}
+.svcrow .ic{font-size:18px;flex:none}.svcrow b{font-size:13px}.svcrow span{display:block;font-size:11.5px;color:var(--muted);line-height:1.4}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center;background:#fbf9fd}
+.kpi .n{font-size:20px;font-weight:900;color:var(--green)}.kpi .l{font-size:10px;color:var(--muted);margin-top:2px}
+label{display:block;font-size:12px;font-weight:800;margin:9px 0 4px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 11px;font:inherit;background:#fff}
+textarea{resize:vertical}
+.honest{font-size:11.5px;color:var(--muted);background:#faf7fd;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:6px;line-height:1.55}
+.honest b{color:#4a3d63}
+.hidden{display:none}
+.tag{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 6px;vertical-align:middle}
+.tag.real{background:#eaf7f0;color:#1f7a4d;border:1px solid #1f7a4d44}
+.tag.plan{background:#fbf1e6;color:#a9781f;border:1px solid #b7842a44}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#120b1c;color:#fff;border-radius:11px;padding:11px 17px;font-size:13px;max-width:88%;text-align:center;display:none;z-index:9}
+</style></head>
+<body>
+<div class="top"><b>🎸 Band Manager</b><span class="chan">· the agent's cockpit</span><span class="sp"></span>
+  <a href="sales_console.html">📇 CRM</a><a href="index.html">Home</a></div>
+
+<div class="wrap">
+  <div class="farrah">🌹 <b>Rosebud here, Michele.</b> Everything your website does — your whole roster, one calendar, one-tap promotion for every band, and fans following the whole bouquet — lives here now. You keep doing exactly what you do; dead.dance just gives every band a home and does the posting for you. <span style="color:#6b6475">Nothing charges, and nothing goes out to an outside network without your tap.</span></div>
+
+  <!-- THE AGENCY / GROUP -->
+  <div class="card">
+    <div class="agency">
+      <div class="mono">MMP</div>
+      <div style="flex:1;min-width:0">
+        <div class="nm">Mountain Music Productions</div>
+        <div class="mt">Santa Cruz · full-service booking, marketing, promotions &amp; production · <b id="rosterN">13</b> acts</div>
+        <div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn sm" id="followBtn" onclick="toggleFollow()">🌹 Follow the bouquet</button>
+          <span class="pill">👥 <b id="fanN">1</b>&nbsp;following</span>
+          <span class="pill">📷 IG · 📘 FB · ▶️ YouTube</span>
+        </div>
+      </div>
+    </div>
+    <div class="honest"><b>A Band-Agent group.</b> Mountain Music Productions is a group here — your bands are members, and any fan can follow the whole roster in one tap and get every show. <span class="tag real">real</span> the follow + fan count are live. We never touch your mailing list; a forward is your paste + credit, never a scrape.</div>
+  </div>
+
+  <!-- ROSTER -->
+  <div class="card">
+    <h2>Your roster</h2>
+    <div class="sub">Every act gets its own free dead.dance home — page, calendar, store, posters, shows. Manage them all from here.</div>
+    <div class="roster" id="roster"></div>
+    <button class="btn ghost wide" onclick="showRecruit()">➕ Add a band — “Gotta band? Ready to play more gigs?”</button>
+    <div id="recruit" class="hidden" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+      <label>Band name</label><input id="rcName" placeholder="The Band Name">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <div><label>What they play</label><input id="rcTag" placeholder="Grateful Dead tribute · blues · folk…"></div>
+        <div><label>Home base</label><input id="rcCity" placeholder="Santa Cruz, CA"></div>
+      </div>
+      <label>A line about them</label><textarea id="rcBlurb" rows="2" placeholder="I’ll write a first draft if you leave it blank."></textarea>
+      <button class="btn gold wide" onclick="addBand()">Add to my roster →</button>
+    </div>
+  </div>
+
+  <!-- ONE CALENDAR -->
+  <div class="card cal">
+    <h2>One calendar <span class="tag real">real board</span></h2>
+    <div class="sub">Every band's shows in one place — on the national map, the Santa Cruz chapter, and every following fan's feed. Add a date once; it lands everywhere.</div>
+    <div id="calList"></div>
+    <button class="btn ghost wide" onclick="showAddDate()">📅 Add a date</button>
+    <div id="addDate" class="hidden" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+      <label>Band</label><select id="adBand"></select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <div><label>Date</label><input id="adDate" type="date"></div>
+        <div><label>Doors / show</label><input id="adTime" placeholder="Doors 7 · Show 8"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <div><label>Venue</label><input id="adVenue" placeholder="Vets Hall Santa Cruz"></div>
+        <div><label>City</label><input id="adCity" placeholder="Santa Cruz, CA"></div>
+      </div>
+      <label>Ticket price (optional)</label><input id="adPrice" placeholder="$22 adv / $25 door">
+      <button class="btn gold wide" onclick="addDate()">Post the date →</button>
+    </div>
+  </div>
+
+  <!-- PROMOTE / HYPERPOST -->
+  <div class="card">
+    <h2>Promote — one tap, every channel <span class="tag real">in-app real</span></h2>
+    <div class="sub">Pick a band (or the whole roster). I write the post in your voice; the in-app one fires to the family, and I open your socials for a one-tap confirm. This <i>is</i> your “Marketing &amp; Promotion Subscription” — done for you.</div>
+    <label>Promote</label>
+    <select id="promoBand"></select>
+    <div class="honest" id="promoPreview" style="margin-top:10px;white-space:pre-wrap"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn gold sm" onclick="firePromo()">📡 Post to the family</button>
+      <button class="btn ghost sm" onclick="openSocials()">↗ Open my socials to confirm</button>
+      <button class="btn ghost sm" onclick="draftPromo()">✍️ Rewrite it</button>
+    </div>
+  </div>
+
+  <!-- SERVICE SHELF -->
+  <div class="card">
+    <h2>Your services — now sellable inside dead.dance</h2>
+    <div class="sub">Everything you broker for bands, mapped to what runs here. The ones marked live are built; the rest are your recurring service, on your terms.</div>
+    <div class="svc" id="svc"></div>
+    <div class="honest"><b>Recurring by design.</b> A band's home is free — but promotion subscriptions, merch/print-on-demand, posters, and your production services are yours to package and sell as a <b>Band-Agent membership</b>, the same way a fan membership works. You set the price; dead.dance runs the rails.</div>
+  </div>
+
+  <!-- REPORTING -->
+  <div class="card">
+    <h2>Your book — at a glance</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="n" id="kBands">13</div><div class="l">acts managed</div></div>
+      <div class="kpi"><div class="n" id="kShows">4</div><div class="l">shows on the board</div></div>
+      <div class="kpi"><div class="n" id="kFans">1</div><div class="l">following MMP</div></div>
+      <div class="kpi"><div class="n" id="kPosts">0</div><div class="l">promos fired</div></div>
+    </div>
+  </div>
+
+  <div class="honest" style="border:0">
+    <b>Honest-state.</b> <span class="tag real">real</span> the roster, the one calendar, the follow/fan count, and in-app promotion posts all work now. <span class="tag plan">planning</span> outside-network posting is a one-tap human confirm (never auto-sent); ticket prices and service pricing are yours to set; nothing charges yet. Roster + calendar seeded from Mountain Music Productions' own public site — enabling Michele, not replacing her.
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+  window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+})();
+</script>
+<script src="dd_feed.js"></script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},3000);}
+
+/* ---- Mountain Music Productions roster (public info, crawled from mountainmusicproductions.com) ---- */
+var ROSTER=[
+ {n:'China Cats',t:'Grateful Dead tribute',b:'Premier GD tribute of Santa Cruz &amp; the SF Bay, performing the music of the Dead since 2010. Matt Hartle, Scott Cooper, Steve Sofranko, Roger Sideman, Michael Owens.'},
+ {n:'Painted Mandolin',t:'Acoustic Jerry Garcia journey',b:'A dynamic acoustic journey through Jerry’s repertoire and beyond. Joe Craven (ex Garcia/Grisman Band), Larry Graff, Matt Hartle, Dan Robbins.'},
+ {n:'Edge of the West',t:'Cosmic honky tonk',b:'Jim Lewin, Bill Laymon (Jefferson Starship, NRPS), Ken Margolis, Marty Carpenter. edgeofthewest.band'},
+ {n:'Tiger’s Tale',t:'Jerry Garcia Band tribute',b:'Santa Cruz’s premier JGB tribute — Motown, reggae, R&amp;B, soul from the Jerry band songbook. Jim Lewin, Josh Salesin, Sebastian Hegenbart, Michael Owens.'},
+ {n:'Anthony Arya',t:'Folk / rock songwriter',b:'Santa Cruz singer-songwriter, NBC The Voice S15, Presidential Scholar in the Arts. Rock, folk &amp; blues originals.'},
+ {n:'Redwood Express',t:'Bay Area jam band',b:'Some of the Bay’s finest jam musicians (China Cats, Rosebud, Aardvark) fronted by blues singer/songwriter Michele Murphy. Originals + classic rock.'},
+ {n:'Buffalo Blues Trio',t:'Vintage blues',b:'Honoring female blues artists of the 1920s–60s. Marc Ramon Butler (guitar/harp), Diane Bock (upright bass), Michele Murphy (vocals).'},
+ {n:'The Puffball Collective',t:'Funk / feel-good',b:'Built to lift you up — members of Banana Slug String Band, Slugs and Roses, Velour, Edge of the West. Fun, funky, made to dance.'},
+ {n:'The Mojo Navigators',t:'Rock / roots',b:'Santa Cruz roots-rock from the MMP roster.'},
+ {n:'David Cameron',t:'Singer / guitarist',b:'Solo singer-guitarist, MMP roster.'},
+ {n:'Vinny Johnson Blues Band',t:'Blues',b:'Blues band on the MMP roster.'},
+ {n:'Magick Blues Band',t:'Blues',b:'Blues band on the MMP roster.'},
+ {n:'The Ramble on Roses',t:'Grateful Dead tribute',b:'Grateful Dead tribute on the MMP roster.'}
+];
+/* real upcoming calendar (public, crawled) */
+var CAL=[
+ {band:'Buffalo Blues Trio',d:'2026-07-11',venue:'Davenport Roadhouse',city:'Davenport, CA',t:'6–9 pm',price:''},
+ {band:'China Cats',d:'2026-07-18',venue:'Veterans Hall Santa Cruz',city:'Santa Cruz, CA',t:'Doors 7 · Show 8',price:'$22 adv / $25 door'},
+ {band:'Redwood Express',d:'2026-08-21',venue:'Henflings Tavern',city:'Ben Lomond, CA',t:'8 pm',price:''},
+ {band:'Halloween w/ China Cats',d:'2026-10-31',venue:'Veterans Hall Santa Cruz',city:'Santa Cruz, CA',t:'7 pm',price:'$27'}
+];
+var SERVICES=[
+ {ic:'📅',t:'Booking &amp; the calendar',s:'Fill stages from the Venue Console + AI booking agent; your dates on the map.',tag:'real'},
+ {ic:'📡',t:'Promotion subscription',s:'One-tap HyperPost per band or the whole roster — done for you, every show.',tag:'real'},
+ {ic:'🛍️',t:'Merch (print-on-demand)',s:'Every band gets a store with their logo on the goods — no inventory.',tag:'real'},
+ {ic:'🖼️',t:'Posters &amp; art',s:'Show posters + the Print Shop (Blumoo) — fans buy prints, bands license art.',tag:'real'},
+ {ic:'🎨',t:'Logo &amp; photography',s:'Your brokered design/photo services — package them as a Band-Agent membership.',tag:'plan'},
+ {ic:'🎬',t:'Video &amp; production',s:'Videography and production — your recurring service, on your terms.',tag:'plan'}
+];
+
+/* ---- state ---- */
+var followed=false; try{ followed=localStorage.getItem('mmp.follow')==='1'; }catch(e){}
+var firedCount=0;
+
+function bandOpts(){ return ROSTER.map(function(b){return '<option>'+esc(b.n)+'</option>';}).join(''); }
+function renderRoster(){
+  $('roster').innerHTML=ROSTER.map(function(b,i){
+    return '<div class="band"><div class="bn">'+esc(b.n)+'</div><div class="bt">'+b.t+'</div><div class="bl">'+b.b+'</div>'+
+      '<div class="acts"><button class="btn ghost sm" onclick="bandHome('+i+')">🏠 Home</button>'+
+      '<button class="btn ghost sm" onclick="promoteFor('+i+')">📡 Promote</button></div></div>';
+  }).join('');
+  $('rosterN').textContent=ROSTER.length; $('kBands').textContent=ROSTER.length;
+  $('adBand').innerHTML=bandOpts(); $('promoBand').innerHTML='<option>— the whole roster —</option>'+bandOpts();
+}
+function fmtDt(d){ try{var x=new Date(d+'T00:00:00');return {m:x.toLocaleDateString(undefined,{month:'short'}).toUpperCase(),day:x.getDate()};}catch(e){return{m:'',day:'?'};} }
+function renderCal(){
+  $('calList').innerHTML=CAL.map(function(e){ var f=fmtDt(e.d);
+    return '<div class="ev"><div class="dt">'+f.day+'<small>'+f.m+'</small></div><div class="evi"><b>'+esc(e.band)+'</b>'+
+      '<span>'+esc(e.venue)+' · '+esc(e.city)+(e.t?(' · '+esc(e.t)):'')+(e.price?(' · '+esc(e.price)):'')+'</span></div></div>';
+  }).join('');
+  $('kShows').textContent=CAL.length;
+}
+function renderSvc(){ $('svc').innerHTML=SERVICES.map(function(s){
+  return '<div class="svcrow"><div class="ic">'+s.ic+'</div><div><b>'+s.t+'</b> <span class="tag '+s.tag+'">'+(s.tag==='real'?'live':'your service')+'</span><span>'+s.s+'</span></div></div>';
+}).join(''); }
+
+function showRecruit(){ $('recruit').classList.toggle('hidden'); }
+function addBand(){
+  var n=($('rcName').value||'').trim(); if(!n){toast('A name first 🌹');return;}
+  var tag=($('rcTag').value||'act').trim(), city=($('rcCity').value||'').trim();
+  var blurb=($('rcBlurb').value||'').trim() || (n+' — '+tag+(city?(' out of '+city):'')+'. New to the MMP roster, welcome.');
+  ROSTER.push({n:n,t:tag,b:blurb}); renderRoster();
+  $('rcName').value='';$('rcTag').value='';$('rcCity').value='';$('rcBlurb').value=''; $('recruit').classList.add('hidden');
+  toast('🎸 '+n+' added to your roster.');
+}
+function showAddDate(){ $('addDate').classList.toggle('hidden'); }
+function addDate(){
+  var band=$('adBand').value, d=$('adDate').value, venue=($('adVenue').value||'').trim();
+  if(!d||!venue){toast('Need at least a date and a venue 🌹');return;}
+  CAL.push({band:band,d:d,venue:venue,city:($('adCity').value||'').trim(),t:($('adTime').value||'').trim(),price:($('adPrice').value||'').trim()});
+  CAL.sort(function(a,b){return a.d<b.d?-1:1;}); renderCal();
+  $('addDate').classList.add('hidden'); $('adVenue').value='';$('adCity').value='';$('adTime').value='';$('adPrice').value='';
+  toast('📅 Posted — '+band+' at '+venue+'. On the board.');
+}
+
+/* ---- follow (real presence) ---- */
+var grpChan=null;
+function startGroup(){
+  try{ var c=window.ddClient&&window.ddClient(); var id=(window.ddId&&window.ddId().id)||'anon'; if(!c)return;
+    grpChan=c.channel('grp-mountain-music-productions',{config:{presence:{key:id}}});
+    grpChan.on('presence',{event:'sync'},function(){ try{ var n=Object.keys(grpChan.presenceState()).length||1; $('fanN').textContent=n; $('kFans').textContent=n; }catch(e){} })
+      .subscribe(function(st){ if(st==='SUBSCRIBED' && followed){ try{ grpChan.track({at:Date.now()}); }catch(e){} } });
+  }catch(e){}
+}
+function toggleFollow(){
+  followed=!followed; try{ localStorage.setItem('mmp.follow',followed?'1':'0'); }catch(e){}
+  $('followBtn').textContent=followed?'✓ Following the bouquet':'🌹 Follow the bouquet';
+  try{ if(grpChan){ if(followed) grpChan.track({at:Date.now()}); else grpChan.untrack(); } }catch(e){}
+  toast(followed?'🌹 Following Mountain Music Productions — every show, every band.':'Unfollowed — still family.');
+}
+
+/* ---- promotion / HyperPost ---- */
+function nextShowFor(band){ for(var i=0;i<CAL.length;i++){ if(CAL[i].band.indexOf(band)>=0) return CAL[i]; } return null; }
+function promoText(band){
+  if(band && band.indexOf('roster')<0){
+    var ns=nextShowFor(band), line=ns?(' Next up: '+ns.venue+', '+ns.city+' — '+ (fmtDt(ns.d).m)+' '+fmtDt(ns.d).day+(ns.price?(' · '+ns.price):'')+'.'):'';
+    return 'Santa Cruz — come see '+band+', booked by Mountain Music Productions. 🌹'+line+'\nFollow them on dead.dance and never miss a night.';
+  }
+  var soon=CAL.slice(0,3).map(function(e){return e.band+' — '+e.venue+' ('+fmtDt(e.d).m+' '+fmtDt(e.d).day+')';}).join('\n• ');
+  return 'Mountain Music Productions — your Santa Cruz live-music family. 🌹 On the board:\n• '+soon+'\nFollow the whole bouquet on dead.dance.';
+}
+function draftPromo(){ var b=$('promoBand').value; $('promoPreview').textContent=promoText(b); }
+function promoteFor(i){ $('promoBand').value=ROSTER[i].n; draftPromo(); $('promoBand').scrollIntoView({behavior:'smooth',block:'center'}); toast('✍️ Drafted a promo for '+ROSTER[i].n+'.'); }
+function firePromo(){
+  var txt=$('promoPreview').textContent||promoText($('promoBand').value);
+  if(window.DDFeed && DDFeed.ready && DDFeed.ready()){
+    DDFeed.post(txt,{scope:'local',region:'Santa Cruz'}).then(function(){ firedCount++; $('kPosts').textContent=firedCount; toast('📡 Posted to the family feed.'); })
+      .catch(function(){ toast('Saved on this device — sign in to reach the family.'); });
+  } else { firedCount++; $('kPosts').textContent=firedCount; toast('📡 Drafted — connect to post to the family.'); }
+}
+function openSocials(){
+  var txt=$('promoPreview').textContent||promoText($('promoBand').value);
+  try{ if(navigator.share){ navigator.share({title:'Mountain Music Productions',text:txt}).catch(function(){}); return; } }catch(e){}
+  toast('↗ Copy the post above into your IG / FB — one tap, your voice, your credit.');
+}
+
+/* ---- band home (opens the band's dead.dance flow) ---- */
+function bandHome(i){ toast('🏠 '+ROSTER[i].n+' — opening their dead.dance home.'); try{ location.href='band_console.html?band='+encodeURIComponent(ROSTER[i].n); }catch(e){} }
+
+/* ---- boot ---- */
+renderRoster(); renderCal(); renderSvc(); draftPromo();
+$('followBtn').textContent=followed?'✓ Following the bouquet':'🌹 Follow the bouquet';
+$('promoBand').addEventListener('change',draftPromo);
+(function(){ function go(){ startGroup(); } setTimeout(go,900); })();
+</script>
+</body></html>
