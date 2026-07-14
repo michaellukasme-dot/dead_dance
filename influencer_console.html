@@ -54,11 +54,13 @@ input:focus{outline:none;border-color:var(--rose)}
   padding:11px 17px;font-size:13px;max-width:88%;text-align:center;display:none;z-index:9}
 </style></head>
 <body>
-<div class="top"><b>📡 Influencer Console</b><span class="chan">· group leader</span><span class="sp"></span>
+<div class="top"><b>📡 Influencer Console</b><span class="chan">· group leader or agency</span><span class="sp"></span>
   <a href="console_directory.html">🗺 Map</a><a href="index.html">Home</a></div>
 
 <div class="wrap">
-  <div class="farrah">🌹 <b>Rosebud here.</b> Your job is two things: bring your people home, and forward your group's best posts into dead.dance. Start a weekly drive and I'll pace it for you — I fire the in-app posts, and line up the invites for your one tap. We never touch your members; a forward is your paste + credit, nothing scraped.</div>
+  <div class="farrah">🌹 <b>Rosebud here.</b> Whether your group is a <b>Facebook community</b> or a <b>roster of bands you manage (an agency)</b>, the job’s the same two things: bring your people home, and forward your group’s best posts into dead.dance. Start a weekly drive and I’ll pace it for you — I fire the in-app posts, and line up the invites for your one tap. We never touch your members; a forward is your paste + credit, nothing scraped.</div>
+
+  <a href="band_manager.html" style="display:block;text-decoration:none;background:linear-gradient(135deg,#5a2e86,#8f1f36);color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-weight:800;font-size:13.5px">🎸 Manage a roster of bands (an agency, like Mountain Music Productions)? <span style="opacity:.85">Open your Agency roster →</span></a>
 
   <div class="kpis">
     <div class="kpi"><div class="n" id="kMembers">0</div><div class="l">members brought home</div></div>
@@ -69,12 +71,48 @@ input:focus{outline:none;border-color:var(--rose)}
   <div class="card">
     <h2>Your group</h2>
     <div class="sub">The name your members see and the slug your recruit links use.</div>
+    <label for="gtype">What kind of group do you lead?</label>
+    <select id="gtype" onchange="groupType()" style="width:100%;padding:10px;border:1px solid var(--line,#e0d3ee);border-radius:10px;font:inherit;margin-bottom:8px">
+      <option value="facebook">Facebook community</option>
+      <option value="agency">Band roster / agency</option>
+      <option value="festival">Festival / event organizer</option>
+      <option value="station">Radio / station / DJ</option>
+      <option value="shop">Record / head shop</option>
+      <option value="podcast">Podcast / tape traders</option>
+      <option value="venue">Venue scene</option>
+      <option value="other">Other — you tell us</option>
+    </select>
+    <div id="gtHint" class="sub" style="margin:-2px 0 8px"></div>
+    <a id="gtAgency" href="band_manager.html" style="display:none;text-decoration:none;color:var(--rose,#b21e46);font-weight:800;font-size:12.5px">🎸 Open your Agency roster (bands = your members) →</a>
     <div class="row2">
       <div><label for="gname">Group / page name</label><input id="gname" type="text" placeholder="Bay Area Deadheads"></div>
-      <div><label for="gurl">Facebook group URL <span style="font-weight:400">(optional)</span></label><input id="gurl" type="text" placeholder="facebook.com/groups/…"></div>
+      <div><label for="gurl">Home page / group URL <span style="font-weight:400">(optional)</span></label><input id="gurl" type="text" placeholder="facebook.com/groups/…"></div>
     </div>
     <button class="btn ghost sm" style="margin-top:10px" onclick="saveGroup()">Save group</button>
     <div id="reflink" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+  </div>
+
+  <div class="card">
+    <h2>Your kit — the same for every group</h2>
+    <div class="sub">Whatever your group is, you get the same three tools. This is what an Influencer/aggregator runs on.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:170px;border:1px solid var(--line,#e0d3ee);border-radius:12px;padding:12px;background:#faf7fd">
+        <div style="font-weight:900;font-size:13.5px">📡 HyperPost</div>
+        <div class="sub" style="margin:3px 0 8px">Write once, spread everywhere — I tailor each version to each channel, in your voice.</div>
+        <a class="btn gold sm" href="hyperpost_demo.html" style="text-decoration:none">Try a HyperPost →</a>
+      </div>
+      <div style="flex:1;min-width:170px;border:1px solid var(--line,#e0d3ee);border-radius:12px;padding:12px;background:#faf7fd">
+        <div style="font-weight:900;font-size:13.5px">🛍️ Merchandising</div>
+        <div class="sub" style="margin:3px 0 8px">A store for your group — posters, tees, the goods. Print-on-demand, no inventory.</div>
+        <a class="btn ghost sm" href="poster_studio.html" style="text-decoration:none">Open the store →</a>
+      </div>
+      <div style="flex:1;min-width:170px;border:1px solid var(--line,#e0d3ee);border-radius:12px;padding:12px;background:#faf7fd">
+        <div style="font-weight:900;font-size:13.5px">🌐 Channels</div>
+        <div class="sub" style="margin:3px 0 6px"><b>Facebook as usual</b> — plus every other channel we fan out to:</div>
+        <div style="font-size:12px;color:var(--muted,#6b6475);line-height:1.7">📘 Facebook · 📷 Instagram · ▶️ YouTube · ✉️ Email · ✖ X · 💬 SMS*</div>
+        <div style="font-size:10.5px;color:var(--muted,#6b6475);margin-top:4px">*SMS only with on-platform opt-in (TCPA). We enhance Facebook — never replace it.</div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -210,6 +248,25 @@ function runPlan(gid){ toast('🤖 Running this week\'s posts…');
   DDGigs.runPlan(gid,{slug:GRP.slug},false).then(function(r){ FIRED+=r.fired; toast('✅ Fired '+r.fired+' post'+(r.fired===1?'':'s')+' to the family.'); openPlan(gid); loadKPIs(); }); }
 
 GRP.slug=GRP.slug||slug(GRP.name);
+/* group-type selector — the console is category-agnostic; type just relabels the same engine */
+var GTYPES={
+  facebook:{hint:'Your Facebook group — bring them home, forward your best posts.',name:'Bay Area Deadheads',agency:false},
+  agency:{hint:'The bands you manage are your members — same tools, a roster instead of a group.',name:'Mountain Music Productions',agency:true},
+  festival:{hint:'Your lineup is your roster; the attendees are your members.',name:'Your festival',agency:false},
+  station:{hint:'Your listeners are your members — bring the audience home.',name:'Your station / show',agency:false},
+  shop:{hint:'Your customers + in-store events — a community with a cash register.',name:'Your record shop',agency:false},
+  podcast:{hint:'Your listeners / tape traders — a following to gather and forward to.',name:'Your podcast',agency:false},
+  venue:{hint:'The scene you curate beyond your own room.',name:'Your venue scene',agency:false},
+  other:{hint:'Tell us what your group is — the tools are exactly the same.',name:'Your group name',agency:false}
+};
+function groupType(){
+  var v=(document.getElementById('gtype')||{}).value||'facebook'; var g=GTYPES[v]||GTYPES.facebook;
+  var h=document.getElementById('gtHint'); if(h)h.textContent=g.hint;
+  var a=document.getElementById('gtAgency'); if(a)a.style.display=g.agency?'inline-block':'none';
+  var nm=document.getElementById('gname'); if(nm)nm.placeholder=g.name;
+  try{ localStorage.setItem('dd.grouptype',v); }catch(e){}
+}
+(function(){ try{ var v=localStorage.getItem('dd.grouptype'); if(v){ var s=document.getElementById('gtype'); if(s)s.value=v; } }catch(e){} groupType(); })();
 (function(){ function go(){ try{ if(window.DDGigs&&DDGigs.ready()){ loadKPIs(); } else setTimeout(go,1200); }catch(e){} } setTimeout(go,1000); })();
 </script>
 </body></html>
