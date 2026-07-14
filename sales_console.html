@@ -77,6 +77,7 @@ input:focus,select:focus{outline:none;border-color:var(--rose)}
     </div>
     <label class="mini" style="margin-top:9px"><input type="checkbox" id="acad" checked style="width:auto;margin-right:6px">Auto-build the outreach cadence</label>
     <button class="btn gold" style="width:100%;margin-top:10px" onclick="addAccount()">📇 Add + start cadence</button>
+    <button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="seedPatch()">🌲 Seed the Santa Cruz patch (Mountain Music Productions)</button>
   </div>
 
   <div class="card">
@@ -200,6 +201,43 @@ function addAccount(){
     if(cad && window.DDGigs){ DDGigs.createGig({template:'sales',band:name,slug:aid,venue:name,city:city}).catch(function(){}); }
     toast('📇 Added'+(cad?' + cadence started':'')); loadPipe();
   }).catch(function(){ toast('Could not add (backend).'); });
+}
+
+/* ---- Michele's Santa Cruz patch seed — Mountain Music Productions (her venues + her band bouquet) ---- */
+var MMP_SEED=[
+ // VENUES = the sale (Santa Cruz + Peninsula — her territory). Candidate monthly sub.
+ {n:'Santa Cruz Veterans Memorial Hall',t:'venue',c:'Santa Cruz, CA',v:199},
+ {n:'Felton Music Hall',t:'venue',c:'Felton, CA',v:199},
+ {n:"Michael's on Main",t:'venue',c:'Soquel, CA',v:166},
+ {n:"Moe's Alley",t:'venue',c:'Santa Cruz, CA',v:199},
+ {n:'The Catalyst',t:'venue',c:'Santa Cruz, CA',v:199},
+ {n:'Rio Theatre',t:'venue',c:'Santa Cruz, CA',v:199},
+ {n:'Kuumbwa Jazz Center',t:'venue',c:'Santa Cruz, CA',v:166},
+ {n:"Don Quixote's Music Hall",t:'venue',c:'Felton, CA',v:166},
+ {n:'The Crepe Place',t:'venue',c:'Santa Cruz, CA',v:129},
+ {n:'The Guild Theatre',t:'venue',c:'Menlo Park, CA',v:199},
+ {n:'Club Fox',t:'venue',c:'Redwood City, CA',v:166},
+ // THE BOUQUET = bands Michele manages (MMP roster) — free inventory, tracked as accounts
+ {n:'China Cats',t:'band',c:'Santa Cruz, CA'},
+ {n:"Tiger's Tale",t:'band',c:'Santa Cruz, CA'},
+ {n:'Painted Mandolin',t:'band',c:'Santa Cruz, CA'},
+ {n:'Edge of the West',t:'band',c:'Santa Cruz, CA'},
+ {n:'Redwood Express',t:'band',c:'Santa Cruz, CA'},
+ {n:'Buffalo Blues Trio',t:'band',c:'Santa Cruz, CA'},
+ {n:'Anthony Arya',t:'band',c:'Santa Cruz, CA'},
+ {n:'The Puffball Collective',t:'band',c:'Santa Cruz, CA'},
+ {n:'The Mojo Navigators',t:'band',c:'Santa Cruz, CA'},
+ {n:'The Ramble on Roses',t:'band',c:'Santa Cruz, CA'}
+];
+function seedPatch(){
+  if(!(window.DDSales&&DDSales.ready())){ toast('Connecting…'); return; }
+  if(!confirm('Seed '+MMP_SEED.length+" Santa Cruz accounts — Mountain Music Productions venues + Michele's band bouquet — into your pipeline?")) return;
+  toast('🌲 Seeding the patch…'); var i=0;
+  (function next(){
+    if(i>=MMP_SEED.length){ toast('✅ Patch seeded — '+MMP_SEED.length+' accounts in your book.'); loadPipe(); return; }
+    var a=MMP_SEED[i++];
+    DDSales.upsertAccount({name:a.n,type:a.t,city:a.c,value_mo:a.v||null}).then(next).catch(next);
+  })();
 }
 
 /* ---- Knowledge base ---- */
