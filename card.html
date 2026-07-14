@@ -27,6 +27,8 @@ h1{font-size:26px;margin:4px 0 2px;font-weight:900}
 .sec{margin-top:22px} .sec h2{font-size:13px;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em}
 .show{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px}
 .show .d{font-weight:800;color:var(--ink)} .show .v{color:var(--muted);font-size:13px}
+.show .goin{border:0;background:#fdeef2;color:var(--rose);font-weight:800;font-size:12px;padding:7px 11px;border-radius:9px;cursor:pointer}
+.gct{color:var(--muted);font-size:11px;margin-top:4px;text-align:right}
 .empty{color:var(--muted);font-size:13px;padding:6px 0}
 .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
 .foot img{width:26px;vertical-align:middle;margin-right:6px;opacity:.9}
@@ -67,6 +69,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_shows.js"></script>
 <script src="dd_bands.js"></script>
 <script src="dd_art.js"></script>
+<script src="dd_pymk.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3200);}
@@ -136,6 +139,11 @@ window.joinBand=function(){ try{ if(window.DDJoin&&DDJoin.track){ DDJoin.track({
 window.followVenue=function(){ try{ if(window.DDJoin&&DDJoin.track){ DDJoin.track({band:NAME,src:'qr',role:'venue-follow'}); } }catch(e){}
   toast("🌹 Following "+NAME+". You'll see every show they book."); };
 window.shopArtist=function(){ location.href='poster_shop.html'; };
+/* "Going" = a footprint that powers People You May Know (you were both there). */
+window.goingShow=function(el){ var id=el.getAttribute('data-id'); if(!id)return;
+  el.textContent='Going ✓'; el.disabled=true; el.style.opacity=0.6;
+  if(window.DDPymk){ DDPymk.attend(id,'rsvp').then(function(){ DDPymk.count(id).then(function(n){ var c=document.getElementById('gc_'+id); if(c) c.textContent=n+' going'; }); }); }
+  toast("🌹 You're going — you'll meet others who are too."); };
 
 /* ---- real reads: shows (dd_shows), members (dd_join), pieces (dd_art) ---- */
 function loadMembers(){ try{ if(window.DDJoin&&DDJoin.bandJoinCount){ DDJoin.bandJoinCount(NAME).then(function(n){ if(n!=null){ STAT.members=n; drawScore(); } }); } }catch(e){} }
@@ -153,10 +161,15 @@ function loadShows(){
     var sec=document.getElementById('showsSec'), host=document.getElementById('shows');
     document.getElementById('showsTitle').textContent=(CFG.showsFor==='venue'?'Upcoming at '+NAME:'Upcoming shows');
     if(mine.length){ sec.style.display='block';
-      host.innerHTML=mine.slice(0,12).map(function(r){
+      var rows=mine.slice(0,12);
+      host.innerHTML=rows.map(function(r){
         var right=CFG.showsFor==='venue'?esc(r.band_name||''):esc([r.venue,r.city].filter(Boolean).join(' · '));
-        return '<div class="show"><div><div class="d">'+esc(fmtDate(r.show_date))+'</div><div class="v">'+right+'</div></div></div>';
+        return '<div class="show"><div><div class="d">'+esc(fmtDate(r.show_date))+'</div><div class="v">'+right+'</div></div>'+
+          '<div><button class="goin" data-id="'+esc(r.id)+'" onclick="goingShow(this)">🌹 Going</button>'+
+          '<div class="gct" id="gc_'+esc(r.id)+'"></div></div></div>';
       }).join('');
+      /* live "N going" — the footprints that power People You May Know */
+      rows.forEach(function(r){ if(window.DDPymk&&r.id){ DDPymk.count(r.id).then(function(n){ var el=document.getElementById('gc_'+r.id); if(el&&n>0) el.textContent=n+' going'; }); } });
     }
   }).catch(function(){});
 }
