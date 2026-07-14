@@ -3112,6 +3112,39 @@ function ddAddFriend(id,name,btn){
   } else if(typeof toast==='function'){ toast('Connect to add friends.'); }
 }
 </script>
+<script>
+/* ===== name nudge — so the family can find you in search / add you as a friend ===== */
+(function(){
+  function named(){ try{ var n=(localStorage.getItem('dd.myname')||'').trim(); return !!(n || (window.ME&&ME.name&&ME.name!=='You')); }catch(e){ return true; } }
+  function asked(){ try{ return !!localStorage.getItem('dd.name.asked'); }catch(e){ return true; } }
+  function show(){
+    if(named()||asked()||document.getElementById('ddName')) return;
+    if(document.getElementById('ddWelcome')) return setTimeout(show,1600);   // let the Welcome modal clear first
+    var ov=document.createElement('div'); ov.id='ddName';
+    ov.setAttribute('style','position:fixed;inset:0;z-index:9997;background:rgba(20,11,30,.72);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px');
+    ov.innerHTML='<div style="max-width:380px;width:100%;background:#fff;border-radius:20px;padding:24px 20px 18px;text-align:center;box-shadow:0 30px 80px rgba(10,5,20,.5)">'
+      +'<div style="font-size:40px">🌹</div>'
+      +'<div style="font-size:20px;font-weight:900;color:#241a2b;margin-top:4px">What should the family call you?</div>'
+      +'<div style="font-size:13.5px;color:#6b6475;line-height:1.5;margin:8px 6px 0">So your friends can find you and say hi. Just a name — first name’s plenty.</div>'
+      +'<input id="ddNameIn" autocomplete="name" placeholder="Your name" style="width:100%;border:1.5px solid #e6e0f0;border-radius:11px;padding:12px;font:inherit;font-size:16px;margin-top:14px;text-align:center">'
+      +'<button id="ddNameGo" style="width:100%;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:15px;background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00;cursor:pointer;margin-top:12px">🌹 That’s me</button>'
+      +'<div id="ddNameSkip" style="font-size:12px;color:#9a8fb0;margin-top:10px;cursor:pointer">maybe later</div></div>';
+    document.body.appendChild(ov);
+    var inp=document.getElementById('ddNameIn'); try{ inp.focus(); }catch(e){}
+    function done(){ try{ localStorage.setItem('dd.name.asked','1'); }catch(e){} ov.remove(); }
+    document.getElementById('ddNameGo').addEventListener('click',function(){
+      var nm=(inp.value||'').trim(); if(!nm){ try{inp.focus();}catch(e){} return; }
+      try{ if(window.DDJoin&&DDJoin.setName) DDJoin.setName(nm); else localStorage.setItem('dd.myname',nm); }catch(e){}
+      done(); if(typeof toast==='function') setTimeout(function(){ toast('🌹 Nice to meet you, '+nm+' — the family can find you now.'); },250);
+    });
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('ddNameGo').click(); });
+    document.getElementById('ddNameSkip').addEventListener('click',done);
+    ov.addEventListener('click',function(e){ if(e.target===ov) done(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(show,1800); });
+  else setTimeout(show,1800);
+})();
+</script>
 <script src="lukas_a2hs.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lukas_chat.js"></script>

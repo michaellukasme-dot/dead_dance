@@ -9,7 +9,7 @@
 (function (root) {
   function client() { try { return root.ddClient && root.ddClient(); } catch (e) { return null; } }
   function myId() { try { var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
-  function myName() { try { return (root.ME && root.ME.name && root.ME.name !== 'You') ? root.ME.name : null; } catch (e) { return null; } }
+  function myName() { try { if (root.ME && root.ME.name && root.ME.name !== 'You') return root.ME.name; var n = root.localStorage && localStorage.getItem('dd.myname'); return (n && n.trim()) || null; } catch (e) { return null; } }
   function attrib() { try { return (root.DDAttrib && root.DDAttrib.stamp && root.DDAttrib.stamp()) || {}; } catch (e) { return {}; } }
   function chapter() { try { return (root.ME && root.ME.chapter) || (root.localStorage && (localStorage.getItem('dd.chapterName') || localStorage.getItem('dd.chapter'))) || null; } catch (e) { return null; } }
   var ROLES = ['band', 'venue', 'ambassador', 'influencer', 'fan'];
@@ -83,5 +83,16 @@
   function boot() { track(); setTimeout(track, 1800); setTimeout(track, 4500); }
   if (root.addEventListener) root.addEventListener('load', boot); else boot();
 
-  root.DDJoin = { ready: ready, track: track, role: role, bandJoins: bandJoins, bandJoinCount: bandJoinCount, claimBand: claimBand, myId: myId };
+  // set/refresh the member's display name so the family can find them in search
+  function setName(name) {
+    name = (name || '').trim(); if (!name) return Promise.resolve(false);
+    try { if (root.ME) root.ME.name = name; if (root.localStorage) localStorage.setItem('dd.myname', name); } catch (e) {}
+    var c = client(), id = myId(); if (!c || !id) return Promise.resolve(false);
+    var a = attrib();
+    return c.rpc('dd_member_upsert', { p_id: id, p_name: name, p_role: role(),
+      p_ref_band: a.ref_band || null, p_ref_group: a.claim_band || null, p_src: a.src || 'organic', p_chapter: chapter() })
+      .then(function (r) { return !(r && r.error); }).catch(function () { return false; });
+  }
+
+  root.DDJoin = { ready: ready, track: track, role: role, setName: setName, myName: myName, bandJoins: bandJoins, bandJoinCount: bandJoinCount, claimBand: claimBand, myId: myId };
 })(typeof window !== 'undefined' ? window : this);
