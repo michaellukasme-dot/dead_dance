@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Connected Site — bring your own front-end · dead.dance</title>
+<meta name="theme-color" content="#180a22">
+<!-- CONNECTED SITE (premium tier). For operators who already built a great site — Jerry's Middle Finger,
+     Hot Sauce, a real venue. They KEEP their site; dead.dance becomes the spine:
+       1) their CALENDAR syncs into ours (iCal ingest → the map, the chapter, every following fan's feed),
+       2) TICKETING runs through dead.dance (the required box office = the revenue + the anti-Ticketmaster wedge).
+     They still get a real dead.dance presence (profile + follow), so premium AUGMENTS the market of markets,
+     it doesn't exit it. Embedding their whole site is offered only as a best-effort "framed tab" where their
+     site allows it — the core is calendar + tickets, which are clean and robust. Honest-state: real iCal
+     parsing here; production sync/checkout arm when the connectors are live. Nothing charges yet. -->
+<style>
+:root{--bg:#150a1f;--bg2:#1d1030;--panel:#241436;--line:#38265a;--ink:#f2ecf7;--muted:#a99cc4;--gold:#e0b34a;--gold2:#b7842a;--rose:#c4324c;--rose2:#8f1f36;--green:#37b26b;--blue:#4f7fd0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(120% 80% at 50% -10%,#2a1442 0%,#150a1f 60%);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding-bottom:44px}
+.top{display:flex;align-items:center;gap:11px;padding:13px 15px;position:sticky;top:0;z-index:20;background:linear-gradient(90deg,#0e0716,#3a1d5e 70%,#8f1f36);box-shadow:0 2px 16px #0008}
+.top .logo{font-weight:900;font-size:16px}.top .logo b{color:var(--gold)}.top .sp{flex:1}
+.top a{color:#e9dff5;text-decoration:none;font-size:12.5px;border:1px solid #ffffff33;border-radius:9px;padding:6px 10px}
+.wrap{max-width:640px;margin:0 auto;padding:16px 15px 40px}
+.rose{background:#efe7f610;border:1px solid #ffffff1c;border-left:3px solid var(--rose);border-radius:12px;padding:12px 14px;font-size:13px;color:#e7dcf5;margin-bottom:16px;line-height:1.55}.rose b{color:var(--gold)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;margin-bottom:3px}.card .sub{color:var(--muted);font-size:12.5px;margin-bottom:12px;line-height:1.5}
+.step{font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--gold);text-transform:uppercase}
+label{display:block;font-size:12px;font-weight:800;margin:9px 0 4px}
+input,textarea,select{width:100%;background:#160c28;border:1px solid var(--line);border-radius:10px;color:#fff;padding:10px 11px;font:inherit}
+textarea{resize:vertical;font-size:13px}
+.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;font-size:13px;cursor:pointer;background:var(--rose);color:#fff}
+.btn.gold{background:linear-gradient(135deg,#e6c25a,#a9781f);color:#2a1c00}
+.btn.ghost{background:#2c1a44;color:#e9dff5;border:1px solid var(--line)}
+.btn.wide{width:100%;margin-top:9px}
+.btn.sm{padding:8px 11px;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ev{display:flex;gap:11px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0}
+.ev:last-child{border-bottom:0}
+.ev .dt{flex:0 0 46px;text-align:center;background:#3a2857;border-radius:9px;padding:5px 0;font-weight:900;font-size:12px;color:#fff;line-height:1.1}
+.ev .dt small{display:block;font-size:9px;color:#c9b9dc}
+.ev .ei{flex:1;min-width:0}.ev .ei b{font-size:13.5px}.ev .ei span{display:block;font-size:12px;color:var(--muted)}
+.ev .tk{flex:none;font-size:11px;font-weight:800;color:#7fe0a6;text-decoration:none;background:#12331f;border:1px solid #1f7a4d66;border-radius:8px;padding:6px 9px}
+.frame{width:100%;height:230px;border:1px solid var(--line);border-radius:11px;background:#0e0716;margin-top:10px}
+.honest{font-size:11.5px;color:var(--muted);background:#160c28;border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:10px;line-height:1.55}.honest b{color:#d6c9ee}
+.tag{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 6px;vertical-align:middle}
+.tag.real{background:#12331f;color:#7fe0a6;border:1px solid #1f7a4d66}.tag.req{background:#3a1420;color:#f0a0b2;border:1px solid #8f1f3666}.tag.plan{background:#2a1e0a;color:#e6c25a;border:1px solid #b7842a55}
+.tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+@media(max-width:560px){.tiers{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+.tier{border:1px solid var(--line);border-radius:12px;padding:12px;background:#160c28}
+.tier.mid{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2)}
+.tier .tn{font-weight:900;font-size:13px}.tier .tp{font-size:18px;font-weight:900;color:var(--gold);margin:3px 0}
+.tier ul{list-style:none;margin-top:6px}.tier li{font-size:11.5px;color:#d6c9ee;padding:2px 0 2px 14px;position:relative;line-height:1.4}.tier li::before{content:"›";position:absolute;left:0;color:var(--gold2);font-weight:900}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:12px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:80;pointer-events:none}.toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">🔗 <b>Connected Site</b> · keep your front-end</div><div class="sp"></div><a href="index.html">Home</a></div>
+
+<div class="wrap">
+  <div class="rose">🌹 <b>Rosebud here.</b> You already built a beautiful site — <b>keep it.</b> Connected Site makes dead.dance your <b>spine</b>: your calendar flows into ours (the map, your chapter, every following fan), and your <b>box office runs here</b>. You still get a home and a following in the family — so you're <b>in</b> the market of markets, just with your own front door. A premium monthly, because you're on the rails your own way.</div>
+
+  <!-- STEP 1 — YOUR SITE -->
+  <div class="card">
+    <div class="step">Step 1 · your site</div>
+    <h2>Bring your front-end <span class="tag real">real</span></h2>
+    <div class="sub">Your site stays yours. Optionally we test a <b>framed tab</b> inside dead.dance — it works only if your site allows embedding; if not, no problem, your calendar and tickets still sync.</div>
+    <label for="siteUrl">Your site URL</label>
+    <input id="siteUrl" type="url" placeholder="https://jerrysmiddlefinger.com" value="">
+    <button class="btn ghost wide" onclick="testFrame()">🔎 Test a framed tab</button>
+    <div id="frameWrap"></div>
+  </div>
+
+  <!-- STEP 2 — CALENDAR SYNC -->
+  <div class="card">
+    <div class="step">Step 2 · calendar sync — required</div>
+    <h2>Your calendar fills ours <span class="tag req">required</span></h2>
+    <div class="sub">Paste your calendar's <b>iCal / .ics</b> feed URL, or drop the file. Every date lands on the dead.dance map, your chapter, and every following fan's feed — entered once, everywhere.</div>
+    <label for="icsUrl">iCal feed URL</label>
+    <input id="icsUrl" type="url" placeholder="https://yoursite.com/events.ics">
+    <div class="row" style="margin-top:9px">
+      <button class="btn sm" onclick="fetchICS()">↧ Pull the feed</button>
+      <button class="btn ghost sm" onclick="document.getElementById('icsFile').click()">📂 Upload .ics</button>
+    </div>
+    <input id="icsFile" type="file" accept=".ics,text/calendar" style="display:none" onchange="loadICSFile(this.files)">
+    <label for="icsText" style="margin-top:10px">…or paste raw iCal text</label>
+    <textarea id="icsText" rows="3" placeholder="BEGIN:VCALENDAR … paste here and I'll parse it"></textarea>
+    <button class="btn wide" onclick="parsePasted()">Sync these dates →</button>
+    <div id="synced"></div>
+  </div>
+
+  <!-- STEP 3 — TICKETING -->
+  <div class="card">
+    <div class="step">Step 3 · box office — required</div>
+    <h2>Tickets run through dead.dance <span class="tag req">required</span></h2>
+    <div class="sub">Every "Buy Tickets" on your site points to a dead.dance checkout. Low, transparent fee — <b>on the buyer, never your door</b> — and no Ticketmaster in the middle. This is the deal that earns the premium.</div>
+    <div class="honest" id="tixNote"><b>Sync your calendar above</b> and each show gets its dead.dance ticket link right here, ready to drop onto your site's buttons.</div>
+  </div>
+
+  <!-- STEP 4 — MUTUAL SYNC (publish back out to ANYONE) -->
+  <div class="card">
+    <div class="step">Step 4 · mutual sync — enter once, everywhere</div>
+    <h2>Share your calendar with anyone <span class="tag real">real iCal out</span></h2>
+    <div class="sub">dead.dance hands back a standard <b>iCal feed</b> — so <b>DeadTributeBands.com</b>, your own site, a promoter, or plain <b>Google / Apple Calendar</b> can subscribe. It's a two-way hub: a date entered on either side propagates to both, de-duplicated. No custom integration — iCal is universal.</div>
+    <label>Your dead.dance subscribe link <span style="font-weight:400;color:var(--muted)">(any calendar can add this)</span></label>
+    <input id="subUrl" type="text" readonly value="webcal://dead.dance/cal/your-calendar.ics">
+    <div class="row" style="margin-top:9px">
+      <button class="btn sm" onclick="copySub()">🔗 Copy subscribe link</button>
+      <button class="btn ghost sm" onclick="downloadICS()">↧ Download .ics of synced dates</button>
+    </div>
+    <div class="honest"><b>Mutual by design.</b> Give a partner your subscribe link and hand us theirs — now both calendars stay in lockstep. We match on title + date + venue so a show shared out and back in never duplicates. <span style="color:#a99cc4">The live hosted feed + scheduled sync arm with the connectors; the .ics you can download here is generated for real, right now.</span></div>
+  </div>
+
+  <!-- PRESENCE (market-of-markets mitigation) -->
+  <div class="card">
+    <div class="step">You're still in the family</div>
+    <h2>Premium doesn't mean opt-out <span class="tag real">real</span></h2>
+    <div class="sub">You keep a real dead.dance <b>profile + follow button + a spot in the roster and the map</b>. Your own site is the front door; dead.dance is still the town — so fans discover you, follow you, and get your shows.</div>
+  </div>
+
+  <!-- TIER -->
+  <div class="card">
+    <div class="step">The tier</div>
+    <h2>Connected Site — Less / More / Most</h2>
+    <div class="sub">A premium monthly above a standard seat, because you run the rails your own way. <span class="tag plan">your price to set</span></div>
+    <div class="tiers">
+      <div class="tier"><div class="tn">Less</div><div class="tp">$—/mo</div><ul><li>Calendar sync in</li><li>dead.dance box office</li><li>Profile + follow</li></ul></div>
+      <div class="tier mid"><div class="tn">More</div><div class="tp">$—/mo</div><ul><li>Everything in Less</li><li>Framed tab (where allowed)</li><li>HyperPost promotion</li><li>Merch / posters</li></ul></div>
+      <div class="tier"><div class="tn">Most</div><div class="tp">$—/mo</div><ul><li>Everything in More</li><li>Priority map + featured</li><li>Karaoke / Trivia nights</li><li>Marquee support</li></ul></div>
+    </div>
+  </div>
+
+  <div class="honest" style="border:0"><b>Honest-state.</b> <span class="tag real">real</span> the iCal parsing, the events preview, and the framed-tab test run right now, in this page. <span class="tag plan">arms with connectors</span> live feed sync and dead.dance checkout switch on when the box-office rail is connected; prices are yours to set; nothing charges yet. This is the White-Box doctrine on the front-end: your site is just another surface writing into one calendar and one box office.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(id){return document.getElementById(id);}
+  function toast(m){var t=$('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3200);}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function slug(s){return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);}
+
+  /* ---------- REAL iCal parser (unit-tested via window.CONNECTED) ---------- */
+  function unfold(t){ return String(t||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\n[ \t]/g,''); }
+  function unesc(v){ return String(v||'').replace(/\\n/gi,' ').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\'); }
+  function parseDT(val){
+    val=String(val||'').trim(); var m=val.match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?/);
+    if(!m) return null;
+    return {y:+m[1],mo:+m[2],d:+m[3],h:m[4]?+m[4]:null,mi:m[5]?+m[5]:null};
+  }
+  function parseICS(text){
+    text=unfold(text); var lines=text.split('\n'), evs=[], cur=null;
+    for(var i=0;i<lines.length;i++){
+      var line=lines[i];
+      if(/^BEGIN:VEVENT/i.test(line)){ cur={}; continue; }
+      if(/^END:VEVENT/i.test(line)){ if(cur) evs.push(cur); cur=null; continue; }
+      if(!cur) continue;
+      var c=line.indexOf(':'); if(c<0) continue;
+      var key=line.slice(0,c).toUpperCase(), val=line.slice(c+1);
+      var name=key.split(';')[0];
+      if(name==='SUMMARY') cur.summary=unesc(val);
+      else if(name==='LOCATION') cur.location=unesc(val);
+      else if(name==='URL') cur.url=val.trim();
+      else if(name==='DTSTART') cur.start=parseDT(val);
+      else if(name==='DESCRIPTION') cur.desc=unesc(val);
+    }
+    // keep only events with a date + title; sort ascending
+    evs=evs.filter(function(e){return e.start&&e.summary;});
+    evs.sort(function(a,b){ return dtNum(a.start)-dtNum(b.start); });
+    return evs;
+  }
+  function dtNum(s){ return s?(s.y*1e8+s.mo*1e6+s.d*1e4+((s.h||0)*100)+(s.mi||0)):0; }
+  var MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  function checkoutUrl(ev){ return 'https://dead.dance/t/'+(slug(ev.summary)||'show')+'?src=connected'; }
+  function pad(n){return ('0'+n).slice(-2);}
+  function dtStamp(s){ return s.y+pad(s.mo)+pad(s.d)+(s.h!=null?('T'+pad(s.h)+pad(s.mi||0)+'00'):''); }
+  function icsEsc(v){ return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+  /* REAL outbound iCal — the "share with anyone" half of the mutual hub */
+  function buildICS(evs,name){
+    var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//dead.dance//Connected Calendar//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:'+icsEsc(name||'dead.dance')];
+    (evs||[]).forEach(function(e){ var d=e.start; if(!d)return;
+      L.push('BEGIN:VEVENT');
+      L.push('UID:'+(slug(e.summary)||'show')+'-'+dtStamp(d)+'@dead.dance');
+      L.push('DTSTART'+(d.h!=null?(':'+dtStamp(d)):(';VALUE=DATE:'+dtStamp(d))));
+      L.push('SUMMARY:'+icsEsc(e.summary));
+      if(e.location) L.push('LOCATION:'+icsEsc(e.location));
+      L.push('URL:'+checkoutUrl(e));
+      L.push('END:VEVENT');
+    });
+    L.push('END:VCALENDAR'); return L.join('\r\n');
+  }
+  window.CONNECTED={ parseICS:parseICS, parseDT:parseDT, unfold:unfold, unesc:unesc, checkoutUrl:checkoutUrl, buildICS:buildICS, slug:slug };
+  var LAST_EVENTS=[];
+
+  /* ---------- render synced events + ticket links ---------- */
+  function renderEvents(evs){
+    if(!evs.length){ toast('No dated events found in that calendar.'); return; }
+    LAST_EVENTS=evs;
+    var sub=$('subUrl'); if(sub){ var nm=(($('siteUrl').value||'').replace(/^https?:\/\//i,'').replace(/\/.*$/,'')||'your-calendar'); sub.value='webcal://dead.dance/cal/'+slug(nm)+'.ics'; }
+    $('synced').innerHTML='<div class="honest" style="margin-top:12px"><b>'+evs.length+' date'+(evs.length===1?'':'s')+' ready to sync</b> — on the map, your chapter, and every follower\'s feed.</div>'+
+      evs.slice(0,40).map(function(e){
+        var s=e.start, day=s.d||'?', mo=MON[(s.mo||1)-1]||'';
+        var t=(s.h!=null)?(' · '+((s.h%12)||12)+(s.mi?(':'+('0'+s.mi).slice(-2)):'')+(s.h<12?'am':'pm')):'';
+        return '<div class="ev"><div class="dt">'+day+'<small>'+mo+'</small></div>'+
+          '<div class="ei"><b>'+esc(e.summary)+'</b><span>'+esc(e.location||'—')+t+'</span></div>'+
+          '<a class="tk" href="'+esc(checkoutUrl(e))+'" target="_blank" rel="noopener">🎟️ dead.dance tix</a></div>';
+      }).join('');
+    $('tixNote').innerHTML='<b>✓ '+evs.length+' show'+(evs.length===1?'':'s')+' wired to dead.dance checkout.</b> Each 🎟️ link above is the button to drop onto your site — the buyer checks out here, the fee sits on them, and your door stays whole. <span style="color:#a99cc4">(Live checkout arms when the box-office rail is connected.)</span>';
+    toast('📅 '+evs.length+' dates synced to dead.dance.');
+  }
+
+  window.parsePasted=function(){ var t=$('icsText').value||''; if(t.trim().length<10){ toast('Paste your iCal text, or pull the feed / upload the file.'); return; } renderEvents(parseICS(t)); };
+  window.loadICSFile=function(files){ var f=files&&files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ $('icsText').value=String(r.result||'').slice(0,20000); renderEvents(parseICS(r.result)); }; r.onerror=function(){ toast('Couldn\'t read that file.'); }; r.readAsText(f); };
+  window.fetchICS=function(){
+    var u=($('icsUrl').value||'').trim(); if(!u){ toast('Paste your .ics feed URL first.'); return; }
+    toast('↧ Pulling the feed…');
+    fetch(u,{mode:'cors'}).then(function(r){ if(!r.ok) throw 0; return r.text(); })
+      .then(function(txt){ $('icsText').value=String(txt).slice(0,20000); renderEvents(parseICS(txt)); })
+      .catch(function(){ $('tixNote').innerHTML='<b>Feed couldn\'t be pulled from the browser</b> (most calendars block cross-site reads — normal). Two clean options: <b>upload the .ics file</b> or <b>paste the text</b> above; in production the sync runs server-side on a schedule. Nothing about the model changes — the dates still land here.'; toast('Feed blocked cross-site — upload or paste instead (server sync in production).'); });
+  };
+
+  /* ---------- mutual sync: copy subscribe link + download a real .ics ---------- */
+  window.copySub=function(){ var v=$('subUrl').value; try{ navigator.clipboard.writeText(v).then(function(){toast('🔗 Subscribe link copied — hand it to DeadTributeBands or any calendar.');},function(){toast(v);}); }catch(e){ toast(v); } };
+  window.downloadICS=function(){
+    if(!LAST_EVENTS.length){ toast('Sync some dates first (Step 2).'); return; }
+    var ics=buildICS(LAST_EVENTS,'dead.dance — Connected Calendar');
+    try{ var blob=new Blob([ics],{type:'text/calendar'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='deaddance-calendar.ics'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},2000); toast('↧ .ics generated — this is the feed we hand back to anyone.'); }
+    catch(e){ toast('Could not build the file here.'); }
+  };
+
+  /* ---------- best-effort framed-tab test (honest about the limits) ---------- */
+  window.testFrame=function(){
+    var u=($('siteUrl').value||'').trim(); if(!u){ toast('Enter your site URL first.'); return; }
+    if(!/^https?:\/\//i.test(u)) u='https://'+u;
+    var w=$('frameWrap'); w.innerHTML='<div class="honest">🔎 Testing whether <b>'+esc(u)+'</b> allows a framed tab…</div>';
+    var done=false, ifr=document.createElement('iframe'); ifr.className='frame'; ifr.referrerPolicy='no-referrer';
+    ifr.onload=function(){ if(done)return; done=true; w.innerHTML='<div class="honest tag-real" style="border-color:#1f7a4d66"><b>✓ Framed tab available.</b> Your site can live inside a dead.dance tab (More tier). Preview below — your calendar &amp; tickets still sync either way.</div>'; w.appendChild(ifr); };
+    w.appendChild(ifr); ifr.src=u;
+    setTimeout(function(){ if(done)return; done=true; w.innerHTML='<div class="honest"><b>Framed tab not available for this site</b> — it declines embedding (common, and totally fine). <b>No problem:</b> your calendar sync and dead.dance box office are the real value, and they work regardless. Fans reach your site by a normal link from your dead.dance profile.</div>'; }, 4200);
+  };
+})();
+</script>
+</body></html>
