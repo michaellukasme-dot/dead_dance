@@ -3125,19 +3125,30 @@ function ddAddFriend(id,name,btn){
     ov.innerHTML='<div style="max-width:380px;width:100%;background:#fff;border-radius:20px;padding:24px 20px 18px;text-align:center;box-shadow:0 30px 80px rgba(10,5,20,.5)">'
       +'<div style="font-size:40px">🌹</div>'
       +'<div style="font-size:20px;font-weight:900;color:#241a2b;margin-top:4px">What should the family call you?</div>'
-      +'<div style="font-size:13.5px;color:#6b6475;line-height:1.5;margin:8px 6px 0">So your friends can find you and say hi. Just a name — first name’s plenty.</div>'
-      +'<input id="ddNameIn" autocomplete="name" placeholder="Your name" style="width:100%;border:1.5px solid #e6e0f0;border-radius:11px;padding:12px;font:inherit;font-size:16px;margin-top:14px;text-align:center">'
+      +'<div style="font-size:13.5px;color:#6b6475;line-height:1.5;margin:8px 6px 0">Drop your email and I’ll fill your name in for you — change anything you like. So your friends can find you and say hi.</div>'
+      +'<input id="ddNameEm" type="email" autocomplete="email" placeholder="you@email.com  (optional — I’ll fill your name)" style="width:100%;border:1.5px solid #e6e0f0;border-radius:11px;padding:12px;font:inherit;font-size:15px;margin-top:14px;text-align:center">'
+      +'<input id="ddNameIn" autocomplete="name" placeholder="Your name" style="width:100%;border:1.5px solid #e6e0f0;border-radius:11px;padding:12px;font:inherit;font-size:16px;margin-top:9px;text-align:center">'
       +'<button id="ddNameGo" style="width:100%;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:15px;background:linear-gradient(135deg,#d3a24a,#a9781f);color:#2a1c00;cursor:pointer;margin-top:12px">🌹 That’s me</button>'
       +'<div id="ddNameSkip" style="font-size:12px;color:#9a8fb0;margin-top:10px;cursor:pointer">maybe later</div></div>';
     document.body.appendChild(ov);
-    var inp=document.getElementById('ddNameIn'); try{ inp.focus(); }catch(e){}
+    var inp=document.getElementById('ddNameIn'), eminp=document.getElementById('ddNameEm'); try{ eminp.focus(); }catch(e){}
+    // as they type their email, pre-fill the name box (only while it's empty / still auto) — they can override
+    var autoName=true;
+    inp.addEventListener('input',function(){ autoName=false; });
+    eminp.addEventListener('input',function(){
+      try{ var guess=window.DDAuto&&DDAuto.nameFromEmail(eminp.value); if(guess&&(autoName||!inp.value.trim())){ inp.value=guess; autoName=true; } }catch(e){}
+    });
     function done(){ try{ localStorage.setItem('dd.name.asked','1'); }catch(e){} ov.remove(); }
     document.getElementById('ddNameGo').addEventListener('click',function(){
-      var nm=(inp.value||'').trim(); if(!nm){ try{inp.focus();}catch(e){} return; }
+      var nm=(inp.value||'').trim(); var em=(eminp.value||'').trim();
+      try{ if(em&&window.DDAuto&&DDAuto.rememberEmail) DDAuto.rememberEmail(em); else if(em) localStorage.setItem('dd.email',em); }catch(e){}
+      if(!nm&&em&&window.DDAuto){ nm=DDAuto.nameFromEmail(em); if(nm) inp.value=nm; }
+      if(!nm){ try{inp.focus();}catch(e){} return; }
       try{ if(window.DDJoin&&DDJoin.setName) DDJoin.setName(nm); else localStorage.setItem('dd.myname',nm); }catch(e){}
       done(); if(typeof toast==='function') setTimeout(function(){ toast('🌹 Nice to meet you, '+nm+' — the family can find you now.'); },250);
     });
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('ddNameGo').click(); });
+    eminp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ try{inp.focus();}catch(x){} } });
     document.getElementById('ddNameSkip').addEventListener('click',done);
     ov.addEventListener('click',function(e){ if(e.target===ov) done(); });
   }
@@ -3161,6 +3172,7 @@ function ddAddFriend(id,name,btn){
 <script src="dd_showmap.js" defer></script>
 <script src="dd_friends.js" defer></script>
 <script src="dd_attrib.js" defer></script>
+<script src="dd_autofill.js" defer></script>
 <script src="dd_join.js" defer></script>
 <script src="dd_feed.js" defer></script>
 <script src="helptest.js" defer></script>

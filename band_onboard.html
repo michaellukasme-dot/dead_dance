@@ -95,6 +95,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 <script src="band_seed.js"></script>
 <script src="dd_attrib.js"></script>
 <script src="dd_refer.js"></script>
+<script src="dd_autofill.js"></script>
 <script src="dd_join.js"></script>
 <script>
 /* ---------- DEMO/TEST band — injected ONLY when the URL has ?demo (or ?test).
@@ -111,7 +112,7 @@ function toast(m){var t=document.getElementById('toast');t.textContent=m;t.class
 var SEED=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
 
 /* ---------- state, with a validator (a corrupt record must never brick the wizard) ---------- */
-var DEF={step:0,band:null,logo:null,logoLost:false,email:'',homepage:'',payout:'',sched:'',dates:'',store:true,tickets:true,
+var DEF={step:0,band:null,logo:null,logoLost:false,email:'',homepage:'',payout:'',about:'',sched:'',dates:'',store:true,tickets:true,
   price:{Mon:250,Tue:250,Wed:300,Thu:400,Fri:600,Sat:700,Sun:350},
   auto:{ads:true,setlist:true,drip:true,calendar:true,dtb:true,followup:true,hyperpost:true,invite:true,qr:true},
   lists:{email:'',fbpage:'',fbgroups:'',ig:'',x:'',web:'',otherSites:''}, listOK:false,
@@ -127,7 +128,7 @@ try{ var sv=JSON.parse(localStorage.getItem('dd.bandonboard')||'null');
     else S[k]=Object.assign(JSON.parse(JSON.stringify(DEF[k])),S[k]); });
   if(typeof S.media!=='number'||!isFinite(S.media)||S.media<0) S.media=0;
   if(S.logo) S.logo=null;                    // never restored from storage — see logoLost
-  ['email','homepage','payout','sched','dates','post'].forEach(function(k){ if(typeof S[k]!=='string') S[k]=''; });
+  ['email','homepage','payout','about','sched','dates','post'].forEach(function(k){ if(typeof S[k]!=='string') S[k]=''; });
 })();
 function save(){ try{ var c=Object.assign({},S); c.logo=null; localStorage.setItem('dd.bandonboard',JSON.stringify(c)); }
   catch(e){ /* quota or private browsing — the wizard still works, it just won't resume */ } }
@@ -266,8 +267,26 @@ function stepLogo(){
     '<input type="url" id="hp" value="'+esc(S.homepage||(b&&b.link)||'')+'" placeholder="https://facebook.com/yourband  ·  your site  ·  Linktree" oninput="S.homepage=this.value;save()">'+
     '<div class="honest" style="margin-top:4px">We pre-filled the public page we already had for you. This becomes the <b>Links</b> on your band page — add your site, socials, and the rest on the next steps.</div>'+
     '<label for="em">Band contact email <span style="font-weight:400">(private — never shown publicly, never sold)</span></label>'+
-    '<input type="email" id="em" value="'+esc(S.email)+'" placeholder="you@yourband.com" oninput="S.email=this.value;save()">';
+    '<input type="email" id="em" value="'+esc(S.email)+'" placeholder="you@yourband.com" oninput="S.email=this.value;onBandEmail(this.value)">'+
+    '<label for="ab">✍️ About your band <span style="font-weight:400">— I wrote you a first draft. Make it yours.</span></label>'+
+    '<textarea id="ab" rows="4" placeholder="A line or two about your band…" oninput="S.about=this.value;save()">'+esc(bandAbout())+'</textarea>'+
+    '<div class="honest" style="margin-top:4px">This is the blurb on your band page. <b>I filled it in so you\'re not staring at a blank box</b> — change a word or the whole thing. Saved as you type.</div>';
 }
+/* auto-write the band bio the first time, save it as a real (editable) draft */
+function bandAbout(){
+  if(S.about && S.about.trim()) return S.about;
+  var b=S.band||{};
+  var draft='';
+  try{ if(window.DDAuto) draft=DDAuto.write('bandBio',{band:b.name,city:b.city,state:b.state}); }catch(e){}
+  if(draft){ S.about=draft; save(); }
+  return S.about;
+}
+/* carry the contact email, and if payout is still empty suggest a name from it */
+window.onBandEmail=function(v){
+  save();
+  try{ if(window.DDAuto&&DDAuto.rememberEmail) DDAuto.rememberEmail(v);
+       if(!S.payout && window.DDAuto){ var nm=DDAuto.nameFromEmail(v); if(nm){ S.payout=nm; save(); } } }catch(e){}
+};
 window.upLogo=function(files){ if(!files||!files[0])return;
   var rd=new FileReader();
   rd.onload=function(){ if(!OKIMG.test(String(rd.result||''))){ toast('That file type isn\'t supported — PNG, JPG, WEBP or GIF.'); return; }
@@ -484,7 +503,7 @@ window.finish=function(){
   /* PERSIST THE CLAIM FIRST — a real row Michael/the Ambassador can see (was: saved to nothing). */
   try{
     var b=S.band||{}, at=S.attrib||{};
-    var note=[[b.city,b.state].filter(Boolean).join(', '), (S.homepage?('site: '+S.homepage):''), (S.payout?('payout: '+S.payout):'')].filter(Boolean).join(' · ');
+    var note=[[b.city,b.state].filter(Boolean).join(', '), (S.homepage?('site: '+S.homepage):''), (S.payout?('payout: '+S.payout):''), (S.about?('about: '+S.about):'')].filter(Boolean).join(' · ');
     if(window.DDJoin && DDJoin.claimBand){
       DDJoin.claimBand({ band:b.name||'(unnamed band)', ref:at.ref_band||at.claim_band||null,
         src:at.src||'claim', region:b.chapterName||b.chapter||null,
