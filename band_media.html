@@ -69,8 +69,13 @@ var DEMO={
   watchLabel:"Fingerhead Fridays on YouTube",
   links:{Instagram:"https://www.instagram.com/jerrys_middle_finger",Facebook:"http://facebook.com/jerrysmiddlefingerband",YouTube:"https://www.youtube.com/channel/UCafq5ZLYZVGXkJZVKmVNpTQ",Site:"https://jerrysmiddlefinger.com"}
 };
-function key(){ try{ var b=new URLSearchParams(location.search).get('band'); return 'dd.media.'+(b||'demo'); }catch(e){ return 'dd.media.demo'; } }
-function load(){ try{ var s=JSON.parse(localStorage.getItem(key())||'null'); return s||DEMO; }catch(e){ return DEMO; } }
+function bandParam(){ try{ return new URLSearchParams(location.search).get('band')||''; }catch(e){ return ''; } }
+function key(){ return 'dd.media.'+(bandParam()||'demo'); }
+// A named band starts as ITS OWN blank page — never Jerry's Middle Finger. JMF stays only as the
+// bare no-band showcase (band_media.html with no ?band=).
+function freshFor(name){ return { name:name, tag:'', spotify:[], youtube:[], watchLabel:'', links:{} }; }
+function load(){ try{ var s=JSON.parse(localStorage.getItem(key())||'null'); if(s) return s; }catch(e){}
+  var b=bandParam(); return b ? freshFor(b) : DEMO; }
 function draw(){
   var m=load();
   document.getElementById('bname').textContent=m.name||'Your band';
