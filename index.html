@@ -648,7 +648,8 @@ body{padding-bottom:64px}
 
 <div class="top">
   <div class="logo"><img src="dd-32.png" alt="DeadDance" style="height:22px;width:22px;border-radius:6px;vertical-align:-5px;margin-right:7px">DeadDance</div>
-  <input class="search" placeholder="Search heads, shows, tapes, art…">
+  <input class="search" id="ddSearch" autocomplete="off" placeholder="Search heads, shows, tapes, art…" oninput="ddSearchInput(this.value)" onkeydown="if(event.key==='Escape'){this.blur();ddSearchClose();}">
+  <div id="ddSearchRes" class="ddsr"></div>
   <button class="cbtn" onclick="openApps()" title="Menu" aria-label="Menu">▦</button>
   <button class="chatbtn" onclick="if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')" title="Family chat" aria-label="Family chat">💬</button>
   <button class="cbtn avat" onclick="openProfMenu()" title="You" aria-label="You">🌹</button>
@@ -3072,6 +3073,44 @@ buildShowlist();renderCal();qrBuild();mirrorBuild();friendsBuild();bandsBuild();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(show,900); });
   else setTimeout(show,900);
 })();
+</script>
+<!-- ===== global search — heads (→ add friend), bands ===== -->
+<style>
+.ddsr{position:fixed;top:58px;left:50%;transform:translateX(-50%);width:min(560px,92vw);max-height:70vh;overflow:auto;background:#fff;border:1px solid #e6e0f0;border-radius:14px;box-shadow:0 20px 60px rgba(20,10,35,.35);z-index:9998;display:none;padding:6px 0}
+.ddsr-sec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#8a7f97;padding:9px 14px 4px}
+.ddsr-row{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer}
+.ddsr-row:hover{background:#f6f2fa}.ddsr-row>span{font-size:20px}
+.ddsr-row b{font-size:14px;color:#241a2b;display:block}.ddsr-row i{font-size:11.5px;color:#8a7f97;font-style:normal}
+.ddsr-add{margin-left:auto;border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.ddsr-add:disabled{opacity:.6}.ddsr-mut{font-size:12.5px;color:#8a7f97;padding:6px 14px 10px}
+</style>
+<script>
+var DDSR_T;
+function ddSE(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ddSearchInput(q){ q=(q||'').trim(); clearTimeout(DDSR_T); if(q.length<2){ ddSearchClose(); return; } DDSR_T=setTimeout(function(){ ddSearchRun(q); },220); }
+function ddSearchClose(){ var r=document.getElementById('ddSearchRes'); if(r){ r.style.display='none'; r.innerHTML=''; } }
+document.addEventListener('click',function(e){ var r=document.getElementById('ddSearchRes'),s=document.getElementById('ddSearch'); if(!r||r.style.display!=='block')return; if(e.target!==s && !r.contains(e.target)) ddSearchClose(); });
+function ddSearchRun(q){
+  var r=document.getElementById('ddSearchRes'); if(!r)return; r.style.display='block';
+  var lc=q.toLowerCase(), html='<div class="ddsr-sec">Heads</div><div id="ddsrPeople"><div class="ddsr-mut">searching…</div></div>';
+  try{ if(typeof BANDS!=='undefined' && BANDS.length){ var bm=[]; for(var i=0;i<BANDS.length && bm.length<6;i++){ if((BANDS[i].name||'').toLowerCase().indexOf(lc)>=0) bm.push(i); }
+    if(bm.length){ html+='<div class="ddsr-sec">Bands</div>'+bm.map(function(i){var b=BANDS[i];return '<div class="ddsr-row" onclick="ddSearchClose();openReader(\'bands\');setTimeout(function(){try{bandView('+i+')}catch(e){}},80)"><span>🎸</span><div><b>'+ddSE(b.name)+'</b><i>'+ddSE(b.region||'')+'</i></div></div>';}).join(''); } } }catch(e){}
+  r.innerHTML=html;
+  try{ var c=(window.ddClient&&ddClient());
+    if(c){ c.rpc('dd_member_search',{p_q:q}).then(function(res){ var rows=(res&&res.data)||[]; var p=document.getElementById('ddsrPeople'); if(!p)return;
+      if(!rows.length){ p.innerHTML='<div class="ddsr-mut">No heads by that name yet — a person shows up here once they’ve set their name in the app.</div>'; return; }
+      p.innerHTML=rows.map(function(m){ var nm=ddSE(m.name||'A head'); var sn=String(m.name||'A head').replace(/\x27/g,''); return '<div class="ddsr-row"><span>🌹</span><div style="flex:1"><b>'+nm+'</b><i>'+ddSE(m.role||'head')+'</i></div><button class="ddsr-add" onclick="ddAddFriend(\''+m.id+'\',\''+sn+'\',this)">＋ Add friend</button></div>'; }).join('');
+    }).catch(function(){ var p=document.getElementById('ddsrPeople'); if(p)p.innerHTML='<div class="ddsr-mut">Couldn’t search heads right now.</div>'; }); }
+    else { var p=document.getElementById('ddsrPeople'); if(p)p.innerHTML='<div class="ddsr-mut">Connect to find heads.</div>'; }
+  }catch(e){}
+}
+function ddAddFriend(id,name,btn){
+  if(window.DDFriends&&DDFriends.send&&DDFriends.ready&&DDFriends.ready()){
+    btn.disabled=true; btn.textContent='…';
+    DDFriends.send(id,name).then(function(){ btn.textContent='✓ Requested'; if(typeof toast==='function')toast('🌹 Friend request sent to '+name+'.'); })
+      .catch(function(){ btn.disabled=false; btn.textContent='＋ Add friend'; if(typeof toast==='function')toast('Could not send — connect first.'); });
+  } else if(typeof toast==='function'){ toast('Connect to add friends.'); }
+}
 </script>
 <script src="lukas_a2hs.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
