@@ -98,6 +98,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 <script src="dd_autofill.js"></script>
 <script src="dd_join.js"></script>
 <script src="dd_bands.js"></script>
+<script src="dd_logoguess.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script>
@@ -540,8 +541,20 @@ window.fbxCopy=function(){ var full=fbxUrl();
   catch(e){ if(typeof toast==='function') toast(full); } };
 /* ---------- Step 0.5 · "Is this your band / your logo?" — the claim opener ---------- */
 function claimHost(){ try{ var u=(S.band&&S.band.link)||S.homepage||''; if(!u)return''; if(u.indexOf('http')!==0)u='http://'+u; return new URL(u).hostname.replace(/^www\./,''); }catch(e){ return ''; } }
+/* the band's own Facebook page slug → their profile picture IS their logo (the seal).
+   "When they sign up, use THAT logo." Works for every FB-page band, not just one. */
+function claimFbSlug(){
+  try{ var u=String((S.band&&(S.band.link||S.band.events))||S.homepage||'');
+    var pm=u.match(/facebook\.com\/profile\.php\?id=(\d+)/i); if(pm) return pm[1];          // profile.php?id=NNN
+    var pg=u.match(/facebook\.com\/pages\/[^\/]+\/(\d+)/i);   if(pg) return pg[1];          // /pages/Name/NNN
+    var m=u.match(/facebook\.com\/([^\/?#]+)/i);                                            // /slug
+    if(m){ var s=m[1]; if(['pages','profile.php','people','groups','p','sharer','events'].indexOf(s.toLowerCase())<0) return s; }
+  }catch(e){}
+  return '';
+}
 function claimGuessUrl(){
-  try{ if(window.DDLogoGuess && S.band && DDLogoGuess[S.band.id]) return DDLogoGuess[S.band.id]; }catch(e){}
+  try{ if(window.DDLogoGuess && S.band && DDLogoGuess[S.band.id]) return DDLogoGuess[S.band.id]; }catch(e){}   // curated override wins
+  var fb=claimFbSlug(); if(fb) return 'https://graph.facebook.com/'+encodeURIComponent(fb)+'/picture?type=large&width=240';   // their FB profile pic = their logo
   var h=claimHost(); if(h && h.indexOf('facebook.')<0 && h.indexOf('.')>0) return 'https://www.google.com/s2/favicons?domain='+encodeURIComponent(h)+'&sz=128';
   return '';
 }

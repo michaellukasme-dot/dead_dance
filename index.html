@@ -3581,7 +3581,7 @@ function sugTile(r,i){
   return '<a class="sugtile" href="'+url+'">'+
     '<div class="sugart" style="background:'+_sugGrad[i%_sugGrad.length]+'">'+art+'<span class="why">🌹 '+esc(r._why||'Picked for you')+'</span></div>'+
     '<div class="sugbody"><div class="dt">'+esc(sugDate(r.show_date))+(r.show_time?(' · '+esc(r.show_time)):'')+'</div>'+
-      '<div class="nm">'+esc(r.band_name||'Show')+'</div>'+
+      '<div class="nm"><span data-bt="'+esc((r.band_name||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))+'" data-bt-name="'+esc(r.band_name||'Show')+'" data-bt-kind="'+(r._opt?'act':'band')+'" data-bt-about="'+esc(r.gig_info||'')+'">'+esc(r.band_name||'Show')+'</span></div>'+
       '<div class="vn">'+esc(r.venue||'')+(loc?(' · '+esc(loc)):'')+'</div>'+
       '<div class="int">'+(going>0?(going+' going'):'Be the first to say you’re going')+'</div>'+
       '<button class="sugint" onclick="sugGoing(event,\''+esc(r.id||'')+'\')">🌹 Interested</button>'+
@@ -3663,6 +3663,10 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_trivia.js" defer></script>
 <script src="dd_categories.js" defer></script>
 <script src="dd_bands.js" defer></script>
+<script src="dd_logoguess.js" defer></script>
+<script src="qr.js" defer></script>
+<script src="dd_qrmark.js" defer></script>
+<script src="dd_bandtoast.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
   /* ===== PWA update prompt — "🌹 There's an update to DeadDance" when a new version ships ===== */
