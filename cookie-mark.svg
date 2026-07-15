@@ -1,0 +1,30 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cookie">
+  <!-- feet -->
+  <ellipse cx="38" cy="90" rx="8" ry="5" fill="#B5673E"/>
+  <ellipse cx="62" cy="90" rx="8" ry="5" fill="#B5673E"/>
+  <!-- arms -->
+  <rect x="8" y="50" width="18" height="8" rx="4" fill="#C8794F"/>
+  <rect x="74" y="50" width="18" height="8" rx="4" fill="#C8794F"/>
+  <!-- body -->
+  <circle cx="50" cy="50" r="34" fill="#C8794F" stroke="#B5673E" stroke-width="2"/>
+  <circle cx="40" cy="40" r="18" fill="#D68C5E" opacity="0.45"/>
+  <!-- cheeks -->
+  <circle cx="31" cy="55" r="6" fill="#E0577A" opacity="0.35"/>
+  <circle cx="69" cy="55" r="6" fill="#E0577A" opacity="0.35"/>
+  <!-- chocolate-chip freckles (grape) -->
+  <circle cx="28" cy="46" r="3" fill="#5A2E86"/>
+  <circle cx="63" cy="34" r="2.6" fill="#5A2E86"/>
+  <circle cx="70" cy="62" r="2.6" fill="#5A2E86"/>
+  <circle cx="44" cy="70" r="2.4" fill="#5A2E86"/>
+  <circle cx="52" cy="30" r="2.2" fill="#5A2E86"/>
+  <!-- happy squint eyes -->
+  <path d="M33 43 q5 -5 10 0" fill="none" stroke="#2A1810" stroke-width="3" stroke-linecap="round"/>
+  <path d="M57 43 q5 -5 10 0" fill="none" stroke="#2A1810" stroke-width="3" stroke-linecap="round"/>
+  <!-- big open grin -->
+  <path d="M36 55 Q50 74 64 55 Z" fill="#3A2417"/>
+  <path d="M36 55 Q50 61 64 55" fill="#FFF3E0"/>
+  <!-- stray crumbs -->
+  <rect x="16" y="24" width="4" height="4" rx="1" fill="#C8794F" transform="rotate(20 18 26)"/>
+  <rect x="82" y="30" width="3.5" height="3.5" rx="1" fill="#B5673E" transform="rotate(-15 84 32)"/>
+  <circle cx="22" cy="78" r="2" fill="#C8794F"/>
+</svg>

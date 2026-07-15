@@ -33,8 +33,10 @@ textarea:focus{outline:none;border-color:var(--acc)}
       <div class="hn" id="who">Your note</div>
       <div class="hs">Write a note to the whole family. That's it — just write.</div></div>
   </div>
-  <textarea id="body" autofocus></textarea>
-  <button class="post" id="claudeBtn" style="background:#f1eef7;color:var(--acc)" onclick="claudeWrite()">✨ Want me to write it with Claude?</button>
+  <div style="position:relative;flex:1;display:flex;flex-direction:column">
+    <button id="claudeBtn" onclick="claudeWrite()" title="Want Claude to write it for you" aria-label="Want Claude to write it for you" style="position:absolute;top:13px;left:12px;z-index:2;border:0;background:none;padding:0;cursor:pointer"><img src="claude-mark.svg" alt="Claude" style="width:24px;height:24px;display:block"></button>
+    <textarea id="body" autofocus style="text-indent:30px"></textarea>
+  </div>
   <button class="post" onclick="postNote()">🌹 Post it to the Family</button>
   <div class="fine">Whatever's on your heart — it goes straight to the whole family. No account, no setup; you can claim your page later.</div>
 </div>
@@ -67,7 +69,6 @@ var INVITE="We'd be honored if you wrote a hello to the DeadDance family right h
 try{ document.getElementById('body').placeholder=INVITE; }catch(e){}
 var DRAFT="Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):"");
 window.claudeWrite=function(){ var b=document.getElementById('body'); b.value=DRAFT; b.focus(); try{ b.setSelectionRange(b.value.length,b.value.length); }catch(e){}
-  var cb=document.getElementById('claudeBtn'); if(cb)cb.textContent='✨ Claude wrote a draft — edit it your way';
   if(typeof toast==='function') toast('✨ A starting point — make it yours, then post.'); };
 
 window.postNote=function(){

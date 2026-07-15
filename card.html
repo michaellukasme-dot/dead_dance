@@ -87,8 +87,10 @@ h1{font-size:26px;margin:4px 0 2px;font-weight:900}
   <div id="covS2" style="display:none">
     <div class="covname" style="font-size:19px">Welcome to the DeadDance family, <span id="covName2"></span>! 🌹</div>
     <div class="covq" style="margin:6px 0 2px">We'd be honored if you said hello to the family.</div>
-    <textarea id="covBody" style="width:100%;min-height:150px;font-size:15px;line-height:1.5;border:1px solid #ece7f2;border-radius:13px;padding:13px;margin:11px 0 6px;resize:none;text-align:left"></textarea>
-    <button class="covno" id="covClaude" style="background:#f1eef7;color:#5a2e86;border-radius:12px;font-weight:800;margin:0 0 6px" onclick="claudeWrite()">✨ Want me to write it with Claude?</button>
+    <div style="position:relative;margin:11px 0 6px">
+      <button id="covClaude" onclick="claudeWrite()" title="Want Claude to write it for you" aria-label="Want Claude to write it for you" style="position:absolute;top:11px;left:11px;z-index:2;border:0;background:none;padding:0;cursor:pointer"><img src="claude-mark.svg" alt="Claude" style="width:22px;height:22px;display:block"></button>
+      <textarea id="covBody" style="width:100%;min-height:150px;font-size:15px;line-height:1.5;border:1px solid #ece7f2;border-radius:13px;padding:13px;resize:none;text-align:left;text-indent:28px"></textarea>
+    </div>
     <button class="covyes" onclick="claimSend()">Send to the Family →</button>
     <button class="covno" onclick="claimSkip()">Say hi later</button>
     <div class="covfine">Your words, your call — whatever's on your heart. Your tour &amp; the rest, we'll sort with you (or your manager) later.</div>
@@ -179,7 +181,7 @@ function covClose(){ var c=document.getElementById('claimCov'); if(c)c.classList
 var INVITE="We'd be honored if you wrote a hello to the DeadDance family right here"+(NAME?(", "+NAME.split(' ')[0]):"")+" — whatever's on your heart. 🌹";
 var DRAFT="Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):"");
 window.claudeWrite=function(){ var ta=document.getElementById('covBody'); if(!ta)return; ta.value=DRAFT; ta.focus(); try{ ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){}
-  var cb=document.getElementById('covClaude'); if(cb)cb.textContent='✨ Claude drafted it — make it yours'; };
+  if(typeof toast==='function') toast('✨ A start — make it yours, then send.'); };
 /* YES → quietly log the claim (we follow up with managers later), then INVITE them to write. */
 window.claimYes=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }catch(e){}
   applyLogo();

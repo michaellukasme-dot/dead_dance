@@ -782,12 +782,14 @@ body{padding-bottom:64px}
     <div class="card" id="composer">
       <div style="display:flex;gap:10px;align-items:flex-start">
         <div class="cmp-av">🌹</div>
-        <textarea id="cmpText" class="cmp-text" placeholder="What's on your mind?"></textarea>
+        <div style="position:relative;flex:1">
+          <button onclick="claudeAssist('cmpText')" title="Want Claude to write it for you" aria-label="Want Claude to write it for you" style="position:absolute;top:8px;left:8px;z-index:2;border:0;background:none;padding:0;cursor:pointer"><img src="claude-mark.svg" alt="Claude" style="width:22px;height:22px;display:block"></button>
+          <textarea id="cmpText" class="cmp-text" placeholder="What's on your mind?" style="width:100%;text-indent:28px"></textarea>
+        </div>
       </div>
       <div id="cmpNets" class="cmp-nets"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap">
         <button class="cmp-gear" onclick="cmpToggleNets()" title="Set your default networks">⚙ Networks</button>
-        <button class="cmp-gear" onclick="claudeAssist('cmpText')" title="Only if you want — your words stay yours">✨ Write with Claude</button>
         <span id="cmpNote" style="font-size:11px;color:var(--muted);flex:1;min-width:120px"></span>
         <button class="hpbtn" style="background:var(--rose);color:#fff" onclick="hpComposer()">📡 HyperPost</button>
       </div>
@@ -799,6 +801,9 @@ body{padding-bottom:64px}
       <button class="ft-opt on" id="sgLocal" onclick="feedScope('local')">📍 Local Family</button>
       <button class="ft-opt" id="sgNat" onclick="feedScope('national')">🌎 National</button>
     </div>
+
+    <!-- One how-to a day — Claude teaches the app one bite at a time, in the blog (dd_learn.js) -->
+    <div class="card" id="howtoCard" style="display:none;margin-bottom:14px"></div>
 
     <!-- People & bands you may know (dd_pymk.js) — grows the family from who you keep running into -->
     <div class="card" id="pymkCard" style="display:none;padding:12px 4px 12px 14px;margin-bottom:14px"></div>
@@ -1070,6 +1075,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="citem" onclick="ddSheet('poster_shop.html','🖼️ The Poster Shop');return false;" style="cursor:pointer"><span>🖼️</span>The Poster Shop</a>
     <a class="citem" onclick="ddSheet('tshirt_shop.html','👕 Tour Tees');return false;" style="cursor:pointer"><span>👕</span>Tour Tees — Print Me the T-Shirt</a>
     <a class="citem" href="dead_karaoke.html"><span>🎤</span>Dead Karaoke — play tonight's round 🌹</a>
+    <a class="citem" href="cookie.html"><span>🍪</span>Cookie &amp; the Coins — feed the family, earn coins</a>
     <a class="citem" onclick="ddSheet('karaoke_store.html','🎤 DeadDance Karaoke');return false;" style="cursor:pointer"><span>🛍️</span>DeadDance Karaoke — merch</a>
     <a class="citem" href="deadman.html"><span>🎙️</span>DEADMAN — sing now, no machine</a>
     <a class="citem" href="band_manager.html"><span>🎸</span>Agency Console — Influencer (band roster)</a>
@@ -1197,8 +1203,10 @@ function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.in
     <div class="hph">📡 HyperPost<button class="cox" onclick="closeHP()">×</button></div>
     <div class="hpbody">
       <div class="hpctx" id="hpctx"></div>
-      <textarea id="hptext" placeholder="Reply to the family… your words post here and radiate where you choose."></textarea>
-      <button class="hpaddmedia" onclick="claudeAssist('hptext')" title="Only if you want it">✨ Want me to write it with Claude?</button>
+      <div style="position:relative">
+        <button onclick="claudeAssist('hptext')" title="Want Claude to write it for you" aria-label="Want Claude to write it for you" style="position:absolute;top:11px;left:11px;z-index:2;border:0;background:none;padding:0;cursor:pointer"><img src="claude-mark.svg" alt="Claude" style="width:22px;height:22px;display:block"></button>
+        <textarea id="hptext" placeholder="Reply to the family… your words post here and radiate where you choose." style="text-indent:28px"></textarea>
+      </div>
       <div class="hpemoji"><span onclick="hpEmoji('😀')">😀</span><span onclick="hpEmoji('🌹')">🌹</span><span onclick="hpEmoji('🔥')">🔥</span><span onclick="hpEmoji('🎶')">🎶</span><span onclick="hpEmoji('🙌')">🙌</span><span onclick="hpEmoji('💀')">💀</span><span onclick="hpEmoji('🐻')">🐻</span><span onclick="hpEmoji('✨')">✨</span></div>
       <div class="hplabel">Goes everywhere by default — chat groups, socials, your lists. <b>Uncheck any to narrow:</b></div>
       <div class="hpchips" id="hpchips"></div>
@@ -2859,7 +2867,7 @@ function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.v
       posted=true;
       var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:(DDFeed.myName?DDFeed.myName():'You');
       ddFeedPrepend({author_id:ddMyIdSafe(), author_name:nm, role:(DDFeed.myRole&&DDFeed.myRole()), body:txt, created_at:new Date().toISOString(), _me:true}); // optimistic — carries my id so my face + name render
-      DDFeed.post(txt).then(function(){ /* realtime will confirm for others */ })
+      DDFeed.post(txt).then(function(){ try{ if(window.DDCoins) DDCoins.feed('post'); }catch(e){} /* 🪙 a coin pops */ })
         .catch(function(){ toast('Saved on this device — sign in to post to the family.'); });
     }
   }catch(e){}
@@ -3649,6 +3657,17 @@ function suggestBuild(){ var host=document.getElementById('suggestCard'); if(!ho
   else if(t>60){ clearInterval(iv); }
 },250); })();
 
+/* ---------- One how-to a day — Claude teaches the app one bite, in the blog ---------- */
+window.howtoClose=function(){ try{ if(window.DDLearn)DDLearn.howtoClose(); }catch(e){} var h=document.getElementById('howtoCard'); if(h)h.style.display='none'; };
+function howtoBuild(){ var host=document.getElementById('howtoCard'); if(!host||!window.DDLearn||!DDLearn.howto) return;
+  var h=DDLearn.howto(); if(!h){ host.style.display='none'; return; }
+  host.style.display='block';
+  host.innerHTML='<div style="display:flex;gap:11px;align-items:flex-start;padding:2px">'+
+    '<img src="claude-mark.svg" alt="Claude" style="width:26px;height:26px;flex:0 0 26px;margin-top:1px">'+
+    '<div style="flex:1;font-size:13.5px;line-height:1.5;color:#2a2233"><b style="color:#5a2e86;font-size:11px;letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:2px">How-to of the day</b>'+h.html+'</div>'+
+    '<button onclick="howtoClose()" aria-label="Close" style="border:0;background:none;font-size:19px;color:#b0a6c4;cursor:pointer;line-height:1;padding:0 2px">×</button></div>'; }
+(function(){ var t=0,iv=setInterval(function(){ t++; if(window.DDLearn){ clearInterval(iv); try{ howtoBuild(); }catch(e){} } else if(t>60) clearInterval(iv); },250); })();
+
 /* ---------- Dead Karaoke — feed card (community group + live global board) ---------- */
 function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!host) return;
   var hero='<div class="kkhero"><div class="kkk">Community group · play tonight</div>'+
@@ -3680,6 +3699,8 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_categories.js" defer></script>
 <script src="dd_bands.js" defer></script>
 <script src="dd_logoguess.js" defer></script>
+<script src="dd_learn.js" defer></script>
+<script src="dd_crumbs.js" defer></script>
 <script src="qr.js" defer></script>
 <script src="dd_qrmark.js" defer></script>
 <script src="dd_bandtoast.js" defer></script>

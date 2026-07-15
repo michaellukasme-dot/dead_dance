@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cookie &amp; the Coins · DeadDance</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="cookie-mark.svg">
+<style>
+:root{--rose:#b8002e;--purple:#2a1b3d;--acc:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--terra:#C8794F}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding:16px 14px 60px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:22px;padding:20px;display:flex;gap:15px;align-items:center}
+.hero img{width:88px;height:88px;flex:0 0 88px}
+.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.hero h1{font-size:24px;margin:4px 0 4px;font-weight:900}
+.hero p{margin:0;color:#cdbfe0;font-size:13px;line-height:1.4}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+.jar{text-align:center}
+.coins{font-size:46px;font-weight:900;color:var(--gold);line-height:1}
+.coins .u{font-size:18px;color:var(--muted);font-weight:800}
+.layer{font-weight:800;font-size:15px;margin-top:4px}
+.layer .d{color:#1f9e6b;font-size:12px;font-weight:800}
+.bar{height:10px;background:#f0ecf6;border-radius:8px;overflow:hidden;margin:10px 0 5px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#f6c34b,#f0a500)}
+.small{color:var(--muted);font-size:12px}
+.belly .b2{height:16px;background:#f6efe6;border-radius:9px;overflow:hidden;margin:9px 0 6px}
+.belly .b2 i{display:block;height:100%;background:linear-gradient(90deg,#e0a066,#C8794F)}
+.tabs{display:flex;gap:6px;background:#f2eef8;border-radius:999px;padding:4px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:none;border-radius:999px;padding:8px;font-weight:800;font-size:12.5px;color:#6a5f86;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #f4f0fa;font-size:14px}
+.row .rk{width:26px;font-weight:900;color:var(--acc);text-align:center}
+.row .nm{flex:1;font-weight:700}.row .pts{font-weight:800;color:var(--gold)}
+.earn{font-size:13.5px;line-height:1.5}.earn b{color:var(--terra)}
+.earn li{margin-bottom:3px}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+.btn{display:block;width:100%;text-align:center;border:0;border-radius:13px;padding:13px;font-weight:800;font-size:15px;cursor:pointer;background:#f1eef7;color:var(--acc);text-decoration:none;margin-top:10px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <img src="cookie-mark.svg" alt="Cookie">
+    <div><div class="k">Feed the family · earn coins</div>
+      <h1>Cookie &amp; the Coins</h1>
+      <p>Hand Cookie a crumb — a show, a gem, a welcome — and he pays you a Coin. Coins unlock a store discount. <b style="color:#ffd76a">He only eats what you hand him.</b></p></div>
+  </div>
+
+  <div class="sec">Your jar</div>
+  <div class="card jar">
+    <div class="coins"><span id="coins">0</span> <span class="u">coins 🪙</span></div>
+    <div class="layer" id="layer">Nibbler <span class="d" id="disc"></span></div>
+    <div class="bar"><i id="lbar" style="width:0%"></i></div>
+    <div class="small" id="lnext">Just getting started.</div>
+    <button class="btn" onclick="testCoin()">🍪 Tap to see a Coin pop</button>
+  </div>
+
+  <div class="sec">Cookie's Belly — the whole family, this week</div>
+  <div class="card belly">
+    <div class="small" id="bellymsg">Loading the family's crumbs…</div>
+    <div class="b2"><i id="bbar" style="width:0%"></i></div>
+    <div class="small">Fill the Belly together and <b>everyone who pitched in gets a treat.</b></div>
+  </div>
+
+  <div class="sec">The board</div>
+  <div class="card">
+    <div class="tabs"><button class="on" id="tWeek" onclick="showBoard('week')">This week</button><button id="tAll" onclick="showBoard('all')">All-time</button></div>
+    <div id="board"><div class="note">No coins yet this week — be the first to feed Cookie. 🍪</div></div>
+  </div>
+
+  <div class="sec">How to earn (feed Cookie)</div>
+  <div class="card earn"><ul style="margin:0;padding-left:18px">
+    <li><b>Add a public show</b> to the calendar — the biggest help. <span class="small">+20</span></li>
+    <li><b>Welcome a newcomer</b> — the family raising the family. <span class="small">+15</span></li>
+    <li><b>Forward a gem</b> into DeadDance. <span class="small">+10</span></li>
+    <li><b>Confirm or fix a listing.</b> <span class="small">+10</span></li>
+    <li><b>Bring a friend home</b> who joins. <span class="small">+40</span></li>
+    <li><b>Post</b>, or tap <b>Going</b> on a show. <span class="small">+5</span></li>
+  </ul>
+  <div class="note">Coins are rewards, not money — they unlock a store discount that grows with your layer. Cookie never touches anything private or behind a login; only what a person hands him.</div></div>
+
+  <div class="foot"><img src="cookie-mark.svg" style="width:20px;vertical-align:middle;margin-right:5px">Feed the garden, and it feeds you back.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="dd_feed.js"></script>
+<script src="dd_crumbs.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var BELLY_GOAL=5000;
+function refresh(){
+  DDCoins.total().then(function(t){
+    document.getElementById('coins').textContent=t.toLocaleString();
+    var L=DDCoins.layer(t); document.getElementById('layer').firstChild.textContent=L.name+' ';
+    document.getElementById('disc').textContent=L.discount?('· '+L.discount+'% store discount'):'';
+    if(L.next){ var span=L.next.min-L.min, into=t-L.min; document.getElementById('lbar').style.width=Math.max(3,Math.min(100,Math.round(into/span*100)))+'%';
+      document.getElementById('lnext').textContent=(L.next.min-t).toLocaleString()+' coins to '+L.next.name+'.'; }
+    else { document.getElementById('lbar').style.width='100%'; document.getElementById('lnext').textContent="Cookie's Chosen — top of the family. 🌹"; }
+  });
+  DDCoins.belly().then(function(b){ var pct=Math.min(100,Math.round(b/BELLY_GOAL*100));
+    document.getElementById('bbar').style.width=pct+'%';
+    document.getElementById('bellymsg').innerHTML = b>=BELLY_GOAL ? ('🎉 <b>Belly full!</b> '+b.toLocaleString()+' coins — everyone who pitched in gets a treat.') : ('The family fed Cookie <b>'+b.toLocaleString()+'</b> coins this week — <b>'+(BELLY_GOAL-b).toLocaleString()+'</b> to a treat.'); });
+}
+function showBoard(scope){ document.getElementById('tWeek').classList.toggle('on',scope==='week'); document.getElementById('tAll').classList.toggle('on',scope==='all');
+  var host=document.getElementById('board'); host.innerHTML='<div class="note">Loading…</div>';
+  DDCoins.board(scope).then(function(rows){ host.innerHTML = (rows&&rows.length) ? rows.map(function(r,i){
+    return '<div class="row"><span class="rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</span><span class="nm">'+esc(r.name||'A head')+'</span><span class="pts">'+Number(r.points||0).toLocaleString()+' 🪙</span></div>'; }).join('')
+    : '<div class="note">No coins yet — be the first to feed Cookie. 🍪</div>'; }); }
+window.testCoin=function(){ DDCoins.pop(5); };  // a taste of the pop (no award)
+try{ refresh(); showBoard('week'); }catch(e){}
+</script>
+</body></html>
