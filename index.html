@@ -1076,6 +1076,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="citem" onclick="ddSheet('tshirt_shop.html','👕 Tour Tees');return false;" style="cursor:pointer"><span>👕</span>Tour Tees — Print Me the T-Shirt</a>
     <a class="citem" href="dead_karaoke.html"><span>🎤</span>Dead Karaoke — play tonight's round 🌹</a>
     <a class="citem" href="cookie.html"><span>🍪</span>Cookie &amp; the Coins — feed the family, earn coins</a>
+    <a class="citem" href="recruit.html"><span>🏡</span>Bring 'em home — your QR, your recruits, your coins</a>
     <a class="citem" onclick="ddSheet('karaoke_store.html','🎤 DeadDance Karaoke');return false;" style="cursor:pointer"><span>🛍️</span>DeadDance Karaoke — merch</a>
     <a class="citem" href="deadman.html"><span>🎙️</span>DEADMAN — sing now, no machine</a>
     <a class="citem" href="band_manager.html"><span>🎸</span>Agency Console — Influencer (band roster)</a>
@@ -2471,7 +2472,7 @@ function gigAddDate(){
  closeGig();
  ddAddPostedShow(show);   /* optimistic — it shows on the calendar this instant */
  if(window.DDShows){
-   DDShows.submit(show).then(function(sid){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); promptVendorSlots(sid||null,venue); })
+   DDShows.submit(show).then(function(sid){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); try{ if(window.DDCoins) DDCoins.feed('show_add', sid||(band+'|'+venue)); }catch(e){} promptVendorSlots(sid||null,venue); })
      .catch(function(){ toast('📅 On your board — connect to share it with the chapter.'); promptVendorSlots(null,venue); });
  } else { toast('📅 On your board.'); promptVendorSlots(null,venue); }
 }
@@ -3330,6 +3331,7 @@ function shareAccept(){ var s=shareState(); var c=s.cand||shareCandidate(); s.st
  qaRender(); toast('🌹 You’re in — '+c.name+'. Open it and forward 10 to our page.'); }
 function shareForward(){ var s=shareState(); if(s.status!=='accepted')return; s.done=(s.done||0)+1; shareSave(s);
  var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id&&s.group&&s.group.id){ try{ cl.rpc('chat_group_mark_shared',{p_group:s.group.id}).catch(function(){}); }catch(e){} }
+ try{ if(window.DDCoins) DDCoins.feed('forward', (s.group&&s.group.id)||('fwd-'+s.done)); }catch(e){}   /* 🪙 */
  qaRender(); if(s.done>=SHARE_GOAL) toast('🎉 That’s 10 — you did your share! 🌹'); }
 function shareNext(){ shareSave({status:'none'}); qaRender(); toast('🙌 Grab another group anytime — thank you.'); }
 function shareSnooze(days){ var s=shareState(); s.status=days>0?'snoozed':'declined'; if(days>0)s.until=Date.now()+days*864e5; shareSave(s);
@@ -3621,6 +3623,7 @@ window.sugGoing=function(ev,id){ ev.preventDefault(); ev.stopPropagation(); if(!
     if(iso && !a.some(function(x){return x.band===r.band_name&&x.iso===iso;})){
       a.push({band:r.band_name,iso:iso,venue:r.venue||'',price:'',bought:false,reminded:false,opt:sugIsOption(r)}); calAddedSave(a); } } }catch(e){}
   if(window.DDPymk&&DDPymk.attend) DDPymk.attend(id,'rsvp').then(function(){ _sugGoing[id]=(_sugGoing[id]||0)+1; });
+  try{ if(window.DDCoins) DDCoins.feed('going', id); }catch(e){}   /* 🪙 */
   try{ if(CAL_SCOPE==='my'){ buildShowlist(); renderCal(); } }catch(e){}
   if(typeof toast==='function') toast('📅 Saved to your calendar — just yours. You’ll meet others going too. 🌹'); };
 var _sugCatsOpen=false;
@@ -3701,6 +3704,7 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_logoguess.js" defer></script>
 <script src="dd_learn.js" defer></script>
 <script src="dd_crumbs.js" defer></script>
+<script src="dd_recruit.js" defer></script>
 <script src="qr.js" defer></script>
 <script src="dd_qrmark.js" defer></script>
 <script src="dd_bandtoast.js" defer></script>

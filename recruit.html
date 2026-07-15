@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bring 'Em Home · DeadDance</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--acc:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding:16px 14px 60px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:22px;padding:20px;position:relative;overflow:hidden}
+.hero img.mk{position:absolute;right:-22px;top:-22px;width:110px;opacity:.14}
+.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.hero h1{font-size:25px;margin:5px 0 4px;font-weight:900}
+.hero p{margin:0;color:#cdbfe0;font-size:13px;line-height:1.45}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+.qrwrap{display:flex;gap:14px;align-items:center}
+.qrbox{width:150px;height:150px;flex:0 0 150px;background:#fff;border-radius:12px}
+.qrcap b{display:block;font-size:14px}.qrcap span{color:var(--muted);font-size:12.5px;line-height:1.4}
+.qrbtns{display:flex;gap:8px;margin-top:9px}
+.qrbtns button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;font-size:12px;cursor:pointer;background:#f1eef7;color:var(--acc)}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;text-align:center}
+.stat .n{font-size:26px;font-weight:900;color:var(--acc)}.stat .l{font-size:11px;color:var(--muted);font-weight:700}
+.stat.act .n{color:#1f9e6b}
+.hc .b2{height:16px;background:#f6efe6;border-radius:9px;overflow:hidden;margin:9px 0 6px}
+.hc .b2 i{display:block;height:100%;background:linear-gradient(90deg,#e0a066,#C8794F)}
+.small{color:var(--muted);font-size:12px;line-height:1.5}
+.tabs{display:flex;gap:6px;background:#f2eef8;border-radius:999px;padding:4px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:none;border-radius:999px;padding:8px;font-weight:800;font-size:12px;color:#6a5f86;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #f4f0fa;font-size:14px}
+.row .rk{width:26px;font-weight:900;color:var(--acc);text-align:center}.row .nm{flex:1;font-weight:700}.row .pts{font-weight:800;color:#1f9e6b}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero"><img class="mk" src="dd-512.png" alt="">
+    <div class="k">The recruiting game</div>
+    <h1>Bring 'em home 🌹</h1>
+    <p>Share your QR. When someone you brought in <b>sticks</b> — earns their own first coins — you earn coins and climb the boards. No cash, no spam; a real head that stays is the whole point.</p>
+  </div>
+
+  <div class="sec">Your front-door QR</div>
+  <div class="card"><div class="qrwrap">
+    <div class="qrbox" id="qr"></div>
+    <div class="qrcap"><b>This is yours.</b><span id="linktxt"></span>
+      <div class="qrbtns"><button onclick="cp()">📋 Copy link</button><button onclick="sh()">↗ Share</button><button onclick="dl()">⬇︎ Save QR</button></div></div>
+  </div></div>
+
+  <div class="sec">Your recruits</div>
+  <div class="card"><div class="stats">
+    <div class="stat"><div class="n" id="sTotal">0</div><div class="l">Brought in</div></div>
+    <div class="stat act"><div class="n" id="sAct">0</div><div class="l">Stuck (activated)</div></div>
+    <div class="stat"><div class="n" id="sCoins">0</div><div class="l">🪙 from recruiting</div></div>
+  </div>
+  <div class="note" id="pendNote"></div></div>
+
+  <div class="sec">Homecoming — new heads this week</div>
+  <div class="card hc">
+    <div class="small" id="hcmsg">Loading…</div>
+    <div class="b2"><i id="hcbar" style="width:0%"></i></div>
+    <div class="small">Fill it together and <b>everyone who brought someone gets a treat.</b></div>
+  </div>
+
+  <div class="sec">The boards</div>
+  <div class="card">
+    <div class="tabs"><button class="on" id="scNat" onclick="setScope('nat')">🌎 National</button><button id="scLoc" onclick="setScope('loc')">📍 My chapter</button></div>
+    <div class="tabs"><button class="on" id="twWk" onclick="setWin('week')">This week</button><button id="twAll" onclick="setWin('all')">All-time</button></div>
+    <div id="board"><div class="note">No homecomings yet — be the first to bring one home. 🌹</div></div>
+  </div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">Grow the family, and the family grows you.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script src="dd_feed.js"></script><script src="dd_crumbs.js"></script><script src="dd_recruit.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var LINK=(window.DDRecruit&&DDRecruit.link())||('https://deaddance.app/?ref='+(ddId().id));
+var SCOPE='nat', WIN='week';
+document.getElementById('linktxt').textContent=LINK.replace('https://','');
+try{ if(window.DDRecruit) DDRecruit.setname(); }catch(e){}
+try{ if(window.DDQR) DDQR.into('qr', LINK, {mark:'dd', size:230, css:150}); }catch(e){}
+window.cp=function(){ try{ navigator.clipboard.writeText(LINK); }catch(e){} };
+window.sh=function(){ if(navigator.share) navigator.share({title:'Come home to DeadDance 🌹',url:LINK}).catch(function(){}); else cp(); };
+window.dl=function(){ try{ DDQR.save(LINK,{mark:'dd'},'my-deaddance-QR.png'); }catch(e){} };
+
+function loadMine(){ if(!window.DDRecruit)return; DDRecruit.mine().then(function(rows){
+  rows=rows||[]; var act=rows.filter(function(r){return r.status==='activated';}).length;
+  document.getElementById('sTotal').textContent=rows.length;
+  document.getElementById('sAct').textContent=act;
+  document.getElementById('sCoins').textContent=(act*40).toLocaleString();   // 40 per activated (v1 reward)
+  var pend=rows.length-act;
+  document.getElementById('pendNote').textContent = rows.length? (pend? (pend+' still warming up — they earn you coins the moment they stick.') : 'Every one of them stuck. 🌹') : 'Share your QR to bring your first head home.';
+}); }
+function loadHome(){ if(!window.DDRecruit)return; var reg=(SCOPE==='loc')?DDRecruit.region():null;
+  DDRecruit.homecoming(null).then(function(n){ var goal=50; var pct=Math.min(100,Math.round(n/goal*100));
+    document.getElementById('hcbar').style.width=pct+'%';
+    document.getElementById('hcmsg').innerHTML = n>=goal? ('🎉 <b>'+n+' new heads home this week!</b> Everyone who brought one gets a treat.') : ('<b>'+n+'</b> new heads home this week — <b>'+(goal-n)+'</b> to a family treat.'); }); }
+function setScope(s){ SCOPE=s; document.getElementById('scNat').classList.toggle('on',s==='nat'); document.getElementById('scLoc').classList.toggle('on',s==='loc'); board(); }
+function setWin(w){ WIN=w; document.getElementById('twWk').classList.toggle('on',w==='week'); document.getElementById('twAll').classList.toggle('on',w==='all'); board(); }
+function board(){ if(!window.DDRecruit)return; var reg=(SCOPE==='loc')?DDRecruit.region():null;
+  var host=document.getElementById('board'); host.innerHTML='<div class="note">Loading…</div>';
+  DDRecruit.board(WIN,reg).then(function(rows){ host.innerHTML=(rows&&rows.length)? rows.map(function(r,i){
+    return '<div class="row"><span class="rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</span><span class="nm">'+esc(r.name||'A head')+'</span><span class="pts">'+Number(r.recruits||0)+' home</span></div>'; }).join('')
+    : '<div class="note">'+(SCOPE==='loc'&&!reg?'Set your chapter to see the local board.':'No homecomings yet — bring the first one home. 🌹')+'</div>'; }); }
+try{ loadMine(); loadHome(); board(); }catch(e){}
+</script>
+</body></html>

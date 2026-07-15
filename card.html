@@ -116,6 +116,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_logoguess.js"></script>
 <script src="dd_logoguess_vip.js"></script>
 <script src="dd_feed.js"></script>
+<script src="dd_crumbs.js"></script>
 <script src="dd_art.js"></script>
 <script src="dd_pymk.js"></script>
 <script>
@@ -232,6 +233,7 @@ window.shopArtist=function(){ location.href='poster_shop.html'; };
 window.goingShow=function(el){ var id=el.getAttribute('data-id'); if(!id)return;
   el.textContent='Going ✓'; el.disabled=true; el.style.opacity=0.6;
   if(window.DDPymk){ DDPymk.attend(id,'rsvp').then(function(){ DDPymk.count(id).then(function(n){ var c=document.getElementById('gc_'+id); if(c) c.textContent=n+' going'; }); }); }
+  try{ if(window.DDCoins) DDCoins.feed('going', id); }catch(e){}   /* 🪙 */
   toast("🌹 You're going — you'll meet others who are too."); };
 
 /* ---- real reads: shows (dd_shows), members (dd_join), pieces (dd_art) ---- */
