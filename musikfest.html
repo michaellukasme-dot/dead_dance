@@ -1,0 +1,393 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Musikfest 2026 · Find Every Platz · DeadDance</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--purple:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--terra:#C8794F}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 70px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:20px;padding:18px 18px 16px}
+.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.hero h1{font-size:25px;margin:5px 0 3px;font-weight:900;letter-spacing:-.4px}
+.hero p{margin:0;color:#cdbfe0;font-size:13.5px;line-height:1.45}
+.joinbar{display:flex;gap:10px;align-items:center;margin-top:14px}
+.joinbtn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;font-size:14.5px;cursor:pointer;background:var(--gold);color:#3a1d00}
+.joinbtn.in{background:#1f9e6b;color:#fff}
+.joincount{color:#cdbfe0;font-size:12.5px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:22px 0 9px}
+.mapwrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
+.mapwrap svg{width:100%;height:auto;display:block;border-radius:10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#4a4356;margin-top:8px;padding:0 4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+.card.tick{border-color:#f0d9a6;background:#fffdf6}
+.card .nm{font-weight:900;font-size:15.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.chip{font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px;letter-spacing:.02em}
+.chip.free{background:#e7f7ef;color:#1f9e6b}.chip.tk{background:#fdf1d8;color:#9a6b00}.chip.jam{background:#fdeaef;color:var(--rose)}
+.card .where{font-size:13px;color:#4a4356;line-height:1.5;margin:5px 0 9px}
+.dir{display:inline-flex;align-items:center;gap:6px;background:#f1eef7;color:var(--purple);border:0;border-radius:10px;padding:9px 13px;font-weight:800;font-size:12.5px;text-decoration:none;cursor:pointer}
+.sched{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.srow{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid #f4f0fa;font-size:13.5px}
+.srow:last-child{border-bottom:0}
+.srow .d{font-weight:900;color:var(--rose);width:60px;flex:none;font-size:12.5px}
+.srow .b{flex:1;font-weight:700}.srow .g{color:var(--muted);font-size:11.5px}
+.ddtog{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:700;margin-bottom:10px;cursor:pointer}
+.carbadge{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:60;background:#241535ee;color:#fff;border-radius:999px;padding:8px 13px;font-weight:800;font-size:13px;box-shadow:0 3px 12px #0005;backdrop-filter:blur(6px)}
+.compbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.compbar button{flex:1;min-width:150px;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;background:#f1eef7;color:var(--purple)}
+.compbar button.on{background:#1f9e6b;color:#fff}
+.trackstat{display:none;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;text-align:center}
+.trackstat .big{font-size:26px;font-weight:900;color:var(--rose)}
+.trackstat .row{display:flex;justify-content:space-around;margin-top:6px}
+.trackstat .row div span{display:block;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.trackstat .row div b{font-size:18px;font-weight:900;color:var(--ink)}
+.catch{width:19px;height:19px;flex:none;accent-color:#b8002e;cursor:pointer}
+.rangebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+.rlab{font-size:12.5px;font-weight:700;color:var(--muted)}
+.rsel{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-weight:700;font-size:13px;background:#fff;color:var(--ink)}
+.tips{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.6}
+.tips b{color:var(--ink)}.tips li{margin-bottom:7px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;line-height:1.6}
+.back{display:inline-block;margin-bottom:10px;color:var(--purple);font-weight:800;text-decoration:none;font-size:13.5px}
+</style></head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
+  <div class="hero">
+    <div class="k">🎪 Bethlehem, PA · Jul 31 – Aug 9, 2026 (Preview Jul 30)</div>
+    <h1>Musikfest 2026 — the Platz, decoded</h1>
+    <p>16 stages. ~3 miles. 400+ acts, free. The town names everything <i>-platz</i> and nobody knows where they are. Here's every one — with directions.</p>
+    <div class="joinbar">
+      <button class="joinbtn" id="joinBtn" onclick="toggleJoin()">🌹 Join the Musikfest crew</button>
+      <span class="joincount" id="joinCount"></span>
+    </div>
+    <div style="color:#9d8cc0;font-size:11.5px;font-weight:700;margin-top:10px;letter-spacing:.04em">FESTIVALS, REIMAGINED — VIRTUALLY · keep this open, it's your companion</div>
+  </div>
+  <div class="carbadge" id="carBadge" style="display:none"></div>
+  <div class="compbar">
+    <button id="trackBtn" onclick="toggleTrack()">🥾 Start my walk</button>
+    <button onclick="nearestBathroom()">🚻 Nearest bathroom</button>
+    <button onclick="postWalk()">📸 Post my walk</button>
+  </div>
+  <div class="trackstat" id="trackStat"></div>
+
+  <div class="card" style="text-align:center;margin-top:14px;border-color:#f0d9a6;background:#fffdf6">
+    <div id="mfqr" style="width:190px;height:190px;margin:4px auto 0;background:#fff;border-radius:12px"></div>
+    <div style="font-weight:900;font-size:15px;margin-top:8px">No app. No download. Just scan.</div>
+    <div style="font-size:12.5px;color:#4a4356;line-height:1.5;margin-top:5px">This whole map opens right in your browser — <b>deaddance.app/musikfest</b>. Built for the street team: blow it up to a <b>2.5'×2.5' rigid sign</b>, plant it at every gate, and every head who scans finds their Platz.</div>
+    <button class="dir" style="margin-top:10px" onclick="saveMFQR()">⬇︎ Save the QR</button>
+  </div>
+
+  <div class="sec">The map — where each Platz actually is</div>
+  <div class="mapwrap">
+    <svg id="pmap" viewBox="0 0 1000 640" aria-label="Musikfest stage map"></svg>
+    <div class="legend">
+      <span><i style="background:#b8002e"></i>North side — free, historic downtown</span>
+      <span><i style="background:#5a2e86"></i>South side — SteelStacks</span>
+      <span><i style="background:#f0a500"></i>Ticketed (Steel Stage)</span>
+      <span>🌹 Dead/jam set in your window</span>
+    </div>
+  </div>
+  <div id="parkBox" style="text-align:center;margin:12px 0"></div>
+
+  <div class="sec">Parking — drive straight to a lot</div>
+  <div id="lotList"></div>
+
+  <div class="sec">North side — Main St &amp; the Colonial Industrial Quarter (all free)</div>
+  <div id="northList"></div>
+
+  <div class="sec">South side — SteelStacks campus</div>
+  <div id="southList"></div>
+
+  <div class="sec">Wind Creek Steel Stage — the ticketed headliners (6:00 PM)</div>
+  <div class="sched" id="sched"></div>
+
+  <div class="sec">Find your sets — pick a window</div>
+  <div class="rangebar">
+    <span class="rlab">From</span><select id="rFrom" class="rsel" onchange="refresh()"></select>
+    <span class="rlab">to</span><select id="rTo" class="rsel" onchange="refresh()"></select>
+  </div>
+  <label class="ddtog"><input type="checkbox" id="ddOnly" onchange="refresh()" style="width:17px;height:17px;accent-color:#b8002e"> 🌹 Dead &amp; jam tributes only <span id="ddCount" style="color:var(--muted);font-weight:600"></span></label>
+  <div class="sched" id="fullSched"></div>
+
+  <div class="sec">My sets — the acts I'm catching 🌹</div>
+  <div id="mySets"></div>
+
+  <div class="sec">What the locals know (and you don't yet)</div>
+  <div class="tips"><ul style="margin:0;padding-left:18px">
+    <li><b>90% of Musikfest is free.</b> Only the <b>Wind Creek Steel Stage</b> costs money — everything else is un-gated.</li>
+    <li><b>Don't walk north↔south.</b> They're across the Lehigh River. Ride the <b>free LANTA Gold Line</b> shuttle; it stops at Stadtplatz (Payrow Plaza) and SteelStacks.</li>
+    <li><b>The jam &amp; Dead-tribute acts</b> land on <b>Volksplatz</b> (downtown, along the creek) and <b>Americaplatz / Levitt Pavilion</b> (SteelStacks). Watch those two.</li>
+    <li><b>Get the mug.</b> The insulated Musikfest mug (2026 art by Doug Boehm) gets you a discount on every refill — and quietly says "I've done this before."</li>
+    <li><b>Food &amp; beer run on 50¢ paper tickets</b>, sold in blocks of 20 at every platz. Buy a strip first.</li>
+    <li><b>Rookie trap:</b> <b>Americaplatz (free Levitt lawn) ≠ Steel Stage (paid)</b> — they're 150 ft apart at SteelStacks.</li>
+  </ul></div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
+    If we can map Musikfest, we can map anything. Free-stage band grid drops from ArtsQuest in July — it lands here when it does. 🌹<br>
+    Source: musikfest.org / artsquest.org. Stage spots are best-estimates good to ~a block.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="dd_feed.js"></script>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+<script src="dd_musikfest.js"></script>
+<script>
+var STAGES=[
+ // NORTH (free)
+ {n:"IBEW 375 Liederplatz",side:"N",free:1,lat:40.6189,lng:-75.3798,where:"The courtyard <b>behind the Sun Inn</b> (556 Main St) — walk through, it's not on Main St itself."},
+ {n:"Main Street Stage",side:"N",free:1,lat:40.6183,lng:-75.3801,where:"On <b>Main St</b> (closed to cars at night), ~500 block near Market St."},
+ {n:"Yuengling Lagerplatz",side:"N",free:1,lat:40.6185,lng:-75.3804,where:"Main St at the edge of the Colonial Industrial Quarter — beer + a stage."},
+ {n:"Guardian Life Zinzenplatz",side:"N",free:1,lat:40.6196,lng:-75.3793,where:"By <b>Central Moravian Church</b>, Church &amp; Main."},
+ {n:"Volksplatz",side:"N",free:1,jam:1,where:"Down the hill in the <b>Colonial Industrial Quarter</b>, off Spring St along the Monocacy Creek. Jam central.",lat:40.6180,lng:-75.3812},
+ {n:"Service Electric Festplatz",side:"N",free:1,lat:40.6182,lng:-75.3808,where:"Polka/German tent, Spring St side of the Colonial Industrial Quarter."},
+ {n:"Martin Guitar Handwerkplatz",side:"N",free:1,lat:40.6175,lng:-75.3818,where:"The 18th-c. <b>Luckenbach Mill</b> (459 Old York Rd) — artisans + the 'Cast in Bronze' bell tower."},
+ {n:"NJM Familienplatz",side:"N",free:1,lat:40.6178,lng:-75.3806,where:"Kids' area in the Colonial Industrial Quarter, near Spring St."},
+ {n:"Plaza Tropical",side:"N",free:1,lat:40.6172,lng:-75.3806,where:"Latin stage at the west end, near Spring St / the Sand Island approach."},
+ {n:"Ice House ComedyPlatz",side:"N",free:1,lat:40.6162,lng:-75.3808,where:"The Ice House, <b>56 River St on Sand Island</b> — a separate river island, not on Main St."},
+ {n:"Hotel Bethlehem Platz",side:"N",free:1,lat:40.6185,lng:-75.3799,where:"At the Historic Hotel Bethlehem, 437 Main St."},
+ {n:"PNC Stadtplatz",side:"N",free:1,lat:40.6214,lng:-75.3782,where:"<b>Payrow Plaza by City Hall</b> (10 E Church St) — the northernmost, easy-to-miss stage."},
+ {n:"Central Moravian Church / Old Chapel",side:"N",free:1,lat:40.6199,lng:-75.3796,where:"73 W Church St — nightly chamber &amp; classical."},
+ // SOUTH
+ {n:"Wind Creek Steel Stage",side:"S",free:0,lat:40.6152,lng:-75.3730,where:"The amphitheater off <b>Founders Way</b>, just west of the blast furnaces. The one ticketed venue."},
+ {n:"Air Products Americaplatz @ Levitt Pavilion",side:"S",free:1,jam:1,lat:40.6167,lng:-75.3708,where:"789 E First St, SteelStacks — a <b>free</b> lawn stage. Don't confuse it with the paid Steel Stage next door."},
+ {n:"Highmark Blue Shield Community Stage",side:"S",free:1,lat:40.6161,lng:-75.3715,where:"In Air Products Town Square, between the Visitor Center &amp; ArtsQuest Center."},
+ {n:"Musikfest Café (PNC Series)",side:"S",free:1,lat:40.6157,lng:-75.3718,where:"Inside the ArtsQuest Center, 101 Founders Way (indoor, A/C)."},
+ {n:"Williams Brew Stage",side:"S",free:1,lat:40.6156,lng:-75.3716,where:"At the ArtsQuest Center, Founders Way / Second St."},
+ {n:"Lyrikplatz + Lutron Jazz Cabaret",side:"S",free:1,lat:40.6157,lng:-75.3720,where:"Inside the ArtsQuest Center (Frank Banko Alehouse Cinemas)."}
+];
+var SCHED=[
+ ["Jul 30","Grupo Niche","salsa · Preview Night"],["Jul 31","Russell Dickerson","country"],
+ ["Aug 1","John Mulaney","comedy · Mister Whatever"],["Aug 2","Third Eye Blind","90s alt-rock"],
+ ["Aug 3","Train","pop-rock"],["Aug 4","\"Weird Al\" Yankovic","Bigger & Weirder 2026"],
+ ["Aug 5","T.I. w/ DaBaby","hip-hop"],["Aug 6","Bailey Zimmerman","country"],
+ ["Aug 7","Parker McCollum","country"],["Aug 8","Yellowcard & Taking Back Sunday","w/ The Click Five"],
+ ["Aug 9","AJR","pop"]
+];
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+/* When opened as a full-page overlay (dropdown → ddSheet iframe), "back" CLOSES the overlay
+   so you land on the DeadDance app to explore — never loads the app inside this frame.
+   Opened standalone (deaddance.app/musikfest), it just goes home. Re-pick from the dropdown reopens. */
+window.mfBack=function(e){ try{ if(window.parent && window.parent!==window && window.parent.ddSheetClose){ if(e&&e.preventDefault)e.preventDefault(); window.parent.ddSheetClose(); return false; } }catch(err){} return true; };
+function dirUrl(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng+'&travelmode=walking'; }  /* turn-by-turn WALKING from where you stand */
+function driveUrl(o){ return 'https://www.google.com/maps/dir/?api=1&destination='+o.lat+','+o.lng+'&travelmode=driving'; } /* DRIVE to a parking lot */
+
+// parking lots (drive here) — south = SteelStacks, north = downtown decks
+var LOTS=[
+ {n:"Riverport Parking Garage",side:"South · SteelStacks",lat:40.6168,lng:-75.3748},
+ {n:"Polk Street Garage",side:"South · SteelStacks",lat:40.6146,lng:-75.3724},
+ {n:"ArtsQuest Creative Factory lot",side:"South · SteelStacks",lat:40.6150,lng:-75.3766},
+ {n:"North Street Parking Deck",side:"North · downtown",lat:40.6207,lng:-75.3788},
+ {n:"Walnut Street Parking Deck",side:"North · downtown",lat:40.6196,lng:-75.3812}
+];
+
+// "Where did I park?" — drop a GPS pin at your car, walk back to it later
+function parkGet(){ try{ return JSON.parse(localStorage.getItem('dd.park')||'null'); }catch(e){ return null; } }
+window.parkSet=function(){ if(!navigator.geolocation){ alert('Location is off — can’t drop a parking pin.'); return; }
+ navigator.geolocation.getCurrentPosition(function(p){ try{ localStorage.setItem('dd.park',JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})); }catch(e){} renderPark(); },
+   function(){ alert('Allow location to remember your spot.'); }, {enableHighAccuracy:true,timeout:8000}); };
+window.parkGo=function(){ var c=parkGet(); if(c) window.open('https://www.google.com/maps/dir/?api=1&destination='+c.lat+','+c.lng+'&travelmode=walking','_blank','noopener'); };
+window.parkClear=function(){ try{ localStorage.removeItem('dd.park'); }catch(e){} renderPark(); };
+function renderPark(){ var el=document.getElementById('parkBox'); if(!el)return; var c=parkGet();
+ el.innerHTML = c
+  ? '<button class="joinbtn in" onclick="parkGo()">🚶 Walk me back to my car</button> <button class="dir" style="margin-left:8px" onclick="parkClear()">reset</button>'
+  : '<button class="joinbtn" onclick="parkSet()">🅿️ Remember where I parked</button>'; }
+function color(s){ return s.free===0?'#f0a500':(s.side==='N'?'#b8002e':'#5a2e86'); }
+
+// ---- projected mini-map (rose-marks stages hosting a Dead/jam set in the chosen window) ----
+var MF_STAGES = [];
+function stageKey(s){ var n=s.n.toLowerCase();
+ for(var i=0;i<MF_STAGES.length;i++){ var core=MF_STAGES[i].toLowerCase().replace(/ .*/,''); if(core.length>3 && n.indexOf(core)>=0) return MF_STAGES[i]; }
+ if(n.indexOf('zinzen')>=0)return 'Zinzenplatz'; if(n.indexOf('tropical')>=0)return 'Plaza Tropical';
+ if(n.indexOf('americaplatz')>=0||n.indexOf('levitt')>=0)return 'Americaplatz'; if(n.indexOf('stadt')>=0)return 'Stadtplatz';
+ return null; }
+function deadStageSet(){ var f=(document.getElementById('rFrom')||{}).value, t=(document.getElementById('rTo')||{}).value, set={};
+ (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!f||r.d>=f) && (!t||r.d<=t)) set[r.st]=true; }); return set; }
+function drawMap(){
+ var pad=54, W=1000,H=640;
+ var lats=STAGES.map(function(s){return s.lat;}), lngs=STAGES.map(function(s){return s.lng;});
+ var laMin=Math.min.apply(0,lats),laMax=Math.max.apply(0,lats),lnMin=Math.min.apply(0,lngs),lnMax=Math.max.apply(0,lngs);
+ function X(lng){ return pad+(lng-lnMin)/((lnMax-lnMin)||1)*(W-2*pad); }
+ function Y(lat){ return pad+(laMax-lat)/((laMax-laMin)||1)*(H-2*pad); }
+ var dead=deadStageSet(), ddOnly=(document.getElementById('ddOnly')||{}).checked;
+ var svg='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#f7f4fb"/>';
+ svg+='<path d="M0,'+(Y(40.6172)+8)+' C 300,'+(Y(40.6168))+' 700,'+(Y(40.6165))+' '+W+','+(Y(40.6160)-6)+' L '+W+','+(Y(40.6160)+34)+' C 700,'+(Y(40.6165)+40)+' 300,'+(Y(40.6168)+40)+' 0,'+(Y(40.6172)+44)+' Z" fill="#cfe3f2"/>';
+ svg+='<text x="14" y="'+(Y(40.6167)+4)+'" font-size="15" font-weight="800" fill="#5c86a8">Lehigh River</text>';
+ svg+='<text x="'+(W-14)+'" y="34" text-anchor="end" font-size="14" font-weight="800" fill="#b8002e" opacity=".7">NORTH · downtown</text>';
+ svg+='<text x="'+(W-14)+'" y="'+(H-16)+'" text-anchor="end" font-size="14" font-weight="800" fill="#5a2e86" opacity=".7">SOUTH · SteelStacks</text>';
+ STAGES.forEach(function(s,i){ var x=X(s.lng),y=Y(s.lat),c=color(s), r=s.free===0?11:8;
+   var isDead=!!dead[stageKey(s)], dim=(ddOnly && !isDead);
+   var shortNm=s.n.replace(/ @.*/,'').replace(/^(IBEW 375 |Service Electric |Guardian Life |Martin Guitar |NJM |PNC |Air Products |Highmark Blue Shield )/,'');
+   var gps=s.lat.toFixed(4)+', '+s.lng.toFixed(4);
+   var isGps=(window.LABELMODE==='gps');
+   svg+='<g class="pin" style="cursor:pointer'+(dim?';opacity:.25':'')+'" onclick="jump('+i+')">'+
+     '<circle cx="'+x+'" cy="'+y+'" r="'+(isDead?r+2:r)+'" fill="'+(isDead?'#b8002e':c)+'" stroke="#fff" stroke-width="2.5"/>'+
+     (isDead?'<text x="'+x+'" y="'+(y+5.5)+'" text-anchor="middle" font-size="15">🌹</text>':'')+
+     '<text x="'+x+'" y="'+(y-r-5)+'" text-anchor="middle" font-size="'+(isGps?10.5:12.5)+'" font-weight="800" fill="'+(dim?'#b3a9c4':(isGps?'#5c86a8':'#2a1b3d'))+'" style="font-variant-numeric:tabular-nums">'+esc(isGps?gps:shortNm)+'</text>'+
+   '</g>'; });
+ // live "you are here" dot — the user walking ON the map (only when they're within the festival footprint)
+ var you=window.YOU;
+ if(you){ var mLat=((laMax-laMin)||0.006)*0.35, mLng=((lnMax-lnMin)||0.01)*0.35;
+   if(you[0]>=laMin-mLat && you[0]<=laMax+mLat && you[1]>=lnMin-mLng && you[1]<=lnMax+mLng){
+     var yx=X(you[1]), yy=Y(you[0]);
+     svg+='<circle cx="'+yx+'" cy="'+yy+'" r="14" fill="#1f9e6b" opacity="0.22"><animate attributeName="r" values="10;22;10" dur="1.8s" repeatCount="indefinite"/></circle>'+
+       '<circle cx="'+yx+'" cy="'+yy+'" r="8" fill="#1f9e6b" stroke="#fff" stroke-width="3"/>'+
+       '<text x="'+yx+'" y="'+(yy-13)+'" text-anchor="middle" font-size="12" font-weight="900" fill="#0d5c3d">YOU</text>';
+   }
+ }
+ document.getElementById('pmap').innerHTML=svg;
+}
+
+function card(s,i){ var chips=(s.free===0?'<span class="chip tk">🎟 Ticketed</span>':'<span class="chip free">Free</span>')+(s.jam?'<span class="chip jam">🌹 jam/Dead here</span>':'');
+ return '<div class="card'+(s.free===0?' tick':'')+'" id="st'+i+'"><div class="nm">'+esc(s.n)+' '+chips+'</div>'+
+   '<div class="where">'+s.where+'</div>'+
+   '<a class="dir" href="'+dirUrl(s)+'" target="_blank" rel="noopener">📍 Get directions</a></div>'; }
+document.getElementById('northList').innerHTML=STAGES.map(function(s,i){return s.side==='N'?card(s,i):'';}).join('');
+document.getElementById('southList').innerHTML=STAGES.map(function(s,i){return s.side==='S'?card(s,i):'';}).join('');
+document.getElementById('sched').innerHTML=SCHED.map(function(r){return '<div class="srow"><span class="d">'+r[0]+'</span><span class="b">'+esc(r[1])+'</span><span class="g">'+esc(r[2])+'</span></div>';}).join('');
+window.jump=function(i){ var el=document.getElementById('st'+i); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.transition='background .3s'; var o=el.style.background; el.style.background='#fff6da'; setTimeout(function(){el.style.background=o;},900); } };
+
+// ---- join the crew (local-first; a friendly base count) ----
+var BASE=1284;
+function joined(){ try{ return localStorage.getItem('dd.musikfest.join')==='1'; }catch(e){ return false; } }
+function renderJoin(){ var b=document.getElementById('joinBtn'), c=document.getElementById('joinCount'), inn=joined();
+ b.className='joinbtn'+(inn?' in':''); b.textContent=inn?'✓ You\'re in the crew':'🌹 Join the Musikfest crew';
+ c.textContent=(BASE+(inn?1:0)).toLocaleString()+' heads going'; }
+window.toggleJoin=function(){ try{ localStorage.setItem('dd.musikfest.join', joined()?'0':'1'); }catch(e){} renderJoin(); };
+renderJoin();
+
+// street-team QR — no app, just scan → this map
+try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190}); }catch(e){}
+window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
+
+// ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----
+var MF=window.DD_MUSIKFEST||[];
+MF_STAGES=Array.from(new Set(MF.map(function(r){return r.st;})));
+var DAYS=Array.from(new Set(MF.map(function(r){return r.d;}))).sort();
+function dayLabel(d){ try{ return new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return d; } }
+function mins(t){ var m=String(t).match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return 0; var h=(+m[1])%12+(/pm/i.test(m[3])?12:0); return h*60+(+m[2]); }
+function fillDaySelect(sel,def){ sel.innerHTML=DAYS.map(function(d){return '<option value="'+d+'"'+(d===def?' selected':'')+'>'+dayLabel(d)+'</option>';}).join(''); }
+window.refresh=function(){ if(!MF.length)return;
+ var fs=document.getElementById('rFrom'), ts=document.getElementById('rTo'); var f=fs.value, t=ts.value;
+ if(f>t){ ts.value=f; t=f; }                                   // keep the window valid
+ var ddOnly=document.getElementById('ddOnly').checked;
+ drawMap();                                                    // re-mark the Platz map for this window
+ var win=MF.filter(function(r){ return r.d>=f && r.d<=t; });
+ var ddN=win.filter(function(r){return r.sc==='dd';}).length;
+ document.getElementById('ddCount').textContent='· '+ddN+' Dead/jam in this window';
+ var rows=win.filter(function(r){ return !ddOnly||r.sc==='dd'; }).sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:mins(a.t)-mins(b.t); });
+ var last='', cs=catchStore();
+ document.getElementById('fullSched').innerHTML = rows.length ? rows.map(function(r){
+   var head=(r.d!==last)?('<div class="srow" style="background:#faf7ff"><span class="b" style="color:var(--purple);font-weight:900">'+dayLabel(r.d)+'</span></div>'):''; last=r.d;
+   var ck=catchKey(r), on=cs[ck]?'checked':'';
+   return head+'<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span><span class="b">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</span><span class="g">'+esc(r.st)+'</span></div>';
+ }).join('') : '<div class="srow"><span class="g">Nothing in that window'+(ddOnly?' for Dead/jam — untick the filter for all acts.':'.')+'</span></div>';
+};
+if(MF.length){ fillDaySelect(document.getElementById('rFrom'),DAYS[0]); fillDaySelect(document.getElementById('rTo'),DAYS[DAYS.length-1]); refresh(); }
+else { drawMap(); }
+// every stage label breathes between its NAME and its GPS coordinates — so you know it's real, and locatable
+window.LABELMODE='name';
+setInterval(function(){ window.LABELMODE=(window.LABELMODE==='gps')?'name':'gps'; try{ drawMap(); }catch(e){} }, 2600);
+
+/* ===== Festivals, Reimagined — the live companion (never closes). One GPS watch drives:
+   the "YOU" dot on the map, your walk distance, elevation (a displayed data point), the
+   distance-to-car badge, the nearest-bathroom finder, and catch-an-act reminders. ===== */
+function hav(a,b,c,d){ var R=3958.8, tR=Math.PI/180, dLa=(c-a)*tR, dLo=(d-b)*tR, la1=a*tR, la2=c*tR;
+  var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); } // miles
+function prettyDist(mi){ return mi<0.19 ? (Math.round(mi*5280)+' ft') : (mi.toFixed(mi<10?2:1)+' mi'); }
+var STAGE_BY_KEY={}; STAGES.forEach(function(s){ var k=stageKey(s); if(k&&!STAGE_BY_KEY[k])STAGE_BY_KEY[k]=s; });
+var BATHROOMS=[  // approx from ArtsQuest campus maps — exact layout to confirm with ArtsQuest/John
+ {n:"Colonial Industrial Quarter",lat:40.6179,lng:-75.3809},{n:"Main St / Sun Inn",lat:40.6188,lng:-75.3800},
+ {n:"Payrow Plaza (Stadtplatz)",lat:40.6213,lng:-75.3783},{n:"SteelStacks Visitor Center",lat:40.6164,lng:-75.3712},
+ {n:"ArtsQuest Center",lat:40.6157,lng:-75.3718},{n:"Levitt / Americaplatz",lat:40.6167,lng:-75.3708}];
+
+var WALK={on:false,miles:0,gain:0,last:null,lastAlt:null,watch:null,path:[]};
+function fmtStat(){ var st=document.getElementById('trackStat'); if(!st)return; st.style.display='block';
+  st.innerHTML='<div class="big">'+WALK.miles.toFixed(2)+' mi</div><div style="font-size:12px;color:var(--muted);font-weight:700">walked at Musikfest</div>'+
+   '<div class="row"><div><span>Elevation ↑</span><b>'+Math.round(WALK.gain)+' ft</b></div><div><span>Steps ≈</span><b>'+Math.round(WALK.miles*2100).toLocaleString()+'</b></div></div>'; }
+function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
+  window.YOU=[la,lo];
+  if(WALK.on && acc<=30){
+    if(WALK.last){ var d=hav(WALK.last[0],WALK.last[1],la,lo); if(d>0.0009 && d<0.5){ WALK.miles+=d; WALK.path.push([la,lo]); } }  // jitter + teleport filter
+    else { WALK.path.push([la,lo]); }
+    WALK.last=[la,lo];
+    if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
+    fmtStat();
+  }
+  try{ drawMap(); }catch(e){}  carBadge(); catchNotifyCheck();
+}
+function startWatch(){ if(WALK.watch!=null||!navigator.geolocation)return; WALK.watch=navigator.geolocation.watchPosition(onPos,function(){},{enableHighAccuracy:true,maximumAge:2000,timeout:12000}); }
+window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
+  if(WALK.on){ b.textContent='⏸ Tracking your walk'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; startWatch(); fmtStat(); }
+  else { b.textContent='🥾 Start my walk'; b.classList.remove('on'); } };
+function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
+  if(c && window.YOU){ el.style.display='block'; el.innerHTML='🚗 '+prettyDist(hav(window.YOU[0],window.YOU[1],c.lat,c.lng))+' to your car'; } else el.style.display='none'; }
+window.nearestBathroom=function(){ if(!window.YOU){ startWatch(); alert('Getting your location — tap again in a moment.'); return; }
+  var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(window.YOU[0],window.YOU[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
+  if(best) window.open('https://www.google.com/maps/dir/?api=1&destination='+best.lat+','+best.lng+'&travelmode=walking','_blank','noopener'); };
+
+// catch acts → My Sets (walk-me-there) + best-effort reminders
+function catchStore(){ try{ return JSON.parse(localStorage.getItem('dd.mf.catch')||'{}'); }catch(e){ return {}; } }
+function catchKey(r){ return r.d+'|'+r.t+'|'+r.b; }
+window.catchToggle=function(key){ var s=catchStore(); if(s[key]) delete s[key];
+  else { var hit=MF.filter(function(r){return catchKey(r)===key;})[0]; if(hit)s[key]=hit;
+    if('Notification' in window && Notification.permission==='default'){ try{Notification.requestPermission();}catch(e){} } }
+  try{ localStorage.setItem('dd.mf.catch',JSON.stringify(s)); }catch(e){} renderMySets(); refresh(); };
+function to24(t){ var m=String(t).match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return '20:00:00'; var h=(+m[1])%12+(/pm/i.test(m[3])?12:0); return (h<10?'0':'')+h+':'+m[2]+':00'; }
+function renderMySets(){ var host=document.getElementById('mySets'); if(!host)return; var s=catchStore();
+  var arr=Object.keys(s).map(function(k){return s[k];}).sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:mins(a.t)-mins(b.t); });
+  host.innerHTML = arr.length ? arr.map(function(r){ var st=STAGE_BY_KEY[r.st];
+    var dir=st?('<a class="dir" href="https://www.google.com/maps/dir/?api=1&destination='+st.lat+','+st.lng+'&travelmode=walking" target="_blank" rel="noopener">🚶 Walk me there</a>'):'';
+    return '<div class="card"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><div class="nm">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</div><div class="where">'+dayLabel(r.d)+' · '+esc(String(r.t).replace(':00',''))+' · '+esc(r.st)+'</div>'+dir+' <button class="dir" style="margin-left:6px;background:#f6eef1;color:#b8002e" data-ck="'+esc(catchKey(r))+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))">✕ drop</button></div>';
+  }).join('') : '<div class="srow"><span class="g">Check off acts in the schedule and they land here — each with a walk-me-there. We\'ll nudge you ~15 min before.</span></div>'; }
+var NOTIFIED={};
+function catchNotifyCheck(){ if(!('Notification' in window)||Notification.permission!=='granted')return; var s=catchStore(), now=Date.now();
+  Object.keys(s).forEach(function(k){ var r=s[k]; var mn=(new Date(r.d+'T'+to24(r.t)).getTime()-now)/60000;
+    if(mn>0 && mn<=15 && !NOTIFIED[k]){ NOTIFIED[k]=1; var st=STAGE_BY_KEY[r.st];
+      try{ var n=new Notification('🌹 '+r.b+' in '+Math.round(mn)+' min',{body:'at '+r.st+' — tap for walking directions'});
+        n.onclick=function(){ if(st) window.open('https://www.google.com/maps/dir/?api=1&destination='+st.lat+','+st.lng+'&travelmode=walking','_blank'); }; }catch(e){} } }); }
+// ===== The postable trophy — curate a map overlay of the day's walk → HyperPost =====
+window.postWalk=function(){
+  var W=1080,H=1080, cv=document.createElement('canvas'); cv.width=W; cv.height=H; var g=cv.getContext('2d');
+  g.fillStyle='#faf8fc'; g.fillRect(0,0,W,H);
+  g.fillStyle='#241535'; g.fillRect(0,0,W,168);
+  g.fillStyle='#f0a500'; g.font='800 30px sans-serif'; g.fillText('MUSIKFEST 2026 · MY WALK', 44, 66);
+  g.fillStyle='#fff'; g.font='900 78px sans-serif'; g.fillText(WALK.miles.toFixed(2)+' miles', 44, 140);
+  var pad=110, top=210, mh=590;
+  var lats=STAGES.map(function(s){return s.lat;}), lngs=STAGES.map(function(s){return s.lng;});
+  WALK.path.forEach(function(p){ lats.push(p[0]); lngs.push(p[1]); });
+  var laMin=Math.min.apply(0,lats),laMax=Math.max.apply(0,lats),lnMin=Math.min.apply(0,lngs),lnMax=Math.max.apply(0,lngs);
+  function X(lng){ return pad+(lng-lnMin)/((lnMax-lnMin)||1)*(W-2*pad); }
+  function Y(lat){ return top+(laMax-lat)/((laMax-laMin)||1)*mh; }
+  g.fillStyle='#d3c3e8'; STAGES.forEach(function(s){ g.beginPath(); g.arc(X(s.lng),Y(s.lat),8,0,7); g.fill(); });
+  if(WALK.path.length>1){ g.strokeStyle='#b8002e'; g.lineWidth=7; g.lineJoin='round'; g.lineCap='round'; g.beginPath();
+    WALK.path.forEach(function(p,i){ var x=X(p[1]),y=Y(p[0]); if(i===0)g.moveTo(x,y); else g.lineTo(x,y); }); g.stroke();
+    var sN=WALK.path[WALK.path.length-1]; g.fillStyle='#1f9e6b'; g.beginPath(); g.arc(X(sN[1]),Y(sN[0]),15,0,7); g.fill();
+    g.fillStyle='#fff'; g.lineWidth=4; g.strokeStyle='#fff'; g.beginPath(); g.arc(X(sN[1]),Y(sN[0]),15,0,7); g.stroke(); }
+  var nSets=Object.keys(catchStore()).length;
+  g.fillStyle='#241535'; g.font='800 40px sans-serif';
+  g.fillText('↑ '+Math.round(WALK.gain)+' ft   ·   ~'+Math.round(WALK.miles*2100).toLocaleString()+' steps', 44, top+mh+80);
+  g.fillStyle='#b8002e'; g.fillText('🌹 '+nSets+' sets caught', 44, top+mh+140);
+  g.fillStyle='#5a2e86'; g.font='800 30px sans-serif'; g.fillText('deaddance.app/musikfest — no app, just scan', 44, H-44);
+  var cap='Walked '+WALK.miles.toFixed(2)+' mi at Musikfest 🌹 '+Math.round(WALK.gain)+' ft, '+nSets+' sets. Find every Platz: deaddance.app/musikfest';
+  cv.toBlob(function(blob){
+    var file=new File([blob],'my-musikfest-walk.png',{type:'image/png'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file],text:cap}).catch(function(){}); }
+    else { var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='my-musikfest-walk.png'; a.click(); }
+    try{ if(window.DDFeed && DDFeed.post) DDFeed.post(cap,{scope:'all'}); }catch(e){}   // also lands on the Musikfest group + DeadDance feed → out to social
+  },'image/png');
+};
+renderMySets(); startWatch();
+
+// parking lots + the "where did I park" button
+try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
+  return '<div class="card"><div class="nm">🅿️ '+esc(o.n)+'</div><div class="where">'+esc(o.side)+' · short walk or the free shuttle to the stages.</div><a class="dir" href="'+driveUrl(o)+'" target="_blank" rel="noopener">🚗 Drive here</a></div>';
+}).join(''); }catch(e){}
+renderPark();
+</script>
+</body></html>

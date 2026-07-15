@@ -17,9 +17,12 @@ a.btn{display:inline-block;background:#b8002e;color:#fff;text-decoration:none;fo
   try{
     var p = location.pathname.replace(/^\/+|\/+$/g,'');
     if(!p){ location.replace('/index.html'); return; }
-    // single segment, no file extension → a vanity band/venue slug
+    // single segment, no file extension → a reserved page or a vanity band/venue slug
     if(p.indexOf('/')<0 && p.indexOf('.')<0){
       var slug = p.toLowerCase();
+      // reserved product pages (deaddance.app/musikfest, /cookie, etc.) resolve to their own page
+      var PAGES={musikfest:'/musikfest.html',cookie:'/cookie.html',recruit:'/recruit.html',privacy:'/privacy.html',bands:'/bands.html'};
+      if(PAGES[slug]){ location.replace(PAGES[slug]); return; }
       // ?t lets a venue vanity work too: deaddance.app/venue/<x> handled above; default band
       location.replace('/card.html?t=band&id='+encodeURIComponent(slug)+'&from=vanity');
       return;

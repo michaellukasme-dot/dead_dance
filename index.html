@@ -738,6 +738,7 @@ body{padding-bottom:64px}
           <option value="Sages And Spirits">Sages &amp; Spirits</option>
           <option value="Jerry's Middle Finger">Jerry's Middle Finger</option>
           <option value="all" selected>Grateful Dead Tribute</option>
+          <option value="__musikfest__">🎪 Musikfest 2026 · Bethlehem →</option>
         </select>
       </div>
       <div class="ch" id="calNavRow">
@@ -1471,7 +1472,10 @@ function calMatch(s){
  return true; }
 function calType(v){ CALTYPE=v||'all'; renderCal(); }
 /* Act filter — thins the busy national rollup to one headliner's dates (or All) */
-function calAct(v){ CAL_ACT=v||'all'; CAL_SEL=null;
+function calAct(v){
+ if(v==='__musikfest__'){ var s=document.getElementById('calAct'); if(s)s.value='all';   /* short-term seasonal item → opens the Musikfest hub */
+   if(window.ddSheet){ ddSheet('musikfest.html','🎪 Musikfest 2026'); } else { window.open('musikfest.html','_blank','noopener'); } return; }
+ CAL_ACT=v||'all'; CAL_SEL=null;
  try{ if(window.DDShowmap&&DDShowmap.setAct) DDShowmap.setAct(CAL_ACT==='all'?null:CAL_ACT); }catch(e){}   /* band dropdown filters the map */
  /* pick a marquee (touring) act → ZOOM the map OUT to National so their whole run shows; keeps calendar+map in sync.
     Back to Tribute (all) → leave the scope where it is (Local default stays perfect). */
