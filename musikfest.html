@@ -273,14 +273,19 @@ document.getElementById('southList').innerHTML=STAGES.map(function(s,i){return s
 document.getElementById('sched').innerHTML=SCHED.map(function(r){return '<div class="srow"><span class="d">'+r[0]+'</span><span class="b">'+esc(r[1])+'</span><span class="g">'+esc(r[2])+'</span></div>';}).join('');
 window.jump=function(i){ var el=document.getElementById('st'+i); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.transition='background .3s'; var o=el.style.background; el.style.background='#fff6da'; setTimeout(function(){el.style.background=o;},900); } };
 
-// ---- join the crew (local-first; a friendly base count) ----
-var BASE=1284;
+// ---- join the crew (server-backed real count) + community-performance logging ----
+var EVENT='musikfest-2026', CREW=0;
+function mfMember(){ try{ var i=window.ddId&&ddId(); return (i&&i.id)||null; }catch(e){ return null; } }
+function mfPerf(action,n,network){ try{ var cl=window.ddClient&&ddClient(); if(cl) cl.rpc('dd_perf_log',{p_event:EVENT,p_member:mfMember(),p_action:action,p_n:n||1,p_network:network||'dd'}).catch(function(){}); }catch(e){} }
 function joined(){ try{ return localStorage.getItem('dd.musikfest.join')==='1'; }catch(e){ return false; } }
 function renderJoin(){ var b=document.getElementById('joinBtn'), c=document.getElementById('joinCount'), inn=joined();
- b.className='joinbtn'+(inn?' in':''); b.textContent=inn?'✓ You\'re in the crew':'🌹 Join the Musikfest crew';
- c.textContent=(BASE+(inn?1:0)).toLocaleString()+' heads going'; }
-window.toggleJoin=function(){ try{ localStorage.setItem('dd.musikfest.join', joined()?'0':'1'); }catch(e){} renderJoin(); };
-renderJoin();
+ if(b){ b.className='joinbtn'+(inn?' in':''); b.textContent=inn?'✓ You\'re in the crew':'🌹 Join the Musikfest crew'; }
+ if(c) c.textContent=(CREW||0).toLocaleString()+' heads going'; }
+function crewRefresh(){ try{ var cl=window.ddClient&&ddClient(); if(cl) cl.rpc('dd_event_crew_count',{p_event:EVENT}).then(function(r){ CREW=Number((r&&r.data)||0); renderJoin(); }).catch(function(){}); }catch(e){} }
+window.toggleJoin=function(){ var was=joined(); try{ localStorage.setItem('dd.musikfest.join', was?'0':'1'); }catch(e){}
+ try{ var cl=window.ddClient&&ddClient(), m=mfMember(); if(cl&&m){ cl.rpc(was?'dd_event_leave':'dd_event_join',{p_event:EVENT,p_member:m}).then(function(r){ CREW=Number((r&&r.data)||CREW); renderJoin(); }).catch(function(){}); } }catch(e){}
+ renderJoin(); };
+crewRefresh(); renderJoin();
 
 // street-team QR — no app, just scan → this map
 try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190}); }catch(e){}
@@ -388,7 +393,7 @@ var PHOTOS=[];
 function myFirst(){ try{ return (localStorage.getItem('dd.myname')||'').split(' ')[0]; }catch(e){ return ''; } }
 window.addPhotos=function(input){ var files=input.files; if(!files||!files.length)return;
   Array.prototype.forEach.call(files,function(f){ var url=URL.createObjectURL(f);
-    var place=function(lat,lng,ex){ var img=new Image(); img.onload=function(){ PHOTOS.push({url:url,img:img,lat:lat,lng:lng,exif:!!ex}); renderPhotoStrip(); try{drawMap();}catch(e){} try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} }; img.src=url; };
+    var place=function(lat,lng,ex){ var img=new Image(); img.onload=function(){ PHOTOS.push({url:url,img:img,lat:lat,lng:lng,exif:!!ex}); renderPhotoStrip(); try{drawMap();}catch(e){} try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){} }; img.src=url; };
     if(window.exifr&&exifr.gps){ exifr.gps(f).then(function(gp){ if(gp&&gp.latitude!=null){ place(gp.latitude,gp.longitude,true); mfToast('📷 Pinned right where you shot it!'); } else place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }).catch(function(){ place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }); }
     else place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false);
   }); input.value=''; };
@@ -427,6 +432,7 @@ window.postWalk=function(){
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file],text:cap}).catch(function(){}); }
     else { var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='my-musikfest-walk.png'; a.click(); }
     try{ if(window.DDFeed && DDFeed.post) DDFeed.post(cap,{scope:'all'}); }catch(e){}   // also lands on the Musikfest group + DeadDance feed → out to social
+    try{ mfPerf('spread',1,'dd'); if(WALK.miles>0) mfPerf('mile',WALK.miles,''); }catch(e){}   // community-performance scoreboard
   },'image/png');
 };
 // DEFAULT GPS ON — start tracking the moment they land; user need not do a thing. The reveal comes at day's end.
