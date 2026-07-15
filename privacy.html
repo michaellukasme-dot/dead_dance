@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Privacy, Data &amp; AI — the DeadDance Guide</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--acc:#5a2e86;--gold:#f0a500;--terra:#C8794F;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:22px 16px 70px}
+.top{display:flex;align-items:center;gap:10px}
+.top img{width:30px}.top b{font-size:19px;font-weight:900;letter-spacing:-.3px}
+h1{font-size:30px;margin:16px 0 4px;font-weight:900;letter-spacing:-.5px}
+.lead{color:var(--muted);font-size:15px;margin:0 0 20px;max-width:600px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.ill{height:120px;display:flex;align-items:center;justify-content:center;font-size:52px;color:#fff}
+.body{padding:16px 17px 18px}
+.cat{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.card h2{font-size:19px;margin:3px 0 9px;font-weight:900;line-height:1.2}
+.card ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.55;color:#3a3348}
+.card ul li{margin-bottom:4px}
+.more{margin-top:12px;background:#f1eef7;color:var(--acc);border:0;border-radius:11px;padding:11px;font-weight:800;font-size:13.5px;cursor:pointer;width:100%}
+.detail{display:none;margin-top:11px;font-size:13px;line-height:1.6;color:#4a4356;border-top:1px solid var(--line);padding-top:11px}
+.detail.on{display:block}
+.detail b{color:var(--ink)}
+.pill{display:inline-block;background:#faf3ff;border:1px solid #e6d6f2;color:var(--acc);font-weight:800;font-size:11px;border-radius:999px;padding:3px 9px;margin:2px 3px 2px 0}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top"><img src="dd-512.png" alt=""><b>DeadDance</b></div>
+  <h1>Privacy, Data &amp; AI</h1>
+  <p class="lead">Plain language, no fine-print games. Here's exactly what we do with your stuff, how we use AI, and the rules that protect artists. Tap any card to go deeper.</p>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
+    Our promise, one line: <b>we only show what you shared, we never sell your list, and no art or AI-in-your-style happens without your yes.</b><br>
+    Questions? Tap Support in the menu — a real person (and Claude) will help.</div>
+</div>
+
+<script>
+var CARDS=[
+ { cat:'Safety', title:'What you share is your call', grad:'linear-gradient(135deg,#7a3cc0,#5a2e86)', emoji:'🔒',
+   bullets:['You choose what’s public — your page, posts, and shows.','Your email list and contacts are <b>never</b> sold, rented, or shared.','Nothing about you is faked or scraped — if we show it, you shared it.'],
+   detail:'DeadDance shows the world only what you put out on purpose. Your band name and your <b>public</b> shows are facts we display; your contact list, your private notes, and anything you didn’t choose to share stay private — used only to reach you, never sold. That’s our honest-state rule: the product never fakes data and never scrapes it.' },
+
+ { cat:'Your account', title:'We keep the minimum', grad:'linear-gradient(135deg,#2f6fe0,#1a3f8a)', emoji:'🛡️',
+   bullets:['A simple device id, your display name if you set one, and what you post.','No passwords handed to us; nothing reached behind your other logins.','Pull back or delete anything you’ve added, any time.'],
+   detail:'We store the least we can to make the app work. There’s no big profile we sell to advertisers. You can remove your logo, your posts, or your whole page on request — and we honor it.' },
+
+ { cat:'Audience', title:'Who sees what', grad:'linear-gradient(135deg,#1f9e6b,#0d5c3d)', emoji:'👥',
+   bullets:['The Grateful Dead community is one thing; other-genre shows (StageFill) are <b>your personal options</b>.','StageFill picks land in <b>My Calendar only</b> — never the community rollups.','My Calendar is just yours — nobody else sees your nights.'],
+   detail:'There’s a clean line: the community calendar and boards are the Dead world. StageFill lets you keep an eye on the comedy night or the local festival too — but those are <b>options for you</b>, saved to your own calendar, and they never mix into the community’s shared feeds or leaderboards.' },
+
+ { cat:'Cookies', title:'Cookies — and Cookie', grad:'linear-gradient(135deg,#C8794F,#8a5330)', emoji:'🍪',
+   bullets:['A “cookie” is a little crumb on your device that remembers your seat.','<b>Cookie</b> (our mascot) only eats what you hand him — public stuff, never private.','Sweep every crumb whenever you like. The choice is always yours.'],
+   detail:'Hi, I’m Cookie! When you visit, I leave a few crumbs on your device — not to eat, just to <b>remember</b> you: your seat, that you’re signed in, where you left off. That’s all a “cookie” really is. I never peek at your private stuff, and any time you want you can grab a broom and sweep every crumb away. “I only eat what’s on the porch — and I don’t do doorknobs.”' },
+
+ { cat:'AI', title:'AI at DeadDance', grad:'linear-gradient(135deg,#D97757,#b8502f)', emoji:'✨',
+   bullets:['<b>“Write with Claude” is always optional</b> — tap it or don’t. Your words stay yours.','Nothing is ever auto-written or posted for you.','We never train AI on your private messages or personal info.'],
+   detail:'You’ll see the Claude mark inside every post box. It’s an <b>offer</b>, never a default — because if AI wrote everyone’s posts, it’d just be a machine talking to a machine. Tap it and Claude drafts a starting point; leave it and you write your own. Either way it’s your voice, and your private stuff is never fed to any model.' },
+
+ { cat:'AI Posters — the rules', title:'How AI art works here', grad:'linear-gradient(135deg,#e0577a,#b8002e)', emoji:'🖼️',
+   bullets:['<b>LESS</b>: a free house poster. <b>MORE</b>: an AI poster in a real artist’s style — only with that artist’s <b>yes</b>. <b>MOST</b>: the artist’s own hand.','Every AI-in-style piece is <b>artist-gated</b> (approve or delete), and honestly labeled <i>“AI in [artist]’s style — licensed.”</i>','The artist keeps <b>50%</b>, and we take <b>no cut of their craft</b> — only the standard transaction fee.'],
+   detail:'This is the part we care about most. A machine never gets to imitate an artist unless that artist turned it on, chose the examples, and approves every single piece — one tap ships it, one tap kills it. It’s always labeled as AI-in-their-style, never passed off as their hand. <b>Rule Zero:</b> we never own an artist’s work or their style — it’s a revenue share, not a piece of them. And we take <b>no position</b> on whether AI belongs in the craft: yes, no, and “not yet” are equally honored — the artist holds the switch, and “no” costs them nothing.' },
+
+ { cat:'Gathering', title:'What Cookie gathers', grad:'linear-gradient(135deg,#5a2e86,#2a1b3d)', emoji:'📥',
+   bullets:['Only <b>public, freely-shared</b> show listings — “what’s on the porch.”','Never private messages, never behind a login, never your personal info.','A person hands it in — we don’t scrape.'],
+   detail:'When you help by adding a show, you’re handing us a public flyer everyone can already see. We build the family calendar from those — not from anything locked, private, or personal. That’s the whole honest machine: public facts in, a better calendar out, nothing taken that wasn’t offered.' }
+];
+var g=document.getElementById('grid');
+g.innerHTML=CARDS.map(function(c,i){
+  return '<div class="card"><div class="ill" style="background:'+c.grad+'">'+c.emoji+'</div>'+
+    '<div class="body"><div class="cat">'+c.cat+'</div><h2>'+c.title+'</h2>'+
+    '<ul>'+c.bullets.map(function(b){return '<li>'+b+'</li>';}).join('')+'</ul>'+
+    '<button class="more" onclick="tog('+i+',this)">Learn more →</button>'+
+    '<div class="detail" id="d'+i+'">'+c.detail+'</div></div></div>';
+}).join('');
+window.tog=function(i,btn){ var d=document.getElementById('d'+i); var on=d.classList.toggle('on'); btn.textContent=on?'Show less ↑':'Learn more →'; };
+</script>
+</body></html>

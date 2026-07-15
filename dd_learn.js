@@ -97,8 +97,8 @@
     "🎤 <b>Dead Karaoke</b>: sing the songbook, quiz the show, and climb one board with rooms across the country.",
     "🖼️ In a band? DeadDance can make you a poster in your own style — free to start.",
     "🌿 That's <b>tending the garden</b>: post a show, forward a gem, welcome a newcomer. Small things, whole family.",
-    "🪙 Meet <b>Cookie</b>: hand him a crumb — a show, a gem, a welcome — and he pays you <b>Coins</b> that pop like magic. Find him in the menu → Cookie &amp; the Coins.",
-    "🏡 Know someone who'd love it here? Your own <b>QR</b> brings them home — and when they stick around, you earn coins. Menu → Bring 'em home."
+    "🍪 Meet <b>Cookie</b>: hand him a crumb — a show, a gem, a welcome — and he pays you <b>Cookies</b> that pop like magic. Find him in the menu → The Cookie Jar.",
+    "🏡 Know someone who'd love it here? Your own <b>QR</b> brings them home — and when they stick around, you earn cookies. Menu → Bring 'em home."
   ];
   function today(){ return new Date().toISOString().slice(0,10); }
   // returns { ix, html } for today's bubble, or null if none/closed-today

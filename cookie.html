@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Cookie &amp; the Coins · DeadDance</title>
+<title>The Cookie Jar · DeadDance</title>
 <meta name="theme-color" content="#2a1b3d"><link rel="icon" href="cookie-mark.svg">
 <style>
 :root{--rose:#b8002e;--purple:#2a1b3d;--acc:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--terra:#C8794F}
@@ -14,8 +14,8 @@
 .sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
 .card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
 .jar{text-align:center}
-.coins{font-size:46px;font-weight:900;color:var(--gold);line-height:1}
-.coins .u{font-size:18px;color:var(--muted);font-weight:800}
+.cookies{font-size:46px;font-weight:900;color:var(--gold);line-height:1}
+.cookies .u{font-size:18px;color:var(--muted);font-weight:800}
 .layer{font-weight:800;font-size:15px;margin-top:4px}
 .layer .d{color:#1f9e6b;font-size:12px;font-weight:800}
 .bar{height:10px;background:#f0ecf6;border-radius:8px;overflow:hidden;margin:10px 0 5px}
@@ -39,18 +39,18 @@
 <div class="wrap">
   <div class="hero">
     <img src="cookie-mark.svg" alt="Cookie">
-    <div><div class="k">Feed the family · earn coins</div>
-      <h1>Cookie &amp; the Coins</h1>
-      <p>Hand Cookie a crumb — a show, a gem, a welcome — and he pays you a Coin. Coins unlock a store discount. <b style="color:#ffd76a">He only eats what you hand him.</b></p></div>
+    <div><div class="k">Feed the family · earn cookies</div>
+      <h1>The Cookie Jar</h1>
+      <p>Hand Cookie a crumb — a show, a gem, a welcome — and he pays you a Cookie. Cookies stack up and unlock a store discount. <b style="color:#ffd76a">He only eats what you hand him.</b></p></div>
   </div>
 
   <div class="sec">Your jar</div>
   <div class="card jar">
-    <div class="coins"><span id="coins">0</span> <span class="u">coins 🪙</span></div>
+    <div class="cookies"><span id="cookies">0</span> <span class="u">cookies 🍪</span></div>
     <div class="layer" id="layer">Nibbler <span class="d" id="disc"></span></div>
     <div class="bar"><i id="lbar" style="width:0%"></i></div>
     <div class="small" id="lnext">Just getting started.</div>
-    <button class="btn" onclick="testCoin()">🍪 Tap to see a Coin pop</button>
+    <button class="btn" onclick="testCoin()">🍪 Tap to see a Cookie pop</button>
   </div>
 
   <div class="sec">Cookie's Belly — the whole family, this week</div>
@@ -63,7 +63,7 @@
   <div class="sec">The board</div>
   <div class="card">
     <div class="tabs"><button class="on" id="tWeek" onclick="showBoard('week')">This week</button><button id="tAll" onclick="showBoard('all')">All-time</button></div>
-    <div id="board"><div class="note">No coins yet this week — be the first to feed Cookie. 🍪</div></div>
+    <div id="board"><div class="note">No cookies yet this week — be the first to feed Cookie. 🍪</div></div>
   </div>
 
   <div class="sec">How to earn (feed Cookie)</div>
@@ -75,7 +75,7 @@
     <li><b>Bring a friend home</b> who sticks. <span class="small">+40</span> <span class="small">· Bring 'em home</span></li>
     <li><b>Post</b>, or tap <b>Going</b> on a show. <span class="small">+5</span></li>
   </ul>
-  <div class="note">Coins are rewards, not money — they unlock a store discount that grows with your layer. Cookie never touches anything private or behind a login; only what a person hands him.</div></div>
+  <div class="note">Cookies are rewards, not money — they unlock a store discount that grows with your layer. Cookie never touches anything private or behind a login; only what a person hands him.</div></div>
 
   <div class="foot"><img src="cookie-mark.svg" style="width:20px;vertical-align:middle;margin-right:5px">Feed the garden, and it feeds you back.</div>
 </div>
@@ -92,22 +92,22 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 var BELLY_GOAL=5000;
 function refresh(){
   DDCoins.total().then(function(t){
-    document.getElementById('coins').textContent=t.toLocaleString();
+    document.getElementById('cookies').textContent=t.toLocaleString();
     var L=DDCoins.layer(t); document.getElementById('layer').firstChild.textContent=L.name+' ';
     document.getElementById('disc').textContent=L.discount?('· '+L.discount+'% store discount'):'';
     if(L.next){ var span=L.next.min-L.min, into=t-L.min; document.getElementById('lbar').style.width=Math.max(3,Math.min(100,Math.round(into/span*100)))+'%';
-      document.getElementById('lnext').textContent=(L.next.min-t).toLocaleString()+' coins to '+L.next.name+'.'; }
+      document.getElementById('lnext').textContent=(L.next.min-t).toLocaleString()+' cookies to '+L.next.name+'.'; }
     else { document.getElementById('lbar').style.width='100%'; document.getElementById('lnext').textContent="Cookie's Chosen — top of the family. 🌹"; }
   });
   DDCoins.belly().then(function(b){ var pct=Math.min(100,Math.round(b/BELLY_GOAL*100));
     document.getElementById('bbar').style.width=pct+'%';
-    document.getElementById('bellymsg').innerHTML = b>=BELLY_GOAL ? ('🎉 <b>Belly full!</b> '+b.toLocaleString()+' coins — everyone who pitched in gets a treat.') : ('The family fed Cookie <b>'+b.toLocaleString()+'</b> coins this week — <b>'+(BELLY_GOAL-b).toLocaleString()+'</b> to a treat.'); });
+    document.getElementById('bellymsg').innerHTML = b>=BELLY_GOAL ? ('🎉 <b>Belly full!</b> '+b.toLocaleString()+' cookies — everyone who pitched in gets a treat.') : ('The family fed Cookie <b>'+b.toLocaleString()+'</b> cookies this week — <b>'+(BELLY_GOAL-b).toLocaleString()+'</b> to a treat.'); });
 }
 function showBoard(scope){ document.getElementById('tWeek').classList.toggle('on',scope==='week'); document.getElementById('tAll').classList.toggle('on',scope==='all');
   var host=document.getElementById('board'); host.innerHTML='<div class="note">Loading…</div>';
   DDCoins.board(scope).then(function(rows){ host.innerHTML = (rows&&rows.length) ? rows.map(function(r,i){
-    return '<div class="row"><span class="rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</span><span class="nm">'+esc(r.name||'A head')+'</span><span class="pts">'+Number(r.points||0).toLocaleString()+' 🪙</span></div>'; }).join('')
-    : '<div class="note">No coins yet — be the first to feed Cookie. 🍪</div>'; }); }
+    return '<div class="row"><span class="rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</span><span class="nm">'+esc(r.name||'A head')+'</span><span class="pts">'+Number(r.cookies||0).toLocaleString()+' 🍪</span></div>'; }).join('')
+    : '<div class="note">No cookies yet — be the first to feed Cookie. 🍪</div>'; }); }
 window.testCoin=function(){ DDCoins.pop(5); };  // a taste of the pop (no award)
 try{ refresh(); showBoard('week'); }catch(e){}
 </script>

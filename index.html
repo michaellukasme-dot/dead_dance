@@ -1075,8 +1075,9 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="citem" onclick="ddSheet('poster_shop.html','🖼️ The Poster Shop');return false;" style="cursor:pointer"><span>🖼️</span>The Poster Shop</a>
     <a class="citem" onclick="ddSheet('tshirt_shop.html','👕 Tour Tees');return false;" style="cursor:pointer"><span>👕</span>Tour Tees — Print Me the T-Shirt</a>
     <a class="citem" href="dead_karaoke.html"><span>🎤</span>Dead Karaoke — play tonight's round 🌹</a>
-    <a class="citem" href="cookie.html"><span>🍪</span>Cookie &amp; the Coins — feed the family, earn coins</a>
-    <a class="citem" href="recruit.html"><span>🏡</span>Bring 'em home — your QR, your recruits, your coins</a>
+    <a class="citem" href="cookie.html"><span>🍪</span>The Cookie Jar — feed the family, earn cookies</a>
+    <a class="citem" href="recruit.html"><span>🏡</span>Bring 'em home — your QR, your recruits, your cookies</a>
+    <a class="citem" href="privacy.html"><span>🔒</span>Privacy, Data &amp; AI — how it all works, in plain language</a>
     <a class="citem" onclick="ddSheet('karaoke_store.html','🎤 DeadDance Karaoke');return false;" style="cursor:pointer"><span>🛍️</span>DeadDance Karaoke — merch</a>
     <a class="citem" href="deadman.html"><span>🎙️</span>DEADMAN — sing now, no machine</a>
     <a class="citem" href="band_manager.html"><span>🎸</span>Agency Console — Influencer (band roster)</a>
@@ -1171,7 +1172,7 @@ function frRespond(reqId,name,accept,btn){
       ? '<span>🌹</span><div><b>'+name+'</b> and you are family now — say hi in the feed! 🎸<i>just now</i></div>'
       : '<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; }
   var msg=accept?('🌹 You and '+name+' are family now.'):'Request dismissed.';
-  if(accept){ try{ if(window.DDCoins) DDCoins.feed('welcome', (reqId||name)); }catch(e){} }   /* 🪙 welcomed a newcomer */
+  if(accept){ try{ if(window.DDCoins) DDCoins.feed('welcome', (reqId||name)); }catch(e){} }   /* 🍪 welcomed a newcomer */
   if(window.DDFriends&&DDFriends.ready()){
     DDFriends.respond(reqId,accept).then(function(){ done(); if(typeof toast==='function')toast(msg); })
       .catch(function(){ done(); if(typeof toast==='function')toast(msg); });
@@ -1561,7 +1562,7 @@ function icsDownload(band,venue,iso){
 function addToCal(i){ var s=SHOWLIST[i]; if(!s)return;
  try{ var a=calAdded(); if(!a.some(function(x){return x.band===s.band&&x.iso===s.iso;})){ a.push({band:s.band,venue:s.venue,iso:s.iso}); calAddedSave(a); } }catch(e){}
  icsDownload(s.band,s.venue,s.iso);
- try{ if(window.DDCoins) DDCoins.feed('verify', (s.band+'|'+s.iso)); }catch(e){}   /* 🪙 confirmed a show onto your calendar */
+ try{ if(window.DDCoins) DDCoins.feed('verify', (s.band+'|'+s.iso)); }catch(e){}   /* 🍪 confirmed a show onto your calendar */
  if(typeof toast==='function') toast('📅 Added to My Calendar 🌹'); }
 /* My Calendar = the user's own saved shows: tickets/notify (dd.want) + 📆 added (dd.cal.added) */
 function myCalShows(){ var out=[], seen={};
@@ -2001,7 +2002,7 @@ function syncSynth(){ var c=ddClient(); if(!c)return;
 /* ================= NAME THAT TUNE — daily Archive teaser =================
    One shared puzzle a day. PLAY a few notes; replay as much as you need; each
    miss unlocks a longer snippet. Timer from first play. Winner announced daily.
-   Points bank → Shakedown discounts. Real Archive clips wire into TUNES[].src
+   Cookies bank → Shakedown discounts. Real Archive clips wire into TUNES[].src
    when the audio source is licensed/configured; until then PLAY uses a labeled
    placeholder sting so the whole loop is playable + testable now. */
 var SONGS=["Scarlet Begonias","Fire on the Mountain","Sugar Magnolia","Truckin'","Casey Jones","Friend of the Devil","Ripple","Box of Rain","Uncle John's Band","Touch of Grey","Eyes of the World","Bertha","Franklin's Tower","Dark Star","St. Stephen","China Cat Sunflower","I Know You Rider","Help on the Way","Estimated Prophet","Terrapin Station","Ramble On Rose","Tennessee Jed","Jack Straw","Sugaree","Deal","Cassidy","Playing in the Band","The Wheel","Brokedown Palace","U.S. Blues","Shakedown Street","Althea","Bird Song","Cumberland Blues","Morning Dew","Wharf Rat","He's Gone","Loser","Stella Blue","Row Jimmy"];
@@ -2021,8 +2022,8 @@ function gInit(){ var d=gToday(), rnd=seeded(d+'tune');
  GAME={date:d,answer:answer,file:answer.file||"",anchor:rnd(),opts:opts,attempt:0,started:0,solved:false,over:false};
  try{var s=JSON.parse(localStorage.getItem('dd.game.'+d)||'null');if(s){GAME.done=true;GAME.score=s.score;GAME.attempt=s.attempts||0;GAME.solved=!!s.solved;}}catch(e){}
 }
-function gPoints(){ try{return +localStorage.getItem('dd.points')||0;}catch(e){return 0;} }
-function gAddPoints(n){ try{localStorage.setItem('dd.points',String(gPoints()+n));}catch(e){} }
+function gPoints(){ try{return +localStorage.getItem('dd.cookies')||0;}catch(e){return 0;} }
+function gAddPoints(n){ try{localStorage.setItem('dd.cookies',String(gPoints()+n));}catch(e){} }
 var GAC=null;
 function gSting(sec,seed){ try{ if(!window.AudioContext&&!window.webkitAudioContext)return; GAC=GAC||new (window.AudioContext||window.webkitAudioContext)();
  var ctx=GAC,t0=ctx.currentTime,rnd=seeded(seed),notes=Math.max(3,Math.round(sec*1.5));
@@ -2064,7 +2065,7 @@ function gFinish(){ try{localStorage.setItem('dd.game.'+GAME.date,JSON.stringify
  if(GAME.solved){ gAddPoints(GAME.score); }
  var c=ddClient(),id=ddId();
  if(c&&id){ try{ c.rpc('chat_game_submit',{p_score:GAME.score,p_seconds:GAME.secs||0,p_attempts:GAME.attempt+(GAME.solved?1:0),p_solved:GAME.solved})
-   .then(function(r){ if(r&&r.data!=null){try{localStorage.setItem('dd.points',String(r.data));}catch(e){}} gResult(); }).catch(function(){ gResult(); }); }catch(e){ gResult(); } }
+   .then(function(r){ if(r&&r.data!=null){try{localStorage.setItem('dd.cookies',String(r.data));}catch(e){}} gResult(); }).catch(function(){ gResult(); }); }catch(e){ gResult(); } }
  else gResult();
 }
 function gSquares(){ var h=''; for(var i=0;i<6;i++){ h+= i<GAME.attempt?'🟥':(i===GAME.attempt&&GAME.solved?'🟩':'⬜'); } return h; }
@@ -2074,10 +2075,10 @@ function gResult(){ var b=document.getElementById('gameBody');
  b.innerHTML='<div style="text-align:center">'+
   '<div style="font-size:18px;font-weight:800;margin-bottom:4px">'+head+'</div>'+
   '<div style="margin:6px 0 10px;font-size:22px">'+gSquares()+'</div>'+
-  '<div style="font-size:13px;color:var(--muted)">Your points: <b id="gPts" style="color:var(--gold)">'+gPoints()+'</b></div>'+
+  '<div style="font-size:13px;color:var(--muted)">Your cookies: <b id="gPts" style="color:var(--gold)">'+gPoints()+'</b></div>'+
   '<button class="btn" style="margin:12px 6px 0" onclick="gShare()">📣 Share result</button>'+
   '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px;text-align:left">'+
-   '<div style="font-weight:800;margin-bottom:8px">🛍️ Spend points on Shakedown</div>'+
+   '<div style="font-weight:800;margin-bottom:8px">🛍️ Spend cookies on Shakedown</div>'+
    '<div style="display:grid;gap:7px">'+
     gRedeemRow(250,200)+gRedeemRow(500,500)+gRedeemRow(1000,1200)+'</div></div>'+
   '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px;text-align:left">'+
@@ -2088,16 +2089,16 @@ function gResult(){ var b=document.getElementById('gameBody');
 function gRedeemRow(cost,cents){ return '<div style="display:flex;align-items:center;gap:10px;background:#faf6ef;border:1px solid var(--line);border-radius:10px;padding:9px 11px">'+
   '<b style="flex:1">$'+(cents/100).toFixed(2)+' off a Shakedown order</b><span style="color:var(--muted);font-size:12px">'+cost+' pts</span>'+
   '<button class="btn gold" style="padding:7px 11px" onclick="gRedeem('+cost+','+cents+')">Redeem</button></div>'; }
-function gRedeem(cost,cents){ if(gPoints()<cost){ toast('Not enough points yet — keep playing daily.'); return; }
+function gRedeem(cost,cents){ if(gPoints()<cost){ toast('Not enough cookies yet — keep playing daily.'); return; }
  var c=ddClient(),id=ddId();
  var done=function(code){ gAddPoints(-cost); var p=document.getElementById('gPts'); if(p)p.textContent=gPoints();
    toast('🎟️ Coupon '+code+' — $'+(cents/100).toFixed(2)+' off at Shakedown checkout.'); };
- if(c&&id){ try{ c.rpc('chat_game_redeem',{p_cost:cost,p_cents_off:cents}).then(function(r){ done((r&&r.data)|| 'SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase()); if(r&&!r.error){try{localStorage.setItem('dd.points',String(Math.max(0,gPoints())));}catch(e){}} }).catch(function(){ done('SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase()); }); }catch(e){ done('SHAKE-LOCAL'); } }
+ if(c&&id){ try{ c.rpc('chat_game_redeem',{p_cost:cost,p_cents_off:cents}).then(function(r){ done((r&&r.data)|| 'SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase()); if(r&&!r.error){try{localStorage.setItem('dd.cookies',String(Math.max(0,gPoints())));}catch(e){}} }).catch(function(){ done('SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase()); }); }catch(e){ done('SHAKE-LOCAL'); } }
  else done('SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase());
 }
 function gShare(){ var txt='🎧 dead.dance Name That Tune '+GAME.date+' '+gSquares()+(GAME.solved?(' — got it in '+(GAME.attempt+1)+'!'):'')+' '+(typeof ddLink==='function'?ddLink('','name_that_tune'):'');
  try{ navigator.clipboard.writeText(txt); }catch(e){} toast('📣 Result copied — paste it to the family. 👇 Link drops in your first comment.'); }
-function syncPoints(){ var c=ddClient(),id=ddId(); if(!c||!id)return; try{ c.rpc('chat_game_points_get').then(function(r){ if(r&&r.data!=null){try{localStorage.setItem('dd.points',String(r.data));}catch(e){} var p=document.getElementById('gPts'); if(p)p.textContent=r.data;} }).catch(function(){}); }catch(e){} }
+function syncPoints(){ var c=ddClient(),id=ddId(); if(!c||!id)return; try{ c.rpc('chat_game_points_get').then(function(r){ if(r&&r.data!=null){try{localStorage.setItem('dd.cookies',String(r.data));}catch(e){} var p=document.getElementById('gPts'); if(p)p.textContent=r.data;} }).catch(function(){}); }catch(e){} }
 var SAMPLE_BOARD=[["Kara",96,8],["Stagger Lee",88,21],["Matt H.",74,34],["Robin S.",61,40]];
 function gBoard(){ var el=document.getElementById('gBoard'); if(!el)return; var c=ddClient();
  var paint=function(rows){ el.innerHTML=rows.map(function(r,i){return '<div style="display:flex;gap:8px;padding:3px 0"><b style="width:22px">'+(i+1)+'.</b><span style="flex:1">'+(r[0]||r.display_name)+'</span><span style="color:var(--gold);font-weight:800">'+(r[1]!=null?r[1]:r.score)+'</span></div>';}).join('')+'<div style="font-size:11px;margin-top:6px">🏆 Winner announced daily — top score takes a bonus + bragging rights.</div>'; };
@@ -2120,7 +2121,7 @@ function inviteFamily(){ var link=inviteLink(), txt=inviteText();
 
 /* ================= THE FLYWHEEL =================
    A new user's FIRST HyperPost goes back to Facebook — where they came from —
-   and points their friends here. That is the whole acquisition loop:
+   and cookies their friends here. That is the whole acquisition loop:
    arrive → post home → friends follow → they arrive → they post home.
    Honest-state: nothing auto-sends. The share sheet is a human tap. We never
    touch Facebook's API, never read their friends, never post silently. */
@@ -2870,7 +2871,7 @@ function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.v
       posted=true;
       var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:(DDFeed.myName?DDFeed.myName():'You');
       ddFeedPrepend({author_id:ddMyIdSafe(), author_name:nm, role:(DDFeed.myRole&&DDFeed.myRole()), body:txt, created_at:new Date().toISOString(), _me:true}); // optimistic — carries my id so my face + name render
-      DDFeed.post(txt).then(function(){ try{ if(window.DDCoins) DDCoins.feed('post'); }catch(e){} /* 🪙 a coin pops */ })
+      DDFeed.post(txt).then(function(){ try{ if(window.DDCoins) DDCoins.feed('post'); }catch(e){} /* 🍪 a cookie pops */ })
         .catch(function(){ toast('Saved on this device — sign in to post to the family.'); });
     }
   }catch(e){}
@@ -3333,7 +3334,7 @@ function shareAccept(){ var s=shareState(); var c=s.cand||shareCandidate(); s.st
  qaRender(); toast('🌹 You’re in — '+c.name+'. Open it and forward 10 to our page.'); }
 function shareForward(){ var s=shareState(); if(s.status!=='accepted')return; s.done=(s.done||0)+1; shareSave(s);
  var cl=ddClient&&ddClient(),id=ddId&&ddId(); if(cl&&id&&s.group&&s.group.id){ try{ cl.rpc('chat_group_mark_shared',{p_group:s.group.id}).catch(function(){}); }catch(e){} }
- try{ if(window.DDCoins) DDCoins.feed('forward', (s.group&&s.group.id)||('fwd-'+s.done)); }catch(e){}   /* 🪙 */
+ try{ if(window.DDCoins) DDCoins.feed('forward', (s.group&&s.group.id)||('fwd-'+s.done)); }catch(e){}   /* 🍪 */
  qaRender(); if(s.done>=SHARE_GOAL) toast('🎉 That’s 10 — you did your share! 🌹'); }
 function shareNext(){ shareSave({status:'none'}); qaRender(); toast('🙌 Grab another group anytime — thank you.'); }
 function shareSnooze(days){ var s=shareState(); s.status=days>0?'snoozed':'declined'; if(days>0)s.until=Date.now()+days*864e5; shareSave(s);
@@ -3625,7 +3626,7 @@ window.sugGoing=function(ev,id){ ev.preventDefault(); ev.stopPropagation(); if(!
     if(iso && !a.some(function(x){return x.band===r.band_name&&x.iso===iso;})){
       a.push({band:r.band_name,iso:iso,venue:r.venue||'',price:'',bought:false,reminded:false,opt:sugIsOption(r)}); calAddedSave(a); } } }catch(e){}
   if(window.DDPymk&&DDPymk.attend) DDPymk.attend(id,'rsvp').then(function(){ _sugGoing[id]=(_sugGoing[id]||0)+1; });
-  try{ if(window.DDCoins) DDCoins.feed('going', id); }catch(e){}   /* 🪙 */
+  try{ if(window.DDCoins) DDCoins.feed('going', id); }catch(e){}   /* 🍪 */
   try{ if(CAL_SCOPE==='my'){ buildShowlist(); renderCal(); } }catch(e){}
   if(typeof toast==='function') toast('📅 Saved to your calendar — just yours. You’ll meet others going too. 🌹'); };
 var _sugCatsOpen=false;

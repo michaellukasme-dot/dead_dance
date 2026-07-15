@@ -37,7 +37,7 @@
   <div class="hero"><img class="mk" src="dd-512.png" alt="">
     <div class="k">The recruiting game</div>
     <h1>Bring 'em home 🌹</h1>
-    <p>Share your QR. When someone you brought in <b>sticks</b> — earns their own first coins — you earn coins and climb the boards. No cash, no spam; a real head that stays is the whole point.</p>
+    <p>Share your QR. When someone you brought in <b>sticks</b> — earns their own first cookies — you earn cookies and climb the boards. No cash, no spam; a real head that stays is the whole point.</p>
   </div>
 
   <div class="sec">Your front-door QR</div>
@@ -51,7 +51,7 @@
   <div class="card"><div class="stats">
     <div class="stat"><div class="n" id="sTotal">0</div><div class="l">Brought in</div></div>
     <div class="stat act"><div class="n" id="sAct">0</div><div class="l">Stuck (activated)</div></div>
-    <div class="stat"><div class="n" id="sCoins">0</div><div class="l">🪙 from recruiting</div></div>
+    <div class="stat"><div class="n" id="sCookies">0</div><div class="l">🍪 from recruiting</div></div>
   </div>
   <div class="note" id="pendNote"></div></div>
 
@@ -94,9 +94,9 @@ function loadMine(){ if(!window.DDRecruit)return; DDRecruit.mine().then(function
   rows=rows||[]; var act=rows.filter(function(r){return r.status==='activated';}).length;
   document.getElementById('sTotal').textContent=rows.length;
   document.getElementById('sAct').textContent=act;
-  document.getElementById('sCoins').textContent=(act*40).toLocaleString();   // 40 per activated (v1 reward)
+  document.getElementById('sCookies').textContent=(act*40).toLocaleString();   // 40 per activated (v1 reward)
   var pend=rows.length-act;
-  document.getElementById('pendNote').textContent = rows.length? (pend? (pend+' still warming up — they earn you coins the moment they stick.') : 'Every one of them stuck. 🌹') : 'Share your QR to bring your first head home.';
+  document.getElementById('pendNote').textContent = rows.length? (pend? (pend+' still warming up — they earn you cookies the moment they stick.') : 'Every one of them stuck. 🌹') : 'Share your QR to bring your first head home.';
 }); }
 function loadHome(){ if(!window.DDRecruit)return; var reg=(SCOPE==='loc')?DDRecruit.region():null;
   DDRecruit.homecoming(null).then(function(n){ var goal=50; var pct=Math.min(100,Math.round(n/goal*100));
