@@ -131,6 +131,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_pymk.js"></script>
 <script src="dd_bandgroups.js"></script>
 <script src="dd_watchdog.js"></script>
+<script src="dd_bench.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script>
@@ -214,9 +215,9 @@ window.claimYes=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }
 /* SEND → post the note to the whole family, authored as them. */
 window.claimSend=function(){ var ta=document.getElementById('covBody'); var t=(ta&&ta.value||'').trim();
   if(!t){ if(ta)ta.focus(); toast('Add a few words first 🌹'); return; }
-  /* watchdog: keep the family feed clean — screen before anything posts */
-  var wd=(window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(t):{ok:true};
-  if(!wd.ok){ if(ta)ta.focus(); toast(wd.reason||'Let’s keep it family 🌹'); return; }
+  /* watchdog + remediation: screen, strike, bench — before anything posts */
+  var wd=window.DDBench?DDBench.guard(t,'all'):((window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(t):{ok:true});
+  if(!wd.ok){ if(ta)ta.focus(); toast(wd.message||wd.reason||'Let’s keep it family 🌹'); return; }
   try{ localStorage.setItem('dd.myname',NAME); window.ME=window.ME||{}; ME.name=NAME; }catch(e){}
   LASTNOTE=t;
   var b=ta.nextElementSibling; if(b){ b.textContent='Saving…'; b.style.opacity=.7; }

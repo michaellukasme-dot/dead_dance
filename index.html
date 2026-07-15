@@ -730,14 +730,14 @@ body{padding-bottom:64px}
       <div class="ch">
         <span class="viewseg"><button id="vwGrid" class="on" onclick="calView('grid')">▦ Month</button><button id="vwList" onclick="calView('list')">📋 Upcoming</button></span>
         <select id="calAct" class="caltype" onchange="calAct(this.value)" title="Filter the calendar by act — thins the busy national rollup.">
-          <option value="all">🌹 Grateful Dead Tribute</option>
-          <option value="Steve Kimock">Steve Kimock</option>
-          <option value="Dark Star Orchestra">Dark Star Orchestra</option>
-          <option value="Joe Russo's Almost Dead">Joe Russo's Almost Dead (JRAD)</option>
-          <option value="Jerry's Middle Finger">Jerry's Middle Finger</option>
-          <option value="Sages And Spirits">Sages &amp; Spirits</option>
+          <option value="Steve Kimock">🌹 Steve Kimock</option>
           <option value="John Mayer">John Mayer</option>
           <option value="Melvin Seals and JGB">Melvin Seals &amp; JGB</option>
+          <option value="Dark Star Orchestra">Dark Star Orchestra</option>
+          <option value="Joe Russo's Almost Dead">Joe Russo's Almost Dead (JRAD)</option>
+          <option value="Sages And Spirits">Sages &amp; Spirits</option>
+          <option value="Jerry's Middle Finger">Jerry's Middle Finger</option>
+          <option value="all" selected>Grateful Dead Tribute</option>
         </select>
       </div>
       <div class="ch" id="calNavRow">
@@ -1477,7 +1477,15 @@ window.calAct=calAct;
 function calView(v){ CAL_VIEW=v; CAL_SEL=null;
  document.getElementById('vwList').classList.toggle('on',v==='list');
  document.getElementById('vwGrid').classList.toggle('on',v==='grid'); renderCal(); }
-function calNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); var m=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); CAL_MONTH=m; CAL_SEL=null; renderCal(); }
+function calNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); var m=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); CAL_MONTH=m; CAL_SEL=null; renderCal(); mapSyncMonth(); }
+/* keep the MAP on the same month the calendar is showing (band + scope + month all mirror) */
+var LAST_MAP_MONTH=null;
+function mapSyncMonth(tries){ tries=tries||0;
+  if(!(window.DDShowmap&&DDShowmap.setMonth)){ if(tries<12) setTimeout(function(){mapSyncMonth(tries+1);},300); return; }
+  if(!CAL_MONTH)CAL_MONTH=cMid();
+  var ym=CAL_MONTH.getFullYear()+'-'+cpad(CAL_MONTH.getMonth()+1);
+  if(ym===LAST_MAP_MONTH) return; LAST_MAP_MONTH=ym;
+  try{ DDShowmap.setMonth(ym); }catch(e){} }
 function dayClick(iso){ CAL_SEL=(CAL_SEL===iso?null:iso); renderCal(); }
 /* HOUSE RULE: never leave the app. Shows we can't sell yet (s.url present) do NOT
    link out — tapping registers in-app demand: the waitlist that wins the headliners. */
@@ -1546,8 +1554,9 @@ function renderCal(){
       foot='<button class="lmore" onclick="listMore()">See '+(up.length-LIST_PAGE)+' more ↓</button>'; }
   list.innerHTML=head+body+foot;
  }
+ try{ mapSyncMonth(); }catch(e){}   /* map follows the calendar's month */
 }
-function listNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); CAL_MONTH=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); LIST_SHOW_ALL=false; CAL_SEL=null; renderCal(); }
+function listNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); CAL_MONTH=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); LIST_SHOW_ALL=false; CAL_SEL=null; renderCal(); mapSyncMonth(); }
 function listMore(){ LIST_SHOW_ALL=true; renderCal(); }
 function listLess(){ LIST_SHOW_ALL=false; renderCal(); var l=document.getElementById('calList'); if(l&&l.scrollIntoView)try{l.scrollIntoView({block:'nearest'});}catch(e){} }
 window.listNav=listNav; window.listMore=listMore; window.listLess=listLess;
@@ -2370,7 +2379,7 @@ function bandGroupsHTML(){
    var badge=g.accepted?'<span style="font-size:10px;font-weight:800;color:#1f9e6b;background:#e7f7ef;border-radius:999px;padding:2px 7px;margin-left:6px">✓ Official</span>':'<span style="font-size:10px;font-weight:800;color:#9a7; background:#f3f0e6;border-radius:999px;padding:2px 7px;margin-left:6px">unclaimed</span>';
    var ava=g.logo?('<img src="'+g.logo+'" alt="" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'ico\',textContent:\''+g.ic+'\'}))" style="width:42px;height:42px;border-radius:11px;object-fit:cover;flex:none">'):('<div class="ico">'+g.ic+'</div>');
    return '<div class="gc"><div class="top">'+ava+
-     '<div style="flex:1"><div class="nm">'+g.disp+badge+'</div><div class="lv">'+g.members.toLocaleString()+' fans · deaddance.app/'+g.slug+'</div></div>'+
+     '<div style="flex:1"><div class="nm">'+(g.rose?'🌹 ':'')+g.disp+badge+(g.rose?'<span style="font-size:10px;font-weight:800;color:#b8002e;background:#fdeaef;border-radius:999px;padding:2px 8px;margin-left:6px">carries the Rose</span>':'')+'</div><div class="lv">'+g.members.toLocaleString()+' fans · deaddance.app/'+g.slug+'</div></div>'+
      '<label class="tune'+(g.tuned?' in':'')+'"><input type="checkbox" '+(g.tuned?'checked':'')+' onchange="bgTune(\''+g.slug+'\',this.checked)"> <span>'+(g.tuned?'TUNED IN':'TUNE IN')+'</span></label></div>'+
      '<div style="display:flex;gap:12px;align-items:center;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px">'+
        '<div id="bgqr-'+g.slug+'" style="width:96px;height:96px;flex:0 0 96px;background:#fff;border-radius:9px"></div>'+
@@ -2916,8 +2925,8 @@ function cmpNote(){ var n=document.getElementById('cmpNote'); if(!n)return; var 
   n.textContent='One tap → '+names.join(', ')+'. ⚙ to change.'; }
 function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.value||'').trim();
   if(!txt){ toast('Say something first 🌹'); return; }
-  var _wd=(window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(txt):{ok:true};   /* watchdog — keep the feed clean */
-  if(!_wd.ok){ if(t)t.focus(); toast(_wd.reason||'Let’s keep it family 🌹'); return; }
+  var _wd=window.DDBench?DDBench.guard(txt,'all'):((window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(txt):{ok:true});   /* watchdog + strikes/restrict/bench (group post) */
+  if(!_wd.ok){ if(t)t.focus(); toast(_wd.message||_wd.reason||'Let’s keep it family 🌹'); return; }
   var def=cmpDefaults(); var ext=def.filter(function(id){return id!=='dd';});
   var extNames=ext.map(function(id){var f=CMP_NETS.filter(function(c){return c.id===id;})[0];return f?f.n.replace(/^\S+\s/,''):id;});
   // 1) dead.dance feed — posts FOR REAL (persists to Supabase; everyone's feed reads it back, live)
@@ -3764,6 +3773,7 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_logoguess_vip.js" defer></script>
 <script src="dd_bandgroups.js" defer></script>
 <script src="dd_watchdog.js" defer></script>
+<script src="dd_bench.js" defer></script>
 <script src="dd_learn.js" defer></script>
 <script src="dd_crumbs.js" defer></script>
 <script src="dd_recruit.js" defer></script>

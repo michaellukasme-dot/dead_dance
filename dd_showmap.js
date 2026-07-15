@@ -195,16 +195,20 @@
   var CH_INDEX = {}; CHAPTERS.forEach(function (ch) { CH_INDEX[ch.name] = ch; });
   var ALLSHOWS = SHOWS.slice();               // master — every future show, never mutated
   var ACT_FILTER = null;                        // lowercased band filter, or null = all acts
+  var MONTH_FILTER = null;                       // 'YYYY-MM' to mirror the calendar's month, or null = all
   function actMatch(s){ if(!ACT_FILTER) return true; var b=(s.band||'').toLowerCase();
     return b===ACT_FILTER || b.indexOf(ACT_FILTER)>=0 || ACT_FILTER.indexOf(b)>=0; }
+  function monthMatch(s){ if(!MONTH_FILTER) return true; return String(s.date||'').slice(0,7)===MONTH_FILTER; }
   function reindexShows(){
     CHAPTERS.forEach(function (ch) { ch.shows = []; });
     SHOWS.forEach(function (s) { var ll = CITY[s.city]; if (!ll) return; s._ll = ll; var ch = nearestChapter(ll[0], ll[1]); ch.shows.push(s); s._chapter = ch.name; });
     CHAPTERS.forEach(function (ch) { ch.shows.sort(function (a, b) { return a.date < b.date ? -1 : 1; }); });
   }
-  // when the Calendar's band dropdown changes, rebuild the map's shows through the same filter
-  function applyActData(band){ ACT_FILTER=(band&&band!=='all')?String(band).toLowerCase():null; SHOWS = ALLSHOWS.filter(actMatch); reindexShows(); }
-  reindexShows();
+  // rebuild the map's shows through BOTH filters (band + month) so it mirrors the calendar exactly
+  function applyFilters(){ SHOWS = ALLSHOWS.filter(function(s){ return actMatch(s) && monthMatch(s); }); reindexShows(); }
+  function applyActData(band){ ACT_FILTER=(band&&band!=='all')?String(band).toLowerCase():null; applyFilters(); }
+  function applyMonthData(ym){ MONTH_FILTER=(ym&&/^\d{4}-\d{2}$/.test(ym))?ym:null; applyFilters(); }
+  applyFilters();
   function chapterByName(n) { return CH_INDEX[n] || null; }
   function festsFor(ch) { try { return (window.DD_FESTIVALS || []).filter(function (f) { return f.region === ch.fk; }); } catch (e) { return []; } }
 
@@ -524,7 +528,8 @@
     function redrawForFilter(){ if (level === "radius") { if (userLoc) { zoomToRadius(radiusMi); } else { toNation(); } } else if (level && level !== "nation") { drill(level); } else { toNation(); } }
     window.DDShowmap = {
       setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },
-      setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} }   // band dropdown → map filter, keeps current scope/zoom
+      setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter, keeps current scope/zoom
+      setMonth: function (ym) { try { applyMonthData(ym); redrawForFilter(); } catch (e) {} }    // calendar month ‹ › → map filter
     };
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });

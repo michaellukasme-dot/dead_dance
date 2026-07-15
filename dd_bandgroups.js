@@ -6,13 +6,13 @@
 (function (root) {
   // the acts that appear in the Calendar band dropdown (#calAct) — one group each
   var MARQUEE = [
+    { name: "Steve Kimock",             ic: "🎸" },   // our king — the throne
+    { name: "John Mayer",               ic: "🎶" },
+    { name: "Melvin Seals and JGB",     ic: "🎹", disp: "Melvin Seals & JGB" },
     { name: "Dark Star Orchestra",      ic: "🌌" },
     { name: "Joe Russo's Almost Dead",  ic: "🔥", disp: "Joe Russo's Almost Dead (JRAD)" },
-    { name: "Jerry's Middle Finger",    ic: "🖐" },
-    { name: "Steve Kimock",             ic: "🎸" },
-    { name: "Melvin Seals and JGB",     ic: "🎹", disp: "Melvin Seals & JGB" },
-    { name: "Sages And Spirits",        ic: "🌀", disp: "Sages & Spirits" },
-    { name: "John Mayer",               ic: "🎶" }
+    { name: "Sages And Spirits",        ic: "🌀", disp: "Sages & Spirits" },   // JK + original DSO + Melvin
+    { name: "Jerry's Middle Finger",    ic: "🖐" }
   ];
   // stable synthetic member counts (until the real join numbers exist)
   var SEED_MEMBERS = { "dark-star-orchestra": 4820, "joe-russo-s-almost-dead": 3610, "jerry-s-middle-finger": 940,
@@ -38,7 +38,7 @@
 
   function meta(m) { return { name: m.name, disp: m.disp || m.name, ic: m.ic, slug: slug(m.name),
     logo: logo(m.name), accepted: accepted(m.name), tuned: tuned(m.name), members: members(m.name), qr: qrUrl(m.name) }; }
-  function list() { return MARQUEE.map(meta); }
+  function list() { return MARQUEE.map(function (m, i) { var o = meta(m); o.rose = (i === 0); return o; }); }  // #1 carries the Rose
   function get(n) { for (var i = 0; i < MARQUEE.length; i++) if (slug(MARQUEE[i].name) === slug(n)) return meta(MARQUEE[i]); return null; }
 
   root.DDBandGroups = { list: list, get: get, slug: slug, logo: logo, accepted: accepted, accept: accept,
