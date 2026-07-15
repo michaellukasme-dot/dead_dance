@@ -241,6 +241,13 @@ body{padding-bottom:64px}
 .d.has i{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--rose)}
 .d.sel{outline:2px solid var(--rose);outline-offset:-2px;border-radius:8px}
 .calnear{font-size:12px;color:var(--accent);font-weight:700;margin:2px 2px 8px}.calnear b{color:var(--rose)}
+.listnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 9px}
+.listnav .lmv{border:0;background:rgba(120,104,150,.14);color:inherit;width:34px;height:34px;border-radius:50%;font-size:20px;font-weight:800;line-height:1;cursor:pointer;flex:none;transition:.12s}
+.listnav .lmv:hover{background:rgba(120,104,150,.28)}.listnav .lmv:active{transform:scale(.94)}
+.listnav .lmo{text-align:center;line-height:1.2}.listnav .lmo b{font-size:15px;font-weight:900;display:block}
+.listnav .lmo span{font-size:11.5px;color:var(--muted);font-weight:700}
+.lmore{display:block;width:100%;margin-top:10px;border:0;background:#f1eef7;color:var(--accent);border-radius:12px;padding:12px;font-weight:800;font-size:13.5px;cursor:pointer;transition:.12s}
+.lmore:hover{background:#e7e0f3}.lmore:active{transform:scale(.99)}
 .bsrow{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px}
 .bstile{flex:0 0 130px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:11px;cursor:pointer;text-align:center}
 .bstile .bsic{font-size:26px}.bstile .bsnm{font-weight:800;font-size:12.5px;margin-top:3px;line-height:1.2}
@@ -1421,7 +1428,7 @@ function toast(m){var t=document.createElement('div');t.className='dd-toast';t.s
 /* ===== Calendar — dynamic, forward-looking, list-first (the front door) ===== */
 var CMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var CDOW=['S','M','T','W','T','F','S'], CDOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='local', CAL_ACT='all';
+var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='local', CAL_ACT='all', LIST_SHOW_ALL=false, LIST_PAGE=6;
 var POSTED_SHOWS=[];   /* REAL dates posted by bands (dd_shows) — merged into the calendar so they display + persist */
 /* DEAL — band #1, real schedule from John Smith (deal_shows.js). Merged lazily (once), because
    deal_shows.js loads later in the body than this inline block. */
@@ -1518,12 +1525,31 @@ function renderCal(){
   list.innerHTML = (CAL_SEL&&byDay[CAL_SEL]) ? ('<div class="cdh">'+CDOW3[new Date(CAL_SEL+'T12:00:00').getDay()]+' · '+CMONTHS[mth]+' '+(new Date(CAL_SEL+'T12:00:00').getDate())+'</div>'+byDay[CAL_SEL].map(calRow).join('')) : '<div class="chint">Tap a highlighted date to see that night\'s shows.</div>';
  } else {
   mo.textContent='Upcoming';
-  var up=SHOWLIST.filter(function(s){ return s.iso>=cIso(cMid()) && calMatch(s); });
-  var mEnd=new Date(cMid().getFullYear(),cMid().getMonth()+1,0); var nearN=up.filter(function(s){return s.d<=mEnd;}).length;
-  var near='<div class="calnear">📍 <b>'+nearN+' show'+(nearN===1?'':'s')+'</b> near you the rest of '+CMONTHS[cMid().getMonth()]+(REG?(' · '+REG):'')+'</div>';
-  list.innerHTML = up.length ? (near + up.slice(0,14).map(calRow).join('')) : (CAL_SCOPE==='my' ? '<div class="cempty">🌹 Your calendar is empty. Tap 📆 or “Notify me” on any show and it lands here — just your nights, nothing else.</div>' : '<div class="cempty">No shows match — try “All”, or roam the map. Bands: add yours with “Add a date”.</div>');
+  // filter to ONE month (‹ › to move); current month shows only what's still ahead
+  var ly=CAL_MONTH.getFullYear(), lm=CAL_MONTH.getMonth();
+  var isCur=(ly===cMid().getFullYear()&&lm===cMid().getMonth());
+  var floor=isCur?cMid():new Date(ly,lm,1);
+  var ceil=new Date(ly,lm,new Date(ly,lm+1,0).getDate(),23,59,59);
+  var up=SHOWLIST.filter(function(s){ return s.d>=floor && s.d<=ceil && calMatch(s); }).sort(function(a,b){return a.d-b.d;});
+  var head='<div class="listnav">'+
+    '<button class="lmv" onclick="listNav(-1)" aria-label="Previous month">‹</button>'+
+    '<div class="lmo"><b>'+CMONTHS[lm]+' '+ly+'</b><span>'+up.length+' show'+(up.length===1?'':'s')+(isCur&&REG?(' · '+REG):'')+'</span></div>'+
+    '<button class="lmv" onclick="listNav(1)" aria-label="Next month">›</button></div>';
+  var body,foot='';
+  if(!up.length){ body = (CAL_SCOPE==='my'
+      ? '<div class="cempty">🌹 Nothing saved in '+CMONTHS[lm]+'. Tap 📆 or “Notify me” on any show and it lands here.</div>'
+      : '<div class="cempty">No shows in '+CMONTHS[lm]+' — try ‹ › to change month, “All”, or roam the map.</div>'); }
+  else if(up.length<=LIST_PAGE || LIST_SHOW_ALL){ body=up.map(calRow).join('');
+      if(up.length>LIST_PAGE) foot='<button class="lmore" onclick="listLess()">See less ↑</button>'; }
+  else { body=up.slice(0,LIST_PAGE).map(calRow).join('');
+      foot='<button class="lmore" onclick="listMore()">See '+(up.length-LIST_PAGE)+' more ↓</button>'; }
+  list.innerHTML=head+body+foot;
  }
 }
+function listNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); CAL_MONTH=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); LIST_SHOW_ALL=false; CAL_SEL=null; renderCal(); }
+function listMore(){ LIST_SHOW_ALL=true; renderCal(); }
+function listLess(){ LIST_SHOW_ALL=false; renderCal(); var l=document.getElementById('calList'); if(l&&l.scrollIntoView)try{l.scrollIntoView({block:'nearest'});}catch(e){} }
+window.listNav=listNav; window.listMore=listMore; window.listLess=listLess;
 /* hover a Month-grid date → band · venue · price · Buy Now (tap still opens the day list) */
 function calHover(ev,iso){ var list=SHOWLIST.filter(function(s){return s.iso===iso && calMatch(s);}); if(!list.length)return;
  var s=list[0], b=document.getElementById('buy'); if(!b)return;
