@@ -1171,6 +1171,7 @@ function frRespond(reqId,name,accept,btn){
       ? '<span>🌹</span><div><b>'+name+'</b> and you are family now — say hi in the feed! 🎸<i>just now</i></div>'
       : '<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; }
   var msg=accept?('🌹 You and '+name+' are family now.'):'Request dismissed.';
+  if(accept){ try{ if(window.DDCoins) DDCoins.feed('welcome', (reqId||name)); }catch(e){} }   /* 🪙 welcomed a newcomer */
   if(window.DDFriends&&DDFriends.ready()){
     DDFriends.respond(reqId,accept).then(function(){ done(); if(typeof toast==='function')toast(msg); })
       .catch(function(){ done(); if(typeof toast==='function')toast(msg); });
@@ -1560,6 +1561,7 @@ function icsDownload(band,venue,iso){
 function addToCal(i){ var s=SHOWLIST[i]; if(!s)return;
  try{ var a=calAdded(); if(!a.some(function(x){return x.band===s.band&&x.iso===s.iso;})){ a.push({band:s.band,venue:s.venue,iso:s.iso}); calAddedSave(a); } }catch(e){}
  icsDownload(s.band,s.venue,s.iso);
+ try{ if(window.DDCoins) DDCoins.feed('verify', (s.band+'|'+s.iso)); }catch(e){}   /* 🪙 confirmed a show onto your calendar */
  if(typeof toast==='function') toast('📅 Added to My Calendar 🌹'); }
 /* My Calendar = the user's own saved shows: tickets/notify (dd.want) + 📆 added (dd.cal.added) */
 function myCalShows(){ var out=[], seen={};
