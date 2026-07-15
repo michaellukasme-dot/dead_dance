@@ -19,6 +19,16 @@
     return c.rpc('dd_crumb_add',{p_member:id,p_name:myName(),p_action:action,p_ref:ref||null}).then(function(r){
       var t=Number((r&&r.data)||0); if(LAST!=null && t>LAST){ pop(t-LAST, opts.x, opts.y); } LAST=t; return t;
     }).catch(function(){ return 0; }); }
+  // add a show → server decides: 40 Cookies if you're FIRST to bring it, 5 if it was already on the board.
+  function showKey(band, date, venue){ function n(x){ return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,''); } return n(band)+'|'+String(date||'')+'|'+n(venue); }
+  function showAdd(band, date, venue, opts){ var c=C(),id=me(); opts=opts||{}; var key=showKey(band,date,venue);
+    if(!c||!id) return Promise.resolve({});
+    return c.rpc('dd_crumb_show_add',{p_member:id,p_name:myName(),p_show_key:key}).then(function(r){
+      var d=(r&&r.data)||{}; var t=Number(d.total||0);
+      if(LAST!=null && t>LAST){ pop(t-LAST, opts.x, opts.y); } LAST=t;
+      if(d.awarded==='new' && typeof root.toast==='function'){ try{ root.toast('🍪 First one in! +'+d.points+' Cookies — the family didn’t have this show. 🌹'); }catch(e){} }
+      return d;
+    }).catch(function(){ return {}; }); }
   function board(scope){ var c=C(); if(!c)return Promise.resolve([]); return c.rpc('dd_crumb_board',{p_scope:scope||'week'}).then(function(r){ return (r&&r.data)||[]; }).catch(function(){return [];}); }
   function belly(){ var c=C(); if(!c)return Promise.resolve(0); return c.rpc('dd_belly',{}).then(function(r){ return Number((r&&r.data)||0); }).catch(function(){return 0;}); }
 
@@ -53,6 +63,6 @@
     var amt=document.createElement('div'); amt.className='ddcoinamt'; amt.textContent='+'+n; amt.style.left=(x+16)+'px'; amt.style.top=(y-8)+'px';
     document.body.appendChild(amt); setTimeout(function(){ try{amt.remove();}catch(e){} },960); ding(); }
 
-  root.DDCoins = { feed:feed, total:total, board:board, belly:belly, layer:layer, pop:pop, LAYERS:LAYERS };
+  root.DDCoins = { feed:feed, showAdd:showAdd, total:total, board:board, belly:belly, layer:layer, pop:pop, LAYERS:LAYERS };
   try{ total(); }catch(e){}   // prime LAST so the first earn pops only the delta, not the whole jar
 })(typeof window !== 'undefined' ? window : this);

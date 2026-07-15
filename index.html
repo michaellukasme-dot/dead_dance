@@ -732,7 +732,7 @@ body{padding-bottom:64px}
         <select id="calAct" class="caltype" onchange="calAct(this.value)" title="Filter the calendar by act — thins the busy national rollup.">
           <option value="Steve Kimock">🌹 Steve Kimock</option>
           <option value="John Mayer">John Mayer</option>
-          <option value="Melvin Seals and JGB">Melvin Seals &amp; JGB</option>
+          <option value="Melvin Seals and JGB">JGB with Melvin Seals</option>
           <option value="Dark Star Orchestra">Dark Star Orchestra</option>
           <option value="Joe Russo's Almost Dead">Joe Russo's Almost Dead (JRAD)</option>
           <option value="Sages And Spirits">Sages &amp; Spirits</option>
@@ -1325,7 +1325,7 @@ function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.in
 var REGIONS = {
  "Mid-Atlantic": { shows:[
    {off:2,band:"Splintered Sunlight",venue:"Ardmore Music Hall · 8:00 PM",price:"$30",type:"grateful_dead"},
-   {off:8,band:"Dark Star Orchestra",venue:"Ardmore Music Hall · 8:00 PM",price:"$42",type:"grateful_dead"},
+   {off:8,band:"Dark Star Orchestra",venue:"The Fillmore Philadelphia · 8:00 PM",price:"$45",type:"grateful_dead"},
    {off:18,band:"Melvin Seals & JGB",venue:"Sellersville Theater · 8:00 PM",price:"$45",type:"grateful_dead"},
    {off:27,band:"Joe Russo's Almost Dead",venue:"The Met, Philadelphia · 7:30 PM",price:"$59",type:"grateful_dead"},
    {date:"2026-07-14",band:"John Kadlecik (solo)",venue:"Jammin' Java, Vienna VA · 8:00 PM",price:"Tix →",type:"grateful_dead",url:"https://www.johnkmusic.net/schedule.html"},
@@ -2541,7 +2541,7 @@ function gigAddDate(){
  closeGig();
  ddAddPostedShow(show);   /* optimistic — it shows on the calendar this instant */
  if(window.DDShows){
-   DDShows.submit(show).then(function(sid){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); try{ if(window.DDCoins) DDCoins.feed('show_add', sid||(band+'|'+venue)); }catch(e){} promptVendorSlots(sid||null,venue); })
+   DDShows.submit(show).then(function(sid){ toast('📅 Posted — '+band+' @ '+venue+' is on the board. The chapter sees it now.'); try{ if(window.DDCoins) DDCoins.showAdd(band, date, venue); }catch(e){} promptVendorSlots(sid||null,venue); })
      .catch(function(){ toast('📅 On your board — connect to share it with the chapter.'); promptVendorSlots(null,venue); });
  } else { toast('📅 On your board.'); promptVendorSlots(null,venue); }
 }

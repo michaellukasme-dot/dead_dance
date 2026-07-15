@@ -8,7 +8,7 @@
   var MARQUEE = [
     { name: "Steve Kimock",             ic: "🎸" },   // our king — the throne
     { name: "John Mayer",               ic: "🎶" },
-    { name: "Melvin Seals and JGB",     ic: "🎹", disp: "Melvin Seals & JGB" },
+    { name: "Melvin Seals and JGB",     ic: "🎹", disp: "JGB with Melvin Seals" },
     { name: "Dark Star Orchestra",      ic: "🌌" },
     { name: "Joe Russo's Almost Dead",  ic: "🔥", disp: "Joe Russo's Almost Dead (JRAD)" },
     { name: "Sages And Spirits",        ic: "🌀", disp: "Sages & Spirits" },   // JK + original DSO + Melvin

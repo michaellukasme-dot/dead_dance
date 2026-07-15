@@ -48,38 +48,136 @@
     "Richmond, VA": [37.54, -77.44], "Nantucket, MA": [41.28, -70.10],
     "Deerfield, MA": [42.54, -72.61], "Nashua, NH": [42.77, -71.47],
     "Jay, VT": [44.97, -72.53], "Canandaigua, NY": [42.89, -77.28],
-    "Petaluma, CA": [38.23, -122.64]
+    "Petaluma, CA": [38.23, -122.64],
+    "Utica, NY": [43.10, -75.23], "Forest Grove, OR": [45.52, -123.11],
+    "Woodinville, WA": [47.75, -122.16], "Jacksonville, OR": [42.31, -122.97],
+    "Red Bank, NJ": [40.35, -74.06], "Orinda, CA": [37.88, -122.18],
+    "South Lake Tahoe, CA": [38.94, -119.98], "Bend, OR": [44.06, -121.31],
+    "Half Moon Bay, CA": [37.46, -122.43], "Thornville, OH": [39.90, -82.41],
+    "Hammonton, NJ": [39.64, -74.80], "Crystal Bay, NV": [39.22, -120.00],
+    "Stroudsburg, PA": [40.99, -75.19], "Homer, NY": [42.64, -76.18],
+    "Fort Collins, CO": [40.59, -105.08], "Menlo Park, CA": [37.45, -122.18],
+    "Montville, CT": [41.49, -72.09], "Charlottesville, VA": [38.03, -78.48],
+    "New Haven, CT": [41.31, -72.93], "Hampton, NH": [42.94, -70.84],
+    "Boston, MA": [42.36, -71.06], "Nicasio, CA": [38.06, -122.70],
+    "Laytonville, CA": [39.69, -123.48], "Paonia, CO": [38.87, -107.59],
+    "Albany, NY": [42.65, -73.75], "Raleigh, NC": [35.78, -78.64],
+    "Stuart, FL": [27.20, -80.25], "Tampa, FL": [27.95, -82.46],
+    "St. Augustine, FL": [29.90, -81.31], "Bangor, PA": [40.87, -75.21],
+    "Easton, PA": [40.69, -75.22], "Allentown, PA": [40.61, -75.49],
+    "Hellertown, PA": [40.58, -75.34]
   };
 
   /* ---- 2. Shows ---- */
+  // VERIFIED against jambase / bandsintown / songkick / venue pages (research pass 2026-07-15).
+  // Band names carry the marquee act's name so the dropdown filter matches (normAct handles &/punct).
   var SHOWS = [
-    { band: "Melvin Seals & JGB", venue: "McDonald Theatre", city: "Eugene, OR", date: "2026-07-03", real: true },
-    { band: "Dark Star Orchestra", venue: "Rock the Dock", city: "Lake George, NY", date: "2026-07-11", real: true },
-    { band: "Joe Russo's Almost Dead", venue: "Holliday Park", city: "Indianapolis, IN", date: "2026-07-17", real: true },
-    { band: "Joe Russo's Almost Dead", venue: "Evans Amphitheater", city: "Cleveland Heights, OH", date: "2026-07-18", real: true },
-    { band: "Joe Russo's Almost Dead", venue: "Riverfront Park", city: "Harrisburg, PA", date: "2026-07-19", real: true },
-    { band: "Dark Star Orchestra", venue: "Humphrey's by the Bay", city: "San Diego, CA", date: "2026-07-28", real: true },
+    // ── Dark Star Orchestra — full run from darkstarorchestra.net/tour (authoritative). (Jamaica 1/12-16 omitted — off-map + sold out.) ──
+    { band: "Dark Star Orchestra", venue: "Humphreys Concerts by the Bay", city: "San Diego, CA", date: "2026-07-28", real: true },
     { band: "Dark Star Orchestra", venue: "California State Fair", city: "Sacramento, CA", date: "2026-07-30", real: true },
-    { band: "Dark Star Orchestra", venue: "Greek Theatre (Rex benefit)", city: "Berkeley, CA", date: "2026-07-31", real: true },
-    { band: "Melvin Seals & JGB", venue: "Great American Music Hall", city: "San Francisco, CA", date: "2026-08-02", real: true },
+    { band: "Dark Star Orchestra", venue: "The Greek Theatre (w/ Melvin Seals & JGB)", city: "Berkeley, CA", date: "2026-07-31", real: true },
+    { band: "Dark Star Orchestra", venue: "The Greek Theatre (w/ Peter Rowan & Sam Grisman Project)", city: "Berkeley, CA", date: "2026-08-01", real: true },
+    { band: "Dark Star Orchestra", venue: "Britt Pavilion", city: "Jacksonville, OR", date: "2026-08-04", real: true },
+    { band: "Dark Star Orchestra", venue: "The Cuthbert Amphitheater", city: "Eugene, OR", date: "2026-08-06", real: true },
+    { band: "Dark Star Orchestra", venue: "Chateau Ste. Michelle Winery", city: "Woodinville, WA", date: "2026-08-07", real: true },
+    { band: "Dark Star Orchestra", venue: "McMenamins Grand Lodge", city: "Forest Grove, OR", date: "2026-08-08", real: true },
+    { band: "Dark Star Orchestra", venue: "Ting Pavilion", city: "Charlottesville, VA", date: "2026-09-10", real: true },
+    { band: "Dark Star Orchestra", venue: "Riverfront Park", city: "Harrisburg, PA", date: "2026-09-11", real: true },
+    { band: "Dark Star Orchestra", venue: "Ovation Hall, Ocean Casino Resort", city: "Atlantic City, NJ", date: "2026-09-12", real: true },
+    { band: "Dark Star Orchestra", venue: "Saranac Brewing Co", city: "Utica, NY", date: "2026-09-15", real: true },
+    { band: "Dark Star Orchestra", venue: "College Street Music Hall", city: "New Haven, CT", date: "2026-09-17", real: true },
+    { band: "Dark Star Orchestra", venue: "Hampton Beach Casino Ballroom", city: "Hampton, NH", date: "2026-09-18", real: true },
+    { band: "Dark Star Orchestra", venue: "Hampton Beach Casino Ballroom", city: "Hampton, NH", date: "2026-09-19", real: true },
+    { band: "Dark Star Orchestra", venue: "Grand Point North Festival", city: "Burlington, VT", date: "2026-09-20", real: true },
+    // ── Joe Russo's Almost Dead — full run from the official site (authoritative) ──
+    { band: "Joe Russo's Almost Dead", venue: "Rock The Ruins", city: "Indianapolis, IN", date: "2026-07-17", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Evans Amphitheater – Cain Park", city: "Cleveland Heights, OH", date: "2026-07-18", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Riverfront Park", city: "Harrisburg, PA", date: "2026-07-19", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Brooklyn Bowl Las Vegas", city: "Las Vegas, NV", date: "2026-07-30", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "OC Fair", city: "Costa Mesa, CA", date: "2026-07-31", real: true },
     { band: "Joe Russo's Almost Dead", venue: "Quarry Amphitheater", city: "Santa Cruz, CA", date: "2026-08-01", real: true },
-    { band: "Kimock · Oteil & Friends", venue: "French Broad River Brewery", city: "Asheville, NC", date: "2026-08-02", real: true },
-    { band: "Joe Russo's Almost Dead", venue: "The Mission Ballroom", city: "Denver, CO", date: "2026-08-20", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Blue Note Napa Summer Sessions", city: "Napa, CA", date: "2026-08-02", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Pioneer Courthouse Square", city: "Portland, OR", date: "2026-08-13", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "The Cuthbert Amphitheater", city: "Eugene, OR", date: "2026-08-14", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Remlinger Farms", city: "Carnation, WA", date: "2026-08-15", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Mission Ballroom", city: "Denver, CO", date: "2026-08-20", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "Gerald R. Ford Amphitheater", city: "Vail, CO", date: "2026-08-21", real: true },
     { band: "Joe Russo's Almost Dead", venue: "Dillon Amphitheater", city: "Dillon, CO", date: "2026-08-22", real: true },
-    { band: "Steve Kimock (Donna Jean celebration)", venue: "Mystic Theatre", city: "Petaluma, CA", date: "2026-08-22", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "MGM Music Hall at Fenway", city: "Boston, MA", date: "2026-09-24", real: true },
     { band: "Joe Russo's Almost Dead", venue: "The Rooftop at Pier 17", city: "New York, NY", date: "2026-09-25", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "The Rooftop at Pier 17", city: "New York, NY", date: "2026-09-26", real: true },
+    { band: "Joe Russo's Almost Dead", venue: "The Sylvee", city: "Madison, WI", date: "2026-10-01", real: true },
     { band: "Joe Russo's Almost Dead", venue: "The Salt Shed", city: "Chicago, IL", date: "2026-10-02", real: true },
-    { band: "John Kadlecik — Sages & Spirits", venue: "The Capitol Theatre", city: "Port Chester, NY", date: "2026-10-02", real: true },
-    { band: "Jeff Mattson & Friends", venue: "City Winery", city: "New York, NY", date: "2026-10-23", real: true },
-    { band: "Jerry Garcia Symphonic Celebration (feat. John Kimock)", venue: "TD Pavilion at Highmark Mann · The Philly Pops", city: "Philadelphia, PA", date: "2026-08-28", real: true },
-    { band: "Steve Kimock — Bobby Weir Celebration", venue: "Oregon Country Fair", city: "Veneta, OR", date: "2026-07-12", real: true },
-    { band: "House Band (sample)", venue: "The Catalyst", city: "Santa Cruz, CA", date: "2026-07-15", sample: true },
-    { band: "House Band (sample)", venue: "The Showbox", city: "Seattle, WA", date: "2026-07-22", sample: true },
-    { band: "House Band (sample)", venue: "Antone's", city: "Austin, TX", date: "2026-08-05", sample: true },
-    { band: "House Band (sample)", venue: "Variety Playhouse", city: "Atlanta, GA", date: "2026-08-12", sample: true },
-    { band: "House Band (sample)", venue: "9:30 Club", city: "Washington, DC", date: "2026-08-19", sample: true },
-    { band: "House Band (sample)", venue: "The Sinclair", city: "Cambridge, MA", date: "2026-08-26", sample: true },
-    { band: "House Band (sample)", venue: "Ardmore Music Hall", city: "Ardmore, PA", date: "2026-09-04", sample: true }
+    { band: "Joe Russo's Almost Dead", venue: "GLC Live at 20 Monroe", city: "Grand Rapids, MI", date: "2026-10-03", real: true },
+    // ── Steve Kimock (summer run billed w/ Oteil & Friends) ──
+    { band: "Steve Kimock · Oteil & Friends", venue: "Gratefulfest", city: "Garrettsville, OH", date: "2026-07-24", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "JamPacked Festival", city: "Richmond, VA", date: "2026-08-01", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "French Broad River Brewery", city: "Asheville, NC", date: "2026-08-02", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "The Muse", city: "Nantucket, MA", date: "2026-08-04", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "Tree House Brewing – Summer Stage", city: "Deerfield, MA", date: "2026-08-06", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "Nashua Center for the Arts", city: "Nashua, NH", date: "2026-08-07", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "Stateside Amphitheatre, Jay Peak", city: "Jay, VT", date: "2026-08-08", real: true },
+    { band: "Steve Kimock · Oteil & Friends", venue: "Lincoln Hill Farms", city: "Canandaigua, NY", date: "2026-08-09", real: true },
+    { band: "Steve Kimock (Donna Jean Godchaux tribute)", venue: "Mystic Theatre", city: "Petaluma, CA", date: "2026-08-22", real: true },
+    { band: "Steve Kimock (Donna Jean Godchaux tribute)", venue: "Mystic Theatre", city: "Petaluma, CA", date: "2026-08-23", real: true },
+    { band: "Steve Kimock (w/ Zero)", venue: "Lost Lands Festival", city: "Thornville, OH", date: "2026-09-18", real: true },
+    { band: "Steve Kimock (w/ Zero)", venue: "Submersion Festival", city: "Hammonton, NJ", date: "2026-10-01", real: true },
+    // ── Melvin Seals & JGB — full run from melvinsealsandjgb.com (authoritative). (Kilauea HI 9/18-20 omitted — off the continental map.) ──
+    { band: "Melvin Seals & JGB", venue: "Grateful Fest", city: "Garrettsville, OH", date: "2026-07-24", real: true },
+    { band: "Melvin Seals & JGB", venue: "The Greek Theatre at UC Berkeley", city: "Berkeley, CA", date: "2026-07-31", real: true },
+    { band: "Melvin Seals & JGB", venue: "Jerry Garcia Amphitheater", city: "San Francisco, CA", date: "2026-08-01", real: true },
+    { band: "Melvin Seals & JGB", venue: "Great American Music Hall", city: "San Francisco, CA", date: "2026-08-02", real: true },
+    { band: "Melvin Seals & JGB", venue: "Lewes Ferry Grounds", city: "Lewes, DE", date: "2026-08-12", real: true },
+    { band: "Melvin Seals & JGB", venue: "Lewes Ferry Grounds", city: "Lewes, DE", date: "2026-08-13", real: true },
+    { band: "Melvin Seals & JGB", venue: "Tropicana Showroom", city: "Atlantic City, NJ", date: "2026-08-15", real: true },
+    { band: "Melvin Seals & JGB", venue: "CanniFest Humboldt", city: "Arcata, CA", date: "2026-09-12", real: true },
+    { band: "Melvin Seals & JGB", venue: "Crystal Bay Casino", city: "Crystal Bay, NV", date: "2026-10-09", real: true },
+    { band: "Melvin Seals & JGB", venue: "Sherman Theater", city: "Stroudsburg, PA", date: "2026-10-15", real: true },
+    { band: "Melvin Seals & JGB", venue: "Stanley Theatre", city: "Utica, NY", date: "2026-10-16", real: true },
+    { band: "Melvin Seals & JGB", venue: "XL Live", city: "Harrisburg, PA", date: "2026-10-17", real: true },
+    { band: "Melvin Seals & JGB", venue: "Center for the Arts of Homer", city: "Homer, NY", date: "2026-10-18", real: true },
+    { band: "Melvin Seals & JGB", venue: "Aggie Theatre", city: "Fort Collins, CO", date: "2026-10-29", real: true },
+    { band: "Melvin Seals & JGB", venue: "Boulder Theater", city: "Boulder, CO", date: "2026-10-30", real: true },
+    { band: "Melvin Seals & JGB", venue: "The Guild Theatre", city: "Menlo Park, CA", date: "2026-12-04", real: true },
+    { band: "Melvin Seals & JGB", venue: "The Guild Theatre", city: "Menlo Park, CA", date: "2026-12-05", real: true },
+    { band: "Melvin Seals & JGB", venue: "Lillian S. Wells Hall at The Parker", city: "Fort Lauderdale, FL", date: "2027-01-17", real: true },
+    // ── Sages & Spirits (JK + original DSO + Melvin) ──
+    { band: "Sages & Spirits", venue: "The Capitol Theatre (100 Years)", city: "Port Chester, NY", date: "2026-10-02", real: true },
+    // ── John Mayer (johnmayer.com lists none; these two are the confirmed dates. Dead & Co not touring.) ──
+    { band: "John Mayer (w/ Clapton & Buddy Guy)", venue: "Radio City Music Hall", city: "New York, NY", date: "2026-10-01", real: true },
+    { band: "John Mayer", venue: "Mohegan Sun Arena", city: "Montville, CT", date: "2026-10-09", real: true },
+    // ── Jerry's Middle Finger — full run from the official site (authoritative) ──
+    { band: "Jerry's Middle Finger", venue: "Old Princeton Landing (Night 1)", city: "Half Moon Bay, CA", date: "2026-07-17", real: true },
+    { band: "Jerry's Middle Finger", venue: "Old Princeton Landing (Night 2)", city: "Half Moon Bay, CA", date: "2026-07-18", real: true },
+    { band: "Jerry's Middle Finger", venue: "Tower Theatre", city: "Bend, OR", date: "2026-08-06", real: true },
+    { band: "Jerry's Middle Finger", venue: "Hidden Hall (Late Show)", city: "Seattle, WA", date: "2026-08-07", real: true },
+    { band: "Jerry's Middle Finger", venue: "Crystal Ballroom (Late Show)", city: "Portland, OR", date: "2026-08-08", real: true },
+    { band: "Jerry's Middle Finger", venue: "WOW Hall", city: "Eugene, OR", date: "2026-08-09", real: true },
+    { band: "Jerry's Middle Finger", venue: "The Hangar", city: "South Lake Tahoe, CA", date: "2026-08-29", real: true },
+    { band: "Jerry's Middle Finger", venue: "Rancho Nicasio", city: "Nicasio, CA", date: "2026-08-30", real: true },
+    { band: "Jerry's Middle Finger", venue: "The Bellwether", city: "Los Angeles, CA", date: "2026-09-04", real: true },
+    { band: "Jerry's Middle Finger", venue: "Music Box", city: "San Diego, CA", date: "2026-09-05", real: true },
+    { band: "Jerry's Middle Finger", venue: "The Hog Farm Celebration", city: "Laytonville, CA", date: "2026-09-18", real: true },
+    { band: "Jerry's Middle Finger", venue: "Siesta Valley Bowl", city: "Orinda, CA", date: "2026-09-19", real: true },
+    { band: "Jerry's Middle Finger", venue: "Mountain Harvest Festival", city: "Paonia, CO", date: "2026-09-26", real: true },
+    { band: "Jerry's Middle Finger", venue: "Brooklyn Bowl NYC", city: "Brooklyn, NY", date: "2026-10-14", real: true },
+    { band: "Jerry's Middle Finger", venue: "Ardmore Music Hall", city: "Ardmore, PA", date: "2026-10-15", real: true },
+    { band: "Jerry's Middle Finger", venue: "Lark Hall", city: "Albany, NY", date: "2026-10-16", real: true },
+    { band: "Jerry's Middle Finger", venue: "The Vogel, Count Basie Center", city: "Red Bank, NJ", date: "2026-10-17", real: true },
+    { band: "Jerry's Middle Finger", venue: "The Hamilton", city: "Washington, DC", date: "2026-10-18", real: true },
+    { band: "Jerry's Middle Finger", venue: "Lincoln Theatre", city: "Raleigh, NC", date: "2026-10-20", real: true },
+    { band: "Jerry's Middle Finger", venue: "Third Room", city: "Asheville, NC", date: "2026-10-21", real: true },
+    { band: "Jerry's Middle Finger", venue: "Terra Fermata Tiki Bar", city: "Stuart, FL", date: "2026-10-23", real: true },
+    { band: "Jerry's Middle Finger", venue: "Zodiac", city: "Tampa, FL", date: "2026-10-24", real: true },
+    { band: "Jerry's Middle Finger", venue: "Colonial Oak Music Park", city: "St. Augustine, FL", date: "2026-10-25", real: true },
+    { band: "Jerry's Middle Finger", venue: "Felton Music Hall (Halloween Night 1)", city: "Felton, CA", date: "2026-10-30", real: true },
+    { band: "Jerry's Middle Finger", venue: "Felton Music Hall (Halloween Night 2)", city: "Felton, CA", date: "2026-10-31", real: true },
+    // ── Life After Dead — Lehigh Valley GD tribute (jam/rock/funk), from reverbnation.com/lifeafterdead1 ──
+    { band: "Life After Dead", venue: "Franklin Hill Vineyards", city: "Bangor, PA", date: "2026-07-18", real: true },
+    { band: "Life After Dead", venue: "Musikfest", city: "Bethlehem, PA", date: "2026-08-06", real: true },
+    { band: "Life After Dead", venue: "HangDog Outdoor Adventure", city: "Easton, PA", date: "2026-08-22", real: true },
+    { band: "Life After Dead", venue: "Weyerbacher Allentown Taproom & Biergarten", city: "Allentown, PA", date: "2026-09-03", real: true },
+    { band: "Life After Dead", venue: "Lost Tavern Brewing", city: "Hellertown, PA", date: "2026-10-31", real: true }
   ];
   try {
     [window.dealMapRows, window.hotSauceMapRows].forEach(function (fn) {
@@ -194,9 +292,10 @@
   // assign every locatable show to its nearest chapter
   var CH_INDEX = {}; CHAPTERS.forEach(function (ch) { CH_INDEX[ch.name] = ch; });
   var ALLSHOWS = SHOWS.slice();               // master — every future show, never mutated
-  var ACT_FILTER = null;                        // lowercased band filter, or null = all acts
+  var ACT_FILTER = null;                        // normalized band filter, or null = all acts
   var MONTH_FILTER = null;                       // 'YYYY-MM' to mirror the calendar's month, or null = all
-  function actMatch(s){ if(!ACT_FILTER) return true; var b=(s.band||'').toLowerCase();
+  function normAct(x){ return String(x||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,' ').trim(); }  // "&"→"and", strip punct (Melvin Seals & JGB === …and JGB)
+  function actMatch(s){ if(!ACT_FILTER) return true; var b=normAct(s.band);
     return b===ACT_FILTER || b.indexOf(ACT_FILTER)>=0 || ACT_FILTER.indexOf(b)>=0; }
   function monthMatch(s){ if(!MONTH_FILTER) return true; return String(s.date||'').slice(0,7)===MONTH_FILTER; }
   function reindexShows(){
@@ -206,7 +305,7 @@
   }
   // rebuild the map's shows through BOTH filters (band + month) so it mirrors the calendar exactly
   function applyFilters(){ SHOWS = ALLSHOWS.filter(function(s){ return actMatch(s) && monthMatch(s); }); reindexShows(); }
-  function applyActData(band){ ACT_FILTER=(band&&band!=='all')?String(band).toLowerCase():null; applyFilters(); }
+  function applyActData(band){ ACT_FILTER=(band&&band!=='all')?normAct(band):null; applyFilters(); }
   function applyMonthData(ym){ MONTH_FILTER=(ym&&/^\d{4}-\d{2}$/.test(ym))?ym:null; applyFilters(); }
   applyFilters();
   function chapterByName(n) { return CH_INDEX[n] || null; }
@@ -471,7 +570,7 @@
       var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
       lit.forEach(function (c) { tot += c.shows.length; });
       var nf = 0; try { nf = (window.DD_FESTIVALS || []).length; } catch (e) {}
-      farrah('The bus is rolling through <b>' + lit.length + ' chapter' + (lit.length !== 1 ? 's' : '') + '</b> tonight — <b>' + tot + ' shows</b>' + (nf ? (' + <b>' + nf + ' summer festivals</b>') : '') + ' on the board. Tap a lit region — or a <b>dark one to post the first date.</b>');
+      farrah('The bus is rolling through <b>' + lit.length + ' chapter' + (lit.length !== 1 ? 's' : '') + '</b> tonight — <b>' + tot + ' shows</b>' + (nf ? (' + <b>' + nf + ' summer festivals</b>') : '') + ' on the board. Tap a lit region — or a <b>dark one to post the first date</b> 🍪 <b>first one in wins the big Cookie.</b>');
     }
     function drill(chapterName) {
       var ch = chapterByName(chapterName); if (!ch) return;
