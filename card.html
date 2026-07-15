@@ -100,6 +100,10 @@ h1{font-size:26px;margin:4px 0 2px;font-weight:900}
     <div class="covlogo">🌹</div>
     <div class="covname">Thank you.</div>
     <div class="covq" id="covThanks">Welcome to the family.</div>
+    <div id="covHyperWrap" style="display:none;margin:13px 0">
+      <button class="covyes" style="background:linear-gradient(90deg,#f0a500,#e0577a)" onclick="covHyper()">🛰️ HyperPost it wider — when you're ready</button>
+      <div style="font-size:11.5px;color:#8a8590;margin-top:6px;line-height:1.4">Optional. Pins it to the family blog and shares it out. <b>Nothing goes wider until you tap.</b></div>
+    </div>
     <div id="covGroupQR" style="display:none;margin:14px 0;background:#fff;border:1px solid #eee;border-radius:14px;padding:15px;text-align:center">
       <div style="font-weight:800;font-size:14.5px;margin-bottom:9px">Now bring your people home 🌹</div>
       <div id="cgqr" style="width:150px;height:150px;margin:0 auto;background:#fff;border-radius:10px"></div>
@@ -126,6 +130,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_art.js"></script>
 <script src="dd_pymk.js"></script>
 <script src="dd_bandgroups.js"></script>
+<script src="dd_watchdog.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script>
@@ -193,7 +198,7 @@ var INVITE=ISVIP
   ? ("Just say hi"+(NAME?(", "+NAME.split(' ')[0]):"")+" — one line is plenty. 🌹")
   : ("We'd be honored if you wrote a hello to the DeadDance family right here"+(NAME?(", "+NAME.split(' ')[0]):"")+" — whatever's on your heart. 🌹");
 var DRAFT=ISVIP
-  ? ("Hey — check me out on DeadDance 🌹"+(NAME?("\n— "+NAME):""))
+  ? ("Hey — come find me on DeadDance 🌹 My shows and my group are all here in one place. See you out there."+(NAME?("\n— "+NAME):""))
   : ("Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):""));
 window.claudeWrite=function(){ var ta=document.getElementById('covBody'); if(!ta)return; ta.value=DRAFT; ta.focus(); try{ ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){}
   if(typeof toast==='function') toast('✨ A start — make it yours, then send.'); };
@@ -209,13 +214,28 @@ window.claimYes=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }
 /* SEND → post the note to the whole family, authored as them. */
 window.claimSend=function(){ var ta=document.getElementById('covBody'); var t=(ta&&ta.value||'').trim();
   if(!t){ if(ta)ta.focus(); toast('Add a few words first 🌹'); return; }
+  /* watchdog: keep the family feed clean — screen before anything posts */
+  var wd=(window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(t):{ok:true};
+  if(!wd.ok){ if(ta)ta.focus(); toast(wd.reason||'Let’s keep it family 🌹'); return; }
   try{ localStorage.setItem('dd.myname',NAME); window.ME=window.ME||{}; ME.name=NAME; }catch(e){}
-  var b=ta.nextElementSibling; if(b){ b.textContent='Sending…'; b.style.opacity=.7; }
-  function thanks(msg){ var e=document.getElementById('covThanks'); if(e)e.textContent=msg; covShow('covS3'); showGroupQR(); }
-  function go(tries){ if(!(window.DDFeed&&DDFeed.post)){ if(tries<20)return setTimeout(function(){go(tries+1);},250); thanks('Your note is on its way to the family — welcome home. 🌹'); return; }
-    DDFeed.post(t,{scope:'all',pinned:true}).then(function(){ thanks('Your note just went out to the whole family — they’ll feel it. Welcome home. 🌹'); })
-      .catch(function(e){ if(tries<20)return setTimeout(function(){go(tries+1);},300); thanks('Your note is on its way — welcome home. 🌹'); }); }
+  LASTNOTE=t;
+  var b=ta.nextElementSibling; if(b){ b.textContent='Saving…'; b.style.opacity=.7; }
+  function thanks(msg){ var e=document.getElementById('covThanks'); if(e)e.textContent=msg; covShow('covS3');
+    var hw=document.getElementById('covHyperWrap'); if(hw)hw.style.display='block';   /* ease-in: HyperPost is the opt-in next step */
+    showGroupQR(); }
+  /* SOFT landing — the hello sits on their page (unpinned, in-app), NOT blasted to the world.
+     No surprise HyperPost. They choose when (and if) to go wider. */
+  function go(tries){ if(!(window.DDFeed&&DDFeed.post)){ if(tries<20)return setTimeout(function(){go(tries+1);},250); thanks('Your hello is saved to your page — welcome home. 🌹'); return; }
+    DDFeed.post(t,{scope:'all'}).then(function(){ try{ if(window.DDCoins) DDCoins.feed('post',(ID||NAME)); }catch(e){} thanks('Your hello is up on your DeadDance page 🌹 — take your time. When you’re ready, you can HyperPost it wider.'); })
+      .catch(function(e){ if(tries<20)return setTimeout(function(){go(tries+1);},300); thanks('Your hello is saved to your page — welcome home. 🌹'); }); }
   go(0); };
+/* Opt-in HyperPost: only when THEY tap it — pins to the family blog + shares wider. */
+var LASTNOTE='';
+window.covHyper=function(){ var hw=document.getElementById('covHyperWrap'); var e=document.getElementById('covThanks');
+  if(!LASTNOTE){ if(hw)hw.style.display='none'; return; }
+  if(hw){ var btn=hw.querySelector('button'); if(btn){ btn.textContent='HyperPosting…'; btn.style.opacity=.7; } }
+  function done(){ if(hw)hw.style.display='none'; if(e)e.textContent='🛰️ HyperPosted — you’re top of the family blog now. The whole family feels it. 🌹'; }
+  try{ if(window.DDFeed&&DDFeed.post){ DDFeed.post(LASTNOTE,{scope:'all',pinned:true}).then(function(){ try{ if(window.DDCoins) DDCoins.feed('forward',(ID||NAME)+'|hyper'); }catch(e){} done(); }).catch(done); } else { done(); } }catch(err){ done(); } };
 window.claimSkip=function(){ var e=document.getElementById('covThanks'); if(e)e.textContent='You’re in. Say hi whenever you like — the family’s glad you’re here. 🌹'; covShow('covS3'); showGroupQR(); };
 /* If this is a marquee band group, bounce them back to Facebook with their GROUP QR to bring fans in. */
 var CGURL=''; try{ if(window.DDBandGroups&&DDBandGroups.get(NAME||ID)) CGURL=DDBandGroups.qrUrl(NAME||ID); else if(T==='band'&&ID) CGURL='https://deaddance.app/'+ID; }catch(e){}   /* marquee → group; regulars → their own page. Everyone comes home on the first shout-out. */

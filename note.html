@@ -49,6 +49,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 </script>
 <script src="dd_logoguess.js"></script>
 <script src="dd_logoguess_vip.js"></script>
+<script src="dd_watchdog.js"></script>
 <script src="dd_feed.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -74,6 +75,8 @@ window.claudeWrite=function(){ var b=document.getElementById('body'); b.value=DR
 window.postNote=function(){
   var t=(document.getElementById('body').value||'').trim();
   if(!t){ document.getElementById('body').focus(); toast('Write a few words first 🌹'); return; }
+  var wd=(window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(t):{ok:true};   /* watchdog — keep the feed clean */
+  if(!wd.ok){ document.getElementById('body').focus(); toast(wd.reason||'Let’s keep it family 🌹'); return; }
   // author the post as this artist on this device
   try{ if(NAME){ localStorage.setItem('dd.myname',NAME); window.ME=window.ME||{}; ME.name=NAME; } }catch(e){}
   var btn=document.querySelector('.post'); btn.textContent='Posting…'; btn.style.opacity=.7;

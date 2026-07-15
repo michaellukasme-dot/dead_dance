@@ -2916,6 +2916,8 @@ function cmpNote(){ var n=document.getElementById('cmpNote'); if(!n)return; var 
   n.textContent='One tap → '+names.join(', ')+'. ⚙ to change.'; }
 function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.value||'').trim();
   if(!txt){ toast('Say something first 🌹'); return; }
+  var _wd=(window.DDWatchdog&&DDWatchdog.checkText)?DDWatchdog.checkText(txt):{ok:true};   /* watchdog — keep the feed clean */
+  if(!_wd.ok){ if(t)t.focus(); toast(_wd.reason||'Let’s keep it family 🌹'); return; }
   var def=cmpDefaults(); var ext=def.filter(function(id){return id!=='dd';});
   var extNames=ext.map(function(id){var f=CMP_NETS.filter(function(c){return c.id===id;})[0];return f?f.n.replace(/^\S+\s/,''):id;});
   // 1) dead.dance feed — posts FOR REAL (persists to Supabase; everyone's feed reads it back, live)
@@ -3761,6 +3763,7 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_logoguess.js" defer></script>
 <script src="dd_logoguess_vip.js" defer></script>
 <script src="dd_bandgroups.js" defer></script>
+<script src="dd_watchdog.js" defer></script>
 <script src="dd_learn.js" defer></script>
 <script src="dd_crumbs.js" defer></script>
 <script src="dd_recruit.js" defer></script>
