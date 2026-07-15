@@ -237,8 +237,8 @@
         '<div class="showmap-head">' +
           '<b>🗺️ Shows on the map</b>' +
           '<div class="dd-scope" role="tablist">' +
-            '<button data-scope="local">📍 Local</button>' +
-            '<button data-scope="national" class="on">National</button>' +
+            '<button data-scope="local" class="on">📍 Local</button>' +
+            '<button data-scope="national">National</button>' +
             '<button data-scope="my">My Calendar</button>' +
           '</div>' +
           '<button class="showmap-x" aria-label="Hide map" title="Hide">✕</button>' +
@@ -524,10 +524,15 @@
     var x = host.querySelector(".showmap-x");
     if (x) x.onclick = function () { host.style.display = "none"; try { localStorage.setItem("dd.showmap.hidden", "1"); } catch (e) {} };
 
-    // boot at national
+    // boot to match the shared scope (Calendar default = Local) so the two never disagree at start
+    var _boot = (window.CAL_SCOPE || "local");
     drawDots(FULL_VB[2], null);
     drawBadges(true);
-    toNation();
+    if (_boot === "local") {
+      var _reg = (window.REG && chapterByName(window.REG)) ? window.REG : null;
+      if (_reg) { drill(_reg); } else { toNation(); }   // focus the same region the Calendar shows — no GPS prompt on load
+    } else { toNation(); }
+    host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === _boot); });
   }
 
   function init() {

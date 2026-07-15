@@ -512,19 +512,17 @@ function crossLinkBlock(b){
       '<span style="color:#7a7285">deaddance.app/</span>'+
       '<input id="fbxHandle" value="'+esc(handle)+'" oninput="fbxHandleChange()" spellcheck="false" style="border:0;border-bottom:2px solid #b8002e;background:none;font:inherit;font-weight:800;color:#b8002e;width:auto;min-width:90px;flex:1;padding:2px 0">'+
     '</div>'+
-    '<label style="display:flex;gap:9px;align-items:flex-start;cursor:pointer;font-size:13.5px;font-weight:700;margin-top:11px">'+
+    /* QR shown BY DEFAULT — right there, light background, ready to send */
+    '<div style="display:flex;gap:13px;align-items:center;margin-top:12px;background:#fff;border:1px solid #efe9f6;border-radius:12px;padding:13px">'+
+      '<div id="fbxQR" style="width:120px;height:120px;flex:0 0 120px;background:#fff;border-radius:10px"></div>'+
+      '<div style="font-size:12.5px;color:#4a4356;line-height:1.45"><b>Your QR — ready to send 🌹</b><br>Every scan opens your DeadDance page. Text it, print it, put it on the case.'+
+        '<div style="display:flex;gap:6px;margin-top:8px"><button class="btn ghost" style="padding:8px 12px;font-size:12px" onclick="fbxCopy()">📋 Copy link</button><button class="btn ghost" style="padding:8px 12px;font-size:12px" onclick="fbxQRsave()">⬇︎ Save QR</button></div></div>'+
+    '</div>'+
+    '<label style="display:flex;gap:9px;align-items:flex-start;cursor:pointer;font-size:13.5px;font-weight:700;margin-top:13px">'+
       '<input type="checkbox" id="fbxOk" onchange="fbxConfirm(this.checked)" style="width:18px;height:18px;margin-top:1px;accent-color:#b8002e">'+
-      '<span>Yes — add DeadDance to <b>'+esc(b.name||'our')+'</b>’s Facebook. This is our page and our choice.</span></label>'+
+      '<span>Also add DeadDance to <b>'+esc(b.name||'our')+'</b>’s Facebook Page? This is our page and our choice.</span></label>'+
     '<div id="fbxActions" style="display:none;margin-top:11px">'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-        '<button class="btn" style="flex:1;min-width:130px;background:#1877f2;color:#fff;border-color:#1877f2" onclick="fbxShare()">↗ Share to Facebook</button>'+
-        '<button class="btn ghost" style="flex:1;min-width:110px" onclick="fbxCopy()">📋 Copy link</button>'+
-      '</div>'+
-      '<div style="display:flex;gap:12px;align-items:center;margin-top:12px;background:#faf7ff;border:1px solid #efe9f6;border-radius:12px;padding:12px">'+
-        '<div id="fbxQR" style="width:110px;height:110px;flex:0 0 110px;background:#fff;border-radius:10px"></div>'+
-        '<div style="font-size:12.5px;color:#4a4356;line-height:1.45"><b>Your band’s QR 🌹</b><br>Unique to you — every scan opens your DeadDance page. Print it on flyers, the merch table, the case.<br>'+
-          '<button class="btn ghost" style="margin-top:7px;padding:8px 12px;font-size:12px" onclick="fbxQRsave()">⬇︎ Save QR</button></div>'+
-      '</div>'+
+      '<button class="btn" style="width:100%;background:#1877f2;color:#fff;border-color:#1877f2" onclick="fbxShare()">↗ Share to Facebook</button>'+
       '<div style="margin-top:10px;font-size:12.5px;color:#4a4356;line-height:1.55">'+
         '<b>Add it to your Page in 20 seconds:</b><br>'+
         '1. Open your Facebook Page → <b>Edit</b> (or Page settings → About).<br>'+
@@ -596,6 +594,7 @@ function render(){
   renderLeft();
   if(S.step===0){var q=document.getElementById('q'); if(q&&S.band){q.value=S.band.name; doSearch();}}
   var h=document.querySelector('#right h2'); if(h&&h.focus)h.focus();
+  if(document.getElementById('fbxQR')) fbxQRrender();   /* QR visible by default on the cross-link step */
   var r=document.getElementById('right');
   if(window.innerWidth<=900&&r&&r.scrollIntoView) r.scrollIntoView({block:'start'});
   else window.scrollTo(0,0);
