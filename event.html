@@ -1,0 +1,221 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Show · DeadDance</title>
+<!-- HYPERPOSTABLE: rich unfurl card wherever this link is pasted (FB, iMessage, Slack, X, WhatsApp) -->
+<meta property="og:site_name" content="DeadDance">
+<meta property="og:type" content="event">
+<meta id="ogTitle" property="og:title" content="A show on DeadDance">
+<meta id="ogDesc" property="og:description" content="Tap Going and meet others who’ll be there. Every show has a page.">
+<meta property="og:image" content="https://deaddance.app/dd-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta id="twTitle" name="twitter:title" content="A show on DeadDance">
+<meta id="twDesc" name="twitter:description" content="Every show on DeadDance has a page.">
+<meta name="twitter:image" content="https://deaddance.app/dd-512.png">
+<meta name="theme-color" content="#2a1b3d">
+<link rel="icon" href="dd-512.png">
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+<style>
+:root{--rose:#b8002e;--purple:#2a1b3d;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding:16px 14px 60px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:22px;padding:22px;position:relative;overflow:hidden}
+.hero .mk{position:absolute;right:-24px;top:-24px;width:120px;opacity:.15}
+.hero .dt{color:#ffd76a;font-weight:800;font-size:13px;letter-spacing:.03em}
+.hero h1{font-size:25px;margin:6px 0 4px;font-weight:900;line-height:1.15}
+.hero .at{color:#cdbfe0;font-size:15px}
+.hero .cov{display:inline-block;margin-top:12px;background:rgba(255,255,255,.14);border-radius:999px;padding:5px 13px;font-weight:800;font-size:13px}
+.acts{display:flex;gap:10px;margin:14px 0}
+.btn{flex:1;border:0;border-radius:13px;padding:13px;font-weight:800;font-size:15px;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.btn.rose{background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
+.btn.ghost{background:#f1eef7;color:var(--purple)}
+.going{color:var(--muted);font-size:13px;text-align:center;margin:-4px 0 10px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.hosts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.host{border:1px solid var(--line);border-radius:16px;padding:14px;text-decoration:none;color:var(--ink);text-align:center;background:#fff}
+.host .mono{width:60px;height:60px;border-radius:16px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff}
+.host .k{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.host .k.band{color:var(--rose)} .host .k.venue{color:#1f9e6b}
+.host .nm{font-weight:800;font-size:14px;line-height:1.15}
+.card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}
+.det{font-size:14px;line-height:1.5}
+.map{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#f6f4fb}
+.map iframe{width:100%;height:200px;border:0;display:block}
+.map .addr{padding:12px 14px}
+.map .addr b{font-size:14px}.map .addr span{color:var(--muted);font-size:13px;display:block}
+.mapbtns{display:flex;gap:8px;padding:0 14px 14px}
+.mapbtns a{flex:1;text-align:center;text-decoration:none;border-radius:11px;padding:11px;font-weight:800;font-size:13px}
+.mapbtns .dir{background:#eef3fd;color:#2f6fe0}
+.mapbtns .print{background:#fdeef2;color:var(--rose)}
+.sharebar{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.sharebar a,.sharebar button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:11px 4px;text-decoration:none;color:var(--ink);font-weight:700;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px}
+.sharebar .ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:900}
+.qrwrap{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px}
+.qrbox{position:relative;width:118px;height:118px;flex:0 0 118px}
+.qrbox #qr img,.qrbox #qr canvas{width:118px !important;height:118px !important;border-radius:10px}
+.qrmk{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:7px;background:#fff;padding:3px;box-shadow:0 0 0 3px #fff}
+.qrcap{font-size:13px;line-height:1.4}.qrcap b{display:block;margin-bottom:3px}.qrcap span{color:var(--muted)}
+.qrdl{margin-top:9px;border:0;background:#f1eef7;color:var(--purple);font-weight:800;font-size:12px;border-radius:10px;padding:8px 12px;cursor:pointer}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:26px}
+.foot img{width:24px;vertical-align:middle;margin-right:6px;opacity:.9}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;z-index:50;max-width:90%;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <img class="mk" src="dd-512.png" alt="">
+    <div class="dt" id="eDate">—</div>
+    <h1 id="eBand">Show</h1>
+    <div class="at" id="eAt"></div>
+    <div class="cov" id="eCov" style="display:none"></div>
+  </div>
+
+  <div class="acts">
+    <button class="btn rose" id="goBtn" onclick="eGoing()">🌹 Going</button>
+    <a class="btn ghost" id="shareBtn" onclick="eShare()">↗ Share</a>
+  </div>
+  <div class="going" id="goCount"></div>
+
+  <div class="sec">Hosted by — the band + the room</div>
+  <div class="hosts" id="hosts"></div>
+
+  <div class="sec">Details</div>
+  <div class="card det" id="details"></div>
+
+  <div class="sec">Where</div>
+  <div class="map" id="mapCard"></div>
+
+  <div class="sec">Share this show — one tap, anywhere</div>
+  <div class="sharebar" id="shareBar"></div>
+
+  <div class="qrwrap">
+    <div class="qrbox"><div id="qr"></div><img class="qrmk" src="dd-512.png" alt=""></div>
+    <div class="qrcap"><b>The show’s QR.</b><span>Screenshot it and post it anywhere — every scan lands right here. This is the show’s front door.</span>
+      <button class="qrdl" onclick="qrDownload()">⬇︎ Save the QR</button></div>
+  </div>
+
+  <div class="foot"><img src="dd-512.png" alt="">Every show on DeadDance has a page. Tap Going and you'll meet others who are too.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="dd_shows.js"></script>
+<script src="dd_bands.js"></script>
+<script src="dd_pymk.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3000);}
+function qp(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return'';}}
+function slug(n){return String(n||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function mono(n){return String(n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'🌹';}
+function fmtDate(iso){ try{var d=new Date(String(iso).slice(0,10)+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}catch(e){return iso;} }
+
+var SHOW={ id:qp('id'), band:qp('band'), venue:qp('venue'), city:qp('city'), state:qp('state'),
+           date:qp('date'), time:qp('time'), cover:qp('cover'), info:qp('info') };
+
+function render(){
+  var loc=[SHOW.city,SHOW.state].filter(Boolean).join(', ');
+  document.getElementById('eDate').textContent=(SHOW.date?fmtDate(SHOW.date):'')+(SHOW.time?(' · '+SHOW.time):'');
+  document.getElementById('eBand').textContent=SHOW.band||'Show';
+  document.getElementById('eAt').textContent=(SHOW.venue?SHOW.venue:'')+(loc?(' · '+loc):'');
+  document.title=(SHOW.band||'Show')+' · DeadDance';
+  if(SHOW.cover){ var c=document.getElementById('eCov'); c.style.display='inline-block'; c.textContent=(String(SHOW.cover).indexOf('$')<0?'$':'')+SHOW.cover+' cover'; }
+  // hosts
+  var G1='linear-gradient(150deg,#e0577a,#b8002e)', G2='linear-gradient(150deg,#1f9e6b,#123b28)';
+  document.getElementById('hosts').innerHTML=
+    '<a class="host" href="card.html?t=band&id='+encodeURIComponent(slug(SHOW.band))+'"><div class="mono" style="background:'+G1+'">'+esc(mono(SHOW.band))+'</div><div class="nm">'+esc(SHOW.band||'Band')+'</div><div class="k band">Band</div></a>'+
+    '<a class="host" href="card.html?t=venue&name='+encodeURIComponent(SHOW.venue||'')+'"><div class="mono" style="background:'+G2+'">'+esc(mono(SHOW.venue))+'</div><div class="nm">'+esc(SHOW.venue||'Venue')+'</div><div class="k venue">Venue</div></a>';
+  // details
+  document.getElementById('details').innerHTML=(SHOW.info?('<p style="margin:0 0 8px">'+esc(SHOW.info)+'</p>'):'')+
+    '<div style="color:var(--muted);font-size:13px">🌹 Public · anyone in the family · '+(SHOW.cover?('$'+String(SHOW.cover).replace('$','')+' at the door'):'free / at the door')+'</div>';
+  // map — real Google embed by venue query (no key), + directions + print-near-venue
+  var q=encodeURIComponent([SHOW.venue,SHOW.city,SHOW.state].filter(Boolean).join(', '));
+  document.getElementById('mapCard').innerHTML=
+    (q?'<iframe loading="lazy" src="https://maps.google.com/maps?q='+q+'&z=15&output=embed" title="Map"></iframe>':'')+
+    '<div class="addr"><b>'+esc(SHOW.venue||'Venue')+'</b><span>'+esc(loc)+'</span></div>'+
+    '<div class="mapbtns">'+
+      '<a class="dir" href="https://maps.google.com/?q='+q+'" target="_blank" rel="noopener">🧭 Directions</a>'+
+      '<a class="print" href="poster_maker.html?band='+encodeURIComponent(SHOW.band||'')+'&venue='+encodeURIComponent(SHOW.venue||'')+'&date='+encodeURIComponent(SHOW.date||'')+'&city='+encodeURIComponent(SHOW.city||'')+'&print=near">🖨️ Print a poster near here</a>'+
+    '</div>';
+  buildShare(); buildQR(); buildMeta();
+  if(SHOW.id) refreshGoing();
+}
+
+/* update the unfurl card so a pasted link previews THIS show */
+function buildMeta(){
+  var loc=[SHOW.city,SHOW.state].filter(Boolean).join(', ');
+  var t='🌹 '+(SHOW.band||'A show')+(SHOW.venue?(' · '+SHOW.venue):'');
+  var d=(SHOW.date?fmtDate(SHOW.date):'')+(SHOW.time?(' · '+SHOW.time):'')+(loc?(' · '+loc):'')+' — on DeadDance. Tap Going.';
+  document.title=(SHOW.band||'Show')+' · DeadDance';
+  ['ogTitle','twTitle'].forEach(function(id){var e=document.getElementById(id);if(e)e.setAttribute('content',t);});
+  ['ogDesc','twDesc'].forEach(function(id){var e=document.getElementById(id);if(e)e.setAttribute('content',d);});
+}
+
+function shareText(){ var loc=[SHOW.city,SHOW.state].filter(Boolean).join(', ');
+  return '🌹 '+(SHOW.band||'A show')+(SHOW.venue?(' at '+SHOW.venue):'')+(SHOW.date?(' · '+fmtDate(SHOW.date)):'')+(SHOW.time?(' '+SHOW.time):'')+(loc?(' · '+loc):'')+' — I’m going. Come.';
+}
+function icsHref(){
+  function pad(n){return(n<10?'0':'')+n;}
+  var d=String(SHOW.date||'').slice(0,10).replace(/-/g,''); if(!d)return '';
+  var tm=(SHOW.time||'').match(/(\d{1,2})(?::(\d{2}))?\s*(a|p)/i);
+  var hh=20,mm=0; if(tm){hh=parseInt(tm[1],10)%12+((/p/i).test(tm[3])?12:0);mm=tm[2]?parseInt(tm[2],10):0;}
+  var st=d+'T'+pad(hh)+pad(mm)+'00', et=d+'T'+pad((hh+3)%24)+pad(mm)+'00';
+  var loc=[SHOW.venue,SHOW.city,SHOW.state].filter(Boolean).join(', ');
+  var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DeadDance//EN','BEGIN:VEVENT',
+    'DTSTART:'+st,'DTEND:'+et,'SUMMARY:'+(SHOW.band||'Show')+(SHOW.venue?(' @ '+SHOW.venue):''),
+    'LOCATION:'+loc,'DESCRIPTION:On DeadDance — '+location.href,'URL:'+location.href,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  return 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
+}
+function buildShare(){
+  var u=encodeURIComponent(location.href), t=encodeURIComponent(shareText()), tb=encodeURIComponent(shareText()+' '+location.href);
+  function tile(bg,ic,lbl,href,click){ return '<'+(href?'a':'button')+' '+(href?('href="'+href+'"'+(href.slice(0,4)==='http'?' target="_blank" rel="noopener"':'')):'')+(click?(' onclick="'+click+'"'):'')+'><span class="ic" style="background:'+bg+'">'+ic+'</span>'+lbl+'</'+(href?'a':'button')+'>'; }
+  var ics=icsHref();
+  document.getElementById('shareBar').innerHTML=
+    tile('linear-gradient(135deg,#e0577a,#b8002e)','↗','Share','','eShare()')+
+    tile('#111','🔗','Copy','','eShare()')+
+    tile('#1877f2','f','Facebook','https://www.facebook.com/sharer/sharer.php?u='+u)+
+    tile('#111','𝕏','Post','https://twitter.com/intent/tweet?text='+t+'&url='+u)+
+    tile('#25d366','🟢','WhatsApp','https://wa.me/?text='+tb)+
+    tile('#34c759','💬','Text','sms:?&body='+tb)+
+    tile('#7a7285','✉︎','Email','mailto:?subject='+encodeURIComponent('🌹 '+(SHOW.band||'A DeadDance show'))+'&body='+tb)+
+    (ics?tile('#2f6fe0','📅','Calendar',ics):'');
+}
+var _qrDone=false;
+function buildQR(){ if(_qrDone||!window.QRCode)return; var el=document.getElementById('qr'); if(!el)return; el.innerHTML='';
+  try{ new QRCode(el,{text:location.href,width:236,height:236,correctLevel:QRCode.CorrectLevel.H,colorDark:'#1a1320',colorLight:'#ffffff'}); _qrDone=true; }catch(e){} }
+window.qrDownload=function(){
+  var img=document.querySelector('#qr img')||document.querySelector('#qr canvas'); if(!img){toast('QR still drawing — one sec.');return;}
+  var S=560,cv=document.createElement('canvas');cv.width=S;cv.height=S;var x=cv.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,S,S);
+  function paint(src){ x.drawImage(src,30,30,S-60,S-60); var mk=new Image(); mk.crossOrigin='anonymous'; mk.onload=function(){ var m=Math.round(S*0.2),c=(S-m)/2; x.fillStyle='#fff';x.fillRect(c-6,c-6,m+12,m+12); x.drawImage(mk,c,c,m,m); go(); }; mk.onerror=go; mk.src='dd-512.png';
+    function go(){ try{ var a=document.createElement('a'); a.download=(slug(SHOW.band||'deaddance-show'))+'-QR.png'; a.href=cv.toDataURL('image/png'); a.click(); toast('⬇︎ QR saved — post it anywhere.'); }catch(e){ toast('Could not save — screenshot it instead.'); } } }
+  if(img.tagName==='CANVAS'){paint(img);} else { var i2=new Image(); i2.onload=function(){paint(i2);}; i2.src=img.src; }
+};
+function refreshGoing(){ if(window.DDPymk&&SHOW.id){ DDPymk.count(SHOW.id).then(function(n){ var el=document.getElementById('goCount'); if(el) el.textContent=(n>0?(n+' going'):'Be the first to say you’re going'); }); } }
+window.eGoing=function(){ var b=document.getElementById('goBtn'); b.textContent='Going ✓'; b.style.opacity=.7;
+  if(window.DDPymk&&SHOW.id){ DDPymk.attend(SHOW.id,'rsvp').then(refreshGoing); }
+  toast("🌹 You're going — you'll meet others who are too."); };
+window.eShare=function(){ var u=location.href; if(navigator.share){ navigator.share({title:(SHOW.band||'Show')+' · DeadDance', url:u}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(u); toast('🔗 Link copied — share it with the family.'); }catch(e){ toast(u); } } };
+
+/* If only an id was passed, hydrate the rest from the real calendar (dd_shows). */
+function boot(){
+  if(SHOW.band && SHOW.venue){ render(); return; }
+  if(window.DDShows && DDShows.upcoming){
+    DDShows.upcoming(600).then(function(rows){
+      var m=(rows||[]).filter(function(r){ return SHOW.id? (r.id===SHOW.id) : (r.band_name===SHOW.band); })[0];
+      if(m){ SHOW.band=m.band_name; SHOW.venue=m.venue; SHOW.city=m.city; SHOW.state=m.state; SHOW.date=m.show_date; SHOW.time=m.show_time; SHOW.info=m.gig_info; SHOW.id=m.id; }
+      render();
+    }).catch(render);
+  } else render();
+}
+boot();
+var _qrTries=0; var _qrT=setInterval(function(){ _qrTries++; if(_qrDone||_qrTries>40){clearInterval(_qrT);return;} if(window.QRCode&&document.getElementById('qr')) buildQR(); },250);
+</script>
+<script src="dd_back.js"></script>
+</body></html>

@@ -351,6 +351,22 @@ body{padding-bottom:64px}
 .reeltile.up .reelup{width:150px;height:266px;border:2px dashed #d9cfe6;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7a2e86;font-size:30px;font-weight:900;cursor:pointer;background:#faf7ff}
 .reelup span{font-size:13px;margin-top:4px}.reelup small{font-size:10px;color:#9a90b0;font-weight:600}
 .reelempty{color:#7a7285;font-size:12px;padding:2px 10px 4px}
+/* Suggested events — ranked-to-you horizontal card */
+.sughd{display:flex;align-items:center;gap:8px;padding:0 8px 10px 2px}
+.sughd b{font-size:16px;color:#1a1320}.sughd span{color:#7a7285;font-size:12px}
+.sugrow{display:flex;gap:11px;overflow-x:auto;padding:2px 8px 8px 0;scroll-snap-type:x mandatory}
+.sugtile{flex:0 0 210px;scroll-snap-align:start;border:1px solid #ece7f2;border-radius:15px;overflow:hidden;background:#fff;text-decoration:none;color:#1a1320;display:block}
+.sugart{height:120px;position:relative;display:flex;align-items:center;justify-content:center;color:#fff}
+.sugart .mono{font-size:34px;font-weight:900;opacity:.95;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+.sugart img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.sugart .why{position:absolute;top:8px;left:8px;background:rgba(20,10,25,.62);color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:8px;max-width:186px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugbody{padding:9px 11px 11px}
+.sugbody .dt{color:#b8002e;font-weight:800;font-size:11.5px}
+.sugbody .nm{font-weight:800;font-size:13.5px;line-height:1.2;margin:3px 0 2px;max-height:2.4em;overflow:hidden}
+.sugbody .vn{color:#7a7285;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugbody .int{color:#7a7285;font-size:11px;margin-top:4px}
+.sugint{margin-top:8px;display:block;width:100%;border:0;border-radius:10px;padding:9px;font-weight:800;font-size:12px;background:#f1eef7;color:#5a2e86;cursor:pointer;text-align:center}
+.sugempty{color:#7a7285;font-size:12px;padding:2px 10px 4px}
 /* Rosebud caption */
 .showmap-farrah{font-size:12px;line-height:1.4;color:#4a4356;background:#faf7ff;border:1px solid #efe9f6;border-left:3px solid var(--gold);border-radius:9px;padding:8px 11px;margin:0 0 9px}
 .showmap-farrah b{color:var(--purple2);font-weight:800}
@@ -769,6 +785,9 @@ body{padding-bottom:64px}
 
     <!-- Reels (dd_reels.js) — horizontal video: centered clip autoplays muted, tap for sound -->
     <div class="card" id="reelsCard" style="display:none;padding:12px 4px 12px 14px;margin-bottom:14px"></div>
+
+    <!-- Suggested events — horizontal card, ranked to YOU (bands you save, your scene, what's soon) -->
+    <div class="card" id="suggestCard" style="display:none;padding:12px 4px 12px 14px;margin-bottom:14px"></div>
 
     <!-- REAL posts from the family (dd_feed.js) render here, newest first. Seed posts below stay so the feed is never empty. -->
     <div id="ddFeed"></div>
@@ -1383,12 +1402,18 @@ function dealMergeOnce(){ if(_dealMerged)return; try{
 function cpad(n){return (n<10?'0':'')+n;}
 function cMid(){var d=new Date();d.setHours(0,0,0,0);return d;}
 function cIso(d){return d.getFullYear()+'-'+cpad(d.getMonth()+1)+'-'+cpad(d.getDate());}
+/* THE BOUNDARY: the community calendar + national/local rollups are the GRATEFUL DEAD
+   world only. StageFill (non-GD, all-genre) shows are personal OPTIONS for a user — they
+   surface in Suggestions and can be saved to MY CALENDAR, but they never enter the
+   community rollups. So: community scopes take GD-only; My Calendar takes whatever the
+   user saved (GD or StageFill option). */
+function isCommunityShow(s){ var t=(s.type||s.scene||'grateful_dead'); return t==='grateful_dead'; }
 function buildShowlist(){ dealMergeOnce(); var t0=cMid(); var src;
- if(CAL_SCOPE==='my'){ src=myCalShows(); }   /* My Calendar: ONLY the user's saved shows (tickets + reminders) — keeps the grid quiet */
+ if(CAL_SCOPE==='my'){ src=myCalShows(); }   /* My Calendar: ONLY the user's saved shows — GD + any StageFill option they added */
  else if(CAL_SCOPE==='national'){ src=[]; for(var k in REGIONS){ if(REGIONS.hasOwnProperty(k)&&REGIONS[k].shows) src=src.concat(REGIONS[k].shows); }
-   try{ if(POSTED_SHOWS&&POSTED_SHOWS.length) src=src.concat(POSTED_SHOWS); }catch(e){} }
+   try{ if(POSTED_SHOWS&&POSTED_SHOWS.length) src=src.concat(POSTED_SHOWS.filter(isCommunityShow)); }catch(e){} }
  else { var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; src=(r.shows||[]).slice();
-   try{ if(POSTED_SHOWS&&POSTED_SHOWS.length) src=src.concat(POSTED_SHOWS); }catch(e){} }   /* REAL posted dates merge in */
+   try{ if(POSTED_SHOWS&&POSTED_SHOWS.length) src=src.concat(POSTED_SHOWS.filter(isCommunityShow)); }catch(e){} }   /* REAL posted GD dates merge in; StageFill options stay out */
  SHOWLIST=src.map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
    return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', deal:!!s.deal}; })
    .filter(function(s){ return s.iso >= cIso(t0); })   /* clear-to-history: a show that already played drops off the calendar */
@@ -3473,6 +3498,102 @@ function reelsBuild(){ var host=document.getElementById('reelsCard'); if(!host||
   }).catch(function(){});
 }
 try{ reelsBuild(); if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(reelsBuild); }catch(e){}
+</script>
+<script>
+/* ---------- Suggested events — a horizontal card ranked TO YOU ----------
+   Source: dd_shows (one calendar behind DeadDance AND StageFill — same backend, all genres).
+   Algorithm (on-device, private): score every upcoming show by how much it looks like
+   you, then show the top ~14. Signals, all local, nothing leaves the phone:
+     • BAND YOU FOLLOW  — a show by a band already on your calendar (saved/going): big.
+     • YOUR SCENE       — the same act-family/headliner you keep saving (Kimock, DSO, JRAD…).
+     • NEAR YOU         — same city/region as shows you save, or your local scope.
+     • SOON             — sooner shows edge up; nothing in the past.
+     • BUZZ             — more people going nudges it up (tie-breaker).
+   New here? No history yet → we fall back to soonest + most-local, and it personalizes
+   itself the moment you tap Going / save a show. */
+var _sugGoing={};
+function sugAffinity(){
+  var bands={}, cities={}, acts={};
+  try{ (myCalShows()||[]).forEach(function(s){ if(s.band)bands[s.band.toLowerCase()]=1; }); }catch(e){}
+  try{ var f=JSON.parse(localStorage.getItem('dd.follows')||'[]'); f.forEach(function(b){ if(b)bands[String(b).toLowerCase()]=1; }); }catch(e){}
+  // act-family the user keeps saving (calAct headliners live in ACTS if present)
+  try{ Object.keys(bands).forEach(function(b){ (window.ACT_KEYS||[]).forEach(function(a){ if(b.indexOf(a)>=0)acts[a]=1; }); }); }catch(e){}
+  return {bands:bands,cities:cities,acts:acts,any:Object.keys(bands).length>0};
+}
+function sugDaysAway(iso){ try{ var d=new Date(String(iso).slice(0,10)+'T12:00:00'); return (d-new Date())/864e5; }catch(e){ return 999; } }
+function sugIsOption(r){ var t=(r.scene||r.type||'grateful_dead'); return t!=='grateful_dead'; } /* StageFill = a personal option, not a community show */
+function sugScore(r,aff,myCity){
+  var s=0, b=(r.band_name||'').toLowerCase(), reasons=[], opt=sugIsOption(r);
+  var da=sugDaysAway(r.show_date); if(da<0) return null;
+  if(opt){
+    /* StageFill option: only surfaces on real fit — a band you follow, or genuinely near you.
+       Kept a labeled minority so the card stays community-first; never enters the rollups. */
+    var fit=false;
+    if(aff.bands[b]){ s+=40; reasons.push('An act you follow'); fit=true; }
+    else if(myCity && r.city && r.city.toLowerCase()===myCity){ s+=20; reasons.push('StageFill · near you'); fit=true; }
+    else if(!aff.any && da<=21){ s+=8; reasons.push('StageFill · an option'); fit=true; }
+    if(!fit) return null;
+    s+=Math.max(0,12-da/3); s-=6; /* options sit just under community shows */
+    return {score:s,reason:reasons[0],option:true};
+  }
+  if(aff.bands[b]){ s+=60; reasons.push('A band you follow'); }
+  else { for(var a in aff.acts){ if(b.indexOf(a)>=0){ s+=34; reasons.push('Your scene'); break; } } }
+  if(myCity && r.city && r.city.toLowerCase()===myCity){ s+=22; if(!reasons.length)reasons.push('Near you'); }
+  s+=Math.max(0,22-da/2.2);
+  if(da<=10 && !reasons.length) reasons.push('Coming up soon');
+  s+=Math.min(10,(_sugGoing[r.id]||0)*2);
+  if(!reasons.length) reasons.push('Picked for you');
+  return {score:s,reason:reasons[0],option:false};
+}
+function sugMono(n){return String(n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'🌹';}
+function sugDate(iso){ try{var d=new Date(String(iso).slice(0,10)+'T12:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}catch(e){return iso;} }
+var _sugGrad=['linear-gradient(150deg,#5a2e86,#b8002e)','linear-gradient(150deg,#1f6f8b,#123b5a)','linear-gradient(150deg,#b8002e,#3a1d00)','linear-gradient(150deg,#2f7a4d,#123b28)','linear-gradient(150deg,#7a3cc0,#2a1b3d)'];
+function sugTile(r,i){
+  var url='event.html?id='+encodeURIComponent(r.id||'')+'&band='+encodeURIComponent(r.band_name||'')+'&venue='+encodeURIComponent(r.venue||'')+'&city='+encodeURIComponent(r.city||'')+'&state='+encodeURIComponent(r.state||'')+'&date='+encodeURIComponent(r.show_date||'')+'&time='+encodeURIComponent(r.show_time||'');
+  var art=r.poster_url?('<img src="'+esc(r.poster_url)+'" alt="">'):('<span class="mono">'+esc(sugMono(r.band_name))+'</span>');
+  var loc=[r.city,r.state].filter(Boolean).join(', ');
+  var going=_sugGoing[r.id]||0;
+  return '<a class="sugtile" href="'+url+'">'+
+    '<div class="sugart" style="background:'+_sugGrad[i%_sugGrad.length]+'">'+art+'<span class="why">🌹 '+esc(r._why||'Picked for you')+'</span></div>'+
+    '<div class="sugbody"><div class="dt">'+esc(sugDate(r.show_date))+(r.show_time?(' · '+esc(r.show_time)):'')+'</div>'+
+      '<div class="nm">'+esc(r.band_name||'Show')+'</div>'+
+      '<div class="vn">'+esc(r.venue||'')+(loc?(' · '+esc(loc)):'')+'</div>'+
+      '<div class="int">'+(going>0?(going+' going'):'Be the first to say you’re going')+'</div>'+
+      '<button class="sugint" onclick="sugGoing(event,\''+esc(r.id||'')+'\')">🌹 Interested</button>'+
+    '</div></a>';
+}
+var _sugById={};
+window.sugGoing=function(ev,id){ ev.preventDefault(); ev.stopPropagation(); if(!id)return;
+  var b=ev.target; b.textContent='On my calendar ✓'; b.style.opacity=.7;
+  var r=_sugById[id];
+  /* Interested = save to MY CALENDAR only (personal). Never posts to the community
+     calendar or the national rollup — true for GD shows and StageFill options alike. */
+  try{ if(r){ var a=calAdded(); var iso=String(r.show_date||'').slice(0,10);
+    if(iso && !a.some(function(x){return x.band===r.band_name&&x.iso===iso;})){
+      a.push({band:r.band_name,iso:iso,venue:r.venue||'',price:'',bought:false,reminded:false,opt:sugIsOption(r)}); calAddedSave(a); } } }catch(e){}
+  if(window.DDPymk&&DDPymk.attend) DDPymk.attend(id,'rsvp').then(function(){ _sugGoing[id]=(_sugGoing[id]||0)+1; });
+  try{ if(CAL_SCOPE==='my'){ buildShowlist(); renderCal(); } }catch(e){}
+  if(typeof toast==='function') toast('📅 Saved to your calendar — just yours. You’ll meet others going too. 🌹'); };
+function suggestBuild(){ var host=document.getElementById('suggestCard'); if(!host||!window.DDShows) return;
+  var hd='<div class="sughd"><img src="dd-512.png" style="width:22px;height:22px"><b>Suggested events</b><span>picked for you — bands you follow, your scene, what’s near</span></div>';
+  DDShows.upcoming(600).then(function(rows){
+    rows=rows||[]; if(!rows.length){ host.style.display='none'; return; }
+    var aff=sugAffinity(); var myCity=''; try{ var mc=(myCalShows()||[])[0]; }catch(e){}
+    var scored=[]; _sugById={}; rows.forEach(function(r){ var sc=sugScore(r,aff,myCity); if(sc){ r._why=sc.reason; r._opt=sc.option; if(r.id)_sugById[r.id]=r; scored.push({r:r,s:sc.score}); } });
+    scored.sort(function(a,b){ return b.s-a.s; });
+    var top=scored.slice(0,14).map(function(x){return x.r;});
+    if(!top.length){ host.style.display='none'; return; }
+    host.style.display='block';
+    host.innerHTML=hd+'<div class="sugrow">'+top.map(sugTile).join('')+'</div>'+
+      (aff.any?'':'<div class="sugempty">Save a show or tap Going — these tune to you the more you do.</div>');
+    // hydrate going counts (best-effort, non-blocking)
+    if(window.DDPymk&&DDPymk.count){ top.slice(0,8).forEach(function(r){ if(!r.id)return; DDPymk.count(r.id).then(function(n){ if(n>0){_sugGoing[r.id]=n; } }).catch(function(){}); }); }
+  }).catch(function(){ host.style.display='none'; });
+}
+(function(){ var t=0, iv=setInterval(function(){ t++;
+  if(window.DDShows){ clearInterval(iv); try{ suggestBuild(); if(DDShows.subscribe) DDShows.subscribe(suggestBuild); }catch(e){} }
+  else if(t>60){ clearInterval(iv); }
+},250); })();
 </script>
 <script src="dd_shows.js" defer></script>
 <script src="dd_bands.js" defer></script>
