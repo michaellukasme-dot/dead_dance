@@ -26,20 +26,30 @@
   function css(){ if(document.getElementById('coincss'))return; var s=document.createElement('style'); s.id='coincss';
     s.textContent=
      '@keyframes ddcoinrise{0%{transform:translateY(6px) scale(.5);opacity:0}18%{opacity:1;transform:translateY(-4px) scale(1)}100%{transform:translateY(-64px) scale(1);opacity:0}}'+
-     '@keyframes ddcoinflip{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.16)}}'+
-     '.ddcoin{position:fixed;z-index:10000;width:32px;height:32px;pointer-events:none;animation:ddcoinrise 900ms cubic-bezier(.2,.7,.3,1) forwards}'+
-     '.ddcoin i{display:flex;width:32px;height:32px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-weight:900;font-size:15px;color:#9a6a00;'+
-       'background:radial-gradient(circle at 34% 30%,#fff0a6,#f6b800 58%,#cf8f00);box-shadow:inset 0 0 0 2px #b5820a,0 2px 5px rgba(0,0,0,.25);animation:ddcoinflip 300ms linear infinite}'+
-     '.ddcoinamt{position:fixed;z-index:10000;font-weight:900;font-size:16px;color:#f0a500;text-shadow:0 1px 2px rgba(0,0,0,.28);pointer-events:none;animation:ddcoinrise 960ms cubic-bezier(.2,.7,.3,1) forwards}';
+     '@keyframes ddcoinflip{0%,100%{transform:scaleX(1) rotate(0)}50%{transform:scaleX(.22) rotate(8deg)}}'+
+     '@keyframes ddcrumbfly{0%{opacity:0;transform:translate(0,0) scale(.5)}22%{opacity:1}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-18px)) scale(1)}}'+
+     '.ddcoin{position:fixed;z-index:10000;width:34px;height:34px;pointer-events:none;animation:ddcoinrise 920ms cubic-bezier(.2,.7,.3,1) forwards}'+
+     '.ddcoin svg{width:34px;height:34px;display:block;filter:drop-shadow(0 2px 4px rgba(80,40,10,.35));animation:ddcoinflip 300ms linear infinite}'+
+     '.ddcrumb{position:fixed;z-index:10000;width:6px;height:6px;border-radius:2px;background:#8a5a34;pointer-events:none;animation:ddcrumbfly 720ms ease-out forwards}'+
+     '.ddcoinamt{position:fixed;z-index:10000;font-weight:900;font-size:16px;color:#B5673E;text-shadow:0 1px 2px rgba(0,0,0,.22);pointer-events:none;animation:ddcoinrise 960ms cubic-bezier(.2,.7,.3,1) forwards}';
     document.head.appendChild(s); }
   function ding(){ try{ var A=root.AudioContext||root.webkitAudioContext; if(!A)return; var ctx=ding._c||(ding._c=new A());
     [[988,0],[1319,0.07]].forEach(function(n){ var o=ctx.createOscillator(),g=ctx.createGain(); o.type='square'; o.frequency.value=n[0];
       o.connect(g); g.connect(ctx.destination); var t=ctx.currentTime+n[1]; g.gain.setValueAtTime(0.05,t); g.gain.exponentialRampToValueAtTime(0.0008,t+0.12); o.start(t); o.stop(t+0.13); }); }catch(e){} }
+  var COOKIE='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#C8794F" stroke="#B5673E" stroke-width="1.5"/>'+
+    '<circle cx="8" cy="9" r="1.7" fill="#5A2E86"/><circle cx="15.5" cy="8.5" r="1.4" fill="#3A2417"/>'+
+    '<circle cx="14" cy="15" r="1.6" fill="#5A2E86"/><circle cx="8" cy="15.5" r="1.2" fill="#3A2417"/><circle cx="12.5" cy="12" r="1.2" fill="#3A2417"/></svg>';
+  function crumb(cx, cy){ var s=document.createElement('div'); s.className='ddcrumb'; s.style.left=(cx)+'px'; s.style.top=(cy)+'px';
+    s.style.setProperty('--tx',(Math.random()*46-23)+'px'); s.style.setProperty('--ty',(-12-Math.random()*28)+'px');
+    document.body.appendChild(s); setTimeout(function(){ try{s.remove();}catch(e){} },720); }
   function pop(n, x, y){ css(); x=(x==null)?(root.innerWidth/2):x; y=(y==null)?(root.innerHeight*0.42):y;
     var k=Math.min(6,Math.max(1,Math.round(n/5)));   // a little shower for bigger rewards
-    for(var i=0;i<k;i++){ (function(i){ setTimeout(function(){ var el=document.createElement('div'); el.className='ddcoin';
-      el.style.left=(x-16+(Math.random()*34-17))+'px'; el.style.top=y+'px'; el.innerHTML='<i>C</i>'; document.body.appendChild(el);
-      setTimeout(function(){ try{el.remove();}catch(e){} },900); }, i*80); })(i); }
+    for(var i=0;i<k;i++){ (function(i){ setTimeout(function(){
+      var cx=x-17+(Math.random()*34-17), cy=y;
+      var el=document.createElement('div'); el.className='ddcoin'; el.style.left=cx+'px'; el.style.top=cy+'px'; el.innerHTML=COOKIE;
+      document.body.appendChild(el); setTimeout(function(){ try{el.remove();}catch(e){} },920);
+      for(var j=0;j<4;j++) crumb(cx+14, cy+14);   // 🍪 crumbs scatter off each cookie
+    }, i*80); })(i); }
     var amt=document.createElement('div'); amt.className='ddcoinamt'; amt.textContent='+'+n; amt.style.left=(x+16)+'px'; amt.style.top=(y-8)+'px';
     document.body.appendChild(amt); setTimeout(function(){ try{amt.remove();}catch(e){} },960); ding(); }
 
