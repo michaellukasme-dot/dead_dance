@@ -98,6 +98,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 <script src="dd_autofill.js"></script>
 <script src="dd_join.js"></script>
 <script src="dd_bands.js"></script>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
 <script>
 /* ---------- DEMO/TEST band — injected ONLY when the URL has ?demo (or ?test).
    Never ships in the public 963-band directory; lets you run the whole Band Install
@@ -478,9 +480,64 @@ function stepDone(){
       Object.keys(S.auto).filter(function(k){return S.auto[k];}).length+' automations · ✅ '+hpSpread()+' channels · ✅ first HyperPost drafted</div>'+
     '<div class="honest" style="text-align:left"><b>Our promise:</b> nothing bills, nothing sends without a human, your list is never sold or shared, and we never take a cut of your door. Remove anything, any time.<br><br>'+
       '<b>Next:</b> Michael or your regional Ambassador reviews your page and brings you that short agreement. <b>Nothing is owed, and nothing sends, until you say so.</b></div>'+
+    crossLinkBlock(b)+
     (window.DDRefer?DDRefer.card(b.name,(b.id||'')):'')+
     '<button class="btn go" style="margin-top:16px" onclick="finish()">Finish install</button></div>';
 }
+/* ---------- Cross-link: put deaddance.app/<band> on the band's OWN Facebook ----------
+   Legal + within Facebook's Terms: the band adds their own link to their own Page — no API,
+   no automation, admin's own hands. We just make it one tap, and only WITH their confirmation.
+   (A deeper auto-add via the Pages API is possible but needs the band's Facebook OAuth grant
+   + Meta App Review — see DESIGN_fb_crosslink.md. This is the immediately-legal Tier 1.) */
+/* short, clean handle: cut the name at the first descriptor separator, then slugify.
+   "Deal - Celebrating the Music of the Grateful Dead" → "deal" */
+function shortHandle(name){
+  var n=String(name||'');
+  n=n.split(/\s+[-–—:]\s+|\s*\(|\s+(?:feat\.?|featuring|celebrating|tribute|presents)\b/i)[0]||n;
+  var s=n.toLowerCase().trim().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  return s||'band';
+}
+function fbxUrl(){ var el=document.getElementById('fbxHandle'); var h=el?el.value:(S&&S.fbHandle); h=(h||shortHandle(S.band&&S.band.name)).toLowerCase().replace(/[^a-z0-9-]/g,''); return 'https://deaddance.app/'+h; }
+window.fbxHandleChange=function(){ var el=document.getElementById('fbxHandle'); if(el){ el.value=el.value.toLowerCase().replace(/[^a-z0-9-]/g,''); try{S.fbHandle=el.value;save();}catch(e){} } var u=document.getElementById('fbxFull'); if(u)u.textContent=fbxUrl(); fbxQRrender(); };
+function fbxQRrender(){ try{ if(window.DDQR&&document.getElementById('fbxQR')) DDQR.into('fbxQR', fbxUrl(), {mark:'dd', size:220, css:110}); }catch(e){} }
+window.fbxQRsave=function(){ try{ var h=(document.getElementById('fbxHandle')||{}).value||'deaddance'; DDQR.save(fbxUrl(), {mark:'dd'}, h+'-deaddance-QR.png'); }catch(e){} };
+function crossLinkBlock(b){
+  var handle=(S&&S.fbHandle)||shortHandle(b&&b.name), full='https://deaddance.app/'+handle;
+  var blurb='We’re on DeadDance 🌹 — our shows, songbook, store & fan group all in one place: '+full;
+  return '<div class="fbx" style="text-align:left;border:1px solid #ece7f2;border-radius:14px;padding:15px;margin-top:16px;background:#fff">'+
+    '<div style="font-weight:900;font-size:15px;margin-bottom:3px">Put your DeadDance link on Facebook 🔗</div>'+
+    '<div class="honest" style="margin:0 0 10px">Add your DeadDance link to your own Page so every visitor reaches your calendar, store, and group. <b>You add it on your own Page</b> — 100% within Facebook’s Terms; we just make it one tap. Pick your handle:</div>'+
+    '<div style="display:flex;align-items:center;gap:2px;background:#faf7ff;border:1px solid #efe9f6;border-radius:11px;padding:9px 11px;font-weight:800;font-size:14px;flex-wrap:wrap">'+
+      '<span style="color:#7a7285">deaddance.app/</span>'+
+      '<input id="fbxHandle" value="'+esc(handle)+'" oninput="fbxHandleChange()" spellcheck="false" style="border:0;border-bottom:2px solid #b8002e;background:none;font:inherit;font-weight:800;color:#b8002e;width:auto;min-width:90px;flex:1;padding:2px 0">'+
+    '</div>'+
+    '<label style="display:flex;gap:9px;align-items:flex-start;cursor:pointer;font-size:13.5px;font-weight:700;margin-top:11px">'+
+      '<input type="checkbox" id="fbxOk" onchange="fbxConfirm(this.checked)" style="width:18px;height:18px;margin-top:1px;accent-color:#b8002e">'+
+      '<span>Yes — add DeadDance to <b>'+esc(b.name||'our')+'</b>’s Facebook. This is our page and our choice.</span></label>'+
+    '<div id="fbxActions" style="display:none;margin-top:11px">'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="btn" style="flex:1;min-width:130px;background:#1877f2;color:#fff;border-color:#1877f2" onclick="fbxShare()">↗ Share to Facebook</button>'+
+        '<button class="btn ghost" style="flex:1;min-width:110px" onclick="fbxCopy()">📋 Copy link</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:12px;background:#faf7ff;border:1px solid #efe9f6;border-radius:12px;padding:12px">'+
+        '<div id="fbxQR" style="width:110px;height:110px;flex:0 0 110px;background:#fff;border-radius:10px"></div>'+
+        '<div style="font-size:12.5px;color:#4a4356;line-height:1.45"><b>Your band’s QR 🌹</b><br>Unique to you — every scan opens your DeadDance page. Print it on flyers, the merch table, the case.<br>'+
+          '<button class="btn ghost" style="margin-top:7px;padding:8px 12px;font-size:12px" onclick="fbxQRsave()">⬇︎ Save QR</button></div>'+
+      '</div>'+
+      '<div style="margin-top:10px;font-size:12.5px;color:#4a4356;line-height:1.55">'+
+        '<b>Add it to your Page in 20 seconds:</b><br>'+
+        '1. Open your Facebook Page → <b>Edit</b> (or Page settings → About).<br>'+
+        '2. Under <b>Contact &amp; basic info → Website</b>, paste: <span id="fbxFull" style="font-weight:800">'+esc(full)+'</span><br>'+
+        '3. Prefer a button? <b>Add a Button → Learn More / Sign Up</b> → same link. Or pin a post with it.</div>'+
+        '<div class="honest" style="margin-top:9px">We’ll also hand your Ambassador a ready-to-paste blurb: <i>“'+esc(blurb)+'”</i></div>'+
+    '</div></div>';
+}
+window.fbxConfirm=function(on){ try{ S.fbCrossLink=!!on; save(); }catch(e){} var a=document.getElementById('fbxActions'); if(a)a.style.display=on?'block':'none';
+  if(on){ fbxQRrender(); if(typeof toast==='function') toast('🔗 Nice — share it, paste it, or print your QR any time.'); } };
+window.fbxShare=function(){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(fbxUrl()),'_blank','noopener'); };
+window.fbxCopy=function(){ var full=fbxUrl();
+  try{ navigator.clipboard.writeText(full); if(typeof toast==='function') toast('📋 Copied '+full+' — paste it on your Page.'); }
+  catch(e){ if(typeof toast==='function') toast(full); } };
 /* ---------- Step 0.5 · "Is this your band / your logo?" — the claim opener ---------- */
 function claimHost(){ try{ var u=(S.band&&S.band.link)||S.homepage||''; if(!u)return''; if(u.indexOf('http')!==0)u='http://'+u; return new URL(u).hostname.replace(/^www\./,''); }catch(e){ return ''; } }
 function claimGuessUrl(){

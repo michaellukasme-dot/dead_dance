@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DeadDance</title>
+<meta name="theme-color" content="#2a1b3d">
+<link rel="icon" href="/dd-512.png">
+<style>
+body{margin:0;background:#241535;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:grid;place-items:center;min-height:100vh;text-align:center}
+.box{padding:24px}.box img{width:64px;opacity:.9}.box h1{font-size:22px;margin:14px 0 6px}.box p{color:#cdbfe0;font-size:14px;margin:0 0 16px}
+a.btn{display:inline-block;background:#b8002e;color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:12px 20px}
+</style>
+<script>
+/* Vanity URLs: deaddance.app/<band>  →  the band's DeadDance scorecard.
+   GitHub Pages serves this 404 for any path with no file. A single clean segment
+   (no dot, no extra slash) is treated as a band slug and forwarded to card.html.
+   Real missing files fall through to the friendly not-found below. */
+(function(){
+  try{
+    var p = location.pathname.replace(/^\/+|\/+$/g,'');
+    if(!p){ location.replace('/index.html'); return; }
+    // single segment, no file extension → a vanity band/venue slug
+    if(p.indexOf('/')<0 && p.indexOf('.')<0){
+      var slug = p.toLowerCase();
+      // ?t lets a venue vanity work too: deaddance.app/venue/<x> handled above; default band
+      location.replace('/card.html?t=band&id='+encodeURIComponent(slug)+'&from=vanity');
+      return;
+    }
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+<div class="box">
+  <img src="/dd-512.png" alt="DeadDance">
+  <h1>Taking you to DeadDance…</h1>
+  <p>If this page doesn’t forward, head home.</p>
+  <a class="btn" href="/index.html">🌹 Go to DeadDance</a>
+</div>
+</body></html>

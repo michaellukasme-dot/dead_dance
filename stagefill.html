@@ -111,6 +111,8 @@ footer b{color:#c7d0dc}
 </script>
 <script src="acts_seed.js"></script>
 <script src="dd_categories.js"></script>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
 <script src="dd_back.js"></script>
 <script>
 (function(){
@@ -134,8 +136,48 @@ function reg(){
   }catch(e){}
   var d=document.getElementById('done');
   d.innerHTML='<div style="font-weight:800;color:#0b6b4e;margin-bottom:4px">✅ '+name.replace(/</g,'&lt;')+' is listed.</div>'+
-    '<div style="font-size:13.5px;color:#173">You’re in the booking exchange — venues and the agent can find you now. We’ll reach out the moment a room wants you. Your contact stays private, and nothing books until you say yes.</div>';
+    '<div style="font-size:13.5px;color:#173">You’re in the booking exchange — venues and the agent can find you now. We’ll reach out the moment a room wants you. Your contact stays private, and nothing books until you say yes.</div>'+
+    sfCrossLink(name);
   d.className='on'; try{ d.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
 }
+/* Cross-link: put stagefill.app/<act> on the act's OWN Facebook — legal, within FB Terms,
+   the act adds it themselves, only with their confirmation. A StageFill act gets its own
+   domain (stagefill.app), the mirror of a DeadDance band's deaddance.app link. */
+function sfHandle(name){
+  var n=String(name||'');
+  n=n.split(/\s+[-–—:]\s+|\s*\(|\s+(?:feat\.?|featuring|celebrating|tribute|presents)\b/i)[0]||n;
+  var s=n.toLowerCase().trim().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  return s||'act';
+}
+function sfxUrl(){ var el=document.getElementById('sfxHandle'); var h=(el?el.value:'')||''; h=h.toLowerCase().replace(/[^a-z0-9-]/g,''); return 'https://stagefill.app/'+h; }
+window.sfxHandleChange=function(){ var el=document.getElementById('sfxHandle'); if(el)el.value=el.value.toLowerCase().replace(/[^a-z0-9-]/g,''); var u=document.getElementById('sfxFull'); if(u)u.textContent=sfxUrl(); sfxQRrender(); };
+function sfxQRrender(){ try{ if(window.DDQR&&document.getElementById('sfxQR')) DDQR.into('sfxQR', sfxUrl(), {mark:'sf', size:220, css:110}); }catch(e){} }
+window.sfxQRsave=function(){ try{ var h=(document.getElementById('sfxHandle')||{}).value||'stagefill'; DDQR.save(sfxUrl(), {mark:'sf'}, h+'-stagefill-QR.png'); }catch(e){} };
+function sfCrossLink(name){
+  var handle=sfHandle(name), full='https://stagefill.app/'+handle;
+  return '<div style="margin-top:14px;border:1px solid #d3e6f7;border-radius:12px;padding:14px;background:#f5fbff;text-align:left">'+
+    '<div style="font-weight:800;font-size:14px;margin-bottom:3px;color:#123a52">Put your link on Facebook 🔗</div>'+
+    '<div style="font-size:13px;color:#1a3a52;margin-bottom:9px">Add your StageFill link to your own Page so fans reach your profile. <b>You add it yourself</b> — 100% within Facebook’s Terms; we just make it one tap. Pick your handle:</div>'+
+    '<div style="display:flex;align-items:center;gap:2px;background:#eef7ff;border:1px solid #d3e6f7;border-radius:10px;padding:8px 11px;font-weight:800;font-size:14px;flex-wrap:wrap">'+
+      '<span style="color:#5b6b7a">stagefill.app/</span>'+
+      '<input id="sfxHandle" value="'+handle.replace(/"/g,'&quot;')+'" oninput="sfxHandleChange()" spellcheck="false" style="border:0;border-bottom:2px solid #0fa3a0;background:none;font:inherit;font-weight:800;color:#0b7f7c;min-width:90px;flex:1;padding:2px 0">'+
+    '</div>'+
+    '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:13px;font-weight:700;margin-top:10px"><input type="checkbox" id="sfxOk" onchange="sfxToggle(this.checked)" style="width:17px;height:17px;margin-top:1px;accent-color:#0fa3a0"><span>Yes — add StageFill to our Facebook. Our page, our choice.</span></label>'+
+    '<div id="sfxA" style="display:none;margin-top:10px">'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button onclick="sfxShare()" style="flex:1;min-width:130px;background:#1877f2;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;cursor:pointer">↗ Share to Facebook</button>'+
+        '<button onclick="sfxCopy()" style="flex:1;min-width:110px;background:#eef3fd;color:#123a52;border:0;border-radius:10px;padding:11px;font-weight:800;cursor:pointer">📋 Copy link</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:12px;align-items:center;margin-top:11px;background:#eef7ff;border:1px solid #d3e6f7;border-radius:12px;padding:12px">'+
+        '<div id="sfxQR" style="width:110px;height:110px;flex:0 0 110px;background:#fff;border-radius:10px"></div>'+
+        '<div style="font-size:12.5px;color:#1a3a52;line-height:1.45"><b>Your act’s QR ◢</b><br>Unique to you — every scan opens your StageFill page. Print it on flyers, the merch table, the case.<br>'+
+          '<button onclick="sfxQRsave()" style="margin-top:7px;background:#eef3fd;color:#123a52;border:0;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer">⬇︎ Save QR</button></div>'+
+      '</div>'+
+      '<div style="font-size:12px;color:#345;margin-top:9px;line-height:1.5"><b>Add it in 20s:</b> your Page → <b>Edit</b> → <b>Contact &amp; basic info → Website</b> → paste <b id="sfxFull">'+full.replace(/</g,'&lt;')+'</b>. Or add a <b>Learn More</b> button to the same link.</div>'+
+    '</div></div>';
+}
+window.sfxToggle=function(on){ var a=document.getElementById('sfxA'); if(a)a.style.display=on?'block':'none'; if(on)sfxQRrender(); };
+window.sfxShare=function(){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(sfxUrl()),'_blank','noopener'); };
+window.sfxCopy=function(){ try{ navigator.clipboard.writeText(sfxUrl()); }catch(e){} };
 </script>
 </body></html>
