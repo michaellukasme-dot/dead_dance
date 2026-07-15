@@ -100,6 +100,12 @@ h1{font-size:26px;margin:4px 0 2px;font-weight:900}
     <div class="covlogo">🌹</div>
     <div class="covname">Thank you.</div>
     <div class="covq" id="covThanks">Welcome to the family.</div>
+    <div id="covGroupQR" style="display:none;margin:14px 0;background:#fff;border:1px solid #eee;border-radius:14px;padding:15px;text-align:center">
+      <div style="font-weight:800;font-size:14.5px;margin-bottom:9px">Now bring your people home 🌹</div>
+      <div id="cgqr" style="width:150px;height:150px;margin:0 auto;background:#fff;border-radius:10px"></div>
+      <div style="font-size:12.5px;color:#555;margin-top:10px;line-height:1.45">Put this QR on your Facebook — every scan brings a fan straight to your DeadDance page. <b>You add it yourself</b>, 100% within Facebook's Terms.</div>
+      <button class="covyes" style="margin-top:11px" onclick="cgShare()">↗ Post it to Facebook</button>
+    </div>
     <button class="covyes" onclick="claimDone()">See my page</button>
   </div>
 </div></div>
@@ -119,6 +125,9 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="dd_art.js"></script>
 <script src="dd_pymk.js"></script>
+<script src="dd_bandgroups.js"></script>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3200);}
@@ -179,14 +188,21 @@ applyLogo();
 })();
 function covShow(step){ ['covS1','covS2','covS3'].forEach(function(s){ var e=document.getElementById(s); if(e)e.style.display=(s===step?'block':'none'); }); }
 function covClose(){ var c=document.getElementById('claimCov'); if(c)c.classList.remove('on'); }
-var INVITE="We'd be honored if you wrote a hello to the DeadDance family right here"+(NAME?(", "+NAME.split(' ')[0]):"")+" — whatever's on your heart. 🌹";
-var DRAFT="Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):"");
+var ISVIP=false; try{ ISVIP=!!(window.DDBandGroups&&DDBandGroups.get(NAME||ID)); }catch(e){}   // the "top boys" — one at a time, keep it dead simple
+var INVITE=ISVIP
+  ? ("Just say hi"+(NAME?(", "+NAME.split(' ')[0]):"")+" — one line is plenty. 🌹")
+  : ("We'd be honored if you wrote a hello to the DeadDance family right here"+(NAME?(", "+NAME.split(' ')[0]):"")+" — whatever's on your heart. 🌹");
+var DRAFT=ISVIP
+  ? ("Hey — check me out on DeadDance 🌹"+(NAME?("\n— "+NAME):""))
+  : ("Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):""));
 window.claudeWrite=function(){ var ta=document.getElementById('covBody'); if(!ta)return; ta.value=DRAFT; ta.focus(); try{ ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){}
   if(typeof toast==='function') toast('✨ A start — make it yours, then send.'); };
 /* YES → quietly log the claim (we follow up with managers later), then INVITE them to write. */
 window.claimYes=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }catch(e){}
   applyLogo();
   try{ if(window.DDJoin&&DDJoin.claimBand) DDJoin.claimBand({band:NAME, note:'said YES via QR — follow up w/ manager', src:'qr-yes', region:CITY}); }catch(e){}
+  /* stamp the band's real logo on their community group (they can change it later) */
+  try{ if(window.DDBandGroups&&DDBandGroups.get(NAME||ID)) DDBandGroups.accept(NAME||ID, LOGO||''); }catch(e){}
   var n2=document.getElementById('covName2'); if(n2)n2.textContent=NAME;
   var ta=document.getElementById('covBody'); if(ta){ ta.value=''; ta.placeholder=INVITE; }
   covShow('covS2'); setTimeout(function(){ if(ta)ta.focus(); },90); };
@@ -195,12 +211,17 @@ window.claimSend=function(){ var ta=document.getElementById('covBody'); var t=(t
   if(!t){ if(ta)ta.focus(); toast('Add a few words first 🌹'); return; }
   try{ localStorage.setItem('dd.myname',NAME); window.ME=window.ME||{}; ME.name=NAME; }catch(e){}
   var b=ta.nextElementSibling; if(b){ b.textContent='Sending…'; b.style.opacity=.7; }
-  function thanks(msg){ var e=document.getElementById('covThanks'); if(e)e.textContent=msg; covShow('covS3'); }
+  function thanks(msg){ var e=document.getElementById('covThanks'); if(e)e.textContent=msg; covShow('covS3'); showGroupQR(); }
   function go(tries){ if(!(window.DDFeed&&DDFeed.post)){ if(tries<20)return setTimeout(function(){go(tries+1);},250); thanks('Your note is on its way to the family — welcome home. 🌹'); return; }
     DDFeed.post(t,{scope:'all',pinned:true}).then(function(){ thanks('Your note just went out to the whole family — they’ll feel it. Welcome home. 🌹'); })
       .catch(function(e){ if(tries<20)return setTimeout(function(){go(tries+1);},300); thanks('Your note is on its way — welcome home. 🌹'); }); }
   go(0); };
-window.claimSkip=function(){ var e=document.getElementById('covThanks'); if(e)e.textContent='You’re in. Say hi whenever you like — the family’s glad you’re here. 🌹'; covShow('covS3'); };
+window.claimSkip=function(){ var e=document.getElementById('covThanks'); if(e)e.textContent='You’re in. Say hi whenever you like — the family’s glad you’re here. 🌹'; covShow('covS3'); showGroupQR(); };
+/* If this is a marquee band group, bounce them back to Facebook with their GROUP QR to bring fans in. */
+var CGURL=''; try{ if(window.DDBandGroups&&DDBandGroups.get(NAME||ID)) CGURL=DDBandGroups.qrUrl(NAME||ID); else if(T==='band'&&ID) CGURL='https://deaddance.app/'+ID; }catch(e){}   /* marquee → group; regulars → their own page. Everyone comes home on the first shout-out. */
+function showGroupQR(){ if(!CGURL)return; var box=document.getElementById('covGroupQR'); if(!box)return; box.style.display='block';
+  try{ if(window.DDQR) DDQR.into('cgqr', CGURL, {mark:'dd', size:230, css:150}); }catch(e){} }
+window.cgShare=function(){ if(!CGURL)return; window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(CGURL),'_blank','noopener'); };
 window.claimDone=function(){ covClose(); };
 window.claimNo=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }catch(e){} covClose(); };
 

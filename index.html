@@ -1471,7 +1471,8 @@ function calMatch(s){
  return true; }
 function calType(v){ CALTYPE=v||'all'; renderCal(); }
 /* Act filter — thins the busy national rollup to one headliner's dates (or All) */
-function calAct(v){ CAL_ACT=v||'all'; CAL_SEL=null; renderCal(); }
+function calAct(v){ CAL_ACT=v||'all'; CAL_SEL=null; renderCal();
+ try{ if(window.DDShowmap&&DDShowmap.setAct) DDShowmap.setAct(CAL_ACT==='all'?null:CAL_ACT); }catch(e){} }   /* band dropdown also filters the map */
 window.calAct=calAct;
 function calView(v){ CAL_VIEW=v; CAL_SEL=null;
  document.getElementById('vwList').classList.toggle('on',v==='list');
@@ -2331,9 +2332,11 @@ function readerTab(tab){
  } else if(tab==='bands'){
   b.innerHTML=bandRolodexHTML();
  } else if(tab==='groups'){
-  b.innerHTML='<p class="rsub"><span class="ff free">FREE</span> All mirrored Dead groups. <b>TUNE IN</b> to follow one — its posts flow into your feed.</p><div class="glist">'+
+  b.innerHTML=bandGroupsHTML()+
+   '<p class="rsub" style="margin-top:16px"><span class="ff free">FREE</span> All mirrored Dead groups. <b>TUNE IN</b> to follow one — its posts flow into your feed.</p><div class="glist">'+
    GROUPS.map(function(g,i){return '<div class="gc"><div class="top"><div class="ico">'+g.ic+'</div><div style="flex:1"><div class="nm">'+g.n+'</div><div class="lv">you last visited '+g.seen+'</div></div><label class="tune'+(g.tuned?' in':'')+'"><input type="checkbox" '+(g.tuned?'checked':'')+' onchange="tuneIn('+i+',this.checked)"> <span>'+(g.tuned?'TUNED IN':'TUNE IN')+'</span></label></div><button class="vg" onclick="viewGroup('+i+')">View group</button></div>';}).join("")+
    '</div><div class="note">We mirror what the family shares — TUNE IN just filters those groups into your feed. Nothing is scraped; <b>View group</b> links back to Facebook.</div>';
+  try{ bandGroupsQRs(); }catch(e){}
  } else if(tab==='market'){
   b.innerHTML='<p class="rsub"><span class="ff fee">FEE · buy</span> <b>The Lot</b> — the lot, online. Set up a stall free; the deal is buyer-to-seller, the house just sets the table.</p>'+
    '<div class="sdcats" id="sdcats"></div><div class="booths" id="booths"></div>'+
@@ -2357,6 +2360,31 @@ function readerTab(tab){
  }
 }
 function viewGroup(i){toast('Opens '+GROUPS[i].n+' on Facebook ↗');}
+/* ===== Band Groups — one per marquee act in the calendar dropdown. Real logo once accepted;
+   each carries a QR the band puts on their own Facebook to bring fans in. ===== */
+function bandGroupsHTML(){
+ if(!window.DDBandGroups) return '';
+ var gs=DDBandGroups.list();
+ return '<p class="rsub"><span class="ff free">FREE</span> 🎸 <b>Band Groups</b> — a home for every act on the calendar. Once the band claims it, their logo goes up (they can change it), and they drop their QR on Facebook to bring the fans in.</p>'+
+  '<div class="glist">'+gs.map(function(g){
+   var badge=g.accepted?'<span style="font-size:10px;font-weight:800;color:#1f9e6b;background:#e7f7ef;border-radius:999px;padding:2px 7px;margin-left:6px">✓ Official</span>':'<span style="font-size:10px;font-weight:800;color:#9a7; background:#f3f0e6;border-radius:999px;padding:2px 7px;margin-left:6px">unclaimed</span>';
+   var ava=g.logo?('<img src="'+g.logo+'" alt="" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'ico\',textContent:\''+g.ic+'\'}))" style="width:42px;height:42px;border-radius:11px;object-fit:cover;flex:none">'):('<div class="ico">'+g.ic+'</div>');
+   return '<div class="gc"><div class="top">'+ava+
+     '<div style="flex:1"><div class="nm">'+g.disp+badge+'</div><div class="lv">'+g.members.toLocaleString()+' fans · deaddance.app/'+g.slug+'</div></div>'+
+     '<label class="tune'+(g.tuned?' in':'')+'"><input type="checkbox" '+(g.tuned?'checked':'')+' onchange="bgTune(\''+g.slug+'\',this.checked)"> <span>'+(g.tuned?'TUNED IN':'TUNE IN')+'</span></label></div>'+
+     '<div style="display:flex;gap:12px;align-items:center;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px">'+
+       '<div id="bgqr-'+g.slug+'" style="width:96px;height:96px;flex:0 0 96px;background:#fff;border-radius:9px"></div>'+
+       '<div style="font-size:12px;color:#4a4356;line-height:1.45"><b>Band: put this on your Facebook 🔗</b><br>Every scan brings a fan into your '+g.disp+' group.'+
+         '<div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap"><button class="btn ghost sm" style="padding:7px 11px;font-size:12px" onclick="bgShare(\''+g.slug+'\')">↗ Share to FB</button><button class="btn ghost sm" style="padding:7px 11px;font-size:12px" onclick="bgSaveQR(\''+g.slug+'\')">⬇︎ Save QR</button></div></div>'+
+     '</div></div>';
+  }).join('')+'</div>';
+}
+function bandGroupsQRs(){ if(!window.DDBandGroups||!window.DDQR)return;
+ DDBandGroups.list().forEach(function(g){ var el=document.getElementById('bgqr-'+g.slug); if(el){ try{ DDQR.into('bgqr-'+g.slug, g.qr, {mark:'dd', size:200, css:96}); }catch(e){} } }); }
+function bgTune(slug,on){ try{ DDBandGroups.setTuned(slug,on); }catch(e){} readerTab('groups'); if(typeof toast==='function')toast(on?'📡 Tuned in — this band\'s posts flow into your feed.':'Tuned out.'); }
+function bgShare(slug){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('https://deaddance.app/'+slug),'_blank','noopener'); }
+function bgSaveQR(slug){ try{ DDQR.save('https://deaddance.app/'+slug, {mark:'dd'}, slug+'-group-QR.png'); }catch(e){} }
+window.bgTune=bgTune; window.bgShare=bgShare; window.bgSaveQR=bgSaveQR;
 function playIdx(i){playTrack(ARCHIVE[i]);}
 function sdCats(){return ["All","Art","Tie-Dye","Jewelry","Glass","Apparel","Food","Tapes"];}
 function sdSet(c){SDCAT=c;sdRender();}
@@ -3731,6 +3759,8 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_categories.js" defer></script>
 <script src="dd_bands.js" defer></script>
 <script src="dd_logoguess.js" defer></script>
+<script src="dd_logoguess_vip.js" defer></script>
+<script src="dd_bandgroups.js" defer></script>
 <script src="dd_learn.js" defer></script>
 <script src="dd_crumbs.js" defer></script>
 <script src="dd_recruit.js" defer></script>

@@ -192,9 +192,19 @@
     return best;
   }
   // assign every locatable show to its nearest chapter
-  var CH_INDEX = {}; CHAPTERS.forEach(function (ch) { ch.shows = []; CH_INDEX[ch.name] = ch; });
-  SHOWS.forEach(function (s) { var ll = CITY[s.city]; if (!ll) return; s._ll = ll; var ch = nearestChapter(ll[0], ll[1]); ch.shows.push(s); s._chapter = ch.name; });
-  CHAPTERS.forEach(function (ch) { ch.shows.sort(function (a, b) { return a.date < b.date ? -1 : 1; }); });
+  var CH_INDEX = {}; CHAPTERS.forEach(function (ch) { CH_INDEX[ch.name] = ch; });
+  var ALLSHOWS = SHOWS.slice();               // master — every future show, never mutated
+  var ACT_FILTER = null;                        // lowercased band filter, or null = all acts
+  function actMatch(s){ if(!ACT_FILTER) return true; var b=(s.band||'').toLowerCase();
+    return b===ACT_FILTER || b.indexOf(ACT_FILTER)>=0 || ACT_FILTER.indexOf(b)>=0; }
+  function reindexShows(){
+    CHAPTERS.forEach(function (ch) { ch.shows = []; });
+    SHOWS.forEach(function (s) { var ll = CITY[s.city]; if (!ll) return; s._ll = ll; var ch = nearestChapter(ll[0], ll[1]); ch.shows.push(s); s._chapter = ch.name; });
+    CHAPTERS.forEach(function (ch) { ch.shows.sort(function (a, b) { return a.date < b.date ? -1 : 1; }); });
+  }
+  // when the Calendar's band dropdown changes, rebuild the map's shows through the same filter
+  function applyActData(band){ ACT_FILTER=(band&&band!=='all')?String(band).toLowerCase():null; SHOWS = ALLSHOWS.filter(actMatch); reindexShows(); }
+  reindexShows();
   function chapterByName(n) { return CH_INDEX[n] || null; }
   function festsFor(ch) { try { return (window.DD_FESTIVALS || []).filter(function (f) { return f.region === ch.fk; }); } catch (e) { return []; } }
 
@@ -511,7 +521,11 @@
     // shared scope pills — route through the one setScope so the Calendar + Map move together
     host.querySelectorAll(".dd-scope button").forEach(function (b) { b.addEventListener("click", function () { var sc = b.getAttribute("data-scope"); if (window.setScope) { window.setScope(sc); } else { setMode(sc === "national" ? "national" : "local"); } }); });
     // let the Calendar drive the Map (Local ↔ Near-me, National ↔ National, My Calendar → national roll-up)
-    window.DDShowmap = { setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} } };
+    function redrawForFilter(){ if (level === "radius") { if (userLoc) { zoomToRadius(radiusMi); } else { toNation(); } } else if (level && level !== "nation") { drill(level); } else { toNation(); } }
+    window.DDShowmap = {
+      setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },
+      setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} }   // band dropdown → map filter, keeps current scope/zoom
+    };
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
     if (radiusSel) radiusSel.addEventListener("change", function () { zoomToRadius(+radiusSel.value || 50); });
