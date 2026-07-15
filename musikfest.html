@@ -42,6 +42,11 @@
 .trackstat .row div span{display:block;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .trackstat .row div b{font-size:18px;font-weight:900;color:var(--ink)}
 .catch{width:19px;height:19px;flex:none;accent-color:#b8002e;cursor:pointer}
+.lmv{border:0;background:rgba(120,104,150,.14);color:var(--purple);width:38px;height:38px;border-radius:50%;font-size:22px;font-weight:800;cursor:pointer;flex:none}
+.pills{display:flex;gap:6px;margin-bottom:9px}
+.pill{flex:1;border:0;background:#f1eef7;color:var(--purple);border-radius:999px;padding:9px;font-weight:800;font-size:12.5px;cursor:pointer}
+.pill.on{background:var(--purple);color:#fff}
+.lmore{display:block;width:100%;margin-top:8px;border:0;background:#f1eef7;color:var(--purple);border-radius:12px;padding:11px;font-weight:800;font-size:13px;cursor:pointer}
 .rangebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
 .rlab{font-size:12.5px;font-weight:700;color:var(--muted)}
 .rsel{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-weight:700;font-size:13px;background:#fff;color:var(--ink)}
@@ -70,6 +75,11 @@
     <button onclick="postWalk()">📸 Post my walk</button>
   </div>
   <div class="trackstat" id="trackStat"></div>
+  <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
+  <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+    <button onclick="document.getElementById('photoIn').click()" style="flex:0 0 auto;border:0;background:#f1eef7;color:var(--purple);border-radius:999px;padding:9px 14px;font-weight:800;font-size:12.5px;cursor:pointer">📷 Add my photos</button>
+    <div id="photoStrip" style="display:flex;flex-wrap:wrap;flex:1;align-items:center"></div>
+  </div>
 
   <div class="card" style="text-align:center;margin-top:14px;border-color:#f0d9a6;background:#fffdf6">
     <div id="mfqr" style="width:190px;height:190px;margin:4px auto 0;background:#fff;border-radius:12px"></div>
@@ -102,13 +112,19 @@
   <div class="sec">Wind Creek Steel Stage — the ticketed headliners (6:00 PM)</div>
   <div class="sched" id="sched"></div>
 
-  <div class="sec">Find your sets — pick a window</div>
-  <div class="rangebar">
-    <span class="rlab">From</span><select id="rFrom" class="rsel" onchange="refresh()"></select>
-    <span class="rlab">to</span><select id="rTo" class="rsel" onchange="refresh()"></select>
+  <div class="sec">The schedule — one day, tight &amp; rolling</div>
+  <div class="rangebar" style="justify-content:space-between">
+    <button class="lmv" onclick="dayStep(-1)" aria-label="Previous day">‹</button>
+    <div style="text-align:center;line-height:1.2"><b id="dayLbl" style="font-size:15px;font-weight:900;display:block"></b><span id="ddCount" style="font-size:11.5px;color:var(--muted);font-weight:700"></span></div>
+    <button class="lmv" onclick="dayStep(1)" aria-label="Next day">›</button>
   </div>
-  <label class="ddtog"><input type="checkbox" id="ddOnly" onchange="refresh()" style="width:17px;height:17px;accent-color:#b8002e"> 🌹 Dead &amp; jam tributes only <span id="ddCount" style="color:var(--muted);font-weight:600"></span></label>
+  <div class="pills">
+    <button class="pill on" id="pill_all" onclick="setPill('all')">All</button>
+    <button class="pill" id="pill_dead" onclick="setPill('dead')">🌹 Dead &amp; jam</button>
+    <button class="pill" id="pill_now" onclick="setPill('now')">⏱ Now → next</button>
+  </div>
   <div class="sched" id="fullSched"></div>
+  <div id="schMore"></div>
 
   <div class="sec">My sets — the acts I'm catching 🌹</div>
   <div id="mySets"></div>
@@ -134,6 +150,8 @@ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.c
 window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
 </script>
 <script src="dd_feed.js"></script>
+<script src="dd_crumbs.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script src="dd_musikfest.js"></script>
@@ -206,15 +224,15 @@ function stageKey(s){ var n=s.n.toLowerCase();
  if(n.indexOf('zinzen')>=0)return 'Zinzenplatz'; if(n.indexOf('tropical')>=0)return 'Plaza Tropical';
  if(n.indexOf('americaplatz')>=0||n.indexOf('levitt')>=0)return 'Americaplatz'; if(n.indexOf('stadt')>=0)return 'Stadtplatz';
  return null; }
-function deadStageSet(){ var f=(document.getElementById('rFrom')||{}).value, t=(document.getElementById('rTo')||{}).value, set={};
- (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!f||r.d>=f) && (!t||r.d<=t)) set[r.st]=true; }); return set; }
+function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!=='undefined')?DAYS[curDayIdx]:null, set={};
+ (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!day||r.d===day)) set[r.st]=true; }); return set; }
 function drawMap(){
  var pad=54, W=1000,H=640;
  var lats=STAGES.map(function(s){return s.lat;}), lngs=STAGES.map(function(s){return s.lng;});
  var laMin=Math.min.apply(0,lats),laMax=Math.max.apply(0,lats),lnMin=Math.min.apply(0,lngs),lnMax=Math.max.apply(0,lngs);
  function X(lng){ return pad+(lng-lnMin)/((lnMax-lnMin)||1)*(W-2*pad); }
  function Y(lat){ return pad+(laMax-lat)/((laMax-laMin)||1)*(H-2*pad); }
- var dead=deadStageSet(), ddOnly=(document.getElementById('ddOnly')||{}).checked;
+ var dead=deadStageSet(), ddOnly=(typeof PILL!=='undefined' && PILL==='dead');
  var svg='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#f7f4fb"/>';
  svg+='<path d="M0,'+(Y(40.6172)+8)+' C 300,'+(Y(40.6168))+' 700,'+(Y(40.6165))+' '+W+','+(Y(40.6160)-6)+' L '+W+','+(Y(40.6160)+34)+' C 700,'+(Y(40.6165)+40)+' 300,'+(Y(40.6168)+40)+' 0,'+(Y(40.6172)+44)+' Z" fill="#cfe3f2"/>';
  svg+='<text x="14" y="'+(Y(40.6167)+4)+'" font-size="15" font-weight="800" fill="#5c86a8">Lehigh River</text>';
@@ -240,6 +258,9 @@ function drawMap(){
        '<text x="'+yx+'" y="'+(yy-13)+'" text-anchor="middle" font-size="12" font-weight="900" fill="#0d5c3d">YOU</text>';
    }
  }
+ (window.PHOTOS||[]).forEach(function(ph){ if(ph.lat==null)return; var mLa=((laMax-laMin)||0.006)*0.35, mLo=((lnMax-lnMin)||0.01)*0.35;
+   if(ph.lat>=laMin-mLa&&ph.lat<=laMax+mLa&&ph.lng>=lnMin-mLo&&ph.lng<=lnMax+mLo){ var px=X(ph.lng),py=Y(ph.lat), cid='ph'+Math.round(px)+'_'+Math.round(py);
+     svg+='<clipPath id="'+cid+'"><circle cx="'+px+'" cy="'+py+'" r="16"/></clipPath><image href="'+ph.url+'" x="'+(px-16)+'" y="'+(py-16)+'" width="32" height="32" preserveAspectRatio="xMidYMid slice" clip-path="url(#'+cid+')"/><circle cx="'+px+'" cy="'+py+'" r="16" fill="none" stroke="#b8002e" stroke-width="3"/>'; } });
  document.getElementById('pmap').innerHTML=svg;
 }
 
@@ -272,24 +293,30 @@ var DAYS=Array.from(new Set(MF.map(function(r){return r.d;}))).sort();
 function dayLabel(d){ try{ return new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return d; } }
 function mins(t){ var m=String(t).match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return 0; var h=(+m[1])%12+(/pm/i.test(m[3])?12:0); return h*60+(+m[2]); }
 function fillDaySelect(sel,def){ sel.innerHTML=DAYS.map(function(d){return '<option value="'+d+'"'+(d===def?' selected':'')+'>'+dayLabel(d)+'</option>';}).join(''); }
-window.refresh=function(){ if(!MF.length)return;
- var fs=document.getElementById('rFrom'), ts=document.getElementById('rTo'); var f=fs.value, t=ts.value;
- if(f>t){ ts.value=f; t=f; }                                   // keep the window valid
- var ddOnly=document.getElementById('ddOnly').checked;
- drawMap();                                                    // re-mark the Platz map for this window
- var win=MF.filter(function(r){ return r.d>=f && r.d<=t; });
- var ddN=win.filter(function(r){return r.sc==='dd';}).length;
- document.getElementById('ddCount').textContent='· '+ddN+' Dead/jam in this window';
- var rows=win.filter(function(r){ return !ddOnly||r.sc==='dd'; }).sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:mins(a.t)-mins(b.t); });
- var last='', cs=catchStore();
- document.getElementById('fullSched').innerHTML = rows.length ? rows.map(function(r){
-   var head=(r.d!==last)?('<div class="srow" style="background:#faf7ff"><span class="b" style="color:var(--purple);font-weight:900">'+dayLabel(r.d)+'</span></div>'):''; last=r.d;
+var curDayIdx=0, PILL='all', SCH_MAX=9, schExpand=false;
+function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function nowMins(){ var d=new Date(); return d.getHours()*60+d.getMinutes(); }
+window.dayStep=function(n){ curDayIdx=Math.max(0,Math.min(DAYS.length-1,curDayIdx+n)); schExpand=false; refresh(); };
+window.setPill=function(p){ PILL=p; schExpand=false; ['all','dead','now'].forEach(function(x){ var el=document.getElementById('pill_'+x); if(el)el.classList.toggle('on',x===p); }); refresh(); };
+window.schToggle=function(){ schExpand=!schExpand; refresh(); };
+window.refresh=function(){ if(!MF.length)return; var day=DAYS[curDayIdx];
+ var lbl=document.getElementById('dayLbl'); if(lbl)lbl.textContent=dayLabel(day);
+ drawMap();                                                    // re-mark the Platz map for this day
+ var rows=MF.filter(function(r){ return r.d===day; });
+ if(PILL==='dead') rows=rows.filter(function(r){ return r.sc==='dd'; });
+ var isToday=(day===todayISO());
+ if(PILL==='now' || isToday){ var nm=nowMins(); rows=rows.filter(function(r){ return mins(r.t)>=nm-10; }); }   // ROLLING: past sets age out
+ rows.sort(function(a,b){ return mins(a.t)-mins(b.t); });
+ var ddN=MF.filter(function(r){ return r.d===day && r.sc==='dd'; }).length;
+ var cnt=document.getElementById('ddCount'); if(cnt)cnt.textContent=rows.length+' set'+(rows.length===1?'':'s')+(ddN?(' · '+ddN+' 🌹'):'');
+ var shown=schExpand?rows:rows.slice(0,SCH_MAX), cs=catchStore();
+ document.getElementById('fullSched').innerHTML = shown.length ? shown.map(function(r){
    var ck=catchKey(r), on=cs[ck]?'checked':'';
-   return head+'<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span><span class="b">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</span><span class="g">'+esc(r.st)+'</span></div>';
- }).join('') : '<div class="srow"><span class="g">Nothing in that window'+(ddOnly?' for Dead/jam — untick the filter for all acts.':'.')+'</span></div>';
+   return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span><span class="b">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</span><span class="g">'+esc(r.st)+'</span></div>';
+ }).join('') : '<div class="srow"><span class="g">Nothing '+(PILL==='dead'?'Dead/jam ':'')+'left today — tap › for the next day.</span></div>';
+ document.getElementById('schMore').innerHTML = (rows.length>SCH_MAX) ? ('<button class="lmore" onclick="schToggle()">'+(schExpand?'Show less ↑':('Show '+(rows.length-SCH_MAX)+' more ↓'))+'</button>') : '';
 };
-if(MF.length){ fillDaySelect(document.getElementById('rFrom'),DAYS[0]); fillDaySelect(document.getElementById('rTo'),DAYS[DAYS.length-1]); refresh(); }
-else { drawMap(); }
+if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; refresh(); } else { drawMap(); }
 // every stage label breathes between its NAME and its GPS coordinates — so you know it's real, and locatable
 window.LABELMODE='name';
 setInterval(function(){ window.LABELMODE=(window.LABELMODE==='gps')?'name':'gps'; try{ drawMap(); }catch(e){} }, 2600);
@@ -310,21 +337,26 @@ var WALK={on:false,miles:0,gain:0,last:null,lastAlt:null,watch:null,path:[]};
 function fmtStat(){ var st=document.getElementById('trackStat'); if(!st)return; st.style.display='block';
   st.innerHTML='<div class="big">'+WALK.miles.toFixed(2)+' mi</div><div style="font-size:12px;color:var(--muted);font-weight:700">walked at Musikfest</div>'+
    '<div class="row"><div><span>Elevation ↑</span><b>'+Math.round(WALK.gain)+' ft</b></div><div><span>Steps ≈</span><b>'+Math.round(WALK.miles*2100).toLocaleString()+'</b></div></div>'; }
+function leftRight(from,cur,tgt){ if(!from)return 'left'; var hx=cur[1]-from[1],hy=cur[0]-from[0],tx=tgt[1]-cur[1],ty=tgt[0]-cur[0]; return (hx*ty-hy*tx)>0?'left':'right'; }
+function mfToast(msg){ var t=document.getElementById('mfToast'); if(!t){ t=document.createElement('div'); t.id='mfToast'; t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;background:#241535;color:#fff;font-weight:800;font-size:14px;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:88%;text-align:center;opacity:0;transition:opacity .25s'; document.body.appendChild(t); } t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3600); }
+function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(here[0],here[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
+  if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
 function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
-  window.YOU=[la,lo];
-  if(WALK.on && acc<=30){
+  var prev=window.YOU; window.YOU=[la,lo];
+  if(WALK.on && acc<=40){
     if(WALK.last){ var d=hav(WALK.last[0],WALK.last[1],la,lo); if(d>0.0009 && d<0.5){ WALK.miles+=d; WALK.path.push([la,lo]); } }  // jitter + teleport filter
     else { WALK.path.push([la,lo]); }
     WALK.last=[la,lo];
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
+  pottyCheck(prev,[la,lo]);
   try{ drawMap(); }catch(e){}  carBadge(); catchNotifyCheck();
 }
 function startWatch(){ if(WALK.watch!=null||!navigator.geolocation)return; WALK.watch=navigator.geolocation.watchPosition(onPos,function(){},{enableHighAccuracy:true,maximumAge:2000,timeout:12000}); }
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
-  if(WALK.on){ b.textContent='⏸ Tracking your walk'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; startWatch(); fmtStat(); }
-  else { b.textContent='🥾 Start my walk'; b.classList.remove('on'); } };
+  if(WALK.on){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; startWatch(); fmtStat(); }
+  else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); } };
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
   if(c && window.YOU){ el.style.display='block'; el.innerHTML='🚗 '+prettyDist(hav(window.YOU[0],window.YOU[1],c.lat,c.lng))+' to your car'; } else el.style.display='none'; }
 window.nearestBathroom=function(){ if(!window.YOU){ startWatch(); alert('Getting your location — tap again in a moment.'); return; }
@@ -335,7 +367,7 @@ window.nearestBathroom=function(){ if(!window.YOU){ startWatch(); alert('Getting
 function catchStore(){ try{ return JSON.parse(localStorage.getItem('dd.mf.catch')||'{}'); }catch(e){ return {}; } }
 function catchKey(r){ return r.d+'|'+r.t+'|'+r.b; }
 window.catchToggle=function(key){ var s=catchStore(); if(s[key]) delete s[key];
-  else { var hit=MF.filter(function(r){return catchKey(r)===key;})[0]; if(hit)s[key]=hit;
+  else { var hit=MF.filter(function(r){return catchKey(r)===key;})[0]; if(hit){ s[key]=hit; try{ selfieNudge(hit.b); }catch(e){} }
     if('Notification' in window && Notification.permission==='default'){ try{Notification.requestPermission();}catch(e){} } }
   try{ localStorage.setItem('dd.mf.catch',JSON.stringify(s)); }catch(e){} renderMySets(); refresh(); };
 function to24(t){ var m=String(t).match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return '20:00:00'; var h=(+m[1])%12+(/pm/i.test(m[3])?12:0); return (h<10?'0':'')+h+':'+m[2]+':00'; }
@@ -351,16 +383,30 @@ function catchNotifyCheck(){ if(!('Notification' in window)||Notification.permis
     if(mn>0 && mn<=15 && !NOTIFIED[k]){ NOTIFIED[k]=1; var st=STAGE_BY_KEY[r.st];
       try{ var n=new Notification('🌹 '+r.b+' in '+Math.round(mn)+' min',{body:'at '+r.st+' — tap for walking directions'});
         n.onclick=function(){ if(st) window.open('https://www.google.com/maps/dir/?api=1&destination='+st.lat+','+st.lng+'&travelmode=walking','_blank'); }; }catch(e){} } }); }
-// ===== The postable trophy — curate a map overlay of the day's walk → HyperPost =====
+// ===== Photos: GPS'd shots pin to the map + fold into the spread; Cookie nudges the selfie =====
+var PHOTOS=[];
+function myFirst(){ try{ return (localStorage.getItem('dd.myname')||'').split(' ')[0]; }catch(e){ return ''; } }
+window.addPhotos=function(input){ var files=input.files; if(!files||!files.length)return;
+  Array.prototype.forEach.call(files,function(f){ var url=URL.createObjectURL(f);
+    var place=function(lat,lng,ex){ var img=new Image(); img.onload=function(){ PHOTOS.push({url:url,img:img,lat:lat,lng:lng,exif:!!ex}); renderPhotoStrip(); try{drawMap();}catch(e){} try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} }; img.src=url; };
+    if(window.exifr&&exifr.gps){ exifr.gps(f).then(function(gp){ if(gp&&gp.latitude!=null){ place(gp.latitude,gp.longitude,true); mfToast('📷 Pinned right where you shot it!'); } else place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }).catch(function(){ place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }); }
+    else place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false);
+  }); input.value=''; };
+function renderPhotoStrip(){ var el=document.getElementById('photoStrip'); if(!el)return; el.innerHTML=PHOTOS.map(function(p){ return '<img src="'+p.url+'" title="'+(p.exif?'pinned by GPS':'added')+'" style="width:52px;height:52px;object-fit:cover;border-radius:9px;margin:3px;border:2px solid #fff;box-shadow:0 1px 4px #0003">'; }).join(''); }
+function selfieNudge(band){ var nm=myFirst(); mfToast('🍪 '+(nm?nm+', ':'')+'grab a selfie with '+band+' in the background — tap 📷 Add my photos!'); }
+
+// ===== The postable trophy — the MUSIKFEST spread → HyperPost =====
 window.postWalk=function(){
   var W=1080,H=1080, cv=document.createElement('canvas'); cv.width=W; cv.height=H; var g=cv.getContext('2d');
   g.fillStyle='#faf8fc'; g.fillRect(0,0,W,H);
   g.fillStyle='#241535'; g.fillRect(0,0,W,168);
-  g.fillStyle='#f0a500'; g.font='800 30px sans-serif'; g.fillText('MUSIKFEST 2026 · MY WALK', 44, 66);
-  g.fillStyle='#fff'; g.font='900 78px sans-serif'; g.fillText(WALK.miles.toFixed(2)+' miles', 44, 140);
+  g.fillStyle='#f0a500'; g.font='900 58px sans-serif'; g.fillText('MUSIKFEST 2026', 44, 74);
+  var FUN=['Dosed on polka and Dead 🌹','Every Platz, conquered.','Walked it like I stole it.','Ten stages, one pair of shoes.','The bus rolled and so did I.','Found every Platz, lost my voice.'];
+  g.fillStyle='#e0cdf5'; g.font='italic 800 29px sans-serif'; g.fillText(FUN[Math.floor(Math.random()*FUN.length)], 44, 118);
+  g.fillStyle='#fff'; g.font='900 42px sans-serif'; g.fillText(WALK.miles.toFixed(2)+' mi walked', 44, 156);
   var pad=110, top=210, mh=590;
   var lats=STAGES.map(function(s){return s.lat;}), lngs=STAGES.map(function(s){return s.lng;});
-  WALK.path.forEach(function(p){ lats.push(p[0]); lngs.push(p[1]); });
+  WALK.path.forEach(function(p){ lats.push(p[0]); lngs.push(p[1]); }); PHOTOS.forEach(function(p){ if(p.lat!=null){ lats.push(p.lat); lngs.push(p.lng); } });
   var laMin=Math.min.apply(0,lats),laMax=Math.max.apply(0,lats),lnMin=Math.min.apply(0,lngs),lnMax=Math.max.apply(0,lngs);
   function X(lng){ return pad+(lng-lnMin)/((lnMax-lnMin)||1)*(W-2*pad); }
   function Y(lat){ return top+(laMax-lat)/((laMax-laMin)||1)*mh; }
@@ -369,6 +415,7 @@ window.postWalk=function(){
     WALK.path.forEach(function(p,i){ var x=X(p[1]),y=Y(p[0]); if(i===0)g.moveTo(x,y); else g.lineTo(x,y); }); g.stroke();
     var sN=WALK.path[WALK.path.length-1]; g.fillStyle='#1f9e6b'; g.beginPath(); g.arc(X(sN[1]),Y(sN[0]),15,0,7); g.fill();
     g.fillStyle='#fff'; g.lineWidth=4; g.strokeStyle='#fff'; g.beginPath(); g.arc(X(sN[1]),Y(sN[0]),15,0,7); g.stroke(); }
+  PHOTOS.forEach(function(ph){ if(ph.lat==null||!ph.img)return; var px=X(ph.lng),py=Y(ph.lat); g.save(); g.beginPath(); g.arc(px,py,32,0,7); g.closePath(); g.clip(); g.drawImage(ph.img,px-32,py-32,64,64); g.restore(); g.lineWidth=5; g.strokeStyle='#b8002e'; g.beginPath(); g.arc(px,py,32,0,7); g.stroke(); });
   var nSets=Object.keys(catchStore()).length;
   g.fillStyle='#241535'; g.font='800 40px sans-serif';
   g.fillText('↑ '+Math.round(WALK.gain)+' ft   ·   ~'+Math.round(WALK.miles*2100).toLocaleString()+' steps', 44, top+mh+80);
@@ -382,7 +429,9 @@ window.postWalk=function(){
     try{ if(window.DDFeed && DDFeed.post) DDFeed.post(cap,{scope:'all'}); }catch(e){}   // also lands on the Musikfest group + DeadDance feed → out to social
   },'image/png');
 };
-renderMySets(); startWatch();
+// DEFAULT GPS ON — start tracking the moment they land; user need not do a thing. The reveal comes at day's end.
+renderMySets(); renderPhotoStrip();
+WALK.on=true; (function(){ var b=document.getElementById('trackBtn'); if(b){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); } })(); fmtStat(); startWatch();
 
 // parking lots + the "where did I park" button
 try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
