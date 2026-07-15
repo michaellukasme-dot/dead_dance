@@ -236,9 +236,10 @@
       '<div class="showmap-card">' +
         '<div class="showmap-head">' +
           '<b>🗺️ Shows on the map</b>' +
-          '<div class="showmap-seg" role="tablist">' +
-            '<button data-mode="national" class="on">🇺🇸 National</button>' +
-            '<button data-mode="local">📍 Near me</button>' +
+          '<div class="dd-scope" role="tablist">' +
+            '<button data-scope="local">📍 Local</button>' +
+            '<button data-scope="national" class="on">National</button>' +
+            '<button data-scope="my">My Calendar</button>' +
           '</div>' +
           '<button class="showmap-x" aria-label="Hide map" title="Hide">✕</button>' +
         '</div>' +
@@ -507,7 +508,10 @@
     }
 
     /* --- controls --- */
-    host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); }); });
+    // shared scope pills — route through the one setScope so the Calendar + Map move together
+    host.querySelectorAll(".dd-scope button").forEach(function (b) { b.addEventListener("click", function () { var sc = b.getAttribute("data-scope"); if (window.setScope) { window.setScope(sc); } else { setMode(sc === "national" ? "national" : "local"); } }); });
+    // let the Calendar drive the Map (Local ↔ Near-me, National ↔ National, My Calendar → national roll-up)
+    window.DDShowmap = { setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} } };
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
     if (radiusSel) radiusSel.addEventListener("change", function () { zoomToRadius(+radiusSel.value || 50); });
