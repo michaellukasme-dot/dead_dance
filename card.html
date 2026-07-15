@@ -59,6 +59,49 @@ h1{font-size:26px;margin:4px 0 2px;font-weight:900}
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- Owner claim overlay — the first thing the owner sees when they scan their QR -->
+<style>
+.cov{position:fixed;inset:0;z-index:9999;background:rgba(20,12,30,.74);display:none;align-items:center;justify-content:center;padding:20px}
+.cov.on{display:flex}
+.covbox{background:#fff;border-radius:22px;max-width:360px;width:100%;padding:26px 22px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.covk{color:#b8002e;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.covlogo{width:122px;height:122px;border-radius:26px;margin:16px auto 12px;background:#f1eef7;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:900;font-size:42px;color:#5a2e86}
+.covlogo img{width:100%;height:100%;object-fit:cover}
+.covname{font-weight:900;font-size:22px;line-height:1.15}
+.covq{font-size:15px;color:#4a4356;margin:7px 0 18px}
+.covyes{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-weight:900;font-size:16px;background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff;cursor:pointer}
+.covno{display:block;width:100%;border:0;background:none;color:#7a7285;font-weight:700;font-size:13px;padding:12px;cursor:pointer;margin-top:2px}
+.covfine{font-size:11.5px;color:#9a90b0;line-height:1.4;margin-top:6px}
+</style>
+<div class="cov" id="claimCov"><div class="covbox">
+  <!-- step 1: is this your logo -->
+  <div id="covS1">
+    <div class="covk">DeadDance · is this you?</div>
+    <div class="covlogo" id="covLogo"></div>
+    <div class="covname" id="covName">Your band</div>
+    <div class="covq">Is this your logo?</div>
+    <button class="covyes" onclick="claimYes()">🌹 Yes — that's us</button>
+    <button class="covno" onclick="claimNo()">No — I'm a fan, just looking</button>
+  </div>
+  <!-- step 2: say something to the Family — pre-written, editable, one SEND -->
+  <div id="covS2" style="display:none">
+    <div class="covname" style="font-size:19px">Welcome to the DeadDance family, <span id="covName2"></span>! 🌹</div>
+    <div class="covq" style="margin:6px 0 2px">We'd be honored if you said hello to the family.</div>
+    <textarea id="covBody" style="width:100%;min-height:150px;font-size:15px;line-height:1.5;border:1px solid #ece7f2;border-radius:13px;padding:13px;margin:11px 0 6px;resize:none;text-align:left"></textarea>
+    <button class="covno" id="covClaude" style="background:#f1eef7;color:#5a2e86;border-radius:12px;font-weight:800;margin:0 0 6px" onclick="claudeWrite()">✨ Want me to write it with Claude?</button>
+    <button class="covyes" onclick="claimSend()">Send to the Family →</button>
+    <button class="covno" onclick="claimSkip()">Say hi later</button>
+    <div class="covfine">Your words, your call — whatever's on your heart. Your tour &amp; the rest, we'll sort with you (or your manager) later.</div>
+  </div>
+  <!-- step 3: thank you — either way -->
+  <div id="covS3" style="display:none">
+    <div class="covlogo">🌹</div>
+    <div class="covname">Thank you.</div>
+    <div class="covq" id="covThanks">Welcome to the family.</div>
+    <button class="covyes" onclick="claimDone()">See my page</button>
+  </div>
+</div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
@@ -68,6 +111,9 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_join.js"></script>
 <script src="dd_shows.js"></script>
 <script src="dd_bands.js"></script>
+<script src="dd_logoguess.js"></script>
+<script src="dd_logoguess_vip.js"></script>
+<script src="dd_feed.js"></script>
 <script src="dd_art.js"></script>
 <script src="dd_pymk.js"></script>
 <script>
@@ -82,6 +128,7 @@ var NAME=qp('name');
 var SEED=(window.GDBandSeed&&GDBandSeed.BANDS)||[];
 var ENT=null;
 if(T==='band'){ ENT=SEED.filter(function(b){return b.id===ID;})[0]||null; if(ENT&&!NAME)NAME=ENT.name; }
+if(!NAME&&ID){ NAME=ID.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }  // vanity slug → readable name for acts not yet in the directory
 if(!NAME) NAME=ID||'DeadDance';
 var CITY=(ENT&&[ENT.city,ENT.state].filter(Boolean).join(', '))||'';
 
@@ -111,8 +158,48 @@ document.getElementById('typeBadge').textContent=CFG.badge;
 document.getElementById('name').textContent=NAME;
 document.getElementById('loc').textContent=CITY;
 document.title=NAME+' · DeadDance';
-(function(){ var slot=document.getElementById('logoSlot');
-  slot.innerHTML='<div class="mono" id="mono">'+esc(mono(NAME))+'</div>'; })();
+/* the band's own logo (from dd_logoguess) goes in the header — its correct spot. */
+var LOGO=''; try{ if(window.DDLogoGuess && ID) LOGO=DDLogoGuess[ID]||''; }catch(e){}
+function applyLogo(){ var slot=document.getElementById('logoSlot'); if(!slot)return;
+  if(LOGO) slot.innerHTML='<img src="'+esc(LOGO)+'" alt="" style="width:72px;height:72px;border-radius:16px;object-fit:cover" onerror="this.outerHTML=\'<div class=&quot;mono&quot; id=&quot;mono&quot;>'+esc(mono(NAME))+'</div>\'">';
+  else slot.innerHTML='<div class="mono" id="mono">'+esc(mono(NAME))+'</div>'; }
+applyLogo();
+/* Owner claim overlay — first thing the owner sees when they scan (once per device). */
+(function(){ if(T!=='band'||!ID) return;
+  var seen=false; try{ seen=localStorage.getItem('dd.claimseen.'+ID)==='1'; }catch(e){}
+  if(seen) return;
+  var cov=document.getElementById('claimCov'); if(!cov) return;
+  var cl=document.getElementById('covLogo');
+  cl.innerHTML = LOGO?('<img src="'+esc(LOGO)+'" alt="" onerror="this.parentNode.textContent=\''+esc(mono(NAME))+'\'">'):esc(mono(NAME));
+  document.getElementById('covName').textContent=NAME;
+  cov.classList.add('on');
+})();
+function covShow(step){ ['covS1','covS2','covS3'].forEach(function(s){ var e=document.getElementById(s); if(e)e.style.display=(s===step?'block':'none'); }); }
+function covClose(){ var c=document.getElementById('claimCov'); if(c)c.classList.remove('on'); }
+var INVITE="We'd be honored if you wrote a hello to the DeadDance family right here"+(NAME?(", "+NAME.split(' ')[0]):"")+" — whatever's on your heart. 🌹";
+var DRAFT="Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):"");
+window.claudeWrite=function(){ var ta=document.getElementById('covBody'); if(!ta)return; ta.value=DRAFT; ta.focus(); try{ ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){}
+  var cb=document.getElementById('covClaude'); if(cb)cb.textContent='✨ Claude drafted it — make it yours'; };
+/* YES → quietly log the claim (we follow up with managers later), then INVITE them to write. */
+window.claimYes=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }catch(e){}
+  applyLogo();
+  try{ if(window.DDJoin&&DDJoin.claimBand) DDJoin.claimBand({band:NAME, note:'said YES via QR — follow up w/ manager', src:'qr-yes', region:CITY}); }catch(e){}
+  var n2=document.getElementById('covName2'); if(n2)n2.textContent=NAME;
+  var ta=document.getElementById('covBody'); if(ta){ ta.value=''; ta.placeholder=INVITE; }
+  covShow('covS2'); setTimeout(function(){ if(ta)ta.focus(); },90); };
+/* SEND → post the note to the whole family, authored as them. */
+window.claimSend=function(){ var ta=document.getElementById('covBody'); var t=(ta&&ta.value||'').trim();
+  if(!t){ if(ta)ta.focus(); toast('Add a few words first 🌹'); return; }
+  try{ localStorage.setItem('dd.myname',NAME); window.ME=window.ME||{}; ME.name=NAME; }catch(e){}
+  var b=ta.nextElementSibling; if(b){ b.textContent='Sending…'; b.style.opacity=.7; }
+  function thanks(msg){ var e=document.getElementById('covThanks'); if(e)e.textContent=msg; covShow('covS3'); }
+  function go(tries){ if(!(window.DDFeed&&DDFeed.post)){ if(tries<20)return setTimeout(function(){go(tries+1);},250); thanks('Your note is on its way to the family — welcome home. 🌹'); return; }
+    DDFeed.post(t,{scope:'all',pinned:true}).then(function(){ thanks('Your note just went out to the whole family — they’ll feel it. Welcome home. 🌹'); })
+      .catch(function(e){ if(tries<20)return setTimeout(function(){go(tries+1);},300); thanks('Your note is on its way — welcome home. 🌹'); }); }
+  go(0); };
+window.claimSkip=function(){ var e=document.getElementById('covThanks'); if(e)e.textContent='You’re in. Say hi whenever you like — the family’s glad you’re here. 🌹'; covShow('covS3'); };
+window.claimDone=function(){ covClose(); };
+window.claimNo=function(){ try{ localStorage.setItem('dd.claimseen.'+ID,'1'); }catch(e){} covClose(); };
 
 /* ---- scorecard tiles (start as — ; fill the real ones as reads land) ---- */
 var STAT={};

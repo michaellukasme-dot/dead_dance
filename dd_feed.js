@@ -22,10 +22,15 @@
     if (!c || !id) return Promise.reject('no-backend');
     var b = String(body == null ? '' : body).trim();
     if (!b) return Promise.reject('empty');
-    return c.rpc('dd_post_create', {
-      p_author_id: id, p_author_name: myName(), p_role: myRole(),
-      p_body: b, p_scope: opts.scope || 'all', p_region: opts.region || null
-    }).then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+    var base = { p_author_id: id, p_author_name: myName(), p_role: myRole(),
+      p_body: b, p_scope: opts.scope || 'all', p_region: opts.region || null };
+    var args = opts.pinned ? Object.assign({ p_pinned: true }, base) : base;   // artist notes ride the top
+    return c.rpc('dd_post_create', args).then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; })
+      .catch(function (e) {
+        // the pinned overload may not be migrated yet — retry UNpinned so the note still posts
+        if (opts.pinned) return c.rpc('dd_post_create', base).then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+        throw e;
+      });
   }
 
   function feed(limit) {

@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A note to the Family · DeadDance</title>
+<meta name="theme-color" content="#2a1b3d">
+<link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--purple:#2a1b3d;--acc:#5a2e86;--gold:#e0a422;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px;min-height:100vh;display:flex;flex-direction:column}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:20px;padding:20px;display:flex;gap:14px;align-items:center;position:relative;overflow:hidden}
+.hero img.mk{position:absolute;right:-20px;top:-20px;width:96px;opacity:.14}
+.lg{width:60px;height:60px;border-radius:15px;flex:0 0 60px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;overflow:hidden}
+.lg img{width:100%;height:100%;object-fit:cover}
+.hk{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.hn{font-size:22px;font-weight:900;line-height:1.1;margin-top:2px}
+.hs{color:#cdbfe0;font-size:13px;margin-top:2px}
+textarea{width:100%;flex:1;min-height:220px;font:inherit;font-size:18px;line-height:1.5;border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px;resize:none}
+textarea:focus{outline:none;border-color:var(--acc)}
+.post{width:100%;border:0;border-radius:15px;padding:16px;font-weight:900;font-size:17px;background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff;cursor:pointer;margin-top:12px}
+.fine{color:var(--muted);font-size:12px;text-align:center;margin-top:10px;line-height:1.4}
+.done{text-align:center;padding:30px 10px}.done .big{font-size:52px}.done h2{font-size:24px;margin:10px 0 6px}
+.done p{color:var(--muted);font-size:15px;line-height:1.5}
+.done .lnk{display:inline-block;margin-top:16px;color:var(--acc);font-weight:800;text-decoration:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style></head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="hero">
+    <img class="mk" src="dd-512.png" alt="">
+    <div class="lg" id="lg">🌹</div>
+    <div><div class="hk">DeadDance · straight to the Family</div>
+      <div class="hn" id="who">Your note</div>
+      <div class="hs">Write a note to the whole family. That's it — just write.</div></div>
+  </div>
+  <textarea id="body" autofocus></textarea>
+  <button class="post" id="claudeBtn" style="background:#f1eef7;color:var(--acc)" onclick="claudeWrite()">✨ Want me to write it with Claude?</button>
+  <button class="post" onclick="postNote()">🌹 Post it to the Family</button>
+  <div class="fine">Whatever's on your heart — it goes straight to the whole family. No account, no setup; you can claim your page later.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="dd_logoguess.js"></script>
+<script src="dd_logoguess_vip.js"></script>
+<script src="dd_feed.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function qp(k){try{return new URLSearchParams(location.search).get(k)||'';}catch(e){return'';}}
+function mono(n){return String(n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'🌹';}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3000);}
+
+var AS=qp('as'), NAME=qp('name')|| (AS?AS.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}):'');
+var LOGO=''; try{ if(window.DDLogoGuess && AS) LOGO=DDLogoGuess[AS]||''; }catch(e){}
+document.getElementById('who').textContent=NAME||'Your note';
+document.title=(NAME?NAME+' — ':'')+'A note to the Family · DeadDance';
+(function(){ var l=document.getElementById('lg'); l.innerHTML=LOGO?('<img src="'+esc(LOGO)+'" alt="" onerror="this.parentNode.textContent=\''+esc(mono(NAME))+'\'">'):(NAME?esc(mono(NAME)):'🌹'); })();
+
+/* a note pre-written in the artist's voice — shows as shadow text; "Edit & send this" drops it in */
+/* the shadow text INVITES them to write — we don't put words in their mouth.
+   But if they'd rather, "Want me to write it with Claude?" drops in a warm draft to edit. */
+var INVITE="We'd be honored if you wrote a hello to the DeadDance family right here"+(NAME?(", "+NAME.split(' ')[0]):"")+" — whatever's on your heart. 🌹";
+try{ document.getElementById('body').placeholder=INVITE; }catch(e){}
+var DRAFT="Family —\n\nIt means the world to be here with you on DeadDance. This music has been my whole life, and you're the reason it never stops. Thank you — for every show, every dance, every mile down the road together.\n\nSee you out there. 🌹"+(NAME?("\n— "+NAME):"");
+window.claudeWrite=function(){ var b=document.getElementById('body'); b.value=DRAFT; b.focus(); try{ b.setSelectionRange(b.value.length,b.value.length); }catch(e){}
+  var cb=document.getElementById('claudeBtn'); if(cb)cb.textContent='✨ Claude wrote a draft — edit it your way';
+  if(typeof toast==='function') toast('✨ A starting point — make it yours, then post.'); };
+
+window.postNote=function(){
+  var t=(document.getElementById('body').value||'').trim();
+  if(!t){ document.getElementById('body').focus(); toast('Write a few words first 🌹'); return; }
+  // author the post as this artist on this device
+  try{ if(NAME){ localStorage.setItem('dd.myname',NAME); window.ME=window.ME||{}; ME.name=NAME; } }catch(e){}
+  var btn=document.querySelector('.post'); btn.textContent='Posting…'; btn.style.opacity=.7;
+  function go(tries){
+    if(!(window.DDFeed&&DDFeed.post)){ if(tries<20){ return setTimeout(function(){go(tries+1);},250); } btn.textContent='🌹 Post it to the Family'; btn.style.opacity=1; toast('Still connecting — tap again in a moment.'); return; }
+    DDFeed.post(t,{scope:'all',pinned:true}).then(function(){ done(); })
+      .catch(function(e){ if((e==='no-backend'||e&&e.message)&&tries<20){ return setTimeout(function(){go(tries+1);},300); }
+        btn.textContent='🌹 Post it to the Family'; btn.style.opacity=1; toast('Couldn’t post just now — try once more.'); });
+  }
+  go(0);
+};
+function done(){
+  document.getElementById('wrap').innerHTML=
+    '<div class="done"><div class="big">🌹</div><h2>Posted'+(NAME?(', '+esc(NAME.split(' ')[0])):'')+'.</h2>'+
+    '<p>Your note just went out to the whole DeadDance family. They’ll feel it.</p>'+
+    '<a class="lnk" href="index.html">See it in the feed →</a></div>';
+}
+</script>
+<script src="dd_join.js"></script>
+</body></html>

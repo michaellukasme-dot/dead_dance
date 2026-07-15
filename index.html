@@ -787,6 +787,7 @@ body{padding-bottom:64px}
       <div id="cmpNets" class="cmp-nets"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap">
         <button class="cmp-gear" onclick="cmpToggleNets()" title="Set your default networks">⚙ Networks</button>
+        <button class="cmp-gear" onclick="claudeAssist('cmpText')" title="Only if you want — your words stay yours">✨ Write with Claude</button>
         <span id="cmpNote" style="font-size:11px;color:var(--muted);flex:1;min-width:120px"></span>
         <button class="hpbtn" style="background:var(--rose);color:#fff" onclick="hpComposer()">📡 HyperPost</button>
       </div>
@@ -1197,6 +1198,7 @@ function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.in
     <div class="hpbody">
       <div class="hpctx" id="hpctx"></div>
       <textarea id="hptext" placeholder="Reply to the family… your words post here and radiate where you choose."></textarea>
+      <button class="hpaddmedia" onclick="claudeAssist('hptext')" title="Only if you want it">✨ Want me to write it with Claude?</button>
       <div class="hpemoji"><span onclick="hpEmoji('😀')">😀</span><span onclick="hpEmoji('🌹')">🌹</span><span onclick="hpEmoji('🔥')">🔥</span><span onclick="hpEmoji('🎶')">🎶</span><span onclick="hpEmoji('🙌')">🙌</span><span onclick="hpEmoji('💀')">💀</span><span onclick="hpEmoji('🐻')">🐻</span><span onclick="hpEmoji('✨')">✨</span></div>
       <div class="hplabel">Goes everywhere by default — chat groups, socials, your lists. <b>Uncheck any to narrow:</b></div>
       <div class="hpchips" id="hpchips"></div>
@@ -2810,6 +2812,20 @@ function hpAddMedia(inp){hpMediaCount+=(inp&&inp.files?inp.files.length:0);hpSpr
 function hpEmoji(e){var t=document.getElementById('hptext');t.value+=e;t.focus();}
 function hpPost(){var on=HPCH.filter(function(c){return c.on;});var g=on.filter(function(c){return c.chat;}).length;var s=on.filter(function(c){return c.net;}).length;var n=g+s;var short=(n>0?Math.max(0,n-hpMediaCount):0);var spread=(n>0&&hpMediaCount>=n)?' — a FULL SPREAD, one post + one image written per network':(n>0&&hpMediaCount>0?' — partial spread; '+short+' network'+(short>1?'s':'')+' sharing for now (add more later, I know where they go)':(n>0?' — I write each of the '+n+' posts':''));document.getElementById('hp').classList.remove('on');toast('📡 HyperPosted to your feed'+(n?(' + '+n+' outbound'+(g&&s?(' ('+g+' groups, '+s+' networks)'):'')):'')+spread+'. You posted it; nothing auto-sent.');}
 function closeHP(){document.getElementById('hp').classList.remove('on');}
+
+/* ---------------- ✨ Write with Claude — OPT-IN, everywhere a post is composed ----------------
+   Never auto-writes: if Claude wrote everyone's posts it'd be us talking to us. This only
+   fires when THEY tap it — that keeps every post human and saves tokens (no drafting unless
+   asked). A live Claude endpoint (DD_CLAUDE_URL) can slot in later for real personalization;
+   until then we drop a light, editable scaffold they finish in their own voice. */
+window.claudeAssist=function(taId){
+  var ta=document.getElementById(taId||'cmpText'); if(!ta)return;
+  if(ta.value.trim()){ ta.focus(); if(typeof toast==='function') toast('✨ You’ve already started — keep going, it’s yours.'); return; }
+  var nm=(window.ME&&ME.name&&ME.name!=='You')?ME.name.split(' ')[0]:'';
+  ta.value = nm ? ("Family — this is "+nm+". ") : "Family — ";   // a start, not a script
+  ta.focus(); try{ ta.setSelectionRange(ta.value.length, ta.value.length); }catch(e){}
+  if(typeof toast==='function') toast('✨ A start — finish it in your own words.');
+};
 
 /* ---------------- "What's on your mind" composer + DEFAULT HyperPost ----------------
    The user sets their default networks ONCE; then a single tap radiates to all of them.
