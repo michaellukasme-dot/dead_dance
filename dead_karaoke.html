@@ -1,0 +1,252 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dead Karaoke · DeadDance</title>
+<meta name="theme-color" content="#2a1b3d">
+<link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--purple:#2a1b3d;--acc:#5a2e86;--gold:#e0a422;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:620px;margin:0 auto;padding:16px 14px 70px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:22px;padding:22px;position:relative;overflow:hidden}
+.hero img.mk{position:absolute;right:-24px;top:-24px;width:120px;opacity:.15}
+.hero .k{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.hero h1{font-size:27px;margin:6px 0 4px;font-weight:900}
+.hero p{color:#cdbfe0;font-size:14px;margin:0}
+.hero .grp{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:rgba(255,255,255,.14);border-radius:999px;padding:5px 13px;font-weight:700;font-size:12px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:22px 0 9px}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+.btn{border:0;border-radius:13px;padding:13px 16px;font-weight:800;font-size:15px;cursor:pointer}
+.btn.rose{background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
+.btn.ghost{background:#f1eef7;color:var(--acc)}
+.btn.full{width:100%;display:block}
+input{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-top:8px}
+/* quiz */
+.qwrap{display:none}.qwrap.on{display:block}
+.qtop{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);font-weight:700}
+.qbar{height:6px;background:#eee;border-radius:6px;overflow:hidden;margin:8px 0 14px}
+.qbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--rose));width:100%;transition:width 1s linear}
+.qprompt{font-size:18px;font-weight:800;line-height:1.3;margin:4px 0 14px}
+.choice{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:14px;margin-bottom:9px;font-weight:700;font-size:15px;cursor:pointer}
+.choice.right{background:#eaf9f1;border-color:#7fce9e}.choice.wrong{background:#fdeaef;border-color:#e79db3}
+.choice:disabled{opacity:.85}
+.run{text-align:center;color:var(--muted);font-size:13px;margin-top:4px}
+.big{text-align:center;font-size:40px;font-weight:900;color:var(--rose)}
+/* boards */
+.tabs{display:flex;gap:6px;background:#f2eef8;border-radius:999px;padding:4px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:none;border-radius:999px;padding:8px;font-weight:800;font-size:12.5px;color:#6a5f86;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #f4f0fa;font-size:14px}
+.row .rk{width:26px;font-weight:900;color:var(--acc);text-align:center}
+.row .nm{font-weight:700;flex:1}.row .sub{color:var(--muted);font-size:11.5px;font-weight:500}
+.row .pts{font-weight:800;color:var(--rose)}
+.row.me{background:#fbf5ee;border-radius:10px}
+/* tiers */
+.tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+@media(max-width:520px){.tiers{grid-template-columns:1fr}}
+.tier{border:1px solid var(--line);border-radius:15px;padding:14px;text-align:center}
+.tier.most{border-color:var(--gold);box-shadow:0 6px 20px #e0a42222}
+.tier .tn{font-weight:900;font-size:14px;letter-spacing:.03em}
+.tier .tn.less{color:var(--muted)}.tier .tn.more{color:var(--acc)}.tier .tn.most{color:var(--rose)}
+.tier .tw{font-size:11.5px;color:var(--muted);margin:5px 0 9px;min-height:46px}
+.tier .pn{font-weight:900;font-size:20px}.tier .pn small{font-size:11px;color:var(--muted);font-weight:600}
+.tier .pm{font-size:12px;color:var(--acc);font-weight:800;margin-top:3px}
+/* franchise week grid */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+@media(max-width:560px){.week{grid-template-columns:repeat(2,1fr)}}
+.day{border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center}
+.day .d{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.05em}
+.day .g{font-size:22px;margin:4px 0 2px}
+.day .gn{font-size:11.5px;font-weight:800;line-height:1.2}
+.day.dead{background:#faf3ff;border-color:#d9b8ee}
+.bb{display:flex;gap:10px;justify-content:center;margin-top:12px;font-weight:800;color:var(--ink)}
+.bb span{background:#fff6e6;border:1px solid #f0dcae;border-radius:999px;padding:7px 14px}
+.songbook{columns:2;column-gap:16px;font-size:13.5px;line-height:1.9}
+@media(max-width:480px){.songbook{columns:1}}
+.songbook li{break-inside:avoid}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;z-index:50;max-width:90%}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <img class="mk" src="dd-512.png" alt="">
+    <div class="k">DeadDance Community Group</div>
+    <h1>Dead Karaoke 🌹🎤</h1>
+    <p>The family sings its own songbook — and quizzes the show it's celebrating. Sing, play, and climb one global board with heads in every room in the country.</p>
+    <span class="grp">🎪 A community group · everyone's welcome</span>
+  </div>
+
+  <!-- PLAY -->
+  <div class="sec">Tonight — Cornell · Barton Hall · 5/8/77</div>
+  <div class="card" id="startCard">
+    <div style="font-weight:800;font-size:15px;margin-bottom:4px">Play the show-specific round</div>
+    <div class="note" style="margin-top:0">20 questions about the show in the room. Every venue answers the same number, so tonight's score ranks you on the <b>global board</b> — heads playing Europe '72 across the country are on the same ladder. Same count, same rules, one winner.</div>
+    <input id="pname" placeholder="Your name for the board" maxlength="24">
+    <button class="btn rose full" style="margin-top:10px" onclick="startRound()">🎵 Start the round</button>
+  </div>
+
+  <div class="qwrap card" id="quiz">
+    <div class="qtop"><span id="qn">Question 1 / 20</span><span id="qt">20s</span></div>
+    <div class="qbar"><i id="qbar"></i></div>
+    <div class="qprompt" id="qprompt">—</div>
+    <div id="qchoices"></div>
+    <div class="run" id="qrun"></div>
+  </div>
+
+  <div class="qwrap card" id="done">
+    <div style="text-align:center;font-weight:800;color:var(--muted);font-size:12px;letter-spacing:.05em">YOUR NORMALIZED SCORE</div>
+    <div class="big" id="finalScore">0</div>
+    <div class="run" id="finalNote"></div>
+    <button class="btn ghost full" style="margin-top:12px" onclick="location.reload()">Play again</button>
+  </div>
+
+  <!-- BOARDS -->
+  <div class="sec">Leaderboards</div>
+  <div class="card">
+    <div class="tabs">
+      <button class="on" id="tabGlobal" onclick="showBoard('global')">🌎 Global tonight</button>
+      <button id="tabRoom" onclick="showBoard('room')">🍺 This room</button>
+      <button id="tabSeason" onclick="showBoard('season')">🏆 Season</button>
+    </div>
+    <div id="board"><div class="note">Play a round to light up the boards. 🌹</div></div>
+  </div>
+
+  <!-- TIERS -->
+  <div class="sec">Bring Dead Karaoke to your room — LESS · MORE · MOST</div>
+  <div class="tiers">
+    <div class="tier"><div class="tn less">LESS</div><div class="tw">Karaoke, reimagined. Just sing — the catalog, the songbook, a QR.</div><div class="pn">$99<small>/night</small></div><div class="pm">$599/mo · unlimited</div></div>
+    <div class="tier"><div class="tn more">MORE</div><div class="tw">Karaoke + Games <i>or</i> Trivia. Add one interactive layer.</div><div class="pn">$129<small>/night</small></div><div class="pm">$799/mo · unlimited</div></div>
+    <div class="tier most"><div class="tn most">MOST</div><div class="tw">Karaoke + Games + Trivia. Multi-player, multi-level, multi-location — one global board.</div><div class="pn">$149<small>/night</small></div><div class="pm">$999/mo · unlimited</div></div>
+  </div>
+  <div class="note">The monthly ladder is <b>unlimited nights</b> at that tier — not a cap on days. Any room running karaoke two-plus nights a week comes out ahead on the month.</div>
+
+  <!-- FRANCHISE / PARTNER CONCEPT -->
+  <div class="sec">Imagine — a concept built on DeadDance · a genre every night</div>
+  <div class="card">
+    <div style="font-weight:800;font-size:15px;margin-bottom:3px">One room, seven scenes 🍔🍺</div>
+    <div class="note" style="margin-top:0;margin-bottom:12px">We don't own the bars — we run the engine. Reimagined karaoke, a deep trivia knowledge base, and ubiquitous use turn a weekly genre schedule into a <b>turnkey concept</b> an entrepreneur could franchise, or a large restaurant group could roll out. Every night a different genre, burgers and beers on the table, and one global tournament threaded through all of it. DeadDance supplies the platform; the operator supplies the room.</div>
+    <div class="week">
+      <div class="day"><div class="d">MON</div><div class="g">🎶</div><div class="gn">Motown Monday</div></div>
+      <div class="day dead"><div class="d">TUE</div><div class="g">🌹</div><div class="gn">Dead Night</div></div>
+      <div class="day"><div class="d">WED</div><div class="g">🎸</div><div class="gn">Classic Rock</div></div>
+      <div class="day"><div class="d">THU</div><div class="g">📼</div><div class="gn">'90s Throwback</div></div>
+      <div class="day"><div class="d">FRI</div><div class="g">🕺</div><div class="gn">Funk &amp; Soul</div></div>
+      <div class="day"><div class="d">SAT</div><div class="g">🤠</div><div class="gn">Country</div></div>
+      <div class="day"><div class="d">SUN</div><div class="g">🎧</div><div class="gn">DJ / Top 40</div></div>
+    </div>
+    <div class="bb"><span>🍔 Burgers</span><span>🍺 Beers</span><span>🎤 Every night</span></div>
+    <div class="note">Each night is just a genre filter over one licensed catalog + a themed trivia bank — no new licensing per night. DeadDance is the picks-and-shovels: the schedule, the game, and the knowledge base. The operator brings the kitchen and the four walls.</div>
+  </div>
+
+  <!-- SONGBOOK -->
+  <div class="sec">The songbook — the canon on the mic</div>
+  <div class="card">
+    <ul class="songbook" style="margin:0;padding-left:18px">
+      <li>Friend of the Devil</li><li>Ripple</li><li>Sugar Magnolia</li><li>Casey Jones</li>
+      <li>Truckin'</li><li>Uncle John's Band</li><li>Touch of Grey</li><li>Fire on the Mountain</li>
+      <li>Scarlet Begonias</li><li>Bertha</li><li>Franklin's Tower</li><li>Eyes of the World</li>
+      <li>Sugaree</li><li>Tennessee Jed</li><li>Brown-Eyed Women</li><li>Deal</li>
+    </ul>
+    <div class="note">Licensed karaoke tracks light this up as the catalog partnership lands; the group and the game are live now.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+</script>
+<script src="dd_trivia.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='toast';},3200);}
+var SESS=null, PLAYER=null, QS=[], IDX=0, TIMER=null, QSTART=0, TOURN='nightly', SHOW='cornell-1977-05-08';
+
+function startRound(){
+  var name=(document.getElementById('pname').value||'').trim()||'Anonymous Head';
+  if(!window.DDTrivia){ toast('Engine not reachable — stand up dd_trivia.sql, then reload.'); return; }
+  toast('🎪 Joining tonight’s round…');
+  DDTrivia.openSession('Dead Karaoke (app)', SHOW, 'most', TOURN).then(function(s){
+    if(!s){ toast('Stand up dd_trivia.sql to play — the group is live, the engine awaits.'); return; }
+    SESS=s.id;
+    DDTrivia.join(s.code, name, 'deadhead').then(function(p){
+      if(!p){ toast('Could not join — try again.'); return; }
+      PLAYER=p.id;
+      DDTrivia.questions(SESS).then(function(qs){
+        QS=qs||[]; if(!QS.length){ toast('No questions found — is the Cornell bank seeded?'); return; }
+        document.getElementById('startCard').style.display='none';
+        IDX=0; renderQ();
+      });
+    });
+  });
+}
+function renderQ(){
+  var quiz=document.getElementById('quiz'); quiz.classList.add('on'); document.getElementById('done').classList.remove('on');
+  var q=QS[IDX];
+  document.getElementById('qn').textContent='Question '+(IDX+1)+' / '+QS.length;
+  document.getElementById('qprompt').textContent=q.prompt;
+  var box=document.getElementById('qchoices'); box.innerHTML='';
+  // shuffle DISPLAY order but keep each choice's ORIGINAL index for server grading
+  var order=(q.choices||[]).map(function(_,i){return i;});
+  for(var j=order.length-1;j>0;j--){ var k=Math.floor(Math.random()*(j+1)); var t=order[j];order[j]=order[k];order[k]=t; }
+  order.forEach(function(orig){
+    var b=document.createElement('button'); b.className='choice'; b.textContent=q.choices[orig]; b.dataset.oi=orig;
+    b.onclick=function(){ pick(orig,b); }; box.appendChild(b);
+  });
+  document.getElementById('qrun').textContent='';
+  // timer
+  var secs=q.seconds||20, left=secs; QSTART=Date.now();
+  var bar=document.getElementById('qbar'); bar.style.transition='none'; bar.style.width='100%';
+  setTimeout(function(){ bar.style.transition='width '+secs+'s linear'; bar.style.width='0%'; },30);
+  document.getElementById('qt').textContent=secs+'s';
+  clearInterval(TIMER);
+  TIMER=setInterval(function(){ left--; document.getElementById('qt').textContent=Math.max(0,left)+'s';
+    if(left<=0){ clearInterval(TIMER); pick(-1,null); } },1000);
+}
+function pick(choiceIdx, btn){
+  clearInterval(TIMER);
+  var q=QS[IDX], ms=Date.now()-QSTART;
+  Array.prototype.forEach.call(document.querySelectorAll('#qchoices .choice'),function(b){ b.disabled=true; });
+  DDTrivia.answer(SESS, PLAYER, q.q_id, choiceIdx, ms).then(function(r){
+    if(r){
+      var chs=document.querySelectorAll('#qchoices .choice');
+      Array.prototype.forEach.call(chs,function(b){ if(+b.dataset.oi===r.answer_idx) b.classList.add('right'); });
+      if(btn && !r.correct) btn.classList.add('wrong');
+      document.getElementById('qrun').textContent=(r.correct?('✅ +'+r.earned):'❌')+'  ·  running: '+r.total;
+    }
+    setTimeout(function(){ IDX++; if(IDX<QS.length) renderQ(); else endRound(); }, 1100);
+  });
+}
+function endRound(){
+  document.getElementById('quiz').classList.remove('on');
+  var d=document.getElementById('done'); d.classList.add('on');
+  DDTrivia.roomBoard(SESS).then(function(rows){
+    var mine=(rows||[]).filter(function(r){return r.player_id===PLAYER;})[0];
+    document.getElementById('finalScore').textContent=(mine?mine.normalized:0);
+    document.getElementById('finalNote').textContent='out of 1000 — that’s your normalized score, comparable with every room tonight.';
+    showBoard('global');
+  });
+}
+/* boards */
+function showBoard(which){
+  ['global','room','season'].forEach(function(k){ var b=document.getElementById('tab'+k[0].toUpperCase()+k.slice(1)); if(b)b.classList.toggle('on',k===which); });
+  var host=document.getElementById('board'); host.innerHTML='<div class="note">Loading…</div>';
+  if(which==='room'){ if(!SESS){ host.innerHTML='<div class="note">Play a round to see this room’s board.</div>'; return; }
+    DDTrivia.roomBoard(SESS).then(function(rows){ host.innerHTML=rows&&rows.length?rows.map(function(r,i){
+      return rowHtml(i+1, r.name, capLevel(r.level), r.normalized, r.player_id===PLAYER); }).join(''):empty(); }); }
+  else if(which==='season'){ DDTrivia.seasonBoard(null).then(function(rows){ host.innerHTML=rows&&rows.length?rows.map(function(r,i){
+      return rowHtml(i+1, r.name, r.sessions+' nights', r.total, false); }).join(''):empty(); }); }
+  else { DDTrivia.globalBoard(TOURN).then(function(rows){ host.innerHTML=rows&&rows.length?rows.map(function(r,i){
+      return rowHtml(i+1, r.name, (r.venue||'')+(r.show_title?(' · '+r.show_title):''), r.normalized, false); }).join(''):empty(); }); }
+}
+function rowHtml(rk,name,sub,pts,me){ return '<div class="row'+(me?' me':'')+'"><div class="rk">'+(rk<=3?['🥇','🥈','🥉'][rk-1]:rk)+'</div>'+
+  '<div class="nm">'+esc(name)+(sub?('<div class="sub">'+esc(sub)+'</div>'):'')+'</div><div class="pts">'+pts+'</div></div>'; }
+function capLevel(l){ return l?l.charAt(0).toUpperCase()+l.slice(1):''; }
+function empty(){ return '<div class="note">No scores yet tonight — be the first on the board. 🌹</div>'; }
+try{ if(window.DDTrivia&&DDTrivia.subscribe) DDTrivia.subscribe(function(){ var on=document.querySelector('.tabs button.on'); if(on){ var w=on.id.replace('tab','').toLowerCase(); showBoard(w); } }); }catch(e){}
+try{ showBoard('global'); }catch(e){}
+</script>
+<script src="dd_back.js"></script>
+</body></html>

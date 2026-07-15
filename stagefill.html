@@ -71,9 +71,12 @@ footer b{color:#c7d0dc}
     <label for="an">Act name</label>
     <input id="an" placeholder="e.g., The Velvet Trio">
     <div class="grid2">
+      <div><label for="acat">Category</label><select id="acat"></select></div>
       <div><label for="ag">Genre</label><select id="ag"></select></div>
-      <div><label for="ast">Style</label><input id="ast" placeholder="e.g., jazz trio, honky-tonk, open-format DJ"></div>
     </div>
+    <label for="ast">Style</label>
+    <input id="ast" placeholder="e.g., jazz trio, honky-tonk, open-format DJ, stand-up">
+    <div style="font-size:12px;color:var(--muted);margin-top:6px">Your category is how DeadDance members find you as an <b>option</b> near them — comedy, DJ, tribute, and so on.</div>
     <div class="grid2">
       <div><label for="asz">Size</label><select id="asz"><option>Solo</option><option>Duo</option><option>Trio</option><option>Quartet</option><option selected>Band</option><option>DJ</option></select></div>
       <div><label for="afit">Best room</label><select id="afit"><option value="Any" selected>Any room</option><option value="Upscale">Upscale — country club / hotel</option><option value="Neighborhood">Neighborhood bar</option><option value="Dive">Dive bar</option></select></div>
@@ -107,6 +110,7 @@ footer b{color:#c7d0dc}
 })();
 </script>
 <script src="acts_seed.js"></script>
+<script src="dd_categories.js"></script>
 <script src="dd_back.js"></script>
 <script>
 (function(){
@@ -114,11 +118,14 @@ footer b{color:#c7d0dc}
   var GEN=(window.DD_GENRES||['Rock','Pop','Country','Jazz']).filter(function(g){return g!=='Grateful Dead';});
   sel.innerHTML=GEN.map(function(g){return '<option value="'+g.replace(/"/g,'&quot;')+'">'+g+'</option>';}).join('');
   var r=GEN.indexOf('Rock'); if(r>=0) sel.selectedIndex=r;
+  var cs=document.getElementById('acat');
+  if(cs&&window.DDCats){ cs.innerHTML=DDCats.list().map(function(c){return '<option value="'+c.key+'">'+c.icon+' '+c.label+'</option>';}).join(''); }
 })();
 function val(id){ return (document.getElementById(id).value||'').trim(); }
 function reg(){
   var name=val('an'); if(!name){ document.getElementById('an').focus(); return; }
-  var act={ name:name, genre:val('ag'), style:val('ast'), size:val('asz')||'Band', fit:document.getElementById('afit').value,
+  var catSel=document.getElementById('acat');
+  var act={ name:name, genre:val('ag'), category:(catSel?catSel.value:''), style:val('ast'), size:val('asz')||'Band', fit:document.getElementById('afit').value,
     energy:val('aen'), fee:+val('afee')||0, city:val('ac'), state:val('ast2').toUpperCase(), dead:false, source:'stagefill',
     contact:{name:val('acn'), email:val('ace')} };
   try{ var q=JSON.parse(localStorage.getItem('dd.acts.registered')||'[]'); q.push(Object.assign({ts:Date.now()},act)); localStorage.setItem('dd.acts.registered',JSON.stringify(q)); }catch(e){}

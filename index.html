@@ -367,6 +367,11 @@ body{padding-bottom:64px}
 .sugbody .int{color:#7a7285;font-size:11px;margin-top:4px}
 .sugint{margin-top:8px;display:block;width:100%;border:0;border-radius:10px;padding:9px;font-weight:800;font-size:12px;background:#f1eef7;color:#5a2e86;cursor:pointer;text-align:center}
 .sugempty{color:#7a7285;font-size:12px;padding:2px 10px 4px}
+.sugcats{display:flex;align-items:center;gap:7px;padding:0 8px 9px 2px;flex-wrap:wrap}
+.sugcats .lead{font-size:11.5px;color:#7a7285;font-weight:700;margin-right:2px}
+.catchip{border:1px solid #e0d8ee;background:#fff;color:#5a2e86;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.catchip.on{background:#5a2e86;color:#fff;border-color:#5a2e86}
+.catmore{border:0;background:none;color:#7a3cc0;font-weight:800;font-size:12px;cursor:pointer;padding:5px 4px}
 /* Rosebud caption */
 .showmap-farrah{font-size:12px;line-height:1.4;color:#4a4356;background:#faf7ff;border:1px solid #efe9f6;border-left:3px solid var(--gold);border-radius:9px;padding:8px 11px;margin:0 0 9px}
 .showmap-farrah b{color:var(--purple2);font-weight:800}
@@ -3526,13 +3531,15 @@ function sugScore(r,aff,myCity){
   var s=0, b=(r.band_name||'').toLowerCase(), reasons=[], opt=sugIsOption(r);
   var da=sugDaysAway(r.show_date); if(da<0) return null;
   if(opt){
-    /* StageFill option: only surfaces on real fit — a band you follow, or genuinely near you.
-       Kept a labeled minority so the card stays community-first; never enters the rollups. */
-    var fit=false;
-    if(aff.bands[b]){ s+=40; reasons.push('An act you follow'); fit=true; }
-    else if(myCity && r.city && r.city.toLowerCase()===myCity){ s+=20; reasons.push('StageFill · near you'); fit=true; }
-    else if(!aff.any && da<=21){ s+=8; reasons.push('StageFill · an option'); fit=true; }
-    if(!fit) return null;
+    /* StageFill option: OPT-IN by category (the Categories picker). It only surfaces if the
+       user has turned on its category — OR it's an act they already follow. Kept a labeled
+       minority so the card stays community-first; never enters the rollups. */
+    var wantsCat = (window.DDCats && DDCats.wants(r));
+    var follows = !!aff.bands[b];
+    if(!wantsCat && !follows) return null;
+    if(follows){ s+=40; reasons.push('An act you follow'); }
+    else { s+=16; var cl=(window.DDCats?DDCats.labelFor(DDCats.categorize(r)):'StageFill'); reasons.push(cl.replace(/^\S+\s/,'')+' · option'); }
+    if(myCity && r.city && r.city.toLowerCase()===myCity){ s+=8; }
     s+=Math.max(0,12-da/3); s-=6; /* options sit just under community shows */
     return {score:s,reason:reasons[0],option:true};
   }
@@ -3574,16 +3581,29 @@ window.sugGoing=function(ev,id){ ev.preventDefault(); ev.stopPropagation(); if(!
   if(window.DDPymk&&DDPymk.attend) DDPymk.attend(id,'rsvp').then(function(){ _sugGoing[id]=(_sugGoing[id]||0)+1; });
   try{ if(CAL_SCOPE==='my'){ buildShowlist(); renderCal(); } }catch(e){}
   if(typeof toast==='function') toast('📅 Saved to your calendar — just yours. You’ll meet others going too. 🌹'); };
+var _sugCatsOpen=false;
+window.sugCatToggle=function(k){ if(window.DDCats){ DDCats.toggle(k); } suggestBuild(); };
+window.sugCatsMore=function(){ _sugCatsOpen=!_sugCatsOpen; suggestBuild(); };
+function sugCatsBar(){
+  if(!window.DDCats) return '';
+  var all=DDCats.list(), on=DDCats.get();
+  /* collapsed: show the ones you've turned on + a few popular; expanded: the whole list */
+  var show = _sugCatsOpen ? all : all.filter(function(c){ return on.indexOf(c.key)>=0; }).concat(
+    all.filter(function(c){ return on.indexOf(c.key)<0; }).slice(0,4));
+  var chips=show.map(function(c){ return '<button class="catchip'+(DDCats.has(c.key)?' on':'')+'" onclick="sugCatToggle(\''+c.key+'\')">'+c.icon+' '+c.label+'</button>'; }).join('');
+  return '<div class="sugcats"><span class="lead">Also show me:</span>'+chips+
+    '<button class="catmore" onclick="sugCatsMore()">'+(_sugCatsOpen?'less ▲':'more ▾')+'</button></div>';
+}
 function suggestBuild(){ var host=document.getElementById('suggestCard'); if(!host||!window.DDShows) return;
-  var hd='<div class="sughd"><img src="dd-512.png" style="width:22px;height:22px"><b>Suggested events</b><span>picked for you — bands you follow, your scene, what’s near</span></div>';
+  var hd='<div class="sughd"><img src="dd-512.png" style="width:22px;height:22px"><b>Suggested events</b><span>picked for you — your bands, your scene, your categories</span></div>'+sugCatsBar();
   DDShows.upcoming(600).then(function(rows){
     rows=rows||[]; if(!rows.length){ host.style.display='none'; return; }
     var aff=sugAffinity(); var myCity=''; try{ var mc=(myCalShows()||[])[0]; }catch(e){}
     var scored=[]; _sugById={}; rows.forEach(function(r){ var sc=sugScore(r,aff,myCity); if(sc){ r._why=sc.reason; r._opt=sc.option; if(r.id)_sugById[r.id]=r; scored.push({r:r,s:sc.score}); } });
     scored.sort(function(a,b){ return b.s-a.s; });
     var top=scored.slice(0,14).map(function(x){return x.r;});
-    if(!top.length){ host.style.display='none'; return; }
     host.style.display='block';
+    if(!top.length){ host.innerHTML=hd+'<div class="sugempty">Turn on a category above to see StageFill options near you — comedy, DJ nights, the open mic. They land only in your calendar, never the community rollup. 🌹</div>'; return; }
     host.innerHTML=hd+'<div class="sugrow">'+top.map(sugTile).join('')+'</div>'+
       (aff.any?'':'<div class="sugempty">Save a show or tap Going — these tune to you the more you do.</div>');
     // hydrate going counts (best-effort, non-blocking)
@@ -3596,6 +3616,7 @@ function suggestBuild(){ var host=document.getElementById('suggestCard'); if(!ho
 },250); })();
 </script>
 <script src="dd_shows.js" defer></script>
+<script src="dd_categories.js" defer></script>
 <script src="dd_bands.js" defer></script>
 <script src="helptest.js" defer></script>
 <script>
