@@ -37,11 +37,32 @@
   }
 
   // render into a container element (creates the canvas)
+  // DUAL-DOOR QR: you can't scan a QR that's on your OWN screen (e.g. one texted to you), so every
+  // QR we draw for a URL is ALSO a tappable link. Tap on your phone → opens it. Scan from another
+  // phone / print → the camera door. One change here makes EVERY DeadDance QR clickable + scannable.
   function into(container, text, opts) {
+    opts = opts || {};
     if (typeof container === 'string') container = document.getElementById(container);
     if (!container) return Promise.resolve(null);
     var cv = container.querySelector('canvas');
-    if (!cv) { cv = document.createElement('canvas'); cv.style.width = ((opts && opts.css) || 150) + 'px'; cv.style.height = cv.style.width; cv.style.borderRadius = '10px'; container.innerHTML = ''; container.appendChild(cv); }
+    if (!cv) {
+      cv = document.createElement('canvas');
+      cv.style.width = (opts.css || 150) + 'px'; cv.style.height = cv.style.width; cv.style.borderRadius = '10px';
+      var isUrl = /^https?:\/\//i.test(String(text || ''));
+      if (isUrl && opts.link !== false) {
+        var a = document.createElement('a');
+        a.href = text; a.target = '_blank'; a.rel = 'noopener';
+        a.title = 'Tap to open — or scan with another phone';
+        a.style.cssText = 'display:inline-block;line-height:0;cursor:pointer';
+        container.innerHTML = ''; a.appendChild(cv); container.appendChild(a);
+        if (opts.caption) {
+          var cap = document.createElement('div');
+          cap.style.cssText = 'font-size:11px;color:#7a7285;font-weight:700;text-align:center;margin-top:5px';
+          cap.textContent = '👆 Tap to open · 📷 or scan';
+          container.appendChild(cap);
+        }
+      } else { container.innerHTML = ''; container.appendChild(cv); }
+    }
     return draw(cv, text, opts);
   }
 

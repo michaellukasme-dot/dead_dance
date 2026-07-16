@@ -223,7 +223,8 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <details class="mfsec"><summary>Share this map · no app needed</summary>
   <div class="card" style="text-align:center;border-color:#f0d9a6;background:#fffdf6">
     <div id="mfqr" style="width:190px;height:190px;margin:4px auto 0;background:#fff;border-radius:12px"></div>
-    <div style="font-weight:900;font-size:15px;margin-top:8px">No app. No download. Just scan.</div>
+    <div style="font-weight:900;font-size:15px;margin-top:8px">No app. No download.</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:2px">On your phone? <b>Tap it.</b> Showing a friend? <b>They scan it.</b></div>
     <div style="font-size:12.5px;color:#4a4356;line-height:1.5;margin-top:5px">This whole map opens right in your browser — <b>deaddance.app/musikfest</b>. Built for the street team: blow it up to a <b>2.5'×2.5' rigid sign</b>, plant it at every gate, and every head who scans finds their Platz.</div>
     <button class="dir" style="margin-top:10px" onclick="saveMFQR()">⬇︎ Save the QR</button>
   </div>
@@ -688,7 +689,7 @@ window.toggleJoin=function(){ var was=joined(); try{ localStorage.setItem('dd.mu
 crewRefresh(); renderJoin();
 
 // street-team QR — no app, just scan → this map
-try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190}); }catch(e){}
+try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190,caption:true}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
 
 // ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----

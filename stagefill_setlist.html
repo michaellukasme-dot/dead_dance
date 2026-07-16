@@ -1,0 +1,156 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your Setlist · StageFill</title><meta name="theme-color" content="#241535">
+<style>
+:root{--rose:#b8002e;--purple:#5a2e86;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--gold:#f0a500}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 90px}
+.hero{background:radial-gradient(125% 125% at 12% -12%,#5a2e86,#2a1b3d 55%,#160c28);color:#fff;border-radius:20px;padding:24px 20px}
+.hero .k{color:#ffd76a;font-weight:800;font-size:11px;letter-spacing:.09em;text-transform:uppercase}
+.hero h1{font-size:30px;margin:6px 0 4px;font-weight:900;line-height:1}
+.hero p{margin:0;color:#cdbfe0;font-size:13px}
+.lab{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink)}
+.song{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+.song .n{width:22px;text-align:center;color:var(--muted);font-weight:800;flex:none}
+.song .t{flex:1}.song .len{width:74px;flex:none;text-align:center}
+.song .x{border:0;background:#f6eef1;color:var(--rose);border-radius:8px;padding:9px 10px;font-weight:800;cursor:pointer;flex:none}
+.add{border:1px dashed #c9b8dd;background:#faf7ff;color:var(--purple);border-radius:11px;padding:11px;font-weight:800;font-size:13.5px;cursor:pointer;width:100%}
+.tot{display:flex;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-weight:800;margin-top:10px}
+.tot b{font-size:18px}
+.btn{border:0;border-radius:13px;padding:14px;font-weight:900;font-size:15px;cursor:pointer;width:100%;margin-top:12px;background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
+/* fan tease card */
+.tease{background:#160c28;color:#fff;border-radius:16px;padding:18px;margin-top:12px}
+.tease .kk{color:#ffd76a;font-weight:800;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.tease h3{margin:4px 0 2px;font-size:19px;font-weight:900}
+.tease .meta{color:#cdbfe0;font-size:13px;margin-bottom:10px}
+.tz{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #ffffff14;font-size:14px}
+.tz .lock{opacity:.6}
+.tz.rev{color:#fff}.tz.hid{color:#8a7ba8}
+.dead{display:inline-block;background:#b8002e;color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 9px;margin-top:8px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="k">🎵 StageFill · for the artist</div>
+    <h1 id="hBand">Your setlist</h1>
+    <p id="hSub">Drop your songs + how long each runs. We tease them to your fans and count you down to showtime.</p>
+  </div>
+
+  <div class="lab">Act</div>
+  <input id="band" placeholder="Your band name" oninput="render()">
+  <div class="lab">Show (stage · date)</div>
+  <input id="show" placeholder="e.g., Zinzenplatz · Aug 6" oninput="render()">
+
+  <div class="lab">The set — song &amp; length (m:ss)</div>
+  <div id="songs"></div>
+  <button class="add" onclick="addSong()">＋ Add a song</button>
+  <div class="tot"><span>Set length</span><span><b id="runtime">0:00</b> · <span id="count">0</span> songs</span></div>
+
+  <div class="lab">How much to tease your fans</div>
+  <select id="tease" onchange="render()">
+    <option value="vibe">Just the vibe — song count + total runtime</option>
+    <option value="opener" selected>The opener — reveal song #1, rest locked till showtime</option>
+    <option value="drip">Drip — one more song revealed each day</option>
+    <option value="full">Full setlist after the show</option>
+  </select>
+
+  <div class="lab">This is what your fans see</div>
+  <div class="tease" id="fanCard"></div>
+
+  <button class="btn" onclick="saveSet()">🎵 Save my setlist →</button>
+
+  <div class="lab">📡 Your fan list — tease them directly</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:7px">This is the payoff: paste your fans and we send them the sneak peek + your show link. Through StageFill, or copy it into your own email tool. Your list stays yours.</div>
+  <textarea id="fanList" rows="3" placeholder="paste your fans' emails — one per line" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:13.5px;font-weight:600;background:#fff" oninput="fanCount()"></textarea>
+  <div id="fanCountL" style="font-size:12px;color:var(--muted);font-weight:700;margin:5px 0">0 fans</div>
+  <label style="display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:700;color:#4a4356"><input type="checkbox" id="fanOptin" style="width:auto"> These are my own fans who opted in to hear from me.</label>
+  <div style="display:flex;gap:8px;margin-top:9px">
+    <button class="btn" style="margin-top:0;flex:1" onclick="teaseFans()">📡 Tease my fans →</button>
+    <button class="add" style="width:auto;flex:0 0 auto;padding:0 14px" onclick="copyTease()">Copy email</button>
+  </div>
+  <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:9px">Every act lives in <b>StageFill</b>. Grateful Dead tribute acts also flow to <b>DeadDance</b>.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function qp(k){ return new URLSearchParams(location.search).get(k)||''; }
+function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+var EVENT='musikfest-2026';
+var HP_ENDPOINT='https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/hyperpost-mail';
+var HP_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM';
+try{ var _SB=window.supabase&&window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SB;}; }catch(e){}
+function ddId(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){v=(crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now());localStorage.setItem(k,v);} return v; }catch(e){ return 'anon'; } }
+
+var SONGS=[];
+function isDead(b){ return /dead|jerry|garcia|grateful|jam|terrapin|shakedown|dark star|jgb/i.test(b||''); }
+function secs(str){ var m=String(str||'').match(/(\d+):(\d{1,2})/); return m?(+m[1]*60+ +m[2]):0; }
+function fmt(t){ var m=Math.floor(t/60), s=t%60; return m+':'+(s<10?'0':'')+s; }
+function addSong(t,len){ SONGS.push({t:t||'',len:len||''}); renderSongs(); render(); }
+window.addSong=addSong;
+function renderSongs(){ var h=document.getElementById('songs'); h.innerHTML=SONGS.map(function(s,i){
+  return '<div class="song"><span class="n">'+(i+1)+'</span>'+
+    '<input class="t" placeholder="Song title" value="'+esc(s.t)+'" oninput="SONGS['+i+'].t=this.value;render()">'+
+    '<input class="len" placeholder="m:ss" value="'+esc(s.len)+'" oninput="SONGS['+i+'].len=this.value;render()">'+
+    '<button class="x" onclick="delSong('+i+')">✕</button></div>'; }).join(''); }
+window.delSong=function(i){ SONGS.splice(i,1); renderSongs(); render(); };
+window.render=function(){
+  var total=SONGS.reduce(function(a,s){return a+secs(s.len);},0);
+  document.getElementById('runtime').textContent=fmt(total);
+  document.getElementById('count').textContent=SONGS.filter(function(s){return s.t.trim();}).length;
+  var band=document.getElementById('band').value.trim()||'Your band';
+  document.getElementById('hBand').textContent=band==='Your band'?'Your setlist':(band+' — setlist');
+  // fan tease
+  var mode=document.getElementById('tease').value, named=SONGS.filter(function(s){return s.t.trim();});
+  var lines='';
+  named.forEach(function(s,i){
+    var reveal = mode==='vibe'?false : mode==='opener'?(i===0) : mode==='drip'?(i===0) : mode==='full'?false : false;
+    lines+='<div class="tz '+(reveal?'rev':'hid')+'">'+(reveal?('🎵 '+esc(s.t)):('🔒 <span class="lock">song '+(i+1)+' — revealed '+(mode==='drip'?'day by day':'at showtime')+'</span>'))+'</div>';
+  });
+  if(!named.length) lines='<div class="tz hid">🔒 songs drop as they add them…</div>';
+  document.getElementById('fanCard').innerHTML=
+    '<div class="kk">Sneak peek · '+esc(document.getElementById('show').value.trim()||'Musikfest')+'</div>'+
+    '<h3>'+esc(band)+'</h3>'+
+    '<div class="meta">'+named.length+' songs · ~'+fmt(SONGS.reduce(function(a,s){return a+secs(s.len);},0))+' set'+(mode==='full'?' · full list unlocks after the show':'')+'</div>'+
+    lines+(isDead(band)?'<div class="dead">🌹 Dead tribute — also on DeadDance</div>':'');
+};
+window.saveSet=function(){
+  var band=document.getElementById('band').value.trim(); if(!band){ alert('Add your band name.'); return; }
+  var payload={ event:EVENT, band:band, band_slug:slug(band), show:document.getElementById('show').value.trim(),
+    songs:SONGS.filter(function(s){return s.t.trim();}), tease:document.getElementById('tease').value,
+    runtime_sec:SONGS.reduce(function(a,s){return a+secs(s.len);},0), dead:isDead(band) };
+  try{ localStorage.setItem('dd.setlist.'+slug(band), JSON.stringify(payload)); }catch(e){}
+  try{ var cl=ddClient&&ddClient(); if(cl) cl.rpc('dd_setlist_save',{p_event:EVENT,p_member:ddId(),p_band:band,p_show:payload.show,p_songs:JSON.stringify(payload.songs),p_tease:payload.tease,p_runtime:payload.runtime_sec}).catch(function(){}); }catch(e){}
+  alert('🎵 Saved! Your '+payload.songs.length+'-song set is teasing to fans'+(payload.dead?' on StageFill + DeadDance.':' on StageFill.'));
+};
+// ---- fan-list HyperPost: the sneak-peek email to the band's own fans ----
+function fanEmails(){ return (document.getElementById('fanList').value.match(/[^\s,;<>()]+@[^\s,;<>()]+\.[^\s,;<>()]+/g)||[]); }
+window.fanCount=function(){ document.getElementById('fanCountL').textContent=fanEmails().length+' fans'; };
+function teaseEmail(){ var band=document.getElementById('band').value.trim()||'We', show=document.getElementById('show').value.trim(),
+  named=SONGS.filter(function(s){return s.t.trim();}), opener=named[0]?named[0].t:'', link='https://deaddance.app/musikfest';
+  var subject='🎵 Sneak peek: '+band+' at Musikfest';
+  var html='<div style="font-family:sans-serif;max-width:520px;margin:auto"><h2>'+esc(band)+' — Musikfest sneak peek</h2>'+
+    '<p>We\'re playing '+esc(show||'Musikfest')+' — <b>'+named.length+' songs</b>, ~'+fmt(SONGS.reduce(function(a,s){return a+secs(s.len);},0))+' of music.</p>'+
+    (opener?('<p>We\'re opening with <b>'+esc(opener)+'</b>. 👀</p>'):'')+
+    '<p>The rest drops at showtime — see the whole setlist &amp; find us on the map:</p>'+
+    '<p><a href="'+link+'">deaddance.app/musikfest →</a></p></div>';
+  return {subject:subject, html:html}; }
+window.copyTease=function(){ var e=teaseEmail(); try{ navigator.clipboard.writeText(e.subject+'\n\n'+e.html); }catch(x){} alert('📋 Copied — paste it into your own email tool and send to your fans.'); };
+window.teaseFans=function(){ var emails=fanEmails(), band=document.getElementById('band').value.trim();
+  if(!band){ alert('Add your band name first.'); return; }
+  if(!emails.length){ alert('Paste your fan list first.'); return; }
+  if(!document.getElementById('fanOptin').checked){ alert('Please confirm these are your own opted-in fans.'); return; }
+  var e=teaseEmail(), payload={ biz:band, sender:slug(band), subject:e.subject, html:e.html, emails:emails };
+  try{ localStorage.setItem('dd.setlist.fans.'+slug(band), JSON.stringify(payload)); }catch(x){}
+  if(HP_ENDPOINT){ fetch(HP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+HP_KEY,'apikey':HP_KEY},body:JSON.stringify(payload)})
+    .then(function(r){return r.json().catch(function(){return{};});}).then(function(){ alert('📡 Teased '+emails.length+' of your fans! They\'ll get the sneak peek.'); })
+    .catch(function(){ alert('Queued '+emails.length+' — sends when the mail service reconnects.'); });
+  } else { alert('📡 List saved ('+emails.length+' fans). Connect the mail service to send.'); } };
+
+// prefill from ?band= & ?show=
+document.getElementById('band').value=qp('band'); document.getElementById('show').value=qp('show')||qp('date');
+addSong(); addSong(); addSong(); render();
+</script>
+</body></html>
