@@ -96,8 +96,12 @@ input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:
     parking, day-of tracking — generated from the pins you drop here. 🌹</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function slugify(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+try{ var _SB=window.supabase&&window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SB;}; }catch(e){}
+function ddOwner(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){v=(crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now());localStorage.setItem(k,v);} return v; }catch(e){ return 'anon'; } }
 var TYPES={stage:{label:'Stage',emoji:'🎤',color:'#b8002e'},potty:{label:'Porta-potty',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'},food:{label:'Food vendor',emoji:'🍔',color:'#e8730c'},merchant:{label:'Shop / bar',emoji:'🛍️',color:'#8a6d3b'}};
 var TOOLKEYS=['stage','potty','parking','food','merchant'];
 var TOOL='stage';
@@ -164,7 +168,17 @@ window.exportJSON=function(){ save(); var s=JSON.stringify(FEST,null,2);
 window.publishNote=function(){ save();
   if(!FEST.name){ alert('Name your festival first.'); return; }
   if(FEST.pins.length<1){ alert('Drop at least one pin first.'); return; }
-  alert('🌹 '+FEST.name+' — '+FEST.pins.length+' pins ready.\n\nPublishing turns this into a live no-app fan map at stagefill.app/'+(FEST.name.toLowerCase().replace(/[^a-z0-9]+/g,'-'))+' with its own QR — same as Musikfest, for your city. (That step saves it to the StageFill back end; it\'s the next build.) Your data is saved on this device in the meantime.'); };
+  var slug=slugify(FEST.name), cl=window.ddClient&&ddClient();
+  if(!cl){ alert('Offline — your festival is saved on this device. Reconnect to publish.'); return; }
+  var btn=event&&event.target; if(btn)btn.textContent='Publishing…';
+  cl.rpc('dd_festival_save',{p_slug:slug,p_owner:ddOwner(),p_doc:JSON.stringify(FEST)})
+    .then(function(r){ if(r.error) throw r.error; var s=(r.data)||slug;
+      return cl.rpc('dd_festival_publish',{p_slug:s,p_owner:ddOwner(),p_on:true}).then(function(){ return s; }); })
+    .then(function(s){ var url='festival.html?event='+encodeURIComponent(s);
+      if(btn)btn.textContent='🌹 Publish (get the fan map + QR)';
+      if(confirm('🎉 Published! '+FEST.name+' is live at:\n\ndeaddance.app/festival?event='+s+'\n\nOpen the live fan map now?')) window.open(url,'_blank','noopener'); })
+    .catch(function(e){ if(btn)btn.textContent='🌹 Publish (get the fan map + QR)'; alert('Publish failed: '+(e&&e.message||e)+'\n(Make sure dd_festival.sql is run.) Your festival is saved locally.'); });
+};
 
 load(); initMap(); redraw(); renderList();
 </script>

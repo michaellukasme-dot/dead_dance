@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Festival · StageFill</title><meta name="theme-color" content="#241535">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--rose:#b8002e;--purple:#5a2e86;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--gold:#f0a500}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 80px}
+.hero{background:#fbf6e3;border:1px solid #ece0bd;border-radius:20px;padding:20px}
+.hero .k{color:#7a6a2e;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.hero h1{font-size:38px;line-height:.95;margin:4px 0 4px;font-weight:900;letter-spacing:-1px;text-transform:uppercase;color:#161616}
+.hero p{margin:0;color:#514a38;font-size:13.5px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+#map{height:360px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.leaflet-attribution-flag{display:none!important}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#4a4356;margin-top:8px}
+.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid #f4f0fa}
+.row:last-child{border-bottom:0}.row .nm{font-weight:700;font-size:14px}.row .dt{font-size:12px;color:var(--muted)}
+.row a{color:var(--purple);font-weight:800;font-size:12.5px;text-decoration:none;white-space:nowrap}
+.qrwrap{text-align:center;background:#fffdf6;border:1px solid #f0d9a6;border-radius:14px;padding:14px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="k" id="fCity">Loading…</div>
+    <h1 id="fName">Festival</h1>
+    <p id="fDates"></p>
+  </div>
+
+  <div class="sec">The map — everything, where it actually is</div>
+  <div id="map"></div>
+  <div class="legend" id="legend"></div>
+
+  <div id="sections"></div>
+
+  <div class="sec">Share this map · no app needed</div>
+  <div class="qrwrap">
+    <div id="fqr" style="width:180px;height:180px;margin:0 auto"></div>
+    <div style="font-weight:900;font-size:15px;margin-top:8px">No app. No download.</div>
+    <div style="font-size:12.5px;color:var(--muted)">On your phone? <b>Tap it.</b> Showing a friend? <b>They scan it.</b></div>
+  </div>
+
+  <div class="foot">Built with <b>StageFill</b> — the any-city festival companion. 🌹</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function qp(k){ return new URLSearchParams(location.search).get(k)||''; }
+var TYPES={stage:{label:'Stages',emoji:'🎤',color:'#b8002e'},potty:{label:'Restrooms',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'},food:{label:'Food',emoji:'🍔',color:'#e8730c'},merchant:{label:'Shops & bars',emoji:'🛍️',color:'#8a6d3b'}};
+var ORDER=['stage','food','parking','potty','merchant'];
+var SB; try{ SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
+function dir(p){ return 'https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng+'&travelmode='+(p.type==='parking'?'driving':'walking'); }
+function fmtRange(a,b){ if(!a)return ''; try{ var o={month:'short',day:'numeric'}; var d1=new Date(a+'T12:00:00').toLocaleDateString(undefined,o); if(!b||b===a)return d1; return d1+' – '+new Date(b+'T12:00:00').toLocaleDateString(undefined,o); }catch(e){ return a+(b?(' – '+b):''); } }
+
+function render(F){
+  document.getElementById('fName').textContent=F.name||'Festival';
+  document.getElementById('fCity').textContent=F.city||'';
+  document.getElementById('fDates').textContent=fmtRange(F.start,F.end);
+  document.title=(F.name||'Festival')+' · StageFill';
+  var pins=(F.pins||[]).filter(function(p){return p.lat!=null;});
+  // map
+  var map=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  pins.forEach(function(p){ var t=TYPES[p.type]||{color:'#888',emoji:'📍'};
+    L.circleMarker([p.lat,p.lng],{radius:8,color:'#fff',weight:2,fillColor:t.color,fillOpacity:1}).addTo(map)
+     .bindTooltip((t.emoji||'')+' '+esc(p.name||''),{direction:'top'})
+     .bindPopup('<b>'+esc(p.name||'')+'</b>'+(p.detail?('<br><span style="font-size:12px;color:#555">'+esc(p.detail)+'</span>'):'')+'<br><a href="'+dir(p)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">'+(p.type==='parking'?'🚗 Drive here':'🚶 Walk me there')+'</a>'); });
+  if(pins.length){ try{ map.fitBounds(pins.map(function(p){return [p.lat,p.lng];}),{padding:[36,36],maxZoom:16}); }catch(e){} }
+  else map.setView([39.95,-75.16],13);
+  setTimeout(function(){ try{map.invalidateSize();}catch(e){} },250);
+  // legend
+  document.getElementById('legend').innerHTML=ORDER.filter(function(k){return pins.some(function(p){return p.type===k;});}).map(function(k){return '<span>'+TYPES[k].emoji+' '+TYPES[k].label+'</span>';}).join('');
+  // sections grouped by type
+  var host=document.getElementById('sections'), html='';
+  ORDER.forEach(function(k){ var group=pins.filter(function(p){return p.type===k;}); if(!group.length)return;
+    html+='<div class="sec">'+TYPES[k].emoji+' '+TYPES[k].label+' ('+group.length+')</div><div class="card">'+
+      group.map(function(p){ return '<div class="row"><div><div class="nm">'+esc(p.name||'')+'</div>'+(p.detail?('<div class="dt">'+esc(p.detail)+'</div>'):'')+'</div><a href="'+dir(p)+'" target="_blank" rel="noopener">'+(k==='parking'?'directions ›':'walk ›')+'</a></div>'; }).join('')+'</div>';
+  });
+  host.innerHTML=html;
+  // QR to this live page (dual-door: tap or scan)
+  try{ if(window.DDQR) DDQR.into('fqr', location.href.split('#')[0], {mark:'dd',size:360,css:180,caption:true}); }catch(e){}
+}
+
+(function(){ var slug=qp('event');
+  if(!slug){ document.getElementById('fName').textContent='No festival'; document.getElementById('fCity').textContent='Add ?event=<name> to the link'; return; }
+  if(!SB){ document.getElementById('fCity').textContent='Offline'; return; }
+  SB.rpc('dd_festival_get',{p_slug:slug}).then(function(r){
+    if(r.error||!r.data){ document.getElementById('fName').textContent='Not found'; document.getElementById('fCity').textContent='This festival isn’t published yet.'; return; }
+    var F=(typeof r.data==='string')?JSON.parse(r.data):r.data; render(F);
+  }).catch(function(){ document.getElementById('fCity').textContent='Could not load.'; });
+})();
+</script>
+</body></html>
