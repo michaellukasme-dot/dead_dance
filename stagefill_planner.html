@@ -58,6 +58,8 @@ input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:
     <button id="t_stage" class="on" onclick="setTool('stage')">🎤 Stage</button>
     <button id="t_potty" onclick="setTool('potty')">🚻 Potty</button>
     <button id="t_parking" onclick="setTool('parking')">🅿️ Parking</button>
+    <button id="t_food" onclick="setTool('food')">🍔 Food</button>
+    <button id="t_merchant" onclick="setTool('merchant')">🛍️ Shop</button>
   </div>
   <div class="hint" id="toolHint">Tap the map to drop a <b>Stage</b> — you'll name it (and add the act/time). Drag a pin to nudge it.</div>
   <div id="map"></div>
@@ -78,7 +80,8 @@ input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:
 
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-var TYPES={stage:{label:'Stage',emoji:'🎤',color:'#b8002e'},potty:{label:'Porta-potty',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'}};
+var TYPES={stage:{label:'Stage',emoji:'🎤',color:'#b8002e'},potty:{label:'Porta-potty',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'},food:{label:'Food vendor',emoji:'🍔',color:'#e8730c'},merchant:{label:'Shop / bar',emoji:'🛍️',color:'#8a6d3b'}};
+var TOOLKEYS=['stage','potty','parking','food','merchant'];
 var TOOL='stage';
 var FEST={ name:'', city:'', start:'', end:'', pins:[] };  // {id,type,name,detail,lat,lng}
 var MAP, LG, MARKERS={};
@@ -89,8 +92,9 @@ function save(){ FEST.name=val('fName'); FEST.city=val('fCity'); FEST.start=val(
   try{ localStorage.setItem('dd.festival.draft',JSON.stringify(FEST)); }catch(e){} }
 function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
 
-window.setTool=function(t){ TOOL=t; ['stage','potty','parking'].forEach(function(k){ var b=document.getElementById('t_'+k); if(b)b.classList.toggle('on',k===t); });
-  document.getElementById('toolHint').innerHTML='Tap the map to drop a <b>'+TYPES[t].label+'</b>'+(t==='stage'?" — you'll name it (and add the act/time)":' — name it')+'. Drag a pin to nudge it.'; };
+window.setTool=function(t){ TOOL=t; TOOLKEYS.forEach(function(k){ var b=document.getElementById('t_'+k); if(b)b.classList.toggle('on',k===t); });
+  var extra=t==='stage'?" — you'll name it (and add the act/time)":t==='merchant'?" — name it, then choose whether to feature it with a paid walk-by toast":' — name it';
+  document.getElementById('toolHint').innerHTML='Tap the map to drop a <b>'+TYPES[t].label+'</b>'+extra+'. Drag a pin to nudge it.'; };
 
 function initMap(){ MAP=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(MAP);
   MAP.setView([39.9526,-75.1652],13); LG=L.layerGroup().addTo(MAP);
@@ -105,8 +109,12 @@ window.centerCity=function(){ var c=val('fCity'); if(!c){ alert('Type a city fir
 function addPin(type,lat,lng){
   var name=prompt(TYPES[type].emoji+' Name this '+TYPES[type].label+':', type==='stage'?'Main Stage':(TYPES[type].label));
   if(name===null) return;
-  var detail=''; if(type==='stage'){ detail=prompt('Act & time for opening (optional, e.g. "The Band · 8 PM"):','')||''; }
-  var p={ id:'p'+Date.now()+Math.round(Math.random()*999), type:type, name:name||TYPES[type].label, detail:detail, lat:+lat.toFixed(6), lng:+lng.toFixed(6) };
+  var detail='', sponsor=false;
+  if(type==='stage')        detail=prompt('Act & time for opening (optional, e.g. "The Band · 8 PM"):','')||'';
+  else if(type==='food')    detail=prompt('What do they sell? (optional, e.g. "wood-fired pizza · $")','')||'';
+  else if(type==='merchant'){ detail=prompt('Offer / note (optional, e.g. "fills the festival cup · A/C · real restrooms")','')||'';
+    sponsor=confirm('Feature this shop with a walk-by toast as fans pass?\n\nA paid white-box placement — fans get a toast about this business when they walk near it.'); }
+  var p={ id:'p'+Date.now()+Math.round(Math.random()*999), type:type, name:name||TYPES[type].label, detail:detail, sponsor:sponsor, lat:+lat.toFixed(6), lng:+lng.toFixed(6) };
   FEST.pins.push(p); save(); drawPin(p); renderList();
 }
 function drawPin(p){ var t=TYPES[p.type];
@@ -119,10 +127,10 @@ function redraw(){ LG.clearLayers(); MARKERS={}; FEST.pins.forEach(drawPin);
   if(FEST.pins.length){ try{ MAP.fitBounds(FEST.pins.map(function(p){return [p.lat,p.lng];}),{padding:[40,40],maxZoom:16}); }catch(e){} } }
 function renderList(){ var host=document.getElementById('pinList'); document.getElementById('pinCount').textContent=FEST.pins.length;
   if(!FEST.pins.length){ host.innerHTML='<div class="hint" style="margin:0">No pins yet — tap the map to place your first stage.</div>'; return; }
-  var order={stage:0,potty:1,parking:2};
+  var order={stage:0,potty:1,parking:2,food:3,merchant:4};
   var rows=FEST.pins.slice().sort(function(a,b){ return (order[a.type]-order[b.type]); });
   host.innerHTML=rows.map(function(p){ var t=TYPES[p.type];
-    return '<div class="pinrow"><span class="dot" style="background:'+t.color+'"></span><span class="nm">'+t.emoji+' '+esc(p.name)+(p.detail?(' <span class="dt">· '+esc(p.detail)+'</span>'):'')+'</span><button class="x" onclick="removePin(\''+p.id+'\')">remove</button></div>';
+    return '<div class="pinrow"><span class="dot" style="background:'+t.color+'"></span><span class="nm">'+t.emoji+' '+esc(p.name)+(p.sponsor?' <span class="dt" style="color:#e8730c">★ featured</span>':'')+(p.detail?(' <span class="dt">· '+esc(p.detail)+'</span>'):'')+'</span><button class="x" onclick="removePin(\''+p.id+'\')">remove</button></div>';
   }).join(''); }
 window.removePin=function(id){ FEST.pins=FEST.pins.filter(function(p){return p.id!==id;}); save(); redraw(); renderList(); };
 

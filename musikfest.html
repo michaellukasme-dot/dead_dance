@@ -66,6 +66,30 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 .tips b{color:var(--ink)}.tips li{margin-bottom:7px}
 .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;line-height:1.6}
 .back{display:inline-block;margin-bottom:10px;color:var(--purple);font-weight:800;text-decoration:none;font-size:13.5px}
+/* ---- Advertise facility ---- */
+.adcta{display:flex;align-items:center;gap:12px;justify-content:space-between;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:12px 14px;margin:12px 0;cursor:pointer}
+.adcta b{font-size:14px}.adcta span{font-size:12px;color:var(--muted)}
+.adcta .go{flex:0 0 auto;background:#f0a500;color:#3a1d00;border:0;border-radius:11px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer}
+.admodal{position:fixed;inset:0;z-index:300;display:none}
+.admodal .bg{position:absolute;inset:0;background:#160c28cc}
+.admodal .panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,94vw);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;padding:16px}
+.admodal h2{margin:2px 0 2px;font-size:19px;font-weight:900}
+.admodal .sub{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.adlab{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px}
+.admodal select,.admodal input,.admodal textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink)}
+.adprevwrap{margin-top:8px;border:1px dashed #d8cfe6;border-radius:12px;padding:10px;text-align:center}
+.adprevwrap img{max-width:100%;max-height:150px;border-radius:8px;display:none;margin:0 auto}
+.tiers{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.tier{border:2px solid var(--line);border-radius:13px;padding:11px 13px;cursor:pointer;position:relative}
+.tier.on{border-color:#f0a500;background:#fff8ec}
+.tier .tn{font-weight:900;font-size:15px}.tier .tp{float:right;font-weight:900;font-size:16px;color:#b8002e}
+.tier .td{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.tier .best{position:absolute;top:-9px;right:12px;background:#b8002e;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px}
+.adsubmit{width:100%;margin-top:14px;border:0;border-radius:13px;padding:14px;font-weight:900;font-size:15px;background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff;cursor:pointer}
+.adfeat{background:#fff;border:1px solid #f0d9a6;border-radius:14px;padding:10px;display:flex;gap:11px;align-items:center;margin-bottom:8px}
+.adfeat img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:0 0 auto}
+.adfeat .h{font-weight:900;font-size:14px}.adfeat .t{font-size:12.5px;color:#4a4356;line-height:1.4}
+.adfeat .tag{font-size:10px;font-weight:800;color:#e8730c;text-transform:uppercase;letter-spacing:.04em}
 </style></head>
 <body>
 <div class="wrap">
@@ -80,6 +104,38 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     </div>
     <div style="color:#9d8cc0;font-size:11.5px;font-weight:700;margin-top:10px;letter-spacing:.04em">FESTIVALS, REIMAGINED — VIRTUALLY · keep this open, it's your companion</div>
   </div>
+  <div class="adcta" onclick="adOpen()">
+    <div><b>📣 Is this your restaurant, shop, or brewery?</b><br><span>You're inside the fest — advertise to every head walking by. From $99.</span></div>
+    <button class="go" onclick="event.stopPropagation();adOpen()">Advertise ▸</button>
+  </div>
+  <div id="adFeatured"></div>
+
+  <div class="admodal" id="adModal">
+    <div class="bg" onclick="adClose()"></div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h2>📣 Advertise at Musikfest</h2><div class="sub">Photo + a line. Live on the map in minutes. Reaches the whole crowd.</div></div>
+        <button onclick="adClose()" style="border:0;background:#f1eef7;color:var(--purple);width:34px;height:34px;border-radius:17px;font-size:16px;cursor:pointer;flex:0 0 auto">✕</button>
+      </div>
+      <div class="adlab">Is this your business?</div>
+      <select id="adBiz" onchange="adBizChange()"></select>
+      <input id="adBizNew" placeholder="Your business name" style="display:none;margin-top:8px">
+      <div class="adlab">Your photo</div>
+      <input type="file" id="adPhotoIn" accept="image/*" onchange="adPhoto(this)">
+      <div class="adprevwrap"><img id="adPrev" alt=""><div id="adPrevHint" style="font-size:12px;color:var(--muted)">A logo, your storefront, or a plate of food.</div></div>
+      <div class="adlab">Headline</div>
+      <input id="adHead" maxlength="42" placeholder="e.g., Cold craft + A/C, 40 ft away">
+      <div class="adlab">One line</div>
+      <textarea id="adText" rows="2" maxlength="130" placeholder="e.g., Fills your Musikfest cup. Real bathrooms. Come cool off."></textarea>
+      <div class="adlab">Choose your spread</div>
+      <div class="tiers" id="adTiers"></div>
+      <div class="adlab">Where do we send your payment link?</div>
+      <input id="adEmail" type="email" placeholder="you@yourshop.com">
+      <button class="adsubmit" onclick="adSubmit()">Sign me up →</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Secure payment link emailed after you sign up — no card entered here. Cancel anytime before it runs.</div>
+    </div>
+  </div>
+
   <div class="carbadge" id="carBadge" style="display:none"></div>
   <div class="compbar">
     <button id="trackBtn" onclick="toggleTrack()">🥾 Start my walk</button>
@@ -110,6 +166,7 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
       <span><i style="background:#5a2e86"></i>South side — SteelStacks</span>
       <span><i style="background:#f0a500"></i>Ticketed (Steel Stage)</span>
       <span>🌹 Dead/jam set in your window</span>
+      <span>🛍️ Shops &amp; taps inside the fest (many fill your cup)</span>
     </div>
   </div>
   <div id="parkBox" style="text-align:center;margin:12px 0"></div>
@@ -123,6 +180,11 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     <div id="northList"></div>
     <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px">South side — SteelStacks</div>
     <div id="southList"></div>
+  </details>
+
+  <details class="mfsec"><summary>🍺 Shops, taps &amp; eats — right inside the fest</summary>
+    <div style="font-size:12.5px;color:#4a4356;line-height:1.5;margin:2px 0 8px">The historic <b>Main Street</b> businesses sit <b>inside</b> the festival footprint — many fill your official <b>Musikfest cup</b> (often better, sometimes cheaper than the tents), with A/C and real bathrooms. These are the brick-and-mortar spots, on top of the hundreds of food trucks &amp; tents.</div>
+    <div id="shopList"></div>
   </details>
 
   <details class="mfsec"><summary>Ticketed headliners · Wind Creek Steel Stage</summary>
@@ -222,6 +284,22 @@ var LOTS=[
  {n:"Walnut Street Parking Deck",side:"North · downtown",lat:40.6196,lng:-75.3812}
 ];
 
+// ---- MERCHANTS inside the footprint: the real Main St shops/taps/eats (verified addresses,
+//      approx coords — John to confirm exact). "cup" = fills the official Musikfest cup.
+//      "sponsor" = paid the white-box walk-by-toast placement ($/day). This is a StageFill ad line. ----
+var MERCHANTS=[
+ {n:"Fegley's Bethlehem Brew Works",kind:"brewery",addr:"559 Main St",lat:40.6195,lng:-75.3803,cup:1,sponsor:1,blurb:"Brewpub with the Brew Works Musikfest Cup — A/C and food cooked with their own beer."},
+ {n:"Historic Hotel Bethlehem — Tap Room",kind:"hotel",addr:"437 Main St",lat:40.6186,lng:-75.3799,cup:1,blurb:"1741 On the Terrace + the Tap Room. Grand lobby, cool drinks, real restrooms."},
+ {n:"McCarthy's Red Stag Pub & Whiskey Bar",kind:"bar",addr:"534 Main St",lat:40.6192,lng:-75.3802,cup:1,blurb:"Celtic pub — whiskey wall, Guinness, a break from the crush. In Donegal Square."},
+ {n:"Lost Tavern Brewing — at the Moravian Book Shop",kind:"brewery",addr:"444 Main St",lat:40.6187,lng:-75.3799,cup:1,blurb:"Taproom tucked inside the 1745 book shop. Local craft, right on Main."},
+ {n:"Moravian Book Shop",kind:"shop",addr:"428 Main St",lat:40.6184,lng:-75.3798,blurb:"America's oldest bookstore (1745). Gifts, café, A/C — a cool escape."},
+ {n:"Donegal Square",kind:"shop",addr:"534 Main St",lat:40.6192,lng:-75.3802,blurb:"Irish & Celtic imports — wool, jewelry, gifts. Above McCarthy's."},
+ {n:"Domaci Home",kind:"shop",addr:"523 Main St",lat:40.6191,lng:-75.3801,blurb:"Design, home & maker goods — a classic Main Street browse."},
+ {n:"Aardvark Sports Shop",kind:"shop",addr:"559 Main St · Main Street Commons",lat:40.6196,lng:-75.3804,blurb:"Running & outdoor gear, Shoppes at Main Street Commons."},
+ {n:"The Sun Inn (1758)",kind:"historic",addr:"556 Main St",lat:40.6194,lng:-75.3803,cup:1,blurb:"Washington, Adams & Franklin stayed here. The courtyard hosts live music — Deal Trio & Duo play here spring–summer — plus shops inside. It's the Liederplatz block."}
+];
+function merchEmoji(k){ return k==='brewery'||k==='bar'?'🍺':k==='hotel'?'🏨':k==='historic'?'🏛️':k==='restaurant'?'🍽️':'🛍️'; }
+
 // "Where did I park?" — drop a GPS pin at your car, walk back to it later
 function parkGet(){ try{ return JSON.parse(localStorage.getItem('dd.park')||'null'); }catch(e){ return null; } }
 window.parkSet=function(){ if(!navigator.geolocation){ alert('Location is off — can’t drop a parking pin.'); return; }
@@ -245,12 +323,12 @@ function stageKey(s){ var n=s.n.toLowerCase();
 function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!=='undefined')?DAYS[curDayIdx]:null, set={};
  (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!day||r.d===day)) set[r.st]=true; }); return set; }
 /* Real map — Leaflet + OpenStreetMap (the hardened TCTP map engine). Clean streets, real geography. */
-var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null;
+var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null;
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
   LMAP=L.map(el,{zoomControl:true,scrollWheelZoom:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP);
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
-  LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP);
+  LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup().addTo(LMAP);
   try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{padding:[26,26]}); }catch(e){ LMAP.setView([40.6175,-75.3755],15); }
   setTimeout(function(){ try{ LMAP.invalidateSize(); }catch(e){} },250);
 }
@@ -268,8 +346,78 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
     m.bindTooltip((isDead?'🌹 ':'')+s.n.replace(/ @.*/,''),{direction:'top',opacity:.95});
     m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b><br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><a href="'+dirUrl(s)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
   });
+  drawShops();
   updateYou(); updatePath(); updatePhotos();
 }
+function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
+  MERCHANTS.forEach(function(m){
+    var ic=L.divIcon({className:'mfshop',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid '+(m.sponsor?'#f0a500':'#c9b8dd')+';display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 4px #0004">'+merchEmoji(m.kind)+'</div>'});
+    var mk=L.marker([m.lat,m.lng],{icon:ic}).addTo(LG_SHOP);
+    mk.bindTooltip((m.cup?'🍺 ':'')+m.n,{direction:'top',opacity:.95});
+    mk.bindPopup('<b>'+esc(m.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(m.addr)+' · '+esc(m.blurb)+'</span>'+(m.cup?'<br><b style="color:#b8002e">🍺 Fills your Musikfest cup</b>':'')+'<br><a href="'+dirUrl(m)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
+  });
+}
+// the SHOPS-inside-the-fest list (collapsible)
+(function renderShops(){ var el=document.getElementById('shopList'); if(!el)return;
+  el.innerHTML=MERCHANTS.map(function(m){
+    return '<div class="card"><div class="nm">'+merchEmoji(m.kind)+' '+esc(m.n)+' '+(m.cup?'<span class="chip free">🍺 fills your cup</span>':'')+(m.sponsor?'<span class="chip jam">featured</span>':'')+'</div>'+
+      '<div class="where">'+esc(m.addr)+' — '+esc(m.blurb)+'</div>'+
+      '<a class="dir" href="'+dirUrl(m)+'" target="_blank" rel="noopener">📍 Get directions</a></div>';
+  }).join('');
+})();
+
+/* ===== ADVERTISE FACILITY — self-serve: pick your business, upload a photo + line,
+   choose Less / More / Most, sign up. Runs live on the map; secure payment link emailed. ===== */
+var MF_DAYS=(function(){ try{ return (SCHED&&SCHED.length)||11; }catch(e){ return 11; } })();
+var TIERS={
+ less:{k:'less',name:'Less',price:99,unit:'/ day',best:false,desc:'One day. Your photo + line on the Musikfest map.'},
+ more:{k:'more',name:'More',price:899,unit:' · all '+MF_DAYS+' days',best:false,desc:'Every day of the fest — flat rate, big discount off the daily.'},
+ most:{k:'most',name:'Most',price:699,unit:' · the whole spread',best:true,desc:'The full festival + featured: the walk-by toast as fans pass, top of the shops list, and a spot in the postable Musikfest spread.'}
+};
+var adState={photo:null,tier:'most'};
+function adStore(){ try{ return JSON.parse(localStorage.getItem('dd.mfads')||'[]'); }catch(e){ return []; } }
+function adSave(a){ try{ var s=adStore(); s.push(a); localStorage.setItem('dd.mfads',JSON.stringify(s)); }catch(e){} }
+window.adOpen=function(){ var sel=document.getElementById('adBiz');
+  sel.innerHTML='<option value="">Is this your restaurant / shop / brewery?</option>'+
+    MERCHANTS.map(function(m){ return '<option value="'+esc(m.n)+'">'+esc(m.n)+' — '+esc(m.addr)+'</option>'; }).join('')+
+    '<option value="__new__">➕ My business isn\'t listed</option>';
+  renderTiers();
+  document.getElementById('adModal').style.display='block'; };
+window.adClose=function(){ document.getElementById('adModal').style.display='none'; };
+window.adBizChange=function(){ var v=document.getElementById('adBiz').value; document.getElementById('adBizNew').style.display=(v==='__new__')?'block':'none'; };
+function renderTiers(){ var host=document.getElementById('adTiers'); host.innerHTML=['less','more','most'].map(function(k){ var t=TIERS[k];
+  return '<div class="tier'+(adState.tier===k?' on':'')+'" onclick="adPick(\''+k+'\')">'+(t.best?'<span class="best">best value</span>':'')+
+    '<span class="tp">$'+t.price.toLocaleString()+'</span><span class="tn">'+t.name+'</span><span style="font-size:11.5px;color:var(--muted);font-weight:700"> '+esc(t.unit)+'</span><div class="td">'+esc(t.desc)+'</div></div>';
+}).join(''); }
+window.adPick=function(k){ adState.tier=k; renderTiers(); };
+window.adPhoto=function(inp){ var f=inp.files&&inp.files[0]; if(!f)return; var img=new Image();
+  img.onload=function(){ var mw=700, sc=Math.min(1,mw/img.width), w=Math.round(img.width*sc), h=Math.round(img.height*sc);
+    var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+    adState.photo=c.toDataURL('image/jpeg',0.82); var p=document.getElementById('adPrev'); p.src=adState.photo; p.style.display='block'; document.getElementById('adPrevHint').style.display='none'; };
+  img.src=URL.createObjectURL(f); };
+window.adSubmit=function(){
+  var v=document.getElementById('adBiz').value, biz=(v==='__new__')?document.getElementById('adBizNew').value.trim():v;
+  var head=document.getElementById('adHead').value.trim(), text=document.getElementById('adText').value.trim(), email=document.getElementById('adEmail').value.trim();
+  if(!biz){ alert('Pick your business (or add its name).'); return; }
+  if(!head && !text){ alert('Add a headline or a line for your ad.'); return; }
+  if(!/.+@.+\..+/.test(email)){ alert('Add an email so we can send your secure payment link.'); return; }
+  var t=TIERS[adState.tier];
+  var ad={biz:biz,head:head,text:text,photo:adState.photo,tier:t.name,price:t.price,email:email,ts:Date.now()};
+  adSave(ad); mfPerf('ad_signup_'+t.k,1,'dd');
+  // light it up immediately: mark the matching shop as a sponsor with this creative
+  MERCHANTS.forEach(function(m){ if(m.n.toLowerCase().indexOf(biz.toLowerCase())>=0 || biz.toLowerCase().indexOf(m.n.toLowerCase())>=0){ m.sponsor=1; m.adhead=head; m.adphoto=ad.photo; } });
+  try{ drawShops(); }catch(e){}
+  renderAds(); adClose();
+  mfToastHTML('✅ <b>You\'re in, '+esc(biz)+'!</b><br><span style="font-weight:600;font-size:12px;color:#e7ddf3">'+esc(t.name)+' · $'+t.price.toLocaleString()+' — secure payment link on its way to '+esc(email)+'.</span><br><span style="font-size:11.5px;color:#f0c96b">Your ad is live on the map now.</span>');
+  // reset
+  adState={photo:null,tier:'most'}; document.getElementById('adHead').value=''; document.getElementById('adText').value=''; document.getElementById('adEmail').value='';
+  var p=document.getElementById('adPrev'); p.style.display='none'; document.getElementById('adPrevHint').style.display='block'; };
+function renderAds(){ var host=document.getElementById('adFeatured'); if(!host)return; var ads=adStore();
+  host.innerHTML=ads.map(function(a){
+    return '<div class="adfeat">'+(a.photo?'<img src="'+a.photo+'" alt="">':'<div style="width:64px;height:64px;border-radius:10px;background:#fff3d6;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto">🛍️</div>')+
+      '<div><div class="tag">Featured at Musikfest</div><div class="h">'+esc(a.head||a.biz)+'</div><div class="t">'+esc(a.text||a.biz)+'</div></div></div>';
+  }).join(''); }
+renderAds();
 
 function card(s,i){ var chips=(s.free===0?'<span class="chip tk">🎟 Ticketed</span>':'<span class="chip free">Free</span>')+(s.jam?'<span class="chip jam">🌹 jam/Dead here</span>':'');
  return '<div class="card'+(s.free===0?' tick':'')+'" id="st'+i+'"><div class="nm">'+esc(s.n)+' '+chips+'</div>'+
@@ -379,6 +527,10 @@ function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach
       if(set){ mfToastHTML(bandCard(set.b, set.st, set.t)); }
       else { mfToastHTML('🎪 You\'re at <b>'+esc(best.n)+'</b><br><span style="font-size:11.5px;color:#b9a9d4">no set on right now — check the schedule</span>'); }
     } } }
+// walk-by MERCHANT toast — ONLY for sponsors (the paid $/day placement), deduped 5 min/shop
+function merchantCheck(here){ if(!here)return; var best=null,bd=1e9; MERCHANTS.forEach(function(m){ if(!m.sponsor)return; var d=hav(here[0],here[1],m.lat,m.lng); if(d<bd){bd=d;best=m;} });
+  if(best && bd<0.03){ var now=Date.now(); if(WALK._mc!==best.n || now-(WALK._mcT||0)>300000){ WALK._mc=best.n; WALK._mcT=now;
+    mfToastHTML(merchEmoji(best.kind)+' <b>'+esc(best.n)+'</b><br><span style="font-weight:600;font-size:12px;color:#e7ddf3">'+esc(best.blurb)+'</span>'+(best.cup?'<br><span style="font-size:11.5px;color:#f0c96b">fills your Musikfest cup · '+esc(best.addr)+'</span>':'')); } } }
 function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(here[0],here[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
   if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
 function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
@@ -390,7 +542,7 @@ function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  pottyCheck(prev,[la,lo]); stageCheck([la,lo]);
+  pottyCheck(prev,[la,lo]); stageCheck([la,lo]); merchantCheck([la,lo]);
   try{ updateYou(); updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();
 }
 function startWatch(){ if(WALK.watch!=null||!navigator.geolocation)return; WALK.watch=navigator.geolocation.watchPosition(onPos,function(){},{enableHighAccuracy:true,maximumAge:2000,timeout:12000}); }
