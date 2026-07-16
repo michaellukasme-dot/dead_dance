@@ -556,7 +556,8 @@ function renderAds(){ var host=document.getElementById('adFeatured'); if(!host)r
   }).join(''); }
 // ---- Retailer HyperPost: seamless in-app email blast via YOUR one Mailchimp account (server-side Edge Function) ----
 // ⬇️ PASTE your deployed Supabase Edge Function URL here (holds the Mailchimp key server-side). Empty = queue locally.
-var HP_ENDPOINT='';
+var HP_ENDPOINT='https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/hyperpost-mail';
+var HP_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM';
 var HP_BIZ=null, HP_MODE='us';
 function hpAdFor(biz){ var ads=adStore(); for(var i=ads.length-1;i>=0;i--){ if(ads[i].biz===biz) return ads[i]; } return {biz:biz,head:'',text:'',coupon:'',photo:null}; }
 function hpBuild(biz){ var a=hpAdFor(biz);
@@ -588,7 +589,7 @@ window.hpSend=function(){ var emails=hpEmails(), a=hpAdFor(HP_BIZ);
   var payload={ biz:HP_BIZ, subject:subject, html:html, emails:emails, fb:document.getElementById('hpFB').value.trim(), ig:document.getElementById('hpIG').value.trim() };
   try{ localStorage.setItem('dd.hp.'+adSlug(HP_BIZ), JSON.stringify(payload)); }catch(e){}
   if(HP_ENDPOINT){ document.getElementById('hpBtn').textContent='Sending…';
-    fetch(HP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    fetch(HP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+HP_KEY,'apikey':HP_KEY},body:JSON.stringify(payload)})
       .then(function(r){ return r.json().catch(function(){return {};}); })
       .then(function(res){ hpClose(); mfToastHTML('📡 <b>Sent to '+emails.length+' on your list!</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(HP_BIZ)+' — your ad is on its way.</span>'); })
       .catch(function(){ hpClose(); mfToastHTML('📡 <b>Queued for '+emails.length+'.</b><br><span style="font-size:12px;color:#e7ddf3">We\'ll send as soon as the mail service reconnects.</span>'); })

@@ -51,7 +51,8 @@ someband@email.com"></textarea>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 // ⬇️ PASTE your deployed hyperpost-mail function URL to send for real
-var HP_ENDPOINT='';
+var HP_ENDPOINT='https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/hyperpost-mail';
+var HP_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM';
 var DEFAULT_BODY="Hey *|FNAME|*,\n\nStagger-Lee here. I built DeadDance for bands like you — your fans find your shows, your live recordings, your store, and each other, all in one place. No gatekeepers, no ads pulling focus. It's free to claim your page.\n\nTake a look: https://deaddance.app\n\nAnd here's the part I love: the minute you claim your spot, you can invite your whole fan list in one click — your people start coming home too.\n\nSee you on the inside. 🌹\n— Stagger-Lee / DeadDance";
 document.getElementById('body').value=DEFAULT_BODY;
 
@@ -72,7 +73,7 @@ window.send=function(){ if(!CONTACTS.length){ alert('Paste at least one band fir
   var payload={ sender:'stagger-lee', subject:document.getElementById('subj').value, html:bodyHtml(true), contacts:CONTACTS };
   try{ localStorage.setItem('dd.bandinvite.batch',JSON.stringify(payload)); }catch(e){}
   if(HP_ENDPOINT){ var b=document.getElementById('sendBtn'); b.textContent='Sending…';
-    fetch(HP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    fetch(HP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+HP_KEY,'apikey':HP_KEY},body:JSON.stringify(payload)})
       .then(function(r){return r.json().catch(function(){return{};});})
       .then(function(){ toast('📡 Invited '+CONTACTS.length+' bands!'); })
       .catch(function(){ toast('Queued '+CONTACTS.length+' — will send when the mail service reconnects.'); })
