@@ -65,7 +65,25 @@ input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:
   <div id="map"></div>
   <div class="card" id="pinList" style="margin-top:10px"><div class="hint" style="margin:0">No pins yet — tap the map to place your first stage.</div></div>
 
-  <div class="sec">3 · Publish</div>
+  <div class="sec">3 · Live parking guidance <span class="count">paid</span></div>
+  <div class="card">
+    <div class="hint" style="margin:0 0 9px">Most cities run a real-time parking-availability feed. Connect it and StageFill guides every visitor to a lot that <b>actually has spaces</b> — 🟢 open / 🟡 filling / 🔴 full — and reroutes as lots fill. Flip it on and <b>we handle the city's data fee</b>; it's part of your plan.</div>
+    <label class="f" style="display:block">Availability provider
+      <select id="pkProvider" onchange="save()">
+        <option value="">— none (static lots only) —</option>
+        <option>INRIX</option><option>Parkopedia</option><option>ParkMobile</option>
+        <option>Passport</option><option>City open-data feed</option><option>Manual lot counts</option>
+      </select>
+    </label>
+    <label class="f" style="display:block;margin-top:8px">Feed / data URL <span style="font-weight:600">(optional)</span>
+      <input id="pkFeed" placeholder="https://…   (API key added securely at publish, never stored here)" oninput="save()">
+    </label>
+    <label style="display:flex;align-items:center;gap:9px;margin-top:11px;font-weight:800;font-size:13.5px;cursor:pointer">
+      <input type="checkbox" id="pkLive" onchange="save()" style="width:auto"> Enable live parking guidance — we cover the city data fee
+    </label>
+  </div>
+
+  <div class="sec">4 · Publish</div>
   <div class="row">
     <button class="btn gold" style="flex:1" onclick="exportJSON()">⬇︎ Copy festival data</button>
     <button class="btn rose" style="flex:1" onclick="publishNote()">🌹 Publish (get the fan map + QR)</button>
@@ -83,12 +101,16 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 var TYPES={stage:{label:'Stage',emoji:'🎤',color:'#b8002e'},potty:{label:'Porta-potty',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'},food:{label:'Food vendor',emoji:'🍔',color:'#e8730c'},merchant:{label:'Shop / bar',emoji:'🛍️',color:'#8a6d3b'}};
 var TOOLKEYS=['stage','potty','parking','food','merchant'];
 var TOOL='stage';
-var FEST={ name:'', city:'', start:'', end:'', pins:[] };  // {id,type,name,detail,lat,lng}
+var FEST={ name:'', city:'', start:'', end:'', pins:[], parking:{provider:'',feed:'',live:false} };  // pin: {id,type,name,detail,lat,lng,spaces?}
 var MAP, LG, MARKERS={};
 
-function load(){ try{ var d=JSON.parse(localStorage.getItem('dd.festival.draft')||'null'); if(d){ FEST=d; fld('fName',d.name); fld('fCity',d.city); fld('fStart',d.start); fld('fEnd',d.end); } }catch(e){} }
+function load(){ try{ var d=JSON.parse(localStorage.getItem('dd.festival.draft')||'null'); if(d){ FEST=d; if(!FEST.parking)FEST.parking={provider:'',feed:'',live:false};
+  fld('fName',d.name); fld('fCity',d.city); fld('fStart',d.start); fld('fEnd',d.end);
+  fld('pkProvider',FEST.parking.provider); fld('pkFeed',FEST.parking.feed); var pl=document.getElementById('pkLive'); if(pl)pl.checked=!!FEST.parking.live; } }catch(e){} }
 function fld(id,v){ var e=document.getElementById(id); if(e&&v)e.value=v; }
+function chk(id){ var e=document.getElementById(id); return !!(e&&e.checked); }
 function save(){ FEST.name=val('fName'); FEST.city=val('fCity'); FEST.start=val('fStart'); FEST.end=val('fEnd');
+  FEST.parking={ provider:val('pkProvider'), feed:val('pkFeed'), live:chk('pkLive') };
   try{ localStorage.setItem('dd.festival.draft',JSON.stringify(FEST)); }catch(e){} }
 function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
 
@@ -110,11 +132,13 @@ function addPin(type,lat,lng){
   var name=prompt(TYPES[type].emoji+' Name this '+TYPES[type].label+':', type==='stage'?'Main Stage':(TYPES[type].label));
   if(name===null) return;
   var detail='', sponsor=false;
+  var spaces=null;
   if(type==='stage')        detail=prompt('Act & time for opening (optional, e.g. "The Band · 8 PM"):','')||'';
+  else if(type==='parking'){ var sp=prompt('How many spaces in this lot? (optional — helps guide by availability)',''); if(sp&&/^\d+$/.test(sp.trim())){ spaces=+sp.trim(); detail=spaces+' spaces'; } }
   else if(type==='food')    detail=prompt('What do they sell? (optional, e.g. "wood-fired pizza · $")','')||'';
   else if(type==='merchant'){ detail=prompt('Offer / note (optional, e.g. "fills the festival cup · A/C · real restrooms")','')||'';
     sponsor=confirm('Feature this shop with a walk-by toast as fans pass?\n\nA paid white-box placement — fans get a toast about this business when they walk near it.'); }
-  var p={ id:'p'+Date.now()+Math.round(Math.random()*999), type:type, name:name||TYPES[type].label, detail:detail, sponsor:sponsor, lat:+lat.toFixed(6), lng:+lng.toFixed(6) };
+  var p={ id:'p'+Date.now()+Math.round(Math.random()*999), type:type, name:name||TYPES[type].label, detail:detail, sponsor:sponsor, spaces:spaces, lat:+lat.toFixed(6), lng:+lng.toFixed(6) };
   FEST.pins.push(p); save(); drawPin(p); renderList();
 }
 function drawPin(p){ var t=TYPES[p.type];
