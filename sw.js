@@ -3,7 +3,7 @@
    • install is BEST-EFFORT (one missing asset can't abort the whole install)
    • HTML navigations are NETWORK-FIRST (no more stale index.html), cache as fallback
    • runtime cache is SAME-ORIGIN ONLY — never caches cross-origin archive.org audio (no quota blowout) */
-var CACHE = "deaddance-v309-2026-07-16";
+var CACHE = "deaddance-v311-2026-07-16";
 var ASSETS = ["./", "./index.html", "./404.html", "./app.html", "./welcome.html", "./studio_calculator.html", "./post_scale.html", "./qr_print.html",
   "./sales_crm.html", "./operator_academy.html", "./hostaband.html", "./managed.html", "./band_vault.html", "./archive.html", "./curator.html", "./record_store.html", "./record_store_kimock_demo.html", "./your_catalogue.html", "./poster_shop.html", "./tshirt_shop.html", "./karaoke.html", "./deadman.html", "./karaoke_store.html", "./jgb_store.html", "./guitars.html", "./bands.html", "./band_onboard.html", "./venue_console.html", "./console_directory.html", "./act_register.html", "./stagefill.html", "./poster_studio.html", "./card.html", "./event.html", "./dead_karaoke.html", "./note.html", "./cookie.html", "./recruit.html", "./privacy.html", "./musikfest.html", "./stagefill_planner.html", "./mf_rep.html", "./welcome_role.html", "./hyperpost_demo.html", "./band_console.html", "./band_manager.html", "./connected_site.html", "./influencer_console.html", "./sales_console.html", "./venue_ops.html", "./venue_pitch.html", "./acts_seed.js", "./target_bands.js", "./audio_manifest.js", "./festivals_seed.js", "./shakedown_scene_seed.js", "./shakedown_scene_seed.csv",
   "./manifest.webmanifest", "./og-card.png", "./bands.js", "./market-core.js", "./cassette-reader.js", "./gd_live.js", "./ad-engine.js", "./syf.png", "./lukas_a2hs.js",

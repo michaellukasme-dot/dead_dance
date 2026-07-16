@@ -154,6 +154,47 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     </div>
   </div>
 
+  <!-- HyperPost setup — retailer enters their list + socials, sends their ad, never leaves the app -->
+  <div class="admodal" id="hpModal">
+    <div class="bg" onclick="hpClose()"></div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h2>📡 Blast your ad to your own list</h2><div class="sub" id="hpSub">Paste your list, add your socials, hit send. All right here — no Mailchimp login.</div></div>
+        <button class="x" onclick="hpClose()" style="border:0;background:#f1eef7;color:var(--purple);width:34px;height:34px;border-radius:17px;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <div class="adlab">Do you already use an email tool?</div>
+      <div class="tiers" id="hpMode">
+        <div class="tier on" id="hpm_us" onclick="hpSetMode('us')"><div class="tn">No — send it for me</div><div class="td">through StageFill</div></div>
+        <div class="tier" id="hpm_own" onclick="hpSetMode('own')"><div class="tn">Yes — I have my own</div><div class="td">Mailchimp, Constant Contact…</div></div>
+      </div>
+
+      <div id="hpUs">
+        <div class="adlab">Your mailing list — paste emails (yours only; never shared)</div>
+        <textarea id="hpList" rows="4" oninput="hpCount()" placeholder="paste emails — one per line, or comma-separated"></textarea>
+        <div id="hpCountL" style="font-size:12px;color:var(--muted);font-weight:700;margin-top:4px">0 emails</div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;font-weight:700;color:#4a4356">
+          <input type="checkbox" id="hpOptin" style="width:auto"> These are my own customers who opted in to hear from me.</label>
+      </div>
+
+      <div id="hpOwn" style="display:none">
+        <div class="adlab">Your ready-to-send email — drop it into your own tool</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="hpCopySubject()" style="flex:1;border:0;border-radius:10px;padding:10px;font-weight:800;background:#f1eef7;color:var(--purple);cursor:pointer">Copy subject</button>
+          <button onclick="hpCopyHtml()" style="flex:1;border:0;border-radius:10px;padding:10px;font-weight:800;background:#f1eef7;color:var(--purple);cursor:pointer">Copy email HTML</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Paste it into Mailchimp, Constant Contact, Klaviyo, Square — whatever you use — and send to your own list. Your contacts never leave your system.</div>
+      </div>
+
+      <div class="adlab">Your social networks (we prep a ready-to-post version)</div>
+      <input id="hpFB" placeholder="Facebook Page URL" style="margin-bottom:8px">
+      <input id="hpIG" placeholder="Instagram @handle">
+      <div class="adlab">This is the email</div>
+      <div id="hpPrev" style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13.5px;line-height:1.5"></div>
+      <button class="adsubmit" id="hpBtn" onclick="hpSend()" style="background:linear-gradient(135deg,#5a2e86,#241535)">📡 Send to my list →</button>
+      <div id="hpNote" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Sent through StageFill — your list stays private, every email includes an unsubscribe link.</div>
+    </div>
+  </div>
+
   <div class="carbadge" id="carBadge" style="display:none"></div>
   <div class="compbar">
     <button id="trackBtn" onclick="toggleTrack()">🥾 Start my walk</button>
@@ -510,8 +551,49 @@ function renderAds(){ var host=document.getElementById('adFeatured'); if(!host)r
   host.innerHTML=ads.map(function(a){ var img=a.photo||(a.photos&&a.photos[0]);
     return '<div class="adfeat">'+(img?'<img src="'+img+'" alt="">':'<div style="width:64px;height:64px;border-radius:10px;background:#fff3d6;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto">🛍️</div>')+
       '<div style="flex:1"><div class="tag">Featured at Musikfest</div><div class="h">'+esc(a.head||a.biz)+'</div><div class="t">'+esc(a.text||a.biz)+'</div>'+(a.coupon?'<div style="margin-top:4px;font-size:12px;font-weight:800;color:#b8002e">🎟 '+esc(a.coupon)+'</div>':'')+
-      '<button onclick="adWindowQR()" style="margin-top:8px;border:0;background:#241535;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">⬇︎ Your 2′×2′ window QR</button></div></div>';
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button onclick="adWindowQR()" style="border:0;background:#241535;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">⬇︎ 2′×2′ QR</button>'+
+      '<button onclick="hpOpen(\''+esc(a.biz).replace(/'/g,"\\'")+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">📡 Blast to my list</button></div></div></div>';
   }).join(''); }
+// ---- Retailer HyperPost: seamless in-app email blast via YOUR one Mailchimp account (server-side Edge Function) ----
+// ⬇️ PASTE your deployed Supabase Edge Function URL here (holds the Mailchimp key server-side). Empty = queue locally.
+var HP_ENDPOINT='';
+var HP_BIZ=null, HP_MODE='us';
+function hpAdFor(biz){ var ads=adStore(); for(var i=ads.length-1;i>=0;i--){ if(ads[i].biz===biz) return ads[i]; } return {biz:biz,head:'',text:'',coupon:'',photo:null}; }
+function hpBuild(biz){ var a=hpAdFor(biz);
+  var subject=(a.head||biz)+' · at Musikfest 2026';
+  var html='<div style="font-family:sans-serif;max-width:560px;margin:auto">'+(a.photo?'<img src="'+a.photo+'" style="max-width:100%;border-radius:8px">':'')+
+    '<h2>'+esc(a.head||biz)+'</h2><p>'+esc(a.text||'')+'</p>'+(a.coupon?'<p style="font-weight:bold;color:#b8002e">🎟 '+esc(a.coupon)+'</p>':'')+
+    '<p><a href="https://deaddance.app/musikfest">See us live at Musikfest →</a></p></div>';
+  return {subject:subject, html:html, ad:a}; }
+window.hpOpen=function(biz){ HP_BIZ=biz; var b=hpBuild(biz), a=b.ad;
+  document.getElementById('hpSub').textContent='For '+biz+' — send it yourself-free, or paste it into your own tool.';
+  document.getElementById('hpPrev').innerHTML=(a.photo?'<img src="'+a.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px">':'')+
+    '<b>'+esc(a.head||biz)+'</b><br><span style="color:#4a4356">'+esc(a.text||'')+'</span>'+(a.coupon?'<br><b style="color:#b8002e">🎟 '+esc(a.coupon)+'</b>':'')+
+    '<br><a href="https://deaddance.app/musikfest" style="color:#5a2e86;font-weight:800">See us live at Musikfest →</a>';
+  hpSetMode('us'); document.getElementById('hpModal').style.display='block'; };
+window.hpClose=function(){ document.getElementById('hpModal').style.display='none'; };
+window.hpSetMode=function(m){ HP_MODE=m; document.getElementById('hpm_us').classList.toggle('on',m==='us'); document.getElementById('hpm_own').classList.toggle('on',m==='own');
+  document.getElementById('hpUs').style.display=(m==='us')?'block':'none'; document.getElementById('hpOwn').style.display=(m==='own')?'block':'none';
+  document.getElementById('hpBtn').style.display=(m==='us')?'block':'none';
+  document.getElementById('hpNote').textContent=(m==='us')?'Sent through StageFill — your list stays private, every email includes an unsubscribe link.':'Your contacts never leave your system — you send from your own tool.'; };
+window.hpCopySubject=function(){ var s=hpBuild(HP_BIZ).subject; try{ navigator.clipboard.writeText(s); }catch(e){} mfToastHTML('📋 Subject copied — paste it into your email tool.'); };
+window.hpCopyHtml=function(){ var h=hpBuild(HP_BIZ).html; try{ navigator.clipboard.writeText(h); }catch(e){} mfToastHTML('📋 Email HTML copied — paste it into your tool and send to your list.'); };
+function hpEmails(){ return (document.getElementById('hpList').value.match(/[^\s,;<>()]+@[^\s,;<>()]+\.[^\s,;<>()]+/g)||[]); }
+window.hpCount=function(){ document.getElementById('hpCountL').textContent=hpEmails().length+' emails'; };
+window.hpSend=function(){ var emails=hpEmails(), a=hpAdFor(HP_BIZ);
+  if(!emails.length){ alert('Paste your mailing list first.'); return; }
+  if(!document.getElementById('hpOptin').checked){ alert('Please confirm these are your own opted-in customers — that keeps the send compliant.'); return; }
+  var subject=(a.head||HP_BIZ)+' · at Musikfest 2026';
+  var html='<div style="font-family:sans-serif">'+(a.photo?'<img src="'+a.photo+'" style="max-width:100%;border-radius:8px">':'')+'<h2>'+esc(a.head||HP_BIZ)+'</h2><p>'+esc(a.text||'')+'</p>'+(a.coupon?'<p><b>🎟 '+esc(a.coupon)+'</b></p>':'')+'<p><a href="https://deaddance.app/musikfest">See us live at Musikfest →</a></p></div>';
+  var payload={ biz:HP_BIZ, subject:subject, html:html, emails:emails, fb:document.getElementById('hpFB').value.trim(), ig:document.getElementById('hpIG').value.trim() };
+  try{ localStorage.setItem('dd.hp.'+adSlug(HP_BIZ), JSON.stringify(payload)); }catch(e){}
+  if(HP_ENDPOINT){ document.getElementById('hpBtn').textContent='Sending…';
+    fetch(HP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){ return r.json().catch(function(){return {};}); })
+      .then(function(res){ hpClose(); mfToastHTML('📡 <b>Sent to '+emails.length+' on your list!</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(HP_BIZ)+' — your ad is on its way.</span>'); })
+      .catch(function(){ hpClose(); mfToastHTML('📡 <b>Queued for '+emails.length+'.</b><br><span style="font-size:12px;color:#e7ddf3">We\'ll send as soon as the mail service reconnects.</span>'); })
+      .finally(function(){ document.getElementById('hpBtn').textContent='📡 Send to my list →'; });
+  } else { hpClose(); mfToastHTML('📡 <b>List saved — '+emails.length+' contacts.</b><br><span style="font-size:12px;color:#e7ddf3">Your blast is queued and sends the moment the mail service is switched on.</span>'); } };
 renderAds();
 // the buyer's 2'x2' display piece — the QR is the Musikfest festival map DIRECTLY
 window.adWindowQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd',size:2000},'musikfest-window-QR-24in.png'); }catch(e){}

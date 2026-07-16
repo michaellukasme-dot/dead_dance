@@ -59,6 +59,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:11px
       <input id="repName" placeholder="your name" oninput="repSet()">
       <button class="chip" id="rep1" onclick="repQuick('Nephew 1')">Nephew 1</button>
       <button class="chip" id="rep2" onclick="repQuick('Nephew 2')">Nephew 2</button>
+      <input id="repPay" placeholder="your Venmo / PayPal — where your 20% gets paid" oninput="repSet()" style="flex-basis:100%">
     </div>
   </div>
 
@@ -69,7 +70,8 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:11px
     <div class="b"><div class="n" id="sLeft">50</div><div class="l">To go</div></div>
   </div>
   <div class="bar"><i id="goalBar" style="width:0%"></i></div>
-  <div style="text-align:center;font-size:12px;color:var(--muted);margin:-8px 0 14px">Team goal: <b>$34,950</b> · 50 retailers × $699</div>
+  <div style="text-align:center;font-size:12px;color:var(--muted);margin:-8px 0 6px">Team goal: <b>$34,950</b> · 50 retailers × $699</div>
+  <div id="payLine" style="text-align:center;font-size:12.5px;color:#0d6b47;font-weight:800;margin:0 0 14px"></div>
 
   <div id="list"></div>
 </div>
@@ -101,6 +103,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:11px
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* qr.js — self-contained QR encoder (byte mode, ECC level M, versions 1–10).
    No dependencies. Verified at build time by jsQR decode round-trip (same doctrine as qr_print.html).
@@ -309,6 +312,12 @@ function slug(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').r
 var GOAL=34950, TARGET_COUNT=50;
 // ⬇️ same two Stripe Payment Links as the fan cart (paste when ready)
 var STRIPE_PAY={ day:'', fest:'' };
+var EVENT='musikfest-2026';
+try{ var _SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SB;}; }catch(e){}
+window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
+var SERVER_BOUGHT={};
+function pollBought(){ try{ var cl=window.ddClient&&ddClient(); if(!cl)return; cl.rpc('dd_ad_bought',{p_event:EVENT}).then(function(r){ if(r&&r.data){ SERVER_BOUGHT={}; r.data.forEach(function(z){ SERVER_BOUGHT[slug(z.biz)]={tier:z.tier,price:z.price,status:z.status}; }); render(); } }).catch(function(){}); }catch(e){} }
+function wrapText(ctx,text,cx,y,maxw,lh){ var words=String(text||'').split(' '),line='',lines=[]; words.forEach(function(w){ var t=(line+' '+w).trim(); if(ctx.measureText(t).width>maxw){ lines.push(line); line=w; } else line=t; }); if(line)lines.push(line); lines.forEach(function(l,i){ ctx.fillText(l,cx,y+i*lh); }); return lines.length; }
 var TIERS={ day:{k:'day',price:99,name:'One day'}, fest:{k:'fest',price:699,name:'Whole fest',best:true} };
 var RETAILERS=[
  {n:"Fegley's Bethlehem Brew Works",addr:"559 Main St",kind:"brewery",cup:1,head:"Cold craft + A/C, right on Main",line:"Fills your Musikfest cup with our own award-winning brews. Duck in and cool off.",coupon:"Show this: $1 off a Brew Works cup"},
@@ -346,8 +355,10 @@ function defPhoto(name){ var c=document.createElement('canvas'); c.width=700;c.h
 
 // ---- rep + status store ----
 function rep(){ return (document.getElementById('repName').value||'').trim(); }
-function repSet(){ try{ localStorage.setItem('dd.rep', rep()); }catch(e){} paintRepChips(); }
-window.repQuick=function(n){ document.getElementById('repName').value=n; repSet(); };
+function repPayVal(){ return (document.getElementById('repPay').value||'').trim(); }
+function repSet(){ var r=rep(); try{ localStorage.setItem('dd.rep', r); if(r) localStorage.setItem('dd.rep.pay.'+r, repPayVal()); }catch(e){} paintRepChips(); render(); }
+function repLoadPay(){ var r=rep(); try{ document.getElementById('repPay').value=localStorage.getItem('dd.rep.pay.'+r)||''; }catch(e){} }
+window.repQuick=function(n){ document.getElementById('repName').value=n; repLoadPay(); repSet(); };
 function paintRepChips(){ var r=rep(); document.getElementById('rep1').classList.toggle('on',r==='Nephew 1'); document.getElementById('rep2').classList.toggle('on',r==='Nephew 2'); }
 function store(){ try{ return JSON.parse(localStorage.getItem('dd.rep.status')||'{}'); }catch(e){ return {}; } }
 function saveStore(s){ try{ localStorage.setItem('dd.rep.status',JSON.stringify(s)); }catch(e){} }
@@ -355,11 +366,23 @@ function st(sl){ var s=store(); return s[sl]||{}; }
 function setSt(sl,patch){ var s=store(); s[sl]=Object.assign({},s[sl]||{},patch); saveStore(s); render(); }
 
 window.toggleTag=function(sl,key){ var cur=st(sl); var patch={}; patch[key]=!cur[key]; setSt(sl,patch); };
-window.fbCopy=function(sl){ var r=RETAILERS.filter(function(x){return slug(x.n)===sl;})[0]; if(!r)return;
+// FB share: builds the RETAILER'S OWN AD image (with Buy Now) + copies a caption.
+// The nephew posts it FROM HIS OWN logged-in Facebook — we never touch his credentials.
+window.fbShare=function(sl){ var r=RETAILERS.filter(function(x){return slug(x.n)===sl;})[0]; if(!r)return;
   var link='https://deaddance.app/musikfest?ad='+sl;
-  var cap='Musikfest lands right at your door — and every visitor with a phone can find you. Claim '+r.n+' on DeadDance and reach every head walking by. From $99. '+link;
+  var c=document.createElement('canvas'); c.width=1080; c.height=1080; var x=c.getContext('2d'); x.textAlign='center';
+  var g=x.createLinearGradient(0,0,1080,1080); g.addColorStop(0,'#3a2456'); g.addColorStop(1,'#241535'); x.fillStyle=g; x.fillRect(0,0,1080,1080);
+  x.fillStyle='#f0a500'; x.font='bold 30px sans-serif'; x.fillText('MUSIKFEST 2026 · BETHLEHEM',540,110);
+  x.fillStyle='#fff'; x.font='bold 58px sans-serif'; var ln=wrapText(x,r.n,540,210,960,66);
+  x.fillStyle='#f0c96b'; x.font='bold 50px sans-serif'; wrapText(x,r.head,540,210+ln*66+70,940,58);
+  x.fillStyle='#e7ddf3'; x.font='400 38px sans-serif'; wrapText(x,r.line,540,560,940,48);
+  if(r.coupon){ x.fillStyle='#ffd36b'; x.font='bold 40px sans-serif'; x.fillText('★ '+r.coupon,540,770); }
+  x.fillStyle='#fff'; x.font='bold 60px sans-serif'; x.fillText('Buy now — scan or tap',540,905);
+  x.fillStyle='#c9b8dd'; x.font='400 32px sans-serif'; x.fillText(link,540,965);
+  try{ var a=document.createElement('a'); a.download='ad_'+sl+'.png'; a.href=c.toDataURL('image/png'); a.click(); }catch(e){}
+  var cap=r.head+' — '+r.line+' '+(r.coupon?('('+r.coupon+') '):'')+'See it live at Musikfest and buy now: '+link;
   try{ navigator.clipboard.writeText(cap); }catch(e){}
-  setSt(sl,{fb:true}); toast('📋 FB caption + link copied — paste it on '+r.n+"'s page."); };
+  setSt(sl,{fb:true}); toast('⬇️ '+r.n+" ad saved + caption copied. Post it from YOUR OWN Facebook (be logged in)."); };
 
 // ---- pitch modal ----
 var P={slug:null,photo:null,photoDef:true,tier:'fest'};
@@ -382,7 +405,10 @@ function renderTiers(){ document.getElementById('pTiers').innerHTML=['fest','day
 window.pPick=function(k){ P.tier=k; renderTiers(); };
 window.processSale=function(){ var r=P.r, email=document.getElementById('pEmail').value.trim(), t=TIERS[P.tier];
   if(!/.+@.+\..+/.test(email)){ alert('Add their email for the receipt.'); return; }
+  var head=document.getElementById('pHead').value.trim(), text=document.getElementById('pText').value.trim();
   setSt(P.slug,{bought:true,visited:true,price:t.price,tier:t.name,rep:rep(),email:email,ts:Date.now()});
+  // write to the server so BOTH nephews' consoles (and you) see this sale
+  try{ var cl=window.ddClient&&ddClient(); if(cl) cl.rpc('dd_ad_signup',{p_event:EVENT,p_member:(window.ddId?ddId().id:null),p_biz:r.n,p_tier:t.name,p_price:t.price,p_head:head,p_body:text,p_email:email}).catch(function(){}); }catch(e){}
   var link=STRIPE_PAY[t.k];
   if(link){ var url=link+(link.indexOf('?')<0?'?':'&')+'prefilled_email='+encodeURIComponent(email)+'&client_reference_id='+encodeURIComponent(P.slug+'|'+t.k+'|'+slug(rep()));
     window.open(url,'_blank','noopener'); toast('🛒 Stripe checkout open — '+r.n+' · $'+t.price); }
@@ -395,13 +421,15 @@ window.giveQR=function(sl){ try{ if(window.DDQR) DDQR.save('https://deaddance.ap
 
 function money(n){ return '$'+Number(n||0).toLocaleString(); }
 function render(){ var s=store(), sold=0,rev=0,mine=0, r=rep();
-  var html=RETAILERS.map(function(x){ var sl=slug(x.n), d=s[sl]||{};
-    if(d.bought){ sold++; rev+=d.price||0; if(d.rep===r) mine+=(d.price||0); }
-    return '<div class="row'+(d.bought?' bought':'')+'"><div class="top"><div><div class="nm">'+merchEmoji(x.kind)+' '+esc(x.n)+(d.bought?' ✅':'')+'</div><div class="ad">'+esc(x.addr)+(d.bought&&d.rep?(' · sold by '+esc(d.rep)+' · '+money(d.price)):'')+'</div></div>'+
-      (d.bought?'<button class="give" onclick="giveQR(\''+sl+'\')">🖨️ QR</button>':'<button class="sell" onclick="openPitch(\''+sl+'\')">Sell ▸</button>')+'</div>'+
-      '<div class="tags"><span class="tg fb'+(d.fb?' on':'')+'" onclick="fbCopy(\''+sl+'\')">'+(d.fb?'✓ Posted FB':'Post to FB')+'</span>'+
+  var html=RETAILERS.map(function(x){ var sl=slug(x.n), d=s[sl]||{}, srv=SERVER_BOUGHT[sl];
+    var bought=!!d.bought||!!srv, price=d.price||(srv&&srv.price)||0;
+    if(bought){ sold++; rev+=price; if(d.rep===r) mine+=price; }
+    var who=d.rep?('sold by '+esc(d.rep)+' · '+money(price)):(srv?('bought online / FB · '+money(price)):'');
+    return '<div class="row'+(bought?' bought':'')+'"><div class="top"><div><div class="nm">'+merchEmoji(x.kind)+' '+esc(x.n)+(bought?' ✅':'')+'</div><div class="ad">'+esc(x.addr)+(bought&&who?(' · '+who):'')+'</div></div>'+
+      (bought?'<button class="give" onclick="giveQR(\''+sl+'\')">🖨️ QR</button>':'<button class="sell" onclick="openPitch(\''+sl+'\')">Sell ▸</button>')+'</div>'+
+      '<div class="tags"><span class="tg fb'+(d.fb?' on':'')+'" onclick="fbShare(\''+sl+'\')">'+(d.fb?'✓ Posted FB':'📣 FB ad')+'</span>'+
       '<span class="tg'+(d.visited?' on':'')+'" onclick="toggleTag(\''+sl+'\',\'visited\')">'+(d.visited?'✓ Visited':'Visited')+'</span>'+
-      '<span class="tg'+(d.bought?' on':'')+'" onclick="toggleTag(\''+sl+'\',\'bought\')">'+(d.bought?'✓ Bought':'Not yet')+'</span></div></div>';
+      '<span class="tg'+(bought?' on':'')+'" onclick="toggleTag(\''+sl+'\',\'bought\')">'+(bought?'✓ Bought':'Not yet')+'</span></div></div>';
   }).join('');
   document.getElementById('list').innerHTML=html;
   document.getElementById('sSold').textContent=sold;
@@ -409,10 +437,12 @@ function render(){ var s=store(), sold=0,rev=0,mine=0, r=rep();
   document.getElementById('sComm').textContent=money(Math.round(mine*0.20));
   document.getElementById('sLeft').textContent=Math.max(0,TARGET_COUNT-sold);
   document.getElementById('goalBar').style.width=Math.min(100,Math.round(rev/GOAL*100))+'%';
+  var pl=document.getElementById('payLine'), h=repPayVal();
+  if(pl) pl.innerHTML = (r&&mine>0) ? ('Your 20%: <b>'+money(Math.round(mine*0.20))+'</b>'+(h?(' → pay '+esc(r)+' at <b>'+esc(h)+'</b>'):' — add your Venmo/PayPal above so you get paid')) : '';
 }
 function toast(m){ var t=document.getElementById('_t'); if(!t){t=document.createElement('div');t.id='_t';t.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:400;background:#241535;color:#fff;font-weight:800;font-size:13.5px;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:90%;text-align:center;opacity:0;transition:opacity .2s';document.body.appendChild(t);} t.textContent=m;t.style.opacity='1';clearTimeout(t._h);t._h=setTimeout(function(){t.style.opacity='0';},3200); }
 
 try{ document.getElementById('repName').value=localStorage.getItem('dd.rep')||''; }catch(e){}
-paintRepChips(); render();
+repLoadPay(); paintRepChips(); render(); pollBought(); setInterval(pollBought,30000);
 </script>
 </body></html>
