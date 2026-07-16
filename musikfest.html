@@ -8,14 +8,14 @@
 :root{--rose:#b8002e;--purple:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--terra:#C8794F}
 *{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:760px;margin:0 auto;padding:16px 14px 70px}
-.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:20px;padding:18px 18px 16px}
-.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-.hero h1{font-size:25px;margin:5px 0 3px;font-weight:900;letter-spacing:-.4px}
-.hero p{margin:0;color:#cdbfe0;font-size:13.5px;line-height:1.45}
+.hero{background:#fbf6e3;color:#1a1414;border:1px solid #ece0bd;border-radius:20px;padding:20px 20px 17px}
+.hero .k{color:#7a6a2e;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+.hero h1{font-size:44px;line-height:.9;margin:0;font-weight:900;letter-spacing:-1.5px;text-transform:uppercase;color:#161616}
+.hero p{margin:9px 0 0;color:#514a38;font-size:13.5px;line-height:1.45}
 .joinbar{display:flex;gap:10px;align-items:center;margin-top:14px}
 .joinbtn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;font-size:14.5px;cursor:pointer;background:var(--gold);color:#3a1d00}
 .joinbtn.in{background:#1f9e6b;color:#fff}
-.joincount{color:#cdbfe0;font-size:12.5px}
+.joincount{color:#7a6a2e;font-size:12.5px;font-weight:700}
 .sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:22px 0 9px}
 .mapwrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
 .mapwrap>svg{width:100%;height:auto;display:block;border-radius:10px}
@@ -98,19 +98,28 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 .adedit[open]>summary{border-bottom:1px solid var(--line)}
 .adedit .adlab:first-of-type{margin-top:10px}
 .adedit>div,.adedit>input,.adedit>textarea{padding-left:13px;padding-right:13px}
+.brgrid{display:grid;grid-template-columns:1fr;gap:6px;margin-top:4px}
+@media(min-width:560px){.brgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.brgrid{grid-template-columns:1fr 1fr 1fr}}
+.brcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+.brcard.dd{background:#fdeaef;border-color:#f3c3d1}
+.brcard .bb{font-weight:800;font-size:13.5px;line-height:1.2}
+.brcard .bm{font-size:11.5px;color:var(--muted);margin-top:2px}
+.brbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.brbar .rsel{flex:1;min-width:130px}
 </style></head>
 <body>
 <div class="wrap">
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
   <div class="hero">
-    <div class="k">🎪 Bethlehem, PA · Jul 31 – Aug 9, 2026 (Preview Jul 30)</div>
-    <h1>Musikfest 2026 — the Platz, decoded</h1>
+    <h1>Musikfest</h1>
+    <div class="k">2026 · Bethlehem, PA · Jul 31 – Aug 9 (Preview Jul 30)</div>
     <p>16 stages. ~3 miles. 400+ acts, free. The town names everything <i>-platz</i> and nobody knows where they are. Here's every one — with directions.</p>
     <div class="joinbar">
       <button class="joinbtn" id="joinBtn" onclick="toggleJoin()">🌹 Join the Musikfest crew</button>
       <span class="joincount" id="joinCount"></span>
     </div>
-    <div style="color:#9d8cc0;font-size:11.5px;font-weight:700;margin-top:10px;letter-spacing:.04em">FESTIVALS, REIMAGINED — VIRTUALLY · keep this open, it's your companion</div>
+    <div style="color:#9a883f;font-size:11.5px;font-weight:800;margin-top:10px;letter-spacing:.05em;text-transform:uppercase">Festivals, reimagined — virtually · keep this open, it's your companion</div>
   </div>
   <div class="adcta" onclick="adOpen()">
     <div><b>📣 Claim your shop, restaurant, or brewery</b><br><span>Buy an ad that reaches <b>every Musikfest visitor</b> passing your door. From $99.</span></div>
@@ -270,6 +279,17 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <div class="sec">My sets — the acts I'm catching 🌹</div>
   <div id="mySets"></div>
 
+  <details class="mfsec" id="browseSec"><summary>🎫 Browse the whole lineup — all <span id="brCount">…</span> sets</summary>
+    <div style="font-size:12.5px;color:#4a4356;margin:2px 0 9px;line-height:1.5">Plan the whole week on your laptop or your phone — search any act, filter by day or stage. Everything at once (their app can't do this).</div>
+    <input id="brSearch" placeholder="Search an act or stage…" oninput="renderBrowse()" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink);margin-bottom:8px">
+    <div class="brbar">
+      <select id="brDay" class="rsel" onchange="renderBrowse()"></select>
+      <select id="brStage" class="rsel" onchange="renderBrowse()"></select>
+      <button class="pill" id="brDead" onclick="brToggleDead()">🌹 Dead &amp; jam</button>
+    </div>
+    <div id="brResults" class="brgrid"></div>
+  </details>
+
   <details class="mfsec"><summary>What the locals know (and you don't yet)</summary>
   <div class="tips"><ul style="margin:0;padding-left:18px">
     <li><b>90% of Musikfest is free.</b> Only the <b>Wind Creek Steel Stage</b> costs money — everything else is un-gated.</li>
@@ -297,6 +317,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script src="dd_musikfest.js"></script>
+<script src="dd_mf_vendors.js"></script>
 <script>
 var STAGES=[
  // NORTH (free)
@@ -381,6 +402,8 @@ var VENDORS=[
  {n:"Smoke & Barrel BBQ",kind:'food',sells:'brisket & pulled pork',coupon:'Show this: free side',lat:40.6160,lng:-75.3719,mobile:1},
  {n:"Woodfire Pizza Co.",kind:'food',sells:'wood-fired pizza',coupon:'',lat:40.6193,lng:-75.3799,mobile:1}
 ];
+// prefer the REAL assimilated Musikfest vendor list (from artsquest.org/musikfest/food) when present
+try{ if(window.DD_MF_VENDORS && window.DD_MF_VENDORS.length){ VENDORS=window.DD_MF_VENDORS.map(function(v){ v.kind='food'; return v; }); } }catch(e){}
 
 // "Where did I park?" — drop a GPS pin at your car, walk back to it later
 function parkGet(){ try{ return JSON.parse(localStorage.getItem('dd.park')||'null'); }catch(e){ return null; } }
@@ -700,6 +723,34 @@ window.refresh=function(){ if(!MF.length)return; var day=DAYS[curDayIdx];
  document.getElementById('schMore').innerHTML = (rows.length>SCH_MAX) ? ('<button class="lmore" onclick="schToggle()">'+(schExpand?'Show less ↑':('Show '+(rows.length-SCH_MAX)+' more ↓'))+'</button>') : '';
 };
 if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; refresh(); } else { drawMap(); }
+
+/* ===== FULL-LINEUP BROWSER — plan all 600+ sets on a laptop or phone (their app can't) ===== */
+var BR_DEAD=false;
+window.brToggleDead=function(){ BR_DEAD=!BR_DEAD; var b=document.getElementById('brDead'); if(b)b.classList.toggle('on',BR_DEAD); renderBrowse(); };
+function browseInit(){ if(!MF.length)return;
+  var bc=document.getElementById('brCount'); if(bc)bc.textContent=MF.length;
+  var dsel=document.getElementById('brDay'); if(dsel) dsel.innerHTML='<option value="all">All days</option>'+DAYS.map(function(d){return '<option value="'+d+'">'+dayLabel(d)+'</option>';}).join('');
+  var ssel=document.getElementById('brStage'); if(ssel){ var stages=Array.from(new Set(MF.map(function(r){return r.st;}))).sort();
+    ssel.innerHTML='<option value="all">All stages</option>'+stages.map(function(s){return '<option value="'+esc(s)+'">'+esc(s)+'</option>';}).join(''); }
+  renderBrowse();
+}
+window.renderBrowse=function(){ if(!MF.length)return;
+  var q=(document.getElementById('brSearch').value||'').toLowerCase().trim();
+  var day=document.getElementById('brDay').value, stage=document.getElementById('brStage').value;
+  var rows=MF.filter(function(r){
+    if(day && day!=='all' && r.d!==day) return false;
+    if(stage && stage!=='all' && r.st!==stage) return false;
+    if(BR_DEAD && r.sc!=='dd') return false;
+    if(q && String(r.b).toLowerCase().indexOf(q)<0 && String(r.st).toLowerCase().indexOf(q)<0) return false;
+    return true; });
+  rows.sort(function(a,b){ if(a.d!==b.d) return a.d<b.d?-1:1; return mins(a.t)-mins(b.t); });
+  var host=document.getElementById('brResults'); if(!host)return;
+  host.innerHTML = rows.length ? rows.slice(0,700).map(function(r){
+    return '<div class="brcard'+(r.sc==='dd'?' dd':'')+'"><div class="bb">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</div><div class="bm">'+esc(dayLabel(r.d))+' · '+esc(String(r.t).replace(':00',''))+' · '+esc(r.st)+'</div></div>';
+  }).join('')+(rows.length>700?'<div style="color:var(--muted);font-size:12px;padding:6px">Showing first 700 — narrow with search.</div>':'')
+   : '<div style="color:var(--muted);padding:10px">No acts match — clear the filters.</div>';
+};
+browseInit();
 // every stage label breathes between its NAME and its GPS coordinates — so you know it's real, and locatable
 /* real Leaflet map now — no schematic label-cycling needed (streets are real) */
 
