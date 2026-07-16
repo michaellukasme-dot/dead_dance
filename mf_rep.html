@@ -117,6 +117,16 @@ try{ var _SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase
 window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
 var SERVER_BOUGHT={};
 function pollBought(){ try{ var cl=window.ddClient&&ddClient(); if(!cl)return; cl.rpc('dd_ad_bought',{p_event:EVENT}).then(function(r){ if(r&&r.data){ SERVER_BOUGHT={}; r.data.forEach(function(z){ SERVER_BOUGHT[slug(z.biz)]={tier:z.tier,price:z.price,status:z.status}; }); render(); } }).catch(function(){}); }catch(e){} }
+// MISSED-TOAST DATA: unique reach per shop (buyer or not) — the number the Abbouds close stragglers with.
+var REACH={};
+function pollReach(){ try{ var cl=window.ddClient&&ddClient(); if(!cl)return; cl.rpc('dd_mf_reach_board').then(function(r){ if(r&&r.data){ REACH={}; r.data.forEach(function(z){ REACH[slug(z.poi)]=+z.reach; }); render(); } }).catch(function(){}); }catch(e){} }
+function reachFor(sl){ return (REACH[sl]!=null)?REACH[sl]:null; }
+// the straggler's own FOMO email — rep copies it and sends from their own account (no creds captured).
+window.missEmail=function(sl){ var r=RETAILERS.filter(function(x){return slug(x.n)===sl;})[0]; if(!r)return;
+  var n=reachFor(sl), cnt=(n!=null?n.toLocaleString():'hundreds of');
+  var body='Hi '+r.n+',\n\nDuring Musikfest, '+cnt+' festival-goers walked within a few steps of your door with DeadDance open on their phone. Every one of them was a walk-by toast you could have sent — your name, your headline, your coupon, right as they passed.\n\nYou sent zero. Next run we can switch your toast on: $99 a day, or $999 for the whole festival with a discount-QR (no discounts, that’s the number). Want in before the last weekend?\n\n— '+(rep()||'the DeadDance team')+' · DeadDance / StageFill';
+  try{ navigator.clipboard.writeText(body); }catch(e){}
+  toast('📧 Miss-email copied ('+(n!=null?n+' walk-bys':'no data yet')+') — paste it into your own email to '+r.n+'.'); };
 function wrapText(ctx,text,cx,y,maxw,lh){ var words=String(text||'').split(' '),line='',lines=[]; words.forEach(function(w){ var t=(line+' '+w).trim(); if(ctx.measureText(t).width>maxw){ lines.push(line); line=w; } else line=t; }); if(line)lines.push(line); lines.forEach(function(l,i){ ctx.fillText(l,cx,y+i*lh); }); return lines.length; }
 var TIERS={ day:{k:'day',price:99,name:'One day'}, fest:{k:'fest',price:699,name:'Whole fest',best:true} };
 var RETAILERS=[
@@ -229,7 +239,9 @@ function render(){ var s=store(), sold=0,rev=0,mine=0, r=rep();
       (bought?'<button class="give" onclick="giveQR(\''+sl+'\')">🖨️ QR</button>':'<button class="sell" onclick="openPitch(\''+sl+'\')">Sell ▸</button>')+'</div>'+
       '<div class="tags"><span class="tg fb'+(d.fb?' on':'')+'" onclick="fbShare(\''+sl+'\')">'+(d.fb?'✓ Posted FB':'📣 FB ad')+'</span>'+
       '<span class="tg'+(d.visited?' on':'')+'" onclick="toggleTag(\''+sl+'\',\'visited\')">'+(d.visited?'✓ Visited':'Visited')+'</span>'+
-      '<span class="tg'+(bought?' on':'')+'" onclick="toggleTag(\''+sl+'\',\'bought\')">'+(bought?'✓ Bought':'Not yet')+'</span></div></div>';
+      '<span class="tg'+(bought?' on':'')+'" onclick="toggleTag(\''+sl+'\',\'bought\')">'+(bought?'✓ Bought':'Not yet')+'</span>'+
+      (!bought?('<span class="tg" style="border-color:#f0a500;color:#a4700a" onclick="missEmail(\''+sl+'\')">📧 '+(reachFor(sl)!=null?(reachFor(sl).toLocaleString()+' walk-bys → email the miss'):'Email the miss')+'</span>'):'')+
+      '</div></div>';
   }).join('');
   document.getElementById('list').innerHTML=html;
   document.getElementById('sSold').textContent=sold;
@@ -243,6 +255,6 @@ function render(){ var s=store(), sold=0,rev=0,mine=0, r=rep();
 function toast(m){ var t=document.getElementById('_t'); if(!t){t=document.createElement('div');t.id='_t';t.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:400;background:#241535;color:#fff;font-weight:800;font-size:13.5px;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:90%;text-align:center;opacity:0;transition:opacity .2s';document.body.appendChild(t);} t.textContent=m;t.style.opacity='1';clearTimeout(t._h);t._h=setTimeout(function(){t.style.opacity='0';},3200); }
 
 try{ document.getElementById('repName').value=localStorage.getItem('dd.rep')||''; }catch(e){}
-repLoadPay(); paintRepChips(); render(); pollBought(); setInterval(pollBought,30000);
+repLoadPay(); paintRepChips(); render(); pollBought(); setInterval(pollBought,30000); pollReach(); setInterval(pollReach,60000);
 </script>
 </body></html>

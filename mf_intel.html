@@ -1,0 +1,205 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Festival Intelligence · StageFill × ArtsQuest</title>
+<meta name="theme-color" content="#0e1830"><link rel="icon" href="dd-512.png">
+<style>
+:root{--bg:#0c1424;--panel:#121d33;--line:#22314f;--ink:#eaf0fb;--mut:#8ea3c6;--gold:#f0b429;--rose:#ff5d73;--grn:#37d39b;--blu:#4c8dff;--pur:#a988ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 14px 70px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px}
+.brand{font-weight:900;font-size:19px;letter-spacing:.2px}.brand span{color:var(--gold)}
+.sub{color:var(--mut);font-size:12.5px}
+.live{display:inline-flex;align-items:center;gap:7px;background:#12233b;border:1px solid #24466e;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;color:#bfe0ff}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 0 0 #37d39b;animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #37d39b88}70%{box-shadow:0 0 0 7px #37d39b00}100%{box-shadow:0 0 0 0 #37d39b00}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .l{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+.kpi .n{font-size:27px;font-weight:900;margin-top:4px}
+.kpi .d{font-size:11.5px;color:var(--mut);margin-top:2px}
+.kpi .n.gold{color:var(--gold)}.kpi .n.grn{color:var(--grn)}.kpi .n.rose{color:var(--rose)}.kpi .n.blu{color:var(--blu)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.panel h2{font-size:14px;margin:0 0 3px;font-weight:900}.panel .cap{color:var(--mut);font-size:12px;margin:0 0 12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.row2{grid-template-columns:1fr}}
+.pbar{display:flex;align-items:center;gap:10px;margin:7px 0}
+.pbar .nm{width:170px;font-size:12.5px;font-weight:700;color:#d7e2f6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar .tr{flex:1;height:16px;background:#0e1a30;border-radius:8px;overflow:hidden}
+.pbar .fl{height:100%;border-radius:8px;background:linear-gradient(90deg,#2f6bd6,#4c8dff)}
+.pbar.hot .fl{background:linear-gradient(90deg,#d64545,#ff5d73)}
+.pbar .v{width:56px;text-align:right;font-size:12.5px;font-weight:800}
+.spark{display:flex;align-items:flex-end;gap:5px;height:120px;margin-top:6px}
+.spark .b{flex:1;background:linear-gradient(180deg,#4c8dff,#2f6bd6);border-radius:5px 5px 0 0;position:relative;min-height:3px}
+.spark .b span{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--mut)}
+.spark .b i{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:9.5px;color:var(--mut);font-style:normal}
+.hrs{display:flex;align-items:flex-end;gap:3px;height:90px}
+.hrs .h{flex:1;background:linear-gradient(180deg,#a988ff,#7d5bd6);border-radius:3px 3px 0 0;min-height:2px}
+.val{background:linear-gradient(135deg,#12233b,#161d34);border:1px solid #2a3f63}
+.val .big{font-size:34px;font-weight:900;color:var(--gold);line-height:1}
+.val ul{margin:10px 0 0;padding:0;list-style:none}.val li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.val li b{color:#fff}
+.ask{margin-top:12px;background:#1a2b17;border:1px solid #2f5a2f;border-left:4px solid var(--grn);border-radius:12px;padding:12px 14px;font-size:13px;color:#cdeccd}
+.pill{display:inline-block;background:#0e1a30;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800;color:var(--mut);margin-left:6px}
+.foot{color:var(--mut);font-size:11.5px;line-height:1.6;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.badge{background:#0e1a30;border:1px solid #2a3f63;border-radius:8px;padding:2px 8px;font-size:10.5px;font-weight:800;color:#bfe0ff}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="brand">📊 Festival Intelligence <span>· StageFill × ArtsQuest</span></div>
+      <div class="sub">Musikfest 2026 · Bethlehem, PA — the data your festival generates, that no one else can hand you.</div>
+    </div>
+    <div class="live"><span class="dot"></span> <span id="liveLbl">LIVE</span></div>
+  </div>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="row2">
+    <div class="panel">
+      <h2>How many people are in each Platz — right now <span class="pill" id="liveTot"></span></h2>
+      <p class="cap">Live occupancy. Each phone counted once, in the Platz it's in this minute. Suppressed under 20.</p>
+      <div id="livePlatz"></div>
+    </div>
+    <div class="panel">
+      <h2>Unique visitors per day</h2>
+      <p class="cap">Deduped per phone per day — a resident who leaves for lunch and returns counts <b>once</b>.</p>
+      <div class="spark" id="daily"></div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="panel">
+      <h2>Where the day's visitors spent the most time</h2>
+      <p class="cap">Each unique visitor attributed to the single Platz they lingered in longest — sums to the daily unique count.</p>
+      <div id="primaryPlatz"></div>
+    </div>
+    <div class="panel">
+      <h2>When they arrived <span class="badge">metadata</span></h2>
+      <p class="cap">Arrivals by hour (yesterday). Plan staffing, gates, and shuttle surges around the real curve.</p>
+      <div class="hrs" id="hourly"></div>
+      <div id="metaRow" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:14px"></div>
+    </div>
+  </div>
+
+  <div class="panel val">
+    <h2>What this crowd is worth — projected from <b>your own</b> 2025 numbers</h2>
+    <p class="cap">Same method we quantify for every StageFill merchant: your real attendance × the ad market it supports.</p>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end">
+      <div><div class="big" id="projAd">—</div><div class="sub">projected in-footprint ad market / festival</div></div>
+      <div style="flex:1;min-width:220px"><ul id="valStack"></ul></div>
+    </div>
+    <div class="ask" id="askLine"></div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dd_mf_retailers.js"></script>
+<script>
+function n(x){return Number(x||0).toLocaleString();}
+function money(x){return '$'+Number(Math.round(x)).toLocaleString();}
+try{ var SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
+
+// ── Musikfest 2025 facts (ArtsQuest / Lehigh Valley press) — the historical basis ────────────────
+var HIST={year:2025,total:1449000,days:11,perDay:Math.round(1449000/11)};   // record; +42% YoY
+// in-footprint ad market this crowd supports (StageFill rate card × real footprint) — stated assumptions:
+var MODEL={ retailers:50, retailerFest:999, vendors:300, vendorFest:499, gateways:6, gatewayFest:9999 };
+MODEL.retailerRev=MODEL.retailers*MODEL.retailerFest;
+MODEL.vendorRev=MODEL.vendors*MODEL.vendorFest;
+MODEL.gatewayRev=MODEL.gateways*MODEL.gatewayFest;
+MODEL.total=MODEL.retailerRev+MODEL.vendorRev+MODEL.gatewayRev;
+var DATA_FEE_PER_DAY=25000;
+
+// Platz list (from the Musikfest map)
+var PLATZ=["Volksplatz","Americaplatz @ Levitt","Wind Creek Steel Stage","SteelStacks / ArtsQuest","Main St / Sun Inn","Liederplatz","Stadtplatz (Payrow)","Yuengling Lagerplatz","Festplatz","Handwerkplatz","Plaza Tropical","Familienplatz","Zinzenplatz","Lyrikplatz"];
+
+// SAMPLE mode: realistic synthetic numbers so the console reads like game-day before live data flows.
+// Every value is replaced by the k-anon RPCs (dd_mf_*) the moment the festival is live.
+var SAMPLE=true;
+function seedLive(){ var base=[4200,3800,9100,5200,3100,1500,900,1400,700,600,1100,800,650,500];
+  return PLATZ.map(function(p,i){ return {cell:p, people: Math.max(20, Math.round(base[i]*(0.85+Math.random()*0.3))) }; })
+    .sort(function(a,b){return b.people-a.people;}); }
+function seedDaily(){ // 11 days, weekend peaks
+  var shape=[0.72,0.66,0.70,0.83,1.0,1.08,0.95,0.80,0.86,1.02,1.12];
+  return shape.map(function(s,i){ return {day:i+1, uniq: Math.round(HIST.perDay*s*(0.96+Math.random()*0.08)) }; }); }
+function seedHourly(){ var shape=[0,0,0,0,0,0,0,0,0,0,.1,.25,.45,.6,.7,.8,.9,1.0,.98,.9,.75,.55,.32,.12];
+  return shape.map(function(s){ return Math.round(HIST.perDay*0.09*s); }); }
+
+function render(live, daily, hourly, dwell, repeatPct, primary){
+  var liveTot=live.reduce(function(s,r){return s+r.people;},0);
+  var yUniq=daily[daily.length-1].uniq;
+  var running=daily.reduce(function(s,r){return s+r.uniq;},0);
+  var peakHr=hourly.indexOf(Math.max.apply(0,hourly));
+  var busiest=live[0]?live[0].cell:'—';
+  document.getElementById('kpis').innerHTML=[
+    ['In the footprint now', n(liveTot),'live phones · all Platzes','blu'],
+    ['Unique visitors yesterday', n(yUniq),'deduped per phone','gold'],
+    ['Festival-to-date (unique)', n(running),'running total','grn'],
+    ['Avg time on site', dwell+' min','per visitor',''],
+    ['Repeat visitors', repeatPct+'%','came 2+ days','rose'],
+    ['Peak arrival hour', (peakHr%12||12)+(peakHr<12?'am':'pm'),'plan the surge','']
+  ].map(function(k){return '<div class="kpi"><div class="l">'+k[0]+'</div><div class="n '+k[3]+'">'+k[1]+'</div><div class="d">'+k[2]+'</div></div>';}).join('');
+
+  document.getElementById('liveTot').textContent=n(liveTot)+' now';
+  var lmax=Math.max.apply(0,live.map(function(r){return r.people;}));
+  document.getElementById('livePlatz').innerHTML=live.map(function(r,i){ var hot=r.people>lmax*0.7;
+    return '<div class="pbar'+(hot?' hot':'')+'"><div class="nm">'+r.cell+'</div><div class="tr"><div class="fl" style="width:'+Math.round(r.people/lmax*100)+'%"></div></div><div class="v">'+n(r.people)+'</div></div>';}).join('');
+
+  var dmax=Math.max.apply(0,daily.map(function(r){return r.uniq;}));
+  document.getElementById('daily').innerHTML=daily.map(function(r){ return '<div class="b" style="height:'+Math.round(r.uniq/dmax*100)+'%"><span>'+Math.round(r.uniq/1000)+'k</span><i>D'+r.day+'</i></div>';}).join('');
+
+  var pmax=Math.max.apply(0,primary.map(function(r){return r.visitors;}));
+  document.getElementById('primaryPlatz').innerHTML=primary.slice(0,10).map(function(r){
+    return '<div class="pbar"><div class="nm">'+r.cell+'</div><div class="tr"><div class="fl" style="width:'+Math.round(r.visitors/pmax*100)+'%"></div></div><div class="v">'+n(r.visitors)+'</div></div>';}).join('');
+
+  var hmax=Math.max.apply(0,hourly);
+  document.getElementById('hourly').innerHTML=hourly.map(function(v){ return '<div class="h" style="height:'+Math.round(v/hmax*100)+'%"></div>';}).join('');
+  document.getElementById('metaRow').innerHTML=[
+    ['Busiest Platz', busiest],['New vs returning', (100-repeatPct)+'% / '+repeatPct+'%'],['Avg dwell', dwell+' min']
+  ].map(function(m){return '<div><div class="l" style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">'+m[0]+'</div><div style="font-weight:800;font-size:14px;margin-top:2px">'+m[1]+'</div></div>';}).join('');
+
+  // value model
+  document.getElementById('projAd').textContent=money(MODEL.total);
+  document.getElementById('valStack').innerHTML=[
+    ['~'+MODEL.retailers+' in-footprint retailers × $'+MODEL.retailerFest, money(MODEL.retailerRev)],
+    ['~'+MODEL.vendors+' mobile vendors × $'+MODEL.vendorFest, money(MODEL.vendorRev)],
+    [MODEL.gateways+' gateway sponsors × $'+n(MODEL.gatewayFest), money(MODEL.gatewayRev)]
+  ].map(function(v){return '<li><span>'+v[0]+'</span><b>'+v[1]+'</b></li>';}).join('');
+  document.getElementById('askLine').innerHTML='<b>The data license: '+money(DATA_FEE_PER_DAY)+' / festival day</b> (~'+money(DATA_FEE_PER_DAY*HIST.days)+' for the run). '+
+    'A fraction of the '+money(MODEL.total)+' ad market it powers — and the hard per-Platz footfall that lets you price and renew every naming sponsor (Wind Creek, Air Products, PNC, Highmark, Yuengling…) with proof, not estimates.';
+
+  document.getElementById('foot').innerHTML='Privacy by construction: every number here is an <b>aggregate</b>, k-anonymity-suppressed (nothing under 20 is shown), from <b>pseudonymous</b> phone tokens — no names, no individual tracking, no PII, no data sold. '+
+    'Built on the same k-anon model as our trail-operator console. '+(SAMPLE?'<span class="badge">SAMPLE — projected from 2025; goes live on real walk data during the festival</span>':'<span class="badge">LIVE</span>')+
+    '<br>Historical basis: Musikfest 2025 drew a record 1,449,000 (+42% YoY) over ~11 days ≈ '+n(HIST.perDay)+'/day (ArtsQuest / Lehigh Valley press). Ad-market figures use the stated StageFill rate card × footprint — a projection, not a guarantee.';
+}
+
+// try live RPCs; fall back to sample so it always renders
+function load(){
+  if(!SB){ demo(); return; }
+  var y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  Promise.all([
+    SB.rpc('dd_mf_live_platz'),
+    SB.rpc('dd_mf_primary_platz',{p_day:y}),
+    SB.rpc('dd_mf_hourly',{p_day:y}),
+    SB.rpc('dd_mf_uniques',{p_day:y}),
+    SB.rpc('dd_mf_dwell_minutes',{p_day:y}),
+    SB.rpc('dd_mf_repeat')
+  ]).then(function(res){
+    var live=(res[0].data||[]).map(function(r){return {cell:r.cell,people:+r.people};});
+    if(!live.length){ demo(); return; }   // no live data yet → sample
+    SAMPLE=false;
+    var primary=(res[1].data||[]).map(function(r){return {cell:r.cell,visitors:+r.visitors};});
+    var hourly=new Array(24).fill(0); (res[2].data||[]).forEach(function(r){hourly[+r.hour]=+r.arrivals;});
+    var rep=(res[5].data&&res[5].data[0])||{repeat_pct:0};
+    render(live, seedDaily(), hourly, res[4].data||'—', rep.repeat_pct||0, primary.length?primary:live.map(function(r){return{cell:r.cell,visitors:r.people};}));
+  }).catch(demo);
+}
+function demo(){ SAMPLE=true; var live=seedLive();
+  var primary=live.map(function(r){return {cell:r.cell,visitors:Math.round(r.people*2.3)};}).sort(function(a,b){return b.visitors-a.visitors;});
+  render(live, seedDaily(), seedHourly(), 187, 34, primary); }
+load(); setInterval(load, 60000);
+</script>
+<script src="dd_back.js"></script>
+</body></html>

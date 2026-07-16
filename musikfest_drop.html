@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>I Launched DeadDance.app at Musikfest 2026 — The Drop</title>
+<meta name="theme-color" content="#17101f">
+<style>
+:root{--purple:#5a2e86;--gold:#e0a021;--rose:#b8002e;--cream:#f6ead2;--muted:#9a8fb0;--line:#2e2148}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:#17101f;color:#eee;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0e0716,#3a1d5e 60%,#b8002e);padding:18px 16px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:20px}.top .logo span{color:#ffd76a}
+.top .tag{font-size:12.5px;color:#e9d8ff;margin-top:2px}
+.hanz{margin:12px 16px;background:#1e2a1e;border:1px solid #3a5a3a;border-left:4px solid #8ef0a0;border-radius:12px;padding:12px 15px;font-size:13px;color:#cfeccf}
+.hanz b{color:#8ef0a0}
+.hero{padding:14px 16px 4px;text-align:center}
+.hero .emb{max-width:360px;width:82%;margin:0 auto;filter:drop-shadow(0 14px 34px #000b)}
+.hero h1{font-size:23px;margin:14px 8px 2px;line-height:1.15;font-weight:900}
+.hero p{color:#d7c8f0;font-size:13.5px;margin:4px 16px 0}
+.ways{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:14px 16px 4px}
+.chip{background:#2a1c40;border:1px solid #43305f;color:#e9d8ff;border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:800;cursor:pointer}
+.chip.on{background:var(--gold);color:#3a1d00;border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px;padding:12px 16px 22px}
+.p{cursor:pointer;background:#1d1430;border:1px solid #33234f;border-radius:14px;padding:12px;transition:transform .12s}
+.p:active{transform:scale(.98)}
+.mock{aspect-ratio:1/1;border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.p .nm{font-weight:900;font-size:14.5px;margin-top:9px}
+.p .pr{color:var(--gold);font-weight:800;font-size:13px}
+.p .sh{color:var(--muted);font-size:11.5px}
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.rec{background:#211533;border:1px solid #3a2a55;border-radius:18px;max-width:400px;width:100%;padding:20px;text-align:center;max-height:92vh;overflow:auto}
+.rec .big{aspect-ratio:1/1;max-width:280px;margin:0 auto 10px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 12px 34px #000b}
+.rec h3{margin:6px 0 2px;font-size:20px}.rec .ra{color:var(--muted);font-size:13px}
+.btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.buy{background:#ffd76a;color:#3a1d00;border:0;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-size:15px}
+.alt{background:#5a2e86;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:900;cursor:pointer}
+.x{background:none;border:0;color:var(--muted);font-weight:800;cursor:pointer;margin-top:8px}
+.honest{margin:2px 16px 34px;background:#1e1430;border:1px solid #3a2a55;border-left:4px solid var(--gold);border-radius:10px;padding:12px 15px;font-size:12px;color:#c9bde0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80;max-width:88%;text-align:center}#toast.on{opacity:1}
+</style></head>
+<body>
+<div class="top"><div class="logo">🌹 The Drop <span>· Musikfest 2026</span></div><div class="tag">“I launched DeadDance.app at Musikfest 2026” — ship-to-order, printed on demand</div></div>
+
+<div class="hanz">💪 <b>Hanz &amp; Franz dreamed it up:</b> “Ve looked at your little app, and ve said — vhy vould you launch it in a boring shirt? Ve are here to pump… <b>YOU UP.</b> Groovy sunburst, a rosebud, und your bragging rights on the front. Now go put it on, girlie-man, und dance.”</div>
+
+<div class="hero">
+  <div class="emb" id="heroEmb"></div>
+  <h1>The commemorative launch capsule 🌹</h1>
+  <p>One original groovy emblem — no borrowed marks, all DeadDance — on the stuff you’ll actually wear down South Side. Pick a colorway, pick a piece.</p>
+</div>
+
+<div class="ways" id="ways"></div>
+<div class="grid" id="grid"></div>
+
+<div class="honest">Honest-state: the emblem is <b>original DeadDance art</b> — a groovy sunburst + our own rosebud, <b>no Grateful Dead marks and no ArtsQuest/Musikfest logos</b> reproduced (“Musikfest” appears only as the event we launched at). Every piece is <b>made-to-order</b> by the family reprint company (sister to Print Me the Vinyl). <b>Ship it to me</b> places a print order; <b>nothing charges until payments go live.</b> 🌹</div>
+
+<div class="ov" id="ov"><div class="rec" id="rec"></div></div>
+<div id="toast"></div>
+
+<script>
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},3200);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ---- the colorways (groovy 70s palettes) --------------------------------------------------
+var WAYS={
+ sun:   {name:'Sunbaked',   bg:'#f6ead2', ink:'#3a1600', ray1:'#e0761f', ray2:'#e8b23a', rose:'#b8002e', ring:'#3a1600'},
+ meadow:{name:'Meadow',     bg:'#f2ecd6', ink:'#20340f', ray1:'#5a8a2e', ray2:'#d9a72b', rose:'#b8002e', ring:'#20340f'},
+ tiedye:{name:'Midnight Tie-Dye', bg:'#211238', ink:'#ffe9b8', ray1:'#7d3aa8', ray2:'#b8006e', rose:'#ffd76a', ring:'#ffd76a'}
+};
+var WAY='sun';
+
+// ---- the emblem: ONE reusable SVG (this IS the print) -------------------------------------
+function emblem(w){ w=WAYS[w]||WAYS.sun;
+  var rays=''; var N=28, cx=200, cy=200;
+  for(var i=0;i<N;i++){ var a0=(i/N)*2*Math.PI, a1=((i+1)/N)*2*Math.PI, R=196;
+    var x0=cx+Math.cos(a0)*R, y0=cy+Math.sin(a0)*R, x1=cx+Math.cos(a1)*R, y1=cy+Math.sin(a1)*R;
+    rays+='<path d="M'+cx+' '+cy+' L'+x0.toFixed(1)+' '+y0.toFixed(1)+' L'+x1.toFixed(1)+' '+y1.toFixed(1)+' Z" fill="'+(i%2?w.ray1:w.ray2)+'"/>';
+  }
+  return '<svg class="embsvg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">'+
+    '<defs>'+
+      '<path id="arcTop" d="M 70 200 A 130 130 0 0 1 330 200"/>'+  /* upper semicircle → text over the top */
+      '<path id="arcBot" d="M 70 200 A 130 130 0 0 0 330 200"/>'+  /* lower semicircle → text under the bottom */
+    '</defs>'+
+    '<circle cx="200" cy="200" r="200" fill="'+w.bg+'"/>'+
+    '<g opacity="'+(WAY==='tiedye'?'.55':'.9')+'">'+rays+'</g>'+
+    '<circle cx="200" cy="200" r="150" fill="'+w.bg+'" stroke="'+w.ring+'" stroke-width="4"/>'+
+    '<circle cx="200" cy="200" r="150" fill="none" stroke="'+w.rose+'" stroke-width="1.5" stroke-dasharray="2 6" opacity="'+(WAY==='tiedye'?'.7':'.5')+'"/>'+
+    // arched top + bottom text
+    '<text font-family="Georgia,\'Times New Roman\',serif" font-weight="700" fill="'+w.ink+'" font-size="20.5" letter-spacing="1.5"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">I LAUNCHED IT AT</textPath></text>'+
+    '<text font-family="Georgia,\'Times New Roman\',serif" font-weight="700" fill="'+w.ink+'" font-size="21.5" letter-spacing="3"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">MUSIKFEST 2026</textPath></text>'+
+    // center stack
+    '<g text-anchor="middle" font-family="\'Arial Black\',Helvetica,sans-serif">'+
+      // rosebud
+      '<g transform="translate(200 128)">'+
+        '<path d="M0 26 C-15 10 -15 -12 0 -20 C15 -12 15 10 0 26 Z" fill="'+w.rose+'"/>'+
+        '<path d="M0 22 C-8 8 -8 -8 0 -16 C8 -8 8 8 0 22 Z" fill="#ffffff" opacity=".18"/>'+
+        '<path d="M0 30 L0 60" stroke="'+w.ink+'" stroke-width="3"/>'+
+        '<path d="M0 46 C12 40 20 46 22 56 C10 58 2 54 0 46 Z" fill="'+(WAY==='meadow'?w.ray1:'#3a7a2e')+'"/>'+
+      '</g>'+
+      '<text x="200" y="210" font-size="44" font-weight="900" fill="'+w.ink+'" letter-spacing="-1">DEADDANCE</text>'+
+      '<text x="200" y="234" font-size="18" font-weight="800" fill="'+w.rose+'" letter-spacing="4">. A P P</text>'+
+      '<line x1="150" y1="248" x2="250" y2="248" stroke="'+w.ink+'" stroke-width="1.5" opacity=".55"/>'+
+      '<text x="200" y="267" font-family="Georgia,serif" font-size="14" font-weight="700" fill="'+w.ink+'" letter-spacing="3" opacity=".9">BETHLEHEM, PA</text>'+
+    '</g>'+
+  '</svg>';
+}
+
+// ---- products (ship-to-order) -------------------------------------------------------------
+var PRODUCTS=[
+ {k:'tee',   nm:'The Tee',        pr:34, sh:'soft ringspun · natural', shape:'tee'},
+ {k:'tank',  nm:'The Muscle Tank',pr:30, sh:'summer cut · for the lot', shape:'tank'},
+ {k:'hat',   nm:'The Dad Hat',    pr:28, sh:'6-panel · curved brim',    shape:'hat'},
+ {k:'crop',  nm:'The Crop Tee',   pr:32, sh:'boxy crop · unisex',       shape:'crop'},
+ {k:'sticker',nm:'The Window Cling',pr:8, sh:'3in · for the bus/cooler', shape:'sticker'},
+ {k:'poster',nm:'The Lot Poster', pr:22, sh:'12×12 · heavy stock',      shape:'poster'}
+];
+// garment/base color per colorway so the emblem pops
+function baseColor(){ return WAY==='tiedye' ? '#141018' : (WAY==='meadow' ? '#efe7cf' : '#efe4cc'); }
+
+// draw the emblem sitting on a product silhouette
+function productArt(shape,embSize){
+  var base=baseColor(), emb='<div style="width:'+embSize+'%;aspect-ratio:1/1">'+emblem(WAY)+'</div>';
+  if(shape==='hat'){
+    return '<div style="width:100%;height:100%;background:'+base+';display:flex;align-items:center;justify-content:center">'+
+      '<div style="width:78%;height:58%;background:'+(WAY==='tiedye'?'#241238':'#e7dcc2')+';border-radius:60px 60px 18px 18px;position:relative;box-shadow:inset 0 -10px 18px #0002;display:flex;align-items:center;justify-content:center">'+
+      '<div style="width:52%;aspect-ratio:1/1">'+emblem(WAY)+'</div>'+
+      '<div style="position:absolute;bottom:-11%;left:8%;width:84%;height:22%;background:'+(WAY==='tiedye'?'#1a0e2a':'#d8ccae')+';border-radius:0 0 40px 40px"></div></div></div>';
+  }
+  if(shape==='sticker'||shape==='poster'){
+    var rad=shape==='sticker'?'50%':'8px';
+    return '<div style="width:100%;height:100%;background:'+(shape==='poster'?'#0e0716':base)+';display:flex;align-items:center;justify-content:center;padding:'+(shape==='poster'?'12%':'6%')+'"><div style="width:100%;aspect-ratio:1/1;border-radius:'+rad+';overflow:hidden;box-shadow:0 6px 18px #0007">'+emblem(WAY)+'</div></div>';
+  }
+  // shirts — a simple garment body with a neck + optional sleeves, emblem on the chest
+  var neck='<div style="position:absolute;top:-6%;left:50%;transform:translateX(-50%);width:26%;height:16%;border:4px solid '+base+';border-top:0;border-radius:0 0 60px 60px;background:'+(WAY==='tiedye'?'#0d0a12':'#0000'+'')+'"></div>';
+  var w = shape==='tank'||shape==='crop' ? 62 : 76;      // narrower body for tank/crop
+  var h = shape==='crop' ? 62 : 82;
+  var sleeves = (shape==='tee') ? '<div style="position:absolute;top:6%;left:-2%;width:22%;height:26%;background:'+base+';transform:skewY(24deg);border-radius:8px"></div><div style="position:absolute;top:6%;right:-2%;width:22%;height:26%;background:'+base+';transform:skewY(-24deg);border-radius:8px"></div>' : '';
+  return '<div style="width:100%;height:100%;background:'+(WAY==='tiedye'?'#0d0a12':'#efe4cc22')+';display:flex;align-items:center;justify-content:center;position:relative">'+
+    '<div style="position:relative;width:'+w+'%;height:'+h+'%;background:'+base+';border-radius:14px;box-shadow:inset 0 -14px 26px #0002;display:flex;align-items:center;justify-content:center">'+
+    sleeves+neck+'<div style="width:'+embSize+'%;aspect-ratio:1/1;margin-top:6%">'+emblem(WAY)+'</div></div></div>';
+}
+
+function renderWays(){ document.getElementById('ways').innerHTML=Object.keys(WAYS).map(function(k){
+  return '<div class="chip'+(k===WAY?' on':'')+'" onclick="setWay(\''+k+'\')">'+esc(WAYS[k].name)+'</div>';}).join(''); }
+function setWay(k){ WAY=k; renderWays(); render(); document.getElementById('heroEmb').innerHTML=emblem(WAY); }
+
+function render(){
+  document.getElementById('grid').innerHTML=PRODUCTS.map(function(p,i){
+    return '<div class="p" onclick="open_('+i+')"><div class="mock">'+productArt(p.shape,64)+'</div>'+
+      '<div class="nm">'+esc(p.nm)+'</div><div class="pr">$'+p.pr+'</div><div class="sh">'+esc(p.sh)+'</div></div>';
+  }).join('');
+}
+function open_(i){ var p=PRODUCTS[i]; var r=document.getElementById('rec');
+  r.innerHTML='<div class="big">'+productArt(p.shape,70)+'</div><h3>'+esc(p.nm)+'</h3>'+
+    '<div class="ra">'+esc(WAYS[WAY].name)+' · '+esc(p.sh)+' · $'+p.pr+'</div>'+
+    '<div class="btns"><button class="buy" onclick="ship(\''+esc(p.nm)+'\')">📦 Ship it to me — $'+p.pr+'</button>'+
+    '<button class="alt" onclick="gift(\''+esc(p.nm)+'\')">🎁 Ship to a friend who missed it</button></div>'+
+    '<button class="x" onclick="close_()">close</button>';
+  document.getElementById('ov').classList.add('on');
+}
+function close_(){document.getElementById('ov').classList.remove('on');}
+document.getElementById('ov').onclick=function(e){if(e.target===this)close_();};
+function ship(n){ toast('📦 "'+n+'" ('+WAYS[WAY].name+') — made-to-order by the family reprint company. Demo: nothing charges until payments go live. 🌹'); }
+function gift(n){ toast('🎁 "'+n+'" — we’ll ask for their address at checkout. Demo only for now.'); }
+
+document.getElementById('heroEmb').innerHTML=emblem(WAY);
+renderWays(); render();
+</script>
+<script src="nowplaying.js" defer></script>
+<script src="dd_back.js"></script>
+<script src="lukas_a2hs.js" defer></script>
+</body></html>

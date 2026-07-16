@@ -741,6 +741,7 @@ body{padding-bottom:64px}
           <option value="Jerry's Middle Finger">Jerry's Middle Finger</option>
           <option value="all" selected>Grateful Dead Tribute</option>
           <option value="__musikfest__">🎪 Musikfest 2026 · Bethlehem →</option>
+          <option value="__fifa__">⚽ Philadelphia World Cup 2026 →</option>
         </select>
       </div>
       <div class="ch" id="calNavRow">
@@ -1475,6 +1476,8 @@ function calType(v){ CALTYPE=v||'all'; renderCal(); }
 function calAct(v){
  if(v==='__musikfest__'){ var s=document.getElementById('calAct'); if(s)s.value='all';   /* short-term seasonal item → opens the Musikfest hub */
    if(window.ddSheet){ ddSheet('musikfest.html','🎪 Musikfest 2026'); } else { window.open('musikfest.html','_blank','noopener'); } return; }
+ if(v==='__fifa__'){ var sf=document.getElementById('calAct'); if(sf)sf.value='all';        /* showcase: Philadelphia World Cup 2026 companion */
+   if(window.ddSheet){ ddSheet('fifa_philadelphia.html','⚽ Philadelphia 2026'); } else { window.open('fifa_philadelphia.html','_blank','noopener'); } return; }
  CAL_ACT=v||'all'; CAL_SEL=null;
  try{ if(window.DDShowmap&&DDShowmap.setAct) DDShowmap.setAct(CAL_ACT==='all'?null:CAL_ACT); }catch(e){}   /* band dropdown filters the map */
  /* pick a marquee (touring) act → ZOOM the map OUT to National so their whole run shows; keeps calendar+map in sync.

@@ -72,7 +72,7 @@
   <div class="foot">An independent fan companion built with <b>StageFill</b> — not affiliated with FIFA or the host committee. Public event info, one map. ⚽<br>Any city. Any festival. This one's Philadelphia.</div>
 </div>
 
-<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script src="qr.js"></script><script src="dd_qrmark.js"></script><script src="dd_map.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function dir(lat,lng,mode){ return 'https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng+'&travelmode='+(mode||'walking'); }
@@ -103,7 +103,7 @@ var MATCHES=[
 var EMO={stadium:'⚽',fan:'🎉',watch:'📺',transit:'🚇',parking:'🅿️'};
 
 // map
-var map=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+var map=L.map('map',{zoomControl:true}); if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
 PINS.forEach(function(p){ L.circleMarker([p.lat,p.lng],{radius:p.t==='stadium'?11:8,color:'#fff',weight:2,fillColor:p.color,fillOpacity:1}).addTo(map)
   .bindTooltip(EMO[p.t]+' '+esc(p.n),{direction:'top',opacity:.95})
   .bindPopup('<b>'+EMO[p.t]+' '+esc(p.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(p.d)+'</span><br><a href="'+dir(p.lat,p.lng,p.t==='parking'?'driving':(p.t==='transit'?'transit':'walking'))+'" target="_blank" rel="noopener" style="font-weight:800;color:#0b7a4b">'+(p.t==='parking'?'🚗 Drive here':'🚶 Take me there')+'</a>'); });

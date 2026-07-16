@@ -47,7 +47,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script src="qr.js"></script><script src="dd_qrmark.js"></script><script src="dd_map.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function qp(k){ return new URLSearchParams(location.search).get(k)||''; }
@@ -62,9 +62,9 @@ function render(F){
   document.getElementById('fCity').textContent=F.city||'';
   document.getElementById('fDates').textContent=fmtRange(F.start,F.end);
   document.title=(F.name||'Festival')+' · StageFill';
-  var pins=(F.pins||[]).filter(function(p){return p.lat!=null;});
+  var pins=(F.pins||[]).filter(function(p){return p.lat!=null;}).slice(0,1000);  // cap render (DoS guard)
   // map
-  var map=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  var map=L.map('map',{zoomControl:true}); if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
   pins.forEach(function(p){ var t=TYPES[p.type]||{color:'#888',emoji:'📍'};
     L.circleMarker([p.lat,p.lng],{radius:8,color:'#fff',weight:2,fillColor:t.color,fillOpacity:1}).addTo(map)
      .bindTooltip((t.emoji||'')+' '+esc(p.name||''),{direction:'top'})

@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DeadDance — Live from the Floor · Musikfest 2026</title>
+<meta name="theme-color" content="#150c22"><link rel="icon" href="dd-512.png">
+<style>
+:root{--bg:#140b21;--panel:#1e1330;--line:#31234c;--ink:#f3ecff;--mut:#a996c9;--gold:#f0b429;--rose:#ff5d73}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:16px 14px 70px}
+.hero{background:linear-gradient(120deg,#2a1245,#5a1f3f);border-radius:18px;padding:18px}
+.hero h1{margin:0;font-size:24px;font-weight:900}.hero h1 span{color:var(--gold)}
+.hero p{margin:5px 0 0;color:#e7d6ff;font-size:13px}
+.count{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+.count .c{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px 14px;flex:1;min-width:130px}
+.count .n{font-size:24px;font-weight:900}.count .n.gold{color:var(--gold)}.count .n.rose{color:var(--rose)}
+.count .l{font-size:11px;color:var(--mut);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:20px 0 10px}
+.feat{background:var(--panel);border:1px solid #4a2f6b;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px #0007}
+.feat img{width:100%;display:block;max-height:460px;object-fit:cover;background:#0e0a16}
+.feat .m{padding:13px 15px}
+.feat .cap{font-weight:700;font-size:15px}.feat .meta{color:var(--mut);font-size:12px;margin-top:5px}
+.chip{display:inline-block;background:#2a1c40;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800;color:#e7d6ff;margin-right:5px}
+.chip.gold{background:#3a2a10;border-color:#6a4e17;color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.card img{width:100%;display:block;aspect-ratio:1/1;object-fit:cover;background:#0e0a16}
+.card .m{padding:10px 12px}.card .cap{font-size:12.5px;line-height:1.35}.card .meta{color:var(--mut);font-size:11px;margin-top:5px}
+.empty{background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--mut)}
+.foot{color:var(--mut);font-size:12px;line-height:1.6;margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+.foot b{color:var(--gold)}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🌹 DeadDance — <span>Live from the Floor</span></h1>
+    <p>Musikfest 2026, crowdsourced. Every stage, every set, shot by the people standing there — and it flows straight to the Musikfest page and their Facebook. We post more than the festival does, because it isn't us. It's everyone.</p>
+  </div>
+
+  <div class="count" id="count"></div>
+
+  <div class="sec">🔥 Featured right now — the best of the floor</div>
+  <div id="feat"></div>
+
+  <div class="sec">The river</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="foot" id="foot">Curated live: the fullest surrounds (most angles), freshest, spread across the most stages rise to the top; the rest flow in the river. <br><b>A Hellertown company.</b> DeadDance — everywhere. 🌹</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var EVENT='musikfest-2026';
+try{ var SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function ago(t){ var s=(Date.now()-new Date(t).getTime())/1000; if(s<60)return'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+function angles(cap){ var m=/(\d+)\s*angles/.exec(cap||''); return m?+m[1]:1; }
+
+// ── CURATION — score each post: more angles, fresher, and reward stage variety in the featured set. ──
+function curate(rows){
+  var now=Date.now();
+  rows.forEach(function(r){ var mins=(now-new Date(r.created_at).getTime())/60000;
+    r._ang=angles(r.caption);
+    r._score = r._ang*10 + Math.max(0, 40 - mins) + (r.thumb?15:0);   // angles + freshness + has-image
+  });
+  var byScore=rows.slice().sort(function(a,b){return b._score-a._score;});
+  // featured: top scorers, but no two from the same stage (variety)
+  var feat=[], seen={};
+  byScore.forEach(function(r){ var k=(r.stage||'').toLowerCase(); if(feat.length<3 && !seen[k]){ seen[k]=1; feat.push(r); } });
+  var featIds={}; feat.forEach(function(r){featIds[r.id]=1;});
+  var river=rows.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);}).filter(function(r){return !featIds[r.id];});
+  return {feat:feat, river:river};
+}
+
+function render(rows){
+  if(!rows||!rows.length){ document.getElementById('count').innerHTML=''; document.getElementById('feat').innerHTML='<div class="empty">The river fills as the crowd shoots. First collage from the floor lands here. 🌹</div>'; document.getElementById('grid').innerHTML=''; return; }
+  var today=rows.filter(function(r){ return (Date.now()-new Date(r.created_at).getTime())<86400000; });
+  var stages={}; rows.forEach(function(r){ if(r.stage) stages[r.stage.toLowerCase()]=1; });
+  var totAng=rows.reduce(function(s,r){return s+angles(r.caption);},0);
+  document.getElementById('count').innerHTML=
+    '<div class="c"><div class="n gold">'+today.length+'</div><div class="l">posts today (crowdsourced)</div></div>'+
+    '<div class="c"><div class="n">'+Object.keys(stages).length+'</div><div class="l">stages covered</div></div>'+
+    '<div class="c"><div class="n rose">'+totAng+'</div><div class="l">angles from the crowd</div></div>';
+
+  var C=curate(rows);
+  document.getElementById('feat').innerHTML=C.feat.map(function(r){
+    return '<div class="feat" style="margin-bottom:12px">'+(r.thumb?('<img src="'+r.thumb+'" alt="">'):'')+
+      '<div class="m"><div class="cap">'+esc(r.caption||'')+'</div>'+
+      '<div class="meta"><span class="chip gold">🔥 '+r._ang+' angles</span>'+(r.stage?'<span class="chip">'+esc(r.stage)+'</span>':'')+(r.act?'<span class="chip">'+esc(r.act)+'</span>':'')+' · '+ago(r.created_at)+'</div></div></div>';
+  }).join('') || '<div class="empty">Warming up…</div>';
+
+  document.getElementById('grid').innerHTML=C.river.map(function(r){
+    return '<div class="card">'+(r.thumb?('<img src="'+r.thumb+'" alt="">'):'')+
+      '<div class="m"><div class="cap">'+esc((r.caption||'').slice(0,120))+'</div>'+
+      '<div class="meta">'+(r.stage?'<span class="chip">'+esc(r.stage)+'</span>':'')+' '+ago(r.created_at)+'</div></div></div>';
+  }).join('');
+}
+
+function load(){ if(!SB){ render([]); return; }
+  SB.rpc('dd_blog_list',{p_event:EVENT,p_limit:120}).then(function(r){ render((r&&r.data)||[]); }).catch(function(){ render([]); }); }
+load(); setInterval(load, 30000);
+</script>
+<script src="dd_back.js"></script>
+</body></html>

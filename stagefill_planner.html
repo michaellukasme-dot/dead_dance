@@ -97,6 +97,7 @@ input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dd_map.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function slugify(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
@@ -122,7 +123,7 @@ window.setTool=function(t){ TOOL=t; TOOLKEYS.forEach(function(k){ var b=document
   var extra=t==='stage'?" — you'll name it (and add the act/time)":t==='merchant'?" — name it, then choose whether to feature it with a paid walk-by toast":' — name it';
   document.getElementById('toolHint').innerHTML='Tap the map to drop a <b>'+TYPES[t].label+'</b>'+extra+'. Drag a pin to nudge it.'; };
 
-function initMap(){ MAP=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(MAP);
+function initMap(){ MAP=L.map('map',{zoomControl:true}); if(window.DDtile){ DDtile(MAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(MAP); }
   MAP.setView([39.9526,-75.1652],13); LG=L.layerGroup().addTo(MAP);
   MAP.on('click',function(e){ addPin(TOOL, e.latlng.lat, e.latlng.lng); });
   setTimeout(function(){ try{MAP.invalidateSize();}catch(e){} },250); }

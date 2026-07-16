@@ -1,0 +1,147 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Straggler Outbound · Musikfest · StageFill</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--purple:#5a2e86;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--gold:#f0a500;--green:#1f9e6b}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:14px 14px 90px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:18px;padding:16px}
+.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.hero h1{font-size:22px;margin:4px 0 2px;font-weight:900}
+.hero p{margin:0;color:#cdbfe0;font-size:13px}
+.big{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;text-align:center}
+.big .n{font-size:30px;font-weight:900;color:var(--rose)}.big .l{font-size:12.5px;color:var(--muted);font-weight:700}
+.launch{display:flex;gap:12px;align-items:center;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid var(--gold);border-radius:14px;padding:12px 14px;margin:12px 0}
+.launch .qr{width:74px;height:74px;flex:0 0 auto}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.bar button{border:0;border-radius:11px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer;background:#241535;color:#fff}
+.bar .g{background:#f1eef7;color:var(--purple)}
+.row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;display:flex;gap:12px}
+.row.sent{opacity:.5}
+.row .qr{width:88px;height:88px;flex:0 0 auto;border:1px solid var(--line);border-radius:8px;padding:3px;background:#fff}
+.row .mid{flex:1;min-width:0}
+.rank{display:inline-block;background:#241535;color:#fff;font-size:11px;font-weight:900;border-radius:999px;padding:2px 8px;margin-right:6px}
+.nm{font-weight:900;font-size:15.5px}.ad{font-size:12px;color:var(--muted);margin:1px 0 6px}
+.stat{font-size:13px;font-weight:800;color:var(--rose)}.stat b{font-size:15px}
+.dm{background:#f6f2fb;border:1px solid #e7dff5;border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.4;color:#2a2136;margin:8px 0;white-space:pre-wrap}
+.acts{display:flex;gap:7px;flex-wrap:wrap}
+.acts button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;font-size:12.5px;cursor:pointer}
+.copy{background:#5a2e86;color:#fff}.qrb{background:var(--gold);color:#3a1d00}.done{background:#eafaf3;color:#0d6b47;border:2px solid #b9e6cf!important}
+.foot{color:var(--muted);font-size:11.5px;text-align:center;margin-top:16px;line-height:1.5}
+#t{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:400;background:#241535;color:#fff;font-weight:800;font-size:13px;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:90%;text-align:center;opacity:0;transition:.2s}#t.on{opacity:1}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="k">🎪 StageFill · internal · the Abbouds</div>
+    <h1>Straggler Outbound — today</h1>
+    <p>Every shop with no ad, ranked by how many Festers walked their door. Message the owner, hand the QR, mark it. One at a time.</p>
+  </div>
+
+  <div class="big"><div class="n" id="hMiss">—</div><div class="l" id="hMissL">Festers who walked past an un-bought shop in the last 3 days</div></div>
+
+  <div class="launch">
+    <div class="qr" id="launchQR"></div>
+    <div style="flex:1"><div style="font-weight:900;font-size:14px">🚀 The launch QR — hand it to anyone</div>
+      <div style="font-size:12px;color:var(--muted)">Scan OR tap → the live Musikfest map. This is the one you keep handing over.</div></div>
+    <button class="qrb" onclick="saveLaunchQR()" style="border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer">🖨️ Save 2′×2′</button>
+  </div>
+
+  <div class="bar">
+    <button onclick="reload()">↻ Refresh stats</button>
+    <button class="g" onclick="downloadCSV()">⬇️ Today's list (CSV)</button>
+    <span style="flex:1"></span>
+    <button class="g" id="rep" onclick="setRep()">✍️ Set my name</button>
+  </div>
+
+  <div id="list"></div>
+  <div class="foot">Stats refresh from live walk-by data. The QR is the Musikfest map itself — clickable and scannable.<br>
+    Sent-marks are saved on this device for today. Ground-truth owners' Messenger handles as you go. 🌹</div>
+</div>
+<div id="t"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="qr.js"></script><script src="dd_qrmark.js"></script><script src="dd_mf_retailers.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function slug(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function merchEmoji(k){return k==='brewery'||k==='bar'?'🍺':k==='hotel'?'🏨':k==='historic'?'🏛️':k==='restaurant'?'🍽️':'🛍️';}
+function toast(m){var t=document.getElementById('t');t.textContent=m;t.className='on';clearTimeout(t._h);t._h=setTimeout(function(){t.className='';},3200);}
+var EVENT='musikfest-2026', BASE='https://deaddance.app/musikfest', GOLIVE='2026-07-31';
+var R=window.MF_RETAILERS||[];
+// LAST-YEAR TOTALS (ArtsQuest / Lehigh Valley press, Musikfest 2025) — the launch-day sell before any
+// live walk-by data exists. Record 1,449,000 over ~11 days ≈ ~131k/day; +42% YoY; 60,800 headliner tix.
+var HIST={ year:2025, total:1449000, days:11, yoy:'+42%', headliners:60800, proj2026:'1.5 million+' };
+HIST.perDay=Math.round(HIST.total/HIST.days);   // ≈ 131,700 a day walking the footprint
+function launchMode(){ try{ return (new Date().toISOString().slice(0,10) < GOLIVE); }catch(e){ return true; } }  // pre-opening → sell on history
+try{ var SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return SB;}; }catch(e){}
+var BOUGHT={}, R3={}, R1={}, RALL={};
+function repName(){ try{ return localStorage.getItem('dd.rep')||'the DeadDance team'; }catch(e){ return 'the DeadDance team'; } }
+window.setRep=function(){ var n=prompt('Your name (for the DM sign-off):', (localStorage.getItem('dd.rep')||'')); if(n!=null){ try{ localStorage.setItem('dd.rep',n.trim()); }catch(e){} render(); } };
+function sentKey(){ return 'dd.mf.straggler.sent.'+new Date().toISOString().slice(0,10); }
+function sentMap(){ try{ return JSON.parse(localStorage.getItem(sentKey())||'{}'); }catch(e){ return {}; } }
+function markSent(sl){ var s=sentMap(); s[sl]=!s[sl]; try{ localStorage.setItem(sentKey(),JSON.stringify(s)); }catch(e){} render(); }
+
+// the Messenger DM. LAUNCH (pre-opening, no live data) sells on last year's totals; days 2+ swap in the
+// day-before's live walk-by count. Same message, adjusted to the freshest number we have.
+function dmFor(x, n3, n1){
+  if(launchMode()){
+    return 'Hey! '+repName()+' here — quick one before Musikfest kicks off. Last year it drew a record '+HIST.total.toLocaleString()+' people to these blocks ('+HIST.yoy+' over the year before) — about '+HIST.perDay.toLocaleString()+' a day walking right past '+x.n+', and '+HIST.proj2026+' expected this year.\n\n'+
+    'This year a ton of them will have the DeadDance map open on their phone. Get on it and your door pops a "toast" — your name, your line, your coupon — every time one walks by.\n\n'+
+    'Opening week + the discount-QR = $999, all in. That\'s the number (no discounts). Want '+x.n+' switched on for day one? I\'ll hand you your QR. 🌹'; }
+  var cnt=((n1!=null?n1:n3)||0), unit=(n1!=null?'Yesterday alone':'In the past 3 days');
+  return 'Hey! '+repName()+' here — we run the DeadDance map a lot of the Musikfest crowd is on this year. Quick one about '+x.n+':\n\n'+
+  '📍 '+unit+', '+Number(cnt).toLocaleString()+' "Festers" walked within a few steps of your door with our map open — and didn\'t see a thing from you. Every one was a walk-by toast we could\'ve popped on their phone: your name, your line, a coupon, right as they passed.\n\n'+
+  'Rest of the week + the discount-QR = $999, all in. That\'s the number (no discounts), and it toasts every remaining day. Say the word and I\'ll switch '+x.n+' on tonight and hand you your QR. 🌹'; }
+
+function stragglers(){ return R.filter(function(x){ return !BOUGHT[slug(x.n)]; })
+  .map(function(x){ var sl=slug(x.n); return {x:x, sl:sl, n3:(R3[sl]||0), n1:(R1[sl]||0), tot:(RALL[sl]||0)}; })
+  .sort(function(a,b){ return b.n3-a.n3 || b.tot-a.tot; }); }
+
+function render(){ var list=stragglers(), sent=sentMap();
+  if(launchMode()){
+    document.getElementById('hMiss').textContent=HIST.total.toLocaleString();
+    document.getElementById('hMissL').textContent='Festers last year ('+HIST.year+', a record '+HIST.yoy+') — ~'+HIST.perDay.toLocaleString()+'/day walking these blocks. Sell on this until day one.';
+  } else {
+    var totMiss=list.reduce(function(s,r){return s+(r.n1||r.n3);},0);
+    document.getElementById('hMiss').textContent=totMiss.toLocaleString();
+    document.getElementById('hMissL').textContent='Festers who walked past an un-bought shop '+(list.some(function(r){return r.n1;})?'yesterday':'in the last 3 days');
+  }
+  document.getElementById('list').innerHTML=list.map(function(r,i){ var x=r.x, isSent=!!sent[r.sl];
+    return '<div class="row'+(isSent?' sent':'')+'"><div class="qr" id="qr_'+r.sl+'"></div>'+
+     '<div class="mid"><div><span class="rank">#'+(i+1)+'</span><span class="nm">'+merchEmoji(x.kind)+' '+esc(x.n)+'</span></div>'+
+     '<div class="ad">'+esc(x.addr)+'</div>'+
+     '<div class="stat">'+(launchMode()
+        ? ('~'+HIST.perDay.toLocaleString()+' Festers/day walk these blocks · <b>'+HIST.year+' record '+HIST.total.toLocaleString()+'</b>')
+        : ((r.n1?('yesterday: <b>'+r.n1.toLocaleString()+'</b>'):('past 3 days: <b>'+r.n3.toLocaleString()+'</b>'))+' Festers walked by'+(r.tot?(' · '+r.tot.toLocaleString()+' total'):'')+' — <b>0</b> toasts sent'))+'</div>'+
+     '<div class="dm" id="dm_'+r.sl+'">'+esc(dmFor(x,r.n3,launchMode()?null:r.n1))+'</div>'+
+     '<div class="acts"><button class="copy" onclick="copyDM(\''+r.sl+'\')">📋 Copy Messenger DM</button>'+
+     '<button class="qrb" onclick="saveQR(\''+r.sl+'\',\''+esc(x.n).replace(/\x27/g,'')+'\')">🖨️ Hand them their QR</button>'+
+     '<button class="'+(isSent?'done':'')+'" style="background:'+(isSent?'#eafaf3':'#f1eef7')+';color:'+(isSent?'#0d6b47':'#5a2e86')+'" onclick="markSent(\''+r.sl+'\')">'+(isSent?'✓ Sent today':'Mark sent')+'</button></div>'+
+     '</div></div>';
+  }).join('') || '<div class="big">🎉 Every shop in the footprint has an ad. No stragglers today.</div>';
+  // draw per-shop QR thumbnails (the shop's own door on the map)
+  list.forEach(function(r){ try{ if(window.DDQR) DDQR.into('qr_'+r.sl, BASE+'?ad='+r.sl, {mark:'dd',size:240,css:82}); }catch(e){} });
+}
+window.copyDM=function(sl){ var el=document.getElementById('dm_'+sl); if(!el)return; try{ navigator.clipboard.writeText(el.textContent); }catch(e){} toast('📋 DM copied — paste into Messenger to the owner.'); };
+window.saveQR=function(sl,nm){ try{ if(window.DDQR) DDQR.save(BASE+'?ad='+sl,{mark:'dd',size:2000},'musikfest-QR-'+sl+'.png'); }catch(e){} toast('🖨️ QR saved for '+nm+' — hand it over (2′×2′ for the window).'); };
+window.saveLaunchQR=function(){ try{ if(window.DDQR) DDQR.save(BASE,{mark:'dd',size:2000},'musikfest-launch-QR.png'); }catch(e){} toast('🖨️ Launch QR saved — 2′×2′, hand to anyone.'); };
+window.downloadCSV=function(){ var rows=[['rank','shop','address','festers_yesterday','festers_3d','festers_total','qr_link','messenger_dm']];
+  stragglers().forEach(function(r,i){ rows.push([i+1,r.x.n,r.x.addr,r.n1,r.n3,r.tot,BASE+'?ad='+r.sl,dmFor(r.x,r.n3,launchMode()?null:r.n1).replace(/\n/g,' ')]); });
+  var csv=rows.map(function(row){ return row.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='straggler-outbound-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  toast('⬇️ Today\'s straggler list downloaded.'); };
+
+function pull(){ var cl=window.ddClient&&ddClient(); if(!cl){ render(); return; }
+  cl.rpc('dd_ad_bought',{p_event:EVENT}).then(function(r){ BOUGHT={}; (r&&r.data||[]).forEach(function(z){ BOUGHT[slug(z.biz)]=1; }); render(); }).catch(render);
+  cl.rpc('dd_mf_reach_board_window',{p_days:3}).then(function(r){ R3={}; (r&&r.data||[]).forEach(function(z){ R3[slug(z.poi)]=+z.reach; }); render(); }).catch(function(){});
+  cl.rpc('dd_mf_reach_board_window',{p_days:1}).then(function(r){ R1={}; (r&&r.data||[]).forEach(function(z){ R1[slug(z.poi)]=+z.reach; }); render(); }).catch(function(){});   // "the day before"
+  cl.rpc('dd_mf_reach_board').then(function(r){ RALL={}; (r&&r.data||[]).forEach(function(z){ RALL[slug(z.poi)]=+z.reach; }); render(); }).catch(function(){});
+}
+window.reload=function(){ pull(); toast('↻ Refreshing…'); };
+try{ if(window.DDQR) DDQR.into('launchQR', BASE, {mark:'dd',size:220,css:74}); }catch(e){}
+render(); pull();
+</script>
+<script src="dd_back.js"></script>
+</body></html>

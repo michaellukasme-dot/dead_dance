@@ -302,6 +302,12 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   </ul></div>
   </details>
 
+  <a href="musikfest_drop.html" style="display:flex;align-items:center;gap:12px;margin:14px 0;text-decoration:none;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:12px 14px">
+    <div style="font-size:26px">👕</div>
+    <div style="flex:1"><div style="color:#241535;font-weight:900;font-size:14px">“I launched DeadDance.app at Musikfest 2026”</div>
+    <div style="color:#7a6a2e;font-size:12px">Wear the day — the groovy launch drop. Tee · tank · dad hat.</div></div>
+    <div style="color:#b8002e;font-weight:900;font-size:18px">›</div></a>
+
   <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
     If we can map Musikfest, we can map anything. Free-stage band grid drops from ArtsQuest in July — it lands here when it does. 🌹<br>
     Source: musikfest.org / artsquest.org. Stage spots are best-estimates good to ~a block.</div>
@@ -316,7 +322,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
-<script src="dd_qrmark.js"></script>
+<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_surround.js"></script>
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
 <script>
@@ -432,7 +438,7 @@ function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!==
 var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null;
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
   LMAP=L.map(el,{zoomControl:true,scrollWheelZoom:true});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP);
+  if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
   LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup().addTo(LMAP);
   try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{padding:[26,26]}); }catch(e){ LMAP.setView([40.6175,-75.3755],15); }
@@ -455,22 +461,34 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
   drawShops();
   updateYou(); updatePath(); updatePhotos();
 }
+// ── LISTING / TOAST RULE (Michael, 2026-07-16) ────────────────────────────────────────────
+// On GO-LIVE (Musikfest opening, Jul 31) we FORGET every retailer/vendor without an ad:
+// no map pin, no shop-list row, no walk-by toast. The TOAST is a paid product — it fires ONLY
+// for ad buyers. BEFORE go-live we show EVERYONE, so the Abboud field team can point at real
+// shops while selling; the non-buyers are the "straggler list" the rep console (mf_rep) works.
+// Flips automatically on the date — no redeploy needed.
+var MF_GOLIVE='2026-07-31';
+function mfPaidOnly(){ try{ return (new Date().toISOString().slice(0,10) >= MF_GOLIVE); }catch(e){ return false; } }
+function _mfPaid(x){ return !!(x && (x.sponsor||x.paid)); }
+function mfShops(){ return mfPaidOnly() ? MERCHANTS.filter(_mfPaid) : MERCHANTS; }
+function mfVendorsList(){ return mfPaidOnly() ? VENDORS.filter(_mfPaid) : VENDORS; }
+function mfWalkPois(){ return mfShops().concat(mfVendorsList()); }   // walk-by toast pool
 function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
-  MERCHANTS.forEach(function(m){
+  mfShops().forEach(function(m){
     var ic=L.divIcon({className:'mfshop',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid '+(m.sponsor?'#f0a500':'#c9b8dd')+';display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 4px #0004">'+merchEmoji(m.kind)+'</div>'});
     var mk=L.marker([m.lat,m.lng],{icon:ic}).addTo(LG_SHOP);
     mk.bindTooltip((m.cup?'🍺 ':'')+m.n,{direction:'top',opacity:.95});
     mk.bindPopup('<b>'+esc(m.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(m.addr)+' · '+esc(m.blurb)+'</span>'+(m.cup?'<br><b style="color:#b8002e">🍺 Fills your Musikfest cup</b>':'')+'<br><a href="'+dirUrl(m)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
   });
   // mobile vendors on the blueprint (trucks/tents) — same as any pin, like a porta-potty
-  VENDORS.forEach(function(v){
+  mfVendorsList().forEach(function(v){
     var ic=L.divIcon({className:'mfvend',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:6px;background:#fff;border:2px solid #e8730c;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px #0004">🍔</div>'});
     L.marker([v.lat,v.lng],{icon:ic}).addTo(LG_SHOP).bindTooltip('🚚 '+v.n+' — '+v.sells,{direction:'top',opacity:.95});
   });
 }
 // the SHOPS-inside-the-fest list (collapsible)
 (function renderShops(){ var el=document.getElementById('shopList'); if(!el)return;
-  el.innerHTML=MERCHANTS.map(function(m){
+  el.innerHTML=mfShops().map(function(m){
     return '<div class="card"><div class="nm">'+merchEmoji(m.kind)+' '+esc(m.n)+' '+(m.cup?'<span class="chip free">🍺 fills your cup</span>':'')+(m.sponsor?'<span class="chip jam">featured</span>':'')+'</div>'+
       '<div class="where">'+esc(m.addr)+' — '+esc(m.blurb)+'</div>'+
       '<a class="dir" href="'+dirUrl(m)+'" target="_blank" rel="noopener">📍 Get directions</a></div>';
@@ -607,14 +625,14 @@ window.adSubmit=function(){
   var label=esc(t.name)+' · $'+total.toLocaleString()+(qrc?' · +10% QR':'');
   if(link){ var url=link+(link.indexOf('?')<0?'?':'&')+'prefilled_email='+encodeURIComponent(email)+'&client_reference_id='+encodeURIComponent(adSlug(biz)+'|'+t.k);
     adClose(); mfToastHTML('🛒 <b>Opening secure Stripe checkout…</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(biz)+' · '+label+'</span>'); window.open(url,'_blank','noopener'); }
-  else { adClose(); mfToastHTML('✅ <b>Got it, '+esc(biz)+'!</b><br><span style="font-size:12px;color:#e7ddf3">'+label+' — we\'ll email your secure payment link to '+esc(email)+'.</span>'+(t.k==='gateway'?'<br><span style="font-size:11.5px;color:#f0c96b">Your gateway welcome is live at every entrance.</span>':'<br><span style="font-size:11.5px;color:#f0c96b">Your ad is live — 2′×2′ window QR ready below.</span>')); }
+  else { adClose(); mfToastHTML('✅ <b>Got it, '+esc(biz)+'!</b><br><span style="font-size:12px;color:#e7ddf3">'+label+' — saved. We\'ll follow up at '+esc(email)+' to finalize your spot.</span>'+(t.k==='gateway'?'<br><span style="font-size:11.5px;color:#f0c96b">Your gateway welcome is queued.</span>':'<br><span style="font-size:11.5px;color:#f0c96b">Your ad preview is live — 2′×2′ window QR ready below.</span>')); }
   adState={photos:[],tier:'fest',photoIsDefault:false,qr:false}; document.getElementById('adEmail').value=''; };
 function renderAds(){ var host=document.getElementById('adFeatured'); if(!host)return; var ads=adStore();
   host.innerHTML=ads.map(function(a){ var img=a.photo||(a.photos&&a.photos[0]);
     return '<div class="adfeat">'+(img?'<img src="'+img+'" alt="">':'<div style="width:64px;height:64px;border-radius:10px;background:#fff3d6;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto">🛍️</div>')+
       '<div style="flex:1"><div class="tag">Featured at Musikfest</div><div class="h">'+esc(a.head||a.biz)+'</div><div class="t">'+esc(a.text||a.biz)+'</div>'+(a.coupon?'<div style="margin-top:4px;font-size:12px;font-weight:800;color:#b8002e">🎟 '+esc(a.coupon)+'</div>':'')+
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button onclick="adWindowQR()" style="border:0;background:#241535;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">⬇︎ 2′×2′ QR</button>'+
-      '<button onclick="hpOpen(\''+esc(a.biz).replace(/'/g,"\\'")+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">📡 Blast to my list</button></div></div></div>';
+      '<button data-b="'+esc(a.biz)+'" onclick="hpOpen(this.getAttribute(\'data-b\'))" style="border:0;background:#5a2e86;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">📡 Blast to my list</button></div></div></div>';
   }).join(''); }
 // ---- Retailer HyperPost: seamless in-app email blast via YOUR one Mailchimp account (server-side Edge Function) ----
 // ⬇️ PASTE your deployed Supabase Edge Function URL here (holds the Mailchimp key server-side). Empty = queue locally.
@@ -788,6 +806,15 @@ function bandCard(b,stage,time){ var i=BAND_INFO[b];
   var foot = (stage||time) ? '<br><span style="font-size:11.5px;color:#b9a9d4">on '+esc(stage||'')+(time?(' · '+esc(String(time).replace(":00",""))):'')+'</span>' : '';
   return head+'<br>'+body+foot; }
 window.bandInfo=function(b){ mfToastHTML(bandCard(b)); };  // tap a 🌹 act in the schedule → same card
+// The show context for Surround/HyperPost — everything we know: band roster/hometown/genre + the LIVE
+// current song computed from set start + song lengths (window.DD_SETLISTS[act]=[{t:title,secs:seconds}]).
+function curSong(set){ try{ var L=(window.DD_SETLISTS||{})[set.b]; if(!L||!L.length) return {};
+  var elapsed=(nowMins()-mins(set.t))*60; if(elapsed<0) return {song:L[0].t,songIdx:1,songTotal:L.length};
+  var acc=0; for(var i=0;i<L.length;i++){ acc+=(L[i].secs||210); if(elapsed<acc) return {song:L[i].t,songIdx:i+1,songTotal:L.length}; }
+  return {song:L[L.length-1].t,songIdx:L.length,songTotal:L.length}; }catch(e){ return {}; } }
+function showCtx(best,set){ var i=BAND_INFO[set.b]||{}, cs=curSong(set);
+  return { stage:best.n.replace(/ @.*/,''), act:set.b, home:i.home||'', genre:i.style||'', time:String(set.t||'').replace(':00',''),
+    song:cs.song||'', songIdx:cs.songIdx||0, songTotal:cs.songTotal||0, stageLatLng:[best.lat,best.lng] }; }
 // who's on a given stage RIGHT NOW today (the set that started most recently, within ~95 min)
 function nowSetAtStage(stKey){ if(!stKey)return null; var day=todayISO(), nm=nowMins(), best=null;
   (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.d!==day || r.st!==stKey) return; var t=mins(r.t);
@@ -798,7 +825,11 @@ function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach
   if(best && bd<0.035){ var now=Date.now();
     if(WALK._st!==best.n || now-(WALK._stT||0)>240000){ WALK._st=best.n; WALK._stT=now;
       var set=nowSetAtStage(stageKey(best));
-      if(set){ mfToastHTML(bandCard(set.b, set.st, set.t)); }
+      if(set){ mfToastHTML(bandCard(set.b, set.st, set.t));
+        // Surround the Stage — offer the crowd collage for EVERY stage, EVERY set (once per stage+set).
+        if(window.Surround){ var sk=best.n+'|'+set.b; if(WALK._sur!==sk){ WALK._sur=sk; window.SURROUND_STAGE=[best.lat,best.lng];
+          setTimeout(function(){ try{ Surround.request(showCtx(best,set)); }catch(e){} }, 6500); } }
+      }
       else { mfToastHTML('🎪 You\'re at <b>'+esc(best.n)+'</b><br><span style="font-size:11.5px;color:#b9a9d4">no set on right now — check the schedule</span>'); }
     } } }
 // GRANULAR walk-by: pass a shop or a truck → its toast pops; walk on → it expires; the next one pops.
@@ -806,8 +837,17 @@ function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach
 function poiObj(p){ return p.mobile
   ? { kind:'food', n:p.n, addr:'', cup:0, photo:null, head:null, line:p.sells||'', coupon:p.adcoupon||p.coupon }
   : { kind:p.kind, n:p.n, addr:p.addr, cup:p.cup, photo:p.adphoto, head:p.adhead, line:p.adline||p.blurb, coupon:p.adcoupon }; }
+// MISSED-TOAST TALLY: one privacy-safe unique-reach ping per device per shop/truck — for EVERYONE,
+// buyer or not. This is what lets us email a straggler "247 phones walked your door — 247 toasts you
+// didn't send." Deduped locally + by the table's primary key, so it's one tiny write per POI, ever.
+function mfReach(n){ try{ WALK._reach=WALK._reach||JSON.parse(localStorage.getItem('dd.mf.reach')||'{}');
+  if(WALK._reach[n])return; WALK._reach[n]=1; localStorage.setItem('dd.mf.reach',JSON.stringify(WALK._reach));
+  var sb=(window.ddClient&&ddClient()); if(sb&&sb.rpc){ sb.rpc('dd_mf_reach_bump',{p_poi:String(n).slice(0,160),p_device:((window.ddId&&ddId().id)||'anon')}).then(function(){},function(){}); }
+}catch(e){} }
 function walkByCheck(here){ if(!here)return; var R=0.02, now=Date.now();
-  var pois=MERCHANTS.concat(VENDORS); WALK._seen=WALK._seen||{};
+  var all=MERCHANTS.concat(VENDORS);
+  all.forEach(function(p){ if(p.lat!=null && hav(here[0],here[1],p.lat,p.lng)<R) mfReach(p.n); });   // tally reach for ALL (the straggler report)
+  var pois=mfWalkPois(); WALK._seen=WALK._seen||{};                                                  // but only AD BUYERS actually toast (after go-live)
   pois.forEach(function(p){ if(p.lat==null)return; var d=hav(here[0],here[1],p.lat,p.lng); if(WALK._seen[p.n] && d>R*1.8) delete WALK._seen[p.n]; }); // walked away → can re-toast next pass
   if(now-(WALK._wbT||0) < 3500) return;                          // pace: at most one pass-by toast every ~3.5s
   var best=null,bd=1e9; pois.forEach(function(p){ if(p.lat==null||WALK._seen[p.n])return; var d=hav(here[0],here[1],p.lat,p.lng); if(d<R && d<bd){bd=d;best=p;} });
@@ -828,10 +868,37 @@ function mfGatewayToast(sp){ if(!sp)return; var el=document.getElementById('mfGa
   el.style.opacity='1'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.opacity='0'; },6500);
 }
 function merchantCheck(){}  // superseded by walkByCheck
+
+// ── ArtsQuest INTELLIGENCE INGEST — pseudonymous, aggregate-only. We report "token spent S seconds in
+// cell C." A cell is the STAGE whose FOOTPRINT you're standing in — and the footprint scales with the
+// stage: a milk-crate street corner has a tiny ring (~90 ft), Steel Stage a big one (~300 ft). So a
+// massive crowd around a tiny stage shows up as huge density in a small ring — the moneyshot. No path,
+// no lat/lng, no identity is ever stored; the token is a per-festival pseudonym.
+function mfToken(){ if(mfToken._v)return mfToken._v; var id=((window.ddId&&ddId().id)||'anon'),h=0,s='mf26|'+id;
+  for(var i=0;i<s.length;i++){ h=(h*131+s.charCodeAt(i))>>>0; } return (mfToken._v='mf26-'+h.toString(36)); }
+function stageFootFt(s){ var nn=(s.n||'').toLowerCase();
+  if(/steel stage|americaplatz|volksplatz|steelstacks|stadtplatz|festplatz|lagerplatz/.test(nn)) return 300; // big
+  if(/lyrik|zinzen|familien|handwerk|comedy|chapel|moravian|tropical/.test(nn)) return 90;                    // milk-crate corners
+  return 150; }
+function cellSlug(x){ return String(x).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40); }
+function currentCell(here){ var best=null,bd=1e9; STAGES.forEach(function(s){ if(s.lat==null)return; var d=hav(here[0],here[1],s.lat,s.lng); var r=stageFootFt(s)/5280; if(d<r && d<bd){bd=d;best=s;} });
+  return best ? cellSlug(best.n) : (insideFest(here)?'roaming':null); }
+var _mfCell={cur:null,since:0,lastFlush:0};
+function mfVisitFlush(now){ var cell=_mfCell.cur; now=now||Date.now();
+  if(!cell){ _mfCell.since=now; _mfCell.lastFlush=now; return; }
+  var sec=Math.round((now-_mfCell.since)/1000); _mfCell.since=now; _mfCell.lastFlush=now;
+  if(sec<=0||sec>3600)return; var sb=(window.ddClient&&ddClient());
+  if(sb&&sb.rpc){ try{ sb.rpc('dd_mf_visit_bump',{p_token:mfToken(),p_cell:cell,p_dwell_sec:sec}).then(function(){},function(){}); }catch(e){} } }
+function mfVisitTick(here){ if(!here)return; var now=Date.now(), cell=currentCell(here);
+  if(cell!==_mfCell.cur){ mfVisitFlush(now); _mfCell.cur=cell; _mfCell.since=now; }               // moved rings → bank the dwell
+  else if(cell && now-_mfCell.lastFlush>90000){ mfVisitFlush(now); } }                             // still here → flush every ~90s
+try{ document.addEventListener('visibilitychange',function(){ if(document.hidden) mfVisitFlush(); }); }catch(e){}
 function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(here[0],here[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
   if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
-function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
-  var prev=window.YOU; window.YOU=[la,lo];
+// Fed by dd_gps.js — position is Kalman-FILTERED (steady dot, tightest σ), so every geofence
+// below acts on the smoothed location, not the raw jitter. acc here = the device's honest σ.
+function onFix(f){ var la=f.lat, lo=f.lng, acc=(f.rawAcc==null?99:f.rawAcc), alt=f.alt;
+  var prev=window.YOU; window.YOU=[la,lo]; window.YOU_ACC=acc;   // remember confidence so we never mislabel the zone
   if(WALK.on && acc<=40){
     if(WALK.last){ var d=hav(WALK.last[0],WALK.last[1],la,lo); if(d>0.0009 && d<0.5){ WALK.miles+=d; WALK.path.push([la,lo]); } }  // jitter + teleport filter
     else { WALK.path.push([la,lo]); }
@@ -839,10 +906,16 @@ function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  pottyCheck(prev,[la,lo]); stageCheck([la,lo]); walkByCheck([la,lo]); gatewayCheck([la,lo]);
-  try{ updateYou(); updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();
+  pottyCheck(prev,[la,lo]); stageCheck([la,lo]); walkByCheck([la,lo]); gatewayCheck([la,lo]); mfVisitTick([la,lo]);
+  try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
-function startWatch(){ if(WALK.watch!=null||!navigator.geolocation)return; WALK.watch=navigator.geolocation.watchPosition(onPos,function(){},{enableHighAccuracy:true,maximumAge:2000,timeout:12000}); }
+function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
+function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
+  ensureMap();  // so DDGPS can mount the dot/ring/Center-Me + auto-zoom to walking level on first lock
+  if(window.DDGPS && LMAP){ WALK.gps=DDGPS.attach(LMAP,{walkZoom:18,q:2.5,lockAcc:20,onFix:onFix}); }
+  else if(window.DDGPS){ WALK.gps=DDGPS.start({q:2.5,lockAcc:20,onFix:onFix}); }
+  else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:15000}); }
+}
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
   if(WALK.on){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; startWatch(); fmtStat(); }
   else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); } };
@@ -929,4 +1002,5 @@ try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
 }).join(''); }catch(e){}
 renderPark();
 </script>
+<script src="lukas_a2hs.js" defer></script>
 </body></html>
