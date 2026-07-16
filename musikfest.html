@@ -90,6 +90,14 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 .adfeat img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:0 0 auto}
 .adfeat .h{font-weight:900;font-size:14px}.adfeat .t{font-size:12.5px;color:#4a4356;line-height:1.4}
 .adfeat .tag{font-size:10px;font-weight:800;color:#e8730c;text-transform:uppercase;letter-spacing:.04em}
+.adtoastprev{background:#241535;color:#fff;border-radius:14px;padding:13px 16px;font-size:14px;line-height:1.42;text-align:center;box-shadow:0 6px 20px #0003}
+.adtoastprev img{width:100%;max-height:120px;object-fit:cover;border-radius:10px;margin-bottom:7px}
+.adedit{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.adedit>summary{list-style:none;cursor:pointer;padding:11px 13px;font-weight:800;font-size:13.5px;color:var(--purple);background:#f7f4fc}
+.adedit>summary::-webkit-details-marker{display:none}
+.adedit[open]>summary{border-bottom:1px solid var(--line)}
+.adedit .adlab:first-of-type{margin-top:10px}
+.adedit>div,.adedit>input,.adedit>textarea{padding-left:13px;padding-right:13px}
 </style></head>
 <body>
 <div class="wrap">
@@ -114,27 +122,35 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     <div class="bg" onclick="adClose()"></div>
     <div class="panel">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div><h2>📣 Claim your shop &amp; advertise</h2><div class="sub">Photo + a line + a coupon. Live on the map in minutes. Reaches every head that walks by.</div></div>
+        <div><h2>📣 Your Musikfest ad</h2><div class="sub" id="adSub">We built it for you. Buy it, or tweak it first.</div></div>
         <button onclick="adClose()" style="border:0;background:#f1eef7;color:var(--purple);width:34px;height:34px;border-radius:17px;font-size:16px;cursor:pointer;flex:0 0 auto">✕</button>
       </div>
-      <div class="adlab">Which business are you claiming?</div>
+      <div class="adlab">Business</div>
       <select id="adBiz" onchange="adBizChange()"></select>
-      <input id="adBizNew" placeholder="Your business name" style="display:none;margin-top:8px">
-      <div class="adlab">Your photo(s) — shown right on the toast</div>
-      <input type="file" id="adPhotoIn" accept="image/*" multiple onchange="adPhoto(this)">
-      <div class="adprevwrap"><div id="adPrevStrip" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div><div id="adPrevHint" style="font-size:12px;color:var(--muted)">A logo, your storefront, or a plate of food. Add a few.</div></div>
-      <div class="adlab">Headline</div>
-      <input id="adHead" maxlength="42" placeholder="e.g., Cold craft + A/C, 40 ft away">
-      <div class="adlab">One line</div>
-      <textarea id="adText" rows="2" maxlength="130" placeholder="e.g., Fills your Musikfest cup. Real bathrooms. Come cool off."></textarea>
-      <div class="adlab">Coupon / offer <span style="font-weight:600;text-transform:none;letter-spacing:0">(optional — shows on the toast)</span></div>
-      <input id="adCoupon" maxlength="52" placeholder='e.g., Show this toast: $1 off a Brew Works cup'>
-      <div class="adlab">Choose your spread</div>
+      <input id="adBizNew" placeholder="Your business name" style="display:none;margin-top:8px" oninput="adPreview()">
+
+      <div class="adlab">Exactly how every festival-goer sees you walking by</div>
+      <div id="adToastPrev" class="adtoastprev"></div>
+
+      <details class="adedit" id="adEdit">
+        <summary>✎ Edit the ad</summary>
+        <div class="adlab">Photo — we dropped in a placeholder; swap in your own</div>
+        <input type="file" id="adPhotoIn" accept="image/*" multiple onchange="adPhoto(this)">
+        <div class="adprevwrap"><div id="adPrevStrip" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div><div id="adPrevHint" style="font-size:12px;color:var(--muted)">Your storefront, logo, or a plate of food.</div></div>
+        <div class="adlab">Headline</div>
+        <input id="adHead" maxlength="42" oninput="adPreview()" placeholder="e.g., Cold craft + A/C, 40 ft away">
+        <div class="adlab">One line</div>
+        <textarea id="adText" rows="2" maxlength="130" oninput="adPreview()" placeholder="e.g., Fills your Musikfest cup. Real bathrooms."></textarea>
+        <div class="adlab">Coupon / offer</div>
+        <input id="adCoupon" maxlength="52" oninput="adPreview()" placeholder='e.g., Show this: $1 off a cup'>
+      </details>
+
+      <div class="adlab">Your spread</div>
       <div class="tiers" id="adTiers"></div>
-      <div class="adlab">Where do we send your payment link?</div>
+      <div class="adlab">Your email (for the receipt)</div>
       <input id="adEmail" type="email" placeholder="you@yourshop.com">
-      <button class="adsubmit" onclick="adSubmit()">Sign me up →</button>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Secure payment link emailed after you sign up — no card entered here. Cancel anytime before it runs.</div>
+      <button class="adsubmit" id="adBuyBtn" onclick="adSubmit()">Buy my ad →</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px" id="adPayNote">Secure checkout by Stripe — card handled by Stripe, never here.</div>
     </div>
   </div>
 
@@ -371,62 +387,119 @@ function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
 /* ===== ADVERTISE FACILITY — self-serve: pick your business, upload a photo + line,
    choose Less / More / Most, sign up. Runs live on the map; secure payment link emailed. ===== */
 var MF_DAYS=(function(){ try{ return (SCHED&&SCHED.length)||11; }catch(e){ return 11; } })();
+// ⬇️ PASTE YOUR TWO STRIPE PAYMENT LINKS HERE (make them in your Stripe dashboard: $99 and $699).
+//    Leave '' to fall back to "we'll email you a link". Retailer email + shop are appended to the URL.
+var STRIPE_PAY={ day:'', fest:'' };
 var TIERS={
- less:{k:'less',name:'Less',price:99,unit:'/ day',best:false,desc:'One day. Your photo + line on the Musikfest map.'},
- more:{k:'more',name:'More',price:899,unit:' · all '+MF_DAYS+' days',best:false,desc:'Every day of the fest — flat rate, big discount off the daily.'},
- most:{k:'most',name:'Most',price:699,unit:' · the whole spread',best:true,desc:'The full festival + featured: the walk-by toast as fans pass, top of the shops list, and a spot in the postable Musikfest spread.'}
+ day: {k:'day', price:99, name:'One day',        unit:'/ day',                 best:false, desc:'Your ad + the walk-by toast for a single festival day.'},
+ fest:{k:'fest',price:699,name:'Whole festival', unit:' · all '+MF_DAYS+' days',best:true,  desc:'Every day of Musikfest — featured: the walk-by toast, top of the shops list, a spot in the postable spread, plus a free 2′×2′ Musikfest QR for your window.'}
 };
-var adState={photos:[],tier:'most'};
+// pre-written ad copy per shop (from research) — the retailer can just buy, or edit it
+var AD_SEED={
+ "Fegley's Bethlehem Brew Works":{head:"Cold craft + A/C, right on Main",line:"Fills your Musikfest cup with our own award-winning brews. Duck in and cool off.",coupon:"Show this: $1 off a Brew Works cup"},
+ "Historic Hotel Bethlehem — Tap Room":{head:"Grand lobby, cold drinks, real restrooms",line:"Slip out of the crowd into the 1741 Tap Room — steps off the festival.",coupon:"Show this: happy-hour price all fest"},
+ "McCarthy's Red Stag Pub & Whiskey Bar":{head:"Guinness, a whiskey wall, a cool break",line:"Celtic pub in Donegal Square — pull up a stool and catch your breath.",coupon:"Show this: $2 off a pint"},
+ "Lost Tavern Brewing — at the Moravian Book Shop":{head:"Local craft, hidden in the book shop",line:"Taproom tucked in the 1745 Moravian Book Shop — a Main St pour you'd miss.",coupon:"Show this: $1 off a pour"},
+ "Moravian Book Shop":{head:"America's oldest bookstore — and it's A/C",line:"Gifts, a café, and cool air since 1745. A calm break mid-fest.",coupon:"Show this: 10% off one gift"},
+ "Donegal Square":{head:"Irish & Celtic finds on Main",line:"Wool, jewelry, and gifts above McCarthy's — worth the browse.",coupon:"Show this: 10% off"},
+ "Domaci Home":{head:"Design & maker goods on Main",line:"Home pieces and local makers — a Main Street must-browse.",coupon:"Show this: 10% off"},
+ "Aardvark Sports Shop":{head:"Sore feet? We've got you.",line:"Running & outdoor gear at Main Street Commons — comfort for the long walk.",coupon:"Show this: 10% off socks"},
+ "The Sun Inn (1758)":{head:"Washington slept here — you can sip here",line:"Historic courtyard with live music (Deal Trio & Duo) and shops inside.",coupon:"Show this: courtyard drink special"}
+};
+var adState={photos:[],tier:'fest',photoIsDefault:false};
 function adSlug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 function adStore(){ try{ return JSON.parse(localStorage.getItem('dd.mfads')||'[]'); }catch(e){ return []; } }
 function adSave(a){ try{ var s=adStore(); s.push(a); localStorage.setItem('dd.mfads',JSON.stringify(s)); }catch(e){} }
+
+// ONE toast builder — used by the live walk-by toast AND the cart preview, so they match exactly
+function merchantToastHTML(o){
+  var img=o.photo?'<img src="'+o.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:10px;margin-bottom:7px">':'';
+  var head=o.head?'<br><span style="font-weight:800;font-size:13.5px">'+esc(o.head)+'</span>':'';
+  var line=o.line?'<br><span style="font-weight:600;font-size:12px;color:#e7ddf3">'+esc(o.line)+'</span>':'';
+  var cup=o.cup?'<br><span style="font-size:11.5px;color:#f0c96b">fills your Musikfest cup · '+esc(o.addr||'')+'</span>':'';
+  var coup=o.coupon?'<br><span style="font-size:12.5px;font-weight:800;color:#ffd36b">🎟 '+esc(o.coupon)+'</span>':'';
+  return img+merchEmoji(o.kind||'shop')+' <b>'+esc(o.n||'Your business')+'</b>'+head+line+cup+coup;
+}
+// a branded placeholder "photo" so the cart shows a finished ad (swapped when they upload their own)
+function adDefaultPhoto(name){ var c=document.createElement('canvas'); c.width=700; c.height=340; var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,700,340); g.addColorStop(0,'#3a2456'); g.addColorStop(1,'#7d1533'); x.fillStyle=g; x.fillRect(0,0,700,340);
+  x.fillStyle='#f0a500'; x.font='bold 26px sans-serif'; x.fillText('MUSIKFEST 2026',34,58);
+  x.fillStyle='#fff'; x.font='bold 44px sans-serif';
+  var words=String(name||'Your business').split(' '), lines=[], cur=''; words.forEach(function(w){ var t=(cur+' '+w).trim(); if(x.measureText(t).width<636)cur=t; else{ lines.push(cur); cur=w; } }); if(cur)lines.push(cur);
+  var y=150; lines.slice(0,3).forEach(function(l){ x.fillText(l,34,y); y+=52; });
+  x.fillStyle='#e7ddf3'; x.font='600 21px sans-serif'; x.fillText('swap in your own photo →',34,322);
+  return c.toDataURL('image/jpeg',0.85); }
+
+function adCurShop(){ var v=document.getElementById('adBiz').value, biz=(v==='__new__')?document.getElementById('adBizNew').value.trim():v;
+  var shop=null; MERCHANTS.forEach(function(m){ if(m.n===biz) shop=m; }); return {biz:biz, shop:shop}; }
+window.adPreview=function(){ var cs=adCurShop();
+  var o={ kind:cs.shop?cs.shop.kind:'shop', n:cs.biz||'Your business', addr:cs.shop?cs.shop.addr:'', cup:cs.shop?cs.shop.cup:0,
+    photo:adState.photos[0]||null, head:document.getElementById('adHead').value.trim(), line:document.getElementById('adText').value.trim(), coupon:document.getElementById('adCoupon').value.trim() };
+  var pv=document.getElementById('adToastPrev'); if(pv) pv.innerHTML=merchantToastHTML(o);
+  var sub=document.getElementById('adSub'); if(sub) sub.textContent=cs.biz?('For '+cs.biz+' — buy it, or tweak it first.'):'We built it for you. Pick your shop, then buy or tweak.'; };
+function adFill(biz){ var s=AD_SEED[biz]||null;
+  document.getElementById('adHead').value=s?s.head:''; document.getElementById('adText').value=s?s.line:''; document.getElementById('adCoupon').value=s?s.coupon:'';
+  if(!adState.photos.length || adState.photoIsDefault){ adState.photos=[adDefaultPhoto(biz)]; adState.photoIsDefault=true; adPrevRender(); }
+  adPreview(); }
+
 window.adOpen=function(){ var sel=document.getElementById('adBiz');
   sel.innerHTML='<option value="">Is this your restaurant / shop / brewery?</option>'+
     MERCHANTS.map(function(m){ return '<option value="'+esc(m.n)+'">'+esc(m.n)+' — '+esc(m.addr)+'</option>'; }).join('')+
     '<option value="__new__">➕ My business isn\'t listed</option>';
-  renderTiers();
+  renderTiers(); adPreview();
   document.getElementById('adModal').style.display='block'; };
 window.adClose=function(){ document.getElementById('adModal').style.display='none'; };
-window.adBizChange=function(){ var v=document.getElementById('adBiz').value; document.getElementById('adBizNew').style.display=(v==='__new__')?'block':'none'; };
-function renderTiers(){ var host=document.getElementById('adTiers'); host.innerHTML=['less','more','most'].map(function(k){ var t=TIERS[k];
+window.adBizChange=function(){ var v=document.getElementById('adBiz').value; document.getElementById('adBizNew').style.display=(v==='__new__')?'block':'none';
+  if(v && v!=='__new__') adFill(v); else adPreview(); };
+function renderTiers(){ var host=document.getElementById('adTiers'); host.innerHTML=['fest','day'].map(function(k){ var t=TIERS[k];
   return '<div class="tier'+(adState.tier===k?' on':'')+'" onclick="adPick(\''+k+'\')">'+(t.best?'<span class="best">best value</span>':'')+
     '<span class="tp">$'+t.price.toLocaleString()+'</span><span class="tn">'+t.name+'</span><span style="font-size:11.5px;color:var(--muted);font-weight:700"> '+esc(t.unit)+'</span><div class="td">'+esc(t.desc)+'</div></div>';
-}).join(''); }
+}).join(''); adBuyLabel(); }
 window.adPick=function(k){ adState.tier=k; renderTiers(); };
+function adBuyLabel(){ var b=document.getElementById('adBuyBtn'); if(b) b.textContent='Buy my ad — $'+TIERS[adState.tier].price.toLocaleString()+' →'; }
 window.adPhoto=function(inp){ var files=inp.files?Array.prototype.slice.call(inp.files):[]; if(!files.length)return;
+  if(adState.photoIsDefault){ adState.photos=[]; adState.photoIsDefault=false; }   // drop the placeholder on first real upload
   files.slice(0,4).forEach(function(f){ var img=new Image();
     img.onload=function(){ var mw=700, sc=Math.min(1,mw/img.width), w=Math.round(img.width*sc), h=Math.round(img.height*sc);
       var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
-      adState.photos.push(c.toDataURL('image/jpeg',0.82)); adPrevRender(); };
+      adState.photos.push(c.toDataURL('image/jpeg',0.82)); adPrevRender(); adPreview(); };
     img.src=URL.createObjectURL(f); }); };
 function adPrevRender(){ var strip=document.getElementById('adPrevStrip'); if(!strip)return;
   strip.innerHTML=adState.photos.map(function(u,i){ return '<span style="position:relative;display:inline-block"><img src="'+u+'" style="width:70px;height:70px;object-fit:cover;border-radius:8px"><button onclick="adPhotoDel('+i+')" style="position:absolute;top:-6px;right:-6px;border:0;background:#b8002e;color:#fff;width:20px;height:20px;border-radius:10px;font-size:12px;cursor:pointer;line-height:1">✕</button></span>'; }).join('');
   document.getElementById('adPrevHint').style.display=adState.photos.length?'none':'block'; }
-window.adPhotoDel=function(i){ adState.photos.splice(i,1); adPrevRender(); };
+window.adPhotoDel=function(i){ adState.photos.splice(i,1); if(!adState.photos.length)adState.photoIsDefault=false; adPrevRender(); adPreview(); };
 window.adSubmit=function(){
-  var v=document.getElementById('adBiz').value, biz=(v==='__new__')?document.getElementById('adBizNew').value.trim():v;
+  var cs=adCurShop(), biz=cs.biz;
   var head=document.getElementById('adHead').value.trim(), text=document.getElementById('adText').value.trim(),
       coupon=document.getElementById('adCoupon').value.trim(), email=document.getElementById('adEmail').value.trim();
-  if(!biz){ alert('Pick the business you\'re claiming (or add its name).'); return; }
+  if(!biz){ alert('Pick your business (or add its name).'); return; }
   if(!head && !text){ alert('Add a headline or a line for your ad.'); return; }
-  if(!/.+@.+\..+/.test(email)){ alert('Add an email so we can send your secure payment link.'); return; }
+  if(!/.+@.+\..+/.test(email)){ alert('Add your email for the receipt.'); return; }
   var t=TIERS[adState.tier];
-  var ad={biz:biz,head:head,text:text,coupon:coupon,photos:adState.photos.slice(),photo:adState.photos[0]||null,tier:t.name,price:t.price,email:email,ts:Date.now()};
-  adSave(ad); mfPerf('ad_signup_'+t.k,1,'dd');
-  // light it up immediately: mark the matching shop as a sponsor with this creative
-  MERCHANTS.forEach(function(m){ if(m.n.toLowerCase().indexOf(biz.toLowerCase())>=0 || biz.toLowerCase().indexOf(m.n.toLowerCase())>=0){ m.sponsor=1; m.adhead=head; m.adphoto=ad.photo; m.adcoupon=coupon; } });
+  var ad={biz:biz,head:head,text:text,coupon:coupon,photos:adState.photos.slice(),photo:adState.photos[0]||null,tier:t.name,price:t.price,email:email,ts:Date.now(),paid:false};
+  adSave(ad); mfPerf('ad_buy_'+t.k,1,'dd');
+  try{ var cl=window.ddClient&&ddClient(); if(cl) cl.rpc('dd_ad_signup',{p_event:EVENT,p_member:mfMember(),p_biz:biz,p_tier:t.name,p_price:t.price,p_head:head,p_body:text,p_email:email}).catch(function(){}); }catch(e){}
+  // light it up on the map immediately (preview == what they saw)
+  MERCHANTS.forEach(function(m){ if(m.n.toLowerCase().indexOf(biz.toLowerCase())>=0 || biz.toLowerCase().indexOf(m.n.toLowerCase())>=0){ m.sponsor=1; m.adhead=head; m.adline=text; m.adphoto=ad.photo; m.adcoupon=coupon; } });
   try{ drawShops(); }catch(e){}
-  renderAds(); adClose();
-  mfToastHTML('✅ <b>Claimed — you\'re in, '+esc(biz)+'!</b><br><span style="font-weight:600;font-size:12px;color:#e7ddf3">'+esc(t.name)+' · $'+t.price.toLocaleString()+' — secure payment link on its way to '+esc(email)+'.</span><br><span style="font-size:11.5px;color:#f0c96b">Your ad is live on the map now.</span>');
-  // reset
-  adState={photos:[],tier:'most'}; document.getElementById('adHead').value=''; document.getElementById('adText').value=''; document.getElementById('adCoupon').value=''; document.getElementById('adEmail').value=''; adPrevRender(); };
+  renderAds();
+  // STRIPE — open the real checkout with the payment link, prefilled; else fall back to email-a-link
+  var link=STRIPE_PAY[t.k];
+  if(link){ var url=link+(link.indexOf('?')<0?'?':'&')+'prefilled_email='+encodeURIComponent(email)+'&client_reference_id='+encodeURIComponent(adSlug(biz)+'|'+t.k);
+    adClose(); mfToastHTML('🛒 <b>Opening secure Stripe checkout…</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(biz)+' · '+esc(t.name)+' · $'+t.price.toLocaleString()+'</span>'); window.open(url,'_blank','noopener'); }
+  else { adClose(); mfToastHTML('✅ <b>Got it, '+esc(biz)+'!</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(t.name)+' · $'+t.price.toLocaleString()+' — we\'ll email your secure payment link to '+esc(email)+'.</span><br><span style="font-size:11.5px;color:#f0c96b">Your ad is live — and your free 2′×2′ window QR is ready below.</span>'); }
+  adState={photos:[],tier:'fest',photoIsDefault:false}; document.getElementById('adEmail').value=''; };
 function renderAds(){ var host=document.getElementById('adFeatured'); if(!host)return; var ads=adStore();
   host.innerHTML=ads.map(function(a){ var img=a.photo||(a.photos&&a.photos[0]);
     return '<div class="adfeat">'+(img?'<img src="'+img+'" alt="">':'<div style="width:64px;height:64px;border-radius:10px;background:#fff3d6;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto">🛍️</div>')+
-      '<div><div class="tag">Featured at Musikfest</div><div class="h">'+esc(a.head||a.biz)+'</div><div class="t">'+esc(a.text||a.biz)+'</div>'+(a.coupon?'<div style="margin-top:4px;font-size:12px;font-weight:800;color:#b8002e">🎟 '+esc(a.coupon)+'</div>':'')+'</div></div>';
+      '<div style="flex:1"><div class="tag">Featured at Musikfest</div><div class="h">'+esc(a.head||a.biz)+'</div><div class="t">'+esc(a.text||a.biz)+'</div>'+(a.coupon?'<div style="margin-top:4px;font-size:12px;font-weight:800;color:#b8002e">🎟 '+esc(a.coupon)+'</div>':'')+
+      '<button onclick="adWindowQR()" style="margin-top:8px;border:0;background:#241535;color:#fff;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer">⬇︎ Your 2′×2′ window QR</button></div></div>';
   }).join(''); }
 renderAds();
-// deep link from a retailer's FB post: deaddance.app/musikfest?ad=<slug> → open claim, preselect their shop
+// the buyer's 2'x2' display piece — the QR is the Musikfest festival map DIRECTLY
+window.adWindowQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd',size:2000},'musikfest-window-QR-24in.png'); }catch(e){}
+  mfToastHTML('🖨️ <b>Your 2′×2′ Musikfest QR</b><br><span style="font-size:12px;color:#e7ddf3">Downloading — print it big for your window. Every scan opens the whole festival map.</span>'); };
+// deep link from a retailer's FB post: deaddance.app/musikfest?ad=<slug> → open the CART, preselect their shop, pre-fill their ad
 (function(){ try{ var m=(location.search.match(/[?&]ad=([^&]+)/)||[])[1]; if(!m)return; m=decodeURIComponent(m);
   setTimeout(function(){ adOpen(); var sel=document.getElementById('adBiz'); if(sel){ for(var i=0;i<sel.options.length;i++){ if(adSlug(sel.options[i].value)===adSlug(m)){ sel.value=sel.options[i].value; adBizChange(); break; } } } }, 450); }catch(e){} })();
 
@@ -541,10 +614,8 @@ function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach
 // walk-by MERCHANT toast — ONLY for sponsors (the paid $/day placement), deduped 5 min/shop
 function merchantCheck(here){ if(!here)return; var best=null,bd=1e9; MERCHANTS.forEach(function(m){ if(!m.sponsor)return; var d=hav(here[0],here[1],m.lat,m.lng); if(d<bd){bd=d;best=m;} });
   if(best && bd<0.03){ var now=Date.now(); if(WALK._mc!==best.n || now-(WALK._mcT||0)>300000){ WALK._mc=best.n; WALK._mcT=now;
-    var img=best.adphoto?'<img src="'+best.adphoto+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:10px;margin-bottom:7px">':'';
-    var line=best.adhead?esc(best.adhead):esc(best.blurb);
-    var coup=best.adcoupon?'<br><span style="font-size:12.5px;font-weight:800;color:#ffd36b">🎟 '+esc(best.adcoupon)+'</span>':'';
-    mfToastHTML(img+merchEmoji(best.kind)+' <b>'+esc(best.n)+'</b><br><span style="font-weight:600;font-size:12px;color:#e7ddf3">'+line+'</span>'+(best.cup?'<br><span style="font-size:11.5px;color:#f0c96b">fills your Musikfest cup · '+esc(best.addr)+'</span>':'')+coup); } } }
+    mfToastHTML(merchantToastHTML({ kind:best.kind, n:best.n, addr:best.addr, cup:best.cup, photo:best.adphoto,
+      head:best.adhead, line:best.adline||best.blurb, coupon:best.adcoupon })); } } }
 function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(here[0],here[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
   if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
 function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
