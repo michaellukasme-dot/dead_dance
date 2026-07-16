@@ -152,7 +152,8 @@ var LEFT=[
  {h:"Step 3 · Your calendar",t:"Every gig, everywhere, once.",
   p:"Paste your schedule link or your dates. From then on your shows appear on the <b>map</b>, the <b>chapter calendar</b> (a chapter is your region — yours is below), the <b>Near You</b> feed, and every fan who tuned in to you.",
   mock:'<div class="mh">Shows on the map</div><div style="font-size:13px;color:#cbb9e6">🗺️ your dates, plotted · 🔔 fans notified · 📅 one calendar</div>',
-  auto:["Automation you're turning on","<b>Post once, appear everywhere.</b> Add a date and it lands on the map, the chapter calendar, and the feeds of everyone tuned in to your band."]},
+  auto:["Automation you're turning on","<b>Post once, appear everywhere.</b> Add a date and it lands on the map, the chapter calendar, and the feeds of everyone tuned in to your band."],
+  cta:{hd:"Tease your setlist",p:"For your next show, drop your songs and how long each runs — we <b>reveal them to your fans one at a time</b> and count them down to showtime. It's the reason bands hand us their fan list.",btn:"🎵 Tease your set to your fans →"}},
 
  {h:"Step 4 · Your store",t:"A merch store that runs itself.",
   p:"Shirts, stickers, posters, and — when you're ready — <b>Print-the-Vinyl</b>: a fan orders your own live show pressed to a real record, one at a time, and it ships to them. No inventory, no boxes in the van.",
@@ -187,16 +188,19 @@ var LEFT=[
  {h:"Step 10 · Done",t:"You're all set.",
   p:"Your page is live, your logo is yours, your calendar syncs, your store is open, and your ads write themselves. Welcome to the family.",
   mock:'<div class="mh">What just turned on</div><div style="font-size:13px;color:#cbb9e6">🎸 Band page · 🗺️ Map · 📅 Calendar · 🛍️ Store · 📡 Ads · 🔊 HyperPost · 🎟️ QR</div>',
-  auto:["Our promise","Nothing bills. Nothing mails without you. <b>You can remove your logo, your list, your dates, or your whole band page at any time.</b>"]}
+  auto:["Our promise","Nothing bills. Nothing mails without you. <b>You can remove your logo, your list, your dates, or your whole band page at any time.</b>"],
+  cta:{hd:"One more thing your fans will love",p:"Before your next show, tease your setlist. Reveal a song a day, count them down, and blast the sneak peek to your own list. Your fans show up already buzzing.",btn:"🎵 Tease your setlist →"}}
 ];
 
+function setlistHref(){ var b=S.band, name=(b&&b.name)||S.newName||''; var show=String(S.dates||S.sched||'').split(/\n/)[0]||''; return 'stagefill_setlist.html?band='+encodeURIComponent(name)+'&show='+encodeURIComponent(show); }
 function renderLeft(){
   var L=LEFT[S.step];
   document.getElementById('left').innerHTML=
     '<div class="show-h">'+L.h+'</div><div class="show-t">'+L.t+'</div><div class="show-p">'+L.p+'</div>'+
     '<div class="mock">'+L.mock+'</div>'+
     '<div class="auto"><b class="hd">'+L.auto[0]+'</b><p>'+L.auto[1]+'</p></div>'+
-    '<div class="more"><b>And this is more than a tribute-band listing:</b> the live Grateful Dead archive that plays, DeadDance Karaoke, the games, a group for every region, real-time setlist broadcast, and a marketplace — <b>your fans are already in here.</b></div>';
+    '<div class="more"><b>And this is more than a tribute-band listing:</b> the live Grateful Dead archive that plays, DeadDance Karaoke, the games, a group for every region, real-time setlist broadcast, and a marketplace — <b>your fans are already in here.</b></div>'+
+    (L.cta ? '<div class="auto" style="border-color:#f0c96b66;background:#2a2011"><b class="hd" style="color:#ffd76a">🎵 '+L.cta.hd+'</b><p>'+L.cta.p+'</p><a href="'+setlistHref()+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;background:#f0a500;color:#3a1d00;font-weight:800;border-radius:11px;padding:11px 16px;text-decoration:none;font-size:13.5px">'+L.cta.btn+'</a></div>' : '');
   var b=S.band;
   if(b){ var mn=document.getElementById('mkMono'), nm=document.getElementById('mkName'), ct=document.getElementById('mkCity');
     if(mn){ if(S.logo){mn.outerHTML='<img src="'+esc(S.logo)+'" alt="" style="width:40px;height:40px;border-radius:9px;object-fit:cover">';} else mn.textContent=b.mono; }
