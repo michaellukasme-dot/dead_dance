@@ -147,6 +147,9 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 
       <div class="adlab">Your spread</div>
       <div class="tiers" id="adTiers"></div>
+      <label id="adQrRow" style="display:flex;align-items:center;gap:9px;margin-top:10px;font-weight:800;font-size:13px;cursor:pointer;background:#fff8ec;border:1px solid #f0d9a6;border-radius:11px;padding:10px 12px">
+        <input type="checkbox" id="adQr" onchange="adQrToggle()" style="width:auto">
+        <span id="adQrLbl">➕ Add a 10% discount QR — expires in 30 days</span></label>
       <div class="adlab">Your email (for the receipt)</div>
       <input id="adEmail" type="email" placeholder="you@yourshop.com">
       <button class="adsubmit" id="adBuyBtn" onclick="adSubmit()">Buy my ad →</button>
@@ -366,7 +369,18 @@ var MERCHANTS=[
  {n:"Café the Lodge",kind:"shop",addr:"427 E 4th St · South Side",lat:40.6151,lng:-75.3666,cup:0,blurb:"Coffee, art, and a chill break under the Urban Arts Trail murals."},
  {n:"Godfrey Daniels",kind:"historic",addr:"7 E 4th St · South Side",lat:40.6153,lng:-75.3691,cup:0,blurb:"Legendary listening room since 1976 — folk, coffee, and history."}
 ];
-function merchEmoji(k){ return k==='brewery'||k==='bar'?'🍺':k==='hotel'?'🏨':k==='historic'?'🏛️':k==='restaurant'?'🍽️':'🛍️'; }
+function merchEmoji(k){ return k==='brewery'||k==='bar'?'🍺':k==='hotel'?'🏨':k==='historic'?'🏛️':k==='restaurant'?'🍽️':k==='food'?'🍔':k==='truck'?'🚚':'🛍️'; }
+// ---- the ~300 MOBILE VENDORS (trucks / trailers / 10×10 tents). SEED/demo — the real list folds in
+//      from ArtsQuest (name + contact + GPS placement on their blueprint). Same schema as a porta-potty:
+//      a point on the map. Vendor ad pricing: $69/day · $499/fest. ----
+var VENDORS=[
+ {n:"Take a Taco",kind:'food',sells:'street tacos & elotes',coupon:'',lat:40.6186,lng:-75.3805,mobile:1},
+ {n:"Aw Shucks Funnel Cakes",kind:'food',sells:'funnel cake & fried Oreos',coupon:'Show this: $2 off a funnel cake',lat:40.6190,lng:-75.3802,mobile:1},
+ {n:"Falafel Bar",kind:'food',sells:'falafel & shawarma wraps',coupon:'',lat:40.6182,lng:-75.3809,mobile:1},
+ {n:"LV Kettle Corn",kind:'food',sells:'fresh kettle corn',coupon:'',lat:40.6168,lng:-75.3711,mobile:1},
+ {n:"Smoke & Barrel BBQ",kind:'food',sells:'brisket & pulled pork',coupon:'Show this: free side',lat:40.6160,lng:-75.3719,mobile:1},
+ {n:"Woodfire Pizza Co.",kind:'food',sells:'wood-fired pizza',coupon:'',lat:40.6193,lng:-75.3799,mobile:1}
+];
 
 // "Where did I park?" — drop a GPS pin at your car, walk back to it later
 function parkGet(){ try{ return JSON.parse(localStorage.getItem('dd.park')||'null'); }catch(e){ return null; } }
@@ -424,6 +438,11 @@ function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
     mk.bindTooltip((m.cup?'🍺 ':'')+m.n,{direction:'top',opacity:.95});
     mk.bindPopup('<b>'+esc(m.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(m.addr)+' · '+esc(m.blurb)+'</span>'+(m.cup?'<br><b style="color:#b8002e">🍺 Fills your Musikfest cup</b>':'')+'<br><a href="'+dirUrl(m)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
   });
+  // mobile vendors on the blueprint (trucks/tents) — same as any pin, like a porta-potty
+  VENDORS.forEach(function(v){
+    var ic=L.divIcon({className:'mfvend',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:6px;background:#fff;border:2px solid #e8730c;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px #0004">🍔</div>'});
+    L.marker([v.lat,v.lng],{icon:ic}).addTo(LG_SHOP).bindTooltip('🚚 '+v.n+' — '+v.sells,{direction:'top',opacity:.95});
+  });
 }
 // the SHOPS-inside-the-fest list (collapsible)
 (function renderShops(){ var el=document.getElementById('shopList'); if(!el)return;
@@ -441,8 +460,11 @@ var MF_DAYS=(function(){ try{ return (SCHED&&SCHED.length)||11; }catch(e){ retur
 //    Leave '' to fall back to "we'll email you a link". Retailer email + shop are appended to the URL.
 var STRIPE_PAY={ day:'', fest:'' };
 var TIERS={
- day: {k:'day', price:99, name:'One day',        unit:'/ day',                 best:false, desc:'Your ad + the walk-by toast for a single festival day.'},
- fest:{k:'fest',price:699,name:'Whole festival', unit:' · all '+MF_DAYS+' days',best:true,  desc:'Every day of Musikfest — featured: the walk-by toast, top of the shops list, a spot in the postable spread, plus a free 2′×2′ Musikfest QR for your window.'}
+ day: {k:'day', price:99, name:'One day',        unit:'/ day',                 addon:49,  best:false, desc:'Your ad + the walk-by toast for a single festival day.'},
+ fest:{k:'fest',price:699,name:'Whole festival', unit:' · all '+MF_DAYS+' days',addon:300, best:true,  desc:'Every day of Musikfest — featured: the walk-by toast, top of the shops list, a spot in the postable spread, plus a free 2′×2′ Musikfest QR for your window.'},
+ vday: {k:'vday', price:69, name:'Truck · one day',    unit:'/ day',                  addon:0, best:false, desc:'Walk-by toast for your food truck / tent for one festival day.'},
+ vfest:{k:'vfest',price:499,name:'Truck · whole fest', unit:' · all '+MF_DAYS+' days', addon:0, best:true,  desc:'Every day — your truck/tent toast pops as folks walk past, plus a spot in the postable spread. For the 300 mobile vendors.'},
+ gateway:{k:'gateway',price:9999,name:'Gateway', unit:' · the big toast at every gate', addon:0, best:false, desc:'The LARGER welcome toast that fires the moment a phone crosses INTO the festival — at Main & Broad, the South Side gate, or on foot across the line. Reaches everyone, all 11 days. For large sponsors — $999/day or $9,999 all-fest. (ArtsQuest gets the first one free.)'}
 };
 // pre-written ad copy per shop (from research) — the retailer can just buy, or edit it
 var AD_SEED={
@@ -464,7 +486,9 @@ var AD_SEED={
  "Café the Lodge":{head:"Coffee, art & a chill break",line:"Cozy South Side café under the Urban Arts Trail murals.",coupon:"Show this: 10% off"},
  "Godfrey Daniels":{head:"Legendary listening room since '76",line:"Folk, coffee, and history at 7 E 4th St.",coupon:"Show this: $1 off admission"}
 };
-var adState={photos:[],tier:'fest',photoIsDefault:false};
+var adState={photos:[],tier:'fest',photoIsDefault:false,qr:false};
+// GATEWAY sponsor (the MOST tier) — the big welcome toast at the boundary. ArtsQuest seeded free.
+var GATEWAY={ sponsor:{ name:'ArtsQuest', head:'Welcome to Musikfest 2026', line:'10 stages of free music down Main Street & at SteelStacks. Presented by ArtsQuest.', photo:null, free:true } };
 function adSlug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 function adStore(){ try{ return JSON.parse(localStorage.getItem('dd.mfads')||'[]'); }catch(e){ return []; } }
 function adSave(a){ try{ var s=adStore(); s.push(a); localStorage.setItem('dd.mfads',JSON.stringify(s)); }catch(e){} }
@@ -495,26 +519,38 @@ window.adPreview=function(){ var cs=adCurShop();
     photo:adState.photos[0]||null, head:document.getElementById('adHead').value.trim(), line:document.getElementById('adText').value.trim(), coupon:document.getElementById('adCoupon').value.trim() };
   var pv=document.getElementById('adToastPrev'); if(pv) pv.innerHTML=merchantToastHTML(o);
   var sub=document.getElementById('adSub'); if(sub) sub.textContent=cs.biz?('For '+cs.biz+' — buy it, or tweak it first.'):'We built it for you. Pick your shop, then buy or tweak.'; };
-function adFill(biz){ var s=AD_SEED[biz]||null;
-  document.getElementById('adHead').value=s?s.head:''; document.getElementById('adText').value=s?s.line:''; document.getElementById('adCoupon').value=s?s.coupon:'';
+function isVendorBiz(b){ for(var i=0;i<VENDORS.length;i++){ if(VENDORS[i].n===b) return VENDORS[i]; } return null; }
+function adFill(biz){ var v=isVendorBiz(biz), s=AD_SEED[biz]||null;
+  if(v){ document.getElementById('adHead').value=''; document.getElementById('adText').value=v.sells||''; document.getElementById('adCoupon').value=v.coupon||''; adState.tier='vfest'; }
+  else { document.getElementById('adHead').value=s?s.head:''; document.getElementById('adText').value=s?s.line:''; document.getElementById('adCoupon').value=s?s.coupon:''; if(adState.tier==='vfest'||adState.tier==='vday') adState.tier='fest'; }
   if(!adState.photos.length || adState.photoIsDefault){ adState.photos=[adDefaultPhoto(biz)]; adState.photoIsDefault=true; adPrevRender(); }
-  adPreview(); }
+  renderTiers(); adPreview(); }
 
 window.adOpen=function(){ var sel=document.getElementById('adBiz');
-  sel.innerHTML='<option value="">Is this your restaurant / shop / brewery?</option>'+
-    MERCHANTS.map(function(m){ return '<option value="'+esc(m.n)+'">'+esc(m.n)+' — '+esc(m.addr)+'</option>'; }).join('')+
+  sel.innerHTML='<option value="">Is this your shop, or your food truck?</option>'+
+    '<optgroup label="Main Street shops">'+MERCHANTS.map(function(m){ return '<option value="'+esc(m.n)+'">'+esc(m.n)+' — '+esc(m.addr)+'</option>'; }).join('')+'</optgroup>'+
+    '<optgroup label="Food trucks & tents ($69/day · $499/fest)">'+VENDORS.map(function(v){ return '<option value="'+esc(v.n)+'">🚚 '+esc(v.n)+' — '+esc(v.sells)+'</option>'; }).join('')+'</optgroup>'+
     '<option value="__new__">➕ My business isn\'t listed</option>';
   renderTiers(); adPreview();
   document.getElementById('adModal').style.display='block'; };
 window.adClose=function(){ document.getElementById('adModal').style.display='none'; };
 window.adBizChange=function(){ var v=document.getElementById('adBiz').value; document.getElementById('adBizNew').style.display=(v==='__new__')?'block':'none';
   if(v && v!=='__new__') adFill(v); else adPreview(); };
-function renderTiers(){ var host=document.getElementById('adTiers'); host.innerHTML=['fest','day'].map(function(k){ var t=TIERS[k];
+function tierKeys(){ var cs=adCurShop(); return isVendorBiz(cs.biz) ? ['vfest','vday','gateway'] : ['fest','day','gateway']; }
+function renderTiers(){ var keys=tierKeys(); if(keys.indexOf(adState.tier)<0) adState.tier=keys[0];
+  var host=document.getElementById('adTiers'); host.innerHTML=keys.map(function(k){ var t=TIERS[k];
   return '<div class="tier'+(adState.tier===k?' on':'')+'" onclick="adPick(\''+k+'\')">'+(t.best?'<span class="best">best value</span>':'')+
     '<span class="tp">$'+t.price.toLocaleString()+'</span><span class="tn">'+t.name+'</span><span style="font-size:11.5px;color:var(--muted);font-weight:700"> '+esc(t.unit)+'</span><div class="td">'+esc(t.desc)+'</div></div>';
-}).join(''); adBuyLabel(); }
-window.adPick=function(k){ adState.tier=k; renderTiers(); };
-function adBuyLabel(){ var b=document.getElementById('adBuyBtn'); if(b) b.textContent='Buy my ad — $'+TIERS[adState.tier].price.toLocaleString()+' →'; }
+}).join(''); adSyncQrRow(); adBuyLabel(); }
+window.adPick=function(k){ adState.tier=k; if(k==='gateway') adState.qr=false; renderTiers(); };
+window.adQrToggle=function(){ var c=document.getElementById('adQr'); adState.qr=!!(c&&c.checked); adBuyLabel(); };
+function adAddon(){ var t=TIERS[adState.tier]; return (adState.qr && t.addon)?t.addon:0; }
+function adTotal(){ return TIERS[adState.tier].price + adAddon(); }
+function adSyncQrRow(){ var row=document.getElementById('adQrRow'), lbl=document.getElementById('adQrLbl'), cb=document.getElementById('adQr'); if(!row)return;
+  var t=TIERS[adState.tier];
+  if(t.addon){ row.style.display='flex'; if(lbl)lbl.textContent='➕ Add a 10% discount QR (expires in 30 days) — +$'+t.addon; if(cb)cb.checked=adState.qr; }
+  else { row.style.display='none'; adState.qr=false; if(cb)cb.checked=false; } }
+function adBuyLabel(){ var b=document.getElementById('adBuyBtn'); if(b) b.textContent='Buy my ad — $'+adTotal().toLocaleString()+' →'; }
 window.adPhoto=function(inp){ var files=inp.files?Array.prototype.slice.call(inp.files):[]; if(!files.length)return;
   if(adState.photoIsDefault){ adState.photos=[]; adState.photoIsDefault=false; }   // drop the placeholder on first real upload
   files.slice(0,4).forEach(function(f){ var img=new Image();
@@ -533,20 +569,22 @@ window.adSubmit=function(){
   if(!biz){ alert('Pick your business (or add its name).'); return; }
   if(!head && !text){ alert('Add a headline or a line for your ad.'); return; }
   if(!/.+@.+\..+/.test(email)){ alert('Add your email for the receipt.'); return; }
-  var t=TIERS[adState.tier];
-  var ad={biz:biz,head:head,text:text,coupon:coupon,photos:adState.photos.slice(),photo:adState.photos[0]||null,tier:t.name,price:t.price,email:email,ts:Date.now(),paid:false};
+  var t=TIERS[adState.tier], total=adTotal();
+  var qrc=(adState.qr && t.addon)?{pct:10, expires:new Date(Date.now()+30*864e5).toISOString().slice(0,10)}:null;
+  var ad={biz:biz,head:head,text:text,coupon:coupon,photos:adState.photos.slice(),photo:adState.photos[0]||null,tier:t.name,tierKey:t.k,price:total,qrcoupon:qrc,email:email,ts:Date.now(),paid:false};
   adSave(ad); mfPerf('ad_buy_'+t.k,1,'dd');
-  try{ var cl=window.ddClient&&ddClient(); if(cl) cl.rpc('dd_ad_signup',{p_event:EVENT,p_member:mfMember(),p_biz:biz,p_tier:t.name,p_price:t.price,p_head:head,p_body:text,p_email:email}).catch(function(){}); }catch(e){}
-  // light it up on the map immediately (preview == what they saw)
-  MERCHANTS.forEach(function(m){ if(m.n.toLowerCase().indexOf(biz.toLowerCase())>=0 || biz.toLowerCase().indexOf(m.n.toLowerCase())>=0){ m.sponsor=1; m.adhead=head; m.adline=text; m.adphoto=ad.photo; m.adcoupon=coupon; } });
-  try{ drawShops(); }catch(e){}
+  try{ var cl=window.ddClient&&ddClient(); if(cl) cl.rpc('dd_ad_signup',{p_event:EVENT,p_member:mfMember(),p_biz:biz,p_tier:t.name,p_price:total,p_head:head,p_body:text,p_email:email}).catch(function(){}); }catch(e){}
+  if(t.k==='gateway'){ GATEWAY.sponsor={ name:biz, head:head||('Welcome to Musikfest — '+biz), line:text, photo:ad.photo, free:false }; }
+  else { // light up the walk-by shop immediately (preview == what they saw)
+    MERCHANTS.forEach(function(m){ if(m.n.toLowerCase().indexOf(biz.toLowerCase())>=0 || biz.toLowerCase().indexOf(m.n.toLowerCase())>=0){ m.sponsor=1; m.adhead=head; m.adline=text; m.adphoto=ad.photo; m.adcoupon=coupon; m.adqr=qrc; } });
+    try{ drawShops(); }catch(e){} }
   renderAds();
-  // STRIPE — open the real checkout with the payment link, prefilled; else fall back to email-a-link
   var link=STRIPE_PAY[t.k];
+  var label=esc(t.name)+' · $'+total.toLocaleString()+(qrc?' · +10% QR':'');
   if(link){ var url=link+(link.indexOf('?')<0?'?':'&')+'prefilled_email='+encodeURIComponent(email)+'&client_reference_id='+encodeURIComponent(adSlug(biz)+'|'+t.k);
-    adClose(); mfToastHTML('🛒 <b>Opening secure Stripe checkout…</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(biz)+' · '+esc(t.name)+' · $'+t.price.toLocaleString()+'</span>'); window.open(url,'_blank','noopener'); }
-  else { adClose(); mfToastHTML('✅ <b>Got it, '+esc(biz)+'!</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(t.name)+' · $'+t.price.toLocaleString()+' — we\'ll email your secure payment link to '+esc(email)+'.</span><br><span style="font-size:11.5px;color:#f0c96b">Your ad is live — and your free 2′×2′ window QR is ready below.</span>'); }
-  adState={photos:[],tier:'fest',photoIsDefault:false}; document.getElementById('adEmail').value=''; };
+    adClose(); mfToastHTML('🛒 <b>Opening secure Stripe checkout…</b><br><span style="font-size:12px;color:#e7ddf3">'+esc(biz)+' · '+label+'</span>'); window.open(url,'_blank','noopener'); }
+  else { adClose(); mfToastHTML('✅ <b>Got it, '+esc(biz)+'!</b><br><span style="font-size:12px;color:#e7ddf3">'+label+' — we\'ll email your secure payment link to '+esc(email)+'.</span>'+(t.k==='gateway'?'<br><span style="font-size:11.5px;color:#f0c96b">Your gateway welcome is live at every entrance.</span>':'<br><span style="font-size:11.5px;color:#f0c96b">Your ad is live — 2′×2′ window QR ready below.</span>')); }
+  adState={photos:[],tier:'fest',photoIsDefault:false,qr:false}; document.getElementById('adEmail').value=''; };
 function renderAds(){ var host=document.getElementById('adFeatured'); if(!host)return; var ads=adStore();
   host.innerHTML=ads.map(function(a){ var img=a.photo||(a.photos&&a.photos[0]);
     return '<div class="adfeat">'+(img?'<img src="'+img+'" alt="">':'<div style="width:64px;height:64px;border-radius:10px;background:#fff3d6;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto">🛍️</div>')+
@@ -711,11 +749,33 @@ function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach
       if(set){ mfToastHTML(bandCard(set.b, set.st, set.t)); }
       else { mfToastHTML('🎪 You\'re at <b>'+esc(best.n)+'</b><br><span style="font-size:11.5px;color:#b9a9d4">no set on right now — check the schedule</span>'); }
     } } }
-// walk-by MERCHANT toast — ONLY for sponsors (the paid $/day placement), deduped 5 min/shop
-function merchantCheck(here){ if(!here)return; var best=null,bd=1e9; MERCHANTS.forEach(function(m){ if(!m.sponsor)return; var d=hav(here[0],here[1],m.lat,m.lng); if(d<bd){bd=d;best=m;} });
-  if(best && bd<0.03){ var now=Date.now(); if(WALK._mc!==best.n || now-(WALK._mcT||0)>300000){ WALK._mc=best.n; WALK._mcT=now;
-    mfToastHTML(merchantToastHTML({ kind:best.kind, n:best.n, addr:best.addr, cup:best.cup, photo:best.adphoto,
-      head:best.adhead, line:best.adline||best.blurb, coupon:best.adcoupon })); } } }
+// GRANULAR walk-by: pass a shop or a truck → its toast pops; walk on → it expires; the next one pops.
+// One at a time, paced, over ALL shops (MERCHANTS) + the ~300 mobile vendors (VENDORS).
+function poiObj(p){ return p.mobile
+  ? { kind:'food', n:p.n, addr:'', cup:0, photo:null, head:null, line:p.sells||'', coupon:p.adcoupon||p.coupon }
+  : { kind:p.kind, n:p.n, addr:p.addr, cup:p.cup, photo:p.adphoto, head:p.adhead, line:p.adline||p.blurb, coupon:p.adcoupon }; }
+function walkByCheck(here){ if(!here)return; var R=0.02, now=Date.now();
+  var pois=MERCHANTS.concat(VENDORS); WALK._seen=WALK._seen||{};
+  pois.forEach(function(p){ if(p.lat==null)return; var d=hav(here[0],here[1],p.lat,p.lng); if(WALK._seen[p.n] && d>R*1.8) delete WALK._seen[p.n]; }); // walked away → can re-toast next pass
+  if(now-(WALK._wbT||0) < 3500) return;                          // pace: at most one pass-by toast every ~3.5s
+  var best=null,bd=1e9; pois.forEach(function(p){ if(p.lat==null||WALK._seen[p.n])return; var d=hav(here[0],here[1],p.lat,p.lng); if(d<R && d<bd){bd=d;best=p;} });
+  if(best){ WALK._seen[best.n]=now; WALK._wbT=now; mfToastHTML(merchantToastHTML(poiObj(best))); }
+}
+// GATEWAY: the big welcome toast the moment a phone crosses INTO the festival (once per entry / hour)
+var MF_GATES=[{lat:40.6188,lng:-75.3800,r:0.30},{lat:40.6158,lng:-75.3720,r:0.30}]; // north (Main & Broad) + south (SteelStacks)
+function insideFest(here){ for(var i=0;i<MF_GATES.length;i++){ if(hav(here[0],here[1],MF_GATES[i].lat,MF_GATES[i].lng) < MF_GATES[i].r) return true; } return false; }
+function gatewayCheck(here){ if(!here)return; var was=WALK._inside, now=insideFest(here); WALK._inside=now;
+  if(now && !was){ var t=Date.now(); if(t-(WALK._gwT||0) > 3600000){ WALK._gwT=t; mfGatewayToast(GATEWAY.sponsor); } } }
+function mfGatewayToast(sp){ if(!sp)return; var el=document.getElementById('mfGate');
+  if(!el){ el=document.createElement('div'); el.id='mfGate'; el.style.cssText='position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:260;background:linear-gradient(135deg,#3a2456,#7d1533);color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:92%;width:420px;padding:16px 18px;text-align:center;opacity:0;transition:opacity .3s'; document.body.appendChild(el); }
+  el.innerHTML=(sp.photo?'<img src="'+sp.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:11px;margin-bottom:9px">':'')+
+    '<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#f0c96b;text-transform:uppercase">'+(sp.free?'Presented by':'A word from')+' '+esc(sp.name)+'</div>'+
+    '<div style="font-size:21px;font-weight:900;margin:3px 0 4px">'+esc(sp.head||'Welcome to Musikfest')+'</div>'+
+    (sp.line?'<div style="font-size:13.5px;color:#e7ddf3;line-height:1.42">'+esc(sp.line)+'</div>':'')+
+    '<div style="font-size:11px;color:#b9a9d4;margin-top:8px">welcome to the festival 🌹</div>';
+  el.style.opacity='1'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.opacity='0'; },6500);
+}
+function merchantCheck(){}  // superseded by walkByCheck
 function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(here[0],here[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
   if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
 function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
@@ -727,7 +787,7 @@ function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  pottyCheck(prev,[la,lo]); stageCheck([la,lo]); merchantCheck([la,lo]);
+  pottyCheck(prev,[la,lo]); stageCheck([la,lo]); walkByCheck([la,lo]); gatewayCheck([la,lo]);
   try{ updateYou(); updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();
 }
 function startWatch(){ if(WALK.watch!=null||!navigator.geolocation)return; WALK.watch=navigator.geolocation.watchPosition(onPos,function(){},{enableHighAccuracy:true,maximumAge:2000,timeout:12000}); }
