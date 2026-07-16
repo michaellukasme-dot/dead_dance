@@ -822,7 +822,8 @@ function nowSetAtStage(stKey){ if(!stKey)return null; var day=todayISO(), nm=now
   return best; }
 // walk-by: within ~180 ft of a stage → toast who's on + their bio (deduped 4 min per stage)
 function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach(function(s){ if(s.lat==null)return; var d=hav(here[0],here[1],s.lat,s.lng); if(d<bd){bd=d;best=s;} });
-  if(best && bd<0.035){ var now=Date.now();
+  var accM=(window.YOU_ACC||999), accOk = best && accM < Math.max(55, stageFootFt(best)*0.3048*1.4);  // don't announce a stage on a loose fix
+  if(best && bd<0.035 && accOk){ var now=Date.now();
     if(WALK._st!==best.n || now-(WALK._stT||0)>240000){ WALK._st=best.n; WALK._stT=now;
       var set=nowSetAtStage(stageKey(best));
       if(set){ mfToastHTML(bandCard(set.b, set.st, set.t));
@@ -844,14 +845,19 @@ function mfReach(n){ try{ WALK._reach=WALK._reach||JSON.parse(localStorage.getIt
   if(WALK._reach[n])return; WALK._reach[n]=1; localStorage.setItem('dd.mf.reach',JSON.stringify(WALK._reach));
   var sb=(window.ddClient&&ddClient()); if(sb&&sb.rpc){ sb.rpc('dd_mf_reach_bump',{p_poi:String(n).slice(0,160),p_device:((window.ddId&&ddId().id)||'anon')}).then(function(){},function(){}); }
 }catch(e){} }
-function walkByCheck(here){ if(!here)return; var R=0.02, now=Date.now();
+function walkByCheck(here){ if(!here)return; var RR=0.02, RT=0.008, now=Date.now(), accM=(window.YOU_ACC||999);
+  // RR (~105 ft) = coarse "walked by" tally for the straggler reach report. RT (~42 ft) = the TIGHT
+  // storefront radius for the actual TOAST, so we only ever name the shop you're truly in front of.
   var all=MERCHANTS.concat(VENDORS);
-  all.forEach(function(p){ if(p.lat!=null && hav(here[0],here[1],p.lat,p.lng)<R) mfReach(p.n); });   // tally reach for ALL (the straggler report)
+  all.forEach(function(p){ if(p.lat!=null && hav(here[0],here[1],p.lat,p.lng)<RR) mfReach(p.n); });   // tally reach for ALL (the straggler report)
   var pois=mfWalkPois(); WALK._seen=WALK._seen||{};                                                  // but only AD BUYERS actually toast (after go-live)
-  pois.forEach(function(p){ if(p.lat==null)return; var d=hav(here[0],here[1],p.lat,p.lng); if(WALK._seen[p.n] && d>R*1.8) delete WALK._seen[p.n]; }); // walked away → can re-toast next pass
+  pois.forEach(function(p){ if(p.lat==null)return; var d=hav(here[0],here[1],p.lat,p.lng); if(WALK._seen[p.n] && d>RT*1.8) delete WALK._seen[p.n]; }); // walked away → can re-toast next pass
   if(now-(WALK._wbT||0) < 3500) return;                          // pace: at most one pass-by toast every ~3.5s
-  var best=null,bd=1e9; pois.forEach(function(p){ if(p.lat==null||WALK._seen[p.n])return; var d=hav(here[0],here[1],p.lat,p.lng); if(d<R && d<bd){bd=d;best=p;} });
-  if(best){ WALK._seen[best.n]=now; WALK._wbT=now; mfToastHTML(merchantToastHTML(poiObj(best))); }
+  if(accM > 20) return;                                          // loose fix can't tell one storefront from the next → stay silent, never wrong
+  var best=null,bd=1e9,second=1e9; pois.forEach(function(p){ if(p.lat==null||WALK._seen[p.n])return; var d=hav(here[0],here[1],p.lat,p.lng); if(d<bd){second=bd;bd=d;best=p;} else if(d<second){second=d;} });
+  // fire ONLY if the nearest shop is within the tight radius AND clearly the closest (the runner-up is
+  // farther out, or well behind) — so standing at the Brewery never pops the shop four doors back.
+  if(best && bd<RT && (second>RT || bd < second*0.6)){ WALK._seen[best.n]=now; WALK._wbT=now; mfToastHTML(merchantToastHTML(poiObj(best))); }
 }
 // GATEWAY: the big welcome toast the moment a phone crosses INTO the festival (once per entry / hour)
 var MF_GATES=[{lat:40.6188,lng:-75.3800,r:0.30},{lat:40.6158,lng:-75.3720,r:0.30}]; // north (Main & Broad) + south (SteelStacks)
@@ -881,8 +887,16 @@ function stageFootFt(s){ var nn=(s.n||'').toLowerCase();
   if(/lyrik|zinzen|familien|handwerk|comedy|chapel|moravian|tropical/.test(nn)) return 90;                    // milk-crate corners
   return 150; }
 function cellSlug(x){ return String(x).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40); }
-function currentCell(here){ var best=null,bd=1e9; STAGES.forEach(function(s){ if(s.lat==null)return; var d=hav(here[0],here[1],s.lat,s.lng); var r=stageFootFt(s)/5280; if(d<r && d<bd){bd=d;best=s;} });
-  return best ? cellSlug(best.n) : (insideFest(here)?'roaming':null); }
+// CONFIDENCE GATE: only claim a stage/Platz if the fix is tight enough to trust it. A 500 m fix in the
+// parking lot must NEVER be reported as "you're in Volksplatz." If we're not sure, we say nothing / roaming.
+function currentCell(here){ var accM=(window.YOU_ACC||999), best=null,bd=1e9;
+  STAGES.forEach(function(s){ if(s.lat==null)return; var d=hav(here[0],here[1],s.lat,s.lng);
+    var rMi=stageFootFt(s)/5280, rM=stageFootFt(s)*0.3048;
+    if(d<rMi && accM < rM*1.4 && d<bd){ bd=d; best=s; } });      // fix must be tighter than the footprint
+  if(best) return cellSlug(best.n);
+  if(insideFest(here) && accM<120) return 'roaming';
+  if(accM>=120){ try{ if(window.DDHealth) DDHealth.gpsLowConf(); }catch(e){} }   // a genuinely coarse fix — logged, not trusted
+  return null; }
 var _mfCell={cur:null,since:0,lastFlush:0};
 function mfVisitFlush(now){ var cell=_mfCell.cur; now=now||Date.now();
   if(!cell){ _mfCell.since=now; _mfCell.lastFlush=now; return; }
@@ -1002,5 +1016,6 @@ try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
 }).join(''); }catch(e){}
 renderPark();
 </script>
+<script src="dd_health.js" defer></script>
 <script src="lukas_a2hs.js" defer></script>
 </body></html>

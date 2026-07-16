@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DeadDance Health</title><meta name="theme-color" content="#0b1220"><link rel="icon" href="dd-512.png">
+<style>
+:root{--bg:#0a1120;--panel:#111c30;--line:#22314f;--ink:#e9f0fb;--mut:#8ba0c4;--grn:#37d39b;--amb:#f0b429;--red:#ff5d73}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+h1{font-size:19px;margin:0;font-weight:900}h1 span{color:var(--mut);font-weight:700;font-size:13px}
+.status{border-radius:16px;padding:16px 18px;margin:14px 0;font-weight:900;font-size:20px;display:flex;align-items:center;gap:12px}
+.status.grn{background:#0f2e24;border:1px solid #1f6b50;color:var(--grn)}
+.status.amb{background:#33280c;border:1px solid #6a4e17;color:var(--amb)}
+.status.red{background:#3a1420;border:1px solid #7d2340;color:var(--red)}
+.dot{width:14px;height:14px;border-radius:50%;background:currentColor;box-shadow:0 0 14px currentColor}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0}
+.k{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px}
+.k .l{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+.k .n{font-size:24px;font-weight:900;margin-top:4px}
+.k .n.grn{color:var(--grn)}.k .n.amb{color:var(--amb)}.k .n.red{color:var(--red)}
+.k .d{font-size:11px;color:var(--mut);margin-top:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.panel h2{font-size:13px;margin:0 0 8px;font-weight:900}
+.ver{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line)}
+.ver:last-child{border:0}.ver b{font-weight:800}
+.flag{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.pill{border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800}
+.pill.on{background:#3a1420;color:var(--red)}.pill.off{background:#0f2e24;color:var(--grn)}
+.foot{color:var(--mut);font-size:11.5px;margin-top:16px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>🩺 DeadDance Health <span id="win">· last 15 min</span></h1><div id="upd" style="font-size:12px;color:var(--mut)"></div></div>
+  <div class="status grn" id="status"><span class="dot"></span><span id="statusTxt">Checking…</span></div>
+  <div class="grid" id="kpis"></div>
+  <div class="panel"><h2>Build versions in the wild</h2><div id="vers"><div style="color:var(--mut);font-size:12px">—</div></div>
+    <div style="color:var(--mut);font-size:11px;margin-top:6px">A long tail of old versions = phones stuck on a bad build → raise <b>min_version</b> to force them forward.</div></div>
+  <div class="panel"><h2>Fleet control flags</h2><div id="flags"></div>
+    <div style="color:var(--mut);font-size:11px;margin-top:8px">Flags are flipped by the health monitor (or via <code>dd_flags_set</code> as service role). The whole fleet obeys within ~60s: kill-switch shows a calm card, min-version force-updates, load-level throttles heavy features.</div></div>
+  <div class="foot" id="foot"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var MINS=15;
+try{ var SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
+function esc(s){return String(s==null?'':s).replace(/[<>&]/g,'');}
+function pct(a,b){ return b?Math.round(1000*a/b)/10:0; }
+function band(v,amb,red){ return v>=red?'red':(v>=amb?'amb':'grn'); }
+
+function render(s, f){
+  s=s||{}; var beats=+s.beats||0;
+  var rpcRate=+s.rpc_err_rate||0, gpsRate=pct(+s.gps_lowconf||0,beats), jsRate=pct(+s.js_err||0,beats), load=+s.avg_load_ms||0, tiles=+s.tile_err||0;
+  var worst='grn';
+  function esc2(b){ if(b==='red')worst='red'; else if(b==='amb'&&worst!=='red')worst='amb'; return b; }
+  var kpi=[
+    ['Active devices', beats, '(beats / '+MINS+' min)', 'grn'],
+    ['RPC error rate', rpcRate+'%', 'DB call failures', esc2(band(rpcRate,1,5))],
+    ['Avg load', (load||'—')+(load?' ms':''), 'page open time', esc2(band(load,2500,5000))],
+    ['GPS coarse-fix', gpsRate+'%', 'guarded, not trusted', esc2(band(gpsRate,25,50))],
+    ['Tile errors', tiles, 'blank-map risk', esc2(band(tiles,1,20))],
+    ['JS errors', jsRate+'%', 'uncaught crashes', esc2(band(jsRate,1,4))]
+  ];
+  document.getElementById('kpis').innerHTML=kpi.map(function(k){return '<div class="k"><div class="l">'+k[0]+'</div><div class="n '+k[3]+'">'+k[1]+'</div><div class="d">'+k[2]+'</div></div>';}).join('');
+  var st=document.getElementById('status'); st.className='status '+worst;
+  document.getElementById('statusTxt').textContent = beats===0 ? 'No beats yet — waiting for the fleet (or nobody’s on).' : (worst==='grn'?'All systems green 🌹':worst==='amb'?'Watch — approaching a high-water mark':'RED — act now (see the flags panel)');
+  // versions
+  var v=s.versions||{}; var keys=Object.keys(v).sort();
+  document.getElementById('vers').innerHTML = keys.length ? keys.map(function(k){return '<div class="ver"><span>'+esc(k)+'</span><b>'+v[k]+'</b></div>';}).join('') : '<div style="color:var(--mut);font-size:12px">—</div>';
+  // flags
+  f=f||{}; document.getElementById('flags').innerHTML=
+    '<div class="flag"><span>Kill switch</span><span class="pill '+(f.kill_switch?'on':'off')+'">'+(f.kill_switch?'ON — maintenance card showing':'off')+'</span></div>'+
+    '<div class="flag"><span>Min version (force-update)</span><b>'+(f.min_version||0)+'</b></div>'+
+    '<div class="flag"><span>Load level</span><b>'+({0:'0 · normal',1:'1 · shedding',2:'2 · heavy (bare map)'}[f.load_level||0])+'</b></div>'+
+    (f.message?'<div class="flag"><span>Banner</span><b>'+esc(f.message)+'</b></div>':'');
+  document.getElementById('upd').textContent='updated '+new Date().toLocaleTimeString();
+  document.getElementById('foot').textContent='Thresholds — RPC err: 1% watch / 5% act · load: 2.5s watch / 5s act · GPS coarse: 25% watch / 50% act · JS err: 1% watch / 4% act. The scheduled monitor watches these same numbers and flips the flags automatically.';
+}
+function load(){ if(!SB){ render({},{}); return; }
+  Promise.all([ SB.rpc('dd_health_summary',{p_mins:MINS}), SB.rpc('dd_flags_get') ]).then(function(r){
+    render((r[0].data&&r[0].data[0])||{}, (r[1].data&&r[1].data[0])||{});
+  }).catch(function(){ render({},{}); });
+}
+load(); setInterval(load, 15000);
+</script>
+<script src="dd_back.js"></script>
+</body></html>

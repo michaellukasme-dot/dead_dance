@@ -11,6 +11,8 @@ window.DD_TILE = {
 };
 window.DDtile = function (map) {
   var t = window.DD_TILE || {};
-  return L.tileLayer(t.url || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  var layer = L.tileLayer(t.url || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     { attribution: t.attribution || "© OpenStreetMap", maxZoom: t.maxZoom || 19 }).addTo(map);
+  try { layer.on("tileerror", function () { if (window.DDHealth) DDHealth.tileErr(); }); } catch (e) {}  // blank-map early warning
+  return layer;
 };

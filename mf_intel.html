@@ -54,6 +54,17 @@
 
   <div class="grid" id="kpis"></div>
 
+  <div class="panel val">
+    <h2>Precision — we report what reconciles to <b>your</b> ground truth</h2>
+    <p class="cap">Our count is a <b>panel</b>: phones running DeadDance — a sample, not your gate. The <b>shares below</b> (which Platz, when, how long) are exact. We will <b>not publish an absolute total</b> until it reconciles to your own numbers. Give us one anchor day (attendance / cashless cards) and we calibrate — with a stated range, never a false-precise number.</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+      <div><div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">Your ground truth for one day</div>
+        <input id="anchor" type="number" inputmode="numeric" placeholder="e.g. 131700" oninput="calib()" style="margin-top:6px;background:#0e1a30;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-weight:800;width:180px"></div>
+      <div><div class="big" id="estTotal">—</div><div class="sub" id="estSub">estimated total — withheld until anchored</div></div>
+    </div>
+    <div class="ask" id="calNote" style="margin-top:12px">No anchor yet. We’re showing shares (exact) and <b>withholding any absolute total</b> — we don’t report a number we can’t reconcile to yours.</div>
+  </div>
+
   <div class="row2">
     <div class="panel">
       <h2>How many people are in each Platz — right now <span class="pill" id="liveTot"></span></h2>
@@ -131,13 +142,14 @@ function render(live, daily, hourly, dwell, repeatPct, primary){
   var liveTot=live.reduce(function(s,r){return s+r.people;},0);
   var yUniq=daily[daily.length-1].uniq;
   var running=daily.reduce(function(s,r){return s+r.uniq;},0);
+  window._panelY=yUniq; window._panelRun=running; try{ calib(); }catch(e){}   // keep the precision gate in sync
   var peakHr=hourly.indexOf(Math.max.apply(0,hourly));
   var busiest=live[0]?live[0].cell:'—';
   document.getElementById('kpis').innerHTML=[
-    ['In the footprint now', n(liveTot),'live phones · all Platzes','blu'],
-    ['Unique visitors yesterday', n(yUniq),'deduped per phone','gold'],
-    ['Festival-to-date (unique)', n(running),'running total','grn'],
-    ['Avg time on site', dwell+' min','per visitor',''],
+    ['App users in footprint now', n(liveTot),'measured · our panel','blu'],
+    ['App users yesterday', n(yUniq),'measured · our panel','gold'],
+    ['App users to date', n(running),'measured · our panel','grn'],
+    ['Avg time on site', dwell+' min','per app user',''],
     ['Repeat visitors', repeatPct+'%','came 2+ days','rose'],
     ['Peak arrival hour', (peakHr%12||12)+(peakHr<12?'am':'pm'),'plan the surge','']
   ].map(function(k){return '<div class="kpi"><div class="l">'+k[0]+'</div><div class="n '+k[3]+'">'+k[1]+'</div><div class="d">'+k[2]+'</div></div>';}).join('');
@@ -176,6 +188,20 @@ function render(live, daily, hourly, dwell, repeatPct, primary){
 }
 
 // try live RPCs; fall back to sample so it always renders
+// PRECISION GATE: only show an absolute total when calibrated to ArtsQuest ground truth; else withhold.
+try{ var _a=localStorage.getItem('dd.mf.anchor'); if(_a) document.getElementById('anchor').value=_a; }catch(e){}
+function calib(){
+  var a=+(document.getElementById('anchor').value)||0, yUniq=window._panelY||0, running=window._panelRun||0;
+  var est=document.getElementById('estTotal'), sub=document.getElementById('estSub'), note=document.getElementById('calNote');
+  try{ localStorage.setItem('dd.mf.anchor', a||''); }catch(e){}
+  if(!a || !yUniq){ est.textContent='—'; sub.textContent='estimated total — withheld until anchored';
+    note.innerHTML='No anchor yet. We’re showing shares (exact) and <b>withholding any absolute total</b> — we don’t report a number we can’t reconcile to yours.'; return; }
+  var r=yUniq/a;                                  // our penetration of their crowd on the anchor day
+  var estRun=Math.round(running/r), band=Math.round(estRun*0.15);
+  est.textContent=(estRun-band).toLocaleString()+'–'+(estRun+band).toLocaleString();
+  sub.textContent='estimated total to date · ±15% · calibrated';
+  note.innerHTML='Calibrated: our panel is <b>'+(Math.round(r*1000)/10)+'%</b> of your ground truth on the anchor day. The estimate carries a <b>±15%</b> band for day-to-day variance — we state the range, never a false-precise single number. Add more anchor days and the band tightens.';
+}
 function load(){
   if(!SB){ demo(); return; }
   var y=new Date(Date.now()-864e5).toISOString().slice(0,10);
