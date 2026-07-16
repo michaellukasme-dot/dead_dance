@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Philadelphia 2026 · World Cup City · StageFill</title><meta name="theme-color" content="#0b3d2e">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--ink:#12181f;--muted:#6b7480;--line:#e7ebf0;--green:#0b7a4b;--navy:#0e2a47;--gold:#e8b53a;--red:#b8002e}
+*{box-sizing:border-box}body{margin:0;background:#f6f8fa;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:14px 14px 90px}
+.hero{background:radial-gradient(130% 130% at 12% -10%,#12855a 0%,#0e2a47 60%,#081b30 100%);color:#fff;border-radius:20px;padding:24px 20px;position:relative;overflow:hidden;box-shadow:0 16px 40px #0e2a4733}
+.hero .k{color:var(--gold);font-weight:800;font-size:11.5px;letter-spacing:.11em;text-transform:uppercase}
+.hero h1{font-size:44px;line-height:.9;margin:6px 0 4px;font-weight:900;letter-spacing:-1.5px;text-transform:uppercase}
+.hero p{margin:8px 0 0;color:#c7dbe8;font-size:13.5px;line-height:1.45}
+.hero .badge{display:inline-block;margin-top:12px;background:#ffffff1c;border:1px solid #ffffff2e;border-radius:999px;padding:6px 13px;font-weight:800;font-size:12.5px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:22px 0 9px}
+#map{height:380px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.leaflet-attribution-flag{display:none!important}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#48505a;margin-top:9px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 14px}
+.m{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #eef2f6}
+.m:last-child{border-bottom:0}
+.m .dt{width:70px;flex:none;text-align:center}.m .dt b{display:block;font-size:14px}.m .dt span{font-size:11px;color:var(--muted)}
+.m .tm{flex:1;font-weight:800;font-size:14.5px}.m .tm span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.m .r16{background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #eef2f6}
+.row:last-child{border-bottom:0}.row .nm{font-weight:700;font-size:14px}.row .dd{font-size:12px;color:var(--muted);margin-top:1px}
+.row a{color:var(--green);font-weight:800;font-size:12.5px;text-decoration:none;white-space:nowrap}
+.qrwrap{text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
+.foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:24px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="k">⚽ World Cup Host City · Jun 14 – Jul 4, 2026</div>
+    <h1>Philadelphia<br>2026</h1>
+    <p>Six World Cup matches at the Linc, a 39-day Fan Festival at Lemon Hill, and the whole city in between — every venue, the transit, the closures, the parking. No app. Just this.</p>
+    <div class="badge">🇺🇸 Round of 16 on July 4 — the nation's 250th</div>
+  </div>
+
+  <div class="sec">The map — the whole World Cup footprint</div>
+  <div id="map"></div>
+  <div class="legend">
+    <span><i style="background:#b8002e"></i>Stadium</span>
+    <span><i style="background:#0b7a4b"></i>Fan Festival</span>
+    <span><i style="background:#e8b53a"></i>Watch party</span>
+    <span><i style="background:#2f6fe0"></i>Transit</span>
+    <span><i style="background:#8a6d3b"></i>Parking</span>
+    <span>🚧 Road closure</span>
+  </div>
+
+  <div class="sec">⚽ The 6 matches — Lincoln Financial Field</div>
+  <div class="card" id="matches"></div>
+
+  <div class="sec">🎉 FIFA Fan Festival™ — Lemon Hill, East Fairmount Park</div>
+  <div class="card" style="padding:14px">
+    <div style="font-weight:800;font-size:14.5px">Free · all 39 days · June 11 – July 19</div>
+    <div style="font-size:13px;color:#48505a;line-height:1.5;margin-top:5px">Live match broadcasts, concerts, cultural programming, and food vendors on the hill over the Schuylkill. Philadelphia is the <b>only U.S. city</b> running a Fan Fest for all 39 tournament days. Capacity <b>15,000/day</b> — free but registration recommended on match days.</div>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=39.9700,-75.1880&travelmode=transit" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;color:var(--green);font-weight:800;font-size:13px;text-decoration:none">🚶 Get me to Lemon Hill →</a>
+  </div>
+
+  <div class="sec">🚇 Getting there</div>
+  <div class="card" id="getting"></div>
+
+  <div class="sec">Share this map · no app</div>
+  <div class="qrwrap">
+    <div id="fqr" style="width:180px;height:180px;margin:0 auto"></div>
+    <div style="font-weight:900;font-size:15px;margin-top:8px">No app. No download.</div>
+    <div style="font-size:12.5px;color:var(--muted)">On your phone? <b>Tap it.</b> Showing a friend? <b>They scan it.</b></div>
+  </div>
+
+  <div class="foot">An independent fan companion built with <b>StageFill</b> — not affiliated with FIFA or the host committee. Public event info, one map. ⚽<br>Any city. Any festival. This one's Philadelphia.</div>
+</div>
+
+<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function dir(lat,lng,mode){ return 'https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng+'&travelmode='+(mode||'walking'); }
+
+// ---- the Philadelphia World Cup footprint (public data) ----
+var PINS=[
+ {t:'stadium',n:'Lincoln Financial Field',d:'6 World Cup matches · Jun 14 – Jul 4',lat:39.9008,lng:-75.1675,color:'#b8002e'},
+ {t:'fan',n:'FIFA Fan Festival™ · Lemon Hill',d:'Free · all 39 days · East Fairmount Park · 15k/day',lat:39.9700,lng:-75.1880,color:'#0b7a4b'},
+ {t:'watch',n:'Xfinity Live!',d:'Watch parties + big screens · Sports Complex',lat:39.9030,lng:-75.1690,color:'#e8b53a'},
+ {t:'watch',n:'Cira Green',d:'Elevated park watch spot · University City',lat:39.9505,lng:-75.1830,color:'#e8b53a'},
+ {t:'transit',n:'NRG Station — Broad St Line',d:'The subway straight to the stadium',lat:39.9088,lng:-75.1722,color:'#2f6fe0'},
+ {t:'transit',n:'Jefferson / Suburban Stations',d:'Regional Rail into Center City',lat:39.9530,lng:-75.1650,color:'#2f6fe0'},
+ {t:'parking',n:'Sports Complex Lots',d:'Stadium-area parking (drive in)',lat:39.9045,lng:-75.1712,color:'#8a6d3b'},
+ {t:'parking',n:'Fairmount Park lots',d:'For the Fan Festival at Lemon Hill',lat:39.9660,lng:-75.1830,color:'#8a6d3b'}
+];
+var CLOSURES=[
+ {n:'Kelly Dr / MLK Dr (Fairmount Park)',path:[[39.9660,-75.1830],[39.9700,-75.1880],[39.9760,-75.1930]]},
+ {n:'Sports Complex — event-day street closures',path:[[39.9010,-75.1700],[39.9008,-75.1675],[39.9020,-75.1650]]}
+];
+var MATCHES=[
+ {d:'Sun',dd:'Jun 14',t:'Côte d’Ivoire vs Ecuador',tm:'7:00 PM · Group'},
+ {d:'Fri',dd:'Jun 19',t:'Brazil vs Haiti',tm:'9:00 PM · Group'},
+ {d:'Mon',dd:'Jun 22',t:'France vs Iraq',tm:'5:00 PM · Group'},
+ {d:'Thu',dd:'Jun 25',t:'Curaçao vs Côte d’Ivoire',tm:'4:00 PM · Group'},
+ {d:'Sat',dd:'Jun 27',t:'Croatia vs Ghana',tm:'5:00 PM · Group'},
+ {d:'Sat',dd:'Jul 4',t:'France vs Paraguay',tm:'5:00 PM',r16:true}
+];
+var EMO={stadium:'⚽',fan:'🎉',watch:'📺',transit:'🚇',parking:'🅿️'};
+
+// map
+var map=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+PINS.forEach(function(p){ L.circleMarker([p.lat,p.lng],{radius:p.t==='stadium'?11:8,color:'#fff',weight:2,fillColor:p.color,fillOpacity:1}).addTo(map)
+  .bindTooltip(EMO[p.t]+' '+esc(p.n),{direction:'top',opacity:.95})
+  .bindPopup('<b>'+EMO[p.t]+' '+esc(p.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(p.d)+'</span><br><a href="'+dir(p.lat,p.lng,p.t==='parking'?'driving':(p.t==='transit'?'transit':'walking'))+'" target="_blank" rel="noopener" style="font-weight:800;color:#0b7a4b">'+(p.t==='parking'?'🚗 Drive here':'🚶 Take me there')+'</a>'); });
+CLOSURES.forEach(function(c){ L.polyline(c.path,{color:'#b8002e',weight:5,opacity:.7,dashArray:'8 7'}).addTo(map).bindTooltip('🚧 '+esc(c.n),{sticky:true}); });
+try{ map.fitBounds(PINS.map(function(p){return [p.lat,p.lng];}),{padding:[36,36],maxZoom:13}); }catch(e){}
+setTimeout(function(){ try{map.invalidateSize();}catch(e){} },250);
+
+// matches
+document.getElementById('matches').innerHTML=MATCHES.map(function(m){
+  return '<div class="m"><div class="dt"><b>'+m.dd.split(' ')[1]+'</b><span>'+m.d+' '+m.dd.split(' ')[0]+'</span></div>'+
+    '<div class="tm">'+esc(m.t)+'<span>'+esc(m.tm)+'</span></div>'+(m.r16?'<span class="r16">Round of 16 · Jul 4 🇺🇸</span>':'')+'</div>';
+}).join('');
+
+// getting there
+document.getElementById('getting').innerHTML=PINS.filter(function(p){return p.t==='transit'||p.t==='parking';}).map(function(p){
+  return '<div class="row"><div><div class="nm">'+EMO[p.t]+' '+esc(p.n)+'</div><div class="dd">'+esc(p.d)+'</div></div><a href="'+dir(p.lat,p.lng,p.t==='parking'?'driving':'transit')+'" target="_blank" rel="noopener">'+(p.t==='parking'?'drive ›':'route ›')+'</a></div>';
+}).join('');
+
+// dual-door QR
+try{ if(window.DDQR) DDQR.into('fqr', location.href.split('#')[0], {mark:'dd',size:360,css:180,caption:true}); }catch(e){}
+</script>
+</body></html>
