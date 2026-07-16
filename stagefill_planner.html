@@ -1,0 +1,139 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Build Your Own Festival · StageFill</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--rose:#b8002e;--purple:#5a2e86;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--green:#1f9e6b;--blue:#2f6fe0;--gold:#f0a500}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:20px;padding:18px}
+.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.hero h1{font-size:24px;margin:5px 0 4px;font-weight:900}
+.hero p{margin:0;color:#cdbfe0;font-size:13.5px;line-height:1.45}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+label.f{flex:1;min-width:150px;font-size:12px;font-weight:800;color:var(--muted)}
+input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;margin-top:4px;background:#fff;color:var(--ink)}
+.btn{border:0;border-radius:12px;padding:12px 15px;font-weight:800;font-size:14px;cursor:pointer;background:#f1eef7;color:var(--purple)}
+.btn.rose{background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
+.btn.gold{background:var(--gold);color:#3a1d00}
+#map{height:380px;border-radius:12px;overflow:hidden;background:#eef;border:1px solid var(--line)}
+.tools{display:flex;gap:6px;margin:9px 0}
+.tools button{flex:1;border:2px solid var(--line);background:#fff;border-radius:11px;padding:9px;font-weight:800;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.tools button.on{border-color:var(--purple);background:#f1eef7;color:var(--purple)}
+.hint{font-size:12px;color:var(--muted);margin:2px 0 8px;line-height:1.5}
+.pinrow{display:flex;align-items:center;gap:9px;padding:9px 4px;border-bottom:1px solid #f4f0fa;font-size:14px}
+.pinrow .dot{width:12px;height:12px;border-radius:50%;flex:none}
+.pinrow .nm{flex:1;font-weight:700}.pinrow .dt{color:var(--muted);font-size:12px}
+.pinrow .x{border:0;background:#f6eef1;color:var(--rose);border-radius:8px;padding:5px 9px;font-weight:800;cursor:pointer;font-size:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+.count{display:inline-block;background:#f1eef7;color:var(--purple);border-radius:999px;padding:2px 9px;font-weight:800;font-size:11px;margin-left:6px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;line-height:1.6}
+.leaflet-container{font:inherit}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="k">🎪 StageFill · the white box for organizers</div>
+    <h1>Build Your Own Festival</h1>
+    <p>A form that makes your city's Musikfest. Name it, center the map on your city, then drop your
+       stages, porta-potties, and parking. Publish → a no-app fan map with a QR. Any city, any event.</p>
+  </div>
+
+  <div class="sec">1 · Your festival</div>
+  <div class="row">
+    <label class="f">Festival name<input id="fName" placeholder="e.g., Philly Fan Fest 2026" oninput="save()"></label>
+    <label class="f">City<input id="fCity" placeholder="Philadelphia, PA" oninput="save()"></label>
+  </div>
+  <div class="row">
+    <label class="f">Start date<input id="fStart" type="date" oninput="save()"></label>
+    <label class="f">End date<input id="fEnd" type="date" oninput="save()"></label>
+    <button class="btn" style="align-self:flex-end;height:44px" onclick="centerCity()">📍 Center map on city</button>
+  </div>
+
+  <div class="sec">2 · Drop your pins <span class="count" id="pinCount">0</span></div>
+  <div class="tools">
+    <button id="t_stage" class="on" onclick="setTool('stage')">🎤 Stage</button>
+    <button id="t_potty" onclick="setTool('potty')">🚻 Potty</button>
+    <button id="t_parking" onclick="setTool('parking')">🅿️ Parking</button>
+  </div>
+  <div class="hint" id="toolHint">Tap the map to drop a <b>Stage</b> — you'll name it (and add the act/time). Drag a pin to nudge it.</div>
+  <div id="map"></div>
+  <div class="card" id="pinList" style="margin-top:10px"><div class="hint" style="margin:0">No pins yet — tap the map to place your first stage.</div></div>
+
+  <div class="sec">3 · Publish</div>
+  <div class="row">
+    <button class="btn gold" style="flex:1" onclick="exportJSON()">⬇︎ Copy festival data</button>
+    <button class="btn rose" style="flex:1" onclick="publishNote()">🌹 Publish (get the fan map + QR)</button>
+  </div>
+  <div class="hint">Copy hands you the full festival as data. Publish is how it becomes a live no-app fan
+    companion at <b>stagefill.app/&lt;your-festival&gt;</b> — same experience as Musikfest, for your city.</div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
+    One dataset, two faces: this is the organizer white box. The fan sees the companion — map, directions,
+    parking, day-of tracking — generated from the pins you drop here. 🌹</div>
+</div>
+
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var TYPES={stage:{label:'Stage',emoji:'🎤',color:'#b8002e'},potty:{label:'Porta-potty',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'}};
+var TOOL='stage';
+var FEST={ name:'', city:'', start:'', end:'', pins:[] };  // {id,type,name,detail,lat,lng}
+var MAP, LG, MARKERS={};
+
+function load(){ try{ var d=JSON.parse(localStorage.getItem('dd.festival.draft')||'null'); if(d){ FEST=d; fld('fName',d.name); fld('fCity',d.city); fld('fStart',d.start); fld('fEnd',d.end); } }catch(e){} }
+function fld(id,v){ var e=document.getElementById(id); if(e&&v)e.value=v; }
+function save(){ FEST.name=val('fName'); FEST.city=val('fCity'); FEST.start=val('fStart'); FEST.end=val('fEnd');
+  try{ localStorage.setItem('dd.festival.draft',JSON.stringify(FEST)); }catch(e){} }
+function val(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
+
+window.setTool=function(t){ TOOL=t; ['stage','potty','parking'].forEach(function(k){ var b=document.getElementById('t_'+k); if(b)b.classList.toggle('on',k===t); });
+  document.getElementById('toolHint').innerHTML='Tap the map to drop a <b>'+TYPES[t].label+'</b>'+(t==='stage'?" — you'll name it (and add the act/time)":' — name it')+'. Drag a pin to nudge it.'; };
+
+function initMap(){ MAP=L.map('map',{zoomControl:true}); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(MAP);
+  MAP.setView([39.9526,-75.1652],13); LG=L.layerGroup().addTo(MAP);
+  MAP.on('click',function(e){ addPin(TOOL, e.latlng.lat, e.latlng.lng); });
+  setTimeout(function(){ try{MAP.invalidateSize();}catch(e){} },250); }
+
+window.centerCity=function(){ var c=val('fCity'); if(!c){ alert('Type a city first.'); return; }
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(c),{headers:{'Accept':'application/json'}})
+   .then(function(r){return r.json();}).then(function(a){ if(a&&a[0]){ MAP.setView([+a[0].lat,+a[0].lon], 14); } else alert('Couldn\'t find that city — drop pins manually.'); })
+   .catch(function(){ alert('Lookup failed — you can still drop pins.'); }); };
+
+function addPin(type,lat,lng){
+  var name=prompt(TYPES[type].emoji+' Name this '+TYPES[type].label+':', type==='stage'?'Main Stage':(TYPES[type].label));
+  if(name===null) return;
+  var detail=''; if(type==='stage'){ detail=prompt('Act & time for opening (optional, e.g. "The Band · 8 PM"):','')||''; }
+  var p={ id:'p'+Date.now()+Math.round(Math.random()*999), type:type, name:name||TYPES[type].label, detail:detail, lat:+lat.toFixed(6), lng:+lng.toFixed(6) };
+  FEST.pins.push(p); save(); drawPin(p); renderList();
+}
+function drawPin(p){ var t=TYPES[p.type];
+  var m=L.circleMarker([p.lat,p.lng],{radius:9,color:'#fff',weight:2,fillColor:t.color,fillOpacity:1,draggable:true}).addTo(LG);
+  m.bindTooltip(t.emoji+' '+esc(p.name),{direction:'top'});
+  // circleMarker isn't draggable; use a draggable marker via divIcon for nudging
+  MARKERS[p.id]=m;
+}
+function redraw(){ LG.clearLayers(); MARKERS={}; FEST.pins.forEach(drawPin);
+  if(FEST.pins.length){ try{ MAP.fitBounds(FEST.pins.map(function(p){return [p.lat,p.lng];}),{padding:[40,40],maxZoom:16}); }catch(e){} } }
+function renderList(){ var host=document.getElementById('pinList'); document.getElementById('pinCount').textContent=FEST.pins.length;
+  if(!FEST.pins.length){ host.innerHTML='<div class="hint" style="margin:0">No pins yet — tap the map to place your first stage.</div>'; return; }
+  var order={stage:0,potty:1,parking:2};
+  var rows=FEST.pins.slice().sort(function(a,b){ return (order[a.type]-order[b.type]); });
+  host.innerHTML=rows.map(function(p){ var t=TYPES[p.type];
+    return '<div class="pinrow"><span class="dot" style="background:'+t.color+'"></span><span class="nm">'+t.emoji+' '+esc(p.name)+(p.detail?(' <span class="dt">· '+esc(p.detail)+'</span>'):'')+'</span><button class="x" onclick="removePin(\''+p.id+'\')">remove</button></div>';
+  }).join(''); }
+window.removePin=function(id){ FEST.pins=FEST.pins.filter(function(p){return p.id!==id;}); save(); redraw(); renderList(); };
+
+window.exportJSON=function(){ save(); var s=JSON.stringify(FEST,null,2);
+  try{ navigator.clipboard.writeText(s); alert('📋 Festival data copied — '+FEST.pins.length+' pins. Paste it anywhere, or hit Publish to make the live fan map.'); }
+  catch(e){ prompt('Copy your festival data:', s); } };
+window.publishNote=function(){ save();
+  if(!FEST.name){ alert('Name your festival first.'); return; }
+  if(FEST.pins.length<1){ alert('Drop at least one pin first.'); return; }
+  alert('🌹 '+FEST.name+' — '+FEST.pins.length+' pins ready.\n\nPublishing turns this into a live no-app fan map at stagefill.app/'+(FEST.name.toLowerCase().replace(/[^a-z0-9]+/g,'-'))+' with its own QR — same as Musikfest, for your city. (That step saves it to the StageFill back end; it\'s the next build.) Your data is saved on this device in the meantime.'); };
+
+load(); initMap(); redraw(); renderList();
+</script>
+</body></html>

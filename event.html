@@ -30,6 +30,7 @@ body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMa
 .btn.rose{background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
 .btn.ghost{background:#f1eef7;color:var(--purple)}
 .going{color:var(--muted);font-size:13px;text-align:center;margin:-4px 0 10px}
+.ticknote{text-align:center;color:var(--muted);font-size:11.5px;margin:8px 0 12px}.ticknote b{color:var(--ink)}
 .sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
 .hosts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .host{border:1px solid var(--line);border-radius:16px;padding:14px;text-decoration:none;color:var(--ink);text-align:center;background:#fff}
@@ -71,8 +72,11 @@ body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMa
     <div class="cov" id="eCov" style="display:none"></div>
   </div>
 
+  <a class="btn rose" id="ticketBtn" style="margin-top:14px;font-size:16px">🎟 Get Tickets</a>
+  <div class="ticknote" id="tickNote">Tickets by <b>StageFill</b> — routed to the official seller, <b>no markup</b>. 🌹</div>
   <div class="acts">
-    <button class="btn rose" id="goBtn" onclick="eGoing()">🌹 Going</button>
+    <button class="btn ghost" id="goBtn" onclick="eGoing()">🌹 Going</button>
+    <button class="btn ghost" id="followBtn" onclick="eFollow()">＋ Follow</button>
     <a class="btn ghost" id="shareBtn" onclick="eShare()">↗ Share</a>
   </div>
   <div class="going" id="goCount"></div>
@@ -116,7 +120,22 @@ function mono(n){return String(n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).fil
 function fmtDate(iso){ try{var d=new Date(String(iso).slice(0,10)+'T12:00:00'); if(isNaN(d))return iso; return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}catch(e){return iso;} }
 
 var SHOW={ id:qp('id'), band:qp('band'), venue:qp('venue'), city:qp('city'), state:qp('state'),
-           date:qp('date'), time:qp('time'), cover:qp('cover'), info:qp('info') };
+           date:qp('date'), time:qp('time'), cover:qp('cover'), info:qp('info'), ticket:qp('ticket') };
+
+/* ===== StageFill — the universal ticket layer. Follow an act (alert on ANNOUNCE, never night-of,
+   never spam), route tickets to the official seller (no markup — the anti-Ticketmaster promise). ===== */
+function followKey(){ return slug(SHOW.band); }
+function isFollowing(){ try{ return !!(JSON.parse(localStorage.getItem('dd.follow')||'{}'))[followKey()]; }catch(e){ return false; } }
+window.eFollow=function(){
+  try{ var f=JSON.parse(localStorage.getItem('dd.follow')||'{}'); if(f[followKey()]) delete f[followKey()]; else f[followKey()]=true; localStorage.setItem('dd.follow',JSON.stringify(f)); }catch(e){}
+  var on=isFollowing(), fb=document.getElementById('followBtn'); if(fb){ fb.textContent=on?'✓ Following':'＋ Follow '+(SHOW.band||'this act'); fb.style.opacity=on?.75:1; }
+  toast(on?('🔔 Following '+(SHOW.band||'this act')+' — we ping you the moment they announce near you. Never the night-of.'):'Unfollowed.');
+  try{ var c=window.ddClient&&ddClient(), id=window.ddId&&ddId(); if(c&&id) c.rpc('dd_follow_act',{p_member:(id&&id.id),p_act:followKey(),p_name:(SHOW.band||''),p_on:on}).catch(function(){}); }catch(e){}
+};
+window.eNotify=function(){
+  toast('🔔 You’re on the list — we’ll tell you the second tickets go live, right here.');
+  try{ var c=window.ddClient&&ddClient(), id=window.ddId&&ddId(); if(c&&id) c.rpc('chat_ticket_want',{p_band:SHOW.band,p_venue:SHOW.venue,p_date:SHOW.date,p_id:(id&&id.id)}).catch(function(){}); }catch(e){}
+};
 
 function render(){
   var loc=[SHOW.city,SHOW.state].filter(Boolean).join(', ');
@@ -132,7 +151,8 @@ function render(){
     '<a class="host" href="card.html?t=venue&name='+encodeURIComponent(SHOW.venue||'')+'"><div class="mono" style="background:'+G2+'">'+esc(mono(SHOW.venue))+'</div><div class="nm">'+esc(SHOW.venue||'Venue')+'</div><div class="k venue">Venue</div></a>';
   // details
   document.getElementById('details').innerHTML=(SHOW.info?('<p style="margin:0 0 8px">'+esc(SHOW.info)+'</p>'):'')+
-    '<div style="color:var(--muted);font-size:13px">🌹 Public · anyone in the family · '+(SHOW.cover?('$'+String(SHOW.cover).replace('$','')+' at the door'):'free / at the door')+'</div>';
+    '<div style="color:var(--muted);font-size:13px">🌹 Public · anyone in the family · '+(SHOW.cover?('$'+String(SHOW.cover).replace('$','')+' at the door'):'free / at the door')+'</div>'+
+    (SHOW.band?('<a href="https://www.setlist.fm/search?query='+encodeURIComponent(SHOW.band)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;color:#5a2e86;font-weight:800;font-size:13px;text-decoration:none">🎵 Setlists on setlist.fm →</a>'):'');
   // map — real Google embed by venue query (no key), + directions + print-near-venue
   var q=encodeURIComponent([SHOW.venue,SHOW.city,SHOW.state].filter(Boolean).join(', '));
   document.getElementById('mapCard').innerHTML=
@@ -142,6 +162,15 @@ function render(){
       '<a class="dir" href="https://maps.google.com/?q='+q+'" target="_blank" rel="noopener">🧭 Directions</a>'+
       '<a class="print" href="poster_maker.html?band='+encodeURIComponent(SHOW.band||'')+'&venue='+encodeURIComponent(SHOW.venue||'')+'&date='+encodeURIComponent(SHOW.date||'')+'&city='+encodeURIComponent(SHOW.city||'')+'&print=near">🖨️ Print a poster near here</a>'+
     '</div>';
+  // StageFill ticket routing (official seller, no markup) + follow state
+  var tb=document.getElementById('ticketBtn'), tn=document.getElementById('tickNote');
+  if(tb){
+    if(SHOW.ticket){ tb.setAttribute('href',SHOW.ticket); tb.setAttribute('target','_blank'); tb.setAttribute('rel','noopener'); tb.textContent='🎟 Get Tickets';
+      tb.onclick=function(){ try{ var c=window.ddClient&&ddClient(), id=window.ddId&&ddId(); if(c) c.rpc('dd_perf_log',{p_event:(SHOW.id||(slug(SHOW.band)+'|'+SHOW.date)),p_member:(id&&id.id),p_action:'ticket_out',p_n:1,p_network:'stagefill'}).catch(function(){}); }catch(e){} };
+      if(tn)tn.style.display='block'; }
+    else { tb.removeAttribute('href'); tb.textContent='🔔 Notify me when tickets drop'; tb.onclick=eNotify; if(tn)tn.style.display='none'; }
+  }
+  var fb=document.getElementById('followBtn'); if(fb){ var _on=isFollowing(); fb.textContent=_on?'✓ Following':'＋ Follow'; fb.style.opacity=_on?.75:1; }
   buildShare(); buildQR(); buildMeta();
   if(SHOW.id) refreshGoing();
 }

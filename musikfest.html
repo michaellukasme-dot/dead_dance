@@ -18,7 +18,9 @@
 .joincount{color:#cdbfe0;font-size:12.5px}
 .sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:22px 0 9px}
 .mapwrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
-.mapwrap svg{width:100%;height:auto;display:block;border-radius:10px}
+.mapwrap>svg{width:100%;height:auto;display:block;border-radius:10px}
+.leaflet-attribution-flag{display:none!important}
+.leaflet-container svg,.leaflet-container img{width:auto;height:auto;border-radius:0;max-width:none}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#4a4356;margin-top:8px;padding:0 4px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
@@ -321,8 +323,9 @@ window.refresh=function(){ if(!MF.length)return; var day=DAYS[curDayIdx];
  var cnt=document.getElementById('ddCount'); if(cnt)cnt.textContent=rows.length+' set'+(rows.length===1?'':'s')+(ddN?(' · '+ddN+' 🌹'):'');
  var shown=schExpand?rows:rows.slice(0,SCH_MAX), cs=catchStore();
  document.getElementById('fullSched').innerHTML = shown.length ? shown.map(function(r){
-   var ck=catchKey(r), on=cs[ck]?'checked':'';
-   return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span><span class="b">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</span><span class="g">'+esc(r.st)+'</span></div>';
+   var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!BAND_INFO[r.b];
+   var bspan='<span class="b'+(bio?' hasbio':'')+'"'+(bio?' data-b="'+esc(r.b)+'" onclick="bandInfo(this.getAttribute(\'data-b\'))" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px"':'')+'>'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+(bio?' ⓘ':'')+'</span>';
+   return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span></div>';
  }).join('') : '<div class="srow"><span class="g">Nothing '+(PILL==='dead'?'Dead/jam ':'')+'left today — tap › for the next day.</span></div>';
  document.getElementById('schMore').innerHTML = (rows.length>SCH_MAX) ? ('<button class="lmore" onclick="schToggle()">'+(schExpand?'Show less ↑':('Show '+(rows.length-SCH_MAX)+' more ↓'))+'</button>') : '';
 };
@@ -347,7 +350,35 @@ function fmtStat(){ var st=document.getElementById('trackStat'); if(!st)return; 
   st.innerHTML='<div class="big">'+WALK.miles.toFixed(2)+' mi</div><div style="font-size:12px;color:var(--muted);font-weight:700">walked at Musikfest</div>'+
    '<div class="row"><div><span>Elevation ↑</span><b>'+Math.round(WALK.gain)+' ft</b></div><div><span>Steps ≈</span><b>'+Math.round(WALK.miles*2100).toLocaleString()+'</b></div></div>'; }
 function leftRight(from,cur,tgt){ if(!from)return 'left'; var hx=cur[1]-from[1],hy=cur[0]-from[0],tx=tgt[1]-cur[1],ty=tgt[0]-cur[0]; return (hx*ty-hy*tx)>0?'left':'right'; }
-function mfToast(msg){ var t=document.getElementById('mfToast'); if(!t){ t=document.createElement('div'); t.id='mfToast'; t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;background:#241535;color:#fff;font-weight:800;font-size:14px;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:88%;text-align:center;opacity:0;transition:opacity .25s'; document.body.appendChild(t); } t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3600); }
+function mfToast(msg,isHtml){ var t=document.getElementById('mfToast'); if(!t){ t=document.createElement('div'); t.id='mfToast'; t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;background:#241535;color:#fff;font-weight:800;font-size:14px;line-height:1.4;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:88%;text-align:center;opacity:0;transition:opacity .25s'; document.body.appendChild(t); } if(isHtml)t.innerHTML=msg; else t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },isHtml?5200:3600); }
+function mfToastHTML(h){ mfToast(h,true); }
+// ---- band bios: as you walk PAST a stage, who's on + their story (BAND · STYLE · HOMETOWN) ----
+var BAND_INFO={
+ "Shakedown Citi":{style:"Grateful Dead tribute",home:"Northeast jam circuit",blurb:"Shakedown Street from the top — a rotating Dead-scene crew."},
+ "Liberty Jams":{style:"jam / improv",home:"Philadelphia, PA",blurb:"Philly jam outfit that stretches the Dead songbook wide open."},
+ "Rift (Philadelphia Phish Tribute)":{style:"Phish tribute · jam",home:"Philadelphia, PA",blurb:"Named for the Phish album — deep cuts and full-band improv."},
+ "Life After Dead: Grateful Dead Tribute":{style:"Grateful Dead tribute",home:"Lehigh Valley, PA",blurb:"Local Valley heads keeping the songbook alive."}
+};
+function bandCard(b,stage,time){ var i=BAND_INFO[b];
+  var head=(i? '🎤 <b>'+esc(b)+'</b>' : '🎤 <b>'+esc(b)+'</b>');
+  var body = i ? '<span style="font-weight:600;font-size:12.5px;color:#e7ddf3">'+esc(i.style)+' · '+esc(i.home)+'<br>'+esc(i.blurb)+'</span>'
+               : '<span style="font-weight:600;font-size:12.5px;color:#e7ddf3">on now</span>';
+  var foot = (stage||time) ? '<br><span style="font-size:11.5px;color:#b9a9d4">on '+esc(stage||'')+(time?(' · '+esc(String(time).replace(":00",""))):'')+'</span>' : '';
+  return head+'<br>'+body+foot; }
+window.bandInfo=function(b){ mfToastHTML(bandCard(b)); };  // tap a 🌹 act in the schedule → same card
+// who's on a given stage RIGHT NOW today (the set that started most recently, within ~95 min)
+function nowSetAtStage(stKey){ if(!stKey)return null; var day=todayISO(), nm=nowMins(), best=null;
+  (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.d!==day || r.st!==stKey) return; var t=mins(r.t);
+    if(t<=nm+5 && t>=nm-95){ if(!best || t>mins(best.t)) best=r; } });
+  return best; }
+// walk-by: within ~180 ft of a stage → toast who's on + their bio (deduped 4 min per stage)
+function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach(function(s){ if(s.lat==null)return; var d=hav(here[0],here[1],s.lat,s.lng); if(d<bd){bd=d;best=s;} });
+  if(best && bd<0.035){ var now=Date.now();
+    if(WALK._st!==best.n || now-(WALK._stT||0)>240000){ WALK._st=best.n; WALK._stT=now;
+      var set=nowSetAtStage(stageKey(best));
+      if(set){ mfToastHTML(bandCard(set.b, set.st, set.t)); }
+      else { mfToastHTML('🎪 You\'re at <b>'+esc(best.n)+'</b><br><span style="font-size:11.5px;color:#b9a9d4">no set on right now — check the schedule</span>'); }
+    } } }
 function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(here[0],here[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
   if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
 function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords.accuracy||99, alt=p.coords.altitude;
@@ -359,7 +390,7 @@ function onPos(p){ var la=p.coords.latitude, lo=p.coords.longitude, acc=p.coords
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  pottyCheck(prev,[la,lo]);
+  pottyCheck(prev,[la,lo]); stageCheck([la,lo]);
   try{ updateYou(); updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();
 }
 function startWatch(){ if(WALK.watch!=null||!navigator.geolocation)return; WALK.watch=navigator.geolocation.watchPosition(onPos,function(){},{enableHighAccuracy:true,maximumAge:2000,timeout:12000}); }
