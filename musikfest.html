@@ -314,7 +314,16 @@ var MERCHANTS=[
  {n:"Donegal Square",kind:"shop",addr:"534 Main St",lat:40.6192,lng:-75.3802,blurb:"Irish & Celtic imports — wool, jewelry, gifts. Above McCarthy's."},
  {n:"Domaci Home",kind:"shop",addr:"523 Main St",lat:40.6191,lng:-75.3801,blurb:"Design, home & maker goods — a classic Main Street browse."},
  {n:"Aardvark Sports Shop",kind:"shop",addr:"559 Main St · Main Street Commons",lat:40.6196,lng:-75.3804,blurb:"Running & outdoor gear, Shoppes at Main Street Commons."},
- {n:"The Sun Inn (1758)",kind:"historic",addr:"556 Main St",lat:40.6194,lng:-75.3803,cup:1,blurb:"Washington, Adams & Franklin stayed here. The courtyard hosts live music — Deal Trio & Duo play here spring–summer — plus shops inside. It's the Liederplatz block."}
+ {n:"The Sun Inn (1758)",kind:"historic",addr:"556 Main St",lat:40.6194,lng:-75.3803,cup:1,blurb:"Washington, Adams & Franklin stayed here. The courtyard hosts live music — Deal Trio & Duo play here spring–summer — plus shops inside. It's the Liederplatz block."},
+ // SOUTH SIDE — SteelStacks edge + the Southside Arts District (adjacent, coords approx)
+ {n:"The Steel Pub · Steel Ice Center",kind:"bar",addr:"320 E First St · at SteelStacks",lat:40.6162,lng:-75.3736,cup:1,blurb:"Bar inside the ice rink, and every Musikfest they set up their own stage + tents outside. Live bands, huge patio, steps from the stacks."},
+ {n:"Bonn Place Brewing",kind:"brewery",addr:"310 Taylor St · South Side",lat:40.6176,lng:-75.3706,cup:1,blurb:"Tiny brewery in the shadow of the stacks — 8+ on tap, every beer named with love."},
+ {n:"Bethlehem Barrel & Drafthouse",kind:"bar",addr:"South Side · near SteelStacks",lat:40.6161,lng:-75.3702,cup:1,blurb:"Whiskey wall + rotating PA craft and local-spirit cocktails, a block off the stacks."},
+ {n:"ZEST",kind:"restaurant",addr:"Gateway Bldg · S New St",lat:40.6156,lng:-75.3690,cup:0,blurb:"New American six floors up — short ribs and a South Side skyline view. Escape the crowd."},
+ {n:"Social Still",kind:"brewery",addr:"530 E 3rd St · South Side",lat:40.6166,lng:-75.3662,cup:1,blurb:"Craft distillery in a 1920s bank — bourbon, gin, vodka, cocktails and bites."},
+ {n:"Molly's Irish Grille & Sports Pub",kind:"bar",addr:"4th & New St · South Side",lat:40.6156,lng:-75.3681,cup:1,blurb:"Pints, wings, and the game — a South Side staple."},
+ {n:"Café the Lodge",kind:"shop",addr:"427 E 4th St · South Side",lat:40.6151,lng:-75.3666,cup:0,blurb:"Coffee, art, and a chill break under the Urban Arts Trail murals."},
+ {n:"Godfrey Daniels",kind:"historic",addr:"7 E 4th St · South Side",lat:40.6153,lng:-75.3691,cup:0,blurb:"Legendary listening room since 1976 — folk, coffee, and history."}
 ];
 function merchEmoji(k){ return k==='brewery'||k==='bar'?'🍺':k==='hotel'?'🏨':k==='historic'?'🏛️':k==='restaurant'?'🍽️':'🛍️'; }
 
@@ -404,7 +413,15 @@ var AD_SEED={
  "Donegal Square":{head:"Irish & Celtic finds on Main",line:"Wool, jewelry, and gifts above McCarthy's — worth the browse.",coupon:"Show this: 10% off"},
  "Domaci Home":{head:"Design & maker goods on Main",line:"Home pieces and local makers — a Main Street must-browse.",coupon:"Show this: 10% off"},
  "Aardvark Sports Shop":{head:"Sore feet? We've got you.",line:"Running & outdoor gear at Main Street Commons — comfort for the long walk.",coupon:"Show this: 10% off socks"},
- "The Sun Inn (1758)":{head:"Washington slept here — you can sip here",line:"Historic courtyard with live music (Deal Trio & Duo) and shops inside.",coupon:"Show this: courtyard drink special"}
+ "The Sun Inn (1758)":{head:"Washington slept here — you can sip here",line:"Historic courtyard with live music (Deal Trio & Duo) and shops inside.",coupon:"Show this: courtyard drink special"},
+ "The Steel Pub · Steel Ice Center":{head:"Our own stage + tents at the stacks",line:"Bar inside the rink, live bands and a huge patio out front. Come hang.",coupon:"Show this: $2 off a draft"},
+ "Bonn Place Brewing":{head:"Nice beers for nice people",line:"Tiny brewery in the shadow of the stacks — 8+ on tap, all named with love.",coupon:"Show this: $1 off a pour"},
+ "Bethlehem Barrel & Drafthouse":{head:"Whiskey wall + rotating PA craft",line:"Local spirits and a deep beer list, a block off the SteelStacks stages.",coupon:"Show this: happy-hour pricing"},
+ "ZEST":{head:"New American, six floors up",line:"Short ribs and a South Side skyline view. Escape the crowd for an hour.",coupon:"Show this: complimentary app"},
+ "Social Still":{head:"Craft distillery on 3rd",line:"Bourbon, gin, and vodka distilled in a 1920s bank — cocktails and bites.",coupon:"Show this: $2 off a craft cocktail"},
+ "Molly's Irish Grille & Sports Pub":{head:"Irish pub at 4th & New",line:"Pints, wings, and the game — a South Side staple.",coupon:"Show this: $2 off a pint"},
+ "Café the Lodge":{head:"Coffee, art & a chill break",line:"Cozy South Side café under the Urban Arts Trail murals.",coupon:"Show this: 10% off"},
+ "Godfrey Daniels":{head:"Legendary listening room since '76",line:"Folk, coffee, and history at 7 E 4th St.",coupon:"Show this: $1 off admission"}
 };
 var adState={photos:[],tier:'fest',photoIsDefault:false};
 function adSlug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
