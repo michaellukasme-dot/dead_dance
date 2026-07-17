@@ -911,7 +911,8 @@ function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS
   if(best && bd<0.03){ var now=Date.now(); if(WALK._pp!==best.n || now-(WALK._ppT||0)>150000){ WALK._pp=best.n; WALK._ppT=now; mfToast('🚻 Porta potty on your '+leftRight(prev,here,[best.lat,best.lng])+' — if you gotta go, you gotta go.'); } } }
 // Fed by dd_gps.js — position is Kalman-FILTERED (steady dot, tightest σ), so every geofence
 // below acts on the smoothed location, not the raw jitter. acc here = the device's honest σ.
-function onFix(f){ var la=f.lat, lo=f.lng, acc=(f.rawAcc==null?99:f.rawAcc), alt=f.alt;
+function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus('📍 Got you! Walk on. 🌹'); }   // first fix arrived → confirm it's working
+  var la=f.lat, lo=f.lng, acc=(f.rawAcc==null?99:f.rawAcc), alt=f.alt;
   var prev=window.YOU; window.YOU=[la,lo]; window.YOU_ACC=acc;   // remember confidence so we never mislabel the zone
   if(WALK.on && acc<=40){
     if(WALK.last){ var d=hav(WALK.last[0],WALK.last[1],la,lo); if(d>0.0009 && d<0.5){ WALK.miles+=d; WALK.path.push([la,lo]); } }  // jitter + teleport filter
@@ -924,15 +925,25 @@ function onFix(f){ var la=f.lat, lo=f.lng, acc=(f.rawAcc==null?99:f.rawAcc), alt
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
 function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
+// ── walk status banner — so the walker ALWAYS knows what's happening (finding you / got you / blocked) ──
+function walkStatus(msg,persist){ var el=document.getElementById('ddWalkStat');
+  if(!el){ el=document.createElement('div'); el.id='ddWalkStat'; el.style.cssText='position:fixed;left:50%;bottom:calc(78px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:215;background:#241535;color:#fff;font-weight:800;font-size:13px;line-height:1.4;padding:11px 16px;border-radius:13px;box-shadow:0 6px 20px #0006;max-width:90%;text-align:center'; document.body.appendChild(el); }
+  el.innerHTML=msg; el.style.display='block'; clearTimeout(el._h); if(!persist){ el._h=setTimeout(function(){ el.style.display='none'; },4500); } }
+function onGeoErr(e){ var c=e&&e.code;
+  if(c===1) walkStatus('📍 <b>Location is off for this app.</b> Allow Location for deaddance.app in your browser/phone settings, then tap Start my walk again.',true);
+  else if(c===3) walkStatus('🛰️ Still finding you — step into the open and hold still a few seconds…',true);
+  else walkStatus('📍 Can’t reach GPS right here — try stepping outside, then tap Start my walk again.',true); }
 function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
   ensureMap();  // so DDGPS can mount the dot/ring/Center-Me + auto-zoom to walking level on first lock
-  if(window.DDGPS && LMAP){ WALK.gps=DDGPS.attach(LMAP,{walkZoom:18,q:2.5,lockAcc:20,onFix:onFix}); }
-  else if(window.DDGPS){ WALK.gps=DDGPS.start({q:2.5,lockAcc:20,onFix:onFix}); }
-  else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:15000}); }
+  if(window.DDGPS && LMAP){ WALK.gps=DDGPS.attach(LMAP,{walkZoom:18,q:2.5,lockAcc:20,onFix:onFix,onError:onGeoErr}); }
+  else if(window.DDGPS){ WALK.gps=DDGPS.start({q:2.5,lockAcc:20,onFix:onFix,onError:onGeoErr}); }
+  else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:0,timeout:15000}); }
 }
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
-  if(WALK.on){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; startWatch(); fmtStat(); }
-  else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); } };
+  if(WALK.on){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
+    walkStatus('🛰️ Finding you… <b>allow location if your phone asks.</b>',true);   // instant feedback — never "nothing"
+    startWatch(); fmtStat(); }
+  else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
   if(c && window.YOU){ el.style.display='block'; el.innerHTML='🚗 '+prettyDist(hav(window.YOU[0],window.YOU[1],c.lat,c.lng))+' to your car'; } else el.style.display='none'; }
 window.nearestBathroom=function(){ if(!window.YOU){ startWatch(); alert('Getting your location — tap again in a moment.'); return; }

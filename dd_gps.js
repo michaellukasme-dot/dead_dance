@@ -67,6 +67,9 @@
     }
     function onErr(e) { if (opts.onError) opts.onError(e); }
 
+    // KICK a fast first fix (cached/coarse ok) so the dot appears in a second or two, and any
+    // permission/timeout error surfaces immediately — then the high-accuracy watch refines it.
+    try { w.navigator.geolocation.getCurrentPosition(onPos, onErr, { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 }); } catch (e) {}
     // enableHighAccuracy → the real GNSS chip; maximumAge:0 → never a stale cached fix; snappy timeout
     id = w.navigator.geolocation.watchPosition(onPos, onErr, {
       enableHighAccuracy: true, maximumAge: 0, timeout: (opts.timeout || 15000)
