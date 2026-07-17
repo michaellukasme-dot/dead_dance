@@ -274,7 +274,9 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <div class="pills">
     <button class="pill on" id="pill_all" onclick="setPill('all')">All</button>
     <button class="pill" id="pill_dead" onclick="setPill('dead')">🌹 Dead &amp; jam</button>
+    <button class="pill" id="pill_earlier" onclick="showEarlier()">⏱ Show earlier</button>
   </div>
+  <div id="askStrip"></div>
   <div class="sched" id="fullSched"></div>
   <div id="schMore"></div>
 
@@ -725,10 +727,13 @@ function dayLabel(d){ try{ return new Date(d+'T12:00:00').toLocaleDateString(und
 function mins(t){ var m=String(t).match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return 0; var h=(+m[1])%12+(/pm/i.test(m[3])?12:0); return h*60+(+m[2]); }
 function fillDaySelect(sel,def){ sel.innerHTML=DAYS.map(function(d){return '<option value="'+d+'"'+(d===def?' selected':'')+'>'+dayLabel(d)+'</option>';}).join(''); }
 function hm(v){ var m=String(v).match(/(\d+):(\d+)/); return m?((+m[1])*60+(+m[2])):0; }                 // "16:00" → minutes
+function nowHM(){ var d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 function planDays(){ var t=todayISO(); var r=DAYS.filter(function(d){return d>=t;}); return r.length?r:DAYS; }  // yesterday drops off
+function syncArriveDefault(){ var psel=document.getElementById('planDate'), a=document.getElementById('planArr'); if(!psel||!a)return; a.value=(psel.value===todayISO())?nowHM():'12:00'; }  // today → start at NOW, hide acts you already missed
 window.fillPlanDate=function(){ var sel=document.getElementById('planDate'); if(!sel)return; var days=planDays(), t=todayISO();
-  sel.innerHTML=days.map(function(d,i){ var lab=dayLabel(d); if(d===t)lab='Today · '+lab; return '<option value="'+d+'"'+(i===0?' selected':'')+'>'+lab+'</option>'; }).join(''); };
-window.planDateChange=function(){ schExpand=false; refresh(); };
+  sel.innerHTML=days.map(function(d,i){ var lab=dayLabel(d); if(d===t)lab='Today · '+lab; return '<option value="'+d+'"'+(i===0?' selected':'')+'>'+lab+'</option>'; }).join(''); syncArriveDefault(); };
+window.planDateChange=function(){ syncArriveDefault(); var b=document.getElementById('pill_earlier'); if(b)b.classList.remove('on'); schExpand=false; refresh(); };
+window.showEarlier=function(){ var a=document.getElementById('planArr'); if(a)a.value='00:00'; var b=document.getElementById('pill_earlier'); if(b)b.classList.add('on'); refresh(); };
 var curDayIdx=0, PILL='all', SCH_MAX=9, schExpand=false;
 function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function nowMins(){ var d=new Date(); return d.getHours()*60+d.getMinutes(); }
@@ -745,6 +750,7 @@ window.refresh=function(){ if(!MF.length)return;
  var aw=hm(aEl?aEl.value:'00:00'), dw=hm(dEl?dEl.value:'23:59');
  rows=rows.filter(function(r){ var mm=mins(r.t); return mm>=aw && mm<=dw; });   // ARRIVE→DEPART window shrinks the pocket
  rows.sort(function(a,b){ return mins(a.t)-mins(b.t); });
+ try{ renderAsks(rows[0]||null); }catch(e){}
  var ddN=MF.filter(function(r){ return r.d===day && r.sc==='dd'; }).length;
  var cnt=document.getElementById('ddCount'); if(cnt)cnt.textContent=rows.length+' set'+(rows.length===1?'':'s')+(ddN?(' · '+ddN+' 🌹'):'');
  var shown=schExpand?rows:rows.slice(0,SCH_MAX), cs=catchStore();
@@ -755,6 +761,39 @@ window.refresh=function(){ if(!MF.length)return;
  }).join('') : '<div class="srow"><span class="g">Nothing '+(PILL==='dead'?'Dead/jam ':'')+'left today — tap › for the next day.</span></div>';
  document.getElementById('schMore').innerHTML = (rows.length>SCH_MAX) ? ('<button class="lmore" onclick="schToggle()">'+(schExpand?'Show less ↑':('Show '+(rows.length-SCH_MAX)+' more ↓'))+'</button>') : '';
 };
+// ===== Claude on the mic — the app WRITES specific asks for whoever's on now; the shot IS the send =====
+var MF_SONGS=['Cumberland Blues','Sugar Magnolia','Fire on the Mountain',"Truckin'",'Bertha','Scarlet Begonias','Ripple',"Franklin's Tower",'Deal','Eyes of the World','Shakedown Street','Sugaree'];
+function askList(a){ var song=MF_SONGS[Math.floor(Math.random()*MF_SONGS.length)];
+  var shots=['📸 Get in close on the bass player.','📸 Lead guitar, mid-solo — freeze it.','🎥 Fifteen seconds of the whole band jamming.','📸 Wide shot of the crowd at '+a.st+'.','📸 The twirlers up front — catch the dancers.'];
+  var caps=(a.sc==='dd')
+    ? ['“'+song+'” is rippling tonight 🌹','You can feel it — '+a.b+' deep in the jam 🌹','The whole crowd’s moving. '+a.b+' at Musikfest 🌹']
+    : [a.b+' is on fire at '+a.st+' 🌹',a.b+' — Musikfest, right now 🌹','This one’s special — '+a.b+' live 🌹'];
+  function pick(x){ return x[Math.floor(Math.random()*x.length)]; }
+  var used={}, out=[]; while(out.length<3){ var sh=pick(shots); if(used[sh])continue; used[sh]=1; out.push({shot:sh, cap:pick(caps)}); }
+  return out;   // each ask = a shot Claude wants + the caption it posts to the family
+}
+function typeInto(el,text,cb){ var i=0; (function step(){ if(i<=text.length){ el.textContent=text.slice(0,i); i++; setTimeout(step,15); } else if(cb) cb(); })(); }
+window.renderAsks=function(a){ var host=document.getElementById('askStrip'); if(!host)return;
+  if(!a){ host.innerHTML=''; host.removeAttribute('data-k'); return; }
+  var key=a.b+'|'+a.t+'|'+a.d; if(host.getAttribute('data-k')===key) return; host.setAttribute('data-k',key);   // don't re-type on every refresh
+  var asks=askList(a);
+  host.innerHTML='<div style="margin:2px 0 10px"><div style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><img src="claude-mark.svg" alt="" style="width:20px;height:20px"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">Claude wrote the caption — tap, take the pic, it posts</span></div><button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four of us, four sides of '+esc(a.st)+', one shot.</span></span></button><div id="askBubbles"></div></div>';
+  var wrap=document.getElementById('askBubbles'), idx=0;
+  function addBubble(ask){ var b=document.createElement('button'); b.type='button'; b.onclick=function(){ askCapture(ask.cap); };
+    b.style.cssText='display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;border:1px solid #f0d0dc;background:linear-gradient(100deg,#fff,#fdf4f7);border-radius:13px;padding:9px 11px;margin:0 0 7px;cursor:pointer;font:inherit';
+    b.innerHTML='<img src="claude-mark.svg" alt="" style="width:18px;height:18px;flex:none;margin-top:1px"><span style="flex:1;min-width:0"><span class="askt" style="display:block;font-size:13px;font-weight:700;color:var(--ink);line-height:1.4"></span><span class="askc" style="display:block;font-size:11.5px;color:#9a6b78;font-style:italic;margin-top:3px"></span></span>';
+    wrap.appendChild(b);
+    typeInto(b.querySelector('.askt'),ask.shot,function(){ b.querySelector('.askc').textContent='📣 posts: “'+ask.cap+'”'; idx++; if(idx<asks.length) setTimeout(function(){ addBubble(asks[idx]); },200); });
+  }
+  addBubble(asks[0]);
+};
+function cookieCelebrate(cap){ var el=document.getElementById('ckPop'); if(!el){ el=document.createElement('div'); el.id='ckPop'; el.style.cssText='position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:260;background:#241535;color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:90%;padding:12px 15px;display:flex;align-items:center;gap:11px'; document.body.appendChild(el); }
+  el.innerHTML='<img src="cookie-mark.svg" alt="" style="width:34px;height:34px;flex:none"><div><div style="font-weight:900;font-size:13px">🍪 Posted to the family!</div>'+(cap?'<div style="font-size:12px;opacity:.9">“'+String(cap).replace(/</g,'&lt;')+'”</div>':'')+'</div>';
+  el.style.display='flex'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.display='none'; },4500);
+}
+window.askCapture=function(cap){ window._askCap=cap||''; var inp=document.getElementById('photoIn'); if(inp)inp.click(); };   // tapping the ask opens the camera; the shot itself is the send
+window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; var inp=document.getElementById('photoIn'); if(inp)inp.click(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
+
 if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; fillPlanDate(); refresh(); } else { drawMap(); }
 
 /* ===== FULL-LINEUP BROWSER — plan all 600+ sets on a laptop or phone (their app can't) ===== */
@@ -959,7 +998,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 356'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 359'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
@@ -996,14 +1035,14 @@ function myFirst(){ try{ return (localStorage.getItem('dd.myname')||'').split(' 
 function pushPhoto(rec){ var url=rec.url; var img=new Image(); img.onload=function(){
     PHOTOS.push({id:rec.id,url:url,img:img,lat:rec.lat,lng:rec.lng,exif:!!rec.exif}); renderPhotoStrip();
     try{updatePhotos();}catch(e){} }; img.src=url; }
-window.addPhotos=function(input){ var files=input.files; if(!files||!files.length)return;
+window.addPhotos=function(input){ var files=input.files; if(!files||!files.length)return; var askCap=window._askCap||''; window._askCap='';
   Array.prototype.forEach.call(files,function(f){
     var save=function(lat,lng,ex){
       if(window.DDPhotos&&DDPhotos.save){
         var _cell=null; try{ if(typeof currentCell==='function'&&window.YOU) _cell=currentCell(window.YOU); }catch(e){}
         DDPhotos.save(f,{lat:lat,lng:lng,exif:ex,cell:_cell}).then(function(r){
           pushPhoto({id:r.id,url:r.localUrl,lat:lat,lng:lng,exif:ex});
-          try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){}
+          try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){} if(askCap){ try{ cookieCelebrate(askCap); }catch(e){} }
         }).catch(function(){ /* even if persist hiccups, still show it */ pushPhoto({url:URL.createObjectURL(f),lat:lat,lng:lng,exif:ex}); });
       } else { pushPhoto({url:URL.createObjectURL(f),lat:lat,lng:lng,exif:ex}); try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} }
     };
