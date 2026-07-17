@@ -3,9 +3,9 @@
 <title>DeadDance</title>
 <meta name="theme-color" content="#2a1b3d">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="dd-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="dd-mark.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="dd-180.png">
+<link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="rose.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="rose-192.png">
 <meta name="description" content="The national community of Deadheads, tribute bands, and the rooms that host them. A Facebook enhancement — your calendar, your store, your family, all in one place.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DeadDance">
@@ -718,7 +718,7 @@ body{padding-bottom:64px}
 <body>
 
 <div class="top">
-  <div class="logo"><img src="dd-32.png" alt="DeadDance" style="height:22px;width:22px;border-radius:6px;vertical-align:-5px;margin-right:7px">DeadDance</div>
+  <div class="logo"><img src="rose-32.png" alt="DeadDance" style="height:22px;width:22px;border-radius:6px;vertical-align:-5px;margin-right:7px">DeadDance</div>
   <input class="search" id="ddSearch" autocomplete="off" placeholder="Search heads, shows, tapes, art…" oninput="ddSearchInput(this.value)" onkeydown="if(event.key==='Escape'){this.blur();ddSearchClose();}">
   <div id="ddSearchRes" class="ddsr"></div>
   <button class="cbtn" onclick="openApps()" title="Menu" aria-label="Menu">▦</button>
@@ -1064,6 +1064,8 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shakedown</b><i>The lot.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.openMiracle&&openMiracle()})"><span>🍀</span><div><b>Miracle Bucket</b><i>Free tickets.</i></div></a>
     <div class="asec">You</div>
+    <a class="aitem" onclick="coGo('appsov',function(){location.href='hyperpost_setup.html'})"><span>🚀</span><div><b>Set up HyperPost</b><i>Networks, lists, invite, install — once.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){location.href='photos_explained.html'})"><span>📸</span><div><b>Show photos — how it works</b><i>Collaborate · Stage Shots · the Chancellor's Image.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){profile('me')})"><span>🪪</span><div><b>Your QR profile</b><i>Tickets, stubs, story.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.qaOpen&&qaOpen()})"><span>🧪</span><div><b>Help test</b><i>Shape the app.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ (window.lukasA2HS&&lukasA2HS.show)?lukasA2HS.show():toast('🌹 Already installed — you\'re running the app.') })"><span>📲</span><div><b>Install Dead Dance</b><i>Full-screen app · works offline.</i></div></a>
