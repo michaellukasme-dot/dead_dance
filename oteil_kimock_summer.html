@@ -1,0 +1,120 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Oteil & Friends · Kimock Summer 2026 · DeadDance</title>
+<meta name="theme-color" content="#241535">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--pur:#5a2e86;--gold:#e0a021;--rose:#b8002e;--ink:#1a1320;--mut:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+.hero{background:radial-gradient(120% 100% at 50% 0,#3a2456,#241535);color:#fff;border-radius:20px;padding:22px 20px;text-align:center}
+.hero .rose{font-size:32px}
+.hero .k{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+.hero h1{font-size:28px;line-height:1.04;margin:6px 8px;font-weight:900;letter-spacing:-.5px}
+.hero p{margin:0 6px;color:#cfbfe6;font-size:13.5px;line-height:1.5}
+.band{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.band span{background:#ffffff18;border:1px solid #ffffff2e;border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700;color:#efe6fa}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+#map{height:320px;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.leaflet-attribution-flag{display:none!important}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;display:flex;gap:13px;align-items:center}
+.card.past{opacity:.5}
+.card.star{border-color:#f0d9a6;background:#fffdf6}
+.date{flex:0 0 auto;width:58px;text-align:center;background:#241535;color:#fff;border-radius:11px;padding:8px 4px}
+.date b{display:block;font-size:20px;font-weight:900;line-height:1}.date span{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.info{flex:1;min-width:0}.info .v{font-weight:900;font-size:15px}.info .c{font-size:12.5px;color:var(--mut)}.info .o{font-size:12px;color:var(--pur);font-weight:700;margin-top:2px}
+.info a.tix{display:inline-block;margin-top:6px;background:#f1eef7;color:#5a2e86;border-radius:9px;padding:6px 11px;font-weight:800;font-size:12px;text-decoration:none}
+.dir{flex:0 0 auto;color:var(--pur);font-weight:800;font-size:12.5px;text-decoration:none;white-space:nowrap}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:22px;line-height:1.6}
+.tag{display:inline-block;background:#b8002e;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;margin-left:6px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="rose">🥁🌹</div>
+    <div class="k">Dead-family · Summer 2026</div>
+    <h1>Oteil &amp; Friends<br>Kimock Summer Run</h1>
+    <p>Oteil Burbridge (Dead &amp; Company) leads a rotating Dead-family crew across the Northeast — with <b>Steve &amp; John Kimock</b> and <b>Melvin Seals</b> sitting in. It rolls right into the Jerry Garcia Symphonic Celebration.</p>
+    <div class="band"><span>Oteil Burbridge</span><span>🥁 John Morgan Kimock</span><span>🎸 Steve Kimock</span><span>Melvin Seals</span><span>Jason Crosby</span></div>
+  </div>
+
+  <div class="sec">The run — ⭐ = Steve Kimock &amp; Melvin Seals sit in</div>
+  <div id="map"></div>
+
+  <div class="sec">Every date · the Dead-family summer run</div>
+  <div id="list"></div>
+
+  <div class="sec">Oteil’s Fall ’26 · “Electrospective” with John Scofield, Larry Goldings &amp; Adam Deitch</div>
+  <div id="fall"></div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
+    Routed through <b>DeadDance</b>. 🌹 Then catch the same players with the orchestra — see the Jerry Garcia Symphonic Celebration.<br>
+    Source: jambase.com/band/john-morgan-kimock. Coords good to ~a block. Not affiliated with the artists or venues.</div>
+</div>
+
+<script src="dd_map.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+// John Morgan Kimock summer 2026, Oteil & Friends run (jambase). star = Steve Kimock + Melvin Seals confirmed.
+var SHOWS=[
+ {d:'2026-07-24',mo:'JUL',day:'24',v:'Gratefulfest',c:'Garrettsville, OH',o:'Oteil & Friends · The Word · Eggy',lat:41.325,lng:-81.055,tix:'https://www.jambase.com/festival/grateful-fest-2026'},
+ {d:'2026-08-01',mo:'AUG',day:'1',v:'JamPacked Craft Beer & Music Festival',c:'Richmond, VA',o:'Oteil & Friends · Big Something · Neighbor',lat:37.5407,lng:-77.4360,tix:'https://www.jambase.com/festival/jampacked-craft-beer-and-music-festival-2026'},
+ {d:'2026-08-02',mo:'AUG',day:'2',v:'French Broad River Brewery',c:'Asheville, NC',o:'Oteil & Friends · Steve Kimock · Jason Crosby',star:1,lat:35.5601,lng:-82.5490,tix:'https://www.jambase.com/show/oteil-friends-french-broad-river-brewery-outdoor-stage-20260802'},
+ {d:'2026-08-04',mo:'AUG',day:'4',v:'The Muse',c:'Nantucket, MA',o:'Oteil & Friends · Melvin Seals · Steve Kimock',star:1,lat:41.2790,lng:-70.1010,tix:'https://www.jambase.com/show/oteil-friends-the-muse-20260804'},
+ {d:'2026-08-05',mo:'AUG',day:'5',v:'The Muse',c:'Nantucket, MA',o:'Oteil & Friends · Melvin Seals · Steve Kimock',star:1,lat:41.2790,lng:-70.1010,tix:'https://www.jambase.com/show/oteil-friends-the-muse-20260805'},
+ {d:'2026-08-06',mo:'AUG',day:'6',v:'Tree House Brewing · Summer Stage',c:'Deerfield, MA',o:'Oteil & Friends · Melvin Seals · Steve Kimock',star:1,lat:42.4760,lng:-72.6010,tix:'https://www.jambase.com/show/oteil-summer-stage-20260806'},
+ {d:'2026-08-07',mo:'AUG',day:'7',v:'Nashua Center for the Arts',c:'Nashua, NH',o:'Oteil & Friends · Melvin Seals · Steve Kimock',star:1,lat:42.7654,lng:-71.4676,tix:'https://www.jambase.com/show/oteil-friends-nashua-center-for-the-arts-20260807'},
+ {d:'2026-08-08',mo:'AUG',day:'8',v:'Stateside Amphitheatre · Jay Peak',c:'Jay, VT',o:'Oteil & Friends · Melvin Seals · Steve Kimock',star:1,lat:44.9240,lng:-72.5270,tix:'https://www.jambase.com/show/oteil-friends-stateside-amphitheatre-at-jay-peak-resort-20260808'},
+ {d:'2026-08-09',mo:'AUG',day:'9',v:'Lincoln Hill Farms',c:'Canandaigua, NY',o:'Oteil & Friends · Melvin Seals · Steve Kimock',star:1,lat:42.8550,lng:-77.3360,tix:'https://www.jambase.com/show/oteil-friends-lincoln-hill-farms-20260809'}
+];
+var TODAY=new Date().toISOString().slice(0,10);
+function dir(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng; }
+
+var map=L.map('map',{zoomControl:true,scrollWheelZoom:false});
+if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
+var pts=[];
+SHOWS.forEach(function(s){ var past=s.d<TODAY;
+  var m=L.circleMarker([s.lat,s.lng],{radius:s.star?10:8,color:'#fff',weight:2,fillColor:past?'#c9c0d6':(s.star?'#e0a021':'#5a2e86'),fillOpacity:1}).addTo(map);
+  m.bindTooltip((s.star?'⭐ ':'🥁 ')+s.v+' · '+s.mo+' '+s.day,{direction:'top'});
+  m.bindPopup('<b>'+esc(s.v)+'</b><br>'+esc(s.c)+' · '+esc(s.mo)+' '+s.day+'<br><span style="color:#5a2e86">'+esc(s.o)+'</span><br><a href="'+dir(s)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚗 Directions</a>');
+  pts.push([s.lat,s.lng]);
+});
+try{ map.fitBounds(pts,{padding:[34,34]}); }catch(e){ map.setView([42,-75],6); }
+setTimeout(function(){ try{map.invalidateSize();}catch(e){} },250);
+
+document.getElementById('list').innerHTML=SHOWS.map(function(s){ var past=s.d<TODAY;
+  return '<div class="card'+(past?' past':'')+(s.star?' star':'')+'"><div class="date"><span>'+s.mo+'</span><b>'+s.day+'</b></div>'+
+    '<div class="info"><div class="v">'+esc(s.v)+(s.star?'<span class="tag">⭐ Steve Kimock</span>':'')+(past?' <span style="color:#c9c0d6">played</span>':'')+'</div><div class="c">'+esc(s.c)+'</div>'+
+    '<div class="o">'+esc(s.o)+'</div>'+
+    (s.tix&&!past?('<a class="tix" href="'+s.tix+'" target="_blank" rel="noopener">🎟 Tickets & info</a>'):'')+'</div>'+
+    '<a class="dir" href="'+dir(s)+'" target="_blank" rel="noopener">🚗 Go</a></div>';
+}).join('');
+
+// Oteil's fall '26 run with John Scofield (Electrospective) — Dead & Co's bassist in jazz mode. List only.
+var FALL=[
+ ['OCT','14','Ludlow Garage','Cincinnati, OH'],['OCT','15','Ludlow Garage','Cincinnati, OH'],
+ ['OCT','16','The Kent Stage','Kent, OH'],['OCT','17','Sharon Lynne Wilson Center','Brookfield, WI'],
+ ['OCT','18','Thalia Hall','Chicago, IL'],['OCT','20','Sheldon Concert Hall','St. Louis, MO'],
+ ['OCT','21','City Winery','Nashville, TN'],['OCT','22','The Hamilton Live','Washington, DC'],
+ ['OCT','24','Miami Beach Bandshell','Miami Beach, FL'],['OCT','25','City Winery','Atlanta, GA · 2 shows'],
+ ['OCT','27','Belly Up','Solana Beach, CA · 2 shows'],['OCT','29','Regent Theatre','Los Angeles, CA'],
+ ['OCT','30','SFJAZZ Center','San Francisco, CA'],['OCT','31','SFJAZZ Center','San Francisco, CA'],
+ ['NOV','1','SFJAZZ Center','San Francisco, CA'],['NOV','3','Revolution Hall','Portland, OR'],
+ ['NOV','4','Tower Theatre','Bend, OR'],['NOV','5','McDonald Theatre','Eugene, OR'],
+ ['NOV','6','Neptune Theatre','Seattle, WA'],['NOV','8','Boulder Theater','Boulder, CO'],
+ ['NOV','11','Dakota','Minneapolis, MN · 2 shows'],['NOV','12','Dakota','Minneapolis, MN · 2 shows'],
+ ['NOV','13','Ardmore Music Hall','Ardmore, PA'],['NOV','15','Ardmore Music Hall','Ardmore, PA'],
+ ['NOV','17','Town Hall','New York, NY'],['NOV','18','Flynn Center','Burlington, VT'],
+ ['NOV','19','Somerville Theatre','Somerville, MA'],['NOV','20','MCG Jazz','Pittsburgh, PA · 2 shows'],
+ ['NOV','21','UNCG Auditorium','Greensboro, NC']
+];
+document.getElementById('fall').innerHTML=FALL.map(function(s){
+  return '<div class="card"><div class="date"><span>'+s[0]+'</span><b>'+s[1]+'</b></div>'+
+    '<div class="info"><div class="v">'+esc(s[2])+'</div><div class="c">'+esc(s[3])+'</div>'+
+    '<div class="o">Oteil Burbridge · John Scofield · Larry Goldings · Adam Deitch</div></div></div>';
+}).join('')+'<div style="text-align:center;margin-top:6px"><a href="https://www.jambase.com/band/oteil-burbridge" target="_blank" rel="noopener" style="color:#5a2e86;font-weight:800;font-size:12.5px;text-decoration:none">🎟 All Oteil dates & tickets · JamBase ›</a></div>';
+</script>
+<script src="dd_health.js" defer></script>
+<script src="dd_back.js"></script>
+</body></html>

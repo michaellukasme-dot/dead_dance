@@ -6,13 +6,20 @@
 (function (root) {
   // the acts that appear in the Calendar band dropdown (#calAct) — one group each
   var MARQUEE = [
-    { name: "Steve Kimock",             ic: "🎸" },   // our king — the throne
-    { name: "John Mayer",               ic: "🎶" },
-    { name: "Melvin Seals and JGB",     ic: "🎹", disp: "JGB with Melvin Seals" },
-    { name: "Dark Star Orchestra",      ic: "🌌" },
-    { name: "Joe Russo's Almost Dead",  ic: "🔥", disp: "Joe Russo's Almost Dead (JRAD)" },
-    { name: "Sages And Spirits",        ic: "🌀", disp: "Sages & Spirits" },   // JK + original DSO + Melvin
-    { name: "Jerry's Middle Finger",    ic: "🖐" }
+    { name: "Steve Kimock",             ic: "🎸",
+      syn: "Garcia's own favorite guitarist — a tone-obsessed, patient improviser who held chairs in Zero, KVHW, and Bob Weir's RatDog. He never chased the spotlight; the spotlight chased his sound. On DeadDance he is the king, and the throne is his. 🌹" },
+    { name: "John Mayer",               ic: "🎶",
+      syn: "The pop-blues virtuoso who became Garcia's improbable heir in Dead & Company — reverent, fluid, and single-handedly responsible for pulling a new generation into the songbook. Proof the music keeps finding its next hands." },
+    { name: "Melvin Seals and JGB",     ic: "🎹", disp: "JGB with Melvin Seals",
+      syn: "The Hammond B-3 thunder of the Jerry Garcia Band. Melvin took the JGB chair around 1980 and, since Garcia's passing, has carried the songbook on the road for three decades. When you want the church of Jerry, it's Melvin." },
+    { name: "Dark Star Orchestra",      ic: "🌌",
+      syn: "The show-recreation pioneers — they don't just play the songs, they perform an entire historic Grateful Dead setlist, era-accurate, night by night. The closest thing anyone has built to a time machine." },
+    { name: "Joe Russo's Almost Dead",  ic: "🔥", disp: "Joe Russo's Almost Dead (JRAD)",
+      syn: "The Brooklyn powerhouse that reimagined the songbook loud, tight, and fearless — the tribute band that made it cool to be young and Dead again. The songbook's rowdiest, most electric second life." },
+    { name: "Sages And Spirits",        ic: "🌀", disp: "Sages & Spirits",
+      syn: "A scene supergroup — John Kimock, original Dark Star Orchestra players, and Melvin Seals — playing the music with pedigree in every seat. Lineage you can hear." },
+    { name: "Jerry's Middle Finger",    ic: "🖐",
+      syn: "West Coast JGB torchbearers — a loving, note-perfect celebration of the Jerry Garcia Band songbook, named with a wink. Pure devotion to Jerry's other band." }
   ];
   // stable synthetic member counts (until the real join numbers exist)
   var SEED_MEMBERS = { "dark-star-orchestra": 4820, "joe-russo-s-almost-dead": 3610, "jerry-s-middle-finger": 940,
@@ -36,7 +43,7 @@
   function setTuned(n, on) { return put(n, { tuned: !!on }); }
   function qrUrl(n) { return "https://deaddance.app/" + slug(n); }     // the QR the band drops on Facebook to funnel fans
 
-  function meta(m) { return { name: m.name, disp: m.disp || m.name, ic: m.ic, slug: slug(m.name),
+  function meta(m) { return { name: m.name, disp: m.disp || m.name, ic: m.ic, slug: slug(m.name), syn: m.syn || "",
     logo: logo(m.name), accepted: accepted(m.name), tuned: tuned(m.name), members: members(m.name), qr: qrUrl(m.name) }; }
   function list() { return MARQUEE.map(function (m, i) { var o = meta(m); o.rose = (i === 0); return o; }); }  // #1 carries the Rose
   function get(n) { for (var i = 0; i < MARQUEE.length; i++) if (slug(MARQUEE[i].name) === slug(n)) return meta(MARQUEE[i]); return null; }

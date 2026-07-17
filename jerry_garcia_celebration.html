@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jerry Garcia Symphonic Celebration 2026 · DeadDance</title>
+<meta name="theme-color" content="#0d2a1e">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--grn:#1f7a4d;--gold:#e0a021;--rose:#b8002e;--ink:#14201a;--mut:#6f8378;--line:#e2ece6}
+*{box-sizing:border-box}body{margin:0;background:#f6faf7;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+.hero{background:radial-gradient(120% 100% at 50% 0,#134a30,#0d2a1e);color:#fff;border-radius:20px;padding:22px 20px;text-align:center;position:relative;overflow:hidden}
+.hero .rose{font-size:34px}
+.hero .k{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+.hero h1{font-size:30px;line-height:1.02;margin:6px 10px 6px;font-weight:900;letter-spacing:-.5px}
+.hero p{margin:0 6px;color:#cfe6da;font-size:13.5px;line-height:1.5}
+.band{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.band span{background:#ffffff18;border:1px solid #ffffff2e;border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700;color:#eafaf1}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+#map{height:320px;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.leaflet-attribution-flag{display:none!important}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;display:flex;gap:13px;align-items:center}
+.card.past{opacity:.55}
+.date{flex:0 0 auto;width:58px;text-align:center;background:#0d2a1e;color:#fff;border-radius:11px;padding:8px 4px}
+.date b{display:block;font-size:20px;font-weight:900;line-height:1}.date span{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.info{flex:1;min-width:0}.info .v{font-weight:900;font-size:15px}.info .c{font-size:12.5px;color:var(--mut)}.info .o{font-size:12px;color:#3a7a55;font-weight:700;margin-top:2px}
+.info a.tix{display:inline-block;margin-top:6px;background:#f1eef7;color:#5a2e86;border-radius:9px;padding:6px 11px;font-weight:800;font-size:12px;text-decoration:none}
+.dir{flex:0 0 auto;color:var(--grn);font-weight:800;font-size:12.5px;text-decoration:none;white-space:nowrap}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:22px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="rose">🌹</div>
+    <div class="k">A Garcia-Family Celebration · 60 Years of the Dead</div>
+    <h1>Jerry Garcia<br>Symphonic Celebration</h1>
+    <p>Garcia's own compositions and the Grateful Dead songbook, reimagined with a full orchestra at each stop. Summer 2026 — the first extended run in a decade.</p>
+    <div class="band">
+      <span>Melvin Seals</span><span>Jacklyn LaBranch</span><span>Tom Hamilton</span><span>Grahame Lesh</span><span>🥁 John Morgan Kimock</span><span>Kanika Moore</span>
+    </div>
+  </div>
+
+  <div class="sec">The tour — seven cities, seven orchestras</div>
+  <div id="map"></div>
+
+  <div class="sec">Every date</div>
+  <div id="list"></div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
+    Routed through <b>DeadDance</b> — a Garcia celebration belongs with the family. 🌹<br>
+    Sources: jerrygarcia.com/events · the venues. Not affiliated with the Jerry Garcia Family LLC or the venues.</div>
+</div>
+
+<script src="dd_map.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+// The 2026 series (jerrygarcia.com/events). lat/lng good to ~a block.
+var SHOWS=[
+ {d:'2026-06-30',mo:'JUN',day:'30',v:'Tanglewood',c:'Lenox, MA',o:'Boston Symphony grounds — the opener',lat:42.3468,lng:-73.3079,tix:''},
+ {d:'2026-08-28',mo:'AUG',day:'28',v:'TD Pavilion at Highmark Mann',c:'Philadelphia, PA',o:'with The Philly Pops · Christopher Dragon',lat:39.9837,lng:-75.2219,tix:'https://www.ticketmaster.com/event/02006474AE17C0CF'},
+ {d:'2026-08-29',mo:'AUG',day:'29',v:'PNC Bank Arts Center',c:'Holmdel, NJ',o:'',lat:40.3707,lng:-74.1493,tix:'https://www.ticketmaster.com/event/02006474A7AAB552'},
+ {d:'2026-08-30',mo:'AUG',day:'30',v:'Bethel Woods Center for the Arts',c:'Bethel, NY',o:'on the Woodstock ’69 grounds',lat:41.6958,lng:-74.8759,tix:'https://www.ticketmaster.com/event/0000647692F15648'},
+ {d:'2026-09-01',mo:'SEP',day:'1',v:'CMAC',c:'Canandaigua, NY',o:'Constellation Brands – Marvin Sands PAC',lat:42.8620,lng:-77.2930,tix:'https://www.ticketmaster.com/event/00006473C6E6E90E'},
+ {d:'2026-09-03',mo:'SEP',day:'3',v:'Allianz Amphitheater at Riverfront',c:'Richmond, VA',o:'with the Richmond Symphony',lat:37.5335,lng:-77.4370,tix:'https://www.ticketmaster.com/event/010064748E4E8E7E'},
+ {d:'2026-09-04',mo:'SEP',day:'4',v:'Wolf Trap · Filene Center',c:'Vienna, VA',o:'with the National Symphony Orchestra',lat:38.9370,lng:-77.2647,tix:'https://www.wolftrap.org/show/26filene/090426/'}
+];
+var TODAY=new Date().toISOString().slice(0,10);
+function dir(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng; }
+
+var map=L.map('map',{zoomControl:true,scrollWheelZoom:false});
+if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
+var pts=[];
+SHOWS.forEach(function(s,i){ var past=s.d<TODAY;
+  var m=L.circleMarker([s.lat,s.lng],{radius:9,color:'#fff',weight:2,fillColor:past?'#9db3a7':'#1f7a4d',fillOpacity:1}).addTo(map);
+  m.bindTooltip('🌹 '+s.v+' · '+s.mo+' '+s.day,{direction:'top'});
+  m.bindPopup('<b>'+esc(s.v)+'</b><br>'+esc(s.c)+' · '+esc(s.mo)+' '+s.day+(s.o?('<br><span style="color:#3a7a55">'+esc(s.o)+'</span>'):'')+'<br><a href="'+dir(s)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚗 Directions</a>');
+  pts.push([s.lat,s.lng]);
+});
+try{ map.fitBounds(pts,{padding:[34,34]}); }catch(e){ map.setView([40,-76],6); }
+setTimeout(function(){ try{map.invalidateSize();}catch(e){} },250);
+
+document.getElementById('list').innerHTML=SHOWS.map(function(s){ var past=s.d<TODAY;
+  return '<div class="card'+(past?' past':'')+'"><div class="date"><span>'+s.mo+'</span><b>'+s.day+'</b></div>'+
+    '<div class="info"><div class="v">'+esc(s.v)+(past?' · <span style="color:#9db3a7;font-weight:700">played</span>':'')+'</div><div class="c">'+esc(s.c)+'</div>'+
+    (s.o?('<div class="o">'+esc(s.o)+'</div>'):'')+
+    (s.tix&&!past?('<a class="tix" href="'+s.tix+'" target="_blank" rel="noopener">🎟 Tickets</a>'):'')+'</div>'+
+    '<a class="dir" href="'+dir(s)+'" target="_blank" rel="noopener">🚗 Go</a></div>';
+}).join('');
+</script>
+<script src="dd_health.js" defer></script>
+<script src="dd_back.js"></script>
+</body></html>

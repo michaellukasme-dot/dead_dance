@@ -740,6 +740,9 @@ body{padding-bottom:64px}
           <option value="Sages And Spirits">Sages &amp; Spirits</option>
           <option value="Jerry's Middle Finger">Jerry's Middle Finger</option>
           <option value="all" selected>Grateful Dead Tribute</option>
+          <option value="__bloodline__">🌹 The Grateful Dead — The Bloodline (groups) →</option>
+          <option value="__jgsc__">🌹 Jerry Garcia Symphonic Celebration · tour →</option>
+          <option value="__jkimock__">🥁 John Kimock · Oteil & Friends Summer '26 →</option>
           <option value="__musikfest__">🎪 Musikfest 2026 · Bethlehem →</option>
           <option value="__fifa__">⚽ Philadelphia World Cup 2026 →</option>
         </select>
@@ -1476,6 +1479,12 @@ function calType(v){ CALTYPE=v||'all'; renderCal(); }
 function calAct(v){
  if(v==='__musikfest__'){ var s=document.getElementById('calAct'); if(s)s.value='all';   /* short-term seasonal item → opens the Musikfest hub */
    if(window.ddSheet){ ddSheet('musikfest.html','🎪 Musikfest 2026'); } else { window.open('musikfest.html','_blank','noopener'); } return; }
+ if(v==='__bloodline__'){ var sb2=document.getElementById('calAct'); if(sb2)sb2.value='all';   /* the GD family tree — joinable groups + histories */
+   if(window.ddSheet){ ddSheet('lineage.html','🌹 The Bloodline'); } else { window.open('lineage.html','_blank','noopener'); } return; }
+ if(v==='__jgsc__'){ var sj=document.getElementById('calAct'); if(sj)sj.value='all';        /* Dead-family series → routes through DeadDance */
+   if(window.ddSheet){ ddSheet('jerry_garcia_celebration.html','🌹 Jerry Garcia Symphonic Celebration'); } else { window.open('jerry_garcia_celebration.html','_blank','noopener'); } return; }
+ if(v==='__jkimock__'){ var sjk=document.getElementById('calAct'); if(sjk)sjk.value='all';    /* John Kimock artist hub — Oteil & Friends summer run */
+   if(window.ddSheet){ ddSheet('oteil_kimock_summer.html','🥁 John Kimock · Summer ’26'); } else { window.open('oteil_kimock_summer.html','_blank','noopener'); } return; }
  if(v==='__fifa__'){ var sf=document.getElementById('calAct'); if(sf)sf.value='all';        /* showcase: Philadelphia World Cup 2026 companion */
    if(window.ddSheet){ ddSheet('fifa_philadelphia.html','⚽ Philadelphia 2026'); } else { window.open('fifa_philadelphia.html','_blank','noopener'); } return; }
  CAL_ACT=v||'all'; CAL_SEL=null;

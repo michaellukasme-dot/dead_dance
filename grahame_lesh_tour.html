@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grahame Lesh — On Tour · DeadDance</title>
+<meta name="theme-color" content="#0d2a1e">
+<style>
+:root{--grn:#1f7a4d;--gold:#e0a021;--rose:#b8002e;--ink:#14201a;--mut:#6f8378;--line:#e2ece6}
+*{box-sizing:border-box}body{margin:0;background:#f6faf7;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+.hero{background:radial-gradient(120% 100% at 50% 0,#134a30,#0d2a1e);color:#fff;border-radius:20px;padding:22px 20px;text-align:center}
+.hero .r{font-size:30px}
+.hero .k{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+.hero h1{font-size:27px;line-height:1.05;margin:6px 8px;font-weight:900;letter-spacing:-.5px}
+.hero p{margin:0 6px;color:#cfe6da;font-size:13.5px;line-height:1.5}
+.chip{display:inline-block;background:#ffffff18;border:1px solid #ffffff2e;border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700;color:#eafaf1;margin:3px 3px 0}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:9px;display:flex;gap:12px;align-items:center}
+.card.past{opacity:.5}
+.date{flex:0 0 auto;width:54px;text-align:center;background:#0d2a1e;color:#fff;border-radius:11px;padding:8px 4px}
+.date b{display:block;font-size:19px;font-weight:900;line-height:1}.date span{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+.info{flex:1;min-width:0}.info .v{font-weight:900;font-size:14.5px}.info .c{font-size:12px;color:var(--mut)}
+.proj{display:inline-block;background:#eaf6ef;color:#1f7a4d;border-radius:999px;padding:2px 8px;font-size:10.5px;font-weight:800;margin-bottom:3px}
+.info a.tix{display:inline-block;margin-top:5px;background:#f1eef7;color:#5a2e86;border-radius:9px;padding:5px 11px;font-weight:800;font-size:12px;text-decoration:none}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:22px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="r">🌱🌹</div>
+    <div class="k">Phil’s son · carries it forward</div>
+    <h1>Grahame Lesh<br>On Tour · 2026</h1>
+    <p>Midnight North, the Terrapin Family Band &amp; Roadshow, Grahame Lesh &amp; Friends — and the Jerry Garcia Symphonic Celebration. He plays with everyone.</p>
+    <div><span class="chip">Midnight North</span><span class="chip">Terrapin Roadshow</span><span class="chip">Grahame Lesh &amp; Friends</span><span class="chip">Phil Lesh &amp; Friends</span></div>
+  </div>
+
+  <div class="sec">Every date</div>
+  <div id="list"></div>
+
+  <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
+    Routed through <b>DeadDance</b>. 🌹 He’s also on the Jerry Garcia Symphonic Celebration (Aug 28–Sep 4) — see that tour.<br>
+    Source: jambase.com/band/grahame-lesh · grahamelesh.com. Not affiliated with the artists or venues.</div>
+</div>
+
+<script src="dd_health.js" defer></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+// Grahame Lesh 2026 (jambase). JGSC dates (Aug 28–Sep 4) live on the Symphonic Celebration page.
+var SHOWS=[
+ {d:'2026-07-17',mo:'JUL',day:'17',proj:'Midnight North',v:'Exit/In',c:'Nashville, TN',tix:'https://www.jambase.com/show/midnight-north-exit-in-20260717'},
+ {d:'2026-07-18',mo:'JUL',day:'18',proj:'Midnight North',v:'Lakeview Marina Music Park',c:'Birmingham, AL',tix:'https://www.jambase.com/show/midnight-north-lakeview-marina-music-park-20260718'},
+ {d:'2026-07-19',mo:'JUL',day:'19',proj:'Midnight North',v:'Grey Eagle',c:'Asheville, NC',tix:'https://www.jambase.com/show/midnight-north-grey-eagle-20260719'},
+ {d:'2026-07-24',mo:'JUL',day:'24',proj:'Terrapin Roadshow',v:'Forest Meadows Amphitheatre',c:'San Rafael, CA',tix:'https://www.jambase.com/show/the-terrapin-family-band-forest-meadows-amphitheatre-20260724'},
+ {d:'2026-07-25',mo:'JUL',day:'25',proj:'Terrapin Roadshow',v:'Forest Meadows Amphitheatre',c:'San Rafael, CA',tix:'https://www.jambase.com/show/the-terrapin-family-band-forest-meadows-amphitheatre-20260725'},
+ {d:'2026-07-26',mo:'JUL',day:'26',proj:'Terrapin Roadshow',v:'Forest Meadows Amphitheatre',c:'San Rafael, CA',tix:'https://www.jambase.com/show/the-terrapin-family-band-forest-meadows-amphitheatre-20260726'},
+ {d:'2026-08-01',mo:'AUG',day:'1',proj:'Terrapin Roadshow',v:'Marjorie Holzgang Concert Bowl',c:'Grants Pass, OR',tix:'https://www.jambase.com/show/grahame-lesh-marjorie-holzgang-concert-bowl-20260801'},
+ {d:'2026-08-02',mo:'AUG',day:'2',proj:'Terrapin Roadshow',v:'Marjorie Holzgang Concert Bowl',c:'Grants Pass, OR',tix:'https://www.jambase.com/show/grahame-lesh-marjorie-holzgang-concert-bowl-20260802'},
+ {d:'2026-08-06',mo:'AUG',day:'6',proj:'Grahame Lesh',v:'The Hamilton Live',c:'Washington, DC',tix:'https://www.jambase.com/show/grahame-lesh-the-hamilton-20260806'},
+ {d:'2026-08-09',mo:'AUG',day:'9',proj:'Grahame Lesh',v:'Garcia’s Chicago',c:'Chicago, IL',tix:'https://www.jambase.com/show/grahame-lesh-garcias-chicago-20260809'},
+ {d:'2026-08-10',mo:'AUG',day:'10',proj:'w/ Little Feat',v:'Fox Theater',c:'Oakland, CA',tix:'https://www.jambase.com/show/little-feat-fox-theater-20260810'},
+ {d:'2026-08-15',mo:'AUG',day:'15',proj:'Terrapin Roadshow',v:'Salty Gebhardt Amphitheater',c:'Truckee, CA',tix:'https://www.jambase.com/show/grahame-lesh-salty-gebhardt-amphitheater-20260815'},
+ {d:'2026-08-16',mo:'AUG',day:'16',proj:'Terrapin Roadshow',v:'Salty Gebhardt Amphitheater',c:'Truckee, CA',tix:'https://www.jambase.com/show/grahame-lesh-salty-gebhardt-amphitheater-20260816'},
+ {d:'2026-08-20',mo:'AUG',day:'20',proj:'Midnight North',v:'Aggie Theatre',c:'Fort Collins, CO',tix:'https://www.jambase.com/show/midnight-north-aggie-theatre-20260820'},
+ {d:'2026-08-21',mo:'AUG',day:'21',proj:'Midnight North',v:'Cervantes’ Other Side',c:'Denver, CO',tix:'https://www.jambase.com/show/midnight-north-cervantes-other-side-20260821'},
+ {d:'2026-08-22',mo:'AUG',day:'22',proj:'Terrapin Roadshow',v:'Two Rivers Park Bandshell',c:'Glenwood Springs, CO',tix:'https://www.jambase.com/show/grahame-lesh-two-rivers-park-bandshell-20260822'},
+ {d:'2026-08-23',mo:'AUG',day:'23',proj:'Terrapin Roadshow',v:'Two Rivers Park Bandshell',c:'Glenwood Springs, CO',tix:'https://www.jambase.com/show/grahame-lesh-two-rivers-park-bandshell-20260823'},
+ {d:'2026-08-28',mo:'AUG',day:'28',proj:'Jerry Garcia Symphonic Celebration',v:'→ see the JGSC tour page',c:'Aug 28 – Sep 4',tix:'jerry_garcia_celebration.html'},
+ {d:'2026-09-07',mo:'SEP',day:'7',proj:'Grahame Lesh & Friends',v:'Golden Gate Free Jam · Robin Williams Meadow',c:'San Francisco, CA',tix:'https://www.jambase.com/show/grahame-lesh-robin-williams-meadow-20260907'},
+ {d:'2026-09-19',mo:'SEP',day:'19',proj:'Midnight North',v:'Annapolis Baygrass Music Festival',c:'Annapolis, MD',tix:'https://www.jambase.com/festival/annapolis-baygrass-music-festival-2026'},
+ {d:'2026-09-24',mo:'SEP',day:'24',proj:'Grahame Lesh',v:'Fort Desolation Fest',c:'Torrey, UT',tix:'https://www.jambase.com/festival/fort-desolation-fest-2026'}
+];
+var TODAY=new Date().toISOString().slice(0,10);
+document.getElementById('list').innerHTML=SHOWS.map(function(s){ var past=s.d<TODAY;
+  return '<div class="card'+(past?' past':'')+'"><div class="date"><span>'+s.mo+'</span><b>'+s.day+'</b></div>'+
+    '<div class="info"><div class="proj">'+esc(s.proj)+'</div><div class="v">'+esc(s.v)+(past?' · <span style="color:#c9c0d6">played</span>':'')+'</div><div class="c">'+esc(s.c)+'</div>'+
+    (s.tix&&!past?('<a class="tix" href="'+s.tix+'" target="_blank" rel="noopener">🎟 Tickets &amp; info</a>'):'')+'</div></div>';
+}).join('');
+</script>
+<script src="dd_back.js"></script>
+</body></html>
