@@ -1015,6 +1015,24 @@ try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
   return '<div class="card"><div class="nm">🅿️ '+esc(o.n)+'</div><div class="where">'+esc(o.side)+' · short walk or the free shuttle to the stages.</div><a class="dir" href="'+driveUrl(o)+'" target="_blank" rel="noopener">🚗 Drive here</a></div>';
 }).join(''); }catch(e){}
 renderPark();
+
+// ── REFINE MODE — the QR/link (?refine=1) drops locals straight into an accuracy-calibration walk.
+// A toast explains the mission; walking feeds the map real GPS so every stage/shop pin gets sharper.
+window.mfRefineGo=function(){ try{ toggleTrack(); }catch(e){} var el=document.getElementById('mfRefine'); if(el) el.style.display='none';
+  try{ mfToastHTML('🥾 Walk on! Keep the screen on and stroll — every step sharpens the map. 🌹'); }catch(e){} };
+window.mfRefineX=function(){ var el=document.getElementById('mfRefine'); if(el) el.style.display='none'; };
+(function(){ try{ if(!/[?&](refine|walk|beta)/i.test(location.search)) return;
+  try{ localStorage.setItem('dd.mf.refine','1'); }catch(e){}
+  var rb=document.createElement('div'); rb.id='mfRefine';
+  rb.style.cssText='position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:270;background:linear-gradient(135deg,#3a2456,#7d1533);color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:94%;width:440px;padding:14px 16px;text-align:center;font-size:13.5px;line-height:1.45';
+  rb.innerHTML='🍪 <b>Thank you, Bethlehem!</b> You’re helping <b>refine the Musikfest map</b>. Allow location, tap <b>Start my walk</b>, and just stroll Main St or the South Side — your steps teach the map exactly where every stage and shop really is. The more of us walk it, the sharper it gets. 🌹'+
+    '<div style="margin-top:11px;display:flex;gap:8px;justify-content:center">'+
+    '<button onclick="mfRefineGo()" style="border:0;border-radius:11px;padding:11px 17px;font-weight:900;font-size:14px;background:#f0a500;color:#3a1d00;cursor:pointer">🥾 Start my walk</button>'+
+    '<button onclick="mfRefineX()" style="border:0;border-radius:11px;padding:11px 14px;font-weight:800;background:#ffffff22;color:#fff;cursor:pointer">later</button></div>';
+  document.body.appendChild(rb);
+  // if they’re not installed, nudge Add-to-Home-Screen a little after they’ve started reading
+  try{ if(!(window.matchMedia && matchMedia('(display-mode: standalone)').matches)) setTimeout(function(){ try{ if(window.lukasA2HS) lukasA2HS.show(); }catch(e){} }, 12000); }catch(e){}
+}catch(e){} })();
 </script>
 <script src="dd_health.js" defer></script>
 <script src="lukas_a2hs.js" defer></script>

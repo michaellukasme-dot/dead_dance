@@ -149,8 +149,17 @@ window.teaseFans=function(){ var emails=fanEmails(), band=document.getElementByI
     .catch(function(){ alert('Queued '+emails.length+' — sends when the mail service reconnects.'); });
   } else { alert('📡 List saved ('+emails.length+' fans). Connect the mail service to send.'); } };
 
-// prefill from ?band= & ?show=
-document.getElementById('band').value=qp('band'); document.getElementById('show').value=qp('show')||qp('date');
-addSong(); addSong(); addSong(); render();
+// prefill from ?band= & ?show= — and RELOAD any saved set so a band can EDIT it, right up to showtime.
+(function(){
+  var b=qp('band'); document.getElementById('band').value=b; document.getElementById('show').value=qp('show')||qp('date');
+  var saved=null; try{ saved=JSON.parse(localStorage.getItem('dd.setlist.'+slug(b))||'null'); }catch(e){}
+  if(saved && saved.songs && saved.songs.length){
+    SONGS=saved.songs.map(function(s){ return {t:s.t||'',len:s.len||''}; });
+    if(saved.show) document.getElementById('show').value=saved.show;
+    var te=document.getElementById('tease'); if(te && saved.tease) te.value=saved.tease;
+    renderSongs(); render();
+    try{ setTimeout(function(){ alert('🎵 Loaded your saved set — tweak it any time, right up to showtime, then hit Save again.'); },300); }catch(e){}
+  } else { addSong(); addSong(); addSong(); render(); }
+})();
 </script>
 </body></html>

@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DeadDance.app — Launch Countdown</title>
+<meta name="theme-color" content="#160c22"><link rel="icon" href="dd-512.png">
+<style>
+:root{--pur:#7d4bd6;--gold:#e0a021;--rose:#b8002e;--ink:#f3ecff;--mut:#a996c9;--line:#31234c;--grn:#37d39b}
+*{box-sizing:border-box}body{margin:0;background:#140b21;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 70px}
+.hero{background:radial-gradient(130% 110% at 50% 0,#3a1d5e,#160c22);border-radius:22px;padding:26px 18px;text-align:center}
+.hero .r{font-size:38px}
+.hero .k{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+.hero h1{font-size:26px;margin:6px 10px 2px;font-weight:900;letter-spacing:-.5px;line-height:1.05}
+.hero p{margin:2px 8px 0;color:#d7c8f0;font-size:13.5px}
+.clock{display:flex;justify-content:center;gap:10px;margin:20px 0 6px}
+.unit{background:#1e1330;border:1px solid var(--line);border-radius:14px;padding:12px 6px;min-width:74px}
+.unit b{display:block;font-size:34px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.unit span{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-top:5px;display:block}
+.tick{color:var(--gold);font-weight:800;text-align:center;font-size:13px;letter-spacing:.1em}
+.bar{height:12px;background:#0e0a16;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:16px 0 6px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#e0577a,#b8002e)}
+.barlab{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);font-weight:700}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:24px 0 8px}
+.phase{background:#1e1330;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+.phase.now{border-color:#4a2f6b;box-shadow:0 0 0 1px #7d4bd6 inset}
+.phase .pt{font-weight:900;font-size:15px}.phase .pw{font-size:12px;color:var(--mut);margin:1px 0 8px}
+.phase.now .pt:after{content:' · NOW';color:var(--grn);font-size:11px;font-weight:800}
+.phase ul{margin:0;padding-left:18px}.phase li{font-size:13px;line-height:1.5;margin:3px 0}
+.foot{color:var(--mut);font-size:11.5px;text-align:center;margin-top:20px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="r">🌹</div>
+    <div class="k">Countdown to Launch</div>
+    <h1>DeadDance.app<br>launches at Musikfest</h1>
+    <p id="target"></p>
+    <div class="clock" id="clock"></div>
+    <div class="tick" id="tick">tick · tick · tick</div>
+  </div>
+
+  <div class="bar"><i id="bar" style="width:0%"></i></div>
+  <div class="barlab"><span>T-14 · Jul 17</span><span id="pctlab"></span><span>GO · Jul 31</span></div>
+
+  <div class="sec">The plan — where we are</div>
+  <div id="phases"></div>
+
+  <div class="foot">Full detail in the Launch Playbook. Cookie Monster nudges you every morning with T-minus and the day’s tasks. 🌹</div>
+</div>
+<script src="dd_health.js" defer></script>
+<script src="dd_back.js"></script>
+<script>
+var LAUNCH=new Date('2026-07-31T17:00:00-04:00');   // Musikfest opening, ET
+var START=new Date('2026-07-17T00:00:00-04:00');
+document.getElementById('target').textContent='July 31, 2026 · Musikfest opening day, Bethlehem';
+var PHASES=[
+ {t:'Phase 1 — Foundation', w:'Jul 17–21 · T-14→T-10', s:'2026-07-17', e:'2026-07-21',
+   li:['Stand up the backend: MapTiler key, Supabase Pro, run the SQL, arm the health monitor','Walk it yourself, then post the refine QR to Bethlehem to tune the GPS','Order 100 large (2′×2′) printed QR codes to post physically (long print lead time)','Order street-team shirts — emblem front, QR on the BACK (walking billboards)','Send setlist invites to the Musikfest acts']},
+ {t:'Phase 2 — Sell', w:'Jul 21–27 · T-10→T-4', s:'2026-07-21', e:'2026-07-27',
+   li:['Field Sales Team works the 50 retailers ($99/day walk-by ads)','Email/post each shop its pre-made ad; hand QRs to buyers','Buy the ad slot on ArtsQuest’s big monitors — our QR on their screens','Train the Ad Sales Team on the CRM (mf_rep.html) on a tablet','ArtsQuest: the Trojan-horse email; hold the intelligence pitch in reserve']},
+ {t:'Phase 3 — Final Approach', w:'Jul 27–30 · T-4→T-1', s:'2026-07-27', e:'2026-07-30',
+   li:['Mailchimp + Stripe live; keyed tiles + Supabase Pro confirmed','Sandbox end-to-end test on iPhone AND Android; kill-switch drill','Feature freeze · health.html reads green']},
+ {t:'Phase 4 — GO 🚀', w:'July 31 · T-0', s:'2026-07-30', e:'2026-08-11',
+   li:['Non-buyers drop off automatically; toasts fire for ad buyers only','Daily straggler machine + ArtsQuest intelligence report begin','Surround, the blog river, and the money layer all self-feeding']}
+];
+function two(n){ return (n<10?'0':'')+n; }
+function render(){ var now=new Date(), ms=LAUNCH-now;
+  var ck=document.getElementById('clock');
+  if(ms<=0){ ck.innerHTML='<div class="unit" style="min-width:auto;padding:14px 22px"><b>LIVE 🌹</b><span>we launched</span></div>'; document.getElementById('tick').textContent='DeadDance.app is LIVE at Musikfest.'; document.getElementById('bar').style.width='100%'; }
+  else { var s=Math.floor(ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), sec=s%60;
+    ck.innerHTML=[[d,'days'],[two(h),'hrs'],[two(m),'min'],[two(sec),'sec']].map(function(u){return '<div class="unit"><b>'+u[0]+'</b><span>'+u[1]+'</span></div>';}).join('');
+  }
+  var pct=Math.max(0,Math.min(100,Math.round((now-START)/(LAUNCH-START)*100)));
+  document.getElementById('bar').style.width=pct+'%'; document.getElementById('pctlab').textContent=pct+'% there';
+  var today=now.toISOString().slice(0,10);
+  document.getElementById('phases').innerHTML=PHASES.map(function(p){ var on=(today>=p.s && today<p.e);
+    return '<div class="phase'+(on?' now':'')+'"><div class="pt">'+p.t+'</div><div class="pw">'+p.w+'</div><ul>'+p.li.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>';
+  }).join('');
+}
+render(); setInterval(render,1000);
+</script>
+</body></html>
