@@ -322,7 +322,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
-<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_surround.js"></script>
+<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
 <script>
@@ -973,12 +973,31 @@ function catchNotifyCheck(){ if(!('Notification' in window)||Notification.permis
 // ===== Photos: GPS'd shots pin to the map + fold into the spread; Cookie nudges the selfie =====
 var PHOTOS=[];
 function myFirst(){ try{ return (localStorage.getItem('dd.myname')||'').split(' ')[0]; }catch(e){ return ''; } }
+// place a photo into the live in-memory strip AND persist it durably (IndexedDB now + backend upload).
+// id lets us rebuild the exact same photo after a reload/update without a duplicate.
+function pushPhoto(rec){ var url=rec.url; var img=new Image(); img.onload=function(){
+    PHOTOS.push({id:rec.id,url:url,img:img,lat:rec.lat,lng:rec.lng,exif:!!rec.exif}); renderPhotoStrip();
+    try{updatePhotos();}catch(e){} }; img.src=url; }
 window.addPhotos=function(input){ var files=input.files; if(!files||!files.length)return;
-  Array.prototype.forEach.call(files,function(f){ var url=URL.createObjectURL(f);
-    var place=function(lat,lng,ex){ var img=new Image(); img.onload=function(){ PHOTOS.push({url:url,img:img,lat:lat,lng:lng,exif:!!ex}); renderPhotoStrip(); try{updatePhotos();}catch(e){} try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){} }; img.src=url; };
-    if(window.exifr&&exifr.gps){ exifr.gps(f).then(function(gp){ if(gp&&gp.latitude!=null){ place(gp.latitude,gp.longitude,true); mfToast('📷 Pinned right where you shot it!'); } else place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }).catch(function(){ place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }); }
-    else place(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false);
+  Array.prototype.forEach.call(files,function(f){
+    var save=function(lat,lng,ex){
+      if(window.DDPhotos&&DDPhotos.save){
+        var _cell=null; try{ if(typeof currentCell==='function'&&window.YOU) _cell=currentCell(window.YOU); }catch(e){}
+        DDPhotos.save(f,{lat:lat,lng:lng,exif:ex,cell:_cell}).then(function(r){
+          pushPhoto({id:r.id,url:r.localUrl,lat:lat,lng:lng,exif:ex});
+          try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){}
+        }).catch(function(){ /* even if persist hiccups, still show it */ pushPhoto({url:URL.createObjectURL(f),lat:lat,lng:lng,exif:ex}); });
+      } else { pushPhoto({url:URL.createObjectURL(f),lat:lat,lng:lng,exif:ex}); try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} }
+    };
+    if(window.exifr&&exifr.gps){ exifr.gps(f).then(function(gp){ if(gp&&gp.latitude!=null){ save(gp.latitude,gp.longitude,true); mfToast('📷 Saved & pinned right where you shot it!'); } else save(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }).catch(function(){ save(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }); }
+    else save(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false);
   }); input.value=''; };
+// rebuild the strip from durable storage on every open — photos NEVER disappear across close/update
+function restorePhotos(){ if(!(window.DDPhotos&&DDPhotos.all))return; DDPhotos.all().then(function(list){
+    (list||[]).forEach(function(rec){ if((PHOTOS||[]).some(function(p){return p.id===rec.id;}))return;
+      var src=rec.url||(rec.blob?URL.createObjectURL(rec.blob):''); if(!src)return;
+      pushPhoto({id:rec.id,url:src,lat:rec.lat,lng:rec.lng,exif:rec.exif}); }); }).catch(function(){}); }
+try{ if(document.readyState!=='loading') restorePhotos(); else document.addEventListener('DOMContentLoaded',restorePhotos); }catch(e){}
 function renderPhotoStrip(){ var el=document.getElementById('photoStrip'); if(!el)return; el.innerHTML=PHOTOS.map(function(p){ return '<img src="'+p.url+'" title="'+(p.exif?'pinned by GPS':'added')+'" style="width:52px;height:52px;object-fit:cover;border-radius:9px;margin:3px;border:2px solid #fff;box-shadow:0 1px 4px #0003">'; }).join(''); }
 function selfieNudge(band){ var nm=myFirst(); mfToast('🍪 '+(nm?nm+', ':'')+'grab a selfie with '+band+' in the background — tap 📷 Add my photos!'); }
 

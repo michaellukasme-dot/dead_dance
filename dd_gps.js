@@ -109,7 +109,7 @@
       onError: opts.onError,
       onFix: function (f) {
         last = f; drawYou(f);
-        if (!firstLock && f.locked) { firstLock = true; if (opts.autoZoom !== false) centerOn(f, walkZoom); }  // snap to walking zoom on first solid lock
+        if (!firstLock) { firstLock = true; if (opts.autoZoom !== false) centerOn(f, walkZoom); }  // center + walking-zoom on the VERY FIRST fix (any accuracy), then follow — never sit parked on the default view
         else if (following) { try { map.panTo([f.lat, f.lng], { animate: true }); } catch (e) {} }
         if (opts.onFix) opts.onFix(f);
       }

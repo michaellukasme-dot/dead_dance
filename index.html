@@ -295,9 +295,14 @@ body{padding-bottom:64px}
 .reader.on{display:flex}
 .rpanel{background:var(--paper);width:100%;max-width:920px;height:86vh;max-height:86vh;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px #0007}
 .rhead{display:flex;align-items:center;gap:6px;background:linear-gradient(90deg,#2a1b3d,#3a1f57);color:#fff;padding:9px 12px}
-.rtab{background:#ffffff1a;border:0;color:#fff;border-radius:9px 9px 0 0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;opacity:.8}
+/* tabs scroll horizontally within their own lane so the ⤢ and × stay pinned + always tappable on mobile */
+.rtabs{display:flex;gap:6px;flex:1 1 auto;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.rtabs::-webkit-scrollbar{display:none}
+.rtab{flex:0 0 auto;white-space:nowrap;background:#ffffff1a;border:0;color:#fff;border-radius:9px 9px 0 0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;opacity:.8}
 .rtab.on{background:var(--paper);color:var(--purple2);opacity:1}
-.rx{margin-left:auto;background:#ffffff22;border:0;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px}
+.rexp{flex:0 0 auto}
+.rx{flex:0 0 auto;margin-left:2px;background:#ffffff22;border:0;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;line-height:1}
+@media(max-width:560px){.reader{padding:12px 8px}.rpanel{height:92vh;max-height:92vh}.rhead{padding:8px 9px}.rtab{padding:8px 11px;font-size:12.5px}}
 .rbody{padding:14px;overflow:auto;flex:1;min-height:0}
 .rsub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .glist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -917,14 +922,16 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 <div class="reader" id="reader" onclick="if(event.target===this)closeReader()">
   <div class="rpanel">
     <div class="rhead">
-      <button class="rtab" data-t="friends" onclick="readerTab('friends')">👥 Friends</button>
-      <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
-      <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
-      <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
-      <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 GD Archive</button>
-      <button class="rtab" data-t="art" onclick="readerTab('art')">🎨 Art</button>
+      <div class="rtabs">
+        <button class="rtab" data-t="friends" onclick="readerTab('friends')">👥 Friends</button>
+        <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
+        <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
+        <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
+        <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 GD Archive</button>
+        <button class="rtab" data-t="art" onclick="readerTab('art')">🎨 Art</button>
+      </div>
       <button class="rexp" onclick="readerExpand(this)" title="Expand to full screen" aria-label="Expand">⤢</button>
-      <button class="rx" onclick="closeReader()">×</button>
+      <button class="rx" onclick="closeReader()" aria-label="Close">×</button>
     </div>
     <div class="rbody" id="rbody"></div>
   </div>
@@ -1190,14 +1197,34 @@ function frRespond(reqId,name,accept,btn){
       .catch(function(){ done(); if(typeof toast==='function')toast(msg); });
   } else { done(); if(typeof toast==='function')toast(msg); }
 }
-/* demo Jen item — used only until the backend is wired */
+/* demo Jen item — persists now so Accept STICKS across reloads and lands in the Friends tab */
+function _rf(){ try{ return JSON.parse(localStorage.getItem('dd.reader.friends')||'[]'); }catch(e){ return []; } }
+function _rfSave(a){ try{ localStorage.setItem('dd.reader.friends',JSON.stringify(a)); }catch(e){} }
+function addReaderFriend(fr){
+  var a=_rf(); if(!a.some(function(x){return x.name===fr.name;})){ a.push(fr); _rfSave(a); }
+  try{ if(typeof MYFRIENDS!=='undefined' && !MYFRIENDS.some(function(x){return x.name===fr.name;})) MYFRIENDS.push(fr); }catch(e){}
+  // if the Friends tab is open, re-render so the new friend shows immediately
+  try{ var on=document.querySelector('.rtab.on'); var r=document.getElementById('reader');
+    if(r&&r.classList.contains('on')&&on&&on.getAttribute('data-t')==='friends') readerTab('friends'); }catch(e){}
+}
 function acceptFriend(name){
   var el=document.getElementById('nfrJen');
   if(el) el.innerHTML='<span>🌹</span><div><b>'+name+'</b> and you are family now — say hi in the feed! 🎸<i>just now</i></div>';
-  try{ var f=JSON.parse(localStorage.getItem('dd.friends')||'[]'); if(f.indexOf(name)<0){ f.push(name); } localStorage.setItem('dd.friends',JSON.stringify(f)); }catch(e){}
+  try{ localStorage.setItem('dd.fr.jen','accepted'); }catch(e){}
+  addReaderFriend({name:name,ic:'🌹',chapter:'Lehigh Valley',preJerry:0,postJerry:22,stubs:5,
+    story:'Met on the DeadDance bus at Musikfest. Newer to the scene, all the way in.',
+    posts:['So stoked to be on the bus 🌹'],photos:['🌹','🎶']});
   if(typeof toast==='function') toast('🌹 You and '+name+' are family now.');
 }
-function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.innerHTML='<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; }
+function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.innerHTML='<span>🌹</span><div>Friend request dismissed.<i>just now</i></div>'; try{ localStorage.setItem('dd.fr.jen','declined'); }catch(e){} }
+/* boot: reflect the saved Jen state (no revert) + merge accepted friends into the roster */
+(function(){ function boot(){
+  try{ var st=localStorage.getItem('dd.fr.jen'), el=document.getElementById('nfrJen');
+    if(el&&st==='accepted') el.innerHTML='<span>🌹</span><div><b>Jen Rund</b> and you are family now — say hi in the feed! 🎸<i></i></div>';
+    else if(el&&st==='declined') el.innerHTML='<span>🌹</span><div>Friend request dismissed.<i></i></div>';
+  }catch(e){}
+  try{ if(typeof MYFRIENDS!=='undefined'){ _rf().forEach(function(fr){ if(!MYFRIENDS.some(function(x){return x.name===fr.name;})) MYFRIENDS.push(fr); }); } }catch(e){}
+} if(document.readyState!=='loading') boot(); else document.addEventListener('DOMContentLoaded',boot); })();
 /* boot: load real requests + subscribe for realtime once the client is up */
 (function(){ function go(){ try{ if(window.DDFriends&&DDFriends.ready()){ loadFriendReqs(); DDFriends.subscribe(function(){ loadFriendReqs(); }); } }catch(e){} } setTimeout(go,1500); setTimeout(go,4000); })();
 </script>
