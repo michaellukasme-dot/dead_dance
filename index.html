@@ -230,7 +230,7 @@ body{padding-bottom:64px}
 .footnav .fn:active{transform:scale(.92)}
 .findshow{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;background:linear-gradient(90deg,#5a2e86,#b8002e);color:#fff;border-radius:11px;padding:8px 12px;margin:0 0 10px;font-size:14px}
 .findshow b{font-weight:800}.findshow span{font-size:11.5px;color:#f3d8e2}
-.caltype{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:3px 9px;background:#fff;color:var(--ink);cursor:pointer}
+.caltype{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:3px 9px;background:#fff;color:var(--ink);cursor:pointer;max-width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .viewseg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
 .viewseg button{border:0;background:#fff;color:var(--muted);font:inherit;font-size:12px;font-weight:700;padding:5px 11px;cursor:pointer}
 .viewseg button.on{background:var(--rose);color:#fff}
@@ -741,15 +741,16 @@ body{padding-bottom:64px}
           <option value="John Mayer">John Mayer</option>
           <option value="Melvin Seals and JGB">JGB with Melvin Seals</option>
           <option value="Dark Star Orchestra">Dark Star Orchestra</option>
-          <option value="Joe Russo's Almost Dead">Joe Russo's Almost Dead (JRAD)</option>
+          <option value="Joe Russo's Almost Dead">Joe Russo's Almost Dead</option>
           <option value="Sages And Spirits">Sages &amp; Spirits</option>
           <option value="Jerry's Middle Finger">Jerry's Middle Finger</option>
           <option value="all" selected>Grateful Dead Tribute</option>
-          <option value="__bloodline__">🌹 The Grateful Dead — The Bloodline (groups) →</option>
-          <option value="__jgsc__">🌹 Jerry Garcia Symphonic Celebration · tour →</option>
-          <option value="__jkimock__">🥁 John Kimock · Oteil & Friends Summer '26 →</option>
-          <option value="__musikfest__">🎪 Musikfest 2026 · Bethlehem →</option>
-          <option value="__fifa__">⚽ Philadelphia World Cup 2026 →</option>
+          <option value="__jgsc__">JG Symphonic w/ Kimock →</option>
+          <option value="__jkimock__">Oteil &amp; Friends w/ Kimock →</option>
+          <optgroup label="Festivals">
+            <option value="__musikfest__">🎪 Musikfest 2026</option>
+            <option value="__fifa__">⚽ Philadelphia World Cup</option>
+          </optgroup>
         </select>
       </div>
       <div class="ch" id="calNavRow">
@@ -1038,6 +1039,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 <div class="cornerov" id="appsov" onclick="if(event.target===this)coClose('appsov')">
  <div class="cpanel">
   <div class="cphd">Menu <button class="shx" onclick="coClose('appsov')">×</button></div>
+  <div id="ddVer" style="text-align:center;font-size:11px;color:var(--muted,#9a8fb0);padding:4px 0 8px;letter-spacing:.03em">DeadDance · deaddance.app</div>
   <div class="appscols">
    <div class="appssecs">
     <div class="asec">Social</div>
@@ -1104,7 +1106,6 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="citem" href="curator.html"><span>👑</span>Group Leader Console</a>
     <a class="citem" onclick="coGo('appsov',function(){openGig('feature')})"><span>💡</span>Add a feature</a>
    </div>
-   <div id="ddVer" style="text-align:center;font-size:11px;color:var(--muted,#9a8fb0);padding:10px 0 2px;letter-spacing:.03em">DeadDance · deaddance.app</div>
   </div>
  </div>
 </div>
