@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Walk Musikfest, get $10 · DeadDance</title>
+<meta name="theme-color" content="#241535"><link rel="icon" href="dd-512.png">
+<style>
+:root{--pur:#5a2e86;--gold:#e0a021;--rose:#b8002e;--ink:#1a1320;--mut:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:620px;margin:0 auto;padding:16px 14px 70px}
+.hero{background:radial-gradient(120% 100% at 50% 0,#3a2456,#241535);color:#fff;border-radius:20px;padding:20px 18px;text-align:center}
+.hero .r{font-size:30px}
+.hero h1{font-size:24px;margin:6px 8px 2px;font-weight:900;line-height:1.05}
+.hero p{margin:0 4px;color:#cfbfe6;font-size:13.5px;line-height:1.5}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:22px 2px 10px}
+.entries{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.entry{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 12px;text-align:left;cursor:pointer;font:inherit}
+.entry.on{border-color:var(--gold);background:#fff8ec}
+.entry .en{font-weight:900;font-size:14.5px}.entry .ed{font-size:11.5px;color:var(--mut);margin-top:2px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px;display:none}
+.card.show{display:block}
+.rc{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rc .code{font-weight:900;font-size:20px;color:var(--pur)}
+.rc .min{font-size:12px;color:var(--mut);font-weight:700}
+.welcome{background:#fff8ec;border:1px solid #f0d9a6;border-radius:11px;padding:9px 11px;font-size:12.5px;color:#7a6a2e;margin:11px 0}
+ol.stops{margin:10px 0;padding-left:20px}ol.stops li{font-size:13.5px;line-height:1.6}
+.go{display:block;text-align:center;background:var(--gold);color:#3a1d00;border-radius:12px;padding:13px;font-weight:900;font-size:15px;text-decoration:none;margin:12px 0 8px}
+.how{background:#f6f2fb;border:1px solid #e7dff5;border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.5;color:#2a2136}
+.how b{color:var(--pur)}
+.grab{display:block;text-align:center;background:var(--rose);color:#fff;border-radius:12px;padding:13px;font-weight:900;font-size:15px;text-decoration:none;margin:12px 0 6px}
+.reroll{display:block;width:100%;text-align:center;background:#f1eef7;color:var(--pur);border:0;border-radius:11px;padding:11px;font-weight:800;font-size:13px;cursor:pointer;margin-top:6px}
+.foot{text-align:center;color:var(--mut);font-size:11.5px;margin-top:18px;line-height:1.6}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="r">🚶🌹</div>
+    <h1>Walk Musikfest, get $10</h1>
+    <p>Grab a route, walk it (about an hour), send your photos — get paid today. You’re helping tune the free Musikfest map before it opens. Like a miracle: grab it, walk it, get paid.</p>
+    <div id="budget" style="margin-top:10px;font-size:12.5px;font-weight:800;color:#f0c96b"></div>
+  </div>
+
+  <div class="sec">1 · Where are you coming in?</div>
+  <div class="entries" id="entries"></div>
+
+  <div class="card" id="card">
+    <div class="rc"><div class="code" id="code"></div><div class="min" id="min"></div></div>
+    <div class="welcome" id="welcome"></div>
+    <div style="font-size:12px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em">Your route — in order</div>
+    <ol class="stops" id="stops"></ol>
+    <a class="go" id="mapbtn" href="#" target="_blank" rel="noopener">🗺️ Open walking directions</a>
+    <div class="sec" style="margin:14px 2px 8px">2 · How to walk it (2 minutes to learn)</div>
+    <div class="how">
+      1. Open <b>deaddance.app/musikfest?refine=1</b> on this phone.<br>
+      2. <b>Allow location</b> (precise), tap <b>“Start my walk.”</b> Keep the screen on.<br>
+      3. Walk the route above. At <b>each stage</b>, stand still ~20–30 sec — snap a photo.<br>
+      4. Tell us <b>where the porta potties are</b> at each spot (our biggest unknown).<br>
+      5. At the end, tap <b>“Post my walk,”</b> then send your photos + notes to get paid.
+    </div>
+    <div class="sec" style="margin:14px 2px 8px">3 · Grab it & get paid $10</div>
+    <a class="grab" id="grabbtn" href="#">📲 Text to grab this route</a>
+    <div id="paynote" style="text-align:center;font-size:11.5px;color:var(--mut)">Walk it, send your photos + porta-potty notes, get $10 Venmo — today.</div>
+    <button class="reroll" onclick="reroll()">↻ Give me a different route</button>
+  </div>
+
+  <div class="foot">A Hellertown company, made in your backyard. Thank you for helping map Musikfest. 🌹<br>
+    Questions? Text the number on the grab button.</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dd_health.js" defer></script>
+<script src="dd_back.js"></script>
+<script>
+var PAY_NUMBER="";  // ← PASTE your phone number here (e.g. "+16105551234") so "Text to grab" prefills to you
+var BUDGET=100, FULL=false;  // 100 paid walks × $10 = $1000. After that: free walks only.
+try{ var SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return SB;}; }catch(e){}
+function loadGrabs(){ if(!window.SB||!SB.rpc){ document.getElementById('budget').textContent=''; return; }
+  SB.rpc('dd_blog_list',{p_event:'route-grab',p_limit:200}).then(function(r){ var n=((r&&r.data)||[]).length, left=Math.max(0,BUDGET-n);
+    FULL=(left<=0); var b=document.getElementById('budget');
+    b.textContent=FULL?('🌹 All 100 paid routes are claimed — you can still walk any route FREE to help the map.'):('💵 '+left+' of '+BUDGET+' paid routes still open — grab one before they’re gone');
+    if(FULL && cur) show(cur.entry,cur.variant);   // refresh the open card into free-mode
+  }).catch(function(){ document.getElementById('budget').textContent=''; });
+}
+function logGrab(code,entry){ if(SB&&SB.rpc){ try{ SB.rpc('dd_blog_post',{p_event:'route-grab',p_kind:'grab',p_stage:entry,p_act:code,p_caption:'Route '+code,p_thumb:null}).then(loadGrabs,function(){}); }catch(e){} } }
+var S={
+ stadt:["PNC Stadtplatz (Payrow Plaza)",40.6214,-75.3782], cmoravian:["Central Moravian / Old Chapel",40.6199,-75.3796],
+ zinzen:["Zinzenplatz (Church & Main)",40.6196,-75.3793], lieder:["Liederplatz (Sun Inn courtyard)",40.6189,-75.3798],
+ hotel:["Hotel Bethlehem Platz",40.6185,-75.3799], mainst:["Main Street Stage",40.6183,-75.3801],
+ yuengling:["Yuengling Lagerplatz",40.6185,-75.3804], festplatz:["Service Electric Festplatz",40.6182,-75.3808],
+ familien:["NJM Familienplatz",40.6178,-75.3806], volks:["Volksplatz (Monocacy Creek)",40.6180,-75.3812],
+ handwerk:["Martin Guitar Handwerkplatz (Mill)",40.6175,-75.3818], tropical:["Plaza Tropical",40.6172,-75.3806],
+ icehouse:["Ice House ComedyPlatz (Sand Island)",40.6162,-75.3808],
+ steel:["Wind Creek Steel Stage",40.6152,-75.3730], america:["Americaplatz @ Levitt",40.6167,-75.3708],
+ highmark:["Highmark Community Stage",40.6161,-75.3715], cafe:["Musikfest Café (ArtsQuest)",40.6157,-75.3718],
+ williams:["Williams Brew Stage (ArtsQuest)",40.6156,-75.3716], lyrik:["Lyrikplatz (ArtsQuest)",40.6157,-75.3720],
+ visitor:["SteelStacks Visitor Center",40.6164,-75.3712]
+};
+var ENTRIES=[
+ {k:'main-broad', en:'Main St @ Broad', ed:'Downtown, from the north', welcome:'Big “Welcome to Musikfest” screen greets you as you come down Main St from Broad.',
+   routes:[['stadt','cmoravian','zinzen','lieder','hotel','mainst','yuengling','festplatz'],
+           ['stadt','zinzen','cmoravian','lieder','yuengling','mainst','hotel','familien']]},
+ {k:'west', en:'West Side', ed:'W Broad / Market St', welcome:'You enter the grounds from the west — the welcome banners line the approach to the Colonial Industrial Quarter.',
+   routes:[['handwerk','volks','tropical','familien','festplatz','yuengling','mainst','hotel'],
+           ['handwerk','tropical','volks','familien','festplatz','lieder','zinzen','mainst']]},
+ {k:'bridge', en:'The Bridge', ed:'Crossing from the South Side', welcome:'Cross the river and the “Welcome to Musikfest” gateway meets you as you come off the bridge into the Quarter.',
+   routes:[['icehouse','tropical','volks','familien','festplatz','yuengling','mainst'],
+           ['icehouse','tropical','handwerk','volks','familien','lieder','hotel']]},
+ {k:'sand-island', en:'Sand Island', ed:'The island, west end', welcome:'Sand Island is the west gateway — the welcome sign sits where the island path meets the grounds.',
+   routes:[['icehouse','tropical','handwerk','volks','familien','festplatz','yuengling'],
+           ['icehouse','tropical','volks','familien','mainst','hotel','zinzen']]},
+ {k:'steelstacks', en:'SteelStacks', ed:'South Side grounds', welcome:'The big screens at SteelStacks flash “Welcome to Musikfest” as you enter the ArtsQuest campus.',
+   routes:[['visitor','steel','williams','cafe','lyrik','highmark','america'],
+           ['america','highmark','visitor','steel','cafe','lyrik','williams']]}
+];
+var cur=null;
+function maplink(keys){ var pts=keys.map(function(k){return S[k];}); var dest=pts[pts.length-1], wp=pts.slice(0,-1);
+  var u='https://www.google.com/maps/dir/?api=1&travelmode=walking&destination='+dest[1].toFixed(4)+','+dest[2].toFixed(4);
+  if(wp.length) u+='&waypoints='+wp.map(function(p){return p[1].toFixed(4)+','+p[2].toFixed(4);}).join('|'); return u; }
+function counter(){ try{ var n=(+localStorage.getItem('dd.route.n')||0)+1; localStorage.setItem('dd.route.n',n); return n; }catch(e){ return Math.floor(Math.random()*999); } }
+function show(entry, variant){ cur={entry:entry,variant:variant};
+  var e=ENTRIES.filter(function(x){return x.k===entry;})[0]; if(!e)return;
+  var keys=e.routes[variant%e.routes.length]; var code=e.en.replace(/[^A-Za-z]/g,'').slice(0,4).toUpperCase()+'-'+String(counter()).padStart(3,'0');
+  document.getElementById('code').textContent='Route '+code;
+  document.getElementById('min').textContent='~1 hour · '+keys.length+' stops · $10';
+  document.getElementById('welcome').innerHTML='📣 '+e.welcome;
+  document.getElementById('stops').innerHTML=keys.map(function(k){return '<li>'+S[k][0]+'</li>';}).join('');
+  document.getElementById('mapbtn').href=maplink(keys);
+  var g=document.getElementById('grabbtn'), pn=document.getElementById('paynote');
+  if(FULL){ g.href='musikfest?refine=1'; g.textContent='🚶 Paid routes are full — walk this one FREE to help'; g.onclick=null;
+    pn.textContent='Free walk — no pay, but every step still sharpens the map. Thank you! 🌹'; }
+  else { var msg=encodeURIComponent('GRABBED Route '+code+' ('+e.en+') — I’m walking it now for $10.');
+    g.href=PAY_NUMBER?('sms:'+PAY_NUMBER+'?&body='+msg):'#'; g.textContent=PAY_NUMBER?'📲 Text to grab this route — $10':'📲 Grab: text “GRABBED Route '+code+'”';
+    g.onclick=function(){ logGrab(code, cur.entry); };
+    pn.textContent='Walk it, send your photos + porta-potty notes, get $10 Venmo — today.'; }
+  document.getElementById('card').classList.add('show');
+  document.querySelectorAll('.entry').forEach(function(b){ b.classList.toggle('on', b.dataset.k===entry); });
+  try{ document.getElementById('card').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+window.reroll=function(){ if(cur) show(cur.entry, cur.variant+1); };
+document.getElementById('entries').innerHTML=ENTRIES.map(function(e){
+  return '<button class="entry" data-k="'+e.k+'" onclick="show(\''+e.k+'\',0)"><div class="en">'+e.en+'</div><div class="ed">'+e.ed+'</div></button>';
+}).join('');
+loadGrabs(); setInterval(loadGrabs, 60000);
+</script>
+</body></html>

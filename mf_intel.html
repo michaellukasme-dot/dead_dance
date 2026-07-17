@@ -182,8 +182,8 @@ function render(live, daily, hourly, dwell, repeatPct, primary){
   document.getElementById('askLine').innerHTML='<b>The data license: '+money(DATA_FEE_PER_DAY)+' / festival day</b> (~'+money(DATA_FEE_PER_DAY*HIST.days)+' for the run). '+
     'A fraction of the '+money(MODEL.total)+' ad market it powers — and the hard per-Platz footfall that lets you price and renew every naming sponsor (Wind Creek, Air Products, PNC, Highmark, Yuengling…) with proof, not estimates.';
 
-  document.getElementById('foot').innerHTML='Privacy by construction: every number here is an <b>aggregate</b>, k-anonymity-suppressed (nothing under 20 is shown), from <b>pseudonymous</b> phone tokens — no names, no individual tracking, no PII, no data sold. '+
-    'Built on the same k-anon model as our trail-operator console. '+(SAMPLE?'<span class="badge">SAMPLE — projected from 2025; goes live on real walk data during the festival</span>':'<span class="badge">LIVE</span>')+
+  document.getElementById('foot').innerHTML='<b>Disclaimer — modeled estimates from a sample, not a census.</b> All figures are modeled estimates derived from a sample of festival-goers using the DeadDance app (the “panel”), not a gate count or official attendance. They are directional, provided “as is” for planning and comparison, and are <b>not</b> to be relied upon as exact attendance or for financial, ticketing, contractual, safety/occupancy, or regulatory purposes without reconciliation against ArtsQuest’s own ground-truth data. No warranty as to accuracy or completeness. '+
+    '<br>Privacy by construction: every number is an <b>aggregate</b>, k-anonymity-suppressed (nothing under 20 shown), from <b>pseudonymous</b> phone tokens — no names, no individual tracking, no PII, no data sold. '+(SAMPLE?'<span class="badge">SAMPLE — projected from 2025; goes live on real walk data during the festival</span>':'<span class="badge">LIVE</span>')+
     '<br>Historical basis: Musikfest 2025 drew a record 1,449,000 (+42% YoY) over ~11 days ≈ '+n(HIST.perDay)+'/day (ArtsQuest / Lehigh Valley press). Ad-market figures use the stated StageFill rate card × footprint — a projection, not a guarantee.';
 }
 
