@@ -234,11 +234,8 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <div class="mapwrap">
     <div id="lmap" style="height:360px;border-radius:11px;overflow:hidden;background:#eef" aria-label="Musikfest stage map"></div>
     <div class="legend">
-      <span><i style="background:#b8002e"></i>North side — free, historic downtown</span>
-      <span><i style="background:#5a2e86"></i>South side — SteelStacks</span>
-      <span><i style="background:#f0a500"></i>Ticketed (Steel Stage)</span>
-      <span>🌹 Dead/jam set in your window</span>
-      <span>🛍️ Shops &amp; taps inside the fest (many fill your cup)</span>
+      <span onclick="mapTo(40.6188,-75.3800,16)" style="cursor:pointer" title="Center the map on the North Side"><i style="background:#b8002e"></i>North side — free, historic downtown ›</span>
+      <span onclick="mapTo(40.6160,-75.3712,16)" style="cursor:pointer" title="Center the map on the South Side"><i style="background:#5a2e86"></i>South side — SteelStacks ›</span>
     </div>
   </div>
   <div id="parkBox" style="text-align:center;margin:12px 0"></div>
@@ -718,6 +715,7 @@ crewRefresh(); renderJoin();
 // street-team QR — no app, just scan → this map
 try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190,caption:true}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
+window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
 
 // ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----
 var MF=window.DD_MUSIKFEST||[];
@@ -998,7 +996,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 366'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 369'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();

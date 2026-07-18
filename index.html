@@ -3514,6 +3514,13 @@ function ddSearchRun(q){
   var lc=q.toLowerCase(), html='<div class="ddsr-sec">Heads</div><div id="ddsrPeople"><div class="ddsr-mut">searching…</div></div>';
   try{ if(typeof BANDS!=='undefined' && BANDS.length){ var bm=[]; for(var i=0;i<BANDS.length && bm.length<6;i++){ if((BANDS[i].name||'').toLowerCase().indexOf(lc)>=0) bm.push(i); }
     if(bm.length){ html+='<div class="ddsr-sec">Bands</div>'+bm.map(function(i){var b=BANDS[i];return '<div class="ddsr-row" onclick="ddSearchClose();openReader(\'bands\');setTimeout(function(){try{bandView('+i+')}catch(e){}},80)"><span>🎸</span><div><b>'+ddSE(b.name)+'</b><i>'+ddSE(b.region||'')+'</i></div></div>';}).join(''); } } }catch(e){}
+  // Shows & tapes — punctuation-insensitive so "Cornell 77" finds "Cornell '77"
+  try{ var nq=lc.replace(/[^a-z0-9]+/g,' ').trim(); var sm=[];
+    if(typeof ARCHIVE!=='undefined' && ARCHIVE.length && nq){ for(var j=0;j<ARCHIVE.length && sm.length<6;j++){ var t=String(ARCHIVE[j]).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); if(t.indexOf(nq)>=0) sm.push(ARCHIVE[j]); } }
+    var sh=''; if(sm.length){ sh+=sm.map(function(s){ return '<div class="ddsr-row" onclick="ddSearchClose();openReader(\'archive\')"><span>📼</span><div><b>'+ddSE(s)+'</b><i>open in the GD Archive</i></div></div>'; }).join(''); }
+    sh+='<div class="ddsr-row" onclick="ddSearchClose();openReader(\'archive\')"><span>🎵</span><div><b>Search the GD Archive</b><i>every show — find “'+ddSE(q)+'”</i></div></div>';
+    html+='<div class="ddsr-sec">Shows &amp; tapes</div>'+sh;
+  }catch(e){}
   r.innerHTML=html;
   try{ var c=(window.ddClient&&ddClient());
     if(c){ c.rpc('dd_member_search',{p_q:q}).then(function(res){ var rows=(res&&res.data)||[]; var p=document.getElementById('ddsrPeople'); if(!p)return;
