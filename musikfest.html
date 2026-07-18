@@ -206,16 +206,15 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 
   <div class="carbadge" id="carBadge" style="display:none"></div>
   <div class="compbar">
-    <button id="trackBtn" onclick="toggleTrack()">🥾 Walk</button>
-    <button onclick="nearestBathroom()" title="Nearest bathroom" aria-label="Nearest bathroom" style="flex:0 0 auto;padding:11px 15px">🚻</button>
-    <button onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk" style="flex:0 0 auto;padding:11px 15px">⤴️</button>
+    <button id="trackBtn" onclick="toggleTrack()">⏸ Auto-Tracking</button>
+    <button onclick="nearestBathroom()" title="Nearest bathroom" aria-label="Nearest bathroom" style="flex:0 0 auto;padding:11px 13px">🚻</button>
+    <button onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos" style="flex:0 0 auto;padding:11px 13px">📷</button>
+    <button onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk" style="flex:0 0 auto;padding:11px 13px">⤴️</button>
+    <button id="parkBtn" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking" style="flex:0 0 auto;padding:11px 13px">🅿️</button>
   </div>
   <div class="trackstat" id="trackStat"></div>
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
-  <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-    <button onclick="document.getElementById('photoIn').click()" style="flex:0 0 auto;border:0;background:#f1eef7;color:var(--purple);border-radius:999px;padding:9px 14px;font-weight:800;font-size:12.5px;cursor:pointer" title="Add my photos" aria-label="Add my photos">📷</button>
-    <div id="photoStrip" style="display:flex;flex-wrap:wrap;flex:1;align-items:center"></div>
-  </div>
+  <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
   <div class="sec">The map — where each Platz actually is</div>
   <div class="mapwrap">
@@ -430,12 +429,13 @@ function parkGet(){ try{ return JSON.parse(localStorage.getItem('dd.park')||'nul
 window.parkSet=function(){ if(!navigator.geolocation){ alert('Location is off — can’t drop a parking pin.'); return; }
  navigator.geolocation.getCurrentPosition(function(p){ try{ localStorage.setItem('dd.park',JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})); }catch(e){} renderPark(); },
    function(){ alert('Allow location to remember your spot.'); }, {enableHighAccuracy:true,timeout:8000}); };
-window.parkGo=function(){ var c=parkGet(); if(c) window.open('https://www.google.com/maps/dir/?api=1&destination='+c.lat+','+c.lng+'&travelmode=walking','_blank','noopener'); };
+window.parkGo=function(){ var c=parkGet(); if(c && typeof mfDirectTo==='function') mfDirectTo(c.lat,c.lng,'your car 🚗'); };
+window.parkTap=function(){ var c=parkGet(); if(!c){ parkSet(); if(typeof mfToast==='function') mfToast('🅿️ Parking pin dropped — tap 🅿️ again anytime to walk back to your car.'); } else { parkGo(); } };
 window.parkClear=function(){ try{ localStorage.removeItem('dd.park'); }catch(e){} renderPark(); };
 function renderPark(){ var el=document.getElementById('parkBox'); if(!el)return; var c=parkGet();
  el.innerHTML = c
   ? '<button class="joinbtn in" onclick="parkGo()">🚶 Walk me back to my car</button> <button class="dir" style="margin-left:8px" onclick="parkClear()">reset</button>'
-  : '<button class="joinbtn" onclick="parkSet()">🅿️ Remember where I parked</button>'; }
+  : ''; }
 function color(s){ return s.free===0?'#f0a500':(s.side==='N'?'#b8002e':'#5a2e86'); }
 
 // ---- projected mini-map (rose-marks stages hosting a Dead/jam set in the chosen window) ----
@@ -451,6 +451,7 @@ function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!==
 var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null, LG_FOOD=null, LG_POTTY=null, LG_DIR=null, MF_MAPON={stage:true,shop:false,food:false,potty:false};
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
   LMAP=L.map(el,{zoomControl:true,scrollWheelZoom:true});
+  try{ L.Popup.mergeOptions({autoPan:true,keepInView:true,autoPanPadding:[16,18],maxWidth:240}); }catch(e){}   // every pin popup pans itself fully into the map frame
   if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
   LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_DIR=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup(); LG_FOOD=L.layerGroup(); LG_POTTY=L.layerGroup();
@@ -466,9 +467,10 @@ function updatePhotos(){ if(!LG_PHOTO)return; LG_PHOTO.clearLayers(); (window.PH
 function drawMap(){ ensureMap(); if(!LMAP)return;
   var dead=deadStageSet(), ddOnly=(typeof PILL!=='undefined' && PILL==='dead');
   LG_STAGE.clearLayers();
-  STAGES.forEach(function(s){ var isDead=!!dead[stageKey(s)]; var col=s.free===0?'#f0a500':(isDead?'#b8002e':(s.side==='N'?'#b8002e':'#5a2e86')); var op=(ddOnly&&!isDead)?0.3:1;
-    var m=L.circleMarker([s.lat,s.lng],{radius:isDead?9:7,color:'#fff',weight:2,fillColor:col,fillOpacity:op}).addTo(LG_STAGE);
-    m.bindTooltip((isDead?'🌹 ':'')+s.n.replace(/ @.*/,''),{direction:'top',opacity:.95});
+  STAGES.forEach(function(s){ var isDead=!!dead[stageKey(s)]; var op=(ddOnly&&!isDead)?0.35:1; var emo=isDead?'🌹':'🎶'; var bd=isDead?'#b8002e':(s.side==='N'?'#b8002e':'#5a2e86');
+    var ic=L.divIcon({className:'mfstage',iconSize:[27,27],iconAnchor:[13,13],html:'<div style="width:27px;height:27px;border-radius:50%;background:#fff;border:2px solid '+bd+';display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 1px 4px #0005;opacity:'+op+'">'+emo+'</div>'});
+    var m=L.marker([s.lat,s.lng],{icon:ic}).addTo(LG_STAGE);
+    m.bindTooltip((isDead?'🌹 ':'🎶 ')+s.n.replace(/ @.*/,''),{direction:'top',opacity:.95});
     var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,'');
     m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>');
   });
@@ -1024,12 +1026,12 @@ function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
   else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:8000,timeout:30000}); }
 }
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
-  if(WALK.on){ b.textContent='⏸ Tracking'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
+  if(WALK.on){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
     walkStatus('🛰️ Finding you… <b>allow location if your phone asks.</b>',true);   // instant feedback — never "nothing"
     startWatch(); fmtStat(); }
-  else { b.textContent='▶ Resume'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
+  else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 378'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 380'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
@@ -1126,7 +1128,7 @@ window.postWalk=function(){
 };
 // DEFAULT GPS ON — start tracking the moment they land; user need not do a thing. The reveal comes at day's end.
 renderMySets(); renderPhotoStrip();
-WALK.on=true; (function(){ var b=document.getElementById('trackBtn'); if(b){ b.textContent='⏸ Tracking'; b.classList.add('on'); } })(); fmtStat(); startWatch();
+WALK.on=true; (function(){ var b=document.getElementById('trackBtn'); if(b){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); } })(); fmtStat(); startWatch();
 
 // parking lots + the "where did I park" button
 try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
