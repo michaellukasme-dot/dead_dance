@@ -1551,6 +1551,8 @@ function buyTix(i){ var s=SHOWLIST[i]; if(!s)return;
  CURBUY={band:s.band,venue:s.venue,price:s.price}; if(typeof buy==='function')buy('ticket'); }
 function buyFromCur(){ if(CURBUY&&CURBUY.url){ wantTix({band:CURBUY.band,venue:CURBUY.venue,iso:CURBUY.iso}); var b=document.getElementById('buy'); if(b)b.classList.remove('on'); }
  else if(typeof buy==='function'){ buy('ticket'); } }
+function capList(rows, limit, label){ limit=limit||5; if(!rows||rows.length<=limit) return (rows||[]).join('');
+  return rows.slice(0,limit).join('')+'<details class="morelist"><summary style="cursor:pointer;color:#5a2e86;font-weight:800;font-size:13px;padding:9px 0;text-align:center;list-style:none">See '+(rows.length-limit)+' more'+(label?(' '+label):'')+' ↓</summary>'+rows.slice(limit).join('')+'</details>'; }
 function calRow(s){ var i=SHOWLIST.indexOf(s);
  var ext=!!s.url, on=ext&&wantHas(s);
  var priceTxt = ext ? (s.price==='Onsale soon'?'Onsale soon':'Coming here') : s.price;
@@ -1589,6 +1591,7 @@ function renderCal(){
   var floor=isCur?cMid():new Date(ly,lm,1);
   var ceil=new Date(ly,lm,new Date(ly,lm+1,0).getDate(),23,59,59);
   var up=SHOWLIST.filter(function(s){ return s.d>=floor && s.d<=ceil && calMatch(s); }).sort(function(a,b){return a.d-b.d;});
+  if(isCur){ var _d28=new Date(cMid().getTime()+28*864e5); up=up.filter(function(s){ return s.d<=_d28; }); }   // Upcoming caps at 4 weeks out — keeps it tight
   var head='<div class="listnav">'+
     '<button class="lmv" onclick="listNav(-1)" aria-label="Previous month">‹</button>'+
     '<div class="lmo"><b>'+CMONTHS[lm]+' '+ly+'</b><span>'+up.length+' show'+(up.length===1?'':'s')+(isCur&&REG?(' · '+REG):'')+'</span></div>'+
@@ -1597,10 +1600,16 @@ function renderCal(){
   if(!up.length){ body = (CAL_SCOPE==='my'
       ? '<div class="cempty">🌹 Nothing saved in '+CMONTHS[lm]+'. Tap 📆 or “Notify me” on any show and it lands here.</div>'
       : '<div class="cempty">No shows in '+CMONTHS[lm]+' — try ‹ › to change month, “All”, or roam the map.</div>'); }
-  else if(up.length<=LIST_PAGE || LIST_SHOW_ALL){ body=up.map(calRow).join('');
-      if(up.length>LIST_PAGE) foot='<button class="lmore" onclick="listLess()">See less ↑</button>'; }
-  else { body=up.slice(0,LIST_PAGE).map(calRow).join('');
-      foot='<button class="lmore" onclick="listMore()">See '+(up.length-LIST_PAGE)+' more ↓</button>'; }
+  else {
+    var near, rest;
+    if(isCur){ var _d3=new Date(cMid().getTime()+3*864e5); near=up.filter(function(s){return s.d<=_d3;}); rest=up.filter(function(s){return s.d>_d3;}); }   // next 3 days open, rest folded
+    else { near=up.slice(0,LIST_PAGE); rest=up.slice(LIST_PAGE); }
+    body=near.map(calRow).join('');
+    if(rest.length){
+      if(LIST_SHOW_ALL){ body+=rest.map(calRow).join(''); foot='<button class="lmore" onclick="listLess()">See less ↑</button>'; }
+      else foot='<button class="lmore" onclick="listMore()">See '+rest.length+' more ↓</button>';
+    }
+  }
   list.innerHTML=head+body+foot;
  }
  try{ mapSyncMonth(); }catch(e){}   /* map follows the calendar's month */
@@ -1913,7 +1922,7 @@ function realBandProfile(i){ var b=(REAL_BANDS||[])[i]; if(!b)return; var safe=S
   '<div class="pname">'+ddSE(b.name)+'</div><div class="pchap">🎸 '+ddSE(b.region||b.city||'')+' · '+shows.length+' show'+(shows.length===1?'':'s')+' on the board</div>'+
   '<div class="prow"><button class="btn" onclick="toast(\'🔔 Following '+safe+' — heads-up when they play near you.\')">🔔 Follow</button><button class="btn ghost" onclick="hyperConsole(\''+safe+'\')">📡 HyperPost</button></div>'+
   (b.about?('<div class="psec">📖 About</div><div class="pstory">'+ddSE(b.about)+'</div>'):'')+
-  (shows.length?('<div class="psec">📅 Upcoming</div>'+shows.map(function(s){return '<div class="ppost">'+ddSE(s.venue)+' · '+ddSE(s.date)+(s.city?(' · '+ddSE(s.city)):'')+'</div>';}).join('')):'')+
+  (shows.length?('<div class="psec">📅 Upcoming</div>'+capList(shows.map(function(s){return '<div class="ppost">'+ddSE(s.venue)+' · '+ddSE(s.date)+(s.city?(' · '+ddSE(s.city)):'')+'</div>';}),4,'shows')):'')+
   '<div class="pfoot">Claimed band — its real home on dead.dance. Logo, story, and dates are theirs.</div>';
  document.getElementById('profile').classList.add('on');
 }
@@ -1968,7 +1977,7 @@ function bandView(i,tab){ var b=BANDS[i]; if(!b)return; tab=tab||'card'; var bod
      '<div class="note">Every band gets its own store. Proceeds credit the buyer\'s <b>local chapter</b> and roll up. (Representative until payments go live — nothing charges yet.)</div>';
  } else {
    var shows=bandNextShows(b.name);
-   var cal=shows.length? shows.map(function(s){return '<div class="bvShow"><span class="bvWhen">'+relDay(s.d)+'</span><div class="bvSh"><b>'+s.venue+'</b><span>'+(s.price?('$'+s.price):'')+(s.url?' · notify me':'')+'</span></div></div>';}).join('')
+   var cal=shows.length? capList(shows.map(function(s){return '<div class="bvShow"><span class="bvWhen">'+relDay(s.d)+'</span><div class="bvSh"><b>'+s.venue+'</b><span>'+(s.price?('$'+s.price):'')+(s.url?' · notify me':'')+'</span></div></div>';}),5,'dates')
      : '<div class="note" style="margin-top:6px">No dates posted yet — the band adds them in one tap.</div>';
    h=top+tabs+bandImgHTML(b,true)+
      '<div class="bvName">'+b.name+'</div><div class="bvReg">🎸 '+b.region+'</div>'+
