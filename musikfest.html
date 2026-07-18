@@ -212,7 +212,6 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     <button onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk" style="flex:0 0 auto;padding:11px 13px">⤴️</button>
     <button id="parkBtn" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking" style="flex:0 0 auto;padding:11px 13px">🅿️</button>
   </div>
-  <div class="trackstat" id="trackStat"></div>
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
@@ -226,6 +225,7 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
       <span id="mf_f_shop" class="mffilt" onclick="mfSetMapFilter('shop')">🛍️ Shops</span>
       <span id="mf_f_food" class="mffilt" onclick="mfSetMapFilter('food')">🍴 Food</span>
       <span id="mf_f_potty" class="mffilt" onclick="mfSetMapFilter('potty')">🚻 Potty</span>
+      <span id="trackStat" style="margin-left:auto"></span>
     </div>
   </div>
 
@@ -873,8 +873,10 @@ var BATHROOMS=[  // approx from ArtsQuest campus maps — exact layout to confir
 
 var WALK={on:false,miles:0,gain:0,last:null,lastAlt:null,watch:null,path:[]};
 function fmtStat(){ var mi=WALK.miles.toFixed(2), ft=Math.round(WALK.gain), steps=Math.round(WALK.miles*2100).toLocaleString();
-  var b=document.getElementById('trackBtn'); if(b) b.textContent=(WALK.on?'⏸':'▶')+' Auto-Tracking · '+mi+' mi · ↑'+ft+' ft · '+steps+' steps';   // distance lives in the button now
-  var st=document.getElementById('trackStat'); if(st) st.style.display='none'; }
+  var b=document.getElementById('trackBtn'); if(b) b.textContent=(WALK.on?'⏸':'▶')+' Auto-Tracking';
+  var st=document.getElementById('trackStat'); if(!st)return;                                    // the counter pill lives in the map legend, bottom-right
+  st.style.cssText='margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:#f2eee9;border:1px solid var(--line,#e7e1f0);border-radius:999px;padding:4px 11px;font-weight:800;font-size:12px;color:var(--ink,#241535);white-space:nowrap';
+  st.innerHTML='🥾 <b style="color:#b8002e">'+mi+' mi</b> · ↑'+ft+' ft · '+steps+' steps'; }
 function leftRight(from,cur,tgt){ if(!from)return 'left'; var hx=cur[1]-from[1],hy=cur[0]-from[0],tx=tgt[1]-cur[1],ty=tgt[0]-cur[0]; return (hx*ty-hy*tx)>0?'left':'right'; }
 function mfToast(msg,isHtml){ var t=document.getElementById('mfToast'); if(!t){ t=document.createElement('div'); t.id='mfToast'; t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;background:#241535;color:#fff;font-weight:800;font-size:14px;line-height:1.4;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:88%;text-align:center;opacity:0;transition:opacity .25s'; document.body.appendChild(t); } if(isHtml)t.innerHTML=msg; else t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },isHtml?5200:3600); }
 function mfToastHTML(h){ mfToast(h,true); }
@@ -1031,7 +1033,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 381'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 382'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
