@@ -354,9 +354,9 @@
             '<button data-scope="national">National</button>' +
             '<button data-scope="my">My Calendar</button>' +
           '</div>' +
-          '<button class="showmap-x" aria-label="Hide map" title="Hide">✕</button>' +
+          '<span class="showmap-sum" id="mapSum"></span>' +
         '</div>' +
-        '<div class="showmap-farrah" id="farrahMap"></div>' +
+        '<div class="showmap-farrah" id="farrahMap" hidden></div>' +
         '<div class="showmap-wrap">' +
           '<svg class="showmap-svg" viewBox="0 0 960 600" role="img" aria-label="US map of upcoming shows" preserveAspectRatio="xMidYMid meet">' +
             '<defs><clipPath id="usClip"><path d="' + US_PATH + '"></path></clipPath></defs>' +
@@ -384,9 +384,6 @@
         '</div>' +
         '<div class="showmap-legend">' +
           '<span class="lg real">● verified date</span>' +
-          '<span class="lg sample">● sample (from our venues)</span>' +
-          '<span class="lg dim">◌ chapter waiting — tap to seed it</span>' +
-          '<span class="showmap-honest">Honest-state — sample rows labeled; nothing sells here.</span>' +
         '</div>' +
         '<div class="showmap-panel" id="showmapPanel" hidden></div>' +
       '</div>';
@@ -407,6 +404,7 @@
     var panel = host.querySelector("#showmapPanel");
 
     function farrah(html) { farrahEl.innerHTML = '🎙️ ' + html; }
+    function setSum(t) { var e = host.querySelector("#mapSum"); if (e) e.textContent = t; }   // compact count on the header line
 
     /* --- dots: sized as fraction of viewBox → constant on-screen. mode: 'nation' faint, 'chapter' bold+labels --- */
     function drawDots(vbW, chapterName) {
@@ -497,7 +495,7 @@
     function showPop(i, gEl) {
       var s = SHOWS[i], id = showId(s), done = notified(id);
       pop.innerHTML =
-        '<div class="pop-band">' + esc(s.band) + (s.sample ? ' <em class="pop-tag">SAMPLE</em>' : '') + '</div>' +
+        '<div class="pop-band">' + esc(s.band) + '</div>' +
         '<div class="pop-line">' + esc(s.venue) + ' · ' + esc(s.city) + '</div>' +
         '<div class="pop-date">📅 ' + fmtDate(s.date) + ', 2026</div>' +
         '<button class="pop-notify' + (done ? ' done' : '') + '" data-id="' + id + '">' +
@@ -536,15 +534,20 @@
     /* --- the drill panel (Rosebud show list) --- */
     function renderPanel(ch) {
       var fests = festsFor(ch);
-      var rows = ch.shows.map(function (s) {
+      var _rowArr = ch.shows.map(function (s) {
         var id = showId(s), done = notified(id);
         return '<div class="prow">' +
           '<div class="pdt">' + esc(fmtDate(s.date).split(" ")[0]) + '<small>' + esc(fmtDate(s.date).split(" ")[1]) + '</small></div>' +
-          '<div class="pinfo"><b>' + esc(s.band) + (s.sample ? ' <em class="pop-tag">SAMPLE</em>' : '') + '</b><span>' + esc(s.venue) + ' · ' + esc(s.city) + '</span></div>' +
+          '<div class="pinfo"><b>' + esc(s.band) + '</b><span>' + esc(s.venue) + ' · ' + esc(s.city) + '</span></div>' +
           '<button class="ptix" data-i="' + SHOWS.indexOf(s) + '">🎟️ Tickets</button>' +
           '<button class="pnotify' + (done ? ' done' : '') + '" data-id="' + id + '">' + (done ? '✓' : '🔔') + '</button>' +
           '</div>';
-      }).join("");
+      });
+      var _LIM = 4;   // show the next few, fold the rest into an accordion so the list never runs long
+      var rows = (_rowArr.length <= _LIM) ? _rowArr.join("")
+        : _rowArr.slice(0, _LIM).join("") +
+          '<details class="pmore"><summary style="cursor:pointer;list-style:none;color:var(--purple2,#5a2e86);font-weight:800;font-size:13px;padding:11px 0;text-align:center">Show ' + (_rowArr.length - _LIM) + ' more ↓</summary>' +
+          _rowArr.slice(_LIM).join("") + '</details>';
       var fhtml = fests.length ? ('<div class="pfhead">🎆 Summer festivals</div>' + fests.map(function (f) {
         var when = f.start ? (f.start.slice(5) + (f.end && f.end !== f.start ? ("–" + f.end.slice(5)) : "")) : "Summer";
         return '<div class="pfrow"><div class="pfdt">🎆<small>' + esc(f.days || "") + 'd</small></div>' +
@@ -570,6 +573,7 @@
       animateTo(FULL_VB.slice(), 560, null, function () { drawBadges(true); });
       var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
       lit.forEach(function (c) { tot += c.shows.length; });
+      setSum(lit.length + ' chapter' + (lit.length !== 1 ? 's' : '') + ' · ' + tot + ' show' + (tot !== 1 ? 's' : ''));
       var nf = 0; try { nf = (window.DD_FESTIVALS || []).length; } catch (e) {}
       farrah('The bus is rolling through <b>' + lit.length + ' chapter' + (lit.length !== 1 ? 's' : '') + '</b> tonight — <b>' + tot + ' shows</b>' + (nf ? (' + <b>' + nf + ' summer festivals</b>') : '') + ' on the board. Tap a lit region — or a <b>dark one to post the first date</b> 🍪 <b>first one in wins the big Cookie.</b>');
     }
@@ -580,6 +584,7 @@
       drawBadges(false); clearYou(); showRadius(false);
       regionRow.hidden = false; backBtn.hidden = false; sel.value = ch.name;
       nearEl.textContent = ch.shows.length ? (ch.shows.length + (ch.shows.length === 1 ? " show" : " shows")) : "waiting — seed it";
+      setSum(shortName(ch.name) + ' · ' + ch.shows.length + ' show' + (ch.shows.length !== 1 ? 's' : ''));
       animateTo(chapterVB(ch), 620, chapterName);
       renderPanel(ch);
       var fests = festsFor(ch);
@@ -602,6 +607,7 @@
       markYou(lat, lng, tvb[2]);
       var n = SHOWS.filter(function (s) { return s._ll && haversineMi(lat, lng, s._ll[0], s._ll[1]) <= mi; }).length;
       nearEl.textContent = n + (n === 1 ? " show" : " shows") + " within " + mi + " mi";
+      setSum(n + ' show' + (n !== 1 ? 's' : '') + ' · ' + mi + ' mi');
       if (radiusSel) radiusSel.value = String(mi);
     }
     function useLocation() {

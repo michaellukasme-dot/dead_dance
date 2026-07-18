@@ -338,6 +338,7 @@ body{padding-bottom:64px}
 #showMap{margin:0 0 14px}
 .showmap-card{background:#fff;color:var(--ink);border-radius:16px;padding:13px 14px 15px;border:1px solid #ece6f2;box-shadow:0 2px 12px rgba(30,18,48,.07)}
 .showmap-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.showmap-sum{margin-left:auto;font-size:12px;font-weight:800;color:var(--purple2,#5a2e86);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42%}
 .showmap-head b{font-size:15px;color:var(--ink)}
 /* National / Near-me segmented toggle */
 .showmap-seg{display:flex;gap:3px;background:#f1ecf7;border-radius:999px;padding:3px;margin-left:auto}
@@ -665,7 +666,7 @@ body{padding-bottom:64px}
 .sgb{background:#f2eee6;border:0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:#6a6577;cursor:pointer}
 .sgb.on{background:var(--accent);color:#fff}
 /* feed-scope single toggle (below composer) */
-.famtoggle{display:flex;background:#efe9f7;border-radius:999px;padding:3px;margin:8px auto 4px;max-width:320px}
+.famtoggle{display:flex;background:#efe9f7;border-radius:999px;padding:3px;margin:8px 0 4px;max-width:320px}
 .famtoggle .ft-opt{flex:1;border:0;background:none;border-radius:999px;padding:8px 10px;font-size:12.5px;font-weight:800;color:#6a5f86;cursor:pointer;transition:.15s}
 .famtoggle .ft-opt.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px #5a2e8655}
 /* tap-to-friend handshake */
@@ -1712,7 +1713,9 @@ function applyMyAvatar(){ var url=ME.img;
  var img=url?('<img src="'+url+'" alt="You" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">'):'🌹';
  var av=document.querySelector('.cbtn.avat'); if(av){ av.innerHTML=img; av.style.overflow='hidden'; av.style.padding='0'; av.style.background=url?'#fff':''; }
  var ca=document.querySelector('.cmp-av'); if(ca){ ca.innerHTML=img; ca.style.overflow='hidden'; ca.style.background=url?'#fff':''; }
- document.querySelectorAll('[data-me-av]').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; }); }
+ document.querySelectorAll('[data-me-av]').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; });
+ var pmav=document.querySelector('.pmav'); if(pmav){ pmav.innerHTML=img; pmav.style.overflow='hidden'; pmav.style.background=url?'#fff':''; }   /* profile-menu head avatar matches */
+ var pmn=document.getElementById('pmMeName'); if(pmn && window.ME && ME.name && ME.name!=='You') pmn.textContent=ME.name; }
 function qrBuild(){drawQR(document.getElementById('qr'),ME.img);var nq=document.getElementById('navqr');if(nq)drawQR(nq,ME.img);applyMyAvatar();}
 
 /* ---------------- the QR PROFILE — portable, shareable, Facebook-style ---------------- */
@@ -2886,7 +2889,7 @@ function openCreate(){ var e=document.getElementById('createov'); if(e)e.classLi
 function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); if(typeof loadFriendReqs==='function')loadFriendReqs(); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; }
 function coClose(id){ var e=document.getElementById(id); if(e)e.classList.remove('on'); }
 function coGo(id,fn){ coClose(id); try{fn();}catch(e){} }
-function openProfMenu(){ var e=document.getElementById('profmenu'); if(e)e.classList.toggle('on'); }
+function openProfMenu(){ try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){} var e=document.getElementById('profmenu'); if(e)e.classList.toggle('on'); }
 document.addEventListener('click',function(ev){ var pm=document.getElementById('profmenu'); if(pm&&pm.classList.contains('on')){ if(!pm.contains(ev.target) && !(ev.target.closest&&ev.target.closest('.avat'))) pm.classList.remove('on'); } });
 /* post ⋯ menu */
 var _pm=null;
