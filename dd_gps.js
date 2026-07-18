@@ -70,9 +70,10 @@
     // KICK a fast first fix (cached/coarse ok) so the dot appears in a second or two, and any
     // permission/timeout error surfaces immediately — then the high-accuracy watch refines it.
     try { w.navigator.geolocation.getCurrentPosition(onPos, onErr, { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 }); } catch (e) {}
-    // enableHighAccuracy → the real GNSS chip; maximumAge:0 → never a stale cached fix; snappy timeout
+    // enableHighAccuracy → the real GNSS chip. maximumAge:8000 → accept a fix up to 8s old so you
+    // appear INSTANTLY (this is exactly what makes TCTP snap to you); the chip refines it live.
     id = w.navigator.geolocation.watchPosition(onPos, onErr, {
-      enableHighAccuracy: true, maximumAge: 0, timeout: (opts.timeout || 15000)
+      enableHighAccuracy: true, maximumAge: 8000, timeout: (opts.timeout || 30000)
     });
     return {
       stop: function () { dead = true; try { w.navigator.geolocation.clearWatch(id); } catch (e) {} },

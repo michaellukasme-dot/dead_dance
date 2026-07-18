@@ -755,7 +755,7 @@ window.refresh=function(){ if(!MF.length)return;
  var cnt=document.getElementById('ddCount'); if(cnt)cnt.textContent=rows.length+' set'+(rows.length===1?'':'s')+(ddN?(' · '+ddN+' 🌹'):'');
  var shown=schExpand?rows:rows.slice(0,SCH_MAX), cs=catchStore();
  document.getElementById('fullSched').innerHTML = shown.length ? shown.map(function(r){
-   var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!BAND_INFO[r.b];
+   var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!(window.BAND_INFO&&BAND_INFO[r.b]);
    var bspan='<span class="b'+(bio?' hasbio':'')+'"'+(bio?' data-b="'+esc(r.b)+'" onclick="bandInfo(this.getAttribute(\'data-b\'))" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px"':'')+'>'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+(bio?' ⓘ':'')+'</span>';
    return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span></div>';
  }).join('') : '<div class="srow"><span class="g">Nothing '+(PILL==='dead'?'Dead/jam ':'')+'left today — tap › for the next day.</span></div>';
@@ -764,7 +764,7 @@ window.refresh=function(){ if(!MF.length)return;
 // ===== Claude on the mic — the app WRITES specific asks for whoever's on now; the shot IS the send =====
 var MF_SONGS=['Cumberland Blues','Sugar Magnolia','Fire on the Mountain',"Truckin'",'Bertha','Scarlet Begonias','Ripple',"Franklin's Tower",'Deal','Eyes of the World','Shakedown Street','Sugaree'];
 function askList(a){ var song=MF_SONGS[Math.floor(Math.random()*MF_SONGS.length)];
-  var shots=['📸 Get in close on the bass player.','📸 Lead guitar, mid-solo — freeze it.','🎥 Fifteen seconds of the whole band jamming.','📸 Wide shot of the crowd at '+a.st+'.','📸 The twirlers up front — catch the dancers.'];
+  var shots=['📸 Get low and shoot up at the bass player — into the lights.','📸 Step stage left, catch the lead mid-solo. Angle nobody else has.','🎥 Fifteen seconds on the dancers — wait for the twirl.','📸 Wide: the whole crowd at '+a.st+', arms up.','📸 Find the brightest smile out there and frame it.'];
   var caps=(a.sc==='dd')
     ? ['“'+song+'” is rippling tonight 🌹','You can feel it — '+a.b+' deep in the jam 🌹','The whole crowd’s moving. '+a.b+' at Musikfest 🌹']
     : [a.b+' is on fire at '+a.st+' 🌹',a.b+' — Musikfest, right now 🌹','This one’s special — '+a.b+' live 🌹'];
@@ -777,7 +777,7 @@ window.renderAsks=function(a){ var host=document.getElementById('askStrip'); if(
   if(!a){ host.innerHTML=''; host.removeAttribute('data-k'); return; }
   var key=a.b+'|'+a.t+'|'+a.d; if(host.getAttribute('data-k')===key) return; host.setAttribute('data-k',key);   // don't re-type on every refresh
   var asks=askList(a);
-  host.innerHTML='<div style="margin:2px 0 10px"><div style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><img src="claude-mark.svg" alt="" style="width:20px;height:20px"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">Claude wrote the caption — tap, take the pic, it posts</span></div><button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four of us, four sides of '+esc(a.st)+', one shot.</span></span></button><div id="askBubbles"></div></div>';
+  host.innerHTML='<div style="margin:2px 0 10px"><div style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><img src="claude-mark.svg" alt="" style="width:20px;height:20px"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Silver’s working the room — tap one, shoot it, it posts</span></div><button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four of us, four sides of '+esc(a.st)+', one shot.</span></span></button><div id="askBubbles"></div></div>';
   var wrap=document.getElementById('askBubbles'), idx=0;
   function addBubble(ask){ var b=document.createElement('button'); b.type='button'; b.onclick=function(){ askCapture(ask.cap); };
     b.style.cssText='display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;border:1px solid #f0d0dc;background:linear-gradient(100deg,#fff,#fdf4f7);border-radius:13px;padding:9px 11px;margin:0 0 7px;cursor:pointer;font:inherit';
@@ -794,7 +794,7 @@ function cookieCelebrate(cap){ var el=document.getElementById('ckPop'); if(!el){
 window.askCapture=function(cap){ window._askCap=cap||''; var inp=document.getElementById('photoIn'); if(inp)inp.click(); };   // tapping the ask opens the camera; the shot itself is the send
 window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; var inp=document.getElementById('photoIn'); if(inp)inp.click(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
 
-if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; fillPlanDate(); refresh(); } else { drawMap(); }
+if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; try{ fillPlanDate(); refresh(); }catch(e){ try{console.error('mf init refresh failed (non-fatal):',e);}catch(_){}}} else { try{ drawMap(); }catch(e){} }
 
 /* ===== FULL-LINEUP BROWSER — plan all 600+ sets on a laptop or phone (their app can't) ===== */
 var BR_DEAD=false;
@@ -990,7 +990,7 @@ function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
   ensureMap();  // so DDGPS can mount the dot/ring/Center-Me + auto-zoom to walking level on first lock
   if(window.DDGPS && LMAP){ WALK.gps=DDGPS.attach(LMAP,{walkZoom:18,q:2.5,lockAcc:20,onFix:onFix,onError:onGeoErr}); }
   else if(window.DDGPS){ WALK.gps=DDGPS.start({q:2.5,lockAcc:20,onFix:onFix,onError:onGeoErr}); }
-  else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:0,timeout:15000}); }
+  else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:8000,timeout:30000}); }
 }
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
   if(WALK.on){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
@@ -998,7 +998,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 359'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 366'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();

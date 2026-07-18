@@ -77,11 +77,17 @@
   }
   var iosOtherBrowser = isIOS() && /crios|fxios|edgios/i.test(ua);
 
+  function shareNow() {
+    // iOS has no direct "add to home screen" API, but navigator.share opens the native
+    // share sheet — where "Add to Home Screen" lives. This is the closest to one-tap.
+    try { if (navigator.share) { navigator.share({ title: appName(), url: location.href }).catch(function () {}); return true; } } catch (e) {}
+    return false;
+  }
   function openSheet() {
     var nm = appName();
     var ov = document.createElement("div"); ov.id = "lukasA2HSov";
     var iosSteps =
-      '<li>Tap the <b>Share</b> button ' + shareGlyph() + '</li>' +
+      '<li id="a2hsShareStep" style="cursor:pointer">Tap the <b>Share</b> button ' + shareGlyph() + '<span style="margin-left:8px;font-size:12px;color:#0a84ff;font-weight:800;white-space:nowrap">open ›</span></li>' +
       '<li>Scroll and tap <b>Add to Home Screen</b> <span class="a2hs-ic">➕</span></li>' +
       '<li>Tap <b>Add</b> — done <span class="a2hs-ic">✅</span></li>';
     var genSteps =
@@ -99,6 +105,7 @@
       '</div>';
     ov.addEventListener("click", function (e) { if (e.target === ov || e.target.className === "a2hs-done") ov.remove(); });
     ov.querySelector(".a2hs-skip").addEventListener("click", function () { remember(); ov.remove(); hide(); });
+    var _ss = ov.querySelector("#a2hsShareStep"); if (_ss) _ss.addEventListener("click", function () { shareNow(); });   // the Share step is now tappable → opens the real iOS share sheet
     document.body.appendChild(ov);
   }
 
