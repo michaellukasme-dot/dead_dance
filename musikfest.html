@@ -122,10 +122,6 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     </div>
     <div style="color:#9a883f;font-size:11.5px;font-weight:800;margin-top:10px;letter-spacing:.05em;text-transform:uppercase">Festivals, reimagined — virtually · keep this open, it's your companion</div>
   </div>
-  <div class="adcta" onclick="adOpen()">
-    <div><b>📣 Claim your shop, restaurant, or brewery</b><br><span>Buy an ad that reaches <b>every Musikfest visitor</b> passing your door. From $99.</span></div>
-    <button class="go" onclick="event.stopPropagation();adOpen()">Claim &amp; advertise ▸</button>
-  </div>
   <div id="adFeatured"></div>
 
   <div class="admodal" id="adModal">
@@ -318,6 +314,11 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     <div style="flex:1"><div style="color:#241535;font-weight:900;font-size:14px">“I launched DeadDance.app at Musikfest 2026”</div>
     <div style="color:#7a6a2e;font-size:12px">Wear the day — the groovy launch drop. Tee · tank · dad hat.</div></div>
     <div style="color:#b8002e;font-weight:900;font-size:18px">›</div></a>
+
+  <div class="adcta" onclick="adOpen()">
+    <div><b>📣 Claim your shop, restaurant, or brewery</b><br><span>Buy an ad that reaches <b>every Musikfest visitor</b> passing your door. From $99.</span></div>
+    <button class="go" onclick="event.stopPropagation();adOpen()">Claim &amp; advertise ▸</button>
+  </div>
 
   <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
     If we can map Musikfest, we can map anything. Free-stage band grid drops from ArtsQuest in July — it lands here when it does. 🌹<br>
@@ -1027,7 +1028,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 374'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 375'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
