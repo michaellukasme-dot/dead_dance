@@ -38,8 +38,8 @@
 .srow .b{flex:1;font-weight:700}.srow .g{color:var(--muted);font-size:11.5px}
 .ddtog{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:700;margin-bottom:10px;cursor:pointer}
 .carbadge{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:60;background:#241535ee;color:#fff;border-radius:999px;padding:8px 13px;font-weight:800;font-size:13px;box-shadow:0 3px 12px #0005;backdrop-filter:blur(6px)}
-.compbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.compbar button{flex:1;min-width:150px;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;background:#f1eef7;color:var(--purple)}
+.compbar{display:flex;gap:7px;flex-wrap:nowrap;margin-top:14px}
+.compbar button{flex:1;min-width:0;border:0;border-radius:12px;padding:11px 6px;font-weight:800;font-size:13px;cursor:pointer;background:#f1eef7;color:var(--purple);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .compbar button.on{background:#1f9e6b;color:#fff}
 .trackstat{display:none;margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;text-align:center}
 .trackstat .big{font-size:26px;font-weight:900;color:var(--rose)}
@@ -206,9 +206,9 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 
   <div class="carbadge" id="carBadge" style="display:none"></div>
   <div class="compbar">
-    <button id="trackBtn" onclick="toggleTrack()">🥾 Start my walk</button>
-    <button onclick="nearestBathroom()">🚻 Nearest bathroom</button>
-    <button onclick="postWalk()">📸 Post my walk</button>
+    <button id="trackBtn" onclick="toggleTrack()">🥾 Walk</button>
+    <button onclick="nearestBathroom()">🚻 Bathroom</button>
+    <button onclick="postWalk()">📸 Post</button>
   </div>
   <div class="trackstat" id="trackStat"></div>
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
@@ -1024,12 +1024,12 @@ function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
   else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:8000,timeout:30000}); }
 }
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
-  if(WALK.on){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
+  if(WALK.on){ b.textContent='⏸ Tracking'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
     walkStatus('🛰️ Finding you… <b>allow location if your phone asks.</b>',true);   // instant feedback — never "nothing"
     startWatch(); fmtStat(); }
-  else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
+  else { b.textContent='▶ Resume'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 376'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 377'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
@@ -1126,7 +1126,7 @@ window.postWalk=function(){
 };
 // DEFAULT GPS ON — start tracking the moment they land; user need not do a thing. The reveal comes at day's end.
 renderMySets(); renderPhotoStrip();
-WALK.on=true; (function(){ var b=document.getElementById('trackBtn'); if(b){ b.textContent='⏸ Auto-tracking your day'; b.classList.add('on'); } })(); fmtStat(); startWatch();
+WALK.on=true; (function(){ var b=document.getElementById('trackBtn'); if(b){ b.textContent='⏸ Tracking'; b.classList.add('on'); } })(); fmtStat(); startWatch();
 
 // parking lots + the "where did I park" button
 try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
