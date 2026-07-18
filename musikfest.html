@@ -112,7 +112,8 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 <body>
 <div class="wrap">
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
-  <div class="hero">
+  <div class="hero" style="position:relative">
+    <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:12px;right:12px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0"><img src="musikfest_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
     <h1>Musikfest</h1>
     <div class="k">2026 · Bethlehem, PA · Jul 31 – Aug 9 (Preview Jul 30)</div>
     <p>16 stages. ~3 miles. 400+ acts, free. The town names everything <i>-platz</i> and nobody knows where they are. Here's every one — with directions.</p>
@@ -123,6 +124,11 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
     <div style="color:#9a883f;font-size:11.5px;font-weight:800;margin-top:10px;letter-spacing:.05em;text-transform:uppercase">Festivals, reimagined — virtually · keep this open, it's your companion</div>
   </div>
   <div id="adFeatured"></div>
+  <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">
+    <button onclick="closePoster()" aria-label="Close poster" style="position:absolute;top:14px;right:16px;border:0;background:#ffffff26;color:#fff;width:42px;height:42px;border-radius:21px;font-size:23px;cursor:pointer;z-index:2">×</button>
+    <img id="posterImg" src="musikfest_poster.jpg" alt="Musikfest 2026 official poster" onerror="this.style.display='none';var d=document.getElementById('posterMiss');if(d)d.style.display='block'" style="max-width:100%;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px #000a">
+    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>musikfest_poster.jpg</b> and it shows here.</div>
+  </div>
 
   <div class="admodal" id="adModal">
     <div class="bg" onclick="adClose()"></div>
@@ -215,7 +221,6 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
-  <div class="sec">The map — where each Platz actually is</div>
   <div class="mapwrap">
     <div id="lmap" style="height:360px;border-radius:11px;overflow:hidden;background:#eef" aria-label="Musikfest stage map"></div>
     <div class="legend">
@@ -471,8 +476,8 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
     var ic=L.divIcon({className:'mfstage',iconSize:[27,27],iconAnchor:[13,13],html:'<div style="width:27px;height:27px;border-radius:50%;background:#fff;border:2px solid '+bd+';display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 1px 4px #0005;opacity:'+op+'">'+emo+'</div>'});
     var m=L.marker([s.lat,s.lng],{icon:ic}).addTo(LG_STAGE);
     m.bindTooltip((isDead?'🌹 ':'🎶 ')+s.n.replace(/ @.*/,''),{direction:'top',opacity:.95});
-    var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,'');
-    m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>');
+    var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,''), _poster=(/levitt/i.test(s.n)?'levitt_poster.jpg':'');
+    m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>'+(_poster?'<button onclick="openPoster(\''+_poster+'\')" style="border:0;background:#f0a500;color:#3a1d00;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer;margin:4px 0 0 6px">🖼️ Poster</button>':''));
   });
   drawShops(); drawFood(); drawPotty(); mfApplyMapFilter();
   updateYou(); updatePath(); updatePhotos();
@@ -751,6 +756,10 @@ crewRefresh(); renderJoin();
 try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190,caption:true}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
+window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
+  if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
+  if(m) m.style.display='flex'; };
+window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none'; };
 
 // ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----
 var MF=window.DD_MUSIKFEST||[];
@@ -1033,11 +1042,13 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 382'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 385'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
-function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
-  if(c && window.YOU){ el.style.display='block'; el.innerHTML='🚗 '+prettyDist(hav(window.YOU[0],window.YOU[1],c.lat,c.lng))+' to your car'; } else el.style.display='none'; }
+function carBadge(){ var el=document.getElementById('carBadge'), c=parkGet(), b=document.getElementById('parkBtn');
+  var dist=(c && window.YOU)?prettyDist(hav(window.YOU[0],window.YOU[1],c.lat,c.lng)):null;
+  if(el){ if(c && window.YOU){ el.style.display='block'; el.innerHTML='🚗 '+dist+' to your car'; } else el.style.display='none'; }
+  if(b){ b.title = c ? (dist ? ('🅿️ '+dist+' to your car — tap to walk back') : '🅿️ Tap to walk back to your car') : '🅿️ Remember where I parked'; } }
 window.nearestBathroom=function(){ if(!window.YOU){ startWatch(); alert('Getting your location — tap again in a moment.'); return; }
   var best=null,bd=1e9; BATHROOMS.forEach(function(b){ var d=hav(window.YOU[0],window.YOU[1],b.lat,b.lng); if(d<bd){bd=d;best=b;} });
   if(best) window.open('https://www.google.com/maps/dir/?api=1&destination='+best.lat+','+best.lng+'&travelmode=walking','_blank','noopener'); };
