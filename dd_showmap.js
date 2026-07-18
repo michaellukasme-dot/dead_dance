@@ -357,6 +357,19 @@
           '<button class="showmap-x" aria-label="Hide map" title="Hide">✕</button>' +
         '</div>' +
         '<div class="showmap-farrah" id="farrahMap"></div>' +
+        '<div class="showmap-wrap">' +
+          '<svg class="showmap-svg" viewBox="0 0 960 600" role="img" aria-label="US map of upcoming shows" preserveAspectRatio="xMidYMid meet">' +
+            '<defs><clipPath id="usClip"><path d="' + US_PATH + '"></path></clipPath></defs>' +
+            '<path class="us-land" d="' + US_PATH + '"></path>' +
+            '<g class="us-grat" clip-path="url(#usClip)">' + US_GRATICULE + '</g>' +
+            '<path class="us-states" clip-path="url(#usClip)" d="' + STATE_PATH + '"></path>' +
+            '<g class="sm-you"></g>' +
+            '<g class="sm-dots"></g>' +
+            '<g class="sm-badges"></g>' +
+          '</svg>' +
+          '<div class="showmap-pop" id="showmapPop" hidden></div>' +
+        '</div>' +
+        /* region controls + legend moved BELOW the map (Musikfest-style — the chapter picker recenters the map like North/South) */
         '<div class="showmap-region" hidden>' +
           '<button class="showmap-back" hidden>‹ All chapters</button>' +
           '<button class="showmap-loc">📍 Use my location</button>' +
@@ -374,18 +387,6 @@
           '<span class="lg sample">● sample (from our venues)</span>' +
           '<span class="lg dim">◌ chapter waiting — tap to seed it</span>' +
           '<span class="showmap-honest">Honest-state — sample rows labeled; nothing sells here.</span>' +
-        '</div>' +
-        '<div class="showmap-wrap">' +
-          '<svg class="showmap-svg" viewBox="0 0 960 600" role="img" aria-label="US map of upcoming shows" preserveAspectRatio="xMidYMid meet">' +
-            '<defs><clipPath id="usClip"><path d="' + US_PATH + '"></path></clipPath></defs>' +
-            '<path class="us-land" d="' + US_PATH + '"></path>' +
-            '<g class="us-grat" clip-path="url(#usClip)">' + US_GRATICULE + '</g>' +
-            '<path class="us-states" clip-path="url(#usClip)" d="' + STATE_PATH + '"></path>' +
-            '<g class="sm-you"></g>' +
-            '<g class="sm-dots"></g>' +
-            '<g class="sm-badges"></g>' +
-          '</svg>' +
-          '<div class="showmap-pop" id="showmapPop" hidden></div>' +
         '</div>' +
         '<div class="showmap-panel" id="showmapPanel" hidden></div>' +
       '</div>';

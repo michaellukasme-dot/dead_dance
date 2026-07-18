@@ -105,6 +105,18 @@
         authStep("sent");
       });
   }
+  function signInFacebook(){
+    if (minorLocked()) return;
+    var btn = document.getElementById("lc-fb-btn"); if (btn){ btn.disabled = true; btn.textContent = "Opening Facebook…"; }
+    function fail(msg){ if (btn){ btn.disabled = false; btn.innerHTML = '<span style="font-weight:900;font-size:16px">f</span> Continue with Facebook'; } toast(msg || "Facebook sign-in is still being switched on — use email for now."); }
+    try {
+      var p = client().auth.signInWithOAuth({ provider: "facebook", options: { redirectTo: location.origin + location.pathname } });
+      if (p && p.then) p.then(function(r){
+        if (r && r.error) fail(/provider|enable|config/i.test(r.error.message||"") ? "Facebook sign-in is still being switched on — use email for now." : ("Facebook sign-in: " + (r.error.message||"try again")));
+        // success → the browser redirects to Facebook; we come back signed in
+      }, function(){ fail(); });
+    } catch(e){ fail(); }
+  }
   function finishIdentity(){
     if (minorLocked()) return;
     var nm = (document.getElementById("lc-name").value || "").trim();
@@ -488,6 +500,8 @@
         '<div class="lc-step" id="lc-step-minor"><h3>All good</h3><p class="lc-tx">Sign-in and chat are for 18+, so they’re off on this device. Everything else is yours — enjoy.</p>' +
           '<div class="lc-row"><button class="lc-btn" onclick="LukasChat._hide()">Got it</button></div></div>' +
         '<div class="lc-step" id="lc-step-email"><h3>Sign in</h3><p class="lc-tx">We’ll email you a magic link — no password. Your email is never shown to anyone.</p>' +
+          '<button class="lc-btn" id="lc-fb-btn" onclick="LukasChat._fb()" style="background:#1877F2;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;width:100%"><span style="font-weight:900;font-size:16px">f</span> Continue with Facebook</button>' +
+          '<div class="lc-tx" style="text-align:center;margin:9px 0;opacity:.55">— or —</div>' +
           '<input id="lc-email" type="email" placeholder="you@email.com" autocomplete="email">' +
           '<div class="lc-row"><button class="lc-btn" id="lc-send-btn" onclick="LukasChat._sendLink()">Email my link</button><button class="lc-btn ghost" onclick="LukasChat._hide()">Cancel</button></div></div>' +
         '<div class="lc-step" id="lc-step-sent"><h3>Check your email</h3><p class="lc-tx">Magic link sent to <b id="lc-sent-to"></b>. Open it on this device and you’ll come right back, signed in.</p>' +
@@ -522,6 +536,6 @@
     // internal handlers referenced by injected markup:
     _openRoom: openRoom, _openAuth: openAuth, _back: backToRooms, _send: send, _attach: attach, _clearAtt: clearAtt, _report: report, _mute: mute, _friend: friend,
     _badge: function(id, nm){ if (root.LukasBadge && root.LukasBadge.viewIdentity) root.LukasBadge.viewIdentity(id, nm); else toast("Badge isn’t available here"); },
-    _attestYes: attestYes, _attestNo: attestNo, _sendLink: sendLink, _finish: finishIdentity, _hide: hideModal
+    _attestYes: attestYes, _attestNo: attestNo, _sendLink: sendLink, _fb: signInFacebook, _finish: finishIdentity, _hide: hideModal
   };
 })(window);
