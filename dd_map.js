@@ -21,8 +21,12 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
     ? { url: mt("streets-v2", "png", w.DD_TILE_KEY), attribution: ATTR, maxZoom: 20 }
     : OSM;
 
-  // DDtile(map) → adds a modern street base AND, when keyed, a Google/Apple-style
-  // "Map ⇄ Satellite" toggle (satellite+labels = hybrid). Auto-falls-back to OSM so a map is never blank.
+  // Esri World Imagery — FREE satellite tiles, no API key required. Gives us the Google-style
+  // Map ⇄ Satellite toggle TODAY. (Upgrades to MapTiler hybrid automatically once a key is pasted.)
+  var ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+
+  // DDtile(map) → street base + a Google/Apple-style "Map ⇄ Satellite" toggle in the map window.
+  // Auto-falls-back to OSM so a map is never blank.
   w.DDtile = function (map) {
     var k = w.DD_TILE_KEY, usingKey = !!k;
     var base = usingKey
@@ -30,11 +34,13 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
       : L.tileLayer(OSM.url, { attribution: OSM.attribution, maxZoom: OSM.maxZoom, crossOrigin: true });
     base.addTo(map);
 
-    if (usingKey) {
-      // the familiar satellite toggle — the paradigm ~1B drivers already know
-      var hybrid = L.tileLayer(mt("hybrid", "jpg", k), { attribution: ATTR, maxZoom: 20, crossOrigin: true });
-      try { L.control.layers({ "🗺 Map": base, "🛰 Satellite": hybrid }, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {}
-    }
+    // Satellite: MapTiler hybrid (with labels) when keyed, else free Esri imagery (no key).
+    var sat = usingKey
+      ? L.tileLayer(mt("hybrid", "jpg", k), { attribution: ATTR, maxZoom: 20, crossOrigin: true })
+      : L.tileLayer(ESRI, { attribution: "Imagery © Esri, Maxar, Earthstar Geographics", maxZoom: 19, crossOrigin: true });
+
+    // the familiar Map ⇄ Satellite toggle, top-right of the map — the paradigm ~1B drivers know
+    try { L.control.layers({ "🗺 Map": base, "🛰 Satellite": sat }, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {}
 
     var errs = 0, swapped = false;
     base.on("tileerror", function () {
@@ -46,7 +52,6 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
         L.tileLayer(OSM.url, { attribution: OSM.attribution, maxZoom: OSM.maxZoom }).addTo(map);
       }
     });
-    if (!usingKey && w.console) console.warn("dd_map.js: no DD_TILE_KEY set — using dev-only OSM tiles (the '2012' look). Paste a MapTiler key in dd_map.js to go modern + enable the satellite toggle.");
     return base;
   };
 })(window);
