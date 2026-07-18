@@ -112,7 +112,7 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 body.mfapp{overflow:hidden;position:fixed;inset:0;width:100%;height:100%;background:#2a1b3d}
 .mf-map{display:none}
 body.mfapp .mf-map{display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1;background:#dfe6ea}
-body.mfapp #lmap{position:absolute!important;inset:0!important;height:100%!important;width:100%!important;border-radius:0!important;background:#dfe6ea}
+body.mfapp #lmap{position:absolute!important;inset:0!important;z-index:0!important;height:100%!important;width:100%!important;border-radius:0!important;background:#dfe6ea}
 body.mfapp .mf-back{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:7;background:#fff;color:var(--purple);padding:8px 13px;border-radius:999px;box-shadow:0 2px 8px #0003;font-size:13px;font-weight:800;text-decoration:none}
 body.mfapp .mf-chips{position:absolute;top:calc(11px + env(safe-area-inset-top,0px));left:0;right:0;z-index:6;display:flex;gap:8px;overflow-x:auto;padding:2px 14px 6px 150px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 body.mfapp .mf-chips::-webkit-scrollbar{display:none}
@@ -1079,7 +1079,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 385'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 394'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'), c=parkGet(), b=document.getElementById('parkBtn');
