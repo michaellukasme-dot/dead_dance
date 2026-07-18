@@ -113,7 +113,8 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 <div class="wrap">
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
   <div class="hero" style="position:relative">
-    <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:12px;right:12px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0"><img src="musikfest_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
+    <div id="roseTotal" title="DeadDance heads at Musikfest right now — tap the 🌹 on any stage to add yourself" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
+    <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="musikfest_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
     <h1>Musikfest</h1>
     <div class="k">2026 · Bethlehem, PA · Jul 31 – Aug 9 (Preview Jul 30)</div>
     <p>16 stages. ~3 miles. 400+ acts, free. The town names everything <i>-platz</i> and nobody knows where they are. Here's every one — with directions.</p>
@@ -469,6 +470,24 @@ function updatePath(){ if(!LG_PATH)return; LG_PATH.clearLayers(); if(typeof WALK
 function updatePhotos(){ if(!LG_PHOTO)return; LG_PHOTO.clearLayers(); (window.PHOTOS||[]).forEach(function(ph){ if(ph.lat==null)return;
   var ic=L.divIcon({className:'mfphoto',iconSize:[46,46],iconAnchor:[23,23],html:'<img src="'+ph.url+'" style="width:46px;height:46px;object-fit:cover;border-radius:50%;border:3px solid #b8002e;box-shadow:0 1px 5px #0006">'});
   L.marker([ph.lat,ph.lng],{icon:ic}).addTo(LG_PHOTO); }); }
+/* ── 🌹 "who's here" — self-add headcount per stage; totaled top-of-hero ──────────────
+   Optimistic + local now; the live cross-device number comes from dd_here_add / dd_here_total
+   (Supabase presence table — Michael runs the SQL). Never blocks: RPC calls are guarded. */
+function hereKey(s){ return String(stageKey(s)).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+function hereStore(){ try{return JSON.parse(localStorage.getItem('dd.mf.herecount')||'{}');}catch(e){return {};} }
+function hereMine(){ try{return JSON.parse(localStorage.getItem('dd.mf.heremine')||'{}');}catch(e){return {};} }
+function roseHereHtml(sk){ var c=hereStore()[sk]||0, mine=hereMine()[sk];
+  return '🌹 <b style="color:#b8002e">'+c+'</b> here'+(mine?' · you’re in':'')+
+    ' <button onclick="mfHere(\''+sk+'\')" '+(mine?'disabled':'')+
+    ' style="border:0;background:'+(mine?'#c9b8dd':'#b8002e')+';color:#fff;border-radius:8px;padding:3px 10px;font-weight:900;cursor:'+(mine?'default':'pointer')+';margin-left:5px">'+(mine?'✓':'+')+'</button>'; }
+window.mfHere=function(sk){ var mine=hereMine(); if(mine[sk])return; mine[sk]=1; var st=hereStore(); st[sk]=(st[sk]||0)+1;
+  try{localStorage.setItem('dd.mf.heremine',JSON.stringify(mine));localStorage.setItem('dd.mf.herecount',JSON.stringify(st));}catch(e){}
+  try{document.querySelectorAll('.mfhere[data-sk="'+sk+'"]').forEach(function(el){el.innerHTML=roseHereHtml(sk);});}catch(e){}
+  mfRoseTotal();
+  try{ var c=window.ddClient&&ddClient(); if(c&&c.rpc) c.rpc('dd_here_add',{p_stage:sk}); }catch(e){} };
+window.mfRoseTotal=function(){ var el=document.getElementById('roseTotalN'); if(!el)return;
+  var st=hereStore(),t=0; Object.keys(st).forEach(function(k){t+=st[k]||0;}); el.textContent=t.toLocaleString();
+  try{ var c=window.ddClient&&ddClient(); if(c&&c.rpc){ var p=c.rpc('dd_here_total'); if(p&&p.then) p.then(function(r){ if(r&&!r.error&&r.data!=null) el.textContent=Number(r.data).toLocaleString(); }); } }catch(e){} };
 function drawMap(){ ensureMap(); if(!LMAP)return;
   var dead=deadStageSet(), ddOnly=(typeof PILL!=='undefined' && PILL==='dead');
   LG_STAGE.clearLayers();
@@ -476,11 +495,11 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
     var ic=L.divIcon({className:'mfstage',iconSize:[27,27],iconAnchor:[13,13],html:'<div style="width:27px;height:27px;border-radius:50%;background:#fff;border:2px solid '+bd+';display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 1px 4px #0005;opacity:'+op+'">'+emo+'</div>'});
     var m=L.marker([s.lat,s.lng],{icon:ic}).addTo(LG_STAGE);
     m.bindTooltip((isDead?'🌹 ':'🎶 ')+s.n.replace(/ @.*/,''),{direction:'top',opacity:.95});
-    var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,''), _poster=(/levitt/i.test(s.n)?'levitt_poster.jpg':'');
-    m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>'+(_poster?'<button onclick="openPoster(\''+_poster+'\')" style="border:0;background:#f0a500;color:#3a1d00;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer;margin:4px 0 0 6px">🖼️ Poster</button>':''));
+    var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,''), _poster=(/levitt/i.test(s.n)?'levitt_poster.jpg':''), _hk=hereKey(s);
+    m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>'+(_poster?'<button onclick="openPoster(\''+_poster+'\')" style="border:0;background:#f0a500;color:#3a1d00;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer;margin:4px 0 0 6px">🖼️ Poster</button>':'')+'<div class="mfhere" data-sk="'+_hk+'" style="margin-top:7px;border-top:1px solid #eee;padding-top:6px;font-size:12.5px">'+roseHereHtml(_hk)+'</div>');
   });
   drawShops(); drawFood(); drawPotty(); mfApplyMapFilter();
-  updateYou(); updatePath(); updatePhotos();
+  updateYou(); updatePath(); updatePhotos(); try{ mfRoseTotal(); }catch(e){}
 }
 // ── LISTING / TOAST RULE (Michael, 2026-07-16) ────────────────────────────────────────────
 // On GO-LIVE (Musikfest opening, Jul 31) we FORGET every retailer/vendor without an ad:
