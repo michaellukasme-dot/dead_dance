@@ -23,6 +23,7 @@
 .leaflet-container svg,.leaflet-container img{width:auto;height:auto;border-radius:0;max-width:none}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700;color:#4a4356;margin-top:8px;padding:0 4px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.legend .mffilt{cursor:pointer;opacity:.5}.legend .mffilt.on{opacity:1;font-weight:900;text-decoration:underline;text-underline-offset:3px}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
 .card.tick{border-color:#f0d9a6;background:#fffdf6}
 .card .nm{font-weight:900;font-size:15.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
@@ -234,8 +235,12 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <div class="mapwrap">
     <div id="lmap" style="height:360px;border-radius:11px;overflow:hidden;background:#eef" aria-label="Musikfest stage map"></div>
     <div class="legend">
-      <span onclick="mapTo(40.6188,-75.3800,16)" style="cursor:pointer" title="Center the map on the North Side"><i style="background:#b8002e"></i>North side — free, historic downtown ›</span>
-      <span onclick="mapTo(40.6160,-75.3712,16)" style="cursor:pointer" title="Center the map on the South Side"><i style="background:#5a2e86"></i>South side — SteelStacks ›</span>
+      <span onclick="mapTo(40.6188,-75.3800,16)" style="cursor:pointer" title="Center on the North Side"><i style="background:#b8002e"></i>North side ›</span>
+      <span onclick="mapTo(40.6160,-75.3712,16)" style="cursor:pointer" title="Center on the South Side"><i style="background:#5a2e86"></i>South side ›</span>
+      <span id="mf_f_stage" class="mffilt on" onclick="mfSetMapFilter('stage')">🎵 Stages</span>
+      <span id="mf_f_shop" class="mffilt" onclick="mfSetMapFilter('shop')">🛍️ Shops</span>
+      <span id="mf_f_food" class="mffilt" onclick="mfSetMapFilter('food')">🍴 Food</span>
+      <span id="mf_f_potty" class="mffilt" onclick="mfSetMapFilter('potty')">🚻 Potty</span>
     </div>
   </div>
   <div id="parkBox" style="text-align:center;margin:12px 0"></div>
@@ -441,12 +446,12 @@ function stageKey(s){ var n=s.n.toLowerCase();
 function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!=='undefined')?DAYS[curDayIdx]:null, set={};
  (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!day||r.d===day)) set[r.st]=true; }); return set; }
 /* Real map — Leaflet + OpenStreetMap (the hardened TCTP map engine). Clean streets, real geography. */
-var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null;
+var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null, LG_FOOD=null, LG_POTTY=null, LG_DIR=null, MF_MAPON={stage:true,shop:false,food:false,potty:false};
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
   LMAP=L.map(el,{zoomControl:true,scrollWheelZoom:true});
   if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
-  LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup().addTo(LMAP);
+  LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_DIR=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup(); LG_FOOD=L.layerGroup(); LG_POTTY=L.layerGroup();
   try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{padding:[26,26]}); }catch(e){ LMAP.setView([40.6175,-75.3755],15); }
   setTimeout(function(){ try{ LMAP.invalidateSize(); }catch(e){} },250);
 }
@@ -462,9 +467,10 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
   STAGES.forEach(function(s){ var isDead=!!dead[stageKey(s)]; var col=s.free===0?'#f0a500':(isDead?'#b8002e':(s.side==='N'?'#b8002e':'#5a2e86')); var op=(ddOnly&&!isDead)?0.3:1;
     var m=L.circleMarker([s.lat,s.lng],{radius:isDead?9:7,color:'#fff',weight:2,fillColor:col,fillOpacity:op}).addTo(LG_STAGE);
     m.bindTooltip((isDead?'🌹 ':'')+s.n.replace(/ @.*/,''),{direction:'top',opacity:.95});
-    m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b><br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><a href="'+dirUrl(s)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
+    var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,'');
+    m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>');
   });
-  drawShops();
+  drawShops(); drawFood(); drawPotty(); mfApplyMapFilter();
   updateYou(); updatePath(); updatePhotos();
 }
 // ── LISTING / TOAST RULE (Michael, 2026-07-16) ────────────────────────────────────────────
@@ -479,19 +485,44 @@ function _mfPaid(x){ return !!(x && (x.sponsor||x.paid)); }
 function mfShops(){ return mfPaidOnly() ? MERCHANTS.filter(_mfPaid) : MERCHANTS; }
 function mfVendorsList(){ return mfPaidOnly() ? VENDORS.filter(_mfPaid) : VENDORS; }
 function mfWalkPois(){ return mfShops().concat(mfVendorsList()); }   // walk-by toast pool
+function _mfDirBtn(lat,lng,name){ var n=String(name).replace(/[\x27"\\]/g,''); return '<br><button onclick="mfDirectTo('+lat+','+lng+',\''+n+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>'; }
 function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
   mfShops().forEach(function(m){
     var ic=L.divIcon({className:'mfshop',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid '+(m.sponsor?'#f0a500':'#c9b8dd')+';display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 4px #0004">'+merchEmoji(m.kind)+'</div>'});
     var mk=L.marker([m.lat,m.lng],{icon:ic}).addTo(LG_SHOP);
     mk.bindTooltip((m.cup?'🍺 ':'')+m.n,{direction:'top',opacity:.95});
-    mk.bindPopup('<b>'+esc(m.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(m.addr)+' · '+esc(m.blurb)+'</span>'+(m.cup?'<br><b style="color:#b8002e">🍺 Fills your Musikfest cup</b>':'')+'<br><a href="'+dirUrl(m)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
-  });
-  // mobile vendors on the blueprint (trucks/tents) — same as any pin, like a porta-potty
-  mfVendorsList().forEach(function(v){
-    var ic=L.divIcon({className:'mfvend',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:6px;background:#fff;border:2px solid #e8730c;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px #0004">🍔</div>'});
-    L.marker([v.lat,v.lng],{icon:ic}).addTo(LG_SHOP).bindTooltip('🚚 '+v.n+' — '+v.sells,{direction:'top',opacity:.95});
+    mk.bindPopup('<b>'+esc(m.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(m.addr)+' · '+esc(m.blurb)+'</span>'+(m.cup?'<br><b style="color:#b8002e">🍺 Fills your Musikfest cup</b>':'')+_mfDirBtn(m.lat,m.lng,m.n));
   });
 }
+function drawFood(){ if(!LG_FOOD)return; LG_FOOD.clearLayers();
+  (typeof VENDORS!=='undefined'?mfVendorsList():[]).forEach(function(v){
+    var ic=L.divIcon({className:'mfvend',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:6px;background:#fff;border:2px solid #e8730c;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px #0004">🍴</div>'});
+    L.marker([v.lat,v.lng],{icon:ic}).addTo(LG_FOOD).bindTooltip('🍴 '+v.n+' — '+v.sells,{direction:'top',opacity:.95}).bindPopup('<b>🍴 '+esc(v.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(v.sells||'Food &amp; drink')+'</span>'+_mfDirBtn(v.lat,v.lng,v.n));
+  });
+}
+function drawPotty(){ if(!LG_POTTY)return; LG_POTTY.clearLayers();
+  (typeof BATHROOMS!=='undefined'?BATHROOMS:[]).forEach(function(b){
+    var ic=L.divIcon({className:'mfpotty',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:6px;background:#fff;border:2px solid #2a7de1;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px #0004">🚻</div>'});
+    L.marker([b.lat,b.lng],{icon:ic}).addTo(LG_POTTY).bindTooltip('🚻 '+(b.n||'Porta-potty'),{direction:'top',opacity:.95}).bindPopup('<b>🚻 '+esc(b.n||'Porta-potty')+'</b>'+_mfDirBtn(b.lat,b.lng,b.n||'Porta-potty'));
+  });
+}
+function mfSetMapFilter(f){ MF_MAPON[f]=!MF_MAPON[f]; var el=document.getElementById('mf_f_'+f); if(el) el.classList.toggle('on',!!MF_MAPON[f]); mfApplyMapFilter(); }   // independent on/off toggle
+function mfApplyMapFilter(){ if(!LMAP)return; var lm={stage:LG_STAGE,shop:LG_SHOP,food:LG_FOOD,potty:LG_POTTY};
+  Object.keys(lm).forEach(function(k){ var lg=lm[k]; if(!lg)return; try{ if(MF_MAPON[k]){ if(!LMAP.hasLayer(lg)) lg.addTo(LMAP); } else if(LMAP.hasLayer(lg)) LMAP.removeLayer(lg); }catch(e){} }); }   // show ALL toggled-on layers
+function mfDirectTo(lat,lng,name){ try{ ensureMap(); if(!LMAP||!LG_DIR)return; LG_DIR.clearLayers();
+  if(!window.YOU){ mfToast('📍 Tap “🥾 Start my walk” first — then I draw the line from you.'); try{ LMAP.setView([lat,lng],17,{animate:true}); }catch(e){} return; }
+  var a=window.YOU, b=[lat,lng];
+  L.polyline([a,b],{color:'#1f6fe0',weight:5,opacity:.9,dashArray:'2,9',lineCap:'round'}).addTo(LG_DIR);
+  L.circleMarker(b,{radius:7,color:'#fff',weight:2,fillColor:'#b8002e',fillOpacity:1}).addTo(LG_DIR);
+  try{ LMAP.fitBounds([a,b],{padding:[55,55],maxZoom:18}); }catch(e){}
+  var mi=hav(a[0],a[1],b[0],b[1]), ft=Math.round(mi*5280);
+  mfToast('🚶 '+(name||'There')+' — '+(ft<1000?ft+' ft':mi.toFixed(2)+' mi')+' away. Follow the blue line. 🌹');
+}catch(e){} }
+function actAtStage(name){ try{ if(typeof MF==='undefined'||!MF.length) return '';
+  var psel=document.getElementById('planDate'); var day=(psel&&psel.value)||(typeof todayISO==='function'?todayISO():'');
+  var now=(typeof nowMins==='function'?nowMins():0), ln=String(name).toLowerCase(), best=null;
+  MF.forEach(function(r){ if(r.d!==day) return; var rs=String(r.st).toLowerCase(); if(ln.indexOf(rs)<0 && rs.indexOf(ln)<0) return; var mm=mins(r.t); if(mm<=now+5){ if(!best||mm>mins(best.t)) best=r; } });
+  return best?best.b:''; }catch(e){ return ''; } }
 // the SHOPS-inside-the-fest list (collapsible)
 (function renderShops(){ var el=document.getElementById('shopList'); if(!el)return;
   el.innerHTML=mfShops().map(function(m){
@@ -837,9 +868,9 @@ var BATHROOMS=[  // approx from ArtsQuest campus maps — exact layout to confir
  {n:"ArtsQuest Center",lat:40.6157,lng:-75.3718},{n:"Levitt / Americaplatz",lat:40.6167,lng:-75.3708}];
 
 var WALK={on:false,miles:0,gain:0,last:null,lastAlt:null,watch:null,path:[]};
-function fmtStat(){ var st=document.getElementById('trackStat'); if(!st)return; st.style.display='block';
-  st.innerHTML='<div class="big">'+WALK.miles.toFixed(2)+' mi</div><div style="font-size:12px;color:var(--muted);font-weight:700">walked at Musikfest</div>'+
-   '<div class="row"><div><span>Elevation ↑</span><b>'+Math.round(WALK.gain)+' ft</b></div><div><span>Steps ≈</span><b>'+Math.round(WALK.miles*2100).toLocaleString()+'</b></div></div>'; }
+function fmtStat(){ var st=document.getElementById('trackStat'); if(!st)return;
+  st.style.cssText='display:inline-flex;align-items:center;gap:7px;background:#f2eee9;border:1px solid var(--line,#e7e1f0);border-radius:999px;padding:6px 13px;margin:8px 0 2px;font-weight:800;font-size:13px;color:var(--ink,#241535);white-space:nowrap';
+  st.innerHTML='🥾 <b style="color:#b8002e">'+WALK.miles.toFixed(2)+' mi</b><span style="opacity:.4">·</span>↑'+Math.round(WALK.gain)+' ft<span style="opacity:.4">·</span>'+Math.round(WALK.miles*2100).toLocaleString()+' steps'; }
 function leftRight(from,cur,tgt){ if(!from)return 'left'; var hx=cur[1]-from[1],hy=cur[0]-from[0],tx=tgt[1]-cur[1],ty=tgt[0]-cur[0]; return (hx*ty-hy*tx)>0?'left':'right'; }
 function mfToast(msg,isHtml){ var t=document.getElementById('mfToast'); if(!t){ t=document.createElement('div'); t.id='mfToast'; t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;background:#241535;color:#fff;font-weight:800;font-size:14px;line-height:1.4;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:88%;text-align:center;opacity:0;transition:opacity .25s'; document.body.appendChild(t); } if(isHtml)t.innerHTML=msg; else t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },isHtml?5200:3600); }
 function mfToastHTML(h){ mfToast(h,true); }
@@ -996,7 +1027,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
     startWatch(); fmtStat(); }
   else { b.textContent='▶ Resume tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 369'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 374'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'); if(!el)return; var c=parkGet();
