@@ -1820,6 +1820,7 @@ function onAvatar(input){var fl=input&&input.files&&input.files[0];if(!fl)return
      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
      try{ ME.img=cv.toDataURL('image/jpeg',0.6); }catch(e){ ME.img=rd.result; }
      try{ localStorage.setItem('dd.me.img',ME.img); }catch(e){}
+     try{ if(window.DDMe) DDMe.set('avatar', ME.img); }catch(e){}   /* → your account: your face follows you to any device */
      qrBuild(); var pq=document.getElementById('profQR'); if(pq)drawQR(pq,ME.img); saveMyProfile();
      toast('📷 Profile photo set — it lives in the center of your QR.'); };
    img.onerror=function(){ toast("Couldn't read that image."); };
@@ -3580,7 +3581,7 @@ function ddAddFriend(id,name,btn){
   try{ if(window.DDMe&&DDMe.onChange){ DDMe.onChange(function(me){ if(!me)return;
     try{ if(me.name){ if(window.ME) ME.name=me.name; localStorage.setItem('dd.myname',me.name); localStorage.setItem('dd.name.asked','1'); } }catch(e){}
     try{ if(me.email) localStorage.setItem('dd.email',me.email); }catch(e){}
-    try{ if(me.avatar){ localStorage.setItem('dd.profile.img',me.avatar); if(typeof applyMyAvatar==='function') applyMyAvatar(); } }catch(e){}
+    try{ if(me.avatar){ if(window.ME) ME.img=me.avatar; localStorage.setItem('dd.profile.img',me.avatar); localStorage.setItem('dd.me.img',me.avatar); if(typeof applyMyAvatar==='function') applyMyAvatar(); } }catch(e){}
   }); } }catch(e){}
 })();
 </script>

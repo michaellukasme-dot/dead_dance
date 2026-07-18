@@ -24,6 +24,7 @@
 
   function tok() {
     try {
+      try { if (w.DDMe && w.DDMe.signedIn && w.DDMe.signedIn() && w.DDMe.id()) return String(w.DDMe.id()); } catch (e) {}   // signed in → uploads tie to your ACCOUNT, not a device
       var t = localStorage.getItem("dd.token");
       if (!t) { t = (w.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("t" + Date.now() + Math.random().toString(36).slice(2)); localStorage.setItem("dd.token", t); }
       return t;
