@@ -370,7 +370,7 @@
           '<div class="showmap-pop" id="showmapPop" hidden></div>' +
         '</div>' +
         /* region controls + legend moved BELOW the map (Musikfest-style — the chapter picker recenters the map like North/South) */
-        '<div class="showmap-region" hidden>' +
+        '<div class="showmap-region">' +
           '<button class="showmap-back" hidden>‹ All chapters</button>' +
           '<button class="showmap-loc">📍 Use my location</button>' +
           '<select class="showmap-select" aria-label="Pick a chapter">' +
@@ -566,7 +566,7 @@
     function toNation() {
       level = "nation"; clearYou();
       host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "national"); });
-      backBtn.hidden = true; regionRow.hidden = true; panel.hidden = true; showRadius(false);
+      backBtn.hidden = true; regionRow.hidden = false; panel.hidden = true; showRadius(false);   /* keep the picker row visible — it strands the user otherwise */
       animateTo(FULL_VB.slice(), 560, null, function () { drawBadges(true); });
       var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
       lit.forEach(function (c) { tot += c.shows.length; });
