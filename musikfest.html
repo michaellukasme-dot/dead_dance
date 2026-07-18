@@ -347,7 +347,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
-<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
+<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
 <script>
@@ -619,7 +619,8 @@ function merchantToastHTML(o){
   var line=o.line?'<br><span style="font-weight:600;font-size:12px;color:#e7ddf3">'+esc(o.line)+'</span>':'';
   var cup=o.cup?'<br><span style="font-size:11.5px;color:#f0c96b">fills your Musikfest cup · '+esc(o.addr||'')+'</span>':'';
   var coup=o.coupon?'<br><span style="font-size:12.5px;font-weight:800;color:#ffd36b">🎟 '+esc(o.coupon)+'</span>':'';
-  return img+merchEmoji(o.kind||'shop')+' <b>'+esc(o.n||'Your business')+'</b>'+head+line+cup+coup;
+  var welcome='<div style="margin-top:8px;padding-top:6px;border-top:1px solid #ffffff22;font-size:11px;font-weight:800;letter-spacing:.05em;color:#f0c96b">🏛️ WELCOME TO BETHLEHEM</div>';   // every ad butters the CITY (our first Coupon-on-the-Block target) — NOT ArtsQuest; ArtsQuest gets the gate banner
+  return img+merchEmoji(o.kind||'shop')+' <b>'+esc(o.n||'Your business')+'</b>'+head+line+cup+coup+welcome;
 }
 // a branded placeholder "photo" so the cart shows a finished ad (swapped when they upload their own)
 function adDefaultPhoto(name){ var c=document.createElement('canvas'); c.width=700; c.height=340; var x=c.getContext('2d');
@@ -926,6 +927,21 @@ function fmtStat(){ var mi=WALK.miles.toFixed(2), ft=Math.round(WALK.gain);
 function leftRight(from,cur,tgt){ if(!from)return 'left'; var hx=cur[1]-from[1],hy=cur[0]-from[0],tx=tgt[1]-cur[1],ty=tgt[0]-cur[0]; return (hx*ty-hy*tx)>0?'left':'right'; }
 function mfToast(msg,isHtml){ var t=document.getElementById('mfToast'); if(!t){ t=document.createElement('div'); t.id='mfToast'; t.style.cssText='position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:200;background:#241535;color:#fff;font-weight:800;font-size:14px;line-height:1.4;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px #0006;max-width:88%;text-align:center;opacity:0;transition:opacity .25s'; document.body.appendChild(t); } if(isHtml)t.innerHTML=msg; else t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },isHtml?5200:3600); }
 function mfToastHTML(h){ mfToast(h,true); }
+// PENNIES FROM HEAVEN — ads/coupons are the ONLY thing that falls in from ABOVE. Money rains as you
+// walk the block. Reserved for paid walk-by ads; every other toast rises from the bottom.
+function mfCoinRain(){ try{ for(var i=0;i<8;i++){ (function(i){ var c=document.createElement('div'); c.textContent=(i%2?'🪙':'💸');
+  c.style.cssText='position:fixed;top:-34px;left:'+(8+Math.random()*84)+'%;z-index:264;font-size:'+(16+Math.random()*12)+'px;pointer-events:none;opacity:1;transition:transform 1.5s cubic-bezier(.4,0,.7,1),opacity 1.5s';
+  document.body.appendChild(c); requestAnimationFrame(function(){ c.style.transform='translateY('+(window.innerHeight*0.45+Math.random()*160)+'px) rotate('+(Math.random()*540-270)+'deg)'; c.style.opacity='0'; });
+  setTimeout(function(){ try{c.remove();}catch(e){} },1650); })(i); } }catch(e){} }
+function mfAdToast(html){ var t=document.getElementById('mfAdToast');
+  if(!t){ t=document.createElement('div'); t.id='mfAdToast';
+    t.style.cssText='position:fixed;left:50%;top:0;transform:translate(-50%,-150%);z-index:265;background:#241535;color:#fff;border:2px solid #f0a500;border-radius:16px;box-shadow:0 14px 36px #0007;max-width:90%;width:360px;padding:13px 16px;font-weight:800;font-size:14px;line-height:1.42;text-align:center;transition:transform .6s cubic-bezier(.2,1.35,.35,1)';
+    document.body.appendChild(t); }
+  t.innerHTML=html;
+  t.style.transform='translate(-50%,-150%)';                       // start above the ceiling
+  requestAnimationFrame(function(){ t.style.transform='translate(-50%,calc(14px + env(safe-area-inset-top,0px)))'; });   // …then drop in with a bounce
+  mfCoinRain();
+  clearTimeout(t._h); t._h=setTimeout(function(){ t.style.transform='translate(-50%,-150%)'; }, 5400); }
 // ---- band bios: as you walk PAST a stage, who's on + their story (BAND · STYLE · HOMETOWN) ----
 var BAND_INFO={
  "Shakedown Citi":{style:"Grateful Dead tribute",home:"Northeast jam circuit",blurb:"Shakedown Street from the top — a rotating Dead-scene crew."},
@@ -991,13 +1007,13 @@ function walkByCheck(here){ if(!here)return; var RR=0.02, RT=0.008, now=Date.now
   var best=null,bd=1e9,second=1e9; pois.forEach(function(p){ if(p.lat==null||WALK._seen[p.n])return; var d=hav(here[0],here[1],p.lat,p.lng); if(d<bd){second=bd;bd=d;best=p;} else if(d<second){second=d;} });
   // fire ONLY if the nearest shop is within the tight radius AND clearly the closest (the runner-up is
   // farther out, or well behind) — so standing at the Brewery never pops the shop four doors back.
-  if(best && bd<RT && (second>RT || bd < second*0.6)){ WALK._seen[best.n]=now; WALK._wbT=now; mfToastHTML(merchantToastHTML(poiObj(best))); }
+  if(best && bd<RT && (second>RT || bd < second*0.6)){ WALK._seen[best.n]=now; WALK._wbT=now; mfAdToast(merchantToastHTML(poiObj(best))); try{ if(window.DDTele) DDTele.toast('musikfest2026', best.n); }catch(e){} }   // paid ad → falls from above
 }
 // GATEWAY: the big welcome toast the moment a phone crosses INTO the festival (once per entry / hour)
 var MF_GATES=[{lat:40.6188,lng:-75.3800,r:0.30},{lat:40.6158,lng:-75.3720,r:0.30},{lat:40.6166,lng:-75.3824,r:0.28}]; // north (Main St at Broad, southbound) + south (SteelStacks) + west (CIQ/Sand Island, approaching from below Rt 378 — approx, confirm w/ John)
 function insideFest(here){ for(var i=0;i<MF_GATES.length;i++){ if(hav(here[0],here[1],MF_GATES[i].lat,MF_GATES[i].lng) < MF_GATES[i].r) return true; } return false; }
 function gatewayCheck(here){ if(!here)return; var was=WALK._inside, now=insideFest(here); WALK._inside=now;
-  if(now && !was){ var t=Date.now(); if(t-(WALK._gwT||0) > 3600000){ WALK._gwT=t; mfGatewayToast(GATEWAY.sponsor); } } }
+  if(now && !was){ var t=Date.now(); if(t-(WALK._gwT||0) > 3600000){ WALK._gwT=t; mfGatewayToast(GATEWAY.sponsor); try{ if(window.DDTele) DDTele.gate('musikfest2026'); }catch(e){} } } }
 function mfGatewayToast(sp){ if(!sp)return; var el=document.getElementById('mfGate');
   if(!el){ el=document.createElement('div'); el.id='mfGate'; el.style.cssText='position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:260;background:linear-gradient(135deg,#3a2456,#7d1533);color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:92%;width:420px;padding:16px 18px;text-align:center;opacity:0;transition:opacity .3s'; document.body.appendChild(el); }
   el.innerHTML=(sp.photo?'<img src="'+sp.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:11px;margin-bottom:9px">':'')+
@@ -1055,7 +1071,7 @@ function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus(
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  pottyCheck(prev,[la,lo]); stageCheck([la,lo]); walkByCheck([la,lo]); gatewayCheck([la,lo]); mfVisitTick([la,lo]);
+  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
 function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
@@ -1082,7 +1098,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
 (function(){ function arm(){ try{ if(WALK.on && window.DDSteps && !DDSteps.active()) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} }
   try{ document.addEventListener('pointerdown', arm, { once:true }); }catch(e){} })();
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 406'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 411'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'), c=parkGet(), b=document.getElementById('parkBtn');

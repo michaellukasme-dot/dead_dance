@@ -1,0 +1,118 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>🐻 Papa Bear — DeadDance / StageFill command</title>
+<meta name="theme-color" content="#0d0a1a">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--rose:#e0577a;--gold:#f0c96b;--ink:#f4eefc;--muted:#9a8fb5;--card:#1a1330;--line:#2a2044}
+*{box-sizing:border-box}body{margin:0;background:#0d0a1a;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.hidden{display:none!important}
+.center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:380px;width:100%;text-align:center}
+h1{font-size:24px;font-weight:900;margin:0}
+.sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.5}
+input{width:100%;border:1px solid var(--line);background:#160f2b;color:var(--ink);border-radius:11px;padding:12px 14px;font-size:16px;margin-top:14px}
+.btn{border:0;background:var(--rose);color:#fff;border-radius:11px;padding:12px 18px;font-weight:800;cursor:pointer;font-size:15px;margin-top:12px}
+.btn-ghost{background:#2a2044;color:var(--ink)}
+.ok{color:#7fe0a8;font-size:13px;margin-top:10px}.err{color:#ff8aa0;font-size:13px;margin-top:10px}
+.wrap{max-width:960px;margin:0 auto;padding:18px 16px 80px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.rf{border:0;background:#2a2044;color:var(--ink);border-radius:10px;padding:9px 14px;font-weight:800;font-size:13px;cursor:pointer}
+.brag{margin-top:16px;background:linear-gradient(135deg,#3a2456,#7d1533);border-radius:16px;padding:16px 18px;font-size:17px;font-weight:800;line-height:1.5}
+.brag b{color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+.tile .n{font-size:30px;font-weight:900;line-height:1}.tile .e{font-size:19px;margin-bottom:4px}
+.tile .l{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:11px 13px;font-size:13.5px;border-bottom:1px solid var(--line)}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.n,th.n{text-align:right;font-weight:800}tr:last-child td{border-bottom:0}
+.foot{color:var(--muted);font-size:11.5px;margin-top:22px;line-height:1.6}
+.warn{background:#3a2a12;border:1px solid #6a4d1a;color:#f0c96b;border-radius:10px;padding:10px 12px;font-size:12.5px;margin-top:12px}
+</style></head>
+<body>
+
+<!-- ============ SIGN-IN (same doctrine as the TCTP admin console: magic-link + authorization RPC) ============ -->
+<div id="signin-view" class="center">
+  <div class="card">
+    <div style="font-size:44px">🐻</div>
+    <h1>Papa Bear</h1>
+    <div class="sub">House command — authorized owners only. Sign in with the email on the admin list.</div>
+    <div id="config-warn" class="warn hidden">Set the Supabase anon key + run <code>dd_admin.sql</code> before this works.</div>
+    <input id="email" type="email" placeholder="you@deaddance.app" autocomplete="email">
+    <button id="send-link" class="btn" style="width:100%" onclick="sendLink()">Send me a sign-in link</button>
+    <div id="signin-ok" class="ok hidden"></div>
+    <div id="signin-err" class="err hidden"></div>
+  </div>
+</div>
+
+<!-- ============ NOT AUTHORIZED ============ -->
+<div id="denied-view" class="center hidden">
+  <div class="card">
+    <div style="font-size:40px">🚫</div>
+    <h1>Not authorized</h1>
+    <div class="sub">This email isn't on the Papa Bear admin list, or its access was revoked.</div>
+    <button class="btn btn-ghost" style="width:100%" onclick="signOut()">Sign out</button>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app-view" class="hidden"><div class="wrap">
+  <div class="top">
+    <div><h1>🐻 Papa Bear</h1><div class="sub">Everything, reported. Anonymized &amp; aggregate — no names, no tracks. <span id="stamp"></span> · <span id="who"></span></div></div>
+    <div><button class="rf" onclick="load()">↻ Refresh</button> <button class="rf" onclick="signOut()">Sign out</button></div>
+  </div>
+  <div class="brag" id="brag">Loading the receipts…</div>
+  <div class="grid" id="tiles"></div>
+  <div class="sec">By district / festival</div>
+  <table><thead><tr><th>District</th><th class="n">People</th><th class="n">Gate entries</th><th class="n">Toasts</th><th class="n">Redeemed</th></tr></thead>
+    <tbody id="drows"><tr><td colspan="5" style="color:var(--muted)">No events yet — they stream in live as phones walk the festival.</td></tr></tbody></table>
+  <div class="foot">🐻 Reads <b>dd_papabear()</b> + <b>dd_brag_cards()</b> (SECURITY DEFINER, aggregate-only). Events flow from <b>dd_telemetry.js</b> → <b>dd_events</b>. Auth is the same magic-link + <b>dd_admin_bind()</b> doctrine as the TCTP console. Auto-refreshes every 30s.</div>
+</div></div>
+
+<script>
+const SUPABASE_URL='https://vmbqfzxhrqxpwgidogfm.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM';
+var sb=null, me=null, timer=null;
+function $(s){return document.querySelector(s);}
+function show(v){ ['signin-view','denied-view','app-view'].forEach(function(x){ document.getElementById(x).classList.toggle('hidden', x!==v); }); }
+function n(x){ return (Number(x)||0).toLocaleString(); }
+async function sendLink(){
+  var email=($('#email').value||'').trim(); var ok=$('#signin-ok'), er=$('#signin-err'); ok.classList.add('hidden'); er.classList.add('hidden');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ er.textContent='Enter a valid email.'; er.classList.remove('hidden'); return; }
+  var b=$('#send-link'); b.disabled=true; b.textContent='Sending…';
+  var r=await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo: location.origin+location.pathname } });
+  b.disabled=false; b.textContent='Send me a sign-in link';
+  if(r.error){ er.textContent=r.error.message||'Could not send link.'; er.classList.remove('hidden'); return; }
+  ok.textContent='Check your email — open the link on this device.'; ok.classList.remove('hidden');
+}
+async function routeSignedIn(){
+  // authorization via SECURITY DEFINER RPC — only allow-listed admins pass (TCTP doctrine)
+  var r=await sb.rpc('dd_admin_bind');
+  var row=(r&&r.data&&r.data[0])||r.data||null;
+  if(r.error || !row || !row.authorized){ show('denied-view'); return; }
+  me=row; $('#who').textContent=(row.email||'')+' · '+(row.role||'admin');
+  show('app-view'); load(); if(!timer) timer=setInterval(load,30000);
+}
+async function signOut(){ try{ await sb.auth.signOut(); }catch(e){} me=null; if(timer){clearInterval(timer);timer=null;} show('signin-view'); }
+var TILES=[['people','🙂','People'],['gates','🎪','Gate entries'],['toasts','📣','Toasts served'],['redeemed','🎟️','Coupons redeemed'],['content','📸','Posts &amp; photos'],['districts','📍','Districts live']];
+function render(d){ d=d||{}; $('#stamp').textContent='updated '+new Date().toLocaleTimeString();
+  document.getElementById('tiles').innerHTML=TILES.map(function(t){ return '<div class="tile"><div class="e">'+t[1]+'</div><div class="n">'+n(d[t[0]])+'</div><div class="l">'+t[2]+'</div></div>'; }).join('');
+  var bd=d.by_district||[];
+  document.getElementById('drows').innerHTML= bd.length ? bd.map(function(r){ return '<tr><td>'+(r.district||'—')+'</td><td class="n">'+n(r.people)+'</td><td class="n">'+n(r.gates)+'</td><td class="n">'+n(r.toasts)+'</td><td class="n">'+n(r.redeemed)+'</td></tr>'; }).join('')
+    : '<tr><td colspan="5" style="color:var(--muted)">No events yet — they stream in live as phones walk the festival.</td></tr>';
+}
+function brag(b){ b=b||{}; $('#brag').innerHTML='<b>'+n(b.redeemed)+'</b> TOAST coupons redeemed across <b>'+n(b.shops)+'</b> shops · <b>'+n(b.welcomed)+'</b> welcomed at the gates. 🌹'; }
+async function load(){ try{
+  var a=await sb.rpc('dd_papabear'); if(a&&!a.error&&a.data) render(a.data);
+  var c=await sb.rpc('dd_brag_cards',{p_district:null}); if(c&&!c.error&&c.data) brag(c.data);
+}catch(e){} }
+(function init(){
+  try{ sb=supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){ document.getElementById('config-warn').classList.remove('hidden'); return; }
+  sb.auth.onAuthStateChange(function(ev, session){ if(session) routeSignedIn(); else show('signin-view'); });
+  sb.auth.getSession().then(function(r){ if(r&&r.data&&r.data.session) routeSignedIn(); else show('signin-view'); });
+})();
+</script>
+</body></html>

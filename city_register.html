@@ -107,7 +107,7 @@ textarea{resize:vertical}
         <div id="cityqr"></div>
         <div style="flex:1;min-width:180px">
           <div style="font-weight:900;font-size:14px;margin-bottom:2px">Your map</div>
-          <div id="okUrl" style="font-size:13px;color:var(--purple);font-weight:800;word-break:break-all"></div>
+          <a id="okUrl" target="_blank" rel="noopener" style="font-size:13px;color:var(--purple);font-weight:800;word-break:break-all;text-decoration:underline"></a>
           <button class="dir" style="margin-top:10px" onclick="saveCityQR()">⬇︎ Download QR for Streets</button>
         </div>
       </div>
@@ -169,7 +169,7 @@ window.submitCity=function(){
   function finish(){
     var url='https://deaddance.app/downtown/'+SLUG;
     document.getElementById('okName').textContent=org;
-    document.getElementById('okUrl').textContent='deaddance.app/downtown/'+SLUG;
+    var _u=document.getElementById('okUrl'); _u.textContent='deaddance.app/downtown/'+SLUG; _u.href=url;   // QR is always paired with a tappable link (you can't scan a QR on your own phone)
     try{ if(window.DDQR) DDQR.into('cityqr',url,{mark:'dd',size:360,css:150}); }catch(e){}
     document.getElementById('result').classList.add('on');
     btn.textContent='Registered ✓';

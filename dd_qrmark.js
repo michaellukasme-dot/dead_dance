@@ -13,8 +13,8 @@
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 
   function drawMark(canvas, mark) {
-    var ctx = canvas.getContext('2d'), W = canvas.width, m = Math.round(W * 0.20),
-        x = (W - m) / 2, y = (W - m) / 2, pad = Math.round(m * 0.16);
+    var ctx = canvas.getContext('2d'), W = canvas.width, m = Math.round(W * 0.15),
+        x = (W - m) / 2, y = (W - m) / 2, pad = Math.round(m * 0.10);   // knockout ≈3% area (was ~7%) → more ECC margin
     ctx.fillStyle = '#fff'; rr(ctx, x - pad, y - pad, m + 2 * pad, m + 2 * pad, Math.round(m * 0.22)); ctx.fill();
     if (mark === 'sf') {
       ctx.fillStyle = '#0fa3a0'; rr(ctx, x, y, m, m, Math.round(m * 0.24)); ctx.fill();
@@ -30,9 +30,9 @@
   // draw into an existing <canvas>; returns a promise resolving to the canvas
   function draw(canvas, text, opts) {
     opts = opts || {};
-    if (!root.QRLite) return Promise.resolve(canvas);
-    try { root.QRLite.drawCanvas(text, canvas, { size: opts.size || 200, dark: opts.dark || '#1a1320', light: '#ffffff', quiet: 4 }); }
-    catch (e) { return Promise.resolve(canvas); }
+    if (!root.QRLite) { try { canvas.dataset.qrOk = '0'; } catch (e) {} return Promise.resolve(canvas); }
+    try { root.QRLite.drawCanvas(text, canvas, { size: opts.size || 200, dark: opts.dark || '#1a1320', light: '#ffffff', quiet: 4 }); try { canvas.dataset.qrOk = '1'; } catch (e) {} }
+    catch (e) { try { console.error('DDQR: QR encode FAILED for payload:', text, e); canvas.dataset.qrOk = '0'; } catch (_) {} return Promise.resolve(canvas); }   // fail LOUD — never a silent blank
     return drawMark(canvas, opts.mark || 'dd').then(function () { return canvas; });
   }
 
@@ -70,6 +70,7 @@
   function save(text, opts, filename) {
     opts = opts || {}; var cv = document.createElement('canvas');
     return draw(cv, text, { size: opts.size || 620, mark: opts.mark || 'dd', dark: opts.dark || '#1a1320' }).then(function () {
+      if (cv.dataset && cv.dataset.qrOk === '0') { try { console.error('DDQR: refusing to save a failed QR for', text); } catch (e) {} return false; }   // never download a blank
       try { var a = document.createElement('a'); a.download = filename || 'deaddance-qr.png'; a.href = cv.toDataURL('image/png'); a.click(); return true; } catch (e) { return false; }
     });
   }
