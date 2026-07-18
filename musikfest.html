@@ -108,9 +108,43 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 .brcard .bm{font-size:11.5px;color:var(--muted);margin-top:2px}
 .brbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .brbar .rsel{flex:1;min-width:130px}
+/* ============ MAPS-PARADIGM APP MODE — fixed map · floating chips · draggable sheet ============ */
+body.mfapp{overflow:hidden;position:fixed;inset:0;width:100%;height:100%;background:#2a1b3d}
+.mf-map{display:none}
+body.mfapp .mf-map{display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1;background:#dfe6ea}
+body.mfapp #lmap{position:absolute!important;inset:0!important;height:100%!important;width:100%!important;border-radius:0!important;background:#dfe6ea}
+body.mfapp .mf-back{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:7;background:#fff;color:var(--purple);padding:8px 13px;border-radius:999px;box-shadow:0 2px 8px #0003;font-size:13px;font-weight:800;text-decoration:none}
+body.mfapp .mf-chips{position:absolute;top:calc(11px + env(safe-area-inset-top,0px));left:0;right:0;z-index:6;display:flex;gap:8px;overflow-x:auto;padding:2px 14px 6px 150px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+body.mfapp .mf-chips::-webkit-scrollbar{display:none}
+.mfchip{flex:0 0 auto;border:0;background:#fff;color:#241535;border-radius:999px;padding:9px 15px;font-weight:800;font-size:14px;box-shadow:0 2px 8px #0003;cursor:pointer;white-space:nowrap}
+.mfchip.on{background:#241535;color:#fff}
+body.mfapp .mf-statpill{position:absolute;left:12px;top:calc(60px + env(safe-area-inset-top,0px));z-index:5;background:#241535ee;color:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:800;box-shadow:0 2px 8px #0004;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+body.mfapp .mf-statpill:empty{display:none}
+/* push Leaflet's own controls below the chip row */
+body.mfapp .leaflet-top.leaflet-left,body.mfapp .leaflet-top.leaflet-right{top:58px}
+/* the draggable bottom sheet — animate TOP (never transform: keeps fixed modals viewport-correct) */
+body.mfapp .wrap{position:fixed;left:0;right:0;top:52vh;bottom:0;max-width:none;margin:0;padding:0 13px 90px;background:#faf8fc;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px #0004;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:20;transition:top .3s cubic-bezier(.32,.72,0,1);will-change:top}
+body.mfapp.mf-drag .wrap{transition:none}
+body.mfapp .wrap>.back{display:none}
+.mf-grab{display:none}
+body.mfapp .mf-grab{display:flex;position:sticky;top:0;z-index:4;justify-content:center;align-items:center;height:24px;margin:0 -13px 4px;background:#faf8fc;border-radius:20px 20px 0 0;cursor:grab;touch-action:none}
+body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3cbe0}
 </style></head>
-<body>
+<body class="mfapp">
+<div class="mf-map" id="mfMapZone">
+  <a class="mf-back" href="index.html" onclick="return mfBack(event)">‹ Dead Dance</a>
+  <div class="mf-chips" id="mfChips">
+    <button class="mfchip on" data-f="stage" onclick="mfChip(this)">🎵 Stages</button>
+    <button class="mfchip" data-f="now" onclick="mfChip(this)">🎶 Acts on Now</button>
+    <button class="mfchip" data-f="food" onclick="mfChip(this)">🍴 Food</button>
+    <button class="mfchip" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
+    <button class="mfchip" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
+  </div>
+  <div id="lmap" aria-label="Musikfest stage map"></div>
+  <span id="trackStat" class="mf-statpill"></span>
+</div>
 <div class="wrap">
+  <div class="mf-grab" id="mfGrab" onpointerdown="mfDragStart(event)"><span></span></div>
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
   <div class="hero" style="position:relative">
     <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
@@ -215,18 +249,8 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
-  <div class="mapwrap">
-    <div id="lmap" style="height:360px;border-radius:11px;overflow:hidden;background:#eef" aria-label="Musikfest stage map"></div>
-    <div class="legend">
-      <span onclick="mapTo(40.6188,-75.3800,16)" style="cursor:pointer" title="Center on the North Side"><i style="background:#b8002e"></i>North side ›</span>
-      <span onclick="mapTo(40.6160,-75.3712,16)" style="cursor:pointer" title="Center on the South Side"><i style="background:#5a2e86"></i>South side ›</span>
-      <span id="mf_f_stage" class="mffilt on" onclick="mfSetMapFilter('stage')">🎵 Stages</span>
-      <span id="mf_f_shop" class="mffilt" onclick="mfSetMapFilter('shop')">🛍️ Shops</span>
-      <span id="mf_f_food" class="mffilt" onclick="mfSetMapFilter('food')">🍴 Food</span>
-      <span id="mf_f_potty" class="mffilt" onclick="mfSetMapFilter('potty')">🚻 Potty</span>
-      <span id="trackStat" style="margin-left:auto"></span>
-    </div>
-  </div>
+  <!-- map + filter chips + distance pill relocated to the fixed top zone (.mf-map) in app mode -->
+  <input type="hidden" id="mf_f_stage"><input type="hidden" id="mf_f_shop"><input type="hidden" id="mf_f_food"><input type="hidden" id="mf_f_potty">
 
   <details class="mfsec"><summary>Share this map · no app needed</summary>
   <div class="card" style="text-align:center;border-color:#f0d9a6;background:#fffdf6">
@@ -800,6 +824,7 @@ window.refresh=function(){ if(!MF.length)return;
  drawMap();                                                    // re-mark the Platz map for this day
  var rows=MF.filter(function(r){ return r.d===day; });
  if(PILL==='dead') rows=rows.filter(function(r){ return r.sc==='dd'; });
+ if(PILL==='now'){ var _nm=nowMins(); rows=rows.filter(function(r){ var mm=mins(r.t); return mm<=_nm+10 && mm>=_nm-95; }); }   // 🎶 Acts on Now — playing right around this moment
  var aEl=document.getElementById('planArr'), dEl=document.getElementById('planDep');
  var aw=hm(aEl?aEl.value:'00:00'), dw=hm(dEl?dEl.value:'23:59');
  rows=rows.filter(function(r){ var mm=mins(r.t); return mm>=aw && mm<=dw; });   // ARRIVE→DEPART window shrinks the pocket
@@ -1181,4 +1206,33 @@ window.mfRefineX=function(){ var el=document.getElementById('mfRefine'); if(el) 
 </script>
 <script src="dd_health.js" defer></script>
 <script src="lukas_a2hs.js" defer></script>
+<script>
+/* ===== Maps paradigm: draggable bottom sheet + floating chips (animate TOP, never transform) ===== */
+(function(){
+  function isApp(){ return document.body.classList.contains('mfapp'); }
+  var sheet=null, curTop=0, dragY=null, liveTop=0;
+  function vh(){ return window.innerHeight/100; }
+  function SNAPS(){ return [10*vh(), 52*vh(), 78*vh()]; }          // full · mid · peek
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function setTop(px){ if(sheet) sheet.style.top=px+'px'; }
+  function nearest(px){ var s=SNAPS(),b=s[0]; s.forEach(function(x){ if(Math.abs(x-px)<Math.abs(b-px))b=x; }); return b; }
+  function invalidate(){ setTimeout(function(){ try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} },330); }
+  window.mfDragStart=function(e){ if(!isApp())return; sheet=document.querySelector('.wrap'); if(!sheet)return;
+    dragY=e.clientY; liveTop=curTop; document.body.classList.add('mf-drag');
+    try{ if(e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId); }catch(x){}
+    window.addEventListener('pointermove',move); window.addEventListener('pointerup',end); e.preventDefault(); };
+  function move(e){ if(dragY==null)return; liveTop=clamp(curTop+(e.clientY-dragY), 8*vh(), 86*vh()); setTop(liveTop); }
+  function end(){ if(dragY==null)return; dragY=null; document.body.classList.remove('mf-drag');
+    curTop=nearest(liveTop); setTop(curTop);
+    window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',end); invalidate(); }
+  function init(){ if(!isApp())return; sheet=document.querySelector('.wrap'); curTop=52*vh(); setTop(curTop);
+    setTimeout(function(){ try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} },500); }
+  window.addEventListener('resize',function(){ if(isApp()&&sheet){ curTop=clamp(curTop,8*vh(),86*vh()); setTop(curTop); try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} } });
+  if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded',init);
+  // floating chips → map layer filters (+ 🎶 Acts-on-Now filters the flowing list)
+  window.mfChip=function(btn){ var f=btn.getAttribute('data-f'); btn.classList.toggle('on');
+    if(f==='now'){ if(typeof setPill==='function') setPill(btn.classList.contains('on')?'now':'all'); return; }
+    if(typeof mfSetMapFilter==='function') mfSetMapFilter(f); };
+})();
+</script>
 </body></html>
