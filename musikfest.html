@@ -515,11 +515,16 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
 // shops while selling; the non-buyers are the "straggler list" the rep console (mf_rep) works.
 // Flips automatically on the date — no redeploy needed.
 var MF_GOLIVE='2026-07-31';
+// ArtsQuest guardrail: truck/tent VENDOR ads exist in the engine but are OFF at launch — selling
+// ads against ArtsQuest's OWN festival vendors is theirs, not ours (don't get blackballed). Fixed
+// year-round retail (Main St + Southside brick-and-mortar) is the TOWN's, not the festival's →
+// every one gets a FREE demo ad. Flip MF_SELL_VENDORS=true only once we're their festival manager.
+var MF_SELL_VENDORS=false;
 function mfPaidOnly(){ try{ return (new Date().toISOString().slice(0,10) >= MF_GOLIVE); }catch(e){ return false; } }
 function _mfPaid(x){ return !!(x && (x.sponsor||x.paid)); }
-function mfShops(){ return mfPaidOnly() ? MERCHANTS.filter(_mfPaid) : MERCHANTS; }
+function mfShops(){ return MERCHANTS; }   // LAUNCH: every fixed Main St / Southside establishment gets a FREE ad → all show + toast
 function mfVendorsList(){ return mfPaidOnly() ? VENDORS.filter(_mfPaid) : VENDORS; }
-function mfWalkPois(){ return mfShops().concat(mfVendorsList()); }   // walk-by toast pool
+function mfWalkPois(){ return mfShops().concat(MF_SELL_VENDORS ? mfVendorsList() : []); }   // walk-by toast pool — fixed retail only; truck vendors gated to festival-manager mode
 function _mfDirBtn(lat,lng,name){ var n=String(name).replace(/[\x27"\\]/g,''); return '<br><button onclick="mfDirectTo('+lat+','+lng+',\''+n+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>'; }
 function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
   mfShops().forEach(function(m){
@@ -602,7 +607,7 @@ var AD_SEED={
 };
 var adState={photos:[],tier:'fest',photoIsDefault:false,qr:false};
 // GATEWAY sponsor (the MOST tier) — the big welcome toast at the boundary. ArtsQuest seeded free.
-var GATEWAY={ sponsor:{ name:'ArtsQuest', head:'Welcome to Musikfest 2026', line:'10 stages of free music down Main Street & at SteelStacks. Presented by ArtsQuest.', photo:null, free:true } };
+var GATEWAY={ sponsor:{ name:'ArtsQuest', head:'ArtsQuest welcomes you to Musikfest 2026', line:'The biggest free music festival in America — 16 stages, 400+ acts, all free, down Main Street & at SteelStacks. 🌹', photo:null, free:true } };  // kiss to ArtsQuest — 16 stages / 400+ acts per musikfest.org, verified 2026-07-18
 function adSlug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 function adStore(){ try{ return JSON.parse(localStorage.getItem('dd.mfads')||'[]'); }catch(e){ return []; } }
 function adSave(a){ try{ var s=adStore(); s.push(a); localStorage.setItem('dd.mfads',JSON.stringify(s)); }catch(e){} }
@@ -642,8 +647,8 @@ function adFill(biz){ var v=isVendorBiz(biz), s=AD_SEED[biz]||null;
 
 window.adOpen=function(){ var sel=document.getElementById('adBiz');
   sel.innerHTML='<option value="">Is this your shop, or your food truck?</option>'+
-    '<optgroup label="Main Street shops">'+MERCHANTS.map(function(m){ return '<option value="'+esc(m.n)+'">'+esc(m.n)+' — '+esc(m.addr)+'</option>'; }).join('')+'</optgroup>'+
-    '<optgroup label="Food trucks & tents ($69/day · $499/fest)">'+VENDORS.map(function(v){ return '<option value="'+esc(v.n)+'">🚚 '+esc(v.n)+' — '+esc(v.sells)+'</option>'; }).join('')+'</optgroup>'+
+    '<optgroup label="Main Street &amp; Southside shops">'+MERCHANTS.map(function(m){ return '<option value="'+esc(m.n)+'">'+esc(m.n)+' — '+esc(m.addr)+'</option>'; }).join('')+'</optgroup>'+
+    (MF_SELL_VENDORS ? ('<optgroup label="Food trucks &amp; tents ($69/day · $499/fest)">'+VENDORS.map(function(v){ return '<option value="'+esc(v.n)+'">🚚 '+esc(v.n)+' — '+esc(v.sells)+'</option>'; }).join('')+'</optgroup>') : '')+
     '<option value="__new__">➕ My business isn\'t listed</option>';
   renderTiers(); adPreview();
   document.getElementById('adModal').style.display='block'; };
@@ -977,7 +982,7 @@ function mfReach(n){ try{ WALK._reach=WALK._reach||JSON.parse(localStorage.getIt
 function walkByCheck(here){ if(!here)return; var RR=0.02, RT=0.008, now=Date.now(), accM=(window.YOU_ACC||999);
   // RR (~105 ft) = coarse "walked by" tally for the straggler reach report. RT (~42 ft) = the TIGHT
   // storefront radius for the actual TOAST, so we only ever name the shop you're truly in front of.
-  var all=MERCHANTS.concat(VENDORS);
+  var all=mfWalkPois();
   all.forEach(function(p){ if(p.lat!=null && hav(here[0],here[1],p.lat,p.lng)<RR) mfReach(p.n); });   // tally reach for ALL (the straggler report)
   var pois=mfWalkPois(); WALK._seen=WALK._seen||{};                                                  // but only AD BUYERS actually toast (after go-live)
   pois.forEach(function(p){ if(p.lat==null)return; var d=hav(here[0],here[1],p.lat,p.lng); if(WALK._seen[p.n] && d>RT*1.8) delete WALK._seen[p.n]; }); // walked away → can re-toast next pass
@@ -989,7 +994,7 @@ function walkByCheck(here){ if(!here)return; var RR=0.02, RT=0.008, now=Date.now
   if(best && bd<RT && (second>RT || bd < second*0.6)){ WALK._seen[best.n]=now; WALK._wbT=now; mfToastHTML(merchantToastHTML(poiObj(best))); }
 }
 // GATEWAY: the big welcome toast the moment a phone crosses INTO the festival (once per entry / hour)
-var MF_GATES=[{lat:40.6188,lng:-75.3800,r:0.30},{lat:40.6158,lng:-75.3720,r:0.30}]; // north (Main & Broad) + south (SteelStacks)
+var MF_GATES=[{lat:40.6188,lng:-75.3800,r:0.30},{lat:40.6158,lng:-75.3720,r:0.30},{lat:40.6166,lng:-75.3824,r:0.28}]; // north (Main St at Broad, southbound) + south (SteelStacks) + west (CIQ/Sand Island, approaching from below Rt 378 — approx, confirm w/ John)
 function insideFest(here){ for(var i=0;i<MF_GATES.length;i++){ if(hav(here[0],here[1],MF_GATES[i].lat,MF_GATES[i].lng) < MF_GATES[i].r) return true; } return false; }
 function gatewayCheck(here){ if(!here)return; var was=WALK._inside, now=insideFest(here); WALK._inside=now;
   if(now && !was){ var t=Date.now(); if(t-(WALK._gwT||0) > 3600000){ WALK._gwT=t; mfGatewayToast(GATEWAY.sponsor); } } }
@@ -997,7 +1002,7 @@ function mfGatewayToast(sp){ if(!sp)return; var el=document.getElementById('mfGa
   if(!el){ el=document.createElement('div'); el.id='mfGate'; el.style.cssText='position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:260;background:linear-gradient(135deg,#3a2456,#7d1533);color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:92%;width:420px;padding:16px 18px;text-align:center;opacity:0;transition:opacity .3s'; document.body.appendChild(el); }
   el.innerHTML=(sp.photo?'<img src="'+sp.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:11px;margin-bottom:9px">':'')+
     '<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#f0c96b;text-transform:uppercase">'+(sp.free?'Presented by':'A word from')+' '+esc(sp.name)+'</div>'+
-    '<div style="font-size:21px;font-weight:900;margin:3px 0 4px">'+esc(sp.head||'Welcome to Musikfest')+'</div>'+
+    '<div style="font-size:24px;font-weight:900;line-height:1.08;margin:4px 0 5px">'+esc(sp.head||'Welcome to Musikfest')+'</div>'+
     (sp.line?'<div style="font-size:13.5px;color:#e7ddf3;line-height:1.42">'+esc(sp.line)+'</div>':'')+
     '<div style="font-size:11px;color:#b9a9d4;margin-top:8px">welcome to the festival 🌹</div>';
   el.style.opacity='1'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.opacity='0'; },6500);
@@ -1077,7 +1082,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
 (function(){ function arm(){ try{ if(WALK.on && window.DDSteps && !DDSteps.active()) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} }
   try{ document.addEventListener('pointerdown', arm, { once:true }); }catch(e){} })();
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 397'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 406'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'), c=parkGet(), b=document.getElementById('parkBtn');
