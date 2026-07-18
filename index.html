@@ -3564,6 +3564,7 @@ function ddAddFriend(id,name,btn){
       if(!nm){ try{inp.focus();}catch(e){} return; }
       try{ if(window.ME) ME.name=nm; }catch(e){}
       try{ if(window.DDJoin&&DDJoin.setName) DDJoin.setName(nm); else localStorage.setItem('dd.myname',nm); }catch(e){}
+      try{ if(window.DDMe){ if(nm) DDMe.set('name',nm); if(em) DDMe.set('email',em); } }catch(e){}   // → your ACCOUNT, so it follows you across every device
       try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){}
       setTimeout(function(){ try{ if(typeof ddFeedRender==='function') ddFeedRender(); }catch(e){} },900);   // past posts flip to my name+face
       done(); if(typeof toast==='function') setTimeout(function(){ toast('🌹 Nice to meet you, '+nm+' — the family can find you now.'); },250);
@@ -3575,12 +3576,19 @@ function ddAddFriend(id,name,btn){
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(show,1800); });
   else setTimeout(show,1800);
+  // hydrate name/email/face FROM THE ACCOUNT (dd_me spine) so a signed-in you is never re-asked, on any device
+  try{ if(window.DDMe&&DDMe.onChange){ DDMe.onChange(function(me){ if(!me)return;
+    try{ if(me.name){ if(window.ME) ME.name=me.name; localStorage.setItem('dd.myname',me.name); localStorage.setItem('dd.name.asked','1'); } }catch(e){}
+    try{ if(me.email) localStorage.setItem('dd.email',me.email); }catch(e){}
+    try{ if(me.avatar){ localStorage.setItem('dd.profile.img',me.avatar); if(typeof applyMyAvatar==='function') applyMyAvatar(); } }catch(e){}
+  }); } }catch(e){}
 })();
 </script>
 <script src="lukas_a2hs.js" defer></script>
 <script src="dd_health.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lukas_chat.js"></script>
+<script src="dd_me.js"></script>
 <script src="guitar_facts.js"></script>
 <script src="band_facts.js"></script>
 <script src="deal_shows.js"></script>
