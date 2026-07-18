@@ -253,29 +253,18 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
   <!-- map + filter chips + distance pill relocated to the fixed top zone (.mf-map) in app mode -->
   <input type="hidden" id="mf_f_stage"><input type="hidden" id="mf_f_shop"><input type="hidden" id="mf_f_food"><input type="hidden" id="mf_f_potty">
 
-  <details class="mfsec"><summary>Share this map · no app needed</summary>
-  <div class="card" style="text-align:center;border-color:#f0d9a6;background:#fffdf6">
-    <div id="mfqr" style="width:190px;height:190px;margin:4px auto 0;background:#fff;border-radius:12px"></div>
-    <div style="font-weight:900;font-size:15px;margin-top:8px">No app. No download.</div>
-    <div style="font-size:12.5px;color:var(--muted);margin-top:2px">On your phone? <b>Tap it.</b> Showing a friend? <b>They scan it.</b></div>
-    <div style="font-size:12.5px;color:#4a4356;line-height:1.5;margin-top:5px">This whole map opens right in your browser — <b>deaddance.app/musikfest</b>. Built for the street team: blow it up to a <b>2.5'×2.5' rigid sign</b>, plant it at every gate, and every head who scans finds their Platz.</div>
-    <button class="dir" style="margin-top:10px" onclick="saveMFQR()">⬇︎ Save the QR</button>
+  <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0 6px">
+    <div id="mfqr" style="width:150px;height:150px;background:#fff;border-radius:12px;flex:0 0 auto"></div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <button class="dir" onclick="mfShareMap()" title="Share this map" aria-label="Share this map" style="justify-content:center;font-size:17px;padding:11px 16px">↗</button>
+      <button class="dir" onclick="saveMFQR()" title="Save the QR image" aria-label="Save QR" style="justify-content:center;padding:11px 16px">⬇︎ Save QR</button>
+    </div>
   </div>
-  </details>
 
   <div id="parkBox" style="text-align:center;margin:12px 0"></div>
 
-  <details class="mfsec"><summary>The Platz, decoded — where each one really is</summary>
-    <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px">North side — downtown &amp; Colonial Industrial Quarter (free)</div>
-    <div id="northList"></div>
-    <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px">South side — SteelStacks</div>
-    <div id="southList"></div>
-  </details>
-
-  <details class="mfsec"><summary>🍺 Shops, taps &amp; eats — right inside the fest</summary>
-    <div style="font-size:12.5px;color:#4a4356;line-height:1.5;margin:2px 0 8px">The historic <b>Main Street</b> businesses sit <b>inside</b> the festival footprint — many fill your official <b>Musikfest cup</b> (often better, sometimes cheaper than the tents), with A/C and real bathrooms. These are the brick-and-mortar spots, on top of the hundreds of food trucks &amp; tents.</div>
-    <div id="shopList"></div>
-  </details>
+  <!-- Platz-decoded + Shops lists removed — that info now lives on the map pin toasts -->
+  <div id="northList" hidden></div><div id="southList" hidden></div><div id="shopList" hidden></div>
 
   <details class="mfsec"><summary>Ticketed headliners · Wind Creek Steel Stage</summary>
     <div class="sched" id="sched"></div>
@@ -358,7 +347,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
-<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
+<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
 <script>
@@ -790,8 +779,11 @@ window.toggleJoin=function(){ var was=joined(); try{ localStorage.setItem('dd.mu
 crewRefresh(); renderJoin();
 
 // street-team QR — no app, just scan → this map
-try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:190,caption:true}); }catch(e){}
+try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:150,caption:false}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
+window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
+  if(navigator.share){ navigator.share({title:'Musikfest 2026 — the DeadDance map',url:url}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(url); mfToast('🔗 Map link copied — paste it anywhere.'); }catch(e){ mfToast(url); } } };
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
@@ -919,7 +911,9 @@ var BATHROOMS=[  // approx from ArtsQuest campus maps — exact layout to confir
  {n:"ArtsQuest Center",lat:40.6157,lng:-75.3718},{n:"Levitt / Americaplatz",lat:40.6167,lng:-75.3708}];
 
 var WALK={on:false,miles:0,gain:0,last:null,lastAlt:null,watch:null,path:[]};
-function fmtStat(){ var mi=WALK.miles.toFixed(2), ft=Math.round(WALK.gain), steps=Math.round(WALK.miles*2100).toLocaleString();
+function fmtStat(){ var mi=WALK.miles.toFixed(2), ft=Math.round(WALK.gain);
+  var _rs=(window.DDSteps&&DDSteps.active())?DDSteps.count():null;                                 // REAL pedometer steps when the accelerometer is live
+  var steps=(_rs!=null?_rs:Math.round(WALK.miles*2100)).toLocaleString();
   var b=document.getElementById('trackBtn'); if(b) b.textContent=(WALK.on?'⏸':'▶')+' Auto-Tracking';
   var st=document.getElementById('trackStat'); if(!st)return;                                    // the counter pill lives in the map legend, bottom-right
   st.style.cssText='margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:#f2eee9;border:1px solid var(--line,#e7e1f0);border-radius:999px;padding:4px 11px;font-weight:800;font-size:12px;color:var(--ink,#241535);white-space:nowrap';
@@ -1077,10 +1071,13 @@ function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
   if(WALK.on){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
     walkStatus('🛰️ Finding you… <b>allow location if your phone asks.</b>',true);   // instant feedback — never "nothing"
-    startWatch(); fmtStat(); }
-  else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
+    startWatch(); try{ if(window.DDSteps) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} fmtStat(); }
+  else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; try{ if(window.DDSteps) DDSteps.stop(); }catch(e){} var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
+/* arm the pedometer on the first user tap — tracking auto-starts at load, but iOS motion needs a gesture */
+(function(){ function arm(){ try{ if(WALK.on && window.DDSteps && !DDSteps.active()) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} }
+  try{ document.addEventListener('pointerdown', arm, { once:true }); }catch(e){} })();
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 395'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 397'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'), c=parkGet(), b=document.getElementById('parkBtn');

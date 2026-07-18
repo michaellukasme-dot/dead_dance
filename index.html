@@ -2968,7 +2968,7 @@ window.claudeAssist=function(taId){
 var CMP_NETS=[{id:'dd',n:'🌹 dead.dance',lock:true},{id:'fb',n:'f Facebook'},{id:'ig',n:'Instagram'},
   {id:'th',n:'Threads'},{id:'x',n:'X'},{id:'rd',n:'Reddit'}];
 function cmpDefaults(){ var d; try{d=JSON.parse(localStorage.getItem('dd.hpdef')||'null');}catch(e){d=null;}
-  if(!d||!d.length){ d=['dd']; } if(d.indexOf('dd')<0) d.unshift('dd'); return d; }
+  if(!d||!d.length){ d=['dd','fb']; } if(d.indexOf('dd')<0) d.unshift('dd'); return d; }   /* Facebook ON by default — user can uncheck in ⚙ Networks */
 function cmpSaveDefaults(arr){ try{localStorage.setItem('dd.hpdef',JSON.stringify(arr));}catch(e){} }
 function cmpInit(){ var t=document.getElementById('cmpText'); if(t){ var nm=(ME&&ME.name&&ME.name!=='You')?ME.name:'';
     t.placeholder=nm?("What's on your mind, "+nm+"?"):"What's on your mind?"; }
@@ -2999,10 +2999,15 @@ function hpComposer(){ var t=document.getElementById('cmpText'); var txt=(t&&t.v
         .catch(function(){ toast('Saved on this device — sign in to post to the family.'); });
     }
   }catch(e){}
-  // 2) external networks — one human handoff (share sheet); nothing silent, nothing auto-sent
-  if(ext.length && navigator.share){
-    navigator.share({ title:'dead.dance', text:txt, url:(typeof inviteLink==='function'?inviteLink():DD_HOME) }).catch(function(){}); }
-  toast('📡 HyperPosted to dead.dance'+(ext.length?(' — and opened '+extNames.join(', ')+' to confirm'):'')+(posted?'':' (this device — sign in to reach the family)')+'.');
+  // 2) external networks — one human handoff, inside each network's own rules (nothing silent/auto)
+  var _shareUrl=(typeof inviteLink==='function'?inviteLink():DD_HOME);
+  if(ext.indexOf('fb')>=0){   // Facebook: its OWN Share Dialog is the only FB-legal path — opens FB with the DD link; the user taps Post
+    try{ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(_shareUrl),'fbshare','noopener,noreferrer,width=600,height=560'); }catch(e){}
+  }
+  var _extOther=ext.filter(function(id){return id!=='fb';});
+  if(_extOther.length && navigator.share){
+    navigator.share({ title:'dead.dance', text:txt, url:_shareUrl }).catch(function(){}); }
+  toast('📡 HyperPosted to dead.dance'+(ext.length?(' — and opened '+extNames.join(', ')+' to post'):'')+(posted?'':' (this device — sign in to reach the family)')+'.');
   if(t) t.value='';
 }
 
