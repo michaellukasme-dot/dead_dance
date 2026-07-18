@@ -113,16 +113,9 @@ details.mfsec>*:not(summary){padding:0 12px 12px}
 <div class="wrap">
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
   <div class="hero" style="position:relative">
-    <div id="roseTotal" title="DeadDance heads at Musikfest right now — tap the 🌹 on any stage to add yourself" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
+    <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
     <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="musikfest_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
     <h1>Musikfest</h1>
-    <div class="k">2026 · Bethlehem, PA · Jul 31 – Aug 9 (Preview Jul 30)</div>
-    <p>16 stages. ~3 miles. 400+ acts, free. The town names everything <i>-platz</i> and nobody knows where they are. Here's every one — with directions.</p>
-    <div class="joinbar">
-      <button class="joinbtn" id="joinBtn" onclick="toggleJoin()">🌹 Join the Musikfest crew</button>
-      <span class="joincount" id="joinCount"></span>
-    </div>
-    <div style="color:#9a883f;font-size:11.5px;font-weight:800;margin-top:10px;letter-spacing:.05em;text-transform:uppercase">Festivals, reimagined — virtually · keep this open, it's your companion</div>
   </div>
   <div id="adFeatured"></div>
   <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">

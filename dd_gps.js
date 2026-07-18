@@ -42,6 +42,29 @@
   //   onFix({lat,lng,acc,rawAcc,speed,heading,locked,raw})  acc = filtered σ (m), rawAcc = device σ (m)
   //   locked = we've seen a fix at/under lockAcc (default 25 m) → geofencing is now trustworthy
   //   dropAcc: ignore garbage fixes coarser than this ONCE we already have a good one (default 120 m)
+  // ── Screen Wake Lock ─────────────────────────────────────────────────────────
+  // The best a web app can do: keep the screen awake WHILE actively tracking, so the
+  // walk keeps counting until you stop or lock the phone yourself. A slept/locked phone
+  // SUSPENDS geolocation — a hard browser limit; true background tracking (screen off,
+  // app closed) requires a NATIVE app. Ref-counted, and re-acquired when the tab returns
+  // to the foreground (the OS drops the lock whenever you switch away).
+  var _wakeLock = null, _wakeCount = 0, _wakeBound = false;
+  function _wakeReq() {
+    try {
+      if (w.navigator && w.navigator.wakeLock && _wakeCount > 0 && !_wakeLock) {
+        w.navigator.wakeLock.request('screen').then(function (s) {
+          _wakeLock = s; if (s && s.addEventListener) s.addEventListener('release', function () { _wakeLock = null; });
+        }, function () {});
+      }
+    } catch (e) {}
+  }
+  function wakeAcquire() {
+    _wakeCount++;
+    if (!_wakeBound) { _wakeBound = true; try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') _wakeReq(); }); } catch (e) {} }
+    _wakeReq();
+  }
+  function wakeRelease() { _wakeCount = Math.max(0, _wakeCount - 1); if (_wakeCount === 0 && _wakeLock) { try { _wakeLock.release(); } catch (e) {} _wakeLock = null; } }
+
   function start(opts) {
     opts = opts || {};
     if (!w.navigator || !w.navigator.geolocation) { if (opts.onError) opts.onError({ code: 0, message: "no geolocation" }); return { stop: function () {} }; }
@@ -75,8 +98,9 @@
     id = w.navigator.geolocation.watchPosition(onPos, onErr, {
       enableHighAccuracy: true, maximumAge: 8000, timeout: (opts.timeout || 30000)
     });
+    wakeAcquire();   // keep the screen awake while this watch runs → the walk keeps counting
     return {
-      stop: function () { dead = true; try { w.navigator.geolocation.clearWatch(id); } catch (e) {} },
+      stop: function () { if (dead) return; dead = true; try { w.navigator.geolocation.clearWatch(id); } catch (e) {} wakeRelease(); },
       recenterKalman: function () { kf.reset(); locked = false; },
       get best() { return bestRaw; }
     };
