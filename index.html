@@ -1118,9 +1118,13 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
 (function(){
   function paint(v){ var el=document.getElementById('ddVer'); if(el) el.innerHTML='DeadDance <b>'+v+'</b> · deaddance.app'; }
   function pick(keys){ var best=null; (keys||[]).forEach(function(k){ var m=/deaddance-v(\d+)/.exec(k); if(m){ var n=+m[1]; if(!best||n>best.n) best={n:n,s:'v'+m[1]}; } }); return best?best.s:null; }
-  try{
-    if(window.caches&&caches.keys){ caches.keys().then(function(ks){ var v=pick(ks); if(v)paint(v); }); }
-  }catch(e){}
+  var tries=0, done=false;
+  function read(){ if(done)return; try{ if(window.caches&&caches.keys){ caches.keys().then(function(ks){ var v=pick(ks);
+    if(v){ done=true; paint(v); } else if(tries++<25){ setTimeout(read,600); }        // fresh/incognito: SW still installing → keep polling until the cache appears
+  }, function(){ if(tries++<25) setTimeout(read,600); }); } }catch(e){} }
+  read();
+  try{ if(navigator.serviceWorker){ navigator.serviceWorker.addEventListener('controllerchange', read);
+    if(navigator.serviceWorker.ready&&navigator.serviceWorker.ready.then) navigator.serviceWorker.ready.then(read); } }catch(e){}
 })();
 </script>
 
