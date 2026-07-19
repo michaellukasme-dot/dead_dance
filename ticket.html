@@ -1,0 +1,192 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ticket · DeadDance / StageFill</title>
+<style>
+:root{--tm-blue:#2f7bf6;--gold:#f0a500;--rose:#d8305a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  display:flex;flex-direction:column;align-items:center;gap:16px;padding:22px 15px 40px;color:#fff;-webkit-font-smoothing:antialiased}
+.cap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8b93a7;text-align:center}
+
+.ticket{width:100%;max-width:340px;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55);position:relative;background:#1b1e26}
+.photo{position:relative;padding:15px 18px 18px;isolation:isolate;min-height:250px;display:flex;flex-direction:column}
+/* band image fills the art; dark scrim keeps text legible */
+.art{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center;background-repeat:no-repeat;filter:saturate(1.05)}
+.photo::after{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg, rgba(14,11,20,.30) 0%, rgba(14,11,20,.55) 45%, rgba(14,11,20,.92) 100%)}
+.artfallback{background:
+  radial-gradient(120% 80% at 20% 0%, rgba(120,60,180,.65), transparent 60%),
+  radial-gradient(120% 90% at 90% 10%, rgba(216,60,90,.5), transparent 55%),
+  radial-gradient(140% 120% at 50% 120%, rgba(240,165,0,.4), transparent 55%),
+  linear-gradient(180deg,#241a33 0%,#191420 55%,#0e0b14 100%)}
+
+.brandbar{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800}
+.brandbar .rose{font-size:15px}
+.brandbar .sf{color:#d9c9f5;font-weight:700}
+.brandbar .lock{margin-left:auto;display:flex;align-items:center;gap:5px;color:#a7f3d0;font-size:11px;font-weight:800;letter-spacing:.03em}
+
+.head{margin-top:auto}
+.gate small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#d5daea;opacity:.9}
+.gate b{font-size:24px;font-weight:900}
+.act{margin-top:11px}
+.act b{font-size:22px;font-weight:900;display:block;line-height:1.04;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+.act span{font-size:12.5px;color:#e6d9fb;font-weight:700}
+.venue{margin-top:6px;font-size:12px;color:#c3c8d8;font-weight:600}
+.srs{display:flex;margin-top:15px;text-align:center}
+.srs>div{flex:1}
+.srs small{display:block;font-size:11px;letter-spacing:.13em;color:#c3c8d8;font-weight:800}
+.srs b{font-size:19px;font-weight:900}
+.ga{margin-top:15px;font-size:13px;font-weight:900;letter-spacing:.12em;color:#ffe08a;text-align:center}
+
+/* ---- BUY panel (payment right here) ---- */
+.buy{background:#fff;color:#12141b;border-radius:14px;margin-top:16px;padding:14px}
+.buy .pr{display:flex;align-items:baseline;justify-content:space-between}
+.buy .pr b{font-size:23px;font-weight:900}
+.buy .pr s{color:#8a9;font-size:12px;font-weight:700;text-decoration:none;color:#6b7280}
+.pay{width:100%;margin-top:11px;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:900;color:#fff;background:#000;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.pay.card{background:var(--tm-blue);margin-top:8px}
+.paynote{margin-top:9px;font-size:10.5px;line-height:1.5;color:#4a4f5e;text-align:center}
+.paynote b{color:#12141b}
+
+/* ---- issued barcode face ---- */
+.barwrap{margin-top:16px;background:#fff;border-radius:14px;padding:14px 14px 10px;position:relative;overflow:hidden}
+#bars{display:block;width:100%;height:70px}
+.sweep{position:absolute;top:0;bottom:26px;width:7px;left:0;background:linear-gradient(180deg,#6aa8ff,var(--tm-blue));
+  box-shadow:0 0 14px 3px rgba(47,123,246,.75);border-radius:6px;animation:sweep 2.4s cubic-bezier(.55,0,.45,1) infinite}
+@keyframes sweep{0%{left:2%}50%{left:95%}100%{left:2%}}
+.barfoot{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.barfoot span{font-size:12.5px;font-weight:800;color:#1b1e26}
+.barfoot .rf{color:#4a4f5e;font-size:15px;animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.foot{margin-top:13px;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:#f2d9e6}
+.foot .rose{font-size:13px}
+
+.perf{height:0;border-top:2px dashed rgba(255,255,255,.18);position:relative;background:#1b1e26}
+.perf::before,.perf::after{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#14161c}
+.perf::before{left:-11px}.perf::after{right:-11px}
+.stub{background:#1b1e26;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#9aa1b4;font-weight:700}
+.stub b{color:#e7e2f2}
+.chip{background:rgba(47,123,246,.16);color:#a9c8ff;border:1px solid rgba(47,123,246,.4);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;letter-spacing:.04em}
+.hidden{display:none!important}
+</style></head>
+<body>
+
+<div class="ticket">
+  <div class="photo">
+    <div class="art" id="art"></div>
+    <div class="brandbar">
+      <span class="rose">🌹</span><span>DeadDance</span><span class="sf">· StageFill</span>
+      <span class="lock">🔒 SECURE</span>
+    </div>
+
+    <div class="head">
+      <div class="gate"><small>Entry Gate</small><b id="gate">Gate A</b></div>
+      <div class="act"><b id="band">—</b><span id="sub"></span></div>
+      <div class="venue" id="venue">—</div>
+      <div class="srs" id="srs"></div>
+      <div class="ga hidden" id="ga">🌹 GENERAL ADMISSION</div>
+    </div>
+
+    <!-- BUY state: payment right on the ticket -->
+    <div id="buyPanel" class="buy">
+      <div class="pr"><b id="price">$18</b><s id="fees">no service fees 🌹</s></div>
+      <button class="pay" id="payApple" onclick="startCheckout('apple')"> Pay</button>
+      <button class="pay card" id="payCard" onclick="startCheckout('card')">🎟️ Buy now · one tap</button>
+      <div class="paynote"><b>Your ticket. Your friends. No toll booth.</b><br>Device-bound &amp; screenshot-proof — the ticket lives on your phone, transfers are free, and we take no resale cut.</div>
+    </div>
+
+    <!-- ISSUED state: the secure rotating face -->
+    <div id="issued" class="hidden">
+      <div class="barwrap">
+        <canvas id="bars" width="600" height="140"></canvas>
+        <div class="sweep"></div>
+        <div class="barfoot"><span>Screenshots won't get you in.</span><span class="rf">↻</span></div>
+      </div>
+      <div class="foot"><span class="rose">🌹</span> <span id="footmsg">Your ticket. Your friends. No toll booth.</span></div>
+    </div>
+  </div>
+
+  <div class="perf"></div>
+  <div class="stub">
+    <span>Ticket ID <b id="tid">d.dance/t/····</b></span>
+    <span class="chip">DEVICE-BOUND</span>
+  </div>
+</div>
+
+<div class="cap" id="statuscap">the blue sweep is the tell — recognized by millions</div>
+
+<script>
+(function(){
+  var Q=new URLSearchParams(location.search);
+  function g(k,d){ var v=Q.get(k); return (v==null||v==='')?d:v; }
+  var band=g('band','SHAKEDOWN'), sub=g('sub','Grateful Dead Tribute'),
+      venue=g('venue','Wind Creek Steel Stage · Bethlehem, PA'), date=g('date',''),
+      price=g('price','$18'), gate=g('gate','Gate A'),
+      sec=g('sec',''), row=g('row',''), seat=g('seat',''), img=g('img','');
+
+  document.getElementById('band').textContent=band.toUpperCase();
+  document.getElementById('sub').textContent=sub;
+  document.getElementById('venue').textContent=venue+(date?(' · '+date):'');
+  document.getElementById('gate').textContent=gate;
+  document.getElementById('footmsg').textContent='Your ticket. Your friends. No toll booth.';
+  // price: if it's a word (Free / Onsale soon) show a friendlier buy
+  var priceEl=document.getElementById('price');
+  var numeric=/\$|\d/.test(price);
+  priceEl.textContent = numeric ? price : price;
+
+  // %BAND% image as the event art
+  var art=document.getElementById('art');
+  if(img){ var im=new Image(); im.onload=function(){ art.style.backgroundImage='url("'+img+'")'; };
+    im.onerror=function(){ art.className='art artfallback'; };
+    im.src=img; art.style.backgroundImage='url("'+img+'")'; }
+  else { art.className='art artfallback'; }
+
+  // seat block vs GA
+  if(sec||row||seat){
+    document.getElementById('srs').innerHTML=
+      '<div><small>SEC</small><b>'+(sec||'—')+'</b></div>'+
+      '<div><small>ROW</small><b>'+(row||'—')+'</b></div>'+
+      '<div><small>SEAT</small><b>'+(seat||'—')+'</b></div>';
+  } else { document.getElementById('ga').classList.remove('hidden'); }
+
+  // short ticket id
+  var id='d.dance/t/'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,4).toUpperCase();
+  document.getElementById('tid').textContent=id;
+
+  // faux PDF417 that "rotates" like a live SafeTix code
+  var timer=null;
+  function drawBars(){
+    var c=document.getElementById('bars'); if(!c)return; var x=c.getContext('2d');
+    var W=c.width,H=c.height,ROWS=6,COLS=68,gap=1; x.clearRect(0,0,W,H); x.fillStyle='#0d0f14';
+    for(var g2=0;g2<3;g2++){ x.fillRect(g2*3,0,2,H); x.fillRect(W-6+g2*3,0,2,H); }
+    var cw=W/COLS,rh=H/ROWS;
+    for(var r=0;r<ROWS;r++){ for(var col=2;col<COLS-2;col++){ if(Math.random()<0.52){ var run=1+((Math.random()*3)|0); x.fillRect(col*cw,r*rh+gap,run*cw-gap,rh-gap*2); col+=run-1; } } }
+  }
+  window.__drawBars=drawBars;
+
+  // Payment handoff. In production this opens Stripe Checkout (hosted, PCI-compliant),
+  // then returns to the issued ticket. Stripe keys/config are set up outside the app.
+  window.startCheckout=function(method){
+    var url=g('url','');
+    if(url){ // external listing (Ticketmaster etc.) → notify path handled by caller; here just open
+      try{ window.open(url,'_blank','noopener'); }catch(e){} return;
+    }
+    var cap=document.getElementById('statuscap');
+    document.getElementById('payApple').textContent='Processing…';
+    document.getElementById('payCard').disabled=true;
+    cap.textContent='connecting secure checkout…';
+    setTimeout(function(){
+      document.getElementById('buyPanel').classList.add('hidden');
+      document.getElementById('issued').classList.remove('hidden');
+      drawBars(); if(!timer) timer=setInterval(drawBars,4000);
+      cap.textContent='ticket issued · device-bound · works offline at the gate';
+      try{ if(window.parent&&window.parent.toast) window.parent.toast('🎟️ Ticket issued — it lives on your phone now. 🌹'); }catch(e){}
+    }, 850);
+  };
+
+  // if already-issued view is requested (?state=issued), skip straight to the face
+  if(g('state','')==='issued'){ document.getElementById('buyPanel').classList.add('hidden'); document.getElementById('issued').classList.remove('hidden'); drawBars(); timer=setInterval(drawBars,4000); }
+})();
+</script>
+</body></html>

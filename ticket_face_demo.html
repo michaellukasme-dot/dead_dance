@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ticket face — DeadDance / StageFill</title>
+<style>
+:root{--tm-blue:#2f7bf6;--ink:#0d0f14}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:34px 16px;color:#fff;-webkit-font-smoothing:antialiased}
+.cap{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8b93a7;text-align:center}
+
+/* ---- the ticket ---- */
+.ticket{width:330px;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55);position:relative;
+  background:#1b1e26}
+.photo{position:relative;padding:16px 18px 20px;isolation:isolate;
+  background:
+    radial-gradient(120% 80% at 20% 0%, rgba(120,60,180,.55), transparent 60%),
+    radial-gradient(120% 90% at 90% 10%, rgba(216,60,90,.45), transparent 55%),
+    radial-gradient(140% 120% at 50% 120%, rgba(240,165,0,.35), transparent 55%),
+    linear-gradient(180deg,#241a33 0%,#191420 55%,#0e0b14 100%)}
+.photo::after{content:"";position:absolute;inset:0;z-index:-1;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, transparent 2px 9px) bottom/100% 40% no-repeat;
+  opacity:.6;mix-blend-mode:screen}
+
+/* issuer bar */
+.brandbar{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;letter-spacing:.01em}
+.brandbar .rose{font-size:15px}
+.brandbar .sf{color:#c9b7ef;font-weight:700}
+.brandbar .lock{margin-left:auto;display:flex;align-items:center;gap:5px;color:#a7f3d0;font-size:11px;font-weight:800;letter-spacing:.03em}
+.dots{color:#c7ccda;font-size:18px;letter-spacing:2px;margin-left:8px}
+
+.gate{margin-top:16px}
+.gate small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c9cede;opacity:.85}
+.gate b{font-size:27px;font-weight:900;letter-spacing:-.01em}
+
+.act{margin-top:12px}
+.act b{font-size:21px;font-weight:900;letter-spacing:.01em;display:block;line-height:1.05}
+.act span{font-size:12.5px;color:#d7c9f2;font-weight:700}
+.venue{margin-top:6px;font-size:12px;color:#aeb4c6;font-weight:600}
+
+.srs{display:flex;margin-top:16px;text-align:center}
+.srs>div{flex:1}
+.srs small{display:block;font-size:11px;letter-spacing:.14em;color:#aeb4c6;font-weight:800}
+.srs b{font-size:20px;font-weight:900;letter-spacing:.01em}
+
+/* ---- the animated barcode ---- */
+.barwrap{margin-top:18px;background:#fff;border-radius:14px;padding:14px 14px 10px;position:relative;overflow:hidden}
+#bars{display:block;width:100%;height:74px}
+.sweep{position:absolute;top:0;bottom:26px;width:7px;left:0;
+  background:linear-gradient(180deg,#6aa8ff,var(--tm-blue));
+  box-shadow:0 0 14px 3px rgba(47,123,246,.75);border-radius:6px;
+  animation:sweep 2.4s cubic-bezier(.55,0,.45,1) infinite}
+@keyframes sweep{0%{left:2%}50%{left:95%}100%{left:2%}}
+.barfoot{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.barfoot span{font-size:12.5px;font-weight:800;color:#1b1e26}
+.barfoot .rf{color:#4a4f5e;font-size:15px;animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.foot{margin-top:14px;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:#f2d9e6;letter-spacing:.01em}
+.foot .rose{font-size:13px}
+
+/* perforation + stub */
+.perf{height:0;border-top:2px dashed rgba(255,255,255,.18);position:relative;background:#1b1e26}
+.perf::before,.perf::after{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#14161c}
+.perf::before{left:-11px}.perf::after{right:-11px}
+.stub{background:#1b1e26;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#9aa1b4;font-weight:700}
+.stub b{color:#e7e2f2}
+.chip{background:rgba(47,123,246,.16);color:#a9c8ff;border:1px solid rgba(47,123,246,.4);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;letter-spacing:.04em}
+</style></head>
+<body>
+<div class="cap">DeadDance / StageFill — mobile ticket</div>
+
+<div class="ticket">
+  <div class="photo">
+    <div class="brandbar">
+      <span class="rose">🌹</span><span>DeadDance</span><span class="sf">· StageFill</span>
+      <span class="lock">🔒 SECURE</span><span class="dots">⋯</span>
+    </div>
+
+    <div class="gate"><small>Entry Gate</small><b>Gate F</b></div>
+
+    <div class="act">
+      <b>SHAKEDOWN</b>
+      <span>Grateful Dead Tribute</span>
+    </div>
+    <div class="venue">Wind Creek Steel Stage · Bethlehem, PA · Sat, Aug 1</div>
+
+    <div class="srs">
+      <div><small>SEC</small><b>101</b></div>
+      <div><small>ROW</small><b>5</b></div>
+      <div><small>SEAT</small><b>1–4</b></div>
+    </div>
+
+    <div class="barwrap">
+      <canvas id="bars" width="600" height="148"></canvas>
+      <div class="sweep"></div>
+      <div class="barfoot"><span>Screenshots won't get you in.</span><span class="rf">↻</span></div>
+    </div>
+
+    <div class="foot"><span class="rose">🌹</span> Your ticket. Your friends. No toll booth.</div>
+  </div>
+
+  <div class="perf"></div>
+  <div class="stub">
+    <span>Ticket ID <b>d.dance/t/9F2A-K7</b></span>
+    <span class="chip">DEVICE-BOUND</span>
+  </div>
+</div>
+
+<div class="cap">the blue sweep is the tell — recognized by millions</div>
+
+<script>
+(function(){
+  var c=document.getElementById('bars'), x=c.getContext('2d');
+  var W=c.width, H=c.height, ROWS=6, COLS=68, gap=1;
+  function draw(){
+    x.clearRect(0,0,W,H); x.fillStyle='#0d0f14';
+    var cw=W/COLS, rh=H/ROWS;
+    // solid start/stop guard bars (PDF417 signature)
+    for(var g=0; g<3; g++){ x.fillRect(g*3, 0, 2, H); x.fillRect(W-6+g*3, 0, 2, H); }
+    for(var r=0;r<ROWS;r++){
+      for(var col=2; col<COLS-2; col++){
+        // clustered runs so it reads like PDF417, not TV static
+        if(Math.random()<0.52){
+          var run=1+((Math.random()*3)|0);
+          x.fillRect(col*cw, r*rh+gap, run*cw-gap, rh-gap*2);
+          col+=run-1;
+        }
+      }
+    }
+  }
+  draw();
+  setInterval(draw, 4000); // "rotates" like a live SafeTix code
+})();
+</script>
+</body></html>

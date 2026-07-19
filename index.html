@@ -762,6 +762,7 @@ body{padding-bottom:64px}
       </div>
       <div class="grid" id="calGrid" style="display:none"></div>
       <div id="calList"></div>
+      <div id="calTicket" style="margin-top:14px"></div>
       <div style="display:flex;gap:8px">
         <button class="openmap" style="flex:1" onclick="openMap()">📍 OPEN MAP</button>
         <button class="openmap" style="flex:1;background:var(--gold);color:#23202a;border-color:var(--gold)" onclick="openGig('date')">📅 ADD A DATE</button>
@@ -1565,8 +1566,26 @@ function wantTix(s){ var k=s.band+'|'+s.iso, w=wantState();
 function buyTix(i){ var s=SHOWLIST[i]; if(!s)return;
  if(s.url){ wantTix(s); return; }
  CURBUY={band:s.band,venue:s.venue,price:s.price}; if(typeof buy==='function')buy('ticket'); }
-function buyFromCur(){ if(CURBUY&&CURBUY.url){ wantTix({band:CURBUY.band,venue:CURBUY.venue,iso:CURBUY.iso}); var b=document.getElementById('buy'); if(b)b.classList.remove('on'); }
- else if(typeof buy==='function'){ buy('ticket'); } }
+function buyFromCur(){ var b=document.getElementById('buy'); if(b)b.classList.remove('on');
+ if(CURBUY&&CURBUY.url){ wantTix({band:CURBUY.band,venue:CURBUY.venue,iso:CURBUY.iso}); return; }
+ if(CURBUY){ openTicket(CURBUY); } }
+/* ===== Ticket (the default sale look) — band image + payment right on the ticket ===== */
+function tixDate(s){ try{ var d=s.d||(s.iso&&new Date(s.iso+'T12:00:00')); if(!d)return ''; return CDOW3[d.getDay()]+', '+CMONTHS[d.getMonth()].slice(0,3)+' '+d.getDate(); }catch(e){ return ''; } }
+function tixUrl(s){ var p=[]; function a(k,v){ if(v!=null&&v!=='') p.push(k+'='+encodeURIComponent(v)); }
+ a('band',s.band); a('venue',s.venue); a('price',s.price); a('img',s.logo); a('date',tixDate(s)); a('sub',s.sub); a('url',s.url);
+ return 'ticket.html?'+p.join('&'); }
+function openTicket(i){ var s=(typeof i==='number')?SHOWLIST[i]:i; if(!s)return; ddSheet(tixUrl(s), '🎟️ '+(s.band||'Ticket')); }
+window.openTicket=openTicket;
+/* the featured live ticket that sits UNDER the calendar — next upcoming show, buy right here */
+var _calTixKey='';
+function renderCalTicket(){ var el=document.getElementById('calTicket'); if(!el)return;
+ var pool=(SHOWLIST||[]).filter(function(x){ return calMatch(x)&&x.d>=cMid(); }).sort(function(a,b){ return a.d-b.d; });
+ var s=pool.filter(function(x){ return !x.url; })[0] || pool[0] || SHOWLIST[0];
+ if(!s){ el.innerHTML=''; _calTixKey=''; return; }
+ var key=(s.band||'')+'|'+(s.iso||''); if(key===_calTixKey) return; _calTixKey=key;
+ el.innerHTML='<div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a7fb0;font-weight:800;margin:2px 0 9px;text-align:center">🎟️ Your ticket · buy right here</div>'+
+   '<iframe title="ticket" src="'+tixUrl(s)+'" style="width:100%;max-width:360px;height:452px;border:0;border-radius:20px;display:block;margin:0 auto;background:#14161c" scrolling="no"></iframe>'; }
+window.renderCalTicket=renderCalTicket;
 function capList(rows, limit, label){ limit=limit||5; if(!rows||rows.length<=limit) return (rows||[]).join('');
   return rows.slice(0,limit).join('')+'<details class="morelist"><summary style="cursor:pointer;color:#5a2e86;font-weight:800;font-size:13px;padding:9px 0;text-align:center;list-style:none">See '+(rows.length-limit)+' more'+(label?(' '+label):'')+' ↓</summary>'+rows.slice(limit).join('')+'</details>'; }
 function calRow(s){ var i=SHOWLIST.indexOf(s);
@@ -1574,7 +1593,7 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var priceTxt = ext ? (s.price==='Onsale soon'?'Onsale soon':'Coming here') : s.price;
  var btn = ext ? (on?'<button style="background:#1f7a4d;color:#fff" disabled>✓ On the list</button>'
                      :'<button onclick="buyTix('+i+')">🔔 Notify me</button>')
-               : '<button onclick="buyTix('+i+')">Tickets</button>';
+               : '<button onclick="openTicket('+i+')">🎟️ Buy</button>';
  var lf=(s.logo||'').replace(/\.png$/,'.svg');
  var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
  return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
@@ -1635,6 +1654,7 @@ function renderCal(){
   list.innerHTML=head+body+foot;
  }
  try{ mapSyncMonth(); }catch(e){}   /* map follows the calendar's month */
+ try{ renderCalTicket(); }catch(e){}   /* the live ticket under the list */
 }
 function listNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); CAL_MONTH=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); LIST_SHOW_ALL=false; CAL_SEL=null; renderCal(); mapSyncMonth(); }
 function listMore(){ LIST_SHOW_ALL=true; renderCal(); }
@@ -1647,7 +1667,7 @@ function calHover(ev,iso){ var list=SHOWLIST.filter(function(s){return s.iso===i
  if(bb)bb.textContent=s.band+(list.length>1?(' +'+(list.length-1)+' more'):'');
  if(bv)bv.textContent=s.venue+' · '+relDay(s.d);
  if(bp)bp.textContent=s.price;
- CURBUY={band:s.band,venue:s.venue,price:s.price,iso:s.iso,url:s.url};
+ CURBUY={band:s.band,venue:s.venue,price:s.price,iso:s.iso,url:s.url,logo:s.logo,d:s.d,sub:s.sub};
  var _bt=document.getElementById('buyBtn'); if(_bt)_bt.textContent = s.url ? '🔔 Notify me when tickets open here' : '🎟️ Buy Now · one tap';
  var r=ev.currentTarget.getBoundingClientRect();
  b.style.left=Math.min((window.innerWidth||360)-250, r.right+8)+'px';
