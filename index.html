@@ -1473,11 +1473,22 @@ var POSTED_SHOWS=[];   /* REAL dates posted by bands (dd_shows) — merged into 
 /* DEAL — band #1, real schedule from John Smith (deal_shows.js). Merged lazily (once), because
    deal_shows.js loads later in the body than this inline block. */
 var _dealMerged=false;
+/* ── Musikfest (StageFill) → the Dead & jam TRIBUTES pulled onto the DD calendar (the sc:'dd' slice,
+   not the other 400 acts). The card's band/venue/festival tag open StageFill Musikfest — this is how
+   a Deadhead on the DD calendar walks into a MIXED festival's Dead content. ── */
+var MF_DEAD_ACTS=[
+ {date:'2026-08-03', band:'Shakedown Citi', venue:'PNC Stadtplatz · Musikfest', price:'Free', type:'grateful_dead', fest:'Musikfest', festHref:'musikfest.html'},
+ {date:'2026-08-05', band:'Liberty Jams', venue:'Plaza Tropical · Musikfest', price:'Free', type:'grateful_dead', fest:'Musikfest', festHref:'musikfest.html'},
+ {date:'2026-08-05', band:'Rift · Philadelphia Phish Tribute', venue:'Zinzenplatz · Musikfest', price:'Free', type:'grateful_dead', fest:'Musikfest', festHref:'musikfest.html'},
+ {date:'2026-08-06', band:'Life After Dead · Grateful Dead Tribute', venue:'Zinzenplatz · Musikfest', price:'Free', type:'grateful_dead', fest:'Musikfest', festHref:'musikfest.html'}
+];
+window.openFest=function(href){ href=href||'musikfest.html'; try{ if(typeof ddSheet==='function'){ ddSheet(href,'🎪 Musikfest'); return; } }catch(e){} location.href=href; };
 function dealMergeOnce(){ if(_dealMerged)return; try{
   if(window.dealCalendarRows && REGIONS["Mid-Atlantic"] && REGIONS["Mid-Atlantic"].shows){
     var ma=REGIONS["Mid-Atlantic"].shows.filter(function(s){return String(s.band).indexOf("DEAL")!==0;});
     ma=ma.concat(window.dealCalendarRows());
     if(window.hotSauceCalendarRows) ma=ma.concat(window.hotSauceCalendarRows());   // band #2
+    ma=ma.concat(MF_DEAD_ACTS);                                                    // Musikfest Dead/jam → StageFill
     REGIONS["Mid-Atlantic"].shows=ma;
     _dealMerged=true;
   }
@@ -1498,7 +1509,7 @@ function buildShowlist(){ dealMergeOnce(); var t0=cMid(); var src;
  else { var r=REGIONS[REG]||REGIONS["Mid-Atlantic"]; src=(r.shows||[]).slice();
    try{ if(POSTED_SHOWS&&POSTED_SHOWS.length) src=src.concat(POSTED_SHOWS.filter(isCommunityShow)); }catch(e){} }   /* REAL posted GD dates merge in; StageFill options stay out */
  SHOWLIST=src.map(function(s){ var d; if(s.date){ d=new Date(s.date+'T20:00:00'); } else { d=new Date(t0); d.setDate(d.getDate()+s.off); }
-   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', deal:!!s.deal}; })
+   return {iso:cIso(d), d:d, band:s.band, venue:s.venue, price:s.price, type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', deal:!!s.deal, fest:s.fest||'', festHref:s.festHref||''}; })
    .filter(function(s){ return s.iso >= cIso(t0); })   /* clear-to-history: a show that already played drops off the calendar */
    .sort(function(a,b){return a.iso<b.iso?-1:(a.iso>b.iso?1:0);}); }
 function setLocalShows(region){ REG=region||"Mid-Atlantic"; buildShowlist(); renderCal();
@@ -1567,7 +1578,13 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var lf=(s.logo||'').replace(/\.png$/,'.svg');
  var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
  return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
-  '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div><b>'+s.band+'</b><span style="display:block">'+s.venue+'</span></div></div>'+
+  '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div>'+
+    (s.fest
+      ? '<b onclick="openFest(\''+s.festHref+'\')" style="cursor:pointer" title="Open on StageFill">'+s.band+'</b>'
+        +'<span onclick="openFest(\''+s.festHref+'\')" style="display:block;cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px" title="Open the venue on StageFill">'+s.venue+'</span>'
+        +'<span onclick="openFest(\''+s.festHref+'\')" style="display:inline-block;margin-top:3px;background:#f0e6ff;color:#5a2e86;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;cursor:pointer" title="Open StageFill Musikfest">🎪 '+s.fest+' ›</span>'
+      : '<b>'+s.band+'</b><span style="display:block">'+s.venue+'</span>')+
+  '</div></div>'+
   '<div class="cact"><span class="cprice">'+priceTxt+'</span><div class="cbtns"><button class="cadd" onclick="addToCal('+i+')" title="Add to my calendar">📆</button>'+btn+'</div></div></div>'; }
 function renderCal(){
  if(!SHOWLIST.length) buildShowlist(); if(!CAL_MONTH) CAL_MONTH=cMid();

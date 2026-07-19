@@ -118,6 +118,10 @@ body.mfapp .mf-chips{position:absolute;top:calc(11px + env(safe-area-inset-top,0
 body.mfapp .mf-chips::-webkit-scrollbar{display:none}
 .mfchip{flex:0 0 auto;border:0;background:#fff;color:#241535;border-radius:999px;padding:9px 15px;font-weight:800;font-size:14px;box-shadow:0 2px 8px #0003;cursor:pointer;white-space:nowrap}
 .mfchip.on{background:#241535;color:#fff}
+.mflayers{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.mflayers .mfll{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-right:2px}
+.mflay{border:0;background:#f1eef7;color:var(--purple);border-radius:999px;padding:8px 13px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.mflay.on{background:#241535;color:#fff}
 body.mfapp .mf-statpill{position:absolute;left:12px;top:calc(60px + env(safe-area-inset-top,0px));z-index:5;background:#241535ee;color:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:800;box-shadow:0 2px 8px #0004;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 body.mfapp .mf-statpill:empty{display:none}
 /* push Leaflet's own controls below the chip row */
@@ -135,11 +139,7 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
 <div class="mf-map" id="mfMapZone">
   <a class="mf-back" href="index.html" onclick="return mfBack(event)">‹ Dead Dance</a>
   <div class="mf-chips" id="mfChips">
-    <button class="mfchip on" data-f="stage" onclick="mfChip(this)">🎵 Stages</button>
     <button class="mfchip" data-f="now" onclick="mfChip(this)">🎶 Acts on Now</button>
-    <button class="mfchip" data-f="food" onclick="mfChip(this)">🍴 Food</button>
-    <button class="mfchip" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
-    <button class="mfchip" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
   </div>
   <div id="lmap" aria-label="Musikfest stage map"></div>
   <span id="trackStat" class="mf-statpill"></span>
@@ -151,6 +151,12 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
     <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
     <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="musikfest_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
     <h1>Musikfest</h1>
+  </div>
+  <div class="mflayers">
+    <span class="mfll">🗺 Show on map</span>
+    <button class="mflay on" data-f="stage" onclick="mfChip(this)">🎵 Stages</button>
+    <button class="mflay" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
+    <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
   </div>
   <div id="adFeatured"></div>
   <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">
@@ -440,7 +446,7 @@ try{ if(window.DD_MF_VENDORS && window.DD_MF_VENDORS.length){ VENDORS=window.DD_
 // "Where did I park?" — drop a GPS pin at your car, walk back to it later
 function parkGet(){ try{ return JSON.parse(localStorage.getItem('dd.park')||'null'); }catch(e){ return null; } }
 window.parkSet=function(){ if(!navigator.geolocation){ alert('Location is off — can’t drop a parking pin.'); return; }
- navigator.geolocation.getCurrentPosition(function(p){ try{ localStorage.setItem('dd.park',JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})); }catch(e){} renderPark(); },
+ navigator.geolocation.getCurrentPosition(function(p){ try{ localStorage.setItem('dd.park',JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})); }catch(e){} renderPark(); try{ mfLockMap(); }catch(e){}   /* parked = you're here → lock the walking map */ },
    function(){ alert('Allow location to remember your spot.'); }, {enableHighAccuracy:true,timeout:8000}); };
 window.parkGo=function(){ var c=parkGet(); if(c && typeof mfDirectTo==='function') mfDirectTo(c.lat,c.lng,'your car 🚗'); };
 window.parkTap=function(){ var c=parkGet(); if(!c){ parkSet(); if(typeof mfToast==='function') mfToast('🅿️ Parking pin dropped — tap 🅿️ again anytime to walk back to your car.'); } else { parkGo(); } };
@@ -520,6 +526,7 @@ var MF_GOLIVE='2026-07-31';
 // year-round retail (Main St + Southside brick-and-mortar) is the TOWN's, not the festival's →
 // every one gets a FREE demo ad. Flip MF_SELL_VENDORS=true only once we're their festival manager.
 var MF_SELL_VENDORS=false;
+var MF_SHOW_TRUCKS=false;   // truck/booth vendors MOVE year to year + we lack ArtsQuest's booth blueprint → tabled this year (we don't out-map the festival). Flip true once we have the real map / are the festival manager.
 function mfPaidOnly(){ try{ return (new Date().toISOString().slice(0,10) >= MF_GOLIVE); }catch(e){ return false; } }
 function _mfPaid(x){ return !!(x && (x.sponsor||x.paid)); }
 function mfShops(){ return MERCHANTS; }   // LAUNCH: every fixed Main St / Southside establishment gets a FREE ad → all show + toast
@@ -534,7 +541,7 @@ function drawShops(){ if(!LG_SHOP)return; LG_SHOP.clearLayers();
     mk.bindPopup('<b>'+esc(m.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(m.addr)+' · '+esc(m.blurb)+'</span>'+(m.cup?'<br><b style="color:#b8002e">🍺 Fills your Musikfest cup</b>':'')+_mfDirBtn(m.lat,m.lng,m.n));
   });
 }
-function drawFood(){ if(!LG_FOOD)return; LG_FOOD.clearLayers();
+function drawFood(){ if(!LG_FOOD)return; LG_FOOD.clearLayers(); if(!MF_SHOW_TRUCKS)return;   // trucks tabled this year — their spots move + no blueprint
   (typeof VENDORS!=='undefined'?mfVendorsList():[]).forEach(function(v){
     var ic=L.divIcon({className:'mfvend',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:6px;background:#fff;border:2px solid #e8730c;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px #0004">🍴</div>'});
     L.marker([v.lat,v.lng],{icon:ic}).addTo(LG_FOOD).bindTooltip('🍴 '+v.n+' — '+v.sells,{direction:'top',opacity:.95}).bindPopup('<b>🍴 '+esc(v.n)+'</b><br><span style="font-size:12px;color:#555">'+esc(v.sells||'Food &amp; drink')+'</span>'+_mfDirBtn(v.lat,v.lng,v.n));
@@ -790,6 +797,8 @@ window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.ap
 window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
   if(navigator.share){ navigator.share({title:'Musikfest 2026 — the DeadDance map',url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); mfToast('🔗 Map link copied — paste it anywhere.'); }catch(e){ mfToast(url); } } };
+window._mfLocked=false;
+function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{ LMAP.setMaxBounds(L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]])); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the fest footprint; zoom stays free
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
@@ -1062,6 +1071,7 @@ function pottyCheck(prev,here){ if(!here)return; var best=null,bd=1e9; BATHROOMS
 // Fed by dd_gps.js — position is Kalman-FILTERED (steady dot, tightest σ), so every geofence
 // below acts on the smoothed location, not the raw jitter. acc here = the device's honest σ.
 function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus('📍 Got you! Walk on. 🌹'); }   // first fix arrived → confirm it's working
+  try{ if(typeof insideFest==='function' && insideFest([f.lat,f.lng])) mfLockMap(); }catch(e){}   // sensed at the fest → lock the map to the boundaries
   var la=f.lat, lo=f.lng, acc=(f.rawAcc==null?99:f.rawAcc), alt=f.alt;
   var prev=window.YOU; window.YOU=[la,lo]; window.YOU_ACC=acc;   // remember confidence so we never mislabel the zone
   if(WALK.on && acc<=40){
@@ -1098,7 +1108,7 @@ window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('
 (function(){ function arm(){ try{ if(WALK.on && window.DDSteps && !DDSteps.active()) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} }
   try{ document.addEventListener('pointerdown', arm, { once:true }); }catch(e){} })();
 /* build stamp — proves THIS file (not just sw.js) actually deployed to the phone */
-(function(){ try{ var s=document.createElement('div'); s.textContent='walk 412'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
+(function(){ try{ var s=document.createElement('div'); s.textContent='walk 415'; s.style.cssText='position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:240;background:rgba(0,0,0,.6);color:#8f8;font:700 10px monospace;padding:3px 7px;border-radius:8px;pointer-events:none';
   function add(){ if(document.body) document.body.appendChild(s); }
   if(document.readyState!=='loading') add(); else document.addEventListener('DOMContentLoaded',add); }catch(e){} })();
 function carBadge(){ var el=document.getElementById('carBadge'), c=parkGet(), b=document.getElementById('parkBtn');

@@ -111,7 +111,10 @@ textarea{resize:vertical}
           <button class="dir" style="margin-top:10px" onclick="saveCityQR()">⬇︎ Download QR for Streets</button>
         </div>
       </div>
-      <div style="margin-top:14px;background:#fff8ec;border:1px solid #f0d9a6;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.5">
+      <div style="margin-top:14px;background:#eef6ff;border:1px solid #cfe2ff;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.5">
+        <b>📍 Step 2 — calibrate your corridor (this week).</b> Have your <b>Streets crew, police, or parking enforcement run the app while on their normal beat</b> along the corridor — they're already covering that ground. A few days of passes and the map <b>auto-learns the exact storefronts, walkable paths, and boundaries.</b> Leave it on all day for a week and it's dialed in — the more passes, the sharper the map. (Anonymous & aggregate — no personal tracking.)
+      </div>
+      <div style="margin-top:10px;background:#fff8ec;border:1px solid #f0d9a6;border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.5">
         <b>We take it from here.</b> We're auto-onboarding every retailer in your zone with a <b>free storefront ad</b>. You earn <b>20–30%</b> of any premium placements they buy. A daily reach report goes to you and to each owner.
       </div>
     </div>
@@ -167,10 +170,10 @@ window.submitCity=function(){
     center_lat:CENTER[0], center_lng:CENTER[1], radius_m:RAD, bbox:window._bbox||null,
     streets:document.getElementById('fStreets').value.trim(), merchants:document.getElementById('fMerch').value.trim() };
   function finish(){
-    var url='https://deaddance.app/downtown/'+SLUG;
+    var url='https://stagefill.app/'+SLUG;   // a corridor is a StageFill product (platform), not a Dead vertical
     document.getElementById('okName').textContent=org;
-    var _u=document.getElementById('okUrl'); _u.textContent='deaddance.app/downtown/'+SLUG; _u.href=url;   // QR is always paired with a tappable link (you can't scan a QR on your own phone)
-    try{ if(window.DDQR) DDQR.into('cityqr',url,{mark:'dd',size:360,css:150}); }catch(e){}
+    var _u=document.getElementById('okUrl'); _u.textContent='stagefill.app/'+SLUG; _u.href=url;   // QR is always paired with a tappable link (you can't scan a QR on your own phone)
+    try{ if(window.DDQR) DDQR.into('cityqr',url,{mark:'sf',size:360,css:150}); }catch(e){}
     document.getElementById('result').classList.add('on');
     btn.textContent='Registered ✓';
     document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
@@ -181,7 +184,7 @@ window.submitCity=function(){
     else finish();
   }catch(e){ finish(); }
 };
-window.saveCityQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/downtown/'+SLUG,{mark:'dd'},(SLUG||'downtown')+'-QR.png'); }catch(e){} };
+window.saveCityQR=function(){ try{ if(window.DDQR) DDQR.save('https://stagefill.app/'+SLUG,{mark:'sf'},(SLUG||'downtown')+'-QR.png'); }catch(e){} };
 initMap();
 </script>
 </body></html>
