@@ -18,6 +18,7 @@ Format: PNG (or swap the reference to .svg in index.html if you have vector). No
 - `logos/potts_hot_dog.png` — Potts Hot Dogs
 - `logos/lehigh_pizza.png` — Lehigh Pizza
 - `logos/westgate_pizza.png` — Westgate Pizza
+- `logos/allentown_fair.png` — The Great Allentown Fair
 - *(Poster artist uses the existing `MUSIKFEST_poster.jpg`; DeadDance uses `rosebud.svg` — no action needed.)*
 
 ## Houses / national
