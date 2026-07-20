@@ -76,7 +76,11 @@
   function onThisDay(list, when) { var k = todayMMDD(when); return (list || []).filter(function (s) { return mmdd(s.date) === k; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; }); }
 
   // how many times DSO has recreated a given GD date (from whatever DSO data we hold)
-  function dsoTimesFor(gdDate) { return DSO.filter(function (s) { return s.recreates === gdDate; }).length; }
+  // index recreates→[dso shows] so trivia/lookups stay O(1) per GD row even at full-archive scale (3,300+ DSO)
+  var _recIdx = {};
+  function buildIdx() { _recIdx = {}; DSO.forEach(function (s) { if (s.recreates) { (_recIdx[s.recreates] = _recIdx[s.recreates] || []).push(s); } }); }
+  buildIdx();
+  function dsoTimesFor(gdDate) { return (_recIdx[gdDate] || []).length; }
 
   /* ---- DOUBLE trivia — only questions the data supports ---- */
   function shuffle(a, seed) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { seed = (seed * 9301 + 49297) % 233280; var j = Math.floor((seed / 233280) * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -92,7 +96,7 @@
       var n = dsoTimesFor(s.date);
       if (DSO_COMPLETE && n > 0) out.push({ q: "How many times has Dark Star Orchestra recreated the " + s.date + " show?", choices: dedupeNums([n, n + 1, Math.max(1, n - 1), n + 2]).map(String), answer: String(n), kind: "dso" });
       // Q2b (DSO cross-reference) — always safe when we have the pairing: which GD show did DSO play back?
-      var rec = DSO.filter(function (d) { return d.recreates === s.date; })[0];
+      var rec = (_recIdx[s.date] || [])[0];
       if (rec) out.push({ q: "On " + rec.date + " at " + rec.venue + ", which historic Grateful Dead show did DSO play?", choices: shuffle([s.date, "1977-05-08", "1972-08-27", "1995-07-09"].filter(function (v, i, a) { return a.indexOf(v) === i; }), seed + 5), answer: s.date, kind: "dso" });
     });
     return out;
@@ -108,6 +112,6 @@
     dsoTimesFor: dsoTimesFor,
     trivia: trivia,
     // one place for #19 to load the full sets:
-    load: function (gd, dso) { try { if (gd && gd.length) GD = root.DDHistory.GD = gd; if (dso && dso.length) DSO = root.DDHistory.DSO = dso; } catch (e) {} }
+    load: function (gd, dso) { try { if (gd && gd.length) GD = root.DDHistory.GD = gd; if (dso && dso.length) DSO = root.DDHistory.DSO = dso; buildIdx(); } catch (e) {} }
   };
 })(typeof window !== "undefined" ? window : this);
