@@ -459,6 +459,17 @@ body{padding-bottom:64px}
 .socialscroll{max-width:620px;margin:0 auto;padding:14px}
 .calvt{background:#3a2a55;border:0;color:#fff;border-radius:9px;padding:4px 9px;font-size:16px;line-height:1;cursor:pointer;margin-left:2px;flex:0 0 auto}
 .calvt:active{transform:scale(.92)}
+.adroll{position:relative;overflow:hidden;padding:0}
+.adroll-tag{position:absolute;top:8px;right:8px;z-index:3;background:#00000059;color:#fff;font-size:9px;font-weight:800;letter-spacing:.08em;border-radius:5px;padding:2px 6px}
+.adroll-head{height:92px;display:flex;align-items:center;justify-content:center;font-size:44px}
+.adroll-body{padding:11px 14px 10px;cursor:pointer}
+.adroll-body b{font-size:14.5px;display:block;color:var(--ink,#1a1320)}
+.adroll-body .off{font-size:12.5px;color:var(--rose,#b8002e);font-weight:800;margin-top:2px}
+.adroll-body .adroll-cta{font-size:11.5px;color:var(--accent,#5a2e86);font-weight:800;margin-top:5px}
+.adroll-foot{font-size:10px;font-weight:800;letter-spacing:.03em;color:#7a5a00;background:#fff3d6;text-align:center;padding:5px}
+.adroll-dots{display:flex;gap:4px;justify-content:center;padding:8px 0 10px;background:#fff}
+.adroll-dots i{width:6px;height:6px;border-radius:50%;background:#00000022;display:inline-block}
+.adroll-dots i.on{background:var(--rose,#b8002e)}
 @keyframes mswing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
 .sm-badges .smmiracle{transform-box:fill-box;transform-origin:100% 50%;animation:mswing 1.7s ease-in-out infinite}
 .sm-badges .smmpill{fill:#2a8a4a;stroke:#c79a3a;stroke-width:2}
@@ -824,14 +835,33 @@ body{padding-bottom:64px}
       <div style="display:flex;align-items:center;gap:9px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
       <div style="display:flex;align-items:center;gap:9px;margin-top:8px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
     </div>
+
+    <div class="card adroll" id="adRollCard" style="display:none"><span class="adroll-tag">AD</span><div class="adroll-view" id="adRollView"></div><div class="adroll-dots" id="adRollDots"></div></div>
     <script>(function(){
       function cachedSignedIn(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i)||''; if(/^sb-.*-auth-token$/.test(k) && localStorage.getItem(k)){ return true; } } }catch(e){} return false; }
+      /* Premium rolling ad card — a signed-in member's front-page corner becomes paid real estate; it rotates so we sell the same slot to many advertisers (LESS/MORE/MOST = rolls per day). */
+      var AD_ROLL=[
+        {bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', ic:'🎪', biz:'Peach Music Festival', off:'3 days of jams · on sale now', cta:'Get tickets ›'},
+        {bg:'linear-gradient(135deg,#5a2e86,#241535)', ic:'🎸', biz:'Ardmore Music Hall', off:'Splintered Sunlight · Fri — nearly sold out', cta:'Grab seats ›'},
+        {bg:'linear-gradient(135deg,#1d9e75,#0f6e56)', ic:'🥁', biz:'Oteil & Friends · Summer Run', off:'20 cities — find your night', cta:'See the tour ›'},
+        {bg:'linear-gradient(135deg,#b8002e,#241535)', ic:'💀', biz:'Grateful Fred', off:'Officially licensed Stealie badges · buy more save more', cta:'Shop ›'},
+        {bg:'linear-gradient(135deg,#f0a500,#c79a3a)', ic:'📣', biz:'Advertise here', off:'Pitch your festival · fill your room — the whole Dead family sees it', house:true, cta:'Buy a spot · LESS / MORE / MOST ›'}
+      ];
+      var ai=0, at=null;
+      function adRender(){ var v=document.getElementById('adRollView'), d=document.getElementById('adRollDots'); if(!v)return; var a=AD_ROLL[ai];
+        v.innerHTML='<div class="adroll-slide" onclick="adRollTap('+ai+')"><div class="adroll-head" style="background:'+a.bg+'">'+a.ic+'</div><div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div></div>';
+        if(d) d.innerHTML=AD_ROLL.map(function(_,i){return '<i class="'+(i===ai?'on':'')+'"></i>';}).join(''); }
+      window.adRollTap=function(i){ var a=AD_ROLL[i]; if(!a)return; if(a.house){ if(window.toast) toast('📣 Advertise on DeadDance — pitch your festival or fill your room. LESS / MORE / MOST. 🌹'); } else if(window.toast){ toast('🎟️ '+a.biz+' — '+a.off+' ›'); } };
+      function adNext(){ ai=(ai+1)%AD_ROLL.length; adRender(); }
+      function adStart(){ adRender(); if(at)clearInterval(at); at=setInterval(adNext,5200); }
+      function adStop(){ if(at){ clearInterval(at); at=null; } }
       function upd(){ try{ var ready=window.DDMe&&DDMe.ready&&DDMe.ready(); var si=ready?(DDMe.signedIn&&DDMe.signedIn()):cachedSignedIn();
         var c=document.getElementById('signupCard'); if(c) c.style.display=si?'none':'';
+        var ad=document.getElementById('adRollCard'); if(ad){ ad.style.display=si?'':'none'; if(si) adStart(); else adStop(); }
         var ss=document.getElementById('signState');
         if(ss){ if(si){ var nm=(window.ME&&ME.name&&ME.name!=='You')?(' · '+ME.name):''; ss.innerHTML='<span style="color:#3fbf6a">● Signed in</span>'+nm; } else { ss.innerHTML='<span style="color:#b9a7e6;cursor:pointer" onclick="openSignin()">🔒 Not signed in — Sign in ›</span>'; } }
       }catch(e){} }
-      upd();   /* runs before paint: cached session → stays hidden (no flash); no session → shows now */
+      upd();
       try{ if(window.DDMe&&DDMe.onChange) DDMe.onChange(upd); }catch(e){}
       setTimeout(upd,1500);
     })();</script>
