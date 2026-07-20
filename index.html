@@ -461,7 +461,8 @@ body{padding-bottom:64px}
 .calvt:active{transform:scale(.92)}
 .adroll{position:relative;overflow:hidden;padding:0}
 .adroll-tag{position:absolute;top:8px;right:8px;z-index:3;background:#00000059;color:#fff;font-size:9px;font-weight:800;letter-spacing:.08em;border-radius:5px;padding:2px 6px}
-.adroll-head{height:92px;display:flex;align-items:center;justify-content:center;font-size:44px}
+.adroll-head{position:relative;height:92px;display:flex;align-items:center;justify-content:center;font-size:44px}
+.adroll-head img.adlogo{position:absolute;inset:0;margin:auto;max-width:82%;max-height:74px;object-fit:contain;filter:drop-shadow(0 1px 4px #0007)}
 .adroll-body{padding:11px 14px 10px;cursor:pointer}
 .adroll-body b{font-size:14.5px;display:block;color:var(--ink,#1a1320)}
 .adroll-body .off{font-size:12.5px;color:var(--rose,#b8002e);font-weight:800;margin-top:2px}
@@ -837,23 +838,75 @@ body{padding-bottom:64px}
     </div>
 
     <div class="card adroll" id="adRollCard" style="display:none"><span class="adroll-tag">AD</span><div class="adroll-view" id="adRollView"></div><div class="adroll-dots" id="adRollDots"></div></div>
+    <script src="dd_mf_retailers.js"></script>
+    <script src="dd_musikfest.js"></script>
     <script>(function(){
       function cachedSignedIn(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i)||''; if(/^sb-.*-auth-token$/.test(k) && localStorage.getItem(k)){ return true; } } }catch(e){} return false; }
       /* Premium rolling ad card — a signed-in member's front-page corner becomes paid real estate; it rotates so we sell the same slot to many advertisers (LESS/MORE/MOST = rolls per day). */
-      var AD_ROLL=[
-        {bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', ic:'🎪', biz:'Peach Music Festival', off:'3 days of jams · on sale now', cta:'Get tickets ›'},
-        {bg:'linear-gradient(135deg,#5a2e86,#241535)', ic:'🎸', biz:'Ardmore Music Hall', off:'Splintered Sunlight · Fri — nearly sold out', cta:'Grab seats ›'},
-        {bg:'linear-gradient(135deg,#1d9e75,#0f6e56)', ic:'🥁', biz:'Oteil & Friends · Summer Run', off:'20 cities — find your night', cta:'See the tour ›'},
-        {bg:'linear-gradient(135deg,#b8002e,#241535)', ic:'💀', biz:'Grateful Fred', off:'Officially licensed Stealie badges · buy more save more', cta:'Shop ›'},
-        {bg:'linear-gradient(135deg,#f0a500,#c79a3a)', ic:'📣', biz:'Advertise here', off:'Pitch your festival · fill your room — the whole Dead family sees it', house:true, cta:'Buy a spot · LESS / MORE / MOST ›'}
+      /* Bethlehem proof-of-concept: every local partner rolls FREE — our first City on the board.
+         Civic anchors + all in-footprint retailers + our own houses + national. Logos drop into
+         /logos (see logos/LOGOS_manifest.md); until a file exists, the emoji shows. LET THEM ROLL. 🌹 */
+      function _slug(s){ return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+      var AD_BETHLEHEM=[
+        {logo:'logos/tee_printer.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Bethlehem Tee Printer',    off:'Founder ad #1 · your shirts walk Musikfest',      cta:'Meet the printer ›', beth:true},
+        {logo:'logos/city_of_bethlehem.png', ic:'🏛️', bg:'linear-gradient(135deg,#5a2e86,#241535)', biz:'City of Bethlehem',         off:'Welcome to Musikfest 2026 — Christmas City, USA', cta:'Visit ›', beth:true},
+        {logo:'logos/artsquest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'ArtsQuest',                 off:'16 stages · 400+ acts · all free',                cta:'Plan your fest ›', beth:true},
+        {logo:'logos/hotel_bethlehem.png',   ic:'🏨', bg:'linear-gradient(135deg,#c79a3a,#8a6a1f)', biz:'Hotel Bethlehem',           off:'Welcome to Hotel Bethlehem — 437 Main St, since 1922', cta:'Step into the lobby ›', beth:true},
+        {logo:'logos/steelstacks.png',       ic:'🏭', bg:'linear-gradient(135deg,#4a4a55,#20202a)', biz:'SteelStacks',               off:'South Side stages under the blast furnaces',      cta:'What\'s on ›', beth:true},
+        {logo:'logos/industrial_museum.png', ic:'⚙️', bg:'linear-gradient(135deg,#8a6a1f,#4a3410)', biz:'Nat\'l Museum of Industrial History', off:'Where the steel was made — open all fest', cta:'Step inside ›', beth:true},
+        {logo:'logos/bethlehem_police.png',  ic:'🚓', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'Bethlehem Police Department',off:'Keeping Musikfest safe · lost & found · here to help', cta:'Safety info ›', beth:true},
+        {logo:'logos/bethlehem_fire.png',    ic:'🚒', bg:'linear-gradient(135deg,#b8002e,#6e0018)', biz:'Bethlehem Fire Department', off:'First on scene, all festival long — stay safe out there', cta:'Fire safety ›', beth:true},
+        {logo:'logos/basd.png',              ic:'🏫', bg:'linear-gradient(135deg,#7a1f2e,#3a0f16)', biz:'Bethlehem Area School District', off:'Where Bethlehem\'s students shine', cta:'Explore BASD ›', beth:true},
+        {logo:'logos/moravian_academy.png',  ic:'🎓', bg:'linear-gradient(135deg,#0f5a4a,#0a2f28)', biz:'Moravian Academy',          off:'PreK–12 in Bethlehem — educating since 1742', cta:'Discover the school ›', beth:true},
+        {logo:'logos/potts_hot_dog.png',     ic:'🌭', bg:'linear-gradient(135deg,#c9431f,#7a1f0e)', biz:'Potts Hot Dogs',           off:'A Lehigh Valley institution — dogs done right', cta:'Grab a dog ›', beth:true},
+        {logo:'logos/lehigh_pizza.png',      ic:'🍕', bg:'linear-gradient(135deg,#b8002e,#7a1f0e)', biz:'Lehigh Pizza',             off:'Bethlehem slices, hot and fast', cta:'Order a pie ›', beth:true},
+        {logo:'logos/westgate_pizza.png',    ic:'🍕', bg:'linear-gradient(135deg,#8a6a1f,#4a3410)', biz:'Westgate Pizza',           off:'Lehigh Valley pizza & subs', cta:'Order up ›', beth:true}
       ];
-      var ai=0, at=null;
-      function adRender(){ var v=document.getElementById('adRollView'), d=document.getElementById('adRollDots'); if(!v)return; var a=AD_ROLL[ai];
-        v.innerHTML='<div class="adroll-slide" onclick="adRollTap('+ai+')"><div class="adroll-head" style="background:'+a.bg+'">'+a.ic+'</div><div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div></div>';
-        if(d) d.innerHTML=AD_ROLL.map(function(_,i){return '<i class="'+(i===ai?'on':'')+'"></i>';}).join(''); }
-      window.adRollTap=function(i){ var a=AD_ROLL[i]; if(!a)return; if(a.house){ if(window.toast) toast('📣 Advertise on DeadDance — pitch your festival or fill your room. LESS / MORE / MOST. 🌹'); } else if(window.toast){ toast('🎟️ '+a.biz+' — '+a.off+' ›'); } };
-      function adNext(){ ai=(ai+1)%AD_ROLL.length; adRender(); }
-      function adStart(){ adRender(); if(at)clearInterval(at); at=setInterval(adNext,5200); }
+      var _KIC={brewery:'🍺',hotel:'🏨',bar:'🍸',shop:'🛍️',restaurant:'🍽️',historic:'🏛️'};
+      function bethRetail(){ var out=[]; try{ (window.MF_RETAILERS||[]).forEach(function(r){ out.push({
+        logo:'logos/retail_'+_slug(r.n)+'.png', ic:(_KIC[r.kind]||'🌹'), bg:'linear-gradient(135deg,#5a2e86,#b8002e)',
+        biz:r.n, off:r.head||r.line||'', cta:(r.coupon?('🎟️ '+r.coupon+' ›'):'Find it on Main ›'), beth:true }); }); }catch(e){} return out; }
+      var AD_HOUSE=[
+        {logo:'rosebud.svg',                  ic:'🌹', bg:'linear-gradient(135deg,#b8002e,#5a2e86)', biz:'DeadDance',           off:'The calendar & map of every Dead & jam show — free', cta:'That\'s this app ›', house:true},
+        {logo:'logos/ford_falcon_friends.png',ic:'🚗', bg:'linear-gradient(135deg,#2a6df0,#12305e)', biz:'Ford-Falcon Friends', off:'1963–65 Falcon lovers — parts, meets, the registry', cta:'Join the club ›', house:true}
+      ];
+      var AD_NATIONAL=[
+        {logo:'logos/peach_fest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Peach Music Festival', off:'3 days of jams · on sale now', cta:'Get tickets ›'},
+        {logo:'logos/ardmore_music_hall.png', ic:'🎸', bg:'linear-gradient(135deg,#5a2e86,#241535)', biz:'Ardmore Music Hall', off:'Splintered Sunlight · Fri — nearly sold out', cta:'Grab seats ›'},
+        {logo:'logos/oteil_friends.png',      ic:'🥁', bg:'linear-gradient(135deg,#1d9e75,#0f6e56)', biz:'Oteil & Friends · Summer Run', off:'20 cities — find your night', cta:'See the tour ›'},
+        {logo:'logos/grateful_fred.png',      ic:'💀', bg:'linear-gradient(135deg,#b8002e,#241535)', biz:'Grateful Fred', off:'Officially licensed Stealie badges · buy more save more', cta:'Shop ›'}
+      ];
+      var AD_PITCH={ic:'📣', bg:'linear-gradient(135deg,#f0a500,#c79a3a)', biz:'Advertise here', off:'Pitch your festival · fill your room — the whole Dead family sees it', house:true, pitch:true, cta:'Buy a spot · LESS / MORE / MOST ›'};
+      var AD_POSTER={logo:'MUSIKFEST_poster.jpg', ic:'🎨', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Musikfest 2026 Poster Artist', off:'The official festival poster — signed prints', cta:'Get a print ›', beth:true};
+      function adHead(a){ return (a.ic||'🌹') + (a.logo ? '<img class="adlogo" src="'+a.logo+'" alt="" onerror="this.remove()">' : ''); }
+      /* Every Musikfest act → a rolling ad inviting them onto StageFill (618 acts, deduped by band).
+         Dead/jam acts (sc:dd) roll 4× as often as the rest. This is how we fill the day's inventory. */
+      function _mfDay(iso){ try{ var d=new Date(iso+'T12:00:00'); return (window.CDOW3?CDOW3[d.getDay()]:'')+' '+(d.getMonth()+1)+'/'+d.getDate(); }catch(e){ return iso; } }
+      function bandAds(sc){ var seen={}, out=[]; try{ (window.DD_MUSIKFEST||[]).forEach(function(r){ if(!r||r.sc!==sc||!r.b)return; var k=(''+r.b).toLowerCase(); if(seen[k])return; seen[k]=1;
+        out.push({ logo:'logos/band_'+_slug(r.b)+'.png', ic:(sc==='dd'?'🌹':'🎵'), bg:(sc==='dd'?'linear-gradient(135deg,#b8002e,#5a2e86)':'linear-gradient(135deg,#5a2e86,#7a3cc0)'),
+          biz:r.b, off:'Musikfest · '+r.st+' · '+_mfDay(r.d)+' '+r.t, cta:(sc==='dd'?'🌹 Claim your StageFill page ›':'🎪 Claim your StageFill page ›'), stagefill:true }); }); }catch(e){} return out; }
+      var POOL_PARTNER=[], POOL_HOUSE=AD_HOUSE, POOL_NAT=AD_NATIONAL, POOL_DD=[], POOL_SF=[];
+      function buildPools(){ POOL_PARTNER=AD_BETHLEHEM.concat(bethRetail(), [AD_POSTER]); POOL_DD=bandAds('dd'); POOL_SF=bandAds('sf'); }
+      buildPools();
+      // rotation frame — dd appears 8×, sf 2× (the 4:1 Dead-first pace); partners/house/national/pitch interleaved so the local POC never disappears
+      var FRAME=['partner','dd','sf','dd','dd','house','dd','national','dd','partner','sf','dd','dd','pitch','partner','dd','national','partner'];
+      var POOLS={partner:function(){return POOL_PARTNER;},house:function(){return POOL_HOUSE;},national:function(){return POOL_NAT;},dd:function(){return POOL_DD;},sf:function(){return POOL_SF;}};
+      var CUR={partner:0,house:0,national:0,dd:0,sf:0}, fi=0, curAd=null, at=null;
+      function nextAd(depth){ depth=depth||0; if(depth>FRAME.length+1) return AD_PITCH;
+        var tok=FRAME[fi%FRAME.length]; fi++;
+        if(tok==='pitch') return AD_PITCH;
+        var pool=POOLS[tok]&&POOLS[tok](); if(!pool||!pool.length) return nextAd(depth+1);
+        var a=pool[CUR[tok]%pool.length]; CUR[tok]++; return a; }
+      function adRender(a){ var v=document.getElementById('adRollView'); if(!v||!a)return; curAd=a; window.__curAd=a;
+        v.innerHTML='<div class="adroll-slide" onclick="adRollTap()"><div class="adroll-head" style="background:'+a.bg+'">'+adHead(a)+'</div><div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div></div>';
+        var d=document.getElementById('adRollDots'); if(d) d.innerHTML='<i class="on"></i><i></i><i></i>'; }
+      window.adRollTap=function(){ var a=window.__curAd; if(!a||!window.toast)return;
+        if(a.pitch){ toast('📣 Advertise on DeadDance — pitch your festival or fill your room. LESS / MORE / MOST. 🌹'); }
+        else if(a.stagefill){ toast((a.ic||'🌹')+' '+a.biz+' plays Musikfest — claim your free StageFill page & sell tickets ›'); }
+        else{ toast((a.ic||'🌹')+' '+a.biz+' — '+(a.off||'')+' ›'); } };
+      function adNext(){ adRender(nextAd()); }
+      var _pooledMF=false;
+      function adStart(){ if(!_pooledMF && (window.MF_RETAILERS||window.DD_MUSIKFEST)){ buildPools(); _pooledMF=!!(window.DD_MUSIKFEST&&window.DD_MUSIKFEST.length); } adRender(nextAd()); if(at)clearInterval(at); at=setInterval(adNext,5200); }
       function adStop(){ if(at){ clearInterval(at); at=null; } }
       function upd(){ try{ var ready=window.DDMe&&DDMe.ready&&DDMe.ready(); var si=ready?(DDMe.signedIn&&DDMe.signedIn()):cachedSignedIn();
         var c=document.getElementById('signupCard'); if(c) c.style.display=si?'none':'';
@@ -973,7 +1026,7 @@ body{padding-bottom:64px}
     <div class="post" data-scope="national" style="display:none">
       <div class="posthead"><div class="pav">🌌</div><div class="pwho"><b>Dark Star Orchestra</b><span><span class="grp">National tour feed</span> · verified date</span></div><button class="pmore" onclick="postMenu(this)">⋯</button></div>
       <div class="txt"><b>Dark Star Orchestra</b> — Fri Jul 31, Greek Theatre, Berkeley CA · the Rex Foundation benefit. Who's making the run?</div>
-      <div class="acts"><button class="act" onclick="like(this)">👍 <span>240</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" style="background:var(--gold);color:#23202a" onclick="CURBUY={band:'Dark Star Orchestra',venue:'Greek Theatre · Berkeley',price:'$59'};buy('ticket')">🎟️ Tickets</button><button class="act reply" onclick="hyperConsole('DSO · Berkeley Greek 7/31')">💬 Comment</button></div>
+      <div class="acts"><button class="act" onclick="like(this)">👍 <span>240</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" style="background:var(--gold);color:#23202a" onclick="openTicket({band:'Dark Star Orchestra',venue:'Greek Theatre · Berkeley',price:'$59'})">🎟️ Tickets</button><button class="act reply" onclick="hyperConsole('DSO · Berkeley Greek 7/31')">💬 Comment</button></div>
       <button class="radiate" onclick="hyperConsole('DSO national run')">📡</button>
     </div>
     </div>
@@ -1537,6 +1590,7 @@ var REGIONS = {
 };
 var GROUPS = [
  {n:"Dark Star Orchestra",ic:"🌌",tuned:true,seen:"a year ago"},
+ {n:"Steal Your Face — the photo wall",ic:"💀",tuned:true,seen:"just now"},
  {n:"Pennsylvania Deadheads",ic:"🔔",tuned:true,seen:"30 weeks ago"},
  {n:"Santa Cruz Music Scene",ic:"🌊",tuned:false,seen:"a year ago"},
  {n:"Dead and Company",ic:"💀",tuned:false,seen:"a year ago"},
@@ -1590,7 +1644,7 @@ function toast(m){var t=document.createElement('div');t.className='dd-toast';t.s
 /* ===== Calendar — dynamic, forward-looking, list-first (the front door) ===== */
 var CMONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var CDOW=['S','M','T','W','T','F','S'], CDOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='local', CAL_ACT='all', LIST_SHOW_ALL=false, LIST_PAGE=6;
+var REG="Mid-Atlantic", SHOWLIST=[], CAL_VIEW='grid', CAL_MONTH=null, CAL_SEL=null, CALTYPE='all', CAL_SCOPE='local', CAL_ACT='all', LIST_SHOW_ALL=false, LIST_PAGE=7;
 var POSTED_SHOWS=[];   /* REAL dates posted by bands (dd_shows) — merged into the calendar so they display + persist */
 /* DEAL — band #1, real schedule from John Smith (deal_shows.js). Merged lazily (once), because
    deal_shows.js loads later in the body than this inline block. */
@@ -1718,6 +1772,37 @@ window.renderCalTicket=renderCalTicket;
 function capList(rows, limit, label){ limit=limit||5; if(!rows||rows.length<=limit) return (rows||[]).join('');
   return rows.slice(0,limit).join('')+'<details class="morelist"><summary style="cursor:pointer;color:#5a2e86;font-weight:800;font-size:13px;padding:9px 0;text-align:center;list-style:none">See '+(rows.length-limit)+' more'+(label?(' '+label):'')+' ↓</summary>'+rows.slice(limit).join('')+'</details>'; }
 function hasTix(s){ try{ var b=(s.band||'').toLowerCase().replace(/[^a-z0-9]/g,''); return (window.MYTIX||[]).some(function(t){ return (t.band||'').toLowerCase().replace(/[^a-z0-9]/g,'')===b; }); }catch(e){ return false; } }
+/* rough chapter centroids [lat,lng] — used to rank "nearest shows" when a chapter is sparse */
+var CH_CENTROID={ "Bay Area":[37.8,-122.3],"Pacific Northwest":[45.5,-122.7],"Mountain West":[39.7,-105],"Rockies":[39.7,-105],"Southwest":[34,-112],"Texas":[30.3,-97.7],"South Central":[32,-92],"Midwest":[41.9,-93],"Great Lakes":[42,-83],"Southeast":[33.7,-84.4],"Mid-Atlantic":[39.9,-75.5],"Northeast + New England":[42.4,-71.5] };
+/* nearest upcoming shows from OTHER chapters, ranked by centroid distance then date — keeps the list full in empty territories */
+function nearbyFill(reg, n, have){
+ if(n<=0) return [];
+ var home=CH_CENTROID[reg]||CH_CENTROID["Mid-Atlantic"], t0=cMid(), cand=[];
+ for(var k in REGIONS){ if(!REGIONS.hasOwnProperty(k)||k===reg||!REGIONS[k].shows)continue;
+   var rc=CH_CENTROID[k]||home, dx=home[0]-rc[0], dy=home[1]-rc[1], dist=Math.sqrt(dx*dx+dy*dy);
+   (function(kk,dd){ REGIONS[k].shows.forEach(function(s){ var d=s.date?new Date(s.date+'T20:00:00'):new Date(t0.getTime()+((s.off||0)*864e5));
+     if(d<t0)return; cand.push({dist:dd,d:d,s:s,region:kk}); }); })(k,dist); }
+ cand.sort(function(a,b){ return a.dist-b.dist || a.d-b.d; });
+ var out=[], seen=have||{};
+ for(var i=0;i<cand.length && out.length<n;i++){ var o=cand[i], s=o.s, key=s.band+'|'+cIso(o.d);
+   if(seen[key])continue; seen[key]=1;
+   out.push({iso:cIso(o.d), d:o.d, band:s.band, venue:s.venue, price:s.price||'', type:s.type||'grateful_dead', url:s.url||'', logo:s.logo||'', _region:o.region}); }
+ return out;
+}
+/* nearby-row renderer — opens the full ticket by value (these rows aren't in SHOWLIST) */
+function calRowNearby(s){
+ var bn=(s.band||'').replace(/'/g,"\\'"), vn=(s.venue||'').replace(/'/g,"\\'"), pr=(s.price||'').replace(/'/g,"\\'");
+ var lf=(s.logo||'').replace(/\.png$/,'.svg');
+ var logo=s.logo?'<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">':'';
+ var open="openTicket({band:'"+bn+"',venue:'"+vn+"',price:'"+pr+"'})";
+ var btn = s.url ? '<button onclick="event.stopPropagation();window.open(\''+s.url+'\',\'_blank\',\'noopener\')">🔔 Notify me</button>'
+                 : '<button onclick="event.stopPropagation();'+open+'">🎟️ Buy</button>';
+ return '<div class="crow" onclick="'+open+'" style="cursor:pointer;opacity:.94"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
+   '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div style="min-width:0;flex:1;overflow:hidden">'+
+     '<b>'+s.band+'</b><span style="display:block">'+s.venue+(s._region?' · <span style="color:#8a6a1f;font-weight:700">'+s._region+'</span>':'')+'</span>'+
+   '</div></div>'+
+   '<div class="cact"><span class="cprice">'+(s.price||'')+'</span><div class="cbtns">'+btn+'</div></div></div>';
+}
 function calRow(s){ var i=SHOWLIST.indexOf(s); var owned=hasTix(s);
  var ext=!!s.url, on=ext&&wantHas(s);
  var priceTxt = ext ? (s.price==='Onsale soon'?'Onsale soon':'Coming here') : s.price;
@@ -1763,19 +1848,25 @@ function renderCal(){
   var ceil=new Date(ly,lm,new Date(ly,lm+1,0).getDate(),23,59,59);
   var up=SHOWLIST.filter(function(s){ return s.d>=floor && s.d<=ceil && calMatch(s); }).sort(function(a,b){return a.d-b.d;});
   if(isCur){ var _d28=new Date(cMid().getTime()+28*864e5); up=up.filter(function(s){ return s.d<=_d28; }); }   // Upcoming caps at 4 weeks out — keeps it tight
+  // Sparse chapter? Keep the page full: backfill with the NEAREST upcoming shows from adjacent
+  // chapters (and adjacent-of-adjacent), so even an empty territory shows ~7 events. (Issa)
+  var nearbyRows='';
+  if(CAL_SCOPE==='local' && CAL_ACT==='all' && up.length<LIST_PAGE){
+    var _have={}; up.forEach(function(s){ _have[s.band+'|'+s.iso]=1; });
+    nearbyFill(REG, LIST_PAGE-up.length, _have).forEach(function(s){ nearbyRows+=calRowNearby(s); });
+  }
   var head='<div class="listnav">'+
     '<button class="lmv" onclick="listNav(-1)" aria-label="Previous month">‹</button>'+
     '<div class="lmo"><b>'+CMONTHS[lm]+' '+ly+'</b><span>'+up.length+' show'+(up.length===1?'':'s')+(isCur&&REG?(' · '+REG):'')+'</span></div>'+
     '<button class="lmv" onclick="listNav(1)" aria-label="Next month">›</button></div>';
   var body,foot='';
-  if(!up.length){ body = (CAL_SCOPE==='my'
+  if(!up.length && !nearbyRows){ body = (CAL_SCOPE==='my'
       ? '<div class="cempty">🌹 Nothing saved in '+CMONTHS[lm]+'. Tap 📆 or “Notify me” on any show and it lands here.</div>'
       : '<div class="cempty">No shows in '+CMONTHS[lm]+' — try ‹ › to change month, “All”, or roam the map.</div>'); }
   else {
-    var near, rest;
-    if(isCur){ var _d3=new Date(cMid().getTime()+3*864e5); near=up.filter(function(s){return s.d<=_d3;}); rest=up.filter(function(s){return s.d>_d3;}); }   // next 3 days open, rest folded
-    else { near=up.slice(0,LIST_PAGE); rest=up.slice(LIST_PAGE); }
+    var near=up.slice(0,LIST_PAGE), rest=up.slice(LIST_PAGE);   // fixed count so the fold reads "See N more"
     body=near.map(calRow).join('');
+    if(nearbyRows){ body+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#8a6a1f;margin:9px 2px 3px;text-align:center">↓ NEAREST SHOWS AROUND '+((REG||'YOU')+'').toUpperCase()+'</div>'+nearbyRows; }
     if(rest.length){
       if(LIST_SHOW_ALL){ body+=rest.map(calRow).join(''); foot='<button class="lmore" onclick="listLess()">See less ↑</button>'; }
       else foot='<button class="lmore" onclick="listMore()">See '+rest.length+' more ↓</button>';
@@ -2954,7 +3045,7 @@ function renderMap(level){
   var rows=days.map(function(d){ var s=r.shows[d]; var bn=s.band.replace(/'/g,"\\'"), vn=s.venue.replace(/'/g,"\\'"), pr=(s.price||'').replace(/'/g,"\\'");
     return '<div class="rsh"><div class="dt">JUN<small>'+d+'</small></div>'+
       '<div class="info"><b>'+s.band+'</b><span>'+s.venue+'</span></div>'+
-      '<button class="tk" onclick="CURBUY={band:\''+bn+'\',venue:\''+vn+'\',price:\''+pr+'\'};closeMap();buy(\'ticket\')">🎟️ '+(s.price||'Tickets')+'</button></div>'; }).join("");
+      '<button class="tk" onclick="closeMap();openTicket({band:\''+bn+'\',venue:\''+vn+'\',price:\''+pr+'\'})">🎟️ '+(s.price||'Tickets')+'</button></div>'; }).join("");
   var fests=festForRegion(MAPLEVEL); var fhtml=fests.length?('<div style="font-size:11px;font-weight:800;color:var(--accent);margin:2px 2px 6px">🎆 SUMMER FESTIVALS</div>'+fests.map(festCard).join('')):'';
   stage.innerHTML='<div class="rlist">'+fhtml+rows+'<button class="addhere" onclick="closeMap();openGig(\'date\',\''+MAPLEVEL.replace(/'/g,"\\'")+'\')">📅 Add a date in '+MAPLEVEL+'</button></div>';
   farrahSay('<b>'+MAPLEVEL+'</b> — <b>'+days.length+' show'+(days.length>1?'s':'')+'</b>'+(fests.length?(' + <b>'+fests.length+' festival'+(fests.length>1?'s':'')+'</b>'):'')+' on the board. Grab tickets with one tap, or add your own date below.');

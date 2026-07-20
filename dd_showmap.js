@@ -41,6 +41,7 @@
     "Lewes, DE": [38.77, -75.14], "Atlantic City, NJ": [39.36, -74.42],
     "Arcata, CA": [40.87, -124.08], "Vienna, VA": [38.90, -77.27],
     "Cleveland Heights, OH": [41.52, -81.56], "Harrisburg, PA": [40.27, -76.88],
+    "Pittsburgh, PA": [40.44, -79.99], "Sellersville, PA": [40.36, -75.30],
     "Las Vegas, NV": [36.17, -115.14], "Costa Mesa, CA": [33.64, -117.92],
     "Napa, CA": [38.30, -122.29], "Carnation, WA": [47.65, -121.91],
     "Vail, CO": [39.64, -106.37], "Dillon, CO": [39.63, -106.04],
@@ -308,6 +309,45 @@
   function applyActData(band){ ACT_FILTER=(band&&band!=='all')?normAct(band):null; applyFilters(); }
   function applyMonthData(ym){ MONTH_FILTER=(ym&&/^\d{4}-\d{2}$/.test(ym))?ym:null; applyFilters(); }
   applyFilters();
+  /* ---- task #16: UNIFY the map with the calendar's REGIONS rollup (index.html) so EVERY act
+     the dropdown offers has map points — Steve Kimock, John Kadlecik, Furthurmore, Jeff Mattson…
+     Parse "Venue, City ST" (or NYC/SF) → CITY coords; dedupe against the curated set. Runs once,
+     lazily (REGIONS is defined in index.html's inline script, which may load after this file). ---- */
+  var _regMerged = false;
+  function _sig(b){ return normAct(b).split(' ').filter(function(w){ return w.length>2; }); }   // significant name tokens
+  function mergeCalendarShows(){
+    if(_regMerged) return false;
+    var R = window.REGIONS; if(!R) return false;      // not defined yet — retry on next call
+    _regMerged = true;
+    // dedupe on date+city AND a shared name token, so the curated set and the calendar rollup
+    // collapse even when they spell the act differently (e.g. "John Kimock · Oteil & Friends" ===
+    // "Oteil & Friends (w/ Kimock…)") — while a true double-bill (no shared token) still passes.
+    var byDC = {};
+    function reg(date,city,band){ (byDC[date+'|'+city] = byDC[date+'|'+city] || []).push(_sig(band)); }
+    function dup(date,city,band){ var a=byDC[date+'|'+city]; if(!a) return false; var t=_sig(band);
+      return a.some(function(ex){ return ex.some(function(w){ return t.indexOf(w)>=0; }); }); }
+    ALLSHOWS.forEach(function(s){ if(s.date && s.city) reg(s.date, s.city, s.band); });
+    Object.keys(R).forEach(function(rk){
+      var arr = (R[rk] && R[rk].shows) || [];
+      arr.forEach(function(s){
+        if(!s || !s.date) return;                       // only dated shows carry a parseable city
+        var v = String(s.venue||''), c = v.lastIndexOf(',');
+        if(c < 0) return;
+        var tail = v.slice(c+1).split('·')[0].trim();   // "Harrisburg PA"
+        if(/^NYC$/i.test(tail)) tail = 'New York NY';   // calendar shorthand → geocodable
+        else if(/^SF$/i.test(tail)) tail = 'San Francisco CA';
+        var m = tail.match(/^(.+?)\s+([A-Za-z]{2})$/);
+        if(!m) return;
+        var city = m[1].trim()+', '+m[2].toUpperCase();
+        if(!CITY[city]) return;                         // unknown city → skip (act still flies via its other dates)
+        if(dup(s.date, city, s.band)) return;           // already on the map (same date+city, shared act name) → don't double-count
+        reg(s.date, city, s.band);
+        ALLSHOWS.push({ band:s.band, venue:s.venue, city:city, date:s.date, real:true });
+      });
+    });
+    ALLSHOWS = ALLSHOWS.filter(function(s){ return !s.date || s.date >= TODAY_ISO; });
+    return true;
+  }
   function chapterByName(n) { return CH_INDEX[n] || null; }
   function festsFor(ch) { try { return (window.DD_FESTIVALS || []).filter(function (f) { return f.region === ch.fk; }); } catch (e) { return []; } }
 
@@ -655,8 +695,8 @@
     function redrawForFilter(){ if (ACT_FILTER) { actExtentFit(); return; } if (level === "radius") { if (userLoc) { zoomToRadius(radiusMi); } else { toNation(); } } else if (level && level !== "nation") { drill(level); } else { toNation(); } }
     window.DDShowmap = {
       setScope: function (scope) { try { if (scope === "local" || scope === "my") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },   /* My Calendar defaults to your local chapter, not the whole nation */
-      setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter, keeps current scope/zoom
-      setMonth: function (ym) { try { applyMonthData(ym); redrawForFilter(); } catch (e) {} },    // calendar month ‹ › → map filter
+      setAct: function (band) { try { mergeCalendarShows(); applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter (unifies with calendar first, so every act flies)
+      setMonth: function (ym) { try { mergeCalendarShows(); applyMonthData(ym); redrawForFilter(); } catch (e) {} },    // calendar month ‹ › → map filter
       refresh: function () { try { if (level === "nation") drawBadges(true); } catch (e) {} }      // re-bloom miracle pills when the bucket changes
     };
     backBtn.addEventListener("click", toNation);
@@ -680,6 +720,9 @@
       if (_reg) { drill(_reg); } else { toNation(); }   // focus the same region the Calendar shows — no GPS prompt on load
     } else { toNation(); }
     host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === _boot); });
+
+    // Once the calendar's REGIONS rollup exists, fold it in so chapter bloom-counts match the calendar too.
+    setTimeout(function(){ try{ if(mergeCalendarShows()){ applyFilters(); if(level==="nation"){ drawDots(FULL_VB[2], null); drawBadges(true); } } }catch(e){} }, 400);
 
     // Blue "you are here" dot — auto-show it if location is ALREADY granted (never a new prompt on load).
     // Does not change the zoom; the dot just appears where the user is on whatever view is showing.
