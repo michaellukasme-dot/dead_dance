@@ -260,17 +260,17 @@ body{padding-bottom:64px}
 .bspacts .act{background:none;border:0;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:2px 4px}
 .cdh{font-weight:800;font-size:12.5px;margin:10px 2px 4px;color:var(--accent)}
 .chint,.cempty{font-size:12px;color:var(--muted);padding:10px 4px;text-align:center}
-.crow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.crow{display:flex;align-items:center;gap:9px;padding:9px 4px;border-bottom:1px solid var(--line);overflow:hidden}
 .crow:last-child{border-bottom:0}
 .cdate{flex:0 0 42px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:5px 0}
 .cdate b{display:block;font-size:10.5px;color:var(--rose);text-transform:uppercase}
 .cdate span{font-size:13px;font-weight:800}
-.cinfo{flex:1;min-width:0}.cinfo b{display:block;font-size:14px}
+.cinfo{flex:1;min-width:0}.cinfo b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cinfo span{font-size:11.5px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cact{flex:0 0 auto;text-align:right}
-.cprice{display:block;font-size:12px;font-weight:800;color:var(--accent)}
+.cprice{display:block;font-size:11px;font-weight:800;color:var(--accent);white-space:nowrap}
 .cbtns{display:flex;gap:5px;justify-content:flex-end;margin-top:3px}
-.cact button{border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer}
+.cact button{border:0;background:var(--gold);color:#23202a;font-weight:800;font-size:11.5px;border-radius:999px;padding:5px 10px;cursor:pointer;white-space:nowrap}
 .cact .cadd{background:#fff;border:1px solid var(--line);color:var(--accent);padding:6px 9px}
 /* 🍀 Miracle Ticket — compact bouncing chip at the top of the calendar */
 .mfab-mini{position:relative;margin-left:auto;background:linear-gradient(135deg,#2a8a4a,#c79a3a);color:#fff;border:0;border-radius:999px;padding:5px 11px;font:800 11px/1 inherit;letter-spacing:.02em;cursor:pointer;box-shadow:0 0 0 2px #ffffff40,0 4px 10px #0004;animation:mbounce 1.7s ease-in-out infinite;white-space:nowrap}
@@ -765,13 +765,13 @@ body{padding-bottom:64px}
         <div style="max-width:360px;max-height:88vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:20px 20px 22px;box-shadow:0 24px 60px #000c;position:relative">
           <button onclick="closeTixSec()" aria-label="Close" style="position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:34px;height:34px;border-radius:17px;font-size:18px;cursor:pointer">×</button>
           <div style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:16.5px;padding-right:30px"><span style="font-size:21px">🌹</span> The most secure ticket on the market</div>
-          <p style="font-size:13px;line-height:1.55;color:#d7d2e2;margin:12px 0 0">From the smallest bar room or restaurant to the largest stadium, DeadDance secures both the <b>ticket</b> and the <b>sale</b> — engineered to thwart the scalper hacks that still work on other ticket vendors.</p>
+          <p style="font-size:14px;line-height:1.6;color:#d7d2e2;margin:12px 0 0">From the smallest bar room or restaurant to the largest stadium, DeadDance secures both the <b>ticket</b> and the <b>sale</b> — engineered to thwart the scalper hacks that still work on other ticket vendors.</p>
           <div style="margin-top:14px;display:flex;flex-direction:column;gap:11px">
-            <div style="display:flex;gap:10px"><span style="font-size:17px">🔒</span><div style="font-size:12.5px;line-height:1.5"><b>Can’t be cloned.</b> The barcode rotates like the one you already trust — but the signing key never leaves your phone. A screenshot is dead on arrival, and it can’t be copied onto another device the way the big vendors’ can.</div></div>
-            <div style="display:flex;gap:10px"><span style="font-size:17px">💺</span><div style="font-size:12.5px;line-height:1.5"><b>Seat-true.</b> Your section, row, and seat are signed into the ticket — nobody edits a screenshot into a better seat.</div></div>
-            <div style="display:flex;gap:10px"><span style="font-size:17px">🎟️</span><div style="font-size:12.5px;line-height:1.5"><b>Distribution locked end to end.</b> Every sale and transfer is signed, so tickets can’t be siphoned into scalper inventory or resold through a back door.</div></div>
-            <div style="display:flex;gap:10px"><span style="font-size:17px">📶</span><div style="font-size:12.5px;line-height:1.5"><b>Works offline at the gate.</b> No signal in a packed room? It still verifies — no network required.</div></div>
-            <div style="display:flex;gap:10px"><span style="font-size:17px">🌹</span><div style="font-size:12.5px;line-height:1.5"><b>Still yours.</b> Free transfers to friends, no resale toll booth — Ticketmaster-grade security, Grateful-Dead ethics.</div></div>
+            <div style="display:flex;gap:10px"><span style="font-size:17px">🔒</span><div style="font-size:13.5px;line-height:1.55"><b>Can’t be cloned.</b> The barcode rotates like the one you already trust — but the signing key never leaves your phone. A screenshot is dead on arrival, and it can’t be copied onto another device the way the big vendors’ can.</div></div>
+            <div style="display:flex;gap:10px"><span style="font-size:17px">💺</span><div style="font-size:13.5px;line-height:1.55"><b>Seat-true.</b> Your section, row, and seat are signed into the ticket — nobody edits a screenshot into a better seat.</div></div>
+            <div style="display:flex;gap:10px"><span style="font-size:17px">🎟️</span><div style="font-size:13.5px;line-height:1.55"><b>Distribution locked end to end.</b> Every sale and transfer is signed, so tickets can’t be siphoned into scalper inventory or resold through a back door.</div></div>
+            <div style="display:flex;gap:10px"><span style="font-size:17px">📶</span><div style="font-size:13.5px;line-height:1.55"><b>Works offline at the gate.</b> No signal in a packed room? It still verifies — no network required.</div></div>
+            <div style="display:flex;gap:10px"><span style="font-size:17px">🌹</span><div style="font-size:13.5px;line-height:1.55"><b>Still yours.</b> Free transfers to friends, no resale toll booth — Ticketmaster-grade security, Grateful-Dead ethics.</div></div>
           </div>
         </div>
       </div>
@@ -1646,7 +1646,7 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var lf=(s.logo||'').replace(/\.png$/,'.svg');
  var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
  return '<div class="crow"'+(s.fest?'':' onclick="openTicket('+i+')" style="cursor:pointer"')+'><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
-  '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div>'+
+  '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div style="min-width:0;flex:1;overflow:hidden">'+
     (s.fest
       ? '<b onclick="openFest(\''+s.festHref+'\')" style="cursor:pointer" title="Open on StageFill">'+s.band+'</b>'
         +'<span onclick="openFest(\''+s.festHref+'\')" style="display:block;cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px" title="Open the venue on StageFill">'+s.venue+'</span>'
