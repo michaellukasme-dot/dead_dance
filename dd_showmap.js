@@ -347,17 +347,14 @@
 
     host.innerHTML =
       '<div class="showmap-card">' +
-        '<div class="showmap-head">' +
-          '<b>🗺️ Shows on the map</b>' +
-          '<div class="dd-scope" role="tablist">' +
+        '<div class="showmap-farrah" id="farrahMap" hidden></div>' +
+        '<div class="showmap-wrap">' +
+          '<div class="dd-scope sm-float" role="tablist">' +
             '<button data-scope="local" class="on">📍 Local</button>' +
             '<button data-scope="national">National</button>' +
             '<button data-scope="my">My Calendar</button>' +
           '</div>' +
-          '<span class="showmap-sum" id="mapSum"></span>' +
-        '</div>' +
-        '<div class="showmap-farrah" id="farrahMap" hidden></div>' +
-        '<div class="showmap-wrap">' +
+          '<span class="showmap-sum sm-floatsum" id="mapSum"></span>' +
           '<svg class="showmap-svg" viewBox="0 0 960 600" role="img" aria-label="US map of upcoming shows" preserveAspectRatio="xMidYMid meet">' +
             '<defs><clipPath id="usClip"><path d="' + US_PATH + '"></path></clipPath></defs>' +
             '<path class="us-land" d="' + US_PATH + '"></path>' +
@@ -657,7 +654,7 @@
     }
     function redrawForFilter(){ if (ACT_FILTER) { actExtentFit(); return; } if (level === "radius") { if (userLoc) { zoomToRadius(radiusMi); } else { toNation(); } } else if (level && level !== "nation") { drill(level); } else { toNation(); } }
     window.DDShowmap = {
-      setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },
+      setScope: function (scope) { try { if (scope === "local" || scope === "my") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },   /* My Calendar defaults to your local chapter, not the whole nation */
       setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter, keeps current scope/zoom
       setMonth: function (ym) { try { applyMonthData(ym); redrawForFilter(); } catch (e) {} },    // calendar month ‹ › → map filter
       refresh: function () { try { if (level === "nation") drawBadges(true); } catch (e) {} }      // re-bloom miracle pills when the bucket changes
