@@ -105,6 +105,17 @@
   .fbsolarcap{margin-top:16px;font-size:12.5px;font-weight:800;color:#cbb8f0;text-align:center}
   .fbsolar{margin-top:8px;border-radius:14px;overflow:hidden;border:1px solid #2a1b3d;background:#0a0818}
   .fbsolar iframe{width:100%;height:260px;border:0;display:block}
+  .composeov{position:fixed;inset:0;z-index:610;background:rgba(42,27,61,.5);display:none;align-items:flex-start;justify-content:center;padding:70px 14px}
+  .composeov.on{display:flex}
+  .composebox{background:#fff;width:100%;max-width:520px;border-radius:16px;padding:16px;box-shadow:0 20px 60px #2a1b3d40}
+  .composehd{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .composehd b{font-size:17px;font-weight:900}.composehd button{border:0;background:#efeaf4;width:32px;height:32px;border-radius:16px;font-size:17px;cursor:pointer}
+  .composerow{display:flex;align-items:center;gap:10px;margin:12px 0 10px}
+  .composerow .cav{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c08a2d,#b8002e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;overflow:hidden;flex:none}
+  #composeText{width:100%;min-height:110px;border:0;resize:vertical;font:inherit;font-size:16px;outline:none;color:var(--ink)}
+  .composefoot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+  .composefoot .hint{font-size:11.5px;color:var(--muted)}
+  .composego{border:0;border-radius:11px;padding:11px 18px;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(135deg,#7a3cc0,#b8002e);cursor:pointer}
   .hpfab{position:fixed;right:16px;bottom:78px;z-index:60;width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:23px;cursor:pointer;box-shadow:0 8px 22px #5a2e8566;display:flex;align-items:center;justify-content:center}
 </style></head>
 <body>
@@ -127,6 +138,7 @@
     <button class="acctsee" onclick="goProfile()">👤 See all profiles</button>
   </div>
   <div class="acctcard">
+    <a class="acctrow" onclick="copyMyId()"><span class="ai">🪪</span><span>Copy my DeadDance id</span></a>
     <a class="acctrow" onclick="location.href='claude_ai.html'"><span class="ai">✳</span><span>Claude AI</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('⚙️ Settings &amp; privacy')"><span class="ai">⚙️</span><span>Settings &amp; privacy</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('❓ Help &amp; support')"><span class="ai">❓</span><span>Help &amp; support</span><span class="ch">›</span></a>
@@ -178,8 +190,8 @@
   <main class="center">
     <div class="card composer">
       <div class="av">M</div>
-      <input placeholder="What's on your mind, Michael?" onclick="hp()">
-      <button class="hp" onclick="hp()">📡 HyperPost</button>
+      <input placeholder="What's on your mind, Michael?" onclick="openCompose()">
+      <button class="hp" onclick="openCompose()">📡 HyperPost</button>
     </div>
 
     <div class="card"><div class="stories">
@@ -194,7 +206,7 @@
       <div class="ph"><div class="av">K</div><div style="flex:1"><b>Kara Diaz</b> <span style="color:var(--muted);font-weight:600">was at</span> <b>Volksplatz</b><div class="t">Musikfest · 2h · 🌹</div></div><div style="color:var(--muted);cursor:pointer">···</div></div>
       <div class="body">The jam went to another galaxy tonight. If you weren’t on the north side you missed it. 🌹⚡</div>
       <div class="img">🌹</div>
-      <div class="acts"><button>👍 Like <span style="color:var(--muted);font-weight:600">· 48</span></button><button>💬 Comment</button><button class="rad">📡 HyperPost</button></div>
+      <div class="acts"><button>👍 Like <span style="color:var(--muted);font-weight:600">· 48</span></button><button>💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div>
     </div>
 
     <div class="card pymk">
@@ -225,8 +237,18 @@
   </aside>
 </div>
 
+<!-- POST COMPOSER (HyperPost) -->
+<div class="composeov" id="composeOv" onclick="if(event.target===this)closeCompose()">
+  <div class="composebox">
+    <div class="composehd"><b>Create post</b><button onclick="closeCompose()" aria-label="Close">×</button></div>
+    <div class="composerow"><div class="cav" id="composeAv">M</div><b id="composeName">Michael</b></div>
+    <textarea id="composeText" placeholder="What's on your mind? Your words start here — then HyperPost radiates them to your groups."></textarea>
+    <div class="composefoot"><span class="hint">🅕 Posts to your Dead groups · no bots</span><button class="composego" onclick="postSubmit()">📡 HyperPost</button></div>
+  </div>
+</div>
+
 <!-- HYPERPOST FAB -->
-<button class="hpfab" onclick="hp()" title="HyperPost">📡</button>
+<button class="hpfab" onclick="openCompose()" title="HyperPost">📡</button>
 
 <!-- OUR BOTTOM MENU (the 7) -->
 <nav class="footnav">
@@ -282,5 +304,31 @@ function wireFriendsData(){
 window.pymkAdd=function(id,name,btn){ try{ if(window.DDFriends&&DDFriends.send&&id) DDFriends.send(id,name); }catch(e){} if(btn){btn.textContent='✓ Requested';btn.disabled=true;btn.style.opacity=.6;} toast('🌹 Friend request sent'); };
 window.frRespond=function(reqId,accept,arg){ try{ if(window.DDFriends&&DDFriends.respond) DDFriends.respond(reqId,accept); }catch(e){} if(accept){ toast('🌹 You\'re friends now'); } else { if(arg&&arg.remove)arg.remove(); toast('Request deleted.'); } };
 setTimeout(wireFriendsData, 500);
+
+/* ---- copy my DeadDance id (auth uid) — for seeding a test friend ---- */
+function copyMyId(){ var id=''; try{ id=(window.DDMe&&DDMe.id&&DDMe.id())||''; }catch(e){}
+  var m=document.getElementById('acctMenu'); if(m)m.classList.remove('on');
+  if(!id){ toast('Sign in first to get your id'); return; }
+  try{ if(navigator.clipboard) navigator.clipboard.writeText(id); }catch(e){}
+  toast('🪪 Copied your id — '+String(id).slice(0,8)+'…'); }
+
+/* ---- real post composer (HyperPost) ---- */
+function openCompose(){ var t=document.getElementById('composeText'); if(t)t.value='';
+  document.getElementById('composeOv').classList.add('on'); setTimeout(function(){ if(t)t.focus(); },60);
+  try{ if(window.DDMe){ var nm=DDMe.name&&DDMe.name(), av=DDMe.avatar&&DDMe.avatar();
+    var cn=document.getElementById('composeName'); if(cn&&nm)cn.textContent=nm;
+    var ca=document.getElementById('composeAv'); if(ca&&av)ca.innerHTML='<img src="'+av+'" style="width:100%;height:100%;object-fit:cover">'; } }catch(e){} }
+function closeCompose(){ document.getElementById('composeOv').classList.remove('on'); }
+function postSubmit(){ var t=document.getElementById('composeText'); var txt=(t&&t.value||'').trim();
+  if(!txt){ toast('Write something first 🌹'); return; }
+  var nm=''; try{ nm=(window.DDMe&&DDMe.name&&DDMe.name())||'You'; }catch(e){ nm='You'; }
+  var center=document.querySelector('.center');
+  if(center){ var card=document.createElement('div'); card.className='card post';
+    var safe=txt.replace(/[<>]/g,function(c){return c==='<'?'&lt;':'&gt;';});
+    card.innerHTML='<div class="ph"><div class="av">'+((nm[0]||'Y').toUpperCase())+'</div><div style="flex:1"><b>'+nm+'</b><div class="t">just now · 🌹</div></div></div><div class="body">'+safe+'</div><div class="acts"><button>👍 Like</button><button>💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div>';
+    var firstPost=center.querySelector('.post'); center.insertBefore(card, firstPost||null); }
+  /* best-effort backend hook — wire dd_post_create(p_text) server-side to persist */
+  try{ var c=window.ddClient&&ddClient(); if(c&&c.rpc) c.rpc('dd_post_create',{p_text:txt}).then(function(){},function(){}); }catch(e){}
+  closeCompose(); toast('📡 HyperPosted — radiating to your groups 🌹'); }
 </script>
 </body></html>
