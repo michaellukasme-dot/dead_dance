@@ -661,6 +661,8 @@ body{padding-bottom:64px}
 .aitem{display:flex;gap:11px;align-items:flex-start;padding:9px 8px;border-radius:10px;cursor:pointer;text-decoration:none;color:var(--ink)}
 .aitem:hover{background:#f4f0e6}.aitem>span{font-size:19px;width:24px;flex:none;text-align:center}
 .aitem b{font-size:14px;display:block}.aitem i{font-size:11.5px;color:var(--muted);font-style:normal}
+.dd-only{display:none}
+body.dd-insider .dd-only{display:block}
 .appscreate{border-left:1px solid var(--line);padding-left:14px}
 @media(max-width:619px){.appscreate{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:6px}}
 .citem{display:flex;gap:10px;align-items:center;padding:10px 8px;border-radius:10px;cursor:pointer;text-decoration:none;color:var(--ink);font-weight:700;font-size:14px}
@@ -898,7 +900,7 @@ body{padding-bottom:64px}
         logo:'logos/retail_'+_slug(r.n)+'.png', ic:(_KIC[r.kind]||'🌹'), bg:'linear-gradient(135deg,#5a2e86,#b8002e)',
         biz:r.n, off:r.head||r.line||'', cta:(r.coupon?('🎟️ '+r.coupon+' ›'):'Find it on Main ›'), beth:true }); }); }catch(e){} return out; }
       var AD_HOUSE=[
-        {logo:'rosebud.svg',                  ic:'🌹', bg:'linear-gradient(135deg,#b8002e,#5a2e86)', biz:'DeadDance',           off:'The calendar & map of every Dead & jam show — free', cta:'That\'s this app ›', house:true},
+        {ic:'🌹', bg:'linear-gradient(135deg,#efe7fb,#d9c8f2)', biz:'DeadDance',           off:'The calendar & map of every Dead & jam show — free', cta:'That\'s this app ›', house:true},
         {logo:'logos/ford_falcon_friends.png',ic:'🚗', bg:'linear-gradient(135deg,#2a6df0,#12305e)', biz:'Ford-Falcon Friends', off:'1963–65 Falcon lovers — parts, meets, the registry', cta:'Join the club ›', house:true}
       ];
       var AD_NATIONAL=[
@@ -1122,7 +1124,7 @@ window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth
   </div>
 </div>
 <script>
-function ddSheet(url,title){var s=document.getElementById('ddsheet');if(!s)return;document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.style.display='block';document.body.style.overflow='hidden';}
+function ddSheet(url,title){var s=document.getElementById('ddsheet');if(!s)return;try{ if(/^(band_onboard|band_console|venue_ops|venue_console|influencer_console|sales_console)/.test(String(url))&&window.ddMarkInsider) ddMarkInsider(); }catch(e){}document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.style.display='block';document.body.style.overflow='hidden';}
 function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.style.display='none';document.getElementById('ddsheet-f').src='about:blank';document.body.style.overflow='';}
 </script>
 
@@ -1264,11 +1266,13 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('band_onboard.html','🌹 Band Install')})"><span>🎤</span><div><b>Band Install</b><i>Claim your band. 963 seeded.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('venue_console.html','🗓️ Venue Console')})"><span>🗓️</span><div><b>Venue Console</b><i>Find an act. Your store. Night math.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('poster_maker.html','🖼️ Create a Show Poster')})"><span>🖼️</span><div><b>Show Poster</b><i>Your look, the show, QR baked in.</i></div></a>
+    <div class="dd-only">
     <div class="asec">Consoles — the Oz behind the curtain</div>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('band_console.html','🎸 Band Console')})"><span>🎸</span><div><b>Band Console</b><i>Autonomous gig management.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('venue_ops.html','🏛 Venue Console')})"><span>🏛</span><div><b>Venue Console</b><i>Autonomous event marketing.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('influencer_console.html','📡 Influencer Console')})"><span>📡</span><div><b>Influencer Console</b><i>Member drives + forward to DD.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('sales_console.html','📇 Sales Console')})"><span>📇</span><div><b>Sales Console</b><i>Pipeline, deal-health, cadence.</i></div></a>
+    </div>
     <div class="asec">Shop</div>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shakedown</b><i>The lot.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.openMiracle&&openMiracle()})"><span>🍀</span><div><b>Miracle Bucket</b><i>Free tickets.</i></div></a>
@@ -1286,11 +1290,13 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('spread'):toast('One sec — loading…') })"><span>🎯</span><div><b>Make me a Spread</b><i>One image per network.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('tiktok'):toast('One sec — loading…') })"><span>🎵</span><div><b>Make me a TikTok</b><i>Caption + shot list.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ (window.HelpTest&&HelpTest.ask)?HelpTest.ask('hyperpost'):toast('One sec — loading…') })"><span>⚡</span><div><b>Write my HyperPost</b><i>The differentiated post.</i></div></a>
+    <div class="dd-only">
     <div class="asec">Team tools</div>
     <a class="aitem" href="sales_crm.html"><span>🗂</span><div><b>Sales CRM</b><i>The field cockpit.</i></div></a>
     <a class="aitem" href="operator_academy.html"><span>🎓</span><div><b>Operator Academy</b><i>Train the org.</i></div></a>
     <a class="aitem" href="hostaband.html"><span>🏛</span><div><b>hostaband</b><i>Venue booking side-door.</i></div></a>
     <a class="aitem" href="partner_enroll.html"><span>🤝</span><div><b>Partner your group</b><i>FB group admins — join the family.</i></div></a>
+    </div>
    </div>
    <div class="appscreate">
     <div class="asec">Create</div>
@@ -1784,7 +1790,7 @@ function wantTix(s){ var k=s.band+'|'+s.iso, w=wantState();
  renderCal(); }
 function buyTix(i){ var s=SHOWLIST[i]; if(!s)return;
  if(s.url){ wantTix(s); return; }
- CURBUY={band:s.band,venue:s.venue,price:s.price}; if(typeof buy==='function')buy('ticket'); }
+ CURBUY={band:s.band,venue:s.venue,price:s.price,iso:s.iso,logo:s.logo,d:s.d,sub:s.sub,url:s.url}; openTicket(s); }
 function buyFromCur(){ var b=document.getElementById('buy'); if(b)b.classList.remove('on');
  if(CURBUY&&CURBUY.url){ wantTix({band:CURBUY.band,venue:CURBUY.venue,iso:CURBUY.iso}); return; }
  if(CURBUY){ openTicket(CURBUY); } }
@@ -2803,7 +2809,7 @@ var SCENES=[["grateful_dead","Grateful Dead"],["phish","Phish"],["allman_brother
 function sceneOpts(){ return SCENES.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>';}).join(""); }
 var ACT_TYPES=[["band","Band"],["tribute","Tribute band"],["original","Original act"],["comedian","Comedian"],["dj","DJ"],["duo","Duo"],["solo","Solo"],["variety","Variety"],["other","Other"]];
 function actTypeOpts(){ return ACT_TYPES.map(function(a){return '<option value="'+a[0]+'">'+a[1]+'</option>';}).join(""); }
-function openGig(tab,region){ GIGREGION=region||(typeof ME!=='undefined'&&ME&&ME.chapter)||(typeof LOCALFAM!=='undefined'?LOCALFAM:null)||"Mid-Atlantic"; try{gigTab(tab||'date');}catch(e){} var g=document.getElementById('gig'); if(g)g.classList.add('on'); }
+function openGig(tab,region){ try{ if((tab==='band'||tab==='act'||tab==='festival')&&window.ddMarkInsider) ddMarkInsider(); }catch(e){} GIGREGION=region||(typeof ME!=='undefined'&&ME&&ME.chapter)||(typeof LOCALFAM!=='undefined'?LOCALFAM:null)||"Mid-Atlantic"; try{gigTab(tab||'date');}catch(e){} var g=document.getElementById('gig'); if(g)g.classList.add('on'); }
 function closeGig(){ document.getElementById('gig').classList.remove('on'); }
 function gigTab(t){ GIGTAB=t;
  document.getElementById('gtab-date').classList.toggle('on',t==='date');
@@ -3189,6 +3195,11 @@ function openCreate(){ var e=document.getElementById('createov'); if(e)e.classLi
 function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); if(typeof loadFriendReqs==='function')loadFriendReqs(); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; }
 function coClose(id){ var e=document.getElementById(id); if(e)e.classList.remove('on'); }
 function coGo(id,fn){ coClose(id); try{fn();}catch(e){} }
+/* Menu length management — Consoles + Team tools show ONLY for DD people (employees, influencers, venues, bands, acts). Normal users never see them. */
+function ddIsInsider(){ try{ return localStorage.getItem('dd_insider')==='1'; }catch(e){ return false; } }
+function ddApplyInsider(){ try{ if(document.body) document.body.classList.toggle('dd-insider', ddIsInsider()); }catch(e){} }
+window.ddMarkInsider=function(){ try{ localStorage.setItem('dd_insider','1'); }catch(e){} ddApplyInsider(); };
+try{ ddApplyInsider(); document.addEventListener('DOMContentLoaded',ddApplyInsider); }catch(e){}
 function openProfMenu(){ try{ if(typeof applyMyAvatar==='function') applyMyAvatar(); }catch(e){} var e=document.getElementById('profmenu'); if(e)e.classList.toggle('on'); }
 document.addEventListener('click',function(ev){ var pm=document.getElementById('profmenu'); if(pm&&pm.classList.contains('on')){ if(!pm.contains(ev.target) && !(ev.target.closest&&ev.target.closest('.avat'))) pm.classList.remove('on'); } });
 /* post ⋯ menu */
@@ -3417,7 +3428,7 @@ function closeShake(){document.getElementById('shake2').classList.remove('on');}
 var CURBUY=null;
 function buy(type,idx){
  var item;
- if(type==='ticket'){ item = CURBUY ? {kind:'🎟️ Ticket',title:CURBUY.band,sub:CURBUY.venue,price:CURBUY.price,qty:true} : {kind:'🎟️ Ticket',title:'The China Cats',sub:'Felton Music Hall · 8:30 PM',price:'$28',qty:true};
+ if(type==='ticket'){ if(CURBUY&&typeof openTicket==='function'){ openTicket(CURBUY); return; } item = CURBUY ? {kind:'🎟️ Ticket',title:CURBUY.band,sub:CURBUY.venue,price:CURBUY.price,qty:true} : {kind:'🎟️ Ticket',title:'The China Cats',sub:'Felton Music Hall · 8:30 PM',price:'$28',qty:true};
    CO={kind:'ticket',ref:(CURBUY&&CURBUY.showId)||null,amountCents:priceCents(item.price),meta:{band:item.title,venue:item.sub}}; }
  else if(type==='market'){ var m=MARKET[idx]; item={kind:'🛍️ Shakedown',title:m.n,sub:"Kara's Prints · the lot",price:m.p,qty:true};
    CO={kind:'shakedown',ref:null,amountCents:priceCents(m.p),meta:{title:m.n}}; }
@@ -3930,6 +3941,7 @@ function ddAddFriend(id,name,btn){
 <script src="dd_autofill.js" defer></script>
 <script src="dd_profile.js" defer></script>
 <script src="dd_native.js" defer></script>
+<script src="dd_rose.js" defer></script>
 <script src="dd_contest.js" defer></script>
 <script src="dd_launch.js" defer></script>
 <script src="dd_miracle.js" defer></script>

@@ -1,0 +1,19 @@
+<svg viewBox="0 0 140 210" xmlns="http://www.w3.org/2000/svg">
+  <!-- long inked stem -->
+  <path d="M70 92 C66 126 74 166 70 200" fill="none" stroke="#161616" stroke-width="3.4" stroke-linecap="round"/>
+  <!-- left leaf -->
+  <path d="M70 134 C50 125 33 131 25 148 C44 155 62 148 70 138 Z" fill="#2E7D33" stroke="#161616" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M66 140 C53 143 40 146 29 147" fill="none" stroke="#161616" stroke-width="1.5"/>
+  <!-- right leaf -->
+  <path d="M70 150 C90 141 107 147 115 164 C96 171 78 164 70 154 Z" fill="#2E7D33" stroke="#161616" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M74 156 C87 159 100 162 111 163" fill="none" stroke="#161616" stroke-width="1.5"/>
+  <!-- sepals at bud base -->
+  <path d="M60 82 C52 88 50 99 56 106 C60 97 62 88 60 82 Z" fill="#2E7D33" stroke="#161616" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M80 82 C88 88 90 99 84 106 C80 97 78 88 80 82 Z" fill="#2E7D33" stroke="#161616" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- rosebud outer -->
+  <path d="M70 20 C46 25 38 52 50 78 C57 92 83 92 90 78 C102 52 94 25 70 20 Z" fill="#E9631C" stroke="#161616" stroke-width="3.2" stroke-linejoin="round"/>
+  <!-- furled petal wraps -->
+  <path d="M55 42 C50 58 57 74 70 78 C83 74 90 58 85 42 C79 54 61 54 55 42 Z" fill="none" stroke="#161616" stroke-width="2.2"/>
+  <path d="M62 34 C56 50 62 66 70 71 C78 66 84 50 78 34" fill="none" stroke="#161616" stroke-width="1.8"/>
+  <path d="M70 40 C66 52 68 64 70 70" fill="none" stroke="#161616" stroke-width="1.5"/>
+</svg>

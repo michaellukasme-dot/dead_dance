@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corridor Watch — Street Sign Kit</title>
+<style>
+  :root{--rose:#b8002e;--purple:#5a2e86;--ink:#160c28;--muted:#6d6580;--line:#e7e1f0}
+  *{box-sizing:border-box}
+  body{margin:0;background:#efeaf5;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .bar{max-width:820px;margin:0 auto;padding:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .bar h1{font-size:16px;margin:0;font-weight:900;flex:1}
+  .btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer;background:var(--purple);color:#fff}
+  .btn.alt{background:#fff;color:var(--purple);border:1px solid var(--line)}
+  .page{max-width:820px;margin:0 auto 22px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 26px #5a2e8618}
+
+  /* ---- THE SIGN (mount at each gateway) ---- */
+  .sign{aspect-ratio:1/1;background:linear-gradient(160deg,#2a1b3d,#150a24);color:#fff;padding:6% 6% 5%;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .sign .kick{font-size:2.2vw;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#e7b7ff;opacity:.9}
+  .sign h2{font-size:5.2vw;line-height:1.02;margin:1.2% 0 0;font-weight:900;letter-spacing:-.5px}
+  .sign h2 b{color:#ffb0cf}
+  .qrwrap{background:#fff;border-radius:18px;padding:3.2%;margin:4% 0 3%}
+  #signqr{width:44vw;max-width:520px;height:44vw;max-height:520px;display:block}
+  .sign .say{font-size:3vw;font-weight:900;letter-spacing:.02em}
+  .sign .foot{font-size:1.9vw;color:#cdbfe6;margin-top:2%;line-height:1.5}
+  .sign .foot b{color:#fff}
+  .rose{font-size:4vw;margin-bottom:1%}
+
+  /* ---- SPEC + CREW CARD ---- */
+  .body{padding:22px 24px}
+  .body h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .spec{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;font-size:13.5px;line-height:1.5}
+  .spec div b{color:var(--rose)}
+  .steps{counter-reset:s;margin:16px 0 0;padding:0;list-style:none}
+  .steps li{counter-increment:s;position:relative;padding:9px 0 9px 40px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.5}
+  .steps li:before{content:counter(s);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:50%;background:var(--purple);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .steps li b{color:var(--ink)}
+  .note{margin-top:16px;background:#f6f2fb;border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:#4a4356}
+  .note b{color:var(--rose)}
+
+  @media print{ body{background:#fff} .bar{display:none} .page{box-shadow:none;border-radius:0;margin:0;page-break-after:always;max-width:none} .sign{aspect-ratio:1/1} #signqr{width:6.6in;height:6.6in} }
+</style></head>
+<body>
+<div class="bar">
+  <h1>🌹 Corridor Watch — Street Sign Kit · Bethlehem</h1>
+  <button class="btn" onclick="window.print()">🖨 Print</button>
+  <a class="btn alt" href="city_register.html">Register a corridor ›</a>
+  <a class="btn alt" href="city_console.html">Open the City Console ›</a>
+</div>
+
+<!-- PAGE 1 — THE GATEWAY SIGN -->
+<div class="page">
+  <div class="sign">
+    <div class="rose">🌹</div>
+    <div class="kick">City of Bethlehem · Corridor Watch</div>
+    <h2>Scan to walk <b>Bethlehem</b>.</h2>
+    <div class="qrwrap"><div id="signqr"></div></div>
+    <div class="say">📍 Every shop, stage &amp; stop — on one live map.</div>
+    <div class="foot"><b>Free.</b> No app-store download needed · works in your browser<br>stagefill.app/bethlehem &nbsp;·&nbsp; a DeadDance / StageFill corridor</div>
+  </div>
+</div>
+
+<!-- PAGE 2 — SPEC + STREETS-CREW INSTRUCTION SET -->
+<div class="page"><div class="body">
+  <h3>Sign spec — for the Streets department</h3>
+  <div class="spec">
+    <div><b>Size:</b> 2.5 ft × 2.5 ft (rigid) — or 18″×18″ for pole banners.</div>
+    <div><b>Material:</b> aluminum composite / dibond, matte laminate (no glare on the QR).</div>
+    <div><b>Where:</b> one at each gateway into the corridor — north entrance (Main &amp; Broad), the Fahy &amp; New St bridges, the SteelStacks approach, the Sand Island lots.</div>
+    <div><b>Height:</b> QR centered 4–5 ft off the ground (thumb-to-phone reach).</div>
+    <div><b>Contrast:</b> keep the white QR panel intact — never print the code onto a dark or textured surface.</div>
+    <div><b>Target:</b> the QR opens <b>stagefill.app/bethlehem</b> — your live corridor map.</div>
+  </div>
+
+  <h3 style="margin-top:22px">The program — what the City runs (and adds to)</h3>
+  <ol class="steps">
+    <li><b>Register the corridor.</b> Two minutes at <b>city_register.html</b> — drop a pin, drag the radius, name your streets. You get this sign's QR instantly.</li>
+    <li><b>Mount the signs</b> at every gateway. That's the on-ramp — every scan lands a visitor on your live walk-by map.</li>
+    <li><b>Calibrate the "GPS well."</b> Have Streets, parking enforcement, or <b>police run the app on their normal beat</b> for a week. The map auto-learns the exact storefronts, walkable paths, and boundaries. <b>Anonymous &amp; aggregate — a survey instrument, never a tracked person.</b> It is a privacy-clean <b>supplement to your camera network at the same coordinates</b> — density where the cameras can't see, and no faces.</li>
+    <li><b>Watch the corridor, always-on.</b> Open the <b>City Console</b> — the NOC shows live crowd density by zone, gate loads, stages, restrooms, first-aid, and safety alerts. For everyone with the app, the corridor is <b>always on, always known.</b></li>
+    <li><b>Market it — and add your own.</b> We hand you a city-wide social campaign that pushes the QR; every storefront gets a free ad; <b>you earn 20–30%</b> of premium placements. Post your own events, alerts, and closures to the same corridor — it's your program to grow.</li>
+  </ol>
+
+  <div class="note">
+    <b>The guardrail travels with the program:</b> opt-in, k-anonymized, aggregate, short-retention, counsel-cleared. Patterns and counts — never individuals, never identities, never sold. No facial recognition, no gunshot detection, no per-user tracking for police. The corridor makes the festival <b>safer and more walkable</b>; that's the only version a City says yes to in public.
+  </div>
+</div></div>
+
+<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script>
+  try{ if(window.DDQR) DDQR.into('signqr','https://stagefill.app/bethlehem',{mark:'sf',size:900,css:520}); }catch(e){}
+</script>
+</body></html>

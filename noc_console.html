@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bethlehem City Admin Console — Musikfest NOC</title>
+<style>
+  :root{--bg:#0a0e18;--pan:#111827;--pan2:#0d1420;--line:#1f2c44;--ink:#eaf1ff;--mut:#8ea3c8;--cyan:#22d3ee;--grn:#34d399;--amb:#fbbf24;--red:#f87171;--rose:#ff2d6f}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .demo{position:fixed;top:8px;right:10px;z-index:9;background:#ff2d6f22;border:1px solid #ff2d6f66;color:#ff9dbf;font-size:10px;font-weight:900;letter-spacing:.1em;border-radius:6px;padding:3px 8px}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0c1322,#0a0e18)}
+  header .b{font-weight:900;font-size:16px;letter-spacing:.5px}
+  header .b span{color:var(--rose)}
+  header .sub{color:var(--mut);font-size:12px}
+  header .stat{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:800;font-size:12px;color:var(--grn)}
+  header .dot{width:9px;height:9px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .clock{color:var(--cyan);font-variant-numeric:tabular-nums;font-weight:800;font-size:13px;margin-left:14px}
+  .grid{display:grid;grid-template-columns:250px 1fr 300px;gap:12px;padding:12px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .panel{background:linear-gradient(180deg,var(--pan),var(--pan2));border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+  .pt{font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+  .big{font-size:34px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
+  .big small{font-size:12px;color:var(--mut);font-weight:700}
+  .split{margin-top:12px}
+  .split .row{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin:9px 0 4px}
+  .bar{height:9px;border-radius:6px;background:#1b2740;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:6px}
+  .n i{background:linear-gradient(90deg,#22d3ee,#0ea5b7)}
+  .s i{background:linear-gradient(90deg,#a78bfa,#7c3aed)}
+  .gate{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:6px 0;border-bottom:1px dashed #1c2942}
+  .gate:last-child{border:0}
+  .gate b{font-variant-numeric:tabular-nums}
+  .load{font-size:11px;font-weight:900;padding:1px 7px;border-radius:6px}
+  .load.ok{background:#0f3a2a;color:var(--grn)} .load.busy{background:#3a3210;color:var(--amb)} .load.high{background:#3a1414;color:var(--red)}
+  /* center map */
+  .map{position:relative;height:420px;border-radius:12px;overflow:hidden;background:radial-gradient(120% 90% at 45% 40%,#0f1830,#0a0e18)}
+  .map .river{position:absolute;left:-5%;right:-5%;top:55%;height:90px;background:linear-gradient(180deg,#0e2a3a88,#0a1c2888);transform:rotate(-4deg);filter:blur(1px)}
+  .map .lbl{position:absolute;font-size:10px;font-weight:800;color:#6f86ad;letter-spacing:.08em}
+  .heat{position:absolute;width:120px;height:120px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:beat 2.6s infinite}
+  @keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.75}50%{transform:translate(-50%,-50%) scale(1.12);opacity:1}}
+  .dotm{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);background:#fff;box-shadow:0 0 8px #fff}
+  .scan{position:absolute;inset:0;background:linear-gradient(90deg,transparent,#22d3ee18,transparent);width:35%;animation:sweep 5s linear infinite}
+  @keyframes sweep{0%{left:-35%}100%{left:100%}}
+  .stagebars{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:12px}
+  .sb{font-size:11.5px}
+  .sb .r{display:flex;justify-content:space-between;font-weight:700;margin-bottom:3px;color:#cdddf7}
+  /* right feed */
+  .feed{max-height:300px;overflow:auto}
+  .ev{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #16223a;font-size:12px}
+  .ev .ic{flex:0 0 auto}
+  .ev .t{color:var(--mut);font-size:10.5px}
+  .kv{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px dashed #1c2942}
+  .kv:last-child{border:0}
+  footer{color:#5f7398;font-size:11px;text-align:center;padding:10px}
+  .wx{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="demo">DEMO · ILLUSTRATIVE</div>
+<header>
+  <div><div class="b">BETHLEHEM · CITY ADMIN CONSOLE — <span>Musikfest NOC</span></div>
+  <div class="sub">Network Operations Center · powered by DeadDance · aggregate &amp; anonymized</div></div>
+  <div class="stat"><span class="dot"></span> ALL CLEAR</div>
+  <div class="clock" id="clk">—</div>
+</header>
+
+<div class="grid">
+  <!-- LEFT: counts -->
+  <div>
+    <div class="panel">
+      <div class="pt">On the map now (opt-in)</div>
+      <div class="big"><span id="tot">0</span> <small>heads</small></div>
+      <div class="split">
+        <div class="row n"><span>◑ North Side</span><span id="nP">63%</span></div><div class="bar n"><i id="nB" style="width:63%"></i></div>
+        <div class="row s"><span>◐ South Side · SteelStacks</span><span id="sP">37%</span></div><div class="bar s"><i id="sB" style="width:37%"></i></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <div class="pt">Gate loads</div>
+      <div class="gate"><span>Main &amp; Broad</span><span><b id="g1">—</b> <span class="load busy">BUSY</span></span></div>
+      <div class="gate"><span>South Side Gateway</span><span><b id="g2">—</b> <span class="load ok">OK</span></span></div>
+      <div class="gate"><span>Sand Island bridge</span><span><b id="g3">—</b> <span class="load ok">OK</span></span></div>
+      <div class="gate"><span>Fahy Bridge (foot)</span><span><b id="g4">—</b> <span class="load high">HIGH</span></span></div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <div class="pt">Weather</div>
+      <div class="wx">☀️ 78°F · clear <span style="color:var(--mut);font-weight:600;font-size:12px">— strong walk-up night</span></div>
+    </div>
+  </div>
+
+  <!-- CENTER: live crowd map -->
+  <div class="panel">
+    <div class="pt">Live crowd density · Bethlehem footprint</div>
+    <div class="map" id="map">
+      <div class="scan"></div>
+      <div class="river"></div>
+      <div class="lbl" style="left:12%;top:20%">NORTH SIDE · MAIN ST</div>
+      <div class="lbl" style="left:60%;top:82%">SOUTH SIDE · STEELSTACKS</div>
+      <!-- heat blooms + stage dots injected by JS -->
+    </div>
+    <div class="stagebars" id="stageBars"></div>
+  </div>
+
+  <!-- RIGHT: ops feed + tourism -->
+  <div>
+    <div class="panel">
+      <div class="pt">Ops feed</div>
+      <div class="feed" id="feed"></div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <div class="pt">Where they came from</div>
+      <div class="kv"><span>Outside Lehigh County</span><b>34%</b></div>
+      <div class="kv"><span>Out of state</span><b>11%</b></div>
+      <div class="kv"><span>Top origins</span><b style="color:var(--cyan)">NYC · Philly · Scranton</b></div>
+      <div class="kv"><span>New members today</span><b style="color:var(--grn)">+412</b></div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <div class="pt">Safety</div>
+      <div class="kv"><span>Lost-person requests</span><b>3 · all reunited</b></div>
+      <div class="kv"><span>Medical routes drawn</span><b>7</b></div>
+      <div class="kv"><span>Density advisories</span><b style="color:var(--amb)">1 active</b></div>
+    </div>
+  </div>
+</div>
+<footer>Aggregate · opt-in · k-anonymized · counsel-cleared — patterns and counts, never individuals. 🌹 The room the City runs the festival from.</footer>
+
+<script>
+(function(){
+  // clock
+  function tick(){ var d=new Date(); document.getElementById('clk').textContent=d.toLocaleTimeString(); } tick(); setInterval(tick,1000);
+  // animated total
+  var target=41200, cur=39880;
+  setInterval(function(){ cur+=Math.round((Math.random()-0.35)*60); cur=Math.max(38000,Math.min(44000,cur)); document.getElementById('tot').textContent=cur.toLocaleString(); },1400);
+  document.getElementById('tot').textContent=cur.toLocaleString();
+  // gates
+  function g(id,base){ document.getElementById(id).textContent=base+'/min'; }
+  g('g1',180); g('g2',70); g('g3',40); g('g4',240);
+  // heat blooms (x%,y%, color, size)
+  var HB=[[22,26,'#22d3ee',150],[30,30,'#22d3ee',120],[26,38,'#34d399',110],[18,34,'#22d3ee',95],[62,72,'#a78bfa',140],[68,76,'#f472b6',120],[57,68,'#a78bfa',100],[72,66,'#fbbf24',90]];
+  var map=document.getElementById('map');
+  HB.forEach(function(h,i){ var e=document.createElement('div'); e.className='heat';
+    e.style.left=h[0]+'%'; e.style.top=h[1]+'%'; e.style.width=h[3]+'px'; e.style.height=h[3]+'px';
+    e.style.background='radial-gradient(circle,'+h[2]+'aa 0%,'+h[2]+'44 40%,transparent 70%)';
+    e.style.animationDelay=(i*0.3)+'s'; map.appendChild(e);
+    var d=document.createElement('div'); d.className='dotm'; d.style.left=h[0]+'%'; d.style.top=h[1]+'%'; map.appendChild(d); });
+  // stage density bars
+  var ST=[['Main Street Stage',92],['Volksplatz (jam)',78],['Americaplatz @ Levitt',71],['Steel Stage',64],['Liederplatz',52],['Festplatz',44]];
+  document.getElementById('stageBars').innerHTML=ST.map(function(s){
+    var c=s[1]>85?'#f87171':(s[1]>65?'#fbbf24':'#34d399');
+    return '<div class="sb"><div class="r"><span>'+s[0]+'</span><span style="color:'+c+'">'+s[1]+'%</span></div><div class="bar"><i style="width:'+s[1]+'%;background:'+c+'"></i></div></div>';
+  }).join('');
+  // ops feed
+  var EV=[
+    ['⚠️','Density rising · Main Street Stage — advise crowd-flow to Guetter St','2m ago','#fbbf24'],
+    ['🍀','Lost child reunited · Familienplatz','9m ago','#34d399'],
+    ['🚑','Medical route drawn to Aid Tent 2 · South Side','14m ago','#22d3ee'],
+    ['🚶','Foot traffic surge · Fahy Bridge — South Side filling','21m ago','#fbbf24'],
+    ['🌹','New members +130 in last hour · 41% from out of town','26m ago','#ff8fb3'],
+    ['✅','Gate Main &amp; Broad steady · no action','33m ago','#8ea3c8']
+  ];
+  document.getElementById('feed').innerHTML=EV.map(function(e){
+    return '<div class="ev"><span class="ic" style="color:'+e[3]+'">'+e[0]+'</span><div><div>'+e[1]+'</div><div class="t">'+e[2]+'</div></div></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

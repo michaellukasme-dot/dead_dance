@@ -147,16 +147,29 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
 <div class="wrap">
   <div class="mf-grab" id="mfGrab" onpointerdown="mfDragStart(event)"><span></span></div>
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
-  <div class="hero" style="position:relative">
+  <div class="hero" style="position:relative;display:flex;align-items:center;gap:12px">
+    <!-- EVENT QR — in front of the title. This IS the event: scan/tap it and you land right on this map.
+         StageFill standard: every event's QR sits in front of its %TITLE%. -->
+    <div id="mfqr" onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="This event’s map QR — scan me, or tap to share" style="width:56px;height:56px;background:#fff;border-radius:10px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;overflow:hidden"></div>
+    <h1 style="margin:0">Musikfest</h1>
     <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
     <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="MUSIKFEST_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
-    <h1>Musikfest</h1>
   </div>
   <div class="mflayers">
     <span class="mfll">🗺 Show on map</span>
+    <button class="mflay" onclick="mfCenterSide('S')" title="Center on the South Side (SteelStacks)">⬇ Southside</button>
+    <button class="mflay" onclick="mfCenterSide('N')" title="Center on the North Side (Main St)">⬆ Northside</button>
     <button class="mflay on" data-f="stage" onclick="mfChip(this)">🌹 Stages</button>
     <button class="mflay" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
+    <span style="width:1px;height:20px;background:var(--line);margin:0 3px"></span>
+    <button id="trackBtn" class="mflay" onclick="toggleTrack()">⏸ Auto-Tracking</button>
+    <button class="mflay" onclick="nearestBathroom()" title="Nearest bathroom" aria-label="Nearest bathroom">🚻</button>
+    <button class="mflay" onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos">📷</button>
+    <button class="mflay" onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" style="vertical-align:-3px"><path d="M13 3l8 7-8 7v-4.2C7.2 12.8 4 15 2 19c.6-7 4.6-10.4 11-10.9V3z"/></svg></button>
+    <button id="parkBtn" class="mflay" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking">🅿️</button>
+    <button class="mflay" onclick="openMfSec('parkSec')" title="Drive to a parking lot">🅿️ Lots</button>
+    <button class="mflay" onclick="openMfSec('localsSec')" title="What the locals know">💡 Locals</button>
   </div>
   <div id="adFeatured"></div>
   <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">
@@ -246,26 +259,12 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
   </div>
 
   <div class="carbadge" id="carBadge" style="display:none"></div>
-  <div class="compbar">
-    <button id="trackBtn" onclick="toggleTrack()">⏸ Auto-Tracking</button>
-    <button onclick="nearestBathroom()" title="Nearest bathroom" aria-label="Nearest bathroom" style="flex:0 0 auto;padding:11px 13px">🚻</button>
-    <button onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos" style="flex:0 0 auto;padding:11px 13px">📷</button>
-    <button onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk" style="flex:0 0 auto;padding:11px 13px">⤴️</button>
-    <button id="parkBtn" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking" style="flex:0 0 auto;padding:11px 13px">🅿️</button>
-  </div>
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
   <!-- map + filter chips + distance pill relocated to the fixed top zone (.mf-map) in app mode -->
   <input type="hidden" id="mf_f_stage"><input type="hidden" id="mf_f_shop"><input type="hidden" id="mf_f_food"><input type="hidden" id="mf_f_potty">
 
-  <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0 6px">
-    <div id="mfqr" style="width:150px;height:150px;background:#fff;border-radius:12px;flex:0 0 auto"></div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <button class="dir" onclick="mfShareMap()" title="Share this map" aria-label="Share this map" style="justify-content:center;font-size:17px;padding:11px 16px">↗</button>
-      <button class="dir" onclick="saveMFQR()" title="Save the QR image" aria-label="Save QR" style="justify-content:center;padding:11px 16px">⬇︎ Save QR</button>
-    </div>
-  </div>
 
   <div id="parkBox" style="text-align:center;margin:12px 0"></div>
 
@@ -289,9 +288,15 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
     <span id="ddCount" style="font-size:11.5px;color:var(--muted);font-weight:700"></span>
   </div>
   <div class="pills">
-    <button class="pill on" id="pill_all" onclick="setPill('all')">All</button>
-    <button class="pill" id="pill_dead" onclick="setPill('dead')">🌹 Dead &amp; jam</button>
-    <button class="pill" id="pill_earlier" onclick="showEarlier()">⏱ Show earlier</button>
+    <button class="pill on" id="pill_all" onclick="setPill('all')">📋 List</button>
+    <button class="pill" id="pill_dead" onclick="setPill('dead')" title="Dead &amp; jam only" aria-label="Dead and jam only">🌹</button>
+    <button class="pill" id="pill_stage" onclick="setPill('stage')">🎪 Browse stage</button>
+    <button class="pill" id="pill_earlier" onclick="showEarlier()" style="margin-left:auto;font-size:12px;opacity:.85">⏱ Earlier</button>
+  </div>
+  <div id="stageBar" style="display:none;gap:8px;align-items:center;margin:8px 0 2px">
+    <button class="pill" onclick="stageDay(-1)" aria-label="Previous day" style="padding:8px 12px">‹ Day</button>
+    <select id="stagePick" onchange="refresh()" style="flex:1;min-width:0;font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)"></select>
+    <button class="pill" onclick="stageDay(1)" aria-label="Next day" style="padding:8px 12px">Day ›</button>
   </div>
   <div id="askStrip"></div>
   <div class="sched" id="fullSched"></div>
@@ -311,11 +316,11 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
     <div id="brResults" class="brgrid"></div>
   </details>
 
-  <details class="mfsec"><summary>Parking — drive to a lot</summary>
+  <details class="mfsec" id="parkSec"><summary>Parking — drive to a lot</summary>
     <div id="lotList"></div>
   </details>
 
-  <details class="mfsec"><summary>What the locals know (and you don't yet)</summary>
+  <details class="mfsec" id="localsSec"><summary>What the locals know (and you don't yet)</summary>
   <div class="tips"><ul style="margin:0;padding-left:18px">
     <li><b>The real scene is the North Side.</b> Across the river on <b>Main Street</b> and the platze <b>just below it</b> — that's where the biggest, best tents are, and where you run into folks you haven't seen in years.</li>
     <li><b>Best seat in town: the Bethlehem library.</b> Catch a show from there — the view is spectacular.</li>
@@ -328,15 +333,15 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
   </ul></div>
   </details>
 
-  <a href="musikfest_drop.html" style="display:flex;align-items:center;gap:12px;margin:14px 0;text-decoration:none;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:12px 14px">
-    <div style="font-size:26px">👕</div>
-    <div style="flex:1"><div style="color:#241535;font-weight:900;font-size:14px">“I launched DeadDance.app at Musikfest 2026”</div>
-    <div style="color:#7a6a2e;font-size:12px">Wear the day — the groovy launch drop. Tee · tank · dad hat.</div></div>
-    <div style="color:#b8002e;font-weight:900;font-size:18px">›</div></a>
-
-  <div class="adcta" onclick="adOpen()">
-    <div><b>📣 Claim your shop, restaurant, or brewery</b><br><span>Buy an ad that reaches <b>every Musikfest visitor</b> passing your door. From $99.</span></div>
-    <button class="go" onclick="event.stopPropagation();adOpen()">Claim &amp; advertise ▸</button>
+  <div style="display:flex;gap:10px;margin:14px 0;align-items:stretch">
+    <button onclick="try{ddLaunchPost&&ddLaunchPost()}catch(e){}" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
+      <div style="color:#241535;font-weight:900;font-size:13px">🚀 I Launched DeadDance</div>
+      <div style="color:#7a6a2e;font-size:11.5px;margin-top:2px">Invite 10 deadhead friends ›</div>
+    </button>
+    <button onclick="adOpen()" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#f3eeff,#fff);border:1px solid #d9c9f0;border-left:5px solid #5a2e86;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
+      <div style="color:#241535;font-weight:900;font-size:13px">📣 Claim your shop</div>
+      <div style="color:#5a2e86;font-size:11.5px;margin-top:2px">Reach every visitor · from $99 ›</div>
+    </button>
   </div>
 
   <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
@@ -356,6 +361,8 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
+<script src="dd_contest.js"></script>
+<script src="dd_launch.js"></script>
 <script>
 var STAGES=[
  // NORTH (free)
@@ -474,7 +481,9 @@ function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById(
   if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
   LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_DIR=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup(); LG_FOOD=L.layerGroup(); LG_POTTY=L.layerGroup();
-  try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{padding:[26,26]}); }catch(e){ LMAP.setView([40.6175,-75.3755],15); }
+  // Fit the WHOLE footprint but reserve room at the bottom for the Musikfest sheet, so the SOUTH SIDE
+  // (SteelStacks) is never hidden behind it. Content sits higher, centered vertically in the visible frame.
+  try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{paddingTopLeft:[24,48], paddingBottomRight:[24,200]}); }catch(e){ LMAP.setView([40.6172,-75.3762],15); }
   setTimeout(function(){ try{ LMAP.invalidateSize(); }catch(e){} },250);
 }
 function updateYou(){ if(!LG_YOU)return; LG_YOU.clearLayers(); if(window.YOU){
@@ -792,7 +801,7 @@ window.toggleJoin=function(){ var was=joined(); try{ localStorage.setItem('dd.mu
 crewRefresh(); renderJoin();
 
 // street-team QR — no app, just scan → this map
-try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:150,caption:false}); }catch(e){}
+try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:56,caption:false}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
 window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
   if(navigator.share){ navigator.share({title:'Musikfest 2026 — the DeadDance map',url:url}).catch(function(){}); }
@@ -800,6 +809,15 @@ window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
 window._mfLocked=false;
 function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{ LMAP.setMaxBounds(L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]])); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the fest footprint; zoom stays free
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
+// Southside / Northside action-bar buttons → recenter on that side's stages, reserving room for the
+// bottom sheet (paddingBottomRight) so the side you pick is never hidden behind it.
+// Festival Bar pill → open that section of the card (Parking lots, Locals tips) + scroll to it
+window.openMfSec=function(id){ try{ var d=document.getElementById(id); if(!d)return; if(d.tagName==='DETAILS') d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} };
+window.mfCenterSide=function(side){ try{ if(typeof ensureMap==='function') ensureMap(); if(!window.LMAP)return;
+  var pts=STAGES.filter(function(s){return s.side===side;}).map(function(s){return [s.lat,s.lng];});
+  if(!pts.length)return;
+  LMAP.fitBounds(pts,{paddingTopLeft:[30,52], paddingBottomRight:[30,205], maxZoom:17, animate:true});
+}catch(e){} };
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
@@ -824,7 +842,11 @@ var curDayIdx=0, PILL='all', SCH_MAX=9, schExpand=false;
 function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function nowMins(){ var d=new Date(); return d.getHours()*60+d.getMinutes(); }
 window.dayStep=function(n){ curDayIdx=Math.max(0,Math.min(DAYS.length-1,curDayIdx+n)); schExpand=false; refresh(); };
-window.setPill=function(p){ PILL=p; schExpand=false; ['all','dead','now'].forEach(function(x){ var el=document.getElementById('pill_'+x); if(el)el.classList.toggle('on',x===p); }); refresh(); };
+window.setPill=function(p){ PILL=p; schExpand=false; ['all','dead','stage'].forEach(function(x){ var el=document.getElementById('pill_'+x); if(el)el.classList.toggle('on',x===p); });
+  var sb=document.getElementById('stageBar'); if(sb) sb.style.display=(p==='stage')?'flex':'none';
+  if(p==='stage'){ var sp=document.getElementById('stagePick'); if(sp&&!sp.options.length){ var st=Array.from(new Set(MF.map(function(r){return r.st;}))).sort(); sp.innerHTML=st.map(function(s){return '<option>'+esc(s)+'</option>';}).join(''); } }
+  refresh(); };
+window.stageDay=function(n){ var s=document.getElementById('planDate'); if(!s||!s.options.length)return; s.selectedIndex=Math.max(0,Math.min(s.options.length-1,s.selectedIndex+n)); planDateChange(); };
 window.schToggle=function(){ schExpand=!schExpand; refresh(); };
 window.refresh=function(){ if(!MF.length)return;
  var psel=document.getElementById('planDate'); var day=(psel&&psel.value)?psel.value:DAYS[curDayIdx];
@@ -833,6 +855,7 @@ window.refresh=function(){ if(!MF.length)return;
  var rows=MF.filter(function(r){ return r.d===day; });
  if(PILL==='dead') rows=rows.filter(function(r){ return r.sc==='dd'; });
  if(PILL==='now'){ var _nm=nowMins(); rows=rows.filter(function(r){ var mm=mins(r.t); return mm<=_nm+10 && mm>=_nm-95; }); }   // 🎶 Acts on Now — playing right around this moment
+ if(PILL==='stage'){ var _sp=document.getElementById('stagePick'); if(_sp&&_sp.value) rows=rows.filter(function(r){ return r.st===_sp.value; }); }   // 🎪 Browse stage — shrink the whole catalogue to one stage
  var aEl=document.getElementById('planArr'), dEl=document.getElementById('planDep');
  var aw=hm(aEl?aEl.value:'00:00'), dw=hm(dEl?dEl.value:'23:59');
  rows=rows.filter(function(r){ var mm=mins(r.t); return mm>=aw && mm<=dw; });   // ARRIVE→DEPART window shrinks the pocket
