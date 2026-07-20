@@ -78,7 +78,33 @@
   .footnav .fn.on .lb,.footnav .fn.on .ic{color:var(--gold)}
   .footnav .fn .b{position:absolute;top:-4px;right:-8px;background:#e11;color:#fff;border-radius:9px;font-size:9px;font-weight:800;padding:0 4px;min-width:15px;height:15px;display:flex;align-items:center;justify-content:center}
   .fbstrip{background:linear-gradient(90deg,#1877f2,#3b5998);color:#fff;font-size:12.5px;padding:9px 16px;display:flex;align-items:center;gap:8px;line-height:1.4}
-  .fbstrip b{font-weight:800}.fbstrip .fbx{margin-left:auto;flex:none;background:#ffffff2e;border:0;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:800;font-size:13px}
+  .fbstrip b{font-weight:800}
+  .fbstrip .fbq{margin-left:auto;flex:none;background:#fff;color:#1877f2;border:0;width:22px;height:22px;border-radius:50%;cursor:pointer;font-weight:900;font-size:13px}
+  .fbstrip .fbx{flex:none;background:#ffffff2e;border:0;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:800;font-size:13px}
+  .rose{color:var(--rose)}
+  .acctmenu{position:fixed;top:58px;right:12px;width:340px;max-width:calc(100vw - 24px);z-index:200;display:none;flex-direction:column;gap:10px}
+  .acctmenu.on{display:flex}
+  .acctcard{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 44px #2a1b3d2e;padding:8px}
+  .acctprof{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+  .acctprof:hover{background:#f6f2fb}.acctprof .pav{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c08a2d,#b8002e);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;flex:none;overflow:hidden}
+  .acctprof .pav img{width:100%;height:100%;object-fit:cover}.acctprof b{font-size:16px}
+  .acctsee{width:100%;margin-top:8px;border:0;border-radius:10px;padding:11px;background:#eee7f4;color:var(--purple);font-weight:800;font-size:14px;cursor:pointer}
+  .acctrow{display:flex;align-items:center;gap:13px;padding:11px 10px;border-radius:10px;cursor:pointer;font-weight:600;font-size:15px}
+  .acctrow:hover{background:#f6f2fb}
+  .acctrow .ai{width:36px;height:36px;border-radius:50%;background:#efeaf4;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+  .acctrow .ch{margin-left:auto;color:var(--muted)}
+  .acctfoot{font-size:11px;color:var(--muted);text-align:center;padding:2px 8px}
+  .fbinfo{position:fixed;inset:0;z-index:600;background:rgba(14,11,20,.9);display:none;align-items:center;justify-content:center;padding:16px}
+  .fbinfo.on{display:flex}
+  .fbcard{max-width:380px;width:100%;max-height:90vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:22px 20px 20px;position:relative;box-shadow:0 24px 60px #000c}
+  .fbclose{position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:34px;height:34px;border-radius:17px;font-size:18px;cursor:pointer}
+  .fbh{display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px;padding-right:34px}
+  .fbp{font-size:13.5px;line-height:1.6;color:#d7d2e2;margin:12px 0 0}.fbp b{color:#fff}
+  .fbrows{margin-top:14px;display:flex;flex-direction:column;gap:11px}
+  .fbrow{display:flex;gap:10px;font-size:13px;line-height:1.5;color:#d7d2e2}.fbrow span{font-size:17px}.fbrow b{color:#fff}
+  .fbsolarcap{margin-top:16px;font-size:12.5px;font-weight:800;color:#cbb8f0;text-align:center}
+  .fbsolar{margin-top:8px;border-radius:14px;overflow:hidden;border:1px solid #2a1b3d;background:#0a0818}
+  .fbsolar iframe{width:100%;height:260px;border:0;display:block}
   .hpfab{position:fixed;right:16px;bottom:78px;z-index:60;width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:23px;cursor:pointer;box-shadow:0 8px 22px #5a2e8566;display:flex;align-items:center;justify-content:center}
 </style></head>
 <body>
@@ -91,10 +117,43 @@
   <div class="ic">▦</div>
   <div class="ic">💬</div>
   <div class="ic">🔔<span class="badge">19</span></div>
-  <div class="ic avat">M</div>
+  <div class="ic avat" id="topAvat" onclick="toggleAcct(event)">M</div>
 </div>
 
-<div class="fbstrip" id="fbstrip">🅕 <b>A Facebook enhancement — not a replacement.</b> It's still Facebook: your words &amp; photos originate here, click by click, then flow to your group. <button class="fbx" onclick="document.getElementById('fbstrip').style.display='none'" aria-label="Dismiss">✕</button></div>
+<!-- AVATAR ACCOUNT MENU (the ⌄ dropdown) -->
+<div class="acctmenu" id="acctMenu">
+  <div class="acctcard">
+    <a class="acctprof" onclick="goProfile()"><div class="pav" id="acctAv">M</div><b id="acctName">Michael Issa Lukas</b></a>
+    <button class="acctsee" onclick="goProfile()">👤 See all profiles</button>
+  </div>
+  <div class="acctcard">
+    <a class="acctrow" onclick="location.href='claude_ai.html'"><span class="ai">✳</span><span>Claude AI</span><span class="ch">›</span></a>
+    <a class="acctrow" onclick="toast('⚙️ Settings &amp; privacy')"><span class="ai">⚙️</span><span>Settings &amp; privacy</span><span class="ch">›</span></a>
+    <a class="acctrow" onclick="toast('❓ Help &amp; support')"><span class="ai">❓</span><span>Help &amp; support</span><span class="ch">›</span></a>
+    <a class="acctrow" onclick="toast('🚩 Report a problem')"><span class="ai">🚩</span><span>Report a problem</span></a>
+    <a class="acctrow" onclick="toast('🌙 Display &amp; accessibility')"><span class="ai">🌙</span><span>Display &amp; accessibility</span><span class="ch">›</span></a>
+    <a class="acctrow" onclick="ddSignOut()"><span class="ai">🚪</span><span>Log out</span></a>
+  </div>
+  <div class="acctfoot">Privacy · Terms · Cookies · <span class="rose">🌹</span> DeadDance</div>
+</div>
+
+<div class="fbstrip" id="fbstrip">🅕 <b>A Facebook enhancement — not a replacement.</b> It's still Facebook: your words &amp; photos originate here, click by click, then flow to your group. <button class="fbq" onclick="openFbInfo()" aria-label="What is this?" title="How the enhancement works">?</button><button class="fbx" onclick="document.getElementById('fbstrip').style.display='none'" aria-label="Dismiss">✕</button></div>
+
+<div class="fbinfo" id="fbInfo" onclick="if(event.target===this)closeFbInfo()">
+  <div class="fbcard">
+    <button class="fbclose" onclick="closeFbInfo()" aria-label="Close">×</button>
+    <div class="fbh"><span style="font-size:21px">🅕</span> → <span style="font-size:21px">🌹</span> <b>An enhancement — not a replacement</b></div>
+    <p class="fbp">DeadDance doesn't replace Facebook — it <b>supercharges</b> it. Your words and photos start here, click by click, then flow out to the groups you already live in. Real human content, no bots.</p>
+    <div class="fbrows">
+      <div class="fbrow"><span>🅕</span><div><b>Still Facebook.</b> Post here, it lands in your Dead group — two-way. Nothing leaves the family.</div></div>
+      <div class="fbrow"><span>🛠️</span><div><b>The tools big groups never get.</b> A calendar, a live map, ticket-grade tickets, a marketplace, and HyperPost — on top of the group you already have.</div></div>
+      <div class="fbrow"><span>🤖</span><div><b>No bots, ever.</b> Every word is a human's; a human always fires it. Original human content, amplified — never faked.</div></div>
+      <div class="fbrow"><span>🌹</span><div><b>Your family, mirrored.</b> The Dead groups fragmented by their own chatter, finally on one map.</div></div>
+    </div>
+    <div class="fbsolarcap">This is <b>HyperPost</b> — write once, radiate everywhere:</div>
+    <div class="fbsolar"><iframe src="hyperpost_map.html" title="HyperPost — content radiating to every network" loading="lazy"></iframe></div>
+  </div>
+</div>
 
 <div class="grid">
   <!-- LEFT SIDEBAR -->
@@ -180,9 +239,48 @@
   <button class="fn"><span class="ic">🪪</span><span class="lb">You</span></button>
 </nav>
 
+<!-- data layer (shares the signed-in Supabase session on this origin) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _DDC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _DDC;}; }catch(e){}</script>
+<script src="dd_me.js"></script>
+<script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
+<script src="dd_pymk.js"></script>
+<script src="dd_friends.js"></script>
+<script src="qr.js"></script>
 <script>
-function hp(){ var t=document.createElement('div'); t.textContent='📡 HyperPost — write once, radiate everywhere 🌹';
-  t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1b1e26;color:#fff;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13.5px;z-index:99;box-shadow:0 10px 30px #0006';
+function openFbInfo(){ document.getElementById('fbInfo').classList.add('on'); }
+function closeFbInfo(){ document.getElementById('fbInfo').classList.remove('on'); }
+function toast(m){ var t=document.createElement('div'); t.innerHTML=m;
+  t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1b1e26;color:#fff;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13.5px;z-index:99;box-shadow:0 10px 30px #0006;max-width:88vw;text-align:center';
   document.body.appendChild(t); setTimeout(function(){t.style.transition='.35s';t.style.opacity=0;setTimeout(function(){t.remove();},360);},2200); }
+function hp(){ toast('📡 HyperPost — write once, radiate everywhere 🌹'); }
+
+/* ---- avatar account menu (the ⌄ dropdown) ---- */
+function toggleAcct(e){ if(e)e.stopPropagation(); document.getElementById('acctMenu').classList.toggle('on'); }
+document.addEventListener('click',function(ev){ var m=document.getElementById('acctMenu'); if(m&&m.classList.contains('on')&&!m.contains(ev.target)&&ev.target.id!=='topAvat') m.classList.remove('on'); });
+function goProfile(){ toast('🌹 Your profile'); }
+function ddSignOut(){ try{ if(window.DDMe&&DDMe.signOut) DDMe.signOut(); }catch(e){} try{ localStorage.removeItem('dd.postSignin'); }catch(e){} location.href='index.html'; }
+
+/* ---- live data wiring (best-effort; the sample layout stays if the backend isn't ready) ---- */
+function _mono(n){ return String(n||'?').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'🌹'; }
+function setAvatars(url,name){ var img=url?('<img src="'+url+'" alt="" style="width:100%;height:100%;object-fit:cover">'):null;
+  ['topAvat','acctAv'].forEach(function(id){ var el=document.getElementById(id); if(el&&img){ el.innerHTML=img; el.style.padding='0'; el.style.overflow='hidden'; } });
+  var an=document.getElementById('acctName'); if(an&&name) an.textContent=name;
+  if(img) document.querySelectorAll('.composer .av').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; }); }
+function wireFriendsData(){
+  try{ if(window.DDMe){ DDMe.load&&DDMe.load(); DDMe.onChange(function(me){ if(me) setAvatars(me.avatar, me.name); }); } }catch(e){}
+  try{ if(window.DDPymk&&DDPymk.suggestions){ DDPymk.suggestions(8).then(function(list){ if(!list||!list.length)return; var row=document.querySelector('.pymk .row'); if(!row)return;
+    var G=['linear-gradient(135deg,#e0577a,#b8002e)','linear-gradient(135deg,#7a3cc0,#3a1f57)','linear-gradient(135deg,#1f9e6b,#123b28)','linear-gradient(135deg,#2f7bf6,#12305e)'];
+    row.innerHTML=list.map(function(p,i){ return '<div class="pk" id="pk-'+i+'"><div class="ph" style="background:'+G[i%4]+'">'+_mono(p.name)+'</div><div class="bd"><div class="nm">'+(p.name||'A Deadhead')+'</div><div class="mu">🌹 '+(p.reason||((p.mutual||0)+' mutual heads'))+'</div><button class="add" onclick="pymkAdd(\''+(p.id||'')+'\',\''+String(p.name||'').replace(/\x27/g,'')+'\',this)">Add friend</button><button class="rm" onclick="var c=document.getElementById(\'pk-'+i+'\'); if(c)c.remove();">Remove</button></div></div>'; }).join('');
+  }).catch(function(){}); } }catch(e){}
+  try{ if(window.DDFriends&&DDFriends.incoming){ DDFriends.incoming().then(function(rows){ if(!rows||!rows.length)return; var host=document.createElement('div'); host.className='card pymk';
+    host.innerHTML='<div class="h">🧑‍🤝‍🧑 Friend requests</div><div class="row">'+rows.map(function(r,i){ var nm=r.from_name||'A head';
+      return '<div class="pk" id="fr-'+i+'"><div class="ph" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">'+_mono(nm)+'</div><div class="bd"><div class="nm">'+nm+'</div><div class="mu">🌹 sent you a request</div><button class="add" onclick="frRespond(\''+r.id+'\',true,this)">Confirm</button><button class="rm" onclick="frRespond(\''+r.id+'\',false,document.getElementById(\'fr-'+i+'\'))">Delete</button></div></div>'; }).join('')+'</div>';
+    var center=document.querySelector('.center'); if(center) center.insertBefore(host, center.children[1]||null);
+  }).catch(function(){}); } }catch(e){}
+}
+window.pymkAdd=function(id,name,btn){ try{ if(window.DDFriends&&DDFriends.send&&id) DDFriends.send(id,name); }catch(e){} if(btn){btn.textContent='✓ Requested';btn.disabled=true;btn.style.opacity=.6;} toast('🌹 Friend request sent'); };
+window.frRespond=function(reqId,accept,arg){ try{ if(window.DDFriends&&DDFriends.respond) DDFriends.respond(reqId,accept); }catch(e){} if(accept){ toast('🌹 You\'re friends now'); } else { if(arg&&arg.remove)arg.remove(); toast('Request deleted.'); } };
+setTimeout(wireFriendsData, 500);
 </script>
 </body></html>

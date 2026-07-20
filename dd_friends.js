@@ -6,31 +6,31 @@
    so the UI can fall back to its demo state — nothing throws. A human still clicks Accept. */
 (function (root) {
   function client() { try { return root.ddClient && root.ddClient(); } catch (e) { return null; } }
-  function myId() { try { var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
+  function myId() { try { var u = (root.DDMe && root.DDMe.id && root.DDMe.id()); if (u) return String(u); var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
   function myName() { try { return (root.ME && root.ME.name && root.ME.name !== 'You') ? root.ME.name : 'A friend'; } catch (e) { return 'A friend'; } }
   function ready() { return !!(client() && myId()); }
 
   function send(toId, toName) {
     var c = client(), id = myId();
     if (!c || !id) return Promise.reject('no-backend');
-    return c.rpc('dd_friend_send', { p_from_id: id, p_from_name: myName(), p_to_id: String(toId), p_to_name: toName || null })
+    return c.rpc('dd_friend_send', { p_to_id: String(toId), p_to_name: toName || null, p_from_name: myName() })
       .then(function (r) { if (r && r.error) throw r.error; return r && r.data; });
   }
   function respond(reqId, accept) {
     var c = client(), id = myId();
     if (!c || !id) return Promise.reject('no-backend');
-    return c.rpc('dd_friend_respond', { p_req_id: reqId, p_to_id: id, p_accept: !!accept })
+    return c.rpc('dd_friend_respond', { p_req_id: reqId, p_accept: !!accept })
       .then(function (r) { if (r && r.error) throw r.error; return r && r.data; });
   }
   function incoming() {
     var c = client(), id = myId();
     if (!c || !id) return Promise.resolve([]);
-    return c.rpc('dd_friends_incoming', { p_to_id: id }).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
+    return c.rpc('dd_friends_incoming', {}).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
   }
   function friends() {
     var c = client(), id = myId();
     if (!c || !id) return Promise.resolve([]);
-    return c.rpc('dd_friends_list', { p_id: id }).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
+    return c.rpc('dd_friends_list', {}).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
   }
 
   var chan = null;

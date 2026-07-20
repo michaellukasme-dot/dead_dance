@@ -4,22 +4,22 @@
    records the FACT ("attended via gps"). Raw coordinates never leave the device. */
 (function (root) {
   function client(){ try{ return root.ddClient && root.ddClient(); }catch(e){ return null; } }
-  function myId(){ try{ var i=root.ddId&&root.ddId(); return (i&&i.id)?String(i.id):null; }catch(e){ return null; } }
+  function myId(){ try{ var u=(root.DDMe&&root.DDMe.id&&root.DDMe.id()); if(u) return String(u); var i=root.ddId&&root.ddId(); return (i&&i.id)?String(i.id):null; }catch(e){ return null; } }
   function myName(){ try{ if(root.ME&&root.ME.name&&root.ME.name!=='You') return root.ME.name;
     var n=root.localStorage&&localStorage.getItem('dd.myname'); return (n&&n.trim())||null; }catch(e){ return null; } }
 
   // mark attendance. via = 'ticket' | 'gps' | 'tapped' | 'rsvp'
   function attend(showId, via){ var c=client(); if(!c||!showId) return Promise.resolve(false);
-    return c.rpc('dd_attend',{p_show_id:showId,p_member:myId(),p_name:myName(),p_via:via||'tapped'})
+    return c.rpc('dd_attend',{p_show_id:showId,p_name:myName(),p_via:via||'tapped'})
       .then(function(r){ return !(r&&r.error); }).catch(function(){ return false; }); }
   function unattend(showId){ var c=client(); if(!c||!showId) return Promise.resolve(false);
-    return c.rpc('dd_unattend',{p_show_id:showId,p_member:myId()}).then(function(){return true;}).catch(function(){return false;}); }
+    return c.rpc('dd_unattend',{p_show_id:showId}).then(function(){return true;}).catch(function(){return false;}); }
   function count(showId){ var c=client(); if(!c||!showId) return Promise.resolve(0);
     return c.rpc('dd_attend_count',{p_show_id:showId}).then(function(r){ return Number((r&&r.data)||0); }).catch(function(){ return 0; }); }
 
   // suggestions -> [{kind:'person', id, name, shared, mutual, band, venue, date, reason}]
   function suggestions(limit){ var c=client(); if(!c) return Promise.resolve([]);
-    return c.rpc('dd_pymk',{p_member:myId(),p_limit:limit||12}).then(function(r){
+    return c.rpc('dd_pymk',{p_limit:limit||12}).then(function(r){
       return ((r&&r.data)||[]).map(function(row){
         var reason;
         if(row.shared_shows>0 && row.sample_band){
