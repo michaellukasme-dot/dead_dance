@@ -464,11 +464,11 @@
       if (rafId) cancelAnimationFrame(rafId);
       if (fallbackT) clearTimeout(fallbackT);
       var start = curVB.slice(), t0 = null, done = false;
-      drawDots(target[2], chapterName);
+      drawDots(target[2], chapterName); refreshYou(target[2]);
       function finish() {                              // guaranteed destination (works even if rAF is paused/throttled)
         if (done) return; done = true;
         if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-        curVB = target.slice(); svg.setAttribute("viewBox", curVB.join(" ")); drawDots(curVB[2], chapterName);
+        curVB = target.slice(); svg.setAttribute("viewBox", curVB.join(" ")); drawDots(curVB[2], chapterName); refreshYou(curVB[2]);
         if (onDone) onDone();
       }
       function step(ts) {
@@ -490,6 +490,7 @@
         '<circle class="you-ring" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r * 1.9).toFixed(1) + '"></circle>' +
         '<circle class="you-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r.toFixed(1) + '"></circle>';
     }
+    function refreshYou(vbW) { if (userLoc) markYou(userLoc[0], userLoc[1], vbW || curVB[2]); }   // re-pin the blue dot on every zoom so it stays the right size + place
 
     /* --- popover (Notify me) --- */
     function showPop(i, gEl) {
@@ -658,6 +659,23 @@
       if (_reg) { drill(_reg); } else { toNation(); }   // focus the same region the Calendar shows — no GPS prompt on load
     } else { toNation(); }
     host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === _boot); });
+
+    // Blue "you are here" dot — auto-show it if location is ALREADY granted (never a new prompt on load).
+    // Does not change the zoom; the dot just appears where the user is on whatever view is showing.
+    function locateYou(mayPrompt) {
+      if (!navigator.geolocation) return;
+      function fix(pos) { userLoc = [pos.coords.latitude, pos.coords.longitude]; refreshYou(); }
+      var opts = { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 };
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          navigator.permissions.query({ name: "geolocation" }).then(function (st) {
+            if (st.state === "granted" || (mayPrompt && st.state === "prompt")) navigator.geolocation.getCurrentPosition(fix, function () {}, opts);
+          }).catch(function () { if (mayPrompt) navigator.geolocation.getCurrentPosition(fix, function () {}, opts); });
+        } else if (mayPrompt) { navigator.geolocation.getCurrentPosition(fix, function () {}, opts); }
+      } catch (e) {}
+    }
+    locateYou(false);
+    try { window.DDShowmap.locateMe = function () { locateYou(true); }; } catch (e) {}
   }
 
   function init() {
