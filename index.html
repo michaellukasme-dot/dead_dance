@@ -266,6 +266,7 @@ body{padding-bottom:64px}
 .cdate b{display:block;font-size:10.5px;color:var(--rose);text-transform:uppercase}
 .cdate span{font-size:13px;font-weight:800}
 .cinfo{flex:1;min-width:0}.cinfo b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tixown{font-size:13px;margin-right:5px;flex:0 0 auto;line-height:1}
 .cinfo span{font-size:11.5px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cact{flex:0 0 auto;text-align:right}
 .cprice{display:block;font-size:11px;font-weight:800;color:var(--accent);white-space:nowrap}
@@ -739,10 +740,10 @@ body{padding-bottom:64px}
   <div class="logo"><img src="rose-32.png" alt="DeadDance" style="height:22px;width:22px;border-radius:6px;vertical-align:-5px;margin-right:7px">DeadDance</div>
   <input class="search" id="ddSearch" autocomplete="off" placeholder="Search heads, shows, tapes, art…" oninput="ddSearchInput(this.value)" onkeydown="if(event.key==='Escape'){this.blur();ddSearchClose();}">
   <div id="ddSearchRes" class="ddsr"></div>
-  <button class="cbtn" onclick="openApps()" title="Menu" aria-label="Menu">▦</button>
-  <button class="chatbtn" onclick="if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')" title="Family chat" aria-label="Family chat">💬</button>
-  <button class="cbtn avat" onclick="openProfMenu()" title="You" aria-label="You">🌹</button>
-  <button class="hpbtn" onclick="hyperConsole('dead.dance')" title="HyperPost — reply, radiate, share">📡 HyperPost</button>
+  <button class="cbtn" onclick="requireSignin(function(){openApps()})" title="Menu" aria-label="Menu">▦</button>
+  <button class="chatbtn" onclick="requireSignin(function(){if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')})" title="Family chat" aria-label="Family chat">💬</button>
+  <button class="cbtn avat" onclick="requireSignin(function(){openProfMenu()})" title="You" aria-label="You">🌹</button>
+  <button class="hpbtn" onclick="requireSignin(function(){hyperConsole('dead.dance')})" title="HyperPost — reply, radiate, share">📡 HyperPost</button>
 </div>
 
 <div class="wrap">
@@ -809,11 +810,10 @@ body{padding-bottom:64px}
     <div class="card">
       <svg class="qrbig" id="qr" viewBox="0 0 100 100" aria-label="My profile QR" onclick="profile('me')" style="cursor:pointer"></svg>
       <div style="text-align:center;font-size:11px;color:var(--accent);font-weight:700;margin-top:5px;cursor:pointer" onclick="profile('me')">tap your QR — it's your whole profile ›</div>
-      <button class="btn gold" style="width:100%;margin-top:9px" onclick="inviteFamily()">🌹 Invite the family</button>
-      <button class="btn" style="width:100%;margin-top:8px;background:#5a2e86;color:#fff;border-color:#5a2e86" onclick="ddSheet('band_onboard.html?src=selfclaim','🌹 Band Install')">🎤 I'm a band — claim your page &amp; add dates</button>
-      <div style="text-align:center;font-weight:800;margin-top:10px">My Purchased Tickets</div>
-      <div class="tix" id="myTix"><span class="when">Tomorrow</span><div class="nm"><b>Splintered Sunlight</b><span>Sellersville Theater · 8:00 PM · 11 mi</span></div></div>
-      <button class="btn ghost sm" style="width:100%" onclick="toast('🎙️ Rosebud: routing you to Felton Music Hall — hands-free.')">🎙️ Rosebud, guide me there</button>
+      <div style="display:flex;gap:8px;margin-top:9px">
+        <button class="btn gold sm" style="flex:1" onclick="inviteFamily()">🌹 Invite Friends</button>
+        <button class="btn sm" style="flex:1;background:#5a2e86;color:#fff;border-color:#5a2e86" onclick="ddSheet('band_onboard.html?src=selfclaim','🌹 Band Install')">🎤 I am a Band</button>
+      </div>
     </div>
 
 
@@ -933,16 +933,46 @@ body{padding-bottom:64px}
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
-  <button class="fn" onclick="openFriends()" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn" onclick="openReader('groups')" title="The Dealer — Groups, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
-  <button class="fn" onclick="openGame()"><span class="ic">🎮</span><span class="lb">Games</span></button>
-  <button class="fn" onclick="ddSheet('record_store.html','💿 DeadDance Records')"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
-  <button class="fn" onclick="openNotifs()" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
-  <button class="fn" onclick="profile('me')"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
+  <button class="fn" onclick="requireSignin(function(){openFriends()})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
+  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="requireSignin(function(){openGame()})"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
+  <button class="fn" onclick="requireSignin(function(){openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
+  <button class="fn" onclick="requireSignin(function(){profile('me')})"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
 </nav>
-<button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
+<button id="createfab" onclick="requireSignin(function(){openCreate()})" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
-<script>window.openFriends=function(){var v=document.getElementById('socialView');if(v){v.classList.add('on');v.scrollTop=0;}try{document.querySelectorAll('.footnav .fn').forEach(function(b){b.classList.remove('fnon');});}catch(e){}};window.closeFriends=function(){var v=document.getElementById('socialView');if(v)v.classList.remove('on');};</script>
+<script>window.openFriends=function(){var v=document.getElementById('socialView');if(v){v.classList.add('on');v.scrollTop=0;}try{document.querySelectorAll('.footnav .fn').forEach(function(b){b.classList.remove('fnon');});}catch(e){}};window.closeFriends=function(){var v=document.getElementById('socialView');if(v)v.classList.remove('on');};
+/* ===== Walled garden: Home is open to all; everything else requires Google/Facebook sign-in ===== */
+var DD_GATE_ON=true;   /* one-line safety valve — set false to disable the gate entirely */
+function ddIsSignedIn(){ try{ return !!(window.DDMe && DDMe.signedIn && DDMe.signedIn()); }catch(e){ return false; } }
+window.requireSignin=function(fn){ if(!DD_GATE_ON || ddIsSignedIn()){ try{ fn&&fn(); }catch(e){} } else { openSignin(); } };
+window.openSignin=function(){ var m=document.getElementById('signinModal'); if(m)m.style.display='flex'; };
+window.closeSignin=function(){ var m=document.getElementById('signinModal'); if(m)m.style.display='none'; };
+window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth&&c.auth.signInWithOAuth){ c.auth.signInWithOAuth({provider:p,options:{redirectTo:location.origin}}).then(function(r){ if(r&&r.error&&window.toast) toast('Sign-in unavailable right now — try again shortly.'); }); } else if(window.toast){ toast('Sign-in is warming up — one moment.'); } }catch(e){ if(window.toast) toast('Sign-in unavailable right now.'); } };
+/* Move the "FB enhancement — not a replacement" note OFF the open home and INSIDE Friends; ✕ asks "never again" and gives the space back */
+(function(){ var s=document.getElementById('fbStrip'), sc=document.querySelector('#socialView .socialscroll');
+  if(s&&sc){ sc.insertBefore(s, sc.firstChild); }
+  if(s){ var x=s.querySelector('.fb-x'); if(x){ x.onclick=function(){
+    s.innerHTML='<span style="flex:1">Hidden. Never show this again?</span>'+
+      '<button style="border:0;background:#ffffff28;color:#fff;font-weight:800;border-radius:8px;padding:5px 11px;margin-left:8px;cursor:pointer" id="fbNeverBtn">Never</button>'+
+      '<button style="border:0;background:#ffffff14;color:#fff;font-weight:700;border-radius:8px;padding:5px 11px;margin-left:6px;cursor:pointer" id="fbNotNowBtn">Not now</button>';
+    s.style.display='flex'; s.style.alignItems='center';
+    var nb=document.getElementById('fbNeverBtn'); if(nb)nb.onclick=function(){ try{localStorage.setItem('dd.fbstrip','1')}catch(e){} s.style.display='none'; };
+    var nn=document.getElementById('fbNotNowBtn'); if(nn)nn.onclick=function(){ s.style.display='none'; };
+  }; } }
+})();</script>
+<div id="signinModal" onclick="if(event.target===this)closeSignin()" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(14,11,20,.9);align-items:center;justify-content:center;padding:18px">
+  <div style="max-width:340px;width:100%;background:#1b1e26;color:#fff;border-radius:20px;padding:24px 22px;text-align:center;position:relative">
+    <button onclick="closeSignin()" aria-label="Close" style="position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:32px;height:32px;border-radius:16px;font-size:18px;cursor:pointer">×</button>
+    <div style="font-size:34px">🌹</div>
+    <div style="font-weight:900;font-size:19px;margin-top:6px">Sign in to play</div>
+    <p style="font-size:13px;color:#d7d2e2;line-height:1.5;margin:8px 0 0">The calendar, map, and tickets are open to everyone. To join the family — Friends, groups, games, and your profile — sign in.</p>
+    <button onclick="ddOAuth('facebook')" style="width:100%;margin-top:16px;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button>
+    <button onclick="ddOAuth('google')" style="width:100%;margin-top:9px;border:1px solid #dadce0;border-radius:12px;padding:13px;font-size:15px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button>
+    <div style="font-size:11px;color:#9aa1b4;margin-top:12px">Keep browsing shows &amp; buy tickets without signing in.</div>
+  </div>
+</div>
 <!-- game FAB removed — Games now lives in the bottom menu -->
 <!-- In-app sheet: opens sub-pages (Records, etc.) in a modal so there is no browser-back dead-end in the PWA -->
 <div id="ddsheet" style="position:fixed;inset:0;z-index:130;display:none">
@@ -1637,7 +1667,8 @@ function renderCalTicket(){ var el=document.getElementById('calTicket'); if(!el)
 window.renderCalTicket=renderCalTicket;
 function capList(rows, limit, label){ limit=limit||5; if(!rows||rows.length<=limit) return (rows||[]).join('');
   return rows.slice(0,limit).join('')+'<details class="morelist"><summary style="cursor:pointer;color:#5a2e86;font-weight:800;font-size:13px;padding:9px 0;text-align:center;list-style:none">See '+(rows.length-limit)+' more'+(label?(' '+label):'')+' ↓</summary>'+rows.slice(limit).join('')+'</details>'; }
-function calRow(s){ var i=SHOWLIST.indexOf(s);
+function hasTix(s){ try{ var b=(s.band||'').toLowerCase().replace(/[^a-z0-9]/g,''); return (window.MYTIX||[]).some(function(t){ return (t.band||'').toLowerCase().replace(/[^a-z0-9]/g,'')===b; }); }catch(e){ return false; } }
+function calRow(s){ var i=SHOWLIST.indexOf(s); var owned=hasTix(s);
  var ext=!!s.url, on=ext&&wantHas(s);
  var priceTxt = ext ? (s.price==='Onsale soon'?'Onsale soon':'Coming here') : s.price;
  var btn = ext ? (on?'<button style="background:#1f7a4d;color:#fff" disabled>✓ On the list</button>'
@@ -1646,7 +1677,7 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var lf=(s.logo||'').replace(/\.png$/,'.svg');
  var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
  return '<div class="crow"'+(s.fest?'':' onclick="openTicket('+i+')" style="cursor:pointer"')+'><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
-  '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div style="min-width:0;flex:1;overflow:hidden">'+
+  '<div class="cinfo" style="display:flex;align-items:center">'+logo+(owned?'<span class="tixown" title="You have tickets for this — in your profile">🎫</span>':'')+'<div style="min-width:0;flex:1;overflow:hidden">'+
     (s.fest
       ? '<b onclick="openFest(\''+s.festHref+'\')" style="cursor:pointer" title="Open on StageFill">'+s.band+'</b>'
         +'<span onclick="openFest(\''+s.festHref+'\')" style="display:block;cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px" title="Open the venue on StageFill">'+s.venue+'</span>'
@@ -1672,7 +1703,7 @@ function renderCal(){
   // pad trailing cells so EVERY month is a constant 6 rows (no resize on ‹ ›)
   for(var tcell=startDow+days; tcell<42; tcell++) h+='<div class="d pad"></div>';
   grid.innerHTML=h;
-  list.innerHTML = (CAL_SEL&&byDay[CAL_SEL]) ? ('<div class="cdh">'+CDOW3[new Date(CAL_SEL+'T12:00:00').getDay()]+' · '+CMONTHS[mth]+' '+(new Date(CAL_SEL+'T12:00:00').getDate())+'</div>'+byDay[CAL_SEL].map(calRow).join('')) : '<div class="chint">Tap a highlighted date to see that night\'s shows.</div>';
+  list.innerHTML = (CAL_SEL&&byDay[CAL_SEL]) ? ('<div class="cdh">'+CDOW3[new Date(CAL_SEL+'T12:00:00').getDay()]+' · '+CMONTHS[mth]+' '+(new Date(CAL_SEL+'T12:00:00').getDate())+'</div>'+byDay[CAL_SEL].map(calRow).join('')) : '';
  } else {
   mo.textContent='Upcoming';
   // filter to ONE month (‹ › to move); current month shows only what's still ahead

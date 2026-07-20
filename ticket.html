@@ -68,6 +68,17 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
 .stub b{color:#e7e2f2}
 .chip{background:rgba(47,123,246,.16);color:#a9c8ff;border:1px solid rgba(47,123,246,.4);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;letter-spacing:.04em}
 .hidden{display:none!important}
+.tmb{display:block;width:100%;max-width:340px;margin:10px auto 0;background:transparent;border:1px dashed #ffffff44;color:#e6d9fb;border-radius:12px;padding:9px;font-size:12.5px;font-weight:800;cursor:pointer}
+#bandPerm{display:none;position:fixed;inset:0;z-index:50;background:rgba(14,11,20,.93);align-items:center;justify-content:center;padding:16px}
+#bandPerm.on{display:flex}
+.bpcard{position:relative;max-width:344px;max-height:90vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:22px 20px}
+.bpx{position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:32px;height:32px;border-radius:16px;font-size:18px;cursor:pointer}
+.bph{font-weight:900;font-size:18px;padding-right:28px}
+.bpp{font-size:13px;line-height:1.5;color:#d7d2e2;margin:10px 0 0}
+.bprow{display:flex;gap:10px;margin-top:12px;font-size:12.5px;line-height:1.45}.bprow span{font-size:18px}
+.bpgo{width:100%;margin-top:16px;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:900;color:#fff;background:#2a8a4a;cursor:pointer}
+.bpno{width:100%;margin-top:8px;border:0;border-radius:12px;padding:11px;font-size:13px;font-weight:800;color:#c9cede;background:#ffffff12;cursor:pointer}
+.bpnote{font-size:11px;color:#9aa1b4;text-align:center;margin-top:10px}
 </style></head>
 <body>
 
@@ -99,6 +110,7 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
     <div class="issuedNote hidden" id="issuedNote">✓ In your wallet · device-bound · works offline at the gate</div>
 
     <div class="foot"><span class="rose">🌹</span> Your ticket. Your friends. No toll booth.</div>
+    <button class="tmb" onclick="bandPerm(1)">🎤 That's my band — sell my tickets</button>
   </div>
 
   <div class="perf"></div>
@@ -108,6 +120,7 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
   </div>
 </div>
 
+<div id="bandPerm"><div class="bpcard" id="bpcard"></div></div>
 <div class="cap">the blue sweep is the tell — recognized by millions</div>
 
 <script>
@@ -169,6 +182,29 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
       try{ if(window.parent&&window.parent.toast) window.parent.toast('🎟️ Ticket issued — it lives on your phone now. 🌹'); }catch(e){}
     }, 750);
   };
+  // "That's my band" → the non-pushy permission ask. We sell NOTHING until the band says yes + confirms their true schedule.
+  window.bandPerm=function(step){
+    var el=document.getElementById('bpcard'); if(!el)return; var nm=String(band||'your band');
+    if(step===2){
+      el.innerHTML='<button class="bpx" onclick="bandPermClose()" aria-label="Close">×</button>'+
+        '<div class="bph">🎉 Let\'s get it right</div>'+
+        '<p class="bpp">Send us <b>'+nm+'</b>\'s <b>true schedule</b> so we sell the exact dates — never our assumption. We reconcile it with the calendar, you confirm, and you\'re live.</p>'+
+        '<button class="bpgo" onclick="bandSetup()">Claim '+nm+' &amp; add my dates ›</button>'+
+        '<div class="bpnote">Nothing goes on sale until you confirm your dates. 🌹</div>';
+    } else {
+      el.innerHTML='<button class="bpx" onclick="bandPermClose()" aria-label="Close">×</button>'+
+        '<div class="bph">🎤 Is this your band?</div>'+
+        '<p class="bpp"><b>May we sell tickets for you?</b> Here\'s exactly how it works:</p>'+
+        '<div class="bprow"><span>🏪</span><div><b>Your own store.</b> Your page, your brand — the tickets stay yours.</div></div>'+
+        '<div class="bprow"><span>👀</span><div><b>You see every transaction.</b> Full transparency, always.</div></div>'+
+        '<div class="bprow"><span>💸</span><div><b>You never pay us.</b> We add a small fee on top — never out of your pocket.</div></div>'+
+        '<button class="bpgo" onclick="bandPerm(2)">✓ Yes — set it up</button>'+
+        '<button class="bpno" onclick="bandPermClose()">Not now</button>';
+    }
+    document.getElementById('bandPerm').classList.add('on');
+  };
+  window.bandPermClose=function(){ var p=document.getElementById('bandPerm'); if(p)p.classList.remove('on'); };
+  window.bandSetup=function(){ try{ location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(String(band||'')); }catch(e){} };
 })();
 </script>
 </body></html>
