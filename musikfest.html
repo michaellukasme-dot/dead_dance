@@ -149,7 +149,7 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
   <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
   <div class="hero" style="position:relative">
     <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
-    <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="musikfest_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
+    <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="MUSIKFEST_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
     <h1>Musikfest</h1>
   </div>
   <div class="mflayers">
@@ -161,8 +161,8 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
   <div id="adFeatured"></div>
   <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">
     <button onclick="closePoster()" aria-label="Close poster" style="position:absolute;top:14px;right:16px;border:0;background:#ffffff26;color:#fff;width:42px;height:42px;border-radius:21px;font-size:23px;cursor:pointer;z-index:2">×</button>
-    <img id="posterImg" src="musikfest_poster.jpg" alt="Musikfest 2026 official poster" onerror="this.style.display='none';var d=document.getElementById('posterMiss');if(d)d.style.display='block'" style="max-width:100%;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px #000a">
-    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>musikfest_poster.jpg</b> and it shows here.</div>
+    <img id="posterImg" src="MUSIKFEST_poster.jpg" alt="Musikfest 2026 official poster" onerror="this.style.display='none';var d=document.getElementById('posterMiss');if(d)d.style.display='block'" style="max-width:100%;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px #000a">
+    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>MUSIKFEST_poster.jpg</b> and it shows here.</div>
   </div>
 
   <div class="admodal" id="adModal">
@@ -801,7 +801,7 @@ window._mfLocked=false;
 function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{ LMAP.setMaxBounds(L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]])); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the fest footprint; zoom stays free
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
-  if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
+  if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
 window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none'; };
 
