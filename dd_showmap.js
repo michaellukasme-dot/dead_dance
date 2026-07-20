@@ -369,6 +369,7 @@
           '</svg>' +
           '<div class="showmap-pop" id="showmapPop" hidden></div>' +
           '<button class="smfab" type="button" onclick="try{window.openMap&&window.openMap()}catch(e){}" title="The bus map — every chapter glowing" aria-label="Open the bus map">🚌</button>' +
+          '<button class="smfab smfab-mir" type="button" onclick="try{window.openMiracle&&openMiracle()}catch(e){}" title="The Miracle Bucket — free tickets in your chapter" aria-label="Open the Miracle bucket">🍀</button>' +
         '</div>' +
         /* region controls + legend moved BELOW the map (Musikfest-style — the chapter picker recenters the map like North/South) */
         '<div class="showmap-region">' +

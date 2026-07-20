@@ -447,6 +447,15 @@ body{padding-bottom:64px}
 .showmap-wrap{position:relative}
 .smfab{position:absolute;right:12px;bottom:12px;z-index:6;width:46px;height:46px;border-radius:50%;border:0;background:linear-gradient(135deg,#f0a500,#e0577a);color:#fff;font-size:22px;line-height:1;box-shadow:0 6px 18px rgba(30,18,48,.35);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .smfab:active{transform:scale(.95)}
+.smfab-mir{bottom:66px;background:linear-gradient(135deg,#2a8a4a,#c79a3a)}
+.socialview{display:none;position:fixed;left:0;right:0;top:0;bottom:58px;z-index:52;background:#160e24;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.socialview.on{display:block}
+.socialbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;background:#241634f2;backdrop-filter:blur(8px);border-bottom:1px solid #ffffff20;padding:12px 14px;color:#fff;font-weight:800}
+.socialbar .sbsub{color:var(--muted);font-size:11px;font-weight:600}
+.socialbar .rx{margin-left:auto;background:#ffffff1a;border:0;color:#fff;width:32px;height:32px;border-radius:16px;font-size:18px;cursor:pointer;line-height:1}
+.socialscroll{max-width:620px;margin:0 auto;padding:14px}
+.calvt{background:#3a2a55;border:0;color:#fff;border-radius:9px;padding:4px 9px;font-size:16px;line-height:1;cursor:pointer;margin-left:2px;flex:0 0 auto}
+.calvt:active{transform:scale(.92)}
 @keyframes mswing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
 .sm-badges .smmiracle{transform-box:fill-box;transform-origin:100% 50%;animation:mswing 1.7s ease-in-out infinite}
 .sm-badges .smmpill{fill:#2a8a4a;stroke:#c79a3a;stroke-width:2}
@@ -768,8 +777,7 @@ body{padding-bottom:64px}
       </div>
       <script>window.openTixSec=function(){var m=document.getElementById('tixSecModal');if(m)m.style.display='flex';};window.closeTixSec=function(){var m=document.getElementById('tixSecModal');if(m)m.style.display='none';};</script>
       <div class="ch">
-        <span class="viewseg"><button id="vwGrid" class="on" onclick="calView('grid')">▦ Month</button><button id="vwList" onclick="calView('list')">📋 Upcoming</button></span>
-        <select id="calAct" class="caltype" onchange="calAct(this.value)" title="Filter the calendar by act — thins the busy national rollup.">
+        <select id="calAct" class="caltype" onchange="calAct(this.value)" title="Filter the calendar by act — thins the busy national rollup." style="flex:1">
           <option value="Steve Kimock">🌹 Steve Kimock</option>
           <option value="John Mayer">John Mayer</option>
           <option value="Melvin Seals and JGB">JGB with Melvin Seals</option>
@@ -788,15 +796,13 @@ body{padding-bottom:64px}
       </div>
       <div class="ch" id="calNavRow">
         <button class="cnav" onclick="calNav(-1)" aria-label="Previous month">‹</button>
-        <span class="mo" id="calMo"></span>
+        <span class="mo" id="calMo" style="min-width:118px;text-align:center;display:inline-block"></span>
         <button class="cnav" onclick="calNav(1)" aria-label="Next month">›</button>
+        <button id="calViewToggle" class="calvt" onclick="calView(CAL_VIEW==='grid'?'list':'grid')" title="Showing Month — tap for the Upcoming list" aria-label="Toggle Month grid or Upcoming list">📅</button>
         <span class="dd-scope"><button class="on" data-scope="local" onclick="setScope('local')">📍 Local</button><button data-scope="national" onclick="setScope('national')">National</button><button data-scope="my" onclick="setScope('my')">My Calendar</button></span>
       </div>
       <div class="grid" id="calGrid" style="display:none"></div>
       <div id="calList"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button id="mfabMini" onclick="openMiracle()" title="The Miracle Bucket — free tickets from the family" aria-label="Miracle Bucket" style="flex:0 0 auto;padding:9px 13px;border-radius:12px;border:1px solid #e6c76b;background:#fff3d6;color:#6b5200;font-weight:800;font-size:15px;line-height:1;cursor:pointer">🍀 Miracle<span class="mm-badge" id="mfabBadge" style="display:none;margin-left:3px">0</span></button>
-      </div>
       <div id="localFam" style="font-size:11px;color:#e0cdf5;margin-top:9px;text-align:center">📍 finding your Local Family…</div>
     </div>
 
@@ -805,11 +811,9 @@ body{padding-bottom:64px}
       <div style="text-align:center;font-size:11px;color:var(--accent);font-weight:700;margin-top:5px;cursor:pointer" onclick="profile('me')">tap your QR — it's your whole profile ›</div>
       <button class="btn gold" style="width:100%;margin-top:9px" onclick="inviteFamily()">🌹 Invite the family</button>
       <button class="btn" style="width:100%;margin-top:8px;background:#5a2e86;color:#fff;border-color:#5a2e86" onclick="ddSheet('band_onboard.html?src=selfclaim','🌹 Band Install')">🎤 I'm a band — claim your page &amp; add dates</button>
-      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:6px">Play something other than the Dead? <a href="stagefill.html" style="color:var(--accent);font-weight:700;text-decoration:none">We've got a home for you too →</a></div>
-      <div style="text-align:center;font-weight:800;margin-top:8px">My Purchased Tickets</div>
+      <div style="text-align:center;font-weight:800;margin-top:10px">My Purchased Tickets</div>
       <div class="tix" id="myTix"><span class="when">Tomorrow</span><div class="nm"><b>Splintered Sunlight</b><span>Sellersville Theater · 8:00 PM · 11 mi</span></div></div>
       <button class="btn ghost sm" style="width:100%" onclick="toast('🎙️ Rosebud: routing you to Felton Music Hall — hands-free.')">🎙️ Rosebud, guide me there</button>
-      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:9px">🎟️ Upload your ticket stubs in <a href="#" onclick="profile('me');return false" style="color:var(--accent);font-weight:700">your QR profile ›</a></div>
     </div>
 
 
@@ -820,7 +824,12 @@ body{padding-bottom:64px}
 
     <!-- ===== US SHOW MAP — upcoming shows plotted by venue (dd_showmap.js) ===== -->
     <div id="showMap"></div>
+  </div>
 
+  <!-- ===================== FRIENDS (social network — curated · synthesized · mirrored) ===================== -->
+  <div id="socialView" class="socialview">
+    <div class="socialbar"><span class="fb">f</span><b>Friends</b><span class="sbsub">with who · following what · shared everywhere</span><button class="rx" onclick="closeFriends()" aria-label="Close Friends">×</button></div>
+    <div class="socialscroll">
     <div class="card">
       <div class="gm-h"><span class="fb">f</span><b>Groups Mirror</b><span style="color:var(--muted);font-size:12px;margin-left:auto">all Dead FB groups, mirrored</span></div>
       <div class="mirror" id="mirror"></div>
@@ -917,13 +926,15 @@ body{padding-bottom:64px}
       <div class="acts"><button class="act" onclick="like(this)">👍 <span>240</span></button><button class="act" onclick="reactPop(this)">😊 React</button><button class="act" style="background:var(--gold);color:#23202a" onclick="CURBUY={band:'Dark Star Orchestra',venue:'Greek Theatre · Berkeley',price:'$59'};buy('ticket')">🎟️ Tickets</button><button class="act reply" onclick="hyperConsole('DSO · Berkeley Greek 7/31')">💬 Comment</button></div>
       <button class="radiate" onclick="hyperConsole('DSO national run')">📡</button>
     </div>
+    </div>
   </div>
 </div>
 
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
-  <button class="fn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
-  <button class="fn" onclick="openReader('groups')" title="The Dealer — Groups, Friends, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
+  <button class="fn" onclick="openFriends()" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
+  <button class="fn" onclick="openReader('groups')" title="The Dealer — Groups, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="openGame()"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="ddSheet('record_store.html','💿 DeadDance Records')"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
   <button class="fn" onclick="openNotifs()" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
@@ -931,6 +942,7 @@ body{padding-bottom:64px}
 </nav>
 <button id="createfab" onclick="openCreate()" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
+<script>window.openFriends=function(){var v=document.getElementById('socialView');if(v){v.classList.add('on');v.scrollTop=0;}try{document.querySelectorAll('.footnav .fn').forEach(function(b){b.classList.remove('fnon');});}catch(e){}};window.closeFriends=function(){var v=document.getElementById('socialView');if(v)v.classList.remove('on');};</script>
 <!-- game FAB removed — Games now lives in the bottom menu -->
 <!-- In-app sheet: opens sub-pages (Records, etc.) in a modal so there is no browser-back dead-end in the PWA -->
 <div id="ddsheet" style="position:fixed;inset:0;z-index:130;display:none">
@@ -956,7 +968,6 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
   <div class="rpanel">
     <div class="rhead">
       <div class="rtabs">
-        <button class="rtab" data-t="friends" onclick="readerTab('friends')">👥 Friends</button>
         <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
         <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
         <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
@@ -1578,8 +1589,9 @@ function calAct(v){
  } }
 window.calAct=calAct;
 function calView(v){ CAL_VIEW=v; CAL_SEL=null;
- document.getElementById('vwList').classList.toggle('on',v==='list');
- document.getElementById('vwGrid').classList.toggle('on',v==='grid'); renderCal(); }
+ var t=document.getElementById('calViewToggle'); if(t){ t.textContent=(v==='grid'?'📅':'📋'); t.title=(v==='grid'?'Showing Month — tap for the Upcoming list':'Showing Upcoming — tap for the Month grid'); }
+ var g=document.getElementById('vwGrid'),l=document.getElementById('vwList'); if(l)l.classList.toggle('on',v==='list'); if(g)g.classList.toggle('on',v==='grid');
+ renderCal(); }
 function calNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); var m=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); CAL_MONTH=m; CAL_SEL=null; renderCal(); mapSyncMonth(); }
 /* keep the MAP on the same month the calendar is showing (band + scope + month all mirror) */
 var LAST_MAP_MONTH=null;
@@ -2429,9 +2441,9 @@ var MIRACLES=[ {id:null,band:"DEAL",venue:"FreeWill Brewing",date:"Jun 16",regio
   {id:null,band:"Joe Russo's Almost Dead",venue:"The Met, Philadelphia",date:"Jun 28",region:"Mid-Atlantic"} ];
 var MYTIX=[ {id:null,band:"Melvin Seals & JGB",venue:"Sellersville Theater",date:"Jun 21"} ];  // demo: your tickets you could Miracle
 var MIRACLE_BANNED=false;
-function miracleBadge(){ var b=document.getElementById('mfabBadge'); if(!b)return; var n=MIRACLES.length;
-  if(n>0){ b.style.display='grid'; b.textContent=n; } else { b.style.display='none'; }
-  /* miracles fall to their show's chapter → bloom a 🍀 pill on that chapter on the map */
+function miracleBadge(){ var n=MIRACLES.length;
+  var b=document.getElementById('mfabBadge'); if(b){ if(n>0){ b.style.display='grid'; b.textContent=n; } else { b.style.display='none'; } }
+  /* Miracle lives on the MAP now, not the calendar → miracles fall to their show's chapter and bloom a 🍀 pill there */
   try{ var m={}; MIRACLES.forEach(function(x){ var r=x.region||(typeof ME!=='undefined'&&ME&&ME.chapter); if(r) m[r]=(m[r]||0)+1; });
        window.DD_MIRACLES_BY_REGION=m; if(window.DDShowmap&&DDShowmap.refresh) DDShowmap.refresh(); }catch(e){} }
 function openMiracle(){ var r=document.getElementById('mRegion'); if(r)r.textContent=(ME&&ME.chapter)||'your chapter';
