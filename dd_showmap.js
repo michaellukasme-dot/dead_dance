@@ -553,7 +553,7 @@
           '<button class="pnotify' + (done ? ' done' : '') + '" data-id="' + id + '">' + (done ? '✓' : '🔔') + '</button>' +
           '</div>';
       });
-      var _LIM = 4;   // show the next few, fold the rest into an accordion so the list never runs long
+      var _LIM = 5;   // show the next few, fold the rest into an accordion so the list never runs long
       var rows = (_rowArr.length <= _LIM) ? _rowArr.join("")
         : _rowArr.slice(0, _LIM).join("") +
           '<details class="pmore"><summary style="cursor:pointer;list-style:none;color:var(--purple2,#5a2e86);font-weight:800;font-size:13px;padding:11px 0;text-align:center">Show ' + (_rowArr.length - _LIM) + ' more ↓</summary>' +
