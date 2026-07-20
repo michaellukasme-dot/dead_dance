@@ -485,10 +485,11 @@
 
     function clearYou() { youG.innerHTML = ""; }
     function markYou(lat, lng, vbW) {
-      var p = project(lat, lng), r = 0.011 * (vbW || curVB[2]);
+      var vw = (vbW || curVB[2]), p = project(lat, lng), r = 0.011 * vw;
       youG.innerHTML =
         '<circle class="you-ring" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r * 1.9).toFixed(1) + '"></circle>' +
-        '<circle class="you-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r.toFixed(1) + '"></circle>';
+        '<circle class="you-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r.toFixed(1) + '"></circle>' +
+        '<text class="you-lbl" x="' + p[0] + '" y="' + (p[1] + r * 2.7).toFixed(1) + '" text-anchor="middle" style="font-size:' + (0.021 * vw).toFixed(1) + 'px">YOUR LOCATION</text>';
     }
     function refreshYou(vbW) { if (userLoc) markYou(userLoc[0], userLoc[1], vbW || curVB[2]); }   // re-pin the blue dot on every zoom so it stays the right size + place
 
@@ -632,7 +633,21 @@
     // shared scope pills — route through the one setScope so the Calendar + Map move together
     host.querySelectorAll(".dd-scope button").forEach(function (b) { b.addEventListener("click", function () { var sc = b.getAttribute("data-scope"); if (window.setScope) { window.setScope(sc); } else { setMode(sc === "national" ? "national" : "local"); } }); });
     // let the Calendar drive the Map (Local ↔ Near-me, National ↔ National, My Calendar → national roll-up)
-    function redrawForFilter(){ if (level === "radius") { if (userLoc) { zoomToRadius(radiusMi); } else { toNation(); } } else if (level && level !== "nation") { drill(level); } else { toNation(); } }
+    /* Map/Calendar intelligence: fit the view to the SELECTED ACT's shows.
+       1 show / 1 chapter → tight; a couple near-adjacent chapters → zoom out to include them; scattered → whole nation. */
+    function actExtentFit(){
+      if(!SHOWS.length){ toNation(); return; }
+      var lats=[],lngs=[];
+      SHOWS.forEach(function(s){ if(s._ll){ lats.push(s._ll[0]); lngs.push(s._ll[1]); } });
+      if(!lats.length){ toNation(); return; }
+      var latMin=Math.min.apply(null,lats),latMax=Math.max.apply(null,lats),lngMin=Math.min.apply(null,lngs),lngMax=Math.max.apply(null,lngs);
+      if((latMax-latMin)>12 || (lngMax-lngMin)>22){ toNation(); return; }   // not near-adjacent → whole nation
+      var b={latMin:latMin,latMax:latMax,lngMin:lngMin,lngMax:lngMax};
+      if(b.latMax-b.latMin<2.4){ var mLat=(b.latMin+b.latMax)/2; b.latMin=mLat-1.6; b.latMax=mLat+1.6; }   // don't over-zoom a lone show
+      if(b.lngMax-b.lngMin<3.2){ var mLng=(b.lngMin+b.lngMax)/2; b.lngMin=mLng-2.4; b.lngMax=mLng+2.4; }
+      var vb=boxToVB(b); animateTo(vb, 620, "*"); refreshYou(vb[2]);
+    }
+    function redrawForFilter(){ if (ACT_FILTER) { actExtentFit(); return; } if (level === "radius") { if (userLoc) { zoomToRadius(radiusMi); } else { toNation(); } } else if (level && level !== "nation") { drill(level); } else { toNation(); } }
     window.DDShowmap = {
       setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },
       setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter, keeps current scope/zoom

@@ -443,6 +443,7 @@ body{padding-bottom:64px}
 .smbadge:hover .blbl,.smbadge:focus .blbl{fill:var(--purple2)}
 .sm-you .you-dot{fill:#1877f2;stroke:#fff;stroke-width:2}
 .sm-you .you-ring{fill:#1877f2;opacity:.22;transform-box:fill-box;transform-origin:center;animation:smpulse 2.2s ease-out infinite}
+.sm-you .you-lbl{fill:#1877f2;font-weight:900;letter-spacing:.04em;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
 @keyframes smpulse{0%{transform:scale(.7);opacity:.5}70%{transform:scale(2.1);opacity:0}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.smdot .smpulse,.sm-you .you-ring{animation:none;opacity:.32}}
 .showmap-pop{position:absolute;z-index:5;width:210px;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 12px 32px rgba(30,18,48,.22);border:1px solid #ece6f2;padding:10px 12px;font-size:12.5px;line-height:1.4}
@@ -786,7 +787,6 @@ body{padding-bottom:64px}
       </div>
       <div class="grid" id="calGrid" style="display:none"></div>
       <div id="calList"></div>
-      <div id="calTicket" style="margin-top:14px"></div>
       <div style="display:flex;gap:8px">
         <button class="openmap" style="flex:1" onclick="openMap()">📍 OPEN MAP</button>
         <button class="openmap" style="flex:1;background:var(--gold);color:#23202a;border-color:var(--gold)" onclick="openGig('date')">📅 ADD A DATE</button>
@@ -1560,10 +1560,17 @@ function calAct(v){
  if(v==='__fifa__'){ var sf=document.getElementById('calAct'); if(sf)sf.value='all';        /* showcase: Philadelphia World Cup 2026 companion */
    if(window.ddSheet){ ddSheet('fifa_philadelphia.html','⚽ Philadelphia 2026'); } else { window.open('fifa_philadelphia.html','_blank','noopener'); } return; }
  CAL_ACT=v||'all'; CAL_SEL=null;
- try{ if(window.DDShowmap&&DDShowmap.setAct) DDShowmap.setAct(CAL_ACT==='all'?null:CAL_ACT); }catch(e){}   /* band dropdown filters the map */
- /* pick a marquee (touring) act → ZOOM the map OUT to National so their whole run shows; keeps calendar+map in sync.
-    Back to Tribute (all) → leave the scope where it is (Local default stays perfect). */
- if(CAL_ACT!=='all' && typeof setScope==='function'){ setScope('national'); } else { renderCal(); } }
+ if(CAL_ACT!=='all'){
+   if(typeof setScope==='function') setScope('national');                 /* pull ALL of the act's dates into the list */
+   try{ var _now=cMid(), _acts=SHOWLIST.filter(calMatch).sort(function(a,b){return a.d-b.d;});
+        var _nx=_acts.filter(function(s){return s.d>=_now;})[0]||_acts[0];
+        if(_nx) CAL_MONTH=new Date(_nx.d.getFullYear(), _nx.d.getMonth(), 1); }catch(e){}   /* land on the month of their next show */
+   try{ if(window.DDShowmap&&DDShowmap.setAct) DDShowmap.setAct(CAL_ACT); }catch(e){}       /* map fits intelligently to the act's spread (1 chapter → tight · near-adjacent → zoom out · scattered → nation) */
+   renderCal();
+ } else {
+   try{ if(window.DDShowmap&&DDShowmap.setAct) DDShowmap.setAct(null); }catch(e){}
+   renderCal();
+ } }
 window.calAct=calAct;
 function calView(v){ CAL_VIEW=v; CAL_SEL=null;
  document.getElementById('vwList').classList.toggle('on',v==='list');
@@ -1617,11 +1624,11 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
  var ext=!!s.url, on=ext&&wantHas(s);
  var priceTxt = ext ? (s.price==='Onsale soon'?'Onsale soon':'Coming here') : s.price;
  var btn = ext ? (on?'<button style="background:#1f7a4d;color:#fff" disabled>✓ On the list</button>'
-                     :'<button onclick="buyTix('+i+')">🔔 Notify me</button>')
-               : '<button onclick="openTicket('+i+')">🎟️ Buy</button>';
+                     :'<button onclick="event.stopPropagation();buyTix('+i+')">🔔 Notify me</button>')
+               : '<button onclick="event.stopPropagation();openTicket('+i+')">🎟️ Buy</button>';
  var lf=(s.logo||'').replace(/\.png$/,'.svg');
  var logo = s.logo ? '<img src="'+s.logo+'" alt="" onerror="this.onerror=null;this.src=\''+lf+'\'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex:none;margin-right:9px;vertical-align:middle">' : '';
- return '<div class="crow"><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
+ return '<div class="crow"'+(s.fest?'':' onclick="openTicket('+i+')" style="cursor:pointer"')+'><div class="cdate"><b>'+CDOW3[s.d.getDay()]+'</b><span>'+(s.d.getMonth()+1)+'/'+s.d.getDate()+'</span></div>'+
   '<div class="cinfo" style="display:flex;align-items:center">'+logo+'<div>'+
     (s.fest
       ? '<b onclick="openFest(\''+s.festHref+'\')" style="cursor:pointer" title="Open on StageFill">'+s.band+'</b>'
@@ -1629,7 +1636,7 @@ function calRow(s){ var i=SHOWLIST.indexOf(s);
         +'<span onclick="openFest(\''+s.festHref+'\')" style="display:inline-block;margin-top:3px;background:#f0e6ff;color:#5a2e86;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;cursor:pointer" title="Open StageFill Musikfest">🎪 '+s.fest+' ›</span>'
       : '<b>'+s.band+'</b><span style="display:block">'+s.venue+'</span>')+
   '</div></div>'+
-  '<div class="cact"><span class="cprice">'+priceTxt+'</span><div class="cbtns"><button class="cadd" onclick="addToCal('+i+')" title="Add to my calendar">📆</button>'+btn+'</div></div></div>'; }
+  '<div class="cact"><span class="cprice">'+priceTxt+'</span><div class="cbtns"><button class="cadd" onclick="event.stopPropagation();addToCal('+i+')" title="Add to my calendar">📆</button>'+btn+'</div></div></div>'; }
 function renderCal(){
  if(!SHOWLIST.length) buildShowlist(); if(!CAL_MONTH) CAL_MONTH=cMid();
  var grid=document.getElementById('calGrid'), list=document.getElementById('calList'),
@@ -1679,7 +1686,6 @@ function renderCal(){
   list.innerHTML=head+body+foot;
  }
  try{ mapSyncMonth(); }catch(e){}   /* map follows the calendar's month */
- try{ renderCalTicket(); }catch(e){}   /* the live ticket under the list */
 }
 function listNav(step){ if(!CAL_MONTH)CAL_MONTH=cMid(); CAL_MONTH=new Date(CAL_MONTH.getFullYear(),CAL_MONTH.getMonth()+step,1); LIST_SHOW_ALL=false; CAL_SEL=null; renderCal(); mapSyncMonth(); }
 function listMore(){ LIST_SHOW_ALL=true; renderCal(); }

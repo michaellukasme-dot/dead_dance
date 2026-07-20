@@ -82,6 +82,7 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
     <div class="gate"><small>Entry Gate</small><b id="gate">Gate A</b></div>
     <div class="act"><b id="band">—</b><span id="sub"></span></div>
     <div class="venue" id="venue">—</div>
+    <a class="veloc" id="veloc" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:12px;font-weight:800;color:#a9c8ff;text-decoration:none">📍 Directions &amp; parking ›</a>
     <div class="srs" id="srs"></div>
     <div class="ga hidden" id="ga">🌹 GENERAL ADMISSION</div>
 
@@ -122,6 +123,7 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
   document.getElementById('sub').textContent=sub;
   document.getElementById('venue').textContent=venue+(date?(' · '+date):'');
   document.getElementById('gate').textContent=gate;
+  var vl=document.getElementById('veloc'); if(vl) vl.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(String(venue||'')+(date?'':''));
 
   // price / buy label
   var numeric=/\$|\d/.test(price);
