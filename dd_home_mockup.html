@@ -202,6 +202,8 @@
       <div class="story" style="background:linear-gradient(180deg,#c08a2d,#5a2e86)"><div class="head">🥁</div><div class="lbl">Oteil &amp; Friends</div></div>
     </div></div>
 
+    <div id="realFeed"></div>
+
     <div class="card post">
       <div class="ph"><div class="av">K</div><div style="flex:1"><b>Kara Diaz</b> <span style="color:var(--muted);font-weight:600">was at</span> <b>Volksplatz</b><div class="t">Musikfest · 2h · 🌹</div></div><div style="color:var(--muted);cursor:pointer">···</div></div>
       <div class="body">The jam went to another galaxy tonight. If you weren’t on the north side you missed it. 🌹⚡</div>
@@ -268,6 +270,7 @@
 <script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
 <script src="dd_pymk.js"></script>
 <script src="dd_friends.js"></script>
+<script src="dd_feed.js"></script>
 <script src="qr.js"></script>
 <script>
 function openFbInfo(){ document.getElementById('fbInfo').classList.add('on'); }
@@ -321,14 +324,28 @@ function openCompose(){ var t=document.getElementById('composeText'); if(t)t.val
 function closeCompose(){ document.getElementById('composeOv').classList.remove('on'); }
 function postSubmit(){ var t=document.getElementById('composeText'); var txt=(t&&t.value||'').trim();
   if(!txt){ toast('Write something first 🌹'); return; }
-  var nm=''; try{ nm=(window.DDMe&&DDMe.name&&DDMe.name())||'You'; }catch(e){ nm='You'; }
-  var center=document.querySelector('.center');
-  if(center){ var card=document.createElement('div'); card.className='card post';
-    var safe=txt.replace(/[<>]/g,function(c){return c==='<'?'&lt;':'&gt;';});
-    card.innerHTML='<div class="ph"><div class="av">'+((nm[0]||'Y').toUpperCase())+'</div><div style="flex:1"><b>'+nm+'</b><div class="t">just now · 🌹</div></div></div><div class="body">'+safe+'</div><div class="acts"><button>👍 Like</button><button>💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div>';
-    var firstPost=center.querySelector('.post'); center.insertBefore(card, firstPost||null); }
-  /* best-effort backend hook — wire dd_post_create(p_text) server-side to persist */
-  try{ var c=window.ddClient&&ddClient(); if(c&&c.rpc) c.rpc('dd_post_create',{p_text:txt}).then(function(){},function(){}); }catch(e){}
-  closeCompose(); toast('📡 HyperPosted — radiating to your groups 🌹'); }
+  var btn=document.querySelector('.composego');
+  if(!(window.DDFeed&&DDFeed.post)){ toast('Feed is loading — try again in a moment'); return; }
+  if(window.DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to post 🌹'); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Posting…'; }
+  DDFeed.post(txt).then(function(){
+    closeCompose(); toast('📡 HyperPosted — radiating to your groups 🌹'); loadFeed();
+  }).catch(function(){
+    toast('Couldn’t post — try again');
+  }).then(function(){ if(btn){ btn.disabled=false; btn.textContent='📡 HyperPost'; } });
+}
+
+/* ---- REAL feed: read persisted posts back (dd_feed) + realtime ---- */
+function _esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function _ago(iso){ try{ var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }catch(e){ return ''; } }
+function postCard(p){ var nm=p.author_name||'A head';
+  var avh=(nm.charAt(0)||'?').toUpperCase();
+  return '<div class="card post"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button>👍 Like</button><button>💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div></div>';
+}
+function loadFeed(){ if(!(window.DDFeed&&DDFeed.feed))return;
+  DDFeed.feed(30).then(function(rows){ var host=document.getElementById('realFeed'); if(!host)return;
+    host.innerHTML=(rows&&rows.length)?rows.map(postCard).join(''):''; }).catch(function(){}); }
+setTimeout(function(){ loadFeed(); try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(){ loadFeed(); }); }catch(e){} }, 600);
 </script>
 </body></html>

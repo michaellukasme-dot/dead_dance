@@ -6,7 +6,7 @@
    empty/broken feed. External-network fan-out stays a human tap elsewhere. */
 (function (root) {
   function client() { try { return root.ddClient && root.ddClient(); } catch (e) { return null; } }
-  function myId() { try { var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
+  function myId() { try { var u = (root.DDMe && root.DDMe.id && root.DDMe.id()); if (u) return String(u); var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
   function myName() {
     try {
       if (root.ME && root.ME.name && root.ME.name !== 'You') return root.ME.name;

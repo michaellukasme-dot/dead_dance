@@ -1,0 +1,31 @@
+/* dd_posts.js — the family feed (create + read), production auth.uid().
+   Talks to Supabase via ddClient(); the server keys the author to auth.uid(), so a
+   post is only "posted" once the RPC actually persists it. No optimistic lies. */
+(function (root) {
+  function client(){ try{ return root.ddClient && root.ddClient(); }catch(e){ return null; } }
+  function myName(){ try{ var n=(root.DDMe&&DDMe.name&&DDMe.name()); if(n) return n;
+    if(root.ME&&root.ME.name&&root.ME.name!=='You') return root.ME.name; return null; }catch(e){ return null; } }
+  function myAvatar(){ try{ return (root.DDMe&&DDMe.avatar&&DDMe.avatar())||null; }catch(e){ return null; } }
+
+  // create -> resolves the new post id, or REJECTS if it did not persist.
+  function create(text){
+    var c=client(), body=(text||'').trim();
+    if(!c) return Promise.reject('no-backend');
+    if(!body) return Promise.reject('empty');
+    return c.rpc('dd_post_create', { p_text: body, p_name: myName(), p_avatar: myAvatar() })
+      .then(function(r){ if(r&&r.error) throw r.error; return r&&r.data; });
+  }
+  // feed -> [{id, author_id, author_name, author_avatar, body, created_at}], newest first.
+  function feed(limit){
+    var c=client(); if(!c) return Promise.resolve([]);
+    return c.rpc('dd_posts_feed', { p_limit: limit||30 })
+      .then(function(r){ if(r&&r.error) throw r.error; return (r&&r.data)||[]; })
+      .catch(function(){ return []; });
+  }
+  var chan=null;
+  function subscribe(onChange){ var c=client(); if(!c||chan) return;
+    try{ chan=c.channel('dd_posts_live').on('postgres_changes',{event:'INSERT',schema:'public',table:'dd_posts'},
+      function(){ try{ onChange&&onChange(); }catch(e){} }).subscribe(); }catch(e){} }
+
+  root.DDPosts = { create: create, feed: feed, subscribe: subscribe };
+})(typeof window !== 'undefined' ? window : this);
