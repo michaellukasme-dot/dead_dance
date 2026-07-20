@@ -1,0 +1,242 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>City Festival Builder · StageFill</title>
+<meta name="theme-color" content="#2a1b3d">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{--rose:#b8002e;--purple:#5a2e86;--accent:#7a3cc0;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--ok:#1f9e6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:#faf8fc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:16px 15px 100px}
+  .back{display:inline-block;margin-bottom:10px;color:var(--purple);font-weight:800;text-decoration:none;font-size:13.5px}
+  .hero{background:linear-gradient(135deg,#2a1b3d,#160c28);color:#fff;border-radius:20px;padding:20px}
+  .hero h1{margin:0;font-size:26px;font-weight:900;letter-spacing:-.4px;line-height:1.05}
+  .hero p{margin:9px 0 0;font-size:13.5px;line-height:1.5;color:#e0d5f2}
+  .sandbox{margin-top:12px;background:#ffffff14;border:1px solid #ffffff2a;border-radius:11px;padding:9px 12px;font-size:12.5px;color:#ffe9c2}
+  .sandbox b{color:#ffd9ec}
+  .sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+  .sec .n{width:22px;height:22px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 16px}
+  label.f{display:block;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 5px}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;font:inherit;font-size:15px;font-weight:600;background:#fff;color:var(--ink)}
+  .row{display:flex;gap:10px}.row>div{flex:1}
+  #fmap{height:280px;border-radius:12px;overflow:hidden;background:#eef;margin-top:6px}
+  .zctl{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .zctl input[type=range]{flex:1;min-width:140px;accent-color:var(--rose)}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:#f1eef7;color:var(--purple);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-weight:800;font-size:13px;cursor:pointer;margin:4px 6px 0 0}
+  .pill.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:#f6f2fb;border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:700;margin:5px 6px 0 0}
+  .chip b{color:var(--rose)}
+  .chip .x{cursor:pointer;color:var(--muted);font-weight:900}
+  .add{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .add input,.add select{flex:1;min-width:110px}
+  .addbtn{background:var(--purple);color:#fff;border:0;border-radius:11px;padding:0 16px;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap}
+  .amen{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .amen .a{display:flex;align-items:center;justify-content:space-between;background:#f8f5fc;border:1px solid var(--line);border-radius:11px;padding:9px 12px;font-size:13.5px;font-weight:700}
+  .amen .a .stp{display:flex;align-items:center;gap:9px}
+  .amen .a button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:16px;cursor:pointer;font-weight:800}
+  .amen .a b{min-width:20px;text-align:center}
+  /* tier meter */
+  .tierbox{background:linear-gradient(135deg,#2a1b3d,#3a1f57);color:#fff;border-radius:16px;padding:16px 18px;margin-top:8px}
+  .tierrow{display:flex;gap:8px;margin:12px 0}
+  .tier{flex:1;text-align:center;background:#ffffff12;border:1px solid #ffffff24;border-radius:12px;padding:11px 8px;transition:.2s}
+  .tier.on{background:#fff;color:var(--ink);border-color:#fff;transform:translateY(-2px)}
+  .tier .t{font-size:15px;font-weight:900;letter-spacing:.02em}
+  .tier .p{font-size:12px;font-weight:800;margin-top:3px;opacity:.85}
+  .tier.on .p{color:var(--rose)}
+  .tier .d{font-size:10.5px;margin-top:4px;line-height:1.3;opacity:.8}
+  .tiernote{font-size:12px;color:#e6d9f5;margin-top:6px;line-height:1.5}
+  .tiernote b{color:#ffd9ec}
+  .actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .go{flex:1;min-width:150px;border:0;border-radius:14px;padding:14px;font-weight:900;font-size:15px;cursor:pointer}
+  .go.primary{background:linear-gradient(135deg,#e0577a,#b8002e);color:#fff}
+  .go.ghost{background:#fff;color:var(--purple);border:1px solid var(--line)}
+  .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;line-height:1.6}
+  .savedtag{font-size:12px;color:var(--ok);font-weight:800;margin-left:8px}
+</style></head>
+<body>
+<div class="wrap">
+  <a class="back" href="city_console.html">‹ City Console</a>
+  <div class="hero">
+    <h1>🎪 City Festival Builder</h1>
+    <p>Build your festival — like Musikfest — inside your city's system. Draw the footprint, drop your stages and platzes, schedule the acts, place the gates and restrooms. It becomes a live StageFill map with its own Event Bar and QR.</p>
+    <div class="sandbox">🧪 <b>Sandbox — yours all year.</b> Build, tweak, and preview any time. You only <b>activate</b> (and pay the tier) in the run-up to the festival. Everything you build is saved to your city.</div>
+  </div>
+
+  <!-- 1 · identity -->
+  <div class="sec"><span class="n">1</span> Your festival</div>
+  <div class="card">
+    <label class="f">Festival name</label>
+    <input id="fName" placeholder="e.g., Bethlehem Riverfest" oninput="save()">
+    <div class="row">
+      <div><label class="f">First day</label><input id="fStart" type="date" onchange="save()"></div>
+      <div><label class="f">Last day</label><input id="fEnd" type="date" onchange="recalc()"></div>
+    </div>
+    <label class="f">Host city / district</label>
+    <input id="fCity" placeholder="e.g., City of Bethlehem, PA" value="City of Bethlehem, PA" oninput="save()">
+  </div>
+
+  <!-- 2 · footprint -->
+  <div class="sec"><span class="n">2</span> The footprint</div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:6px">Click the map to set the festival center, then drag the radius. Tap <b>＋ Multi-site</b> if it spans both sides of the river (like Musikfest's North Side + SteelStacks).</div>
+    <div id="fmap"></div>
+    <div class="zctl">
+      <span style="font-size:12px;font-weight:800;color:var(--muted)">RADIUS</span>
+      <input type="range" id="fRad" min="150" max="2500" step="50" value="700">
+      <span id="radLbl" style="font-size:13px;font-weight:800;color:var(--rose)">700 m</span>
+      <button class="pill" id="multiPill" onclick="toggleMulti()">＋ Multi-site</button>
+    </div>
+    <div id="zread" style="font-size:12px;font-weight:700;color:#4a4356;background:#f4f0fa;border-radius:9px;padding:8px 11px;margin-top:8px;line-height:1.5">Center: — · tap the map to set it.</div>
+  </div>
+
+  <!-- 3 · stages -->
+  <div class="sec"><span class="n">3</span> Stages &amp; platzes</div>
+  <div class="card">
+    <div id="stageList"><span style="font-size:12.5px;color:var(--muted)">No stages yet — add your first below.</span></div>
+    <div class="add">
+      <input id="stName" placeholder="Stage / platz name">
+      <select id="stSide"><option value="N">North side</option><option value="S">South side</option><option value="C">Central</option></select>
+      <button class="addbtn" onclick="addStage()">＋ Stage</button>
+    </div>
+  </div>
+
+  <!-- 4 · days & acts -->
+  <div class="sec"><span class="n">4</span> Days &amp; acts</div>
+  <div class="card">
+    <div id="actList"><span style="font-size:12.5px;color:var(--muted)">No acts scheduled yet.</span></div>
+    <div class="add">
+      <input id="acBand" placeholder="Act / band">
+      <select id="acStage"><option value="">Stage…</option></select>
+    </div>
+    <div class="add">
+      <input id="acDay" type="date">
+      <input id="acTime" type="time" value="20:00">
+      <button class="addbtn" onclick="addAct()">＋ Act</button>
+    </div>
+  </div>
+
+  <!-- 5 · amenities -->
+  <div class="sec"><span class="n">5</span> Amenities &amp; safety</div>
+  <div class="card">
+    <div class="amen" id="amen"></div>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.45">These place icons on the live map and feed the NOC counters in your City Console (gates, restrooms, first-aid, vendors, parking).</div>
+  </div>
+
+  <!-- 6 · size → tier -->
+  <div class="sec"><span class="n">6</span> Size &amp; your tier</div>
+  <div class="card">
+    <label class="f">Expected peak attendance (per day)</label>
+    <input id="fPeak" type="number" min="0" step="500" placeholder="e.g., 60000" value="8000" oninput="recalc()">
+    <div class="tierbox">
+      <div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#e6d9f5">Festival Builder — LESS · MORE · MOST</div>
+      <div class="tierrow">
+        <div class="tier" id="tier-LESS"><div class="t">LESS</div><div class="p" id="p-LESS">—</div><div class="d">Block party / street fair<br>≤5k/day · 1–2 stages · 1–3 days</div></div>
+        <div class="tier" id="tier-MORE"><div class="t">MORE</div><div class="p" id="p-MORE">—</div><div class="d">City festival<br>5k–50k/day · 3–8 stages</div></div>
+        <div class="tier" id="tier-MOST"><div class="t">MOST</div><div class="p" id="p-MOST">—</div><div class="d">Marquee (Musikfest-scale)<br>50k+/day · 8+ stages · multi-site</div></div>
+      </div>
+      <div class="tiernote" id="tierNote">Set your size above — we'll recommend a tier.</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="go ghost" onclick="preview()">👁 Preview the map</button>
+    <button class="go ghost" onclick="makeQR()">🔳 Event QR</button>
+    <button class="go primary" onclick="activate()">🚀 Activate this festival</button>
+  </div>
+  <div id="qrhost" style="text-align:center;margin-top:14px"></div>
+
+  <div class="foot">StageFill · City Festival Builder — one engine, every city festival. 🌹<br>Build free all year · activate (LESS/MORE/MOST) before the festival. <span id="savedTag" class="savedtag"></span></div>
+</div>
+
+<script src="qr.js"></script><script src="dd_qrmark.js"></script>
+<script>
+var LMAP,CENTER=null,CIRCLE=null,MARKER=null,RAD=700,MULTI=false;
+var F={name:'',start:'',end:'',city:'',stages:[],acts:[],amen:{gate:4,rest:6,aid:2,vendor:12,park:5},peak:8000};
+var AMEN=[['gate','🚪','Gates'],['rest','🚻','Restrooms'],['aid','🚑','First-aid'],['vendor','🍺','Vendors'],['park','🅿️','Parking lots']];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function slug(s){return String(s||'festival').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);}
+
+/* ---- map ---- */
+function initMap(){
+  LMAP=L.map('fmap',{scrollWheelZoom:true}).setView([40.6175,-75.3755],14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP);
+  LMAP.on('click',function(e){ setCenter(e.latlng.lat,e.latlng.lng); });
+  try{ navigator.geolocation&&navigator.geolocation.getCurrentPosition(function(p){ if(!CENTER)LMAP.setView([p.coords.latitude,p.coords.longitude],14); },function(){},{timeout:6000}); }catch(e){}
+}
+function setCenter(la,lo){ CENTER=[la,lo];
+  if(!MARKER){ MARKER=L.marker(CENTER,{draggable:true}).addTo(LMAP); MARKER.on('dragend',function(){var m=MARKER.getLatLng();CENTER=[m.lat,m.lng];drawZone();}); }
+  else MARKER.setLatLng(CENTER); drawZone(); }
+function drawZone(){ if(!CENTER)return; if(CIRCLE)LMAP.removeLayer(CIRCLE);
+  CIRCLE=L.circle(CENTER,{radius:RAD,color:'#b8002e',weight:2,fillColor:'#b8002e',fillOpacity:MULTI?0.06:0.10}).addTo(LMAP);
+  document.getElementById('zread').innerHTML='Center: <b>'+CENTER[0].toFixed(5)+', '+CENTER[1].toFixed(5)+'</b> · radius <b>'+RAD+' m</b>'+(MULTI?' · <b>multi-site</b>':'');
+  save(); }
+document.getElementById('fRad').addEventListener('input',function(){RAD=+this.value;document.getElementById('radLbl').textContent=RAD+' m';drawZone();recalc();});
+function toggleMulti(){ MULTI=!MULTI; document.getElementById('multiPill').classList.toggle('on',MULTI); drawZone(); recalc(); }
+
+/* ---- stages ---- */
+function addStage(){ var n=document.getElementById('stName').value.trim(); if(!n)return;
+  F.stages.push({n:n,side:document.getElementById('stSide').value}); document.getElementById('stName').value='';
+  renderStages(); save(); recalc(); }
+function renderStages(){ var h=document.getElementById('stageList'), sel=document.getElementById('acStage');
+  if(!F.stages.length){ h.innerHTML='<span style="font-size:12.5px;color:var(--muted)">No stages yet — add your first below.</span>'; }
+  else h.innerHTML=F.stages.map(function(s,i){ var e=s.side==='N'?'🏛️':s.side==='S'?'🏭':'🎪'; return '<span class="chip">'+e+' '+esc(s.n)+' <span class="x" onclick="delStage('+i+')">✕</span></span>'; }).join('');
+  sel.innerHTML='<option value="">Stage…</option>'+F.stages.map(function(s){return '<option>'+esc(s.n)+'</option>';}).join(''); }
+function delStage(i){ F.stages.splice(i,1); renderStages(); save(); recalc(); }
+
+/* ---- acts ---- */
+function addAct(){ var b=document.getElementById('acBand').value.trim(); if(!b)return;
+  F.acts.push({b:b,st:document.getElementById('acStage').value,d:document.getElementById('acDay').value,t:document.getElementById('acTime').value});
+  document.getElementById('acBand').value=''; renderActs(); save(); }
+function renderActs(){ var h=document.getElementById('actList');
+  if(!F.acts.length){ h.innerHTML='<span style="font-size:12.5px;color:var(--muted)">No acts scheduled yet.</span>'; return; }
+  h.innerHTML=F.acts.map(function(a,i){ return '<span class="chip">🎸 <b>'+esc(a.b)+'</b>'+(a.st?' · '+esc(a.st):'')+(a.d?' · '+esc(a.d):'')+(a.t?' '+esc(a.t):'')+' <span class="x" onclick="delAct('+i+')">✕</span></span>'; }).join(''); }
+function delAct(i){ F.acts.splice(i,1); renderActs(); save(); }
+
+/* ---- amenities ---- */
+function renderAmen(){ document.getElementById('amen').innerHTML=AMEN.map(function(a){ return '<div class="a"><span>'+a[1]+' '+a[2]+'</span><span class="stp"><button onclick="amStep(\''+a[0]+'\',-1)">−</button><b id="am-'+a[0]+'">'+(F.amen[a[0]]||0)+'</b><button onclick="amStep(\''+a[0]+'\',1)">＋</button></span></div>'; }).join(''); }
+function amStep(k,d){ F.amen[k]=Math.max(0,(F.amen[k]||0)+d); document.getElementById('am-'+k).textContent=F.amen[k]; save(); }
+
+/* ---- size → tier ---- */
+function daysCount(){ try{ if(F.start&&F.end){ var a=new Date(F.start),b=new Date(F.end); var d=Math.round((b-a)/86400000)+1; return d>0?d:1; } }catch(e){} return 1; }
+function tierFor(){ var peak=+document.getElementById('fPeak').value||0, st=F.stages.length, dy=daysCount(), score=0;
+  score += peak>=50000?3 : peak>=5000?2 : 1;
+  score += st>=8?2 : st>=3?1 : 0;
+  score += dy>=10?2 : dy>=3?1 : 0;
+  score += MULTI?1:0;
+  return score>=7?'MOST' : score>=4?'MORE':'LESS'; }
+var PRICE={LESS:'$0–$750 / event',MORE:'$1.5k–$6k / event',MOST:'$10k+ / event'};
+var BLURB={LESS:'a block party or street fair — get the map, the bar, and the QR for a weekend.',MORE:'a real city festival — full schedule, multi-day, the NOC counters, your ad corridor.',MOST:'a marquee, Musikfest-scale festival — multi-site, all the platzes, year-round build, priority ops.'};
+function recalc(){ F.peak=+document.getElementById('fPeak').value||0; F.start=document.getElementById('fStart').value; F.end=document.getElementById('fEnd').value;
+  ['LESS','MORE','MOST'].forEach(function(t){ document.getElementById('p-'+t).textContent=PRICE[t]; document.getElementById('tier-'+t).classList.remove('on'); });
+  var t=tierFor(); document.getElementById('tier-'+t).classList.add('on');
+  document.getElementById('tierNote').innerHTML='Recommended: <b>'+t+'</b> — '+BLURB[t]+' <span style="opacity:.7">('+daysCount()+' day'+(daysCount()>1?'s':'')+' · '+F.stages.length+' stage'+(F.stages.length===1?'':'s')+(MULTI?' · multi-site':'')+')</span>';
+  save(); }
+
+/* ---- persistence (yours all year) ---- */
+function save(){ F.name=document.getElementById('fName').value; F.city=document.getElementById('fCity').value; F.start=document.getElementById('fStart').value; F.end=document.getElementById('fEnd').value;
+  F.center=CENTER; F.radius=RAD; F.multi=MULTI;
+  try{ localStorage.setItem('sf_festival_draft', JSON.stringify(F)); document.getElementById('savedTag').textContent='✓ draft saved'; setTimeout(function(){var s=document.getElementById('savedTag');if(s)s.textContent='';},1500); }catch(e){} }
+function load(){ try{ var raw=localStorage.getItem('sf_festival_draft'); if(!raw)return; var d=JSON.parse(raw); F=Object.assign(F,d);
+  document.getElementById('fName').value=F.name||''; document.getElementById('fCity').value=F.city||'City of Bethlehem, PA';
+  document.getElementById('fStart').value=F.start||''; document.getElementById('fEnd').value=F.end||''; document.getElementById('fPeak').value=F.peak||8000;
+  if(F.radius){ RAD=F.radius; document.getElementById('fRad').value=RAD; document.getElementById('radLbl').textContent=RAD+' m'; }
+  MULTI=!!F.multi; document.getElementById('multiPill').classList.toggle('on',MULTI);
+  if(F.center){ setTimeout(function(){ setCenter(F.center[0],F.center[1]); LMAP.setView(F.center,14); },300); }
+}catch(e){} }
+
+/* ---- actions ---- */
+function preview(){ if(!CENTER){ alert('Set the festival center on the map first.'); return; } save();
+  alert('Preview: '+(F.name||'Your festival')+'\n'+daysCount()+' days · '+F.stages.length+' stages · '+F.acts.length+' acts\nRecommended tier: '+tierFor()+'\n\n(The live StageFill map + Event Bar render from this draft.)'); }
+function makeQR(){ save(); var url='https://stagefill.app/'+(slug(F.city)||'city')+'/'+(slug(F.name)||'festival');
+  document.getElementById('qrhost').innerHTML='<div id="fqr" style="width:170px;height:170px;margin:0 auto"></div><div style="font-size:12.5px;color:var(--purple);font-weight:800;margin-top:8px">'+esc(url.replace('https://',''))+'</div>';
+  try{ if(window.DDQR) DDQR.into('fqr',url,{mark:'sf',size:340,css:170}); }catch(e){} }
+function activate(){ save(); var t=tierFor();
+  alert('🚀 Activate "'+(F.name||'your festival')+'" on the '+t+' tier ('+PRICE[t]+').\n\nCheckout opens once your Stripe keys are live — nothing is charged in sandbox. Your festival build is saved and ready to go live.'); }
+
+/* boot */
+initMap(); renderStages(); renderActs(); renderAmen(); load(); recalc();
+</script>
+</body></html>

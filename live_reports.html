@@ -1,0 +1,170 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Live Reports · DeadDance</title>
+<meta name="theme-color" content="#5a2e86">
+<style>
+  :root{--rose:#b8002e;--purple:#5a2e86;--accent:#7a3cc0;--gold:#c79a3a;--ink:#23202a;--muted:#7a7686;--line:#e7ddf5;--bg:#f2ecfb;--card:#fff;--ok:#2a6b46}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:14px 14px 90px}
+  .hero{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#efe7fb,#e0d3f5);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+  .hero .t{flex:1;min-width:0}
+  .hero h1{margin:0;font-size:20px;font-weight:900;color:var(--purple)}
+  .hero p{margin:2px 0 0;font-size:12.5px;color:#6a5a86;line-height:1.4}
+  .cookies{flex:none;background:#fff;border:1px solid var(--line);border-radius:13px;padding:8px 12px;text-align:center}
+  .cookies b{display:block;font-size:20px;font-weight:900;color:var(--rose)}
+  .cookies span{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .report{width:100%;margin:14px 0;border:0;border-radius:14px;padding:13px;font-weight:900;font-size:16px;color:#fff;background:linear-gradient(135deg,#7a3cc0,#5a2e86);cursor:pointer;box-shadow:0 8px 20px #5a2e8633}
+  .sec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 2px 9px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:11px;transition:.25s}
+  .card .top{display:flex;align-items:flex-start;gap:11px}
+  .ic{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;font-size:22px;background:#f2ecfb}
+  .ic.haz{background:#fde8e8}.ic.good{background:#e7f5ec}
+  .card .info{flex:1;min-width:0}
+  .card .info b{font-size:15.5px;display:block}
+  .card .info .meta{color:var(--muted);font-size:12px;margin-top:2px}
+  .card .info .who{font-size:11.5px;margin-top:5px}
+  .card .info .who .first{color:var(--rose);font-weight:800}
+  .age{flex:none;font-size:11px;font-weight:800;color:var(--muted);background:#f2ecfb;border-radius:8px;padding:3px 8px}
+  .age.fade{color:#b06a00;background:#fff3d6}
+  .cbar{display:flex;gap:8px;margin-top:11px}
+  .cbtn{flex:1;border:0;border-radius:10px;padding:10px;font-weight:800;font-size:13.5px;cursor:pointer}
+  .cbtn.yes{background:#e7f5ec;color:var(--ok)}.cbtn.yes:hover{background:#d8eede}
+  .cbtn.no{background:#f0e9f6;color:#6a5a86}.cbtn.no:hover{background:#e6dcf0}
+  .cbtn:disabled{opacity:.55;cursor:default}
+  .confirms{font-size:11.5px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+  .confirms .bar{flex:1;height:5px;background:#eee3f7;border-radius:3px;overflow:hidden}.confirms .bar i{display:block;height:100%;background:var(--accent)}
+  /* leaderboard */
+  .lb{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 4px}
+  .lrow{display:flex;align-items:center;gap:11px;padding:8px 10px}
+  .lrow .rk{width:24px;text-align:center;font-weight:900;color:var(--muted)}
+  .lrow .rk.one{color:var(--gold)}
+  .lav{width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px}
+  .lrow .ln{flex:1;font-weight:700;font-size:14px}.lrow .ln small{display:block;color:var(--muted);font-weight:600;font-size:11px}
+  .lrow .lp{font-weight:900;color:var(--rose);font-size:14px}
+  /* composer */
+  .ov{position:fixed;inset:0;background:rgba(42,27,61,.5);display:none;align-items:flex-end;justify-content:center;z-index:50}
+  .ov.on{display:flex}
+  .sheet{background:#fff;width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:16px 16px 26px;max-height:82vh;overflow:auto}
+  .sheet h3{margin:2px 0 3px;font-size:18px;font-weight:900}.sheet .s{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+  .types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .type{border:1px solid var(--line);border-radius:13px;padding:12px 6px;text-align:center;cursor:pointer;background:#fff;font-weight:800;font-size:12px}
+  .type:hover{background:#f6f2fb;border-color:var(--accent)}
+  .type .e{font-size:26px;display:block;margin-bottom:5px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1b1e26;color:#fff;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13.5px;z-index:99;box-shadow:0 10px 30px #0006;display:flex;align-items:center;gap:8px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="t"><h1>🚗🌹 Live Reports</h1><p>First to call it earns the most. Every confirm keeps the corridor true.</p></div>
+    <div class="cookies"><b id="cookieN">0</b><span>🍪 Cookies</span></div>
+  </div>
+
+  <button class="report" onclick="openComposer()">＋ Report something on the corridor</button>
+
+  <div class="sec">Live on the corridor</div>
+  <div id="feed"></div>
+
+  <div class="sec">🍪 Cookie leaderboard · today</div>
+  <div class="lb" id="lb"></div>
+</div>
+
+<!-- composer -->
+<div class="ov" id="ov" onclick="if(event.target===this)closeComposer()">
+  <div class="sheet">
+    <h3>What do you see?</h3>
+    <p class="s">You're the first informer — that's <b style="color:var(--rose)">+25 🍪</b>. Pick a type.</p>
+    <div class="types" id="types"></div>
+  </div>
+</div>
+
+<script>
+var COOKIES=0, TRUST=1;
+function setCookies(n){ COOKIES=n; var el=document.getElementById('cookieN'); if(el)el.textContent=COOKIES.toLocaleString();
+  try{ localStorage.setItem('dd.cookies', COOKIES); }catch(e){} }
+try{ var c=+localStorage.getItem('dd.cookies'); setCookies(isNaN(c)||!c?320:c); }catch(e){ setCookies(320); }
+
+var TYPES=[
+  {k:'gate',   e:'🎟️', n:'Gate line',        place:'this gate',        good:0, life:20},
+  {k:'lotfull',e:'🅿️', n:'Lot full',          place:'the lot',          good:0, life:120},
+  {k:'police', e:'👮', n:'Police / security', place:'ahead',            good:0, life:40},
+  {k:'shoulder',e:'🚗',n:'Car on shoulder',   place:'on the road in',   good:0, life:30, haz:1},
+  {k:'hazard', e:'⚠️', n:'Hazard / crush',    place:'here',             good:0, life:60, haz:1},
+  {k:'medical',e:'🚑', n:'Needs help',        place:'here',             good:0, life:60, haz:1},
+  {k:'rest',   e:'🚻', n:'Restroom line',     place:'nearby',           good:0, life:20},
+  {k:'water',  e:'💧', n:'Water here',        place:'nearby',           good:1, life:60},
+  {k:'set',    e:'🔥', n:'Killer set on',     place:'this stage',       good:1, life:45},
+  {k:'shake',  e:'🛍️', n:'Shakedown vendor',  place:'the lot',          good:1, life:90},
+  {k:'miracle',e:'🌹', n:'Miracle spare',     place:'here',             good:1, life:30},
+  {k:'need',   e:'🙏', n:'Miracle needed',    place:'here',             good:0, life:60}
+];
+function T(k){ return TYPES.filter(function(t){return t.k===k;})[0]; }
+
+var REPORTS=[
+  {id:1,k:'gate',    place:'Gate 3 · Wind Creek Steel Stage', first:'Glen Arndt', mins:4,  confirms:9, cleared:0, mine:0},
+  {id:2,k:'lotfull', place:'Sand Island lot',                 first:'Kara D.',    mins:12, confirms:14,cleared:0, mine:0},
+  {id:3,k:'set',     place:'Volksplatz — jam is ON',          first:'Robbie G.',  mins:2,  confirms:6, cleared:0, mine:0},
+  {id:4,k:'shoulder',place:'Rt 378 SB before the bridge',     first:'Matt H.',    mins:7,  confirms:3, cleared:0, mine:0},
+  {id:5,k:'rest',    place:'Restrooms free at Liederplatz',   first:'Nikki J.',   mins:9,  confirms:5, cleared:0, mine:0}
+];
+var LEADERS=[
+  {name:'Glen Arndt', note:'click · click · click', pts:1840, g:'linear-gradient(150deg,#d19a2a,#8a5a12)'},
+  {name:'Kara Diaz', note:'lot scout', pts:1210, g:'linear-gradient(150deg,#e0577a,#b8002e)'},
+  {name:'Robbie G.', note:'the Chancellor', pts:990, g:'linear-gradient(150deg,#7a3cc0,#3a1f57)'},
+  {name:'Matt Hartle', note:'road reports', pts:760, g:'linear-gradient(150deg,#2f7bf6,#12305e)'}
+];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function ageTxt(r){ var t=T(r.k), fade=r.mins> (t.life*0.6); return {txt:r.mins+'m', fade:fade}; }
+
+function card(r){ var t=T(r.k), a=ageTxt(r);
+  var cls=t.haz?' haz':(t.good?' good':'');
+  var pct=Math.min(100, Math.round(r.confirms/15*100));
+  var done=r.voted;
+  return '<div class="card" id="rep-'+r.id+'"><div class="top">'+
+    '<div class="ic'+cls+'">'+t.e+'</div>'+
+    '<div class="info"><b>'+esc(t.n)+'</b><div class="meta">'+esc(r.place)+'</div>'+
+      '<div class="who"><span class="first">🌹 '+esc(r.first)+'</span> reported first · '+r.mins+'m ago</div></div>'+
+    '<div class="age'+(a.fade?' fade':'')+'">'+a.txt+'</div></div>'+
+    '<div class="confirms">✓ '+r.confirms+' confirmed <div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<div class="cbar">'+
+      '<button class="cbtn yes" '+(done?'disabled':'')+' onclick="confirmR('+r.id+')">✓ Still there (+5 🍪)</button>'+
+      '<button class="cbtn no" '+(done?'disabled':'')+' onclick="clearR('+r.id+')">✗ Gone</button>'+
+    '</div></div>';
+}
+function renderFeed(){ var h=REPORTS.filter(function(r){return !r.gone;}).sort(function(a,b){return a.mins-b.mins;}).map(card).join('');
+  document.getElementById('feed').innerHTML = h || '<div style="color:var(--muted);font-size:13px;padding:10px 4px">All clear on the corridor. Be the first to report something. 🌹</div>'; }
+function renderLB(){ document.getElementById('lb').innerHTML=LEADERS.map(function(l,i){
+  return '<div class="lrow"><div class="rk'+(i===0?' one':'')+'">'+(i===0?'👑':(i+1))+'</div>'+
+    '<div class="lav" style="background:'+l.g+'">'+l.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2)+'</div>'+
+    '<div class="ln">'+esc(l.name)+'<small>'+esc(l.note)+'</small></div><div class="lp">'+l.pts.toLocaleString()+' 🍪</div></div>';
+}).join(''); }
+
+function confirmR(id){ var r=byId(id); if(!r||r.voted)return; r.voted=1; r.confirms++; r.mins=Math.max(0,r.mins-1);
+  setCookies(COOKIES+5); toast('✓ Confirmed — +5 🍪. You kept the corridor true.'); renderFeed(); bumpGlen(); }
+function clearR(id){ var r=byId(id); if(!r||r.voted)return; r.voted=1; r.cleared++;
+  setCookies(COOKIES+5);
+  if(r.cleared>=1){ var el=document.getElementById('rep-'+id); if(el){ el.style.opacity=0; el.style.transform='scale(.97)'; } r.gone=1; setTimeout(renderFeed,260); toast('✗ Cleared — +5 🍪. Stale pin gone.'); }
+  else { toast('✗ Marked gone — +5 🍪.'); renderFeed(); } }
+function byId(id){ return REPORTS.filter(function(r){return r.id===id;})[0]; }
+function bumpGlen(){ LEADERS[0].pts+=1; /* Glen never stops */ }
+
+/* composer */
+function openComposer(){ document.getElementById('types').innerHTML=TYPES.map(function(t){
+  return '<div class="type" onclick="fileReport(\''+t.k+'\')"><span class="e">'+t.e+'</span>'+esc(t.n)+'</div>'; }).join('');
+  document.getElementById('ov').classList.add('on'); }
+function closeComposer(){ document.getElementById('ov').classList.remove('on'); }
+function fileReport(k){ var t=T(k); closeComposer();
+  var r={id:Date.now(), k:k, place:t.place+' · your location', first:'You', mins:0, confirms:1, cleared:0, mine:1, voted:1};
+  REPORTS.unshift(r); setCookies(COOKIES+25); toast('🌹 First informer — +25 🍪! Heads behind you will confirm it.'); renderFeed();
+  /* feed the corridor NOC (aggregate, if the app is present) */
+  try{ var P=window.parent&&window.parent!==window?window.parent:null; if(P&&P.ddReportEvent) P.ddReportEvent(k, r.place); }catch(e){} }
+
+function toast(m){ var t=document.createElement('div'); t.className='toast'; t.textContent=m;
+  document.body.appendChild(t); setTimeout(function(){ t.style.transition='.35s'; t.style.opacity=0; setTimeout(function(){t.remove();},360); },2400); }
+
+renderFeed(); renderLB();
+/* the corridor breathes — ages tick up, Glen keeps clicking */
+setInterval(function(){ REPORTS.forEach(function(r){ if(!r.gone) r.mins++; }); if(Math.random()<0.4){ LEADERS[0].pts++; renderLB(); } renderFeed(); }, 12000);
+</script>
+</body></html>

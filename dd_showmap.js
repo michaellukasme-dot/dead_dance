@@ -697,7 +697,8 @@
       setScope: function (scope) { try { if (scope === "local" || scope === "my") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },   /* My Calendar defaults to your local chapter, not the whole nation */
       setAct: function (band) { try { mergeCalendarShows(); applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter (unifies with calendar first, so every act flies)
       setMonth: function (ym) { try { mergeCalendarShows(); applyMonthData(ym); redrawForFilter(); } catch (e) {} },    // calendar month ‹ › → map filter
-      refresh: function () { try { if (level === "nation") drawBadges(true); } catch (e) {} }      // re-bloom miracle pills when the bucket changes
+      refresh: function () { try { if (level === "nation") drawBadges(true); } catch (e) {} },      // re-bloom miracle pills when the bucket changes
+      backout: function () { try { toNation(); } catch (e) {} }      // sparse local chapter → zoom out so the nearest shows are visible
     };
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
