@@ -20,6 +20,9 @@ Format: PNG (or swap the reference to .svg in index.html if you have vector). No
 - `logos/westgate_pizza.png` — Westgate Pizza
 - `logos/allentown_fair.png` — The Great Allentown Fair
 - `logos/aci_consulting.png` — Abboud Consulting Inc. (ACI)
+- `logos/vallos_bakery.png` — Vallos Bakery
+- `logos/st_george_allentown.png` — St. George Orthodox Church, Allentown (stgeorgeallentown.com)
+- `logos/st_paul_emmaus.png` — St. Paul, Emmaus (saintpaulemmaus.org)
 - *(Poster artist uses the existing `MUSIKFEST_poster.jpg`; DeadDance uses `rosebud.svg` — no action needed.)*
 
 ## Houses / national

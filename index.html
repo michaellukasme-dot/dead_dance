@@ -465,18 +465,39 @@ body{padding-bottom:64px}
 .socialscroll{max-width:620px;margin:0 auto;padding:14px}
 .calvt{background:#3a2a55;border:0;color:#fff;border-radius:9px;padding:4px 9px;font-size:16px;line-height:1;cursor:pointer;margin-left:2px;flex:0 0 auto}
 .calvt:active{transform:scale(.92)}
-.adroll{position:relative;overflow:hidden;padding:0}
+.adroll{position:relative;overflow:hidden;padding:0;height:216px}   /* head 92 + body 100 + dots 24 — LOCKED so the card never resizes the page */
 .adroll-tag{position:absolute;top:8px;right:8px;z-index:3;background:#00000059;color:#fff;font-size:9px;font-weight:800;letter-spacing:.08em;border-radius:5px;padding:2px 6px}
 .adroll-head{position:relative;height:92px;display:flex;align-items:center;justify-content:center;font-size:44px}
 .adroll-head img.adlogo{position:absolute;inset:0;margin:auto;max-width:82%;max-height:74px;object-fit:contain;filter:drop-shadow(0 1px 4px #0007)}
-.adroll-body{padding:11px 14px 10px;cursor:pointer}
-.adroll-body b{font-size:14.5px;display:block;color:var(--ink,#1a1320)}
-.adroll-body .off{font-size:12.5px;color:var(--rose,#b8002e);font-weight:800;margin-top:2px}
-.adroll-body .adroll-cta{font-size:11.5px;color:var(--accent,#5a2e86);font-weight:800;margin-top:5px}
+/* FIXED size for every ad — no jitter as they rotate: constant head + body + dots height, text clamped */
+.adroll-body{height:100px;padding:11px 14px 10px;cursor:pointer;overflow:hidden;box-sizing:border-box}
+.adroll-body b{font-size:14.5px;display:block;color:var(--ink,#1a1320);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.adroll-body .off{font-size:12.5px;color:var(--rose,#b8002e);font-weight:800;margin-top:2px;line-height:1.25;max-height:2.5em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.adroll-body .adroll-cta{font-size:11.5px;color:var(--accent,#5a2e86);font-weight:800;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .adroll-foot{font-size:10px;font-weight:800;letter-spacing:.03em;color:#7a5a00;background:#fff3d6;text-align:center;padding:5px}
 .adroll-dots{display:flex;gap:4px;justify-content:center;padding:8px 0 10px;background:#fff}
 .adroll-dots i{width:6px;height:6px;border-radius:50%;background:#00000022;display:inline-block}
 .adroll-dots i.on{background:var(--rose,#b8002e)}
+/* ad-swap effects — a mix cycled through like a slide deck (fixed 216px card contains them) */
+.adroll-view{perspective:1000px}
+.adroll-slide{will-change:transform,opacity,filter;backface-visibility:hidden}
+@keyframes adfxFade{from{opacity:0}to{opacity:1}}
+@keyframes adfxZoom{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes adfxUp{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:none}}
+@keyframes adfxDown{from{opacity:0;transform:translateY(-36px)}to{opacity:1;transform:none}}
+@keyframes adfxSlideL{from{opacity:.15;transform:translateX(100%)}to{opacity:1;transform:none}}
+@keyframes adfxSlideR{from{opacity:.15;transform:translateX(-100%)}to{opacity:1;transform:none}}
+@keyframes adfxFlip{from{opacity:0;transform:rotateY(92deg)}to{opacity:1;transform:none}}
+@keyframes adfxBlur{from{opacity:0;filter:blur(11px)}to{opacity:1;filter:blur(0)}}
+.adfx-fade{animation:adfxFade .5s ease both}
+.adfx-zoom{animation:adfxZoom .55s cubic-bezier(.2,.9,.3,1.15) both}
+.adfx-up{animation:adfxUp .5s cubic-bezier(.2,.8,.3,1) both}
+.adfx-down{animation:adfxDown .5s cubic-bezier(.2,.8,.3,1) both}
+.adfx-slideL{animation:adfxSlideL .5s cubic-bezier(.3,.8,.3,1) both}
+.adfx-slideR{animation:adfxSlideR .5s cubic-bezier(.3,.8,.3,1) both}
+.adfx-flip{animation:adfxFlip .55s ease both}
+.adfx-blur{animation:adfxBlur .5s ease both}
+@media (prefers-reduced-motion:reduce){.adfx-fade,.adfx-zoom,.adfx-up,.adfx-down,.adfx-slideL,.adfx-slideR,.adfx-flip,.adfx-blur{animation:adfxFade .3s ease both}}
 @keyframes mswing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
 .sm-badges .smmiracle{transform-box:fill-box;transform-origin:100% 50%;animation:mswing 1.7s ease-in-out infinite}
 .sm-badges .smmpill{fill:#2a8a4a;stroke:#c79a3a;stroke-width:2}
@@ -854,7 +875,7 @@ body{padding-bottom:64px}
          /logos (see logos/LOGOS_manifest.md); until a file exists, the emoji shows. LET THEM ROLL. 🌹 */
       function _slug(s){ return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
       var AD_BETHLEHEM=[
-        {logo:'logos/tee_printer.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Bethlehem Tee Printer',    off:'Founder ad #1 · your shirts walk Musikfest',      cta:'Meet the printer ›', beth:true},
+        {logo:'logos/tee_printer.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Jay\'s Customz Print',      off:'Custom screen printing · 50 Broad St, Bethlehem',  cta:'Get yours ›', beth:true},
         {logo:'logos/city_of_bethlehem.png', ic:'🏛️', bg:'linear-gradient(135deg,#5a2e86,#241535)', biz:'City of Bethlehem',         off:'Welcome to Musikfest 2026 — Christmas City, USA', cta:'Visit ›', beth:true},
         {logo:'logos/artsquest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'ArtsQuest',                 off:'16 stages · 400+ acts · all free',                cta:'Plan your fest ›', beth:true},
         {logo:'logos/hotel_bethlehem.png',   ic:'🏨', bg:'linear-gradient(135deg,#c79a3a,#8a6a1f)', biz:'Hotel Bethlehem',           off:'Welcome to Hotel Bethlehem — 437 Main St, since 1922', cta:'Step into the lobby ›', beth:true},
@@ -867,7 +888,10 @@ body{padding-bottom:64px}
         {logo:'logos/potts_hot_dog.png',     ic:'🌭', bg:'linear-gradient(135deg,#c9431f,#7a1f0e)', biz:'Potts Hot Dogs',           off:'A Lehigh Valley institution — dogs done right', cta:'Grab a dog ›', beth:true},
         {logo:'logos/lehigh_pizza.png',      ic:'🍕', bg:'linear-gradient(135deg,#b8002e,#7a1f0e)', biz:'Lehigh Pizza',             off:'Bethlehem slices, hot and fast', cta:'Order a pie ›', beth:true},
         {logo:'logos/westgate_pizza.png',    ic:'🍕', bg:'linear-gradient(135deg,#8a6a1f,#4a3410)', biz:'Westgate Pizza',           off:'Lehigh Valley pizza & subs', cta:'Order up ›', beth:true},
-        {logo:'logos/allentown_fair.png',    ic:'🎡', bg:'linear-gradient(135deg,#5a2e86,#b8002e)', biz:'The Great Allentown Fair', off:'Rides, grandstand shows & fair food — end of summer', cta:'See the lineup ›', beth:true}
+        {logo:'logos/allentown_fair.png',    ic:'🎡', bg:'linear-gradient(135deg,#5a2e86,#b8002e)', biz:'The Great Allentown Fair', off:'Rides, grandstand shows & fair food — end of summer', cta:'See the lineup ›', beth:true},
+        {logo:'logos/vallos_bakery.png',     ic:'🥖', bg:'linear-gradient(135deg,#8a5a1f,#4a3410)', biz:'Vallos Bakery',            off:'Fresh-baked, the Lehigh Valley way', cta:'Grab a loaf ›', beth:true},
+        {logo:'logos/st_george_allentown.png', ic:'⛪', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'St. George Orthodox Church', off:'Allentown · all are welcome', cta:'Visit ›', beth:true},
+        {logo:'logos/st_paul_emmaus.png',    ic:'⛪', bg:'linear-gradient(135deg,#5a2e86,#2a1440)', biz:'St. Paul (Emmaus)',        off:'A community in Emmaus · all are welcome', cta:'Visit ›', beth:true}
       ];
       var _KIC={brewery:'🍺',hotel:'🏨',bar:'🍸',shop:'🛍️',restaurant:'🍽️',historic:'🏛️'};
       function bethRetail(){ var out=[]; try{ (window.MF_RETAILERS||[]).forEach(function(r){ out.push({
@@ -899,14 +923,15 @@ body{padding-bottom:64px}
       // rotation frame — dd appears 8×, sf 2× (the 4:1 Dead-first pace); partners/house/national/pitch interleaved so the local POC never disappears
       var FRAME=['partner','dd','sf','dd','dd','house','dd','national','dd','partner','sf','dd','dd','pitch','partner','dd','national','partner'];
       var POOLS={partner:function(){return POOL_PARTNER;},house:function(){return POOL_HOUSE;},national:function(){return POOL_NAT;},dd:function(){return POOL_DD;},sf:function(){return POOL_SF;}};
-      var CUR={partner:0,house:0,national:0,dd:0,sf:0}, fi=0, curAd=null, at=null;
+      var CUR={partner:0,house:0,national:0,dd:0,sf:0}, fi=0, curAd=null, at=null, FX=['fade','zoom','up','slideL','flip','down','slideR','blur'], fxi=0;
       function nextAd(depth){ depth=depth||0; if(depth>FRAME.length+1) return AD_PITCH;
         var tok=FRAME[fi%FRAME.length]; fi++;
         if(tok==='pitch') return AD_PITCH;
         var pool=POOLS[tok]&&POOLS[tok](); if(!pool||!pool.length) return nextAd(depth+1);
         var a=pool[CUR[tok]%pool.length]; CUR[tok]++; return a; }
       function adRender(a){ var v=document.getElementById('adRollView'); if(!v||!a)return; curAd=a; window.__curAd=a;
-        v.innerHTML='<div class="adroll-slide" onclick="adRollTap()"><div class="adroll-head" style="background:'+a.bg+'">'+adHead(a)+'</div><div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div></div>';
+        var fx=FX[fxi++ % FX.length];   // cycle the swap effect like a slide deck
+        v.innerHTML='<div class="adroll-slide adfx-'+fx+'" onclick="adRollTap()"><div class="adroll-head" style="background:'+a.bg+'">'+adHead(a)+'</div><div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div></div>';
         var d=document.getElementById('adRollDots'); if(d) d.innerHTML='<i class="on"></i><i></i><i></i>'; }
       window.adRollTap=function(){ var a=window.__curAd; if(!a||!window.toast)return;
         if(a.pitch){ toast('📣 Advertise on DeadDance — pitch your festival or fill your room. LESS / MORE / MOST. 🌹'); }
