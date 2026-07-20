@@ -488,8 +488,9 @@
       var vw = (vbW || curVB[2]), p = project(lat, lng), r = 0.011 * vw;
       youG.innerHTML =
         '<circle class="you-ring" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r * 1.9).toFixed(1) + '"></circle>' +
-        '<circle class="you-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r.toFixed(1) + '"></circle>' +
-        '<text class="you-lbl" x="' + p[0] + '" y="' + (p[1] + r * 2.7).toFixed(1) + '" text-anchor="middle" style="font-size:' + (0.021 * vw).toFixed(1) + 'px">YOUR LOCATION</text>';
+        '<circle class="you-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r * 1.25).toFixed(1) + '"></circle>' +
+        '<text class="you-pin" x="' + p[0] + '" y="' + p[1] + '" text-anchor="middle" dominant-baseline="central" style="font-size:' + (r * 1.7).toFixed(1) + 'px">📍</text>' +
+        '<text class="you-lbl" x="' + p[0] + '" y="' + (p[1] + r * 2.6).toFixed(1) + '" text-anchor="middle" style="font-size:' + (0.013 * vw).toFixed(1) + 'px;stroke-width:' + (0.0032 * vw).toFixed(2) + 'px">YOUR LOCATION</text>';
     }
     function refreshYou(vbW) { if (userLoc) markYou(userLoc[0], userLoc[1], vbW || curVB[2]); }   // re-pin the blue dot on every zoom so it stays the right size + place
 
