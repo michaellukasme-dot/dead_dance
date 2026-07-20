@@ -444,6 +444,13 @@ body{padding-bottom:64px}
 .sm-you .you-dot{fill:#1877f2;stroke:#fff;stroke-width:2}
 .sm-you .you-ring{fill:#1877f2;opacity:.22;transform-box:fill-box;transform-origin:center;animation:smpulse 2.2s ease-out infinite}
 .sm-you .you-lbl{fill:#1877f2;font-weight:900;letter-spacing:.04em;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.showmap-wrap{position:relative}
+.smfab{position:absolute;right:12px;bottom:12px;z-index:6;width:46px;height:46px;border-radius:50%;border:0;background:linear-gradient(135deg,#f0a500,#e0577a);color:#fff;font-size:22px;line-height:1;box-shadow:0 6px 18px rgba(30,18,48,.35);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.smfab:active{transform:scale(.95)}
+@keyframes mswing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.sm-badges .smmiracle{transform-box:fill-box;transform-origin:100% 50%;animation:mswing 1.7s ease-in-out infinite}
+.sm-badges .smmpill{fill:#2a8a4a;stroke:#c79a3a;stroke-width:2}
+.sm-badges .smmtxt{fill:#fff;font-weight:900}
 @keyframes smpulse{0%{transform:scale(.7);opacity:.5}70%{transform:scale(2.1);opacity:0}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.smdot .smpulse,.sm-you .you-ring{animation:none;opacity:.32}}
 .showmap-pop{position:absolute;z-index:5;width:210px;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 12px 32px rgba(30,18,48,.22);border:1px solid #ece6f2;padding:10px 12px;font-size:12.5px;line-height:1.4}
@@ -787,10 +794,8 @@ body{padding-bottom:64px}
       </div>
       <div class="grid" id="calGrid" style="display:none"></div>
       <div id="calList"></div>
-      <div style="display:flex;gap:8px">
-        <button class="openmap" style="flex:1" onclick="openMap()">📍 OPEN MAP</button>
-        <button class="openmap" style="flex:1;background:var(--gold);color:#23202a;border-color:var(--gold)" onclick="openGig('date')">📅 ADD A DATE</button>
-        <button id="mfabMini" onclick="openMiracle()" title="The Miracle Bucket — free tickets from the family" aria-label="Miracle Bucket" style="flex:0 0 auto;padding:10px 13px;border-radius:12px;border:1px solid #e6c76b;background:#fff3d6;color:#6b5200;font-weight:800;font-size:16px;line-height:1;cursor:pointer">🍀<span class="mm-badge" id="mfabBadge" style="display:none;margin-left:3px">0</span></button>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="mfabMini" onclick="openMiracle()" title="The Miracle Bucket — free tickets from the family" aria-label="Miracle Bucket" style="flex:0 0 auto;padding:9px 13px;border-radius:12px;border:1px solid #e6c76b;background:#fff3d6;color:#6b5200;font-weight:800;font-size:15px;line-height:1;cursor:pointer">🍀 Miracle<span class="mm-badge" id="mfabBadge" style="display:none;margin-left:3px">0</span></button>
       </div>
       <div id="localFam" style="font-size:11px;color:#e0cdf5;margin-top:9px;text-align:center">📍 finding your Local Family…</div>
     </div>
@@ -799,7 +804,7 @@ body{padding-bottom:64px}
       <svg class="qrbig" id="qr" viewBox="0 0 100 100" aria-label="My profile QR" onclick="profile('me')" style="cursor:pointer"></svg>
       <div style="text-align:center;font-size:11px;color:var(--accent);font-weight:700;margin-top:5px;cursor:pointer" onclick="profile('me')">tap your QR — it's your whole profile ›</div>
       <button class="btn gold" style="width:100%;margin-top:9px" onclick="inviteFamily()">🌹 Invite the family</button>
-      <button class="btn" style="width:100%;margin-top:8px;background:#5a2e86;color:#fff;border-color:#5a2e86" onclick="ddSheet('band_onboard.html?src=selfclaim','🌹 Band Install')">🎤 I am a band — claim your page</button>
+      <button class="btn" style="width:100%;margin-top:8px;background:#5a2e86;color:#fff;border-color:#5a2e86" onclick="ddSheet('band_onboard.html?src=selfclaim','🌹 Band Install')">🎤 I'm a band — claim your page &amp; add dates</button>
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:6px">Play something other than the Dead? <a href="stagefill.html" style="color:var(--accent);font-weight:700;text-decoration:none">We've got a home for you too →</a></div>
       <div style="text-align:center;font-weight:800;margin-top:8px">My Purchased Tickets</div>
       <div class="tix" id="myTix"><span class="when">Tomorrow</span><div class="nm"><b>Splintered Sunlight</b><span>Sellersville Theater · 8:00 PM · 11 mi</span></div></div>
@@ -2425,7 +2430,10 @@ var MIRACLES=[ {id:null,band:"DEAL",venue:"FreeWill Brewing",date:"Jun 16",regio
 var MYTIX=[ {id:null,band:"Melvin Seals & JGB",venue:"Sellersville Theater",date:"Jun 21"} ];  // demo: your tickets you could Miracle
 var MIRACLE_BANNED=false;
 function miracleBadge(){ var b=document.getElementById('mfabBadge'); if(!b)return; var n=MIRACLES.length;
-  if(n>0){ b.style.display='grid'; b.textContent=n; } else { b.style.display='none'; } }
+  if(n>0){ b.style.display='grid'; b.textContent=n; } else { b.style.display='none'; }
+  /* miracles fall to their show's chapter → bloom a 🍀 pill on that chapter on the map */
+  try{ var m={}; MIRACLES.forEach(function(x){ var r=x.region||(typeof ME!=='undefined'&&ME&&ME.chapter); if(r) m[r]=(m[r]||0)+1; });
+       window.DD_MIRACLES_BY_REGION=m; if(window.DDShowmap&&DDShowmap.refresh) DDShowmap.refresh(); }catch(e){} }
 function openMiracle(){ var r=document.getElementById('mRegion'); if(r)r.textContent=(ME&&ME.chapter)||'your chapter';
   renderMiracle(); document.getElementById('miracle').classList.add('on'); syncMiracle(); }
 function closeMiracle(){ document.getElementById('miracle').classList.remove('on'); }

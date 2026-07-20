@@ -368,6 +368,7 @@
             '<g class="sm-badges"></g>' +
           '</svg>' +
           '<div class="showmap-pop" id="showmapPop" hidden></div>' +
+          '<button class="smfab" type="button" onclick="try{window.openMap&&window.openMap()}catch(e){}" title="The bus map — every chapter glowing" aria-label="Open the bus map">🚌</button>' +
         '</div>' +
         /* region controls + legend moved BELOW the map (Musikfest-style — the chapter picker recenters the map like North/South) */
         '<div class="showmap-region">' +
@@ -443,12 +444,17 @@
       badgeG.innerHTML = CHAPTERS.map(function (ch) {
         var p = project(ch.c[0], ch.c[1]), n = ch.shows.length, live = n > 0;
         var sz = live ? (rB + Math.min(n, 8) * 0.0022 * vbW) : rB * 0.86;
+        var mc = ((window.DD_MIRACLES_BY_REGION || {})[ch.name]) || 0;
+        var mir = mc > 0 ? ('<g transform="translate(' + p[0].toFixed(1) + ',' + (p[1] - sz - fL * 1.4).toFixed(1) + ')" onclick="event.stopPropagation();try{window.openMiracle&&openMiracle()}catch(e){}" style="cursor:pointer" aria-label="' + mc + ' miracle ticket' + (mc > 1 ? 's' : '') + ' in ' + esc(ch.name) + '"><g class="smmiracle">' +
+          '<rect class="smmpill" x="' + (-(0.05 * vbW)).toFixed(1) + '" y="' + (-(0.018 * vbW)).toFixed(1) + '" width="' + (0.10 * vbW).toFixed(1) + '" height="' + (0.036 * vbW).toFixed(1) + '" rx="' + (0.018 * vbW).toFixed(1) + '"></rect>' +
+          '<text class="smmtxt" x="0" y="' + (0.012 * vbW).toFixed(1) + '" text-anchor="middle" style="font-size:' + (0.023 * vbW).toFixed(1) + 'px">🍀 ' + mc + '</text>' +
+        '</g></g>') : '';
         return '<g class="smbadge' + (live ? "" : " dim") + '" data-ch="' + esc(ch.name) + '" tabindex="0" role="button" ' +
           'aria-label="' + esc(ch.name + (live ? (": " + n + " shows") : ": no dates yet — add the first")) + '">' +
           '<circle class="bdot" cx="' + p[0] + '" cy="' + p[1] + '" r="' + sz.toFixed(1) + '"></circle>' +
           '<text class="bnum" x="' + p[0] + '" y="' + (p[1] + fC * 0.34) + '" style="font-size:' + fC.toFixed(1) + 'px">' + (live ? n : "+") + '</text>' +
           '<text class="blbl" x="' + p[0] + '" y="' + (p[1] + sz + fL * 1.1) + '" style="font-size:' + fL.toFixed(1) + 'px">' + esc(shortName(ch.name)) + '</text>' +
-          '</g>';
+          '</g>' + mir;
       }).join("");
       badgeG.querySelectorAll(".smbadge").forEach(function (g) {
         var name = g.getAttribute("data-ch");
@@ -652,7 +658,8 @@
     window.DDShowmap = {
       setScope: function (scope) { try { if (scope === "local") { useLocation(); } else { toNation(); } host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === scope); }); } catch (e) {} },
       setAct: function (band) { try { applyActData(band); redrawForFilter(); } catch (e) {} },   // band dropdown → map filter, keeps current scope/zoom
-      setMonth: function (ym) { try { applyMonthData(ym); redrawForFilter(); } catch (e) {} }    // calendar month ‹ › → map filter
+      setMonth: function (ym) { try { applyMonthData(ym); redrawForFilter(); } catch (e) {} },    // calendar month ‹ › → map filter
+      refresh: function () { try { if (level === "nation") drawBadges(true); } catch (e) {} }      // re-bloom miracle pills when the bucket changes
     };
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
