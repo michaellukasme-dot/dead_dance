@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Today in Grateful Dead & DSO History — DeadDance</title>
+<meta property="og:title" content="Today in Grateful Dead History 🌹">
+<meta property="og:description" content="On this day in Dead history — and how Dark Star Orchestra played it back. Double trivia for Karaoke night.">
+<meta property="og:image" content="https://deaddance.app/stealie_qr.png">
+<style>
+  :root{--bg:#0e0b14;--rose:#b8002e;--mut:#b9a9e0;--card:#17122b}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 70px}
+  header{text-align:center;padding:22px 12px 6px}
+  header h1{font-size:clamp(21px,4.4vw,30px);font-weight:900;margin:0}
+  header .d{color:var(--mut);font-size:13px;margin-top:4px}
+  h2.sec{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:#8f7bbf;margin:26px 0 10px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .card{background:var(--card);border:1px solid #ffffff12;border-radius:14px;padding:14px 15px;margin:10px 0}
+  .card .dt{font-weight:900;font-size:15px}
+  .card .vn{color:#e8dcff;font-size:14px}
+  .card .nt{color:#b9a9e0;font-size:13px;margin-top:5px}
+  .card .dso{margin-top:7px;font-size:12px;font-weight:800;color:#ffd76a}
+  .empty{color:#8f7bbf;font-size:13.5px;text-align:center;padding:10px}
+  .tv{background:linear-gradient(160deg,#1c1233,#120b24);border:1px solid #f0c96b33;border-radius:16px;padding:16px;margin-top:8px}
+  .tv .q{font-weight:900;font-size:15px;margin-bottom:10px}
+  .tv .op{display:block;width:100%;text-align:left;background:#ffffff0f;border:1px solid #ffffff1c;color:#fff;border-radius:11px;padding:11px 13px;margin:6px 0;font-size:14px;cursor:pointer}
+  .tv .op:hover{background:#ffffff1a}
+  .tv .op.ok{background:#1f7a4d;border-color:#1f7a4d}
+  .tv .op.no{background:#7a1f2e;border-color:#7a1f2e}
+  .tv .tag{font-size:10px;font-weight:800;letter-spacing:.1em;color:#ffd76a;text-transform:uppercase}
+  .nav{margin-top:8px;text-align:center}
+  .nav button{background:linear-gradient(135deg,#b8002e,#5a2e86);color:#fff;border:0;border-radius:11px;padding:11px 20px;font-weight:800;cursor:pointer}
+  .back{display:inline-block;margin:14px 0 0;color:#a071ff;text-decoration:none;font-weight:800;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🌹 Today in Grateful Dead History</h1>
+    <div class="d" id="todayLabel"></div>
+  </header>
+
+  <h2 class="sec">💀 Grateful Dead — on this day</h2>
+  <div id="gdFeed"></div>
+
+  <h2 class="sec">🌌 Dark Star Orchestra — on this day</h2>
+  <div id="dsoFeed"></div>
+
+  <h2 class="sec">🍪 Double Trivia — DSO Karaoke Night</h2>
+  <div class="tv" id="triviaCard"></div>
+  <div class="nav"><button onclick="nextQ()">Next question ›</button></div>
+
+  <a class="back" href="index.html">‹ Back to DeadDance</a>
+</div>
+
+<script src="dd_history.js"></script>
+<script>
+(function(){
+  var H = window.DDHistory;
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date();
+  document.getElementById('todayLabel').textContent = months[now.getMonth()]+' '+now.getDate()+' — on this day through the years';
+
+  function esc(s){return String(s||'').replace(/[<>&]/g,'');}
+  function card(s, dso){
+    var extra = dso ? ('<div class="dso">🌌 '+(s.recreates?('recreates the Dead’s '+s.recreates):'DSO show')+'</div>') : '';
+    return '<div class="card"><div class="dt">'+esc(s.date)+'</div><div class="vn">'+esc(s.venue)+' · '+esc(s.city)+'</div>'+(s.note?'<div class="nt">'+esc(s.note)+'</div>':'')+extra+'</div>';
+  }
+  var gd = H.todayGD(), dso = H.todayDSO();
+  document.getElementById('gdFeed').innerHTML = gd.length ? gd.map(function(s){return card(s,false);}).join('') : '<div class="empty">No seeded Dead show on today’s date yet — the full archive is loading in (task #19). 🌹</div>';
+  document.getElementById('dsoFeed').innerHTML = dso.length ? dso.map(function(s){return card(s,true);}).join('') : '<div class="empty">DSO recreations for this date arrive with the archive cross-reference. 🌌</div>';
+
+  // trivia — today's if available, else from the whole seed so there's always a question
+  var QS = H.trivia(gd.length?gd:H.GD); var qi=0;
+  function renderQ(){
+    var c=document.getElementById('triviaCard'); if(!QS.length){ c.innerHTML='<div class="q">Trivia arrives with the archive. 🌹</div>'; return; }
+    var q=QS[qi%QS.length];
+    c.innerHTML='<div class="tag">'+(q.kind==='dso'?'DSO':'GRATEFUL DEAD')+'</div><div class="q">'+esc(q.q)+'</div>'+
+      q.choices.map(function(ch){return '<button class="op" data-v="'+esc(ch)+'" onclick="pick(this)">'+esc(ch)+'</button>';}).join('');
+    c.setAttribute('data-a', q.answer);
+  }
+  window.pick=function(btn){
+    var c=document.getElementById('triviaCard'), a=c.getAttribute('data-a');
+    c.querySelectorAll('.op').forEach(function(b){ b.disabled=true; if(b.getAttribute('data-v')===a) b.classList.add('ok'); });
+    if(btn.getAttribute('data-v')!==a) btn.classList.add('no');
+  };
+  window.nextQ=function(){ qi++; renderQ(); };
+  renderQ();
+})();
+</script>
+</body>
+</html>

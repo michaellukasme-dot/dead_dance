@@ -2,6 +2,12 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DeadDance</title>
 <meta name="theme-color" content="#2a1b3d">
+<meta name="color-scheme" content="light">
+<!-- native-app feel (standards-based, consent-gated capabilities load in dd_native.js) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DeadDance">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="rose.svg" type="image/svg+xml">
@@ -879,6 +885,7 @@ body{padding-bottom:64px}
       ];
       var AD_PITCH={ic:'📣', bg:'linear-gradient(135deg,#f0a500,#c79a3a)', biz:'Advertise here', off:'Pitch your festival · fill your room — the whole Dead family sees it', house:true, pitch:true, cta:'Buy a spot · LESS / MORE / MOST ›'};
       var AD_POSTER={logo:'MUSIKFEST_poster.jpg', ic:'🎨', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Musikfest 2026 Poster Artist', off:'The official festival poster — signed prints', cta:'Get a print ›', beth:true};
+      var AD_ACI={logo:'logos/aci_consulting.png', ic:'📊', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'Abboud Consulting Inc. (ACI)', off:'Strategy & operations consulting', cta:'Get in touch ›', beth:true};   // 2× roll (added twice to the partner pool)
       function adHead(a){ return (a.ic||'🌹') + (a.logo ? '<img class="adlogo" src="'+a.logo+'" alt="" onerror="this.remove()">' : ''); }
       /* Every Musikfest act → a rolling ad inviting them onto StageFill (618 acts, deduped by band).
          Dead/jam acts (sc:dd) roll 4× as often as the rest. This is how we fill the day's inventory. */
@@ -887,7 +894,7 @@ body{padding-bottom:64px}
         out.push({ logo:'logos/band_'+_slug(r.b)+'.png', ic:(sc==='dd'?'🌹':'🎵'), bg:(sc==='dd'?'linear-gradient(135deg,#b8002e,#5a2e86)':'linear-gradient(135deg,#5a2e86,#7a3cc0)'),
           biz:r.b, off:'Musikfest · '+r.st+' · '+_mfDay(r.d)+' '+r.t, cta:(sc==='dd'?'🌹 Claim your StageFill page ›':'🎪 Claim your StageFill page ›'), stagefill:true }); }); }catch(e){} return out; }
       var POOL_PARTNER=[], POOL_HOUSE=AD_HOUSE, POOL_NAT=AD_NATIONAL, POOL_DD=[], POOL_SF=[];
-      function buildPools(){ POOL_PARTNER=AD_BETHLEHEM.concat(bethRetail(), [AD_POSTER]); POOL_DD=bandAds('dd'); POOL_SF=bandAds('sf'); }
+      function buildPools(){ POOL_PARTNER=AD_BETHLEHEM.concat(bethRetail(), [AD_POSTER, AD_ACI, AD_ACI]); POOL_DD=bandAds('dd'); POOL_SF=bandAds('sf'); }
       buildPools();
       // rotation frame — dd appears 8×, sf 2× (the 4:1 Dead-first pace); partners/house/national/pitch interleaved so the local POC never disappears
       var FRAME=['partner','dd','sf','dd','dd','house','dd','national','dd','partner','sf','dd','dd','pitch','partner','dd','national','partner'];
@@ -1592,6 +1599,9 @@ var REGIONS = {
 var GROUPS = [
  {n:"Dark Star Orchestra",ic:"🌌",tuned:true,seen:"a year ago"},
  {n:"Steal Your Face — the photo wall",ic:"💀",tuned:true,seen:"just now"},
+ {n:"Today in Grateful Dead History",ic:"📅",tuned:true,seen:"today"},
+ {n:"Today in Dark Star Orchestra History",ic:"🌌",tuned:true,seen:"today"},
+ {n:"SetList — show by show",ic:"🎼",tuned:true,seen:"live"},
  {n:"Pennsylvania Deadheads",ic:"🔔",tuned:true,seen:"30 weeks ago"},
  {n:"Santa Cruz Music Scene",ic:"🌊",tuned:false,seen:"a year ago"},
  {n:"Dead and Company",ic:"💀",tuned:false,seen:"a year ago"},
@@ -3893,6 +3903,10 @@ function ddAddFriend(id,name,btn){
 <script src="dd_friends.js" defer></script>
 <script src="dd_attrib.js" defer></script>
 <script src="dd_autofill.js" defer></script>
+<script src="dd_profile.js" defer></script>
+<script src="dd_native.js" defer></script>
+<script src="dd_contest.js" defer></script>
+<script src="dd_launch.js" defer></script>
 <script src="dd_join.js" defer></script>
 <script src="dd_feed.js" defer></script>
 <script src="dd_pymk.js"></script>

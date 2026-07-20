@@ -269,4 +269,5 @@ function groupType(){
 (function(){ try{ var v=localStorage.getItem('dd.grouptype'); if(v){ var s=document.getElementById('gtype'); if(s)s.value=v; } }catch(e){} groupType(); })();
 (function(){ function go(){ try{ if(window.DDGigs&&DDGigs.ready()){ loadKPIs(); } else setTimeout(go,1200); }catch(e){} } setTimeout(go,1000); })();
 </script>
+<script src="dd_profile.js"></script>
 </body></html>
