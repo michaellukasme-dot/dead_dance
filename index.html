@@ -804,30 +804,11 @@ body.dd-insider .dd-only{display:block}
 </div>
 
 <div class="wrap">
-    <div class="fb-strip" id="fbStrip">🅕 <b>A Facebook enhancement — not a replacement.</b> It’s still Facebook: your words &amp; photos originate here, click by click, then flow to your group. We just add the communication + marketplace tools that huge Dead groups — the ones fragmented by their own chatter — don’t get on their own. Real human content, no bots.<button class="fb-x" aria-label="Close" onclick="this.closest('.fb-strip').style.display='none';try{localStorage.setItem('dd.fbstrip','1')}catch(e){}">✕</button></div>
+    <div class="fb-strip" id="fbStrip" style="display:none">🅕 <b>A Facebook enhancement — not a replacement.</b> It’s still Facebook: your words &amp; photos originate here, click by click, then flow to your group. We just add the communication + marketplace tools that huge Dead groups — the ones fragmented by their own chatter — don’t get on their own. Real human content, no bots.<button class="fb-x" aria-label="Close" onclick="this.closest('.fb-strip').style.display='none';try{localStorage.setItem('dd.fbstrip','1')}catch(e){}">✕</button></div>
     <script>try{if(localStorage.getItem('dd.fbstrip')){var _s=document.getElementById('fbStrip');if(_s)_s.style.display='none';}}catch(e){}</script>
   <!-- ===================== LEFT RAIL ===================== -->
   <div class="left">
-    <nav class="ddnav" aria-label="DeadDance">
-      <a onclick="ddSheet('claude_ai.html','✳ Claude AI')"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
-      <a onclick="requireSignin(function(){profile('me')})"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Your profile</b></a>
-      <a onclick="requireSignin(function(){ddSheet('friends.html','🌹 Friends')})"><span class="gi" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">👥</span><b>Friends</b></a>
-      <a onclick="openReader('groups')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
-      <a onclick="var r=document.getElementById('reelsCard'); if(r){r.style.display='block';r.scrollIntoView({behavior:'smooth',block:'center'});}"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
-      <a onclick="openReader('market')"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
-      <a onclick="openReader('archive')"><span class="gi" style="background:linear-gradient(135deg,#b8002e,#5a2e86)">💿</span><b>Records &amp; tapes</b></a>
-      <a onclick="ddSheet('karaoke.html','🎤 Karaoke')"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#b8002e)">🎤</span><b>Karaoke</b></a>
-      <a onclick="requireSignin(function(){window.openMiracle&&openMiracle()})"><span class="gi" style="background:linear-gradient(135deg,#2a6b46,#0f3b28)">🍀</span><b>Miracle Bucket</b></a>
-      <a onclick="ddSheet('live_reports.html','🚗 Live Reports')"><span class="gi" style="background:linear-gradient(135deg,#d19a2a,#8a5a12)">🚗</span><b>Live Reports</b></a>
-      <a onclick="window.openMap&&openMap()"><span class="gi" style="background:linear-gradient(135deg,#5a2e86,#241535)">🗺️</span><b>Show map</b></a>
-      <a onclick="requireSignin(function(){openApps()})"><span class="gi" style="background:#ece7f2;color:#5a2e86">▦</span><b>See more</b></a>
-      <div class="sep"></div>
-      <div class="sc">Your shortcuts</div>
-      <a onclick="openReader('groups')"><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
-      <a onclick="openReader('groups')"><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
-      <a onclick="openReader('groups')"><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
-      <a onclick="openReader('groups')"><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
-    </nav>
+
     <div class="cal" id="calCard">
       <div class="findshow" style="display:block;position:relative;background:none;border:0;padding:0;margin-bottom:10px">
         <button class="calx" onclick="calExpand()" title="Expand the calendar" aria-label="Expand the calendar" style="position:absolute;top:7px;right:7px;z-index:3">⤢</button>
@@ -1108,7 +1089,7 @@ body.dd-insider .dd-only{display:block}
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
-  <button class="fn" onclick="requireSignin(function(){ddSheet('friends.html','🌹 Friends')})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
+  <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
   <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="requireSignin(function(){openGame()})"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
@@ -1124,7 +1105,7 @@ function ddIsSignedIn(){ try{ return !!(window.DDMe && DDMe.signedIn && DDMe.sig
 window.requireSignin=function(fn){ if(!DD_GATE_ON || ddIsSignedIn()){ try{ fn&&fn(); }catch(e){} } else { openSignin(); } };
 window.openSignin=function(){ var m=document.getElementById('signinModal'); if(m)m.style.display='flex'; };
 window.closeSignin=function(){ var m=document.getElementById('signinModal'); if(m)m.style.display='none'; };
-window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth&&c.auth.signInWithOAuth){ c.auth.signInWithOAuth({provider:p,options:{redirectTo:location.origin}}).then(function(r){ if(r&&r.error&&window.toast) toast('Sign-in unavailable right now — try again shortly.'); }); } else if(window.toast){ toast('Sign-in is warming up — one moment.'); } }catch(e){ if(window.toast) toast('Sign-in unavailable right now.'); } };
+window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth&&c.auth.signInWithOAuth){ try{localStorage.setItem('dd.postSignin','friends');}catch(e){} c.auth.signInWithOAuth({provider:p,options:{redirectTo:location.origin}}).then(function(r){ if(r&&r.error&&window.toast) toast('Sign-in unavailable right now — try again shortly.'); }); } else if(window.toast){ toast('Sign-in is warming up — one moment.'); } }catch(e){ if(window.toast) toast('Sign-in unavailable right now.'); } };
 /* Move the "FB enhancement — not a replacement" note OFF the open home and INSIDE Friends; ✕ asks "never again" and gives the space back */
 (function(){ var s=document.getElementById('fbStrip'), sc=document.querySelector('#socialView .socialscroll');
   if(s&&sc){ sc.insertBefore(s, sc.firstChild); }
@@ -1293,7 +1274,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <div class="asec">Social</div>
     <a class="aitem" onclick="coGo('appsov',function(){openMap()})"><span>🎟️</span><div><b>Shows</b><i>The calendar / ticket store.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('groups')})"><span>📡</span><div><b>Groups</b><i>Your family, mirrored.</i></div></a>
-    <a class="aitem" onclick="coGo('appsov',function(){ddSheet('friends.html','🌹 Friends')})"><span>👥</span><div><b>Friends</b><i>Your heads.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){location.href='dd_home_mockup.html'})"><span>👥</span><div><b>Friends</b><i>Your heads.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('bands')})"><span>🎸</span><div><b>Bands</b><i>The rolodex.</i></div></a>
     <div class="asec">Play &amp; listen</div>
     <a class="aitem" onclick="coGo('appsov',function(){window.openGame&&openGame()})"><span>🎮</span><div><b>Games</b><i>Name That Tune.</i></div></a>
@@ -3954,6 +3935,7 @@ function ddAddFriend(id,name,btn){
   else setTimeout(show,1800);
   // hydrate name/email/face FROM THE ACCOUNT (dd_me spine) so a signed-in you is never re-asked, on any device
   try{ if(window.DDMe&&DDMe.onChange){ DDMe.onChange(function(me){ if(!me)return;
+    try{ if(localStorage.getItem('dd.postSignin')==='friends'){ localStorage.removeItem('dd.postSignin'); location.href='dd_home_mockup.html'; return; } }catch(e){}
     try{ if(me.name){ if(window.ME) ME.name=me.name; localStorage.setItem('dd.myname',me.name); localStorage.setItem('dd.name.asked','1'); } }catch(e){}
     try{ if(me.email) localStorage.setItem('dd.email',me.email); }catch(e){}
     try{ if(me.avatar){ if(window.ME) ME.img=me.avatar; localStorage.setItem('dd.profile.img',me.avatar); localStorage.setItem('dd.me.img',me.avatar); if(typeof applyMyAvatar==='function') applyMyAvatar(); } }catch(e){}

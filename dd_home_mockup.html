@@ -1,0 +1,188 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DeadDance — Home (familiar)</title>
+<meta name="theme-color" content="#5a2e86">
+<style>
+  :root{--rose:#b8002e;--purple:#5a2e86;--accent:#7a3cc0;--gold:#c79a3a;--ink:#23202a;--muted:#7a7686;--line:#e7ddf5;--bg:#f2ecfb;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:66px}
+  a{color:inherit;text-decoration:none}
+  /* top bar */
+  .top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid var(--line);padding:9px 16px}
+  .top .logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#c08a2d,#b8002e);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+  .top .search{flex:1;max-width:340px;background:#f2ecfb;border:0;border-radius:999px;padding:10px 16px;font:inherit;font-size:14px;color:var(--ink)}
+  .top .sp{flex:1}
+  .top .ic{width:40px;height:40px;border-radius:50%;background:#efeaf4;display:flex;align-items:center;justify-content:center;font-size:17px;position:relative;cursor:pointer}
+  .top .ic .badge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;background:#e11;color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px}
+  .top .avat{background:linear-gradient(135deg,#c08a2d,#b8002e);color:#fff;font-weight:900}
+  .top .avat::after{content:"⌄";position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;line-height:13px;text-align:center;font-size:11px;font-weight:900;color:var(--purple);background:#fff;border-radius:50%;box-shadow:0 1px 3px #0003}
+  /* grid */
+  .grid{display:grid;grid-template-columns:288px 1fr 300px;gap:18px;max-width:1220px;margin:0 auto;padding:16px;align-items:start}
+  @media(max-width:1080px){.grid{grid-template-columns:260px 1fr}.rail{display:none}}
+  @media(max-width:800px){.grid{grid-template-columns:1fr}.side{display:none}}
+  /* left sidebar */
+  .side .nav a{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:11px;font-weight:700;font-size:14.5px;cursor:pointer}
+  .side .nav a:hover{background:#eee7f8}
+  .side .nav .gi{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff}
+  .side .nav .gi.sq{border-radius:9px;width:32px;height:32px;font-size:15px}
+  .side .sep{height:1px;background:var(--line);margin:9px 6px}
+  .side .sc{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px 4px}
+  /* center */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 3px #0000000a;margin-bottom:16px}
+  .composer{display:flex;align-items:center;gap:11px;padding:13px 15px}
+  .composer .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c08a2d,#b8002e);display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
+  .composer input{flex:1;background:#f2ecfb;border:0;border-radius:999px;padding:11px 16px;font:inherit;font-size:14.5px;color:var(--ink);cursor:pointer}
+  .composer .hp{border:0;border-radius:999px;padding:10px 15px;font-weight:900;font-size:13px;color:#fff;background:linear-gradient(135deg,#7a3cc0,#b8002e);cursor:pointer;white-space:nowrap}
+  /* stories */
+  .stories{display:flex;gap:10px;overflow-x:auto;padding:12px 14px}
+  .story{flex:0 0 108px;height:168px;border-radius:14px;position:relative;overflow:hidden;color:#fff;display:flex;align-items:flex-end;padding:9px;font-size:12px;font-weight:800;cursor:pointer;background-size:cover}
+  .story.mk{background:linear-gradient(180deg,#7a3cc0,#2a1b3d)}
+  .story .plus{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#fff;color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;border:3px solid #fff}
+  .story .lbl{position:relative;z-index:2;text-shadow:0 1px 4px #000a;line-height:1.15}
+  .story .head{position:absolute;top:9px;left:9px;width:38px;height:38px;border-radius:50%;border:3px solid var(--accent);background:linear-gradient(135deg,#e0577a,#5a2e86);display:flex;align-items:center;justify-content:center;font-size:15px;z-index:2}
+  /* post */
+  .post .ph{display:flex;align-items:center;gap:10px;padding:13px 15px 10px}
+  .post .ph .av{width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;background:linear-gradient(135deg,#1f9e6b,#123b28)}
+  .post .ph b{font-size:14.5px}.post .ph .t{font-size:11.5px;color:var(--muted)}
+  .post .body{padding:0 15px 11px;font-size:14.5px;line-height:1.5}
+  .post .img{aspect-ratio:16/10;background:linear-gradient(135deg,#3a1f57,#b8002e);display:flex;align-items:center;justify-content:center;color:#fff;font-size:44px}
+  .post .acts{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line);margin-top:0}
+  .post .acts button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-weight:800;font-size:13.5px;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+  .post .acts button:hover{background:#f2ecfb}
+  .post .acts .rad{color:var(--accent)}
+  /* pymk */
+  .pymk .h{display:flex;align-items:center;gap:8px;padding:13px 15px 4px;font-weight:900}
+  .pymk .row{display:flex;gap:12px;overflow-x:auto;padding:10px 14px 15px}
+  .pk{flex:0 0 150px;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .pk .ph{height:120px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:38px;font-weight:900}
+  .pk .bd{padding:9px 10px 11px}
+  .pk .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pk .mu{color:var(--muted);font-size:11px;margin:2px 0 8px}
+  .pk .add{width:100%;border:0;border-radius:9px;padding:8px;font-weight:800;font-size:13px;background:var(--accent);color:#fff;cursor:pointer}
+  .pk .rm{width:100%;border:0;border-radius:9px;padding:7px;font-weight:800;font-size:12.5px;background:#efeaf4;color:#555;cursor:pointer;margin-top:5px}
+  /* right rail */
+  .rail .card{padding:14px 15px}
+  .rail h3{font-size:16px;font-weight:900;margin:0 0 10px}
+  .rail .bd{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.35}
+  .rail .bd .gift{width:36px;height:36px;border-radius:50%;background:#fdeaf1;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+  .rail .con{display:flex;align-items:center;gap:11px;padding:7px 4px;border-radius:9px;cursor:pointer}
+  .rail .con:hover{background:#f2ecfb}
+  .rail .con .av{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;position:relative}
+  .rail .con .av .dot{position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:#2ecc71;border:2px solid #fff}
+  .rail .con b{font-size:13.5px;font-weight:600}
+  /* bottom footnav — OUR menu */
+  .footnav{position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;justify-content:space-around;align-items:center;background:#241634f2;backdrop-filter:blur(8px);padding:6px 2px 8px;border-top:1px solid #ffffff1a}
+  .footnav .fn{flex:1;background:none;border:0;color:#e9def7;display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 1px;cursor:pointer}
+  .footnav .fn .ic{font-size:22px;line-height:1;position:relative}
+  .footnav .fn .lb{font-size:9.5px;font-weight:800;color:#b6a9c9}
+  .footnav .fn.on .lb,.footnav .fn.on .ic{color:var(--gold)}
+  .footnav .fn .b{position:absolute;top:-4px;right:-8px;background:#e11;color:#fff;border-radius:9px;font-size:9px;font-weight:800;padding:0 4px;min-width:15px;height:15px;display:flex;align-items:center;justify-content:center}
+  .fbstrip{background:linear-gradient(90deg,#1877f2,#3b5998);color:#fff;font-size:12.5px;padding:9px 16px;display:flex;align-items:center;gap:8px;line-height:1.4}
+  .fbstrip b{font-weight:800}.fbstrip .fbx{margin-left:auto;flex:none;background:#ffffff2e;border:0;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:800;font-size:13px}
+  .hpfab{position:fixed;right:16px;bottom:78px;z-index:60;width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:23px;cursor:pointer;box-shadow:0 8px 22px #5a2e8566;display:flex;align-items:center;justify-content:center}
+</style></head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top">
+  <div class="logo">🌹</div>
+  <input class="search" placeholder="Search heads, shows, tapes, art…">
+  <span class="sp"></span>
+  <div class="ic">▦</div>
+  <div class="ic">💬</div>
+  <div class="ic">🔔<span class="badge">19</span></div>
+  <div class="ic avat">M</div>
+</div>
+
+<div class="fbstrip" id="fbstrip">🅕 <b>A Facebook enhancement — not a replacement.</b> It's still Facebook: your words &amp; photos originate here, click by click, then flow to your group. <button class="fbx" onclick="document.getElementById('fbstrip').style.display='none'" aria-label="Dismiss">✕</button></div>
+
+<div class="grid">
+  <!-- LEFT SIDEBAR -->
+  <aside class="side">
+    <nav class="nav">
+      <a><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
+      <a><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
+      <a><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
+      <a><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
+      <a><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
+      <a><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
+      <div class="sep"></div>
+      <div class="sc">Your shortcuts</div>
+      <a><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
+      <a><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
+      <a><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
+      <a><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
+    </nav>
+  </aside>
+
+  <!-- CENTER FEED -->
+  <main class="center">
+    <div class="card composer">
+      <div class="av">M</div>
+      <input placeholder="What's on your mind, Michael?" onclick="hp()">
+      <button class="hp" onclick="hp()">📡 HyperPost</button>
+    </div>
+
+    <div class="card"><div class="stories">
+      <div class="story mk"><div class="plus">+</div><div class="lbl" style="align-self:flex-start;margin-top:auto">Create story</div></div>
+      <div class="story" style="background:linear-gradient(180deg,#e0577a,#3a1f57)"><div class="head">🎸</div><div class="lbl">Dark Star Orchestra</div></div>
+      <div class="story" style="background:linear-gradient(180deg,#2f7bf6,#12305e)"><div class="head">🌹</div><div class="lbl">Kara Diaz</div></div>
+      <div class="story" style="background:linear-gradient(180deg,#1f9e6b,#123b28)"><div class="head">👑</div><div class="lbl">Robbie G.</div></div>
+      <div class="story" style="background:linear-gradient(180deg,#c08a2d,#5a2e86)"><div class="head">🥁</div><div class="lbl">Oteil &amp; Friends</div></div>
+    </div></div>
+
+    <div class="card post">
+      <div class="ph"><div class="av">K</div><div style="flex:1"><b>Kara Diaz</b> <span style="color:var(--muted);font-weight:600">was at</span> <b>Volksplatz</b><div class="t">Musikfest · 2h · 🌹</div></div><div style="color:var(--muted);cursor:pointer">···</div></div>
+      <div class="body">The jam went to another galaxy tonight. If you weren’t on the north side you missed it. 🌹⚡</div>
+      <div class="img">🌹</div>
+      <div class="acts"><button>👍 Like <span style="color:var(--muted);font-weight:600">· 48</span></button><button>💬 Comment</button><button class="rad">📡 HyperPost</button></div>
+    </div>
+
+    <div class="card pymk">
+      <div class="h">🧑‍🤝‍🧑 Heads you may know</div>
+      <div class="row">
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#e0577a,#b8002e)">JV</div><div class="bd"><div class="nm">Jerome Velosky</div><div class="mu">🌹 15 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">JC</div><div class="bd"><div class="nm">Jake Cohen</div><div class="mu">🌹 8 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">BC</div><div class="bd"><div class="nm">Brian Cody</div><div class="mu">🌹 3 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">NJ</div><div class="bd"><div class="nm">Nikki Jam</div><div class="mu">🌹 3 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT RAIL (mockup — the "later" Messenger/Birthdays column) -->
+  <aside class="rail">
+    <div class="card">
+      <h3>🎂 Birthdays</h3>
+      <div class="bd"><div class="gift">🎁</div><div><b>Luke Issa</b> and <b>3 others</b> have birthdays today.</div></div>
+    </div>
+    <div class="card">
+      <h3>Contacts</h3>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">KD<span class="dot"></span></div><b>Kara Diaz</b></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">MH<span class="dot"></span></div><b>Matt Hartle</b></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">RG</div><b>Robbie G.</b></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">GA<span class="dot"></span></div><b>Glen Arndt</b></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#e0577a,#b8002e)">NJ</div><b>Nikki Jam</b></div>
+    </div>
+  </aside>
+</div>
+
+<!-- HYPERPOST FAB -->
+<button class="hpfab" onclick="hp()" title="HyperPost">📡</button>
+
+<!-- OUR BOTTOM MENU (the 7) -->
+<nav class="footnav">
+  <button class="fn" onclick="location.href='index.html'"><span class="ic">🌹</span><span class="lb">Home</span></button>
+  <button class="fn on"><span class="ic">👥</span><span class="lb">Friends</span></button>
+  <button class="fn"><span class="ic">💎</span><span class="lb">Dealer</span></button>
+  <button class="fn"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn"><span class="ic">💿</span><span class="lb">Records</span></button>
+  <button class="fn"><span class="ic">🔔<span class="b">3</span></span><span class="lb">Alerts</span></button>
+  <button class="fn"><span class="ic">🪪</span><span class="lb">You</span></button>
+</nav>
+
+<script>
+function hp(){ var t=document.createElement('div'); t.textContent='📡 HyperPost — write once, radiate everywhere 🌹';
+  t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1b1e26;color:#fff;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13.5px;z-index:99;box-shadow:0 10px 30px #0006';
+  document.body.appendChild(t); setTimeout(function(){t.style.transition='.35s';t.style.opacity=0;setTimeout(function(){t.remove();},360);},2200); }
+</script>
+</body></html>

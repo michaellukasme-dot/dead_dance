@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Friends · DeadDance</title>
-<meta name="theme-color" content="#2a1b3d">
+<meta name="theme-color" content="#5a2e86">
 <style>
   :root{--rose:#b8002e;--purple:#5a2e86;--accent:#7a3cc0;--gold:#c79a3a;--ink:#23202a;--muted:#7a7686;--line:#e7ddf5;--bg:#f2ecfb;--card:#fff;--ok:#2a6b46}
   *{box-sizing:border-box}
@@ -10,7 +10,7 @@
   .shell{display:flex;min-height:100vh;max-width:1180px;margin:0 auto}
   /* sidebar */
   .side{width:290px;flex:none;background:var(--card);border-right:1px solid var(--line);padding:14px 10px 30px}
-  .side .head{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 12px}
+  .side .head{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 12px;position:relative}
   .side .head h1{font-size:23px;font-weight:900;margin:0}
   .gear{width:34px;height:34px;border-radius:50%;border:0;background:#eee7f4;color:var(--purple);font-size:16px;cursor:pointer;position:relative}
   .nav a{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:11px;font-weight:700;font-size:15px;cursor:pointer}
@@ -78,13 +78,12 @@
   <aside class="side">
     <div class="head">
       <h1><span class="rose">🌹</span> Friends</h1>
-      <button class="gear" onclick="togPop(event)" title="Notification settings">⚙️
-        <div class="pop" id="pop" onclick="event.stopPropagation()">
-          <h4>Notification settings</h4>
-          <p>Manage how you're notified about Friends updates.</p>
-          <div class="tog"><span>Show notification dots</span><div class="sw on" id="dotSw" onclick="togDots()"><i></i></div></div>
-        </div>
-      </button>
+      <button class="gear" onclick="togPop(event)" title="Notification settings">⚙️</button>
+      <div class="pop" id="pop" onclick="event.stopPropagation()">
+        <h4>Notification settings</h4>
+        <p>Manage how you're notified about Friends updates.</p>
+        <div class="tog"><span>Show notification dots</span><div class="sw on" id="dotSw" onclick="togDots()"><i></i></div></div>
+      </div>
     </div>
     <nav class="nav" id="nav">
       <a data-s="home" class="on" onclick="go('home')"><span class="i">🏠</span><b>Home</b></a>
@@ -138,8 +137,8 @@ var ALL=[
   {name:'Lisa Nicolosi Sofranko',mutual:87},{name:'Steve Lieberman',mutual:25}
 ];
 var BDAY_TODAY=[
-  {name:'Charles Lafountain', date:'July 19, 1970', age:'56'},
-  {name:'Paul Bonewicz', date:'July 19, 1968', age:'58'}
+  {name:'Charles Lafountain', date:'July 20, 1970', age:'56'},
+  {name:'Paul Bonewicz', date:'July 20, 1968', age:'58'}
 ];
 var BDAY_UP=[
   {name:'Jason Meigs', date:'July 21 · 56'},{name:'Scott N. Brown', date:'July 21'},
@@ -255,6 +254,7 @@ try{
   if(P&&P.DDPymk&&P.DDPymk.suggestions){ P.DDPymk.suggestions(10).then(function(list){ if(list&&list.length){ PYMK=list.map(function(x){return {name:x.name,mutual:x.mutual||0,reason:x.reason||'In your scene'};}); if(CUR==='home'||CUR==='suggestions') go(CUR); } }); }
 }catch(e){}
 
-go('home');
+var _h=(location.hash||"").replace("#","");
+go(["home","requests","suggestions","all","birthdays","lists"].indexOf(_h)>=0?_h:"home");
 </script>
 </body></html>
