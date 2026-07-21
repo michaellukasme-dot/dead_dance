@@ -1234,9 +1234,18 @@ window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth
     <iframe id="ddsheet-f" title="Shop sub-page" style="flex:1;width:100%;border:0;background:#fff"></iframe>
   </div>
 </div>
+<!-- Ticket modal: white card floating over Home. No title header. Transparent iframe; the ticket page paints its own dark scrim + centered white card, and closes via × / scrim-tap. -->
+<div id="ddtix" style="position:fixed;inset:0;z-index:150;display:none">
+  <iframe id="ddtix-f" title="Ticket" allowtransparency="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent"></iframe>
+</div>
 <script>
 function ddSheet(url,title){var s=document.getElementById('ddsheet');if(!s)return;try{ if(/^(band_onboard|band_console|venue_ops|venue_console|influencer_console|sales_console)/.test(String(url))&&window.ddMarkInsider) ddMarkInsider(); }catch(e){}document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.style.display='block';document.body.style.overflow='hidden';}
 function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.style.display='none';document.getElementById('ddsheet-f').src='about:blank';document.body.style.overflow='';}
+/* Ticket = white modal floating over Home: header-less, transparent iframe so Home shows behind the ticket's own scrim */
+function ddTix(url){var s=document.getElementById('ddtix');if(!s)return;document.getElementById('ddtix-f').src=url;s.style.display='block';document.body.style.overflow='hidden';}
+function ddTixClose(){var s=document.getElementById('ddtix');if(!s)return;s.style.display='none';document.getElementById('ddtix-f').src='about:blank';document.body.style.overflow='';}
+window.ddTixClose=ddTixClose;
+window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='ddTixClose') ddTixClose(); }catch(x){} });
 </script>
 
 <!-- buy bubble -->
@@ -1912,7 +1921,7 @@ function tixDate(s){ try{ var d=s.d||(s.iso&&new Date(s.iso+'T12:00:00')); if(!d
 function tixUrl(s){ var p=[]; function a(k,v){ if(v!=null&&v!=='') p.push(k+'='+encodeURIComponent(v)); }
  a('band',s.band); a('venue',s.venue); a('price',s.price); a('img',s.logo); a('date',tixDate(s)); a('sub',s.sub); a('url',s.url);
  return 'ticket.html?'+p.join('&'); }
-function openTicket(i){ var s=(typeof i==='number')?SHOWLIST[i]:i; if(!s)return; ddSheet(tixUrl(s), '🎟️ '+(s.band||'Ticket')); }
+function openTicket(i){ var s=(typeof i==='number')?SHOWLIST[i]:i; if(!s)return; ddTix(tixUrl(s)); }
 window.openTicket=openTicket;
 /* the featured live ticket that sits UNDER the calendar — next upcoming show, buy right here */
 var _calTixKey='';

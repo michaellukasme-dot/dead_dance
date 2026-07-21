@@ -2,73 +2,68 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Ticket · DeadDance / StageFill</title>
 <style>
-:root{--tm-blue:#2f7bf6;--gold:#f0a500;--rose:#d8305a}
+:root{--tm-blue:#2f7bf6;--gold:#c79a3a;--rose:#b8002e;--purple:#5a2e86;--ink:#23202a;--muted:#7a7686;--line:#e7ddf5;--secure:#1877f2;--green:#1a8f4f}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%}
-body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 15px 40px;color:#fff;-webkit-font-smoothing:antialiased}
-.cap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8b93a7;text-align:center}
+html{background:transparent}
+/* body IS the dark scrim; Home shows through behind the transparent iframe */
+body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 15px;color:var(--ink);min-height:100vh;overflow-y:auto;-webkit-font-smoothing:antialiased}
+.cap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#d9cdf0;text-align:center}
 
-.ticket{width:100%;max-width:340px;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55);position:relative;background:#1b1e26}
-.photo{position:relative;padding:15px 18px 18px;isolation:isolate;display:flex;flex-direction:column}
-.art{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center;background-repeat:no-repeat;filter:saturate(1.05)}
-.photo::after{content:"";position:absolute;inset:0;z-index:-1;
-  background:linear-gradient(180deg, rgba(14,11,20,.30) 0%, rgba(14,11,20,.55) 42%, rgba(14,11,20,.92) 100%)}
-.artfallback{background:
-  radial-gradient(120% 80% at 20% 0%, rgba(120,60,180,.65), transparent 60%),
-  radial-gradient(120% 90% at 90% 10%, rgba(216,60,90,.5), transparent 55%),
-  radial-gradient(140% 120% at 50% 120%, rgba(240,165,0,.4), transparent 55%),
-  linear-gradient(180deg,#241a33 0%,#191420 55%,#0e0b14 100%)}
+.ticket{width:100%;max-width:360px;border-radius:18px;overflow:hidden;box-shadow:0 26px 64px rgba(20,12,30,.45);position:relative;background:#fff;border:1px solid var(--line)}
+.tx-close{position:absolute;top:10px;right:12px;z-index:6;border:0;background:#f1ecf9;color:var(--ink);width:32px;height:32px;border-radius:16px;font-size:19px;line-height:1;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tx-close:active{transform:scale(.94)}
+.photo{position:relative;padding:15px 18px 18px;display:flex;flex-direction:column;background:#fff}
+.art{display:none}
 
-.brandbar{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800}
+.brandbar{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;padding-right:34px}
 .brandbar .rose{font-size:15px}
-.brandbar .sf{color:#d9c9f5;font-weight:700}
-.brandbar .lock{margin-left:auto;display:flex;align-items:center;gap:5px;color:#a7f3d0;font-size:11px;font-weight:800;letter-spacing:.03em}
+.brandbar .sf{color:var(--purple);font-weight:700}
+.brandbar .lock{margin-left:auto;display:flex;align-items:center;gap:5px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.03em}
 
 .gate{margin-top:14px}
-.gate small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#d5daea;opacity:.9}
-.gate b{font-size:24px;font-weight:900}
+.gate small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.gate b{font-size:24px;font-weight:900;color:var(--ink)}
 .act{margin-top:11px}
-.act b{font-size:22px;font-weight:900;display:block;line-height:1.04;text-shadow:0 2px 14px rgba(0,0,0,.5)}
-.act span{font-size:12.5px;color:#e6d9fb;font-weight:700}
-.venue{margin-top:6px;font-size:12px;color:#c3c8d8;font-weight:600}
+.act b{font-size:22px;font-weight:900;display:block;line-height:1.04;color:var(--ink)}
+.act span{font-size:12.5px;color:var(--purple);font-weight:700}
+.venue{margin-top:6px;font-size:12px;color:var(--muted);font-weight:600}
 .srs{display:flex;margin-top:14px;text-align:center}
 .srs>div{flex:1}
-.srs small{display:block;font-size:11px;letter-spacing:.13em;color:#c3c8d8;font-weight:800}
-.srs b{font-size:19px;font-weight:900}
-.ga{margin-top:14px;font-size:13px;font-weight:900;letter-spacing:.12em;color:#ffe08a;text-align:center}
+.srs small{display:block;font-size:11px;letter-spacing:.13em;color:var(--muted);font-weight:800}
+.srs b{font-size:19px;font-weight:900;color:var(--ink)}
+.ga{margin-top:14px;font-size:13px;font-weight:900;letter-spacing:.12em;color:var(--gold);text-align:center}
 
-/* the marketing barcode — shown always */
-.barwrap{margin-top:14px;background:#fff;border-radius:14px;padding:14px 14px 10px;position:relative;overflow:hidden}
+/* the marketing barcode — shown always (dark bars + blue sweep on white) */
+.barwrap{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px;position:relative;overflow:hidden}
 #bars{display:block;width:100%;height:66px}
 .sweep{position:absolute;top:0;bottom:26px;width:7px;left:0;background:linear-gradient(180deg,#6aa8ff,var(--tm-blue));
   box-shadow:0 0 14px 3px rgba(47,123,246,.75);border-radius:6px;animation:sweep 2.4s cubic-bezier(.55,0,.45,1) infinite}
 @keyframes sweep{0%{left:2%}50%{left:95%}100%{left:2%}}
 .barfoot{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
-.barfoot span{font-size:12.5px;font-weight:800;color:#1b1e26}
-.barfoot .rf{color:#4a4f5e;font-size:15px;animation:spin 2.4s linear infinite}
+.barfoot span{font-size:12.5px;font-weight:800;color:var(--ink)}
+.barfoot .rf{color:var(--muted);font-size:15px;animation:spin 2.4s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* PRICE + BUY NOW — directly on the marketing piece */
 .buybar{display:flex;align-items:center;gap:10px;margin-top:14px}
 .bbprice{display:flex;flex-direction:column;line-height:1.15}
-.bbprice b{font-size:22px;font-weight:900;color:#fff}
-.bbprice span{font-size:10.5px;color:#c9cede;font-weight:700}
+.bbprice b{font-size:22px;font-weight:900;color:var(--ink)}
+.bbprice span{font-size:10.5px;color:var(--muted);font-weight:700}
 .bbbuy{margin-left:auto;border:0;border-radius:12px;padding:13px 18px;font-size:15px;font-weight:900;color:#fff;background:var(--tm-blue);cursor:pointer;white-space:nowrap}
 .bbbuy:active{transform:scale(.98)}
-.issuedNote{margin-top:12px;font-size:11.5px;font-weight:800;color:#a7f3d0;text-align:center}
+.issuedNote{margin-top:12px;font-size:11.5px;font-weight:800;color:var(--green);text-align:center}
 
-.foot{margin-top:13px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#f2d9e6}
+.foot{margin-top:13px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--ink)}
 .foot .rose{font-size:14px}
 
-.perf{height:0;border-top:2px dashed rgba(255,255,255,.18);position:relative;background:#1b1e26}
-.perf::before,.perf::after{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#14161c}
-.perf::before{left:-11px}.perf::after{right:-11px}
-.stub{background:#1b1e26;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#9aa1b4;font-weight:700}
-.stub b{color:#e7e2f2}
-.chip{background:rgba(47,123,246,.16);color:#a9c8ff;border:1px solid rgba(47,123,246,.4);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;letter-spacing:.04em}
+.perf{height:0;border-top:2px dashed var(--line);position:relative;background:#fff}
+.stub{background:#faf7ff;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700}
+.stub b{color:var(--ink)}
+.chip{background:rgba(47,123,246,.10);color:var(--tm-blue);border:1px solid rgba(47,123,246,.35);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:900;letter-spacing:.04em}
 .hidden{display:none!important}
-.tmb{display:block;width:100%;max-width:340px;margin:10px auto 0;background:transparent;border:1px dashed #ffffff44;color:#e6d9fb;border-radius:12px;padding:9px;font-size:12.5px;font-weight:800;cursor:pointer}
+.tmb{display:block;width:100%;max-width:360px;margin:10px auto 0;background:transparent;border:1px dashed var(--purple);color:var(--purple);border-radius:12px;padding:9px;font-size:12.5px;font-weight:800;cursor:pointer}
 #bandPerm{display:none;position:fixed;inset:0;z-index:50;background:rgba(14,11,20,.93);align-items:center;justify-content:center;padding:16px}
 #bandPerm.on{display:flex}
 .bpcard{position:relative;max-width:344px;max-height:90vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:22px 20px}
@@ -83,9 +78,10 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
 #tixSecModal{display:none;position:fixed;inset:0;z-index:600;background:rgba(14,11,20,.88);align-items:center;justify-content:center;padding:18px}
 #tixSecModal.on{display:flex}
 </style></head>
-<body>
+<body onclick="if(event.target===this)ddTixDismiss()">
 
 <div class="ticket">
+  <button class="tx-close" onclick="ddTixDismiss()" aria-label="Close">×</button>
   <div class="photo">
     <div class="art" id="art"></div>
     <div class="brandbar">
@@ -96,7 +92,7 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
     <div class="gate"><small>Entry Gate</small><b id="gate">Gate A</b></div>
     <div class="act"><b id="band">—</b><span id="sub"></span></div>
     <div class="venue" id="venue">—</div>
-    <a class="veloc" id="veloc" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:12px;font-weight:800;color:#a9c8ff;text-decoration:none">📍 Directions &amp; parking ›</a>
+    <a class="veloc" id="veloc" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:12px;font-weight:800;color:#2f7bf6;text-decoration:none">📍 Directions &amp; parking ›</a>
     <div class="srs" id="srs"></div>
     <div class="ga hidden" id="ga">🌹 GENERAL ADMISSION</div>
 
@@ -229,6 +225,11 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
   };
   window.bandPermClose=function(){ var p=document.getElementById('bandPerm'); if(p)p.classList.remove('on'); };
   window.bandSetup=function(){ try{ location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(String(band||'')); }catch(e){} };
+  // Close the ticket modal → return to Home. Prefer the parent's direct close; fall back to postMessage.
+  window.ddTixDismiss=function(){
+    try{ if(window.parent&&window.parent!==window&&typeof window.parent.ddTixClose==='function'){ window.parent.ddTixClose(); return; } }catch(e){}
+    try{ window.parent.postMessage({dd:'ddTixClose'},'*'); }catch(e){}
+  };
 })();
 </script>
 <div id="tixSecModal" onclick="if(event.target===this)closeTixSec()"><div style="max-width:360px;max-height:88vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:20px 20px 22px;box-shadow:0 24px 60px #000c;position:relative"><button onclick="closeTixSec()" aria-label="Close" style="position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:34px;height:34px;border-radius:17px;font-size:18px;cursor:pointer">×</button><div style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:16.5px;padding-right:30px"><span style="font-size:21px">🌹</span> The most secure ticket on the market</div><p style="font-size:14px;line-height:1.6;color:#d7d2e2;margin:12px 0 0">From the smallest bar room or restaurant to the largest stadium, DeadDance secures both the <b>ticket</b> and the <b>sale</b> — engineered to thwart the scalper hacks that still work on other ticket vendors.</p><div style="margin-top:14px;display:flex;flex-direction:column;gap:11px"><div style="display:flex;gap:10px"><span style="font-size:17px">🔒</span><div style="font-size:13.5px;line-height:1.55"><b>Can’t be cloned.</b> The barcode rotates like the one you already trust — but the signing key never leaves your phone. A screenshot is dead on arrival, and it can’t be copied onto another device the way the big vendors’ can.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🪑</span><div style="font-size:13.5px;line-height:1.55"><b>Seat-true.</b> Your section, row, and seat are signed into the ticket — nobody edits a screenshot into a better seat.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🎟️</span><div style="font-size:13.5px;line-height:1.55"><b>Distribution locked end to end.</b> Every sale and transfer is signed, so tickets can’t be siphoned into scalper inventory or resold through a back door.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">📶</span><div style="font-size:13.5px;line-height:1.55"><b>Works offline at the gate.</b> No signal in a packed room? It still verifies — no network required.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🌹</span><div style="font-size:13.5px;line-height:1.55"><b>Still yours.</b> Free transfers to friends, no resale toll booth — Ticketmaster-grade security, Grateful-Dead ethics.</div></div></div></div></div><script>window.openTixSec=function(){var m=document.getElementById("tixSecModal");if(m)m.classList.add("on");};window.closeTixSec=function(){var m=document.getElementById("tixSecModal");if(m)m.classList.remove("on");};</script>

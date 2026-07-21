@@ -146,7 +146,7 @@
   </div>
   <div class="acctcard">
     <a class="acctrow" onclick="copyMyId()"><span class="ai">🪪</span><span>Copy my DeadDance id</span></a>
-    <a class="acctrow" onclick="location.href='claude_ai.html'"><span class="ai">✳</span><span>Claude AI</span><span class="ch">›</span></a>
+    <a class="acctrow" onclick="document.getElementById('acctMenu').classList.remove('on');openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="ai">✳</span><span>Claude AI</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('⚙️ Settings &amp; privacy')"><span class="ai">⚙️</span><span>Settings &amp; privacy</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('❓ Help &amp; support')"><span class="ai">❓</span><span>Help &amp; support</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('🚩 Report a problem')"><span class="ai">🚩</span><span>Report a problem</span></a>
@@ -178,7 +178,7 @@
   <!-- LEFT SIDEBAR -->
   <aside class="side">
     <nav class="nav">
-      <a onclick="openAppSheet('you')"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
+      <a onclick="toggleAcct(event)"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael Lukas</b></a>
       <a onclick="openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
       <a onclick="openAppSheet('dealer')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
       <a onclick="var s=document.getElementById('reelsShelf')||document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
