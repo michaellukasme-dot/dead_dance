@@ -160,7 +160,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
   #calCard{order:1}
   .wrap>#signupCard{order:2}
   .wrap>.center{order:3}
-  .wrap>#adRollCard{order:4}
+  #adRollCard{order:4}   /* nested in .left → plain ID selector so the order actually applies (Ad is LAST when narrow) */
   #profCard{order:5}
 }
 /* Facebook-enhancement card (dismissible) */

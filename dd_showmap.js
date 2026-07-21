@@ -410,10 +410,9 @@
         '</div>' +
         /* region controls + legend moved BELOW the map (Musikfest-style — the chapter picker recenters the map like North/South) */
         '<div class="showmap-region">' +
-          '<button class="showmap-back" hidden>‹ All chapters</button>' +
           '<button class="showmap-loc">📍 Use my location</button>' +
-          '<select class="showmap-select" aria-label="Pick a chapter">' +
-            '<option value="">Pick a chapter…</option>' +
+          '<select class="showmap-select" aria-label="Region">' +
+            '<option value="__nation__">National</option>' +
             CHAPTERS.map(function (ch) { return '<option value="' + esc(ch.name) + '">' + esc(shortName(ch.name)) + '</option>'; }).join('') +
           '</select>' +
           '<select class="showmap-radius" hidden aria-label="Radius (miles)">' +
@@ -438,7 +437,7 @@
     var radiusSel = host.querySelector(".showmap-radius");
     function showRadius(on){ if (radiusSel) radiusSel.hidden = !on; }
     var sel = host.querySelector(".showmap-select");
-    var backBtn = host.querySelector(".showmap-back");
+    var backBtn = host.querySelector(".showmap-back") || { hidden: true, addEventListener: function () {} };   /* back pill removed — "National" now lives in the dropdown */
     var farrahEl = host.querySelector("#farrahMap");
     var panel = host.querySelector("#showmapPanel");
 
@@ -631,7 +630,7 @@
     function toNation() {
       level = "nation"; clearYou();
       host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "national"); });
-      backBtn.hidden = true; regionRow.hidden = false; panel.hidden = true; showRadius(false);   /* keep the picker row visible — it strands the user otherwise */
+      backBtn.hidden = true; regionRow.hidden = false; panel.hidden = true; showRadius(false); try { sel.value = "__nation__"; } catch (e) {}   /* dropdown shows National at nation level */
       animateTo(FULL_VB.slice(), 560, null, function () { drawBadges(true); });
       var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
       lit.forEach(function (c) { tot += c.shows.length; });
@@ -718,7 +717,7 @@
     backBtn.addEventListener("click", toNation);
     host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
     if (radiusSel) radiusSel.addEventListener("change", function () { zoomToRadius(+radiusSel.value || 50); });
-    sel.addEventListener("change", function () { if (sel.value) { showRadius(false); drill(sel.value); } });
+    sel.addEventListener("change", function () { if (sel.value === "__nation__") { showRadius(false); toNation(); } else if (sel.value) { showRadius(false); drill(sel.value); } });
     wrap.addEventListener("mouseleave", hidePop);
     document.addEventListener("click", function (e) {
       if (pop.hidden) return;
