@@ -145,6 +145,9 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 #calCard{flex:0 0 auto}
 #adRollCard{flex:1 1 auto}   /* the Ad fills the rest of the left column so its bottom lines up with the Map/List card */
 .center,.left{min-width:0}   /* let grid columns shrink to fit — no more content clipped off the right edge */
+/* "bare overlay" mode — index.html loaded inside the Friends sheet shows ONLY the requested overlay */
+body.ddonly .top, body.ddonly .wrap, body.ddonly .footnav, body.ddonly .hpfab, body.ddonly .qafab, body.ddonly .fb-strip{display:none!important}
+body.ddonly{background:#160e24}
 .ddnav{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:8px;margin-bottom:14px;box-shadow:0 1px 3px #0000000a}
 .ddnav a{display:flex;align-items:center;gap:12px;padding:8px 9px;border-radius:10px;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;text-decoration:none}
 .ddnav a:hover{background:#f3eefb}
@@ -1170,17 +1173,24 @@ body.dd-insider .dd-only{display:block}
 <script>window.openFriends=function(){var v=document.getElementById('socialView');if(v){v.classList.add('on');v.scrollTop=0;}try{document.querySelectorAll('.footnav .fn').forEach(function(b){b.classList.remove('fnon');});}catch(e){}};window.closeFriends=function(){var v=document.getElementById('socialView');if(v)v.classList.remove('on');};
 /* bottom-nav intents arriving from the Friends page (dd_home_mockup.html) — #go=dealer|games|records|alerts|you */
 (function(){ try{ var m=(location.hash||'').match(/go=(\w+)/); if(!m) return; var go=m[1];
+  var inFrame=false; try{ inFrame=(window.self!==window.top); }catch(e){ inFrame=true; }
+  /* when loaded inside the Friends sheet, render ONLY the overlay (hide the Home shell) so it reads as "over Friends" */
+  if(inFrame){ try{ document.body.classList.add('ddonly'); }catch(e){} }
   try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  function watch(sel,gone){ if(!inFrame)return; setTimeout(function(){ var el=document.querySelector(sel); if(!el)return;
+    var iv=setInterval(function(){ try{ if(gone(el)){ clearInterval(iv); try{ window.parent.postMessage({dd:'closeSheet'},'*'); }catch(e){} } }catch(e){ clearInterval(iv); } },400); },700); }
+  var offOn=function(el){ return !el.classList.contains('on'); };
+  var offDisp=function(el){ try{ return getComputedStyle(el).display==='none'; }catch(e){ return false; } };
   function fire(){ try{
-    if(go==='dealer'&&window.openReader) return openReader('groups');
-    if(go==='shakedown'&&window.openReader) return openReader('market');
-    if(go==='apps'&&window.openApps) return openApps();
-    if(go==='games'&&window.openGame) return openGame();
-    if(go==='records'&&window.ddSheet) return ddSheet('record_store.html','💿 DeadDance Records');
-    if(go==='alerts'&&window.openNotifs) return openNotifs();
-    if(go==='you'&&window.profile) return profile('me');
+    if(go==='dealer'&&window.openReader){ openReader('groups'); watch('#reader',offOn); return; }
+    if(go==='shakedown'&&window.openReader){ openReader('market'); watch('#reader',offOn); return; }
+    if(go==='apps'&&window.openApps){ openApps(); watch('#appsov',offOn); return; }
+    if(go==='games'&&window.openGame){ openGame(); watch('#game',offOn); return; }
+    if(go==='records'&&window.ddSheet){ ddSheet('record_store.html','💿 DeadDance Records'); watch('#ddsheet',offDisp); return; }
+    if(go==='alerts'&&window.openNotifs){ openNotifs(); watch('#notifov',offOn); return; }
+    if(go==='you'&&window.profile){ profile('me'); return; }
   }catch(e){} }
-  setTimeout(fire, 650);
+  setTimeout(fire, inFrame?300:650);
 }catch(e){} })();
 /* ===== Walled garden: Home is open to all; everything else requires Google/Facebook sign-in ===== */
 var DD_GATE_ON=true;   /* one-line safety valve — set false to disable the gate entirely */

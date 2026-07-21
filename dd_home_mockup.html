@@ -269,12 +269,18 @@
 <nav class="footnav">
   <button class="fn" onclick="location.href='index.html'"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn on"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn" onclick="location.href='index.html#go=dealer'"><span class="ic">💎</span><span class="lb">Dealer</span></button>
-  <button class="fn" onclick="location.href='index.html#go=games'"><span class="ic">🎮</span><span class="lb">Games</span></button>
-  <button class="fn" onclick="location.href='index.html#go=records'"><span class="ic">💿</span><span class="lb">Records</span></button>
-  <button class="fn" onclick="location.href='index.html#go=alerts'"><span class="ic">🔔<span class="b">3</span></span><span class="lb">Alerts</span></button>
-  <button class="fn" onclick="location.href='index.html#go=you'"><span class="ic">🪪</span><span class="lb">You</span></button>
+  <button class="fn" onclick="openAppSheet('dealer')"><span class="ic">💎</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="openAppSheet('games')"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn" onclick="openAppSheet('records')"><span class="ic">💿</span><span class="lb">Records</span></button>
+  <button class="fn" onclick="openAppSheet('alerts')"><span class="ic">🔔<span class="b">3</span></span><span class="lb">Alerts</span></button>
+  <button class="fn" onclick="openAppSheet('you')"><span class="ic">🪪</span><span class="lb">You</span></button>
 </nav>
+
+<!-- APP SHEET — Dealer/Games/Records/Alerts/You open OVER Friends, close back to Friends -->
+<div class="appsheet" id="appSheet">
+  <div class="appsheethd"><button class="appx" onclick="closeAppSheet()">‹ Friends</button><b id="appSheetTitle"></b></div>
+  <iframe id="appSheetFrame" title="DeadDance" src="about:blank" allow="clipboard-write; geolocation"></iframe>
+</div>
 
 <!-- data layer (shares the signed-in Supabase session on this origin) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -293,6 +299,13 @@ function closeFbInfo(){ document.getElementById('fbInfo').classList.remove('on')
 window.toggleSideMenu=function(){ var s=document.querySelector('.side'), sc=document.getElementById('menuScrim'); if(!s)return; var open=!s.classList.contains('open'); s.classList.toggle('open',open); if(sc)sc.classList.toggle('on',open); };
 window.closeSideMenu=function(){ var s=document.querySelector('.side'), sc=document.getElementById('menuScrim'); if(s)s.classList.remove('open'); if(sc)sc.classList.remove('on'); };
 (function(){ try{ var nav=document.querySelector('.side .nav'); if(nav) nav.addEventListener('click',function(e){ if(e.target.closest('a')) setTimeout(closeSideMenu,10); }); }catch(e){} })();
+/* App sheet — Dealer/Games/Records/Alerts/You render OVER Friends (bare overlay from index.html) and close back to Friends */
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.appsheet{display:none;position:fixed;inset:0;z-index:210;background:#160e24;flex-direction:column}.appsheet.on{display:flex}.appsheethd{display:flex;align-items:center;gap:10px;background:#241634;color:#fff;padding:9px 12px;flex:none;border-bottom:1px solid #ffffff1a}.appsheethd .appx{border:0;background:#ffffff1a;color:#fff;font-weight:800;font-size:14px;border-radius:9px;padding:8px 12px;cursor:pointer}.appsheethd b{font-size:15px}.appsheet iframe{flex:1;width:100%;border:0;background:#160e24}</style>'); }catch(e){} })();
+var _APP_TITLES={dealer:'💎 Dealer',games:'🎮 Games',records:'💿 Records',alerts:'🔔 Alerts',you:'🪪 You'};
+window.openAppSheet=function(which){ var s=document.getElementById('appSheet'), f=document.getElementById('appSheetFrame'), t=document.getElementById('appSheetTitle'); if(!s||!f)return;
+  if(t)t.textContent=_APP_TITLES[which]||''; f.src='index.html#go='+which; s.classList.add('on'); document.body.style.overflow='hidden'; };
+window.closeAppSheet=function(){ var s=document.getElementById('appSheet'), f=document.getElementById('appSheetFrame'); if(s)s.classList.remove('on'); if(f)f.src='about:blank'; document.body.style.overflow=''; };
+window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='closeSheet') closeAppSheet(); }catch(x){} });
 function toast(m){ var t=document.createElement('div'); t.innerHTML=m;
   t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1b1e26;color:#fff;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13.5px;z-index:99;box-shadow:0 10px 30px #0006;max-width:88vw;text-align:center';
   document.body.appendChild(t); setTimeout(function(){t.style.transition='.35s';t.style.opacity=0;setTimeout(function(){t.remove();},360);},2200); }
