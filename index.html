@@ -147,7 +147,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .center,.left{min-width:0}   /* let grid columns shrink to fit — no more content clipped off the right edge */
 /* "bare overlay" mode — index.html loaded inside the Friends sheet shows ONLY the requested overlay */
 body.ddonly .top, body.ddonly .wrap, body.ddonly .footnav, body.ddonly .hpfab, body.ddonly .qafab, body.ddonly .fb-strip{display:none!important}
-body.ddonly{background:#160e24}
+body.ddonly{background:transparent}   /* in the Friends sheet: transparent so the overlay's own scrim shows Social behind — reads as a modal over Friends, not a page */
 .ddnav{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:8px;margin-bottom:14px;box-shadow:0 1px 3px #0000000a}
 .ddnav a{display:flex;align-items:center;gap:12px;padding:8px 9px;border-radius:10px;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;text-decoration:none}
 .ddnav a:hover{background:#f3eefb}
@@ -1130,9 +1130,9 @@ body.dd-insider .dd-only{display:block}
       <button class="radiate" onclick="hyperConsole('Crowdsource · Hurdy Gurdy')">📡</button>
     </div>
 
-    <div class="sec">🛍️ SHAKEDOWN</div>
+    <div class="sec">🛍️ SHOP</div>
     <div class="post" style="cursor:pointer" onclick="openReader('market')">
-      <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-weight:800;color:#23202a">KP</div><div style="flex:1"><b>Shakedown · Kara's Prints</b><div class="by">1h ago · new drop on the lot</div></div><span style="color:var(--accent);font-weight:800">Open Market ▸</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-weight:800;color:#23202a">KP</div><div style="flex:1"><b>Shop · Kara's Prints</b><div class="by">1h ago · new drop on the lot</div></div><span style="color:var(--accent);font-weight:800">Open Market ▸</span></div>
     </div>
 
     <div class="sec" data-scope="local">🌹 DEAD_DANCE EVENTS — LOCATION REVEAL</div>
@@ -1162,7 +1162,7 @@ body.dd-insider .dd-only{display:block}
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shakedown, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="requireSignin(function(){openGame()})"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" style="display:none" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><!-- hidden for launch — no records yet --><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
   <button class="fn" onclick="requireSignin(function(){openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
@@ -1188,7 +1188,7 @@ body.dd-insider .dd-only{display:block}
     if(go==='games'&&window.openGame){ openGame(); watch('#game',offOn); return; }
     if(go==='records'&&window.ddSheet){ ddSheet('record_store.html','💿 DeadDance Records'); watch('#ddsheet',offDisp); return; }
     if(go==='alerts'&&window.openNotifs){ openNotifs(); watch('#notifov',offOn); return; }
-    if(go==='you'&&window.profile){ profile('me'); return; }
+    if(go==='you'&&window.profile){ profile('me'); watch('#profile',offOn); return; }
   }catch(e){} }
   setTimeout(fire, inFrame?300:650);
 }catch(e){} })();
@@ -1231,7 +1231,7 @@ window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth
       <span id="ddsheet-t">DeadDance Records</span>
       <button onclick="ddSheetClose()" aria-label="Close" style="border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer">✕</button>
     </div>
-    <iframe id="ddsheet-f" title="Shakedown sub-page" style="flex:1;width:100%;border:0;background:#fff"></iframe>
+    <iframe id="ddsheet-f" title="Shop sub-page" style="flex:1;width:100%;border:0;background:#fff"></iframe>
   </div>
 </div>
 <script>
@@ -1249,7 +1249,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
       <div class="rtabs">
         <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
         <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
-        <button class="rtab" data-t="market" onclick="readerTab('market')">Shakedown</button>
+        <button class="rtab" data-t="market" onclick="readerTab('market')">Shop</button>
         <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 GD Archive</button>
         <button class="rtab" data-t="art" onclick="readerTab('art')">🎨 Art</button>
       </div>
@@ -1386,7 +1386,7 @@ function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('sales_console.html','📇 Sales Console')})"><span>📇</span><div><b>Sales Console</b><i>Pipeline, deal-health, cadence.</i></div></a>
     </div>
     <div class="asec">Shop</div>
-    <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shakedown</b><i>The lot.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){openReader('market')})"><span>🛍️</span><div><b>Shop</b><i>The lot.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){window.openMiracle&&openMiracle()})"><span>🍀</span><div><b>Miracle Bucket</b><i>Free tickets.</i></div></a>
     <div class="asec">You</div>
     <a class="aitem" onclick="coGo('appsov',function(){location.href='hyperpost_setup.html'})"><span>🚀</span><div><b>Set up HyperPost</b><i>Networks, lists, invite, install — once.</i></div></a>
@@ -1655,15 +1655,15 @@ function declineFriend(){ var el=document.getElementById('nfrJen'); if(el) el.in
 <!-- ============ VENUE BOOKS A BAND → how many 4×4 vendor tables? (Chaperone fills them) ============ -->
 <div class="checkout" id="vend" onclick="if(event.target===this)closeVend()">
   <div class="cobox"><button class="cox" onclick="closeVend()">×</button>
-    <div class="co-kind">🎪 Shakedown · the lot</div>
+    <div class="co-kind">🛍️ Shop · the lot</div>
     <div class="co-ttl">Vendor tables</div>
     <div class="co-sub" id="vendSub">How many 4×4 tables can this show host? The chapter Chaperone fills them.</div>
-    <div style="text-align:left;margin:16px 0 4px;font-size:12px;font-weight:800;color:var(--muted)">🌀 SHAKEDOWN tables</div>
+    <div style="text-align:left;margin:16px 0 4px;font-size:12px;font-weight:800;color:var(--muted)">🌀 SHOP tables</div>
     <div class="co-qty"><button onclick="vendStep('sd',-4)">−</button><span id="vendSD">8</span><button onclick="vendStep('sd',4)">+</button></div>
     <div style="text-align:left;margin:8px 0 4px;font-size:12px;font-weight:800;color:var(--muted)">🎨 ART tables</div>
     <div class="co-qty"><button onclick="vendStep('ar',-2)">−</button><span id="vendAR">4</span><button onclick="vendStep('ar',2)">+</button></div>
     <button class="co-pay" onclick="vendSave()">📣 Hand to the Chaperones ▸</button>
-    <div class="co-foot">The Chaperone's job: fill every table with Shakedown &amp; art vendors before showtime. Nothing auto-sends.</div>
+    <div class="co-foot">The Chaperone's job: fill every table with Shop &amp; art vendors before showtime. Nothing auto-sends.</div>
   </div>
 </div>
 
@@ -1780,7 +1780,7 @@ var ME={name:"You",img:null,chapter:"Mid-Atlantic",preJerry:42,postJerry:118,stu
 var MYFRIENDS=[
  {name:"Kara Diaz",ic:"🌹",chapter:"Mid-Atlantic",preJerry:63,postJerry:90,stubs:34,
   story:"Lot artist since '78. If there's a Greyhound Rock poster on your wall, it's probably mine. Saw Jerry 63 times and painted most of them.",
-  posts:["New prints up at the Shakedown tab 🎨","Who's got a couch in Philly for the Met run?"],photos:["🖼️","🌹","🎨","🌅","📼"]},
+  posts:["New prints up at the Shop tab 🎨","Who's got a couch in Philly for the Met run?"],photos:["🖼️","🌹","🎨","🌅","📼"]},
  {name:"Matt Hartle",ic:"🎸",chapter:"Bay Area",preJerry:0,postJerry:140,stubs:12,
   story:"Too young for Jerry — but I carry the tone every night with the China Cats. 140 shows played and counting.",
   posts:["China Cats at Felton this weekend — come dance.","Still looking for a Hurdy Gurdy to borrow 🪕"],photos:["🎸","🎶","🎟️"]},
@@ -2213,7 +2213,7 @@ function leaderFirstPost(L){ L=L||leaderState()||{}; var g=L.name||'our group';
   'What’s there for you:\n'+
   '• Every show, tape, and tour date — in one clean spot.\n'+
   '• Our group mirrored + amplified — and every post still links right back here.\n'+
-  '• A Shakedown store for the artists and makers among us.\n'+
+  '• A Shop for the artists and makers among us.\n'+
   '• No ads in your face, no clickbait. Just us.'+vision+'\n\n'+
   'It’s all on the level — nothing scraped, nothing automated, I share by hand and it links back to us here. A home next to our group, not instead of it.\n\n'+
   'Come see what we built: deaddance.app 🌹'; }
@@ -2523,7 +2523,7 @@ function syncSynth(){ var c=ddClient(); if(!c)return;
 /* ================= NAME THAT TUNE — daily Archive teaser =================
    One shared puzzle a day. PLAY a few notes; replay as much as you need; each
    miss unlocks a longer snippet. Timer from first play. Winner announced daily.
-   Cookies bank → Shakedown discounts. Real Archive clips wire into TUNES[].src
+   Cookies bank → Shop discounts. Real Archive clips wire into TUNES[].src
    when the audio source is licensed/configured; until then PLAY uses a labeled
    placeholder sting so the whole loop is playable + testable now. */
 var SONGS=["Scarlet Begonias","Fire on the Mountain","Sugar Magnolia","Truckin'","Casey Jones","Friend of the Devil","Ripple","Box of Rain","Uncle John's Band","Touch of Grey","Eyes of the World","Bertha","Franklin's Tower","Dark Star","St. Stephen","China Cat Sunflower","I Know You Rider","Help on the Way","Estimated Prophet","Terrapin Station","Ramble On Rose","Tennessee Jed","Jack Straw","Sugaree","Deal","Cassidy","Playing in the Band","The Wheel","Brokedown Palace","U.S. Blues","Shakedown Street","Althea","Bird Song","Cumberland Blues","Morning Dew","Wharf Rat","He's Gone","Loser","Stella Blue","Row Jimmy"];
@@ -2599,7 +2599,7 @@ function gResult(){ var b=document.getElementById('gameBody');
   '<div style="font-size:13px;color:var(--muted)">Your cookies: <b id="gPts" style="color:var(--gold)">'+gPoints()+'</b></div>'+
   '<button class="btn" style="margin:12px 6px 0" onclick="gShare()">📣 Share result</button>'+
   '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px;text-align:left">'+
-   '<div style="font-weight:800;margin-bottom:8px">🛍️ Spend cookies on Shakedown</div>'+
+   '<div style="font-weight:800;margin-bottom:8px">🛍️ Spend cookies on Shop</div>'+
    '<div style="display:grid;gap:7px">'+
     gRedeemRow(250,200)+gRedeemRow(500,500)+gRedeemRow(1000,1200)+'</div></div>'+
   '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px;text-align:left">'+
@@ -2608,12 +2608,12 @@ function gResult(){ var b=document.getElementById('gameBody');
  gBoard();
 }
 function gRedeemRow(cost,cents){ return '<div style="display:flex;align-items:center;gap:10px;background:#faf6ef;border:1px solid var(--line);border-radius:10px;padding:9px 11px">'+
-  '<b style="flex:1">$'+(cents/100).toFixed(2)+' off a Shakedown order</b><span style="color:var(--muted);font-size:12px">'+cost+' pts</span>'+
+  '<b style="flex:1">$'+(cents/100).toFixed(2)+' off a Shop order</b><span style="color:var(--muted);font-size:12px">'+cost+' pts</span>'+
   '<button class="btn gold" style="padding:7px 11px" onclick="gRedeem('+cost+','+cents+')">Redeem</button></div>'; }
 function gRedeem(cost,cents){ if(gPoints()<cost){ toast('Not enough cookies yet — keep playing daily.'); return; }
  var c=ddClient(),id=ddId();
  var done=function(code){ gAddPoints(-cost); var p=document.getElementById('gPts'); if(p)p.textContent=gPoints();
-   toast('🎟️ Coupon '+code+' — $'+(cents/100).toFixed(2)+' off at Shakedown checkout.'); };
+   toast('🎟️ Coupon '+code+' — $'+(cents/100).toFixed(2)+' off at Shop checkout.'); };
  if(c&&id){ try{ c.rpc('chat_game_redeem',{p_cost:cost,p_cents_off:cents}).then(function(r){ done((r&&r.data)|| 'SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase()); if(r&&!r.error){try{localStorage.setItem('dd.cookies',String(Math.max(0,gPoints())));}catch(e){}} }).catch(function(){ done('SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase()); }); }catch(e){ done('SHAKE-LOCAL'); } }
  else done('SHAKE-'+Math.random().toString(36).slice(2,8).toUpperCase());
 }
@@ -2912,7 +2912,7 @@ function sdRender(){
 }
 function buyBooth(bi,ii){var bo=BOOTHS[bi],it=bo.items[ii];
  CO={kind:'shakedown',ref:null,amountCents:priceCents(it.p),meta:{booth:bo.n,item:it.n}};
- document.getElementById('coBody').innerHTML='<div class="co-kind">Shakedown · '+bo.n+'</div><div class="co-ttl">'+it.n+'</div><div class="co-sub">'+bo.n+' · the lot</div><div class="co-price">'+it.p+'</div><div class="co-qty"><button onclick="coQty(-1)">−</button><span id="coQ">1</span><button onclick="coQty(1)">+</button></div><button class="co-pay" onclick="coPay()"> Pay</button><div class="co-foot">One tap → secure Stripe checkout. Deal is buyer-to-seller; the house sets the table.</div>';
+ document.getElementById('coBody').innerHTML='<div class="co-kind">Shop · '+bo.n+'</div><div class="co-ttl">'+it.n+'</div><div class="co-sub">'+bo.n+' · the lot</div><div class="co-price">'+it.p+'</div><div class="co-qty"><button onclick="coQty(-1)">−</button><span id="coQ">1</span><button onclick="coQty(1)">+</button></div><button class="co-pay" onclick="coPay()"> Pay</button><div class="co-foot">One tap → secure Stripe checkout. Deal is buyer-to-seller; the house sets the table.</div>';
  document.getElementById('checkout').classList.add('on');}
 function tuneIn(i,on){GROUPS[i].tuned=on;try{localStorage.setItem('dd.groups',JSON.stringify(GROUPS.map(function(g){return g.tuned;})));}catch(e){}readerTab('groups');toast(on?('📡 Tuned in to '+GROUPS[i].n+' — its posts flow into your feed.'):('Tuned out of '+GROUPS[i].n+'.'));}
 (function(){try{var s=JSON.parse(localStorage.getItem('dd.groups'));if(s)GROUPS.forEach(function(g,i){if(typeof s[i]==='boolean')g.tuned=s[i];});}catch(e){}})();
@@ -3061,7 +3061,7 @@ function closeVend(){ document.getElementById('vend').classList.remove('on'); }
 function vendStep(k,d){ if(k==='sd'){ VENDSD=Math.max(0,VENDSD+d); document.getElementById('vendSD').textContent=VENDSD; }
  else { VENDAR=Math.max(0,VENDAR+d); document.getElementById('vendAR').textContent=VENDAR; } }
 function vendSave(){ var c=ddClient(),id=ddId(); closeVend();
- var msg='📣 '+VENDSD+' Shakedown + '+VENDAR+' art tables — handed to the chapter Chaperones to fill.';
+ var msg='📣 '+VENDSD+' Shop + '+VENDAR+' art tables — handed to the chapter Chaperones to fill.';
  if(c&&id&&VENDSHOW){ try{ c.rpc('chat_show_set_vendor_slots',{p_show:VENDSHOW,p_shakedown:VENDSD,p_arts:VENDAR})
    .then(function(r){ toast(r&&r.error?'Saved locally — sign in to dispatch Chaperones.':msg); }).catch(function(){ toast(msg); }); }catch(e){ toast(msg); } }
  else { toast(msg); } }
@@ -3550,7 +3550,7 @@ function buy(type,idx){
  var item;
  if(type==='ticket'){ if(CURBUY&&typeof openTicket==='function'){ openTicket(CURBUY); return; } item = CURBUY ? {kind:'🎟️ Ticket',title:CURBUY.band,sub:CURBUY.venue,price:CURBUY.price,qty:true} : {kind:'🎟️ Ticket',title:'The China Cats',sub:'Felton Music Hall · 8:30 PM',price:'$28',qty:true};
    CO={kind:'ticket',ref:(CURBUY&&CURBUY.showId)||null,amountCents:priceCents(item.price),meta:{band:item.title,venue:item.sub}}; }
- else if(type==='market'){ var m=MARKET[idx]; item={kind:'🛍️ Shakedown',title:m.n,sub:"Kara's Prints · the lot",price:m.p,qty:true};
+ else if(type==='market'){ var m=MARKET[idx]; item={kind:'🛍️ Shop',title:m.n,sub:"Kara's Prints · the lot",price:m.p,qty:true};
    CO={kind:'shakedown',ref:null,amountCents:priceCents(m.p),meta:{title:m.n}}; }
  else if(type==='art'){ var a=ART[idx]; item={kind:'🎨 The Easel',title:a.c,sub:'by '+a.by,price:a.p,qty:true};
    CO={kind:'art',ref:null,amountCents:priceCents(a.p),meta:{title:a.c,by:a.by}}; }

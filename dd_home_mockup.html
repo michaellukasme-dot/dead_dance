@@ -182,7 +182,7 @@
       <a onclick="openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
       <a onclick="openAppSheet('dealer')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
       <a onclick="var s=document.getElementById('reelsShelf')||document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
-      <a onclick="openAppSheet('shakedown')"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
+      <a onclick="openAppSheet('shakedown')"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Shop</b></a>
       <a onclick="openAppSheet('apps')"><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
       <div class="sep"></div>
       <div class="sc">Your shortcuts</div>
@@ -255,6 +255,14 @@
   <div class="friendsbox">
     <div class="mghd"><b>🌹 Add friends</b><button onclick="closeFriendsMgr()" aria-label="Close">×</button></div>
     <div class="mgbody">
+      <div class="mgsec">Invite friends</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+        <button onclick="inviteVia('email')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">📧 Email</button>
+        <button onclick="inviteVia('sms')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">💬 Text</button>
+        <button onclick="inviteVia('fb')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">🅕 Facebook</button>
+        <button onclick="inviteVia('copy')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">🔗 Copy link</button>
+      </div>
+      <div style="font-size:11.5px;color:#7a7686;margin:0 2px 8px">Bring your heads onto the map — every friend grows the family. 🌹</div>
       <div id="mgrReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="mgrReq"></div></div>
       <div class="mgsec">People you may know</div><div id="mgrSug"><div class="mgempty">Loading…</div></div>
     </div>
@@ -290,7 +298,6 @@
 
 <!-- APP SHEET — Dealer/Games/Records/Alerts/You open OVER Friends, close back to Friends -->
 <div class="appsheet" id="appSheet">
-  <div class="appsheethd"><button class="appx" onclick="closeAppSheet()">‹ Friends</button><b id="appSheetTitle"></b></div>
   <iframe id="appSheetFrame" title="DeadDance" src="about:blank" allow="clipboard-write; geolocation"></iframe>
 </div>
 
@@ -313,7 +320,7 @@ window.toggleSideMenu=function(){ var s=document.querySelector('.side'), sc=docu
 window.closeSideMenu=function(){ var s=document.querySelector('.side'), sc=document.getElementById('menuScrim'); if(s)s.classList.remove('open'); if(sc)sc.classList.remove('on'); };
 (function(){ try{ var nav=document.querySelector('.side .nav'); if(nav) nav.addEventListener('click',function(e){ if(e.target.closest('a')) setTimeout(closeSideMenu,10); }); }catch(e){} })();
 /* App sheet — Dealer/Games/Records/Alerts/You render OVER Friends (bare overlay from index.html) and close back to Friends */
-(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.appsheet{display:none;position:fixed;inset:0;z-index:210;background:#f2ecfb;flex-direction:column}.appsheet.on{display:flex}.appsheethd{display:flex;align-items:center;gap:10px;background:#241634;color:#fff;padding:9px 12px;flex:none;border-bottom:1px solid #ffffff1a}.appsheethd .appx{border:0;background:#ffffff1a;color:#fff;font-weight:800;font-size:14px;border-radius:9px;padding:8px 12px;cursor:pointer}.appsheethd b{font-size:15px}.appsheet iframe{flex:1;width:100%;border:0;background:#f2ecfb}</style>'); }catch(e){} })();
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.appsheet{display:none;position:fixed;inset:0;z-index:210;background:transparent;flex-direction:column}.appsheet.on{display:flex}.appsheethd{display:flex;align-items:center;gap:10px;background:#241634;color:#fff;padding:9px 12px;flex:none;border-bottom:1px solid #ffffff1a}.appsheethd .appx{border:0;background:#ffffff1a;color:#fff;font-weight:800;font-size:14px;border-radius:9px;padding:8px 12px;cursor:pointer}.appsheethd b{font-size:15px}.appsheet iframe{flex:1;width:100%;border:0;background:transparent}</style>'); }catch(e){} })();
 var _APP_TITLES={dealer:'💎 Dealer',games:'🎮 Games',records:'💿 Records',alerts:'🔔 Alerts',you:'🪪 You'};
 window.openAppSheet=function(which,opts){ opts=opts||{}; var s=document.getElementById('appSheet'), f=document.getElementById('appSheetFrame'), t=document.getElementById('appSheetTitle'); if(!s||!f)return;
   if(t)t.textContent=opts.title||_APP_TITLES[which]||''; f.src=opts.url||('index.html#go='+which); s.classList.add('on'); document.body.style.overflow='hidden'; };
@@ -356,6 +363,16 @@ window.frRespond=function(reqId,accept,arg){ try{ if(window.DDFriends&&DDFriends
 function _mgRow(name,reason,acts,id){ var av=(String(name||'?').charAt(0)||'?').toUpperCase(); return '<div class="mgrow" id="'+id+'"><div class="mgav">'+_esc(av)+'</div><div class="mginfo"><b>'+_esc(name)+'</b><span>'+_esc(reason)+'</span></div><div class="mgacts">'+acts+'</div></div>'; }
 window.openFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(!ov)return; ov.classList.add('on'); loadMgrRequests(); loadMgrSuggestions(); };
 window.closeFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(ov)ov.classList.remove('on'); };
+/* REAL invite facility — Email / Text / Facebook / Copy link */
+window.inviteVia=function(how){ var link='https://deaddance.app/?utm_source=invite&utm_medium=friends';
+  var msg='Come see what we built — the whole Grateful Dead & jam family on one map. 🌹 '+link;
+  try{
+    if(how==='email'){ location.href='mailto:?subject='+encodeURIComponent('Join me on DeadDance 🌹')+'&body='+encodeURIComponent(msg); return; }
+    if(how==='sms'){ location.href='sms:?&body='+encodeURIComponent(msg); return; }
+    if(how==='fb'){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link),'_blank','noopener'); return; }
+    if(how==='copy'){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(msg).then(function(){ toast('🌹 Invite link copied — paste it to your heads'); },function(){ toast('🌹 '+link); }); } else { toast('🌹 '+link); } return; }
+    if(navigator.share){ navigator.share({title:'DeadDance',text:'Join the family on DeadDance 🌹',url:link}).catch(function(){}); }
+  }catch(e){ if(window.toast) toast('🌹 Share: '+link); } };
 window.mgrConfirm=function(reqId,rowId){ try{ frRespond(reqId,true); }catch(e){} var c=document.getElementById(rowId); if(c){ var a=c.querySelector('.mgacts'); if(a)a.innerHTML='<span style="color:#1f7a4d;font-weight:800;font-size:13px">🌹 Friends</span>'; } };
 function loadMgrSuggestions(){ var host=document.getElementById('mgrSug'); if(!host)return; host.innerHTML='<div class="mgempty">Loading…</div>';
   if(!(window.DDPymk&&DDPymk.suggestions)){ host.innerHTML='<div class="mgempty">Suggestions loading…</div>'; return; }
