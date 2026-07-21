@@ -3,9 +3,9 @@
 <title>Band Install — dead.dance</title>
 <meta name="theme-color" content="#1a1030">
 <style>
-:root{--purple:#5a2e86;--gold:#ffd76a;--gold2:#c08a2d;--rose:#b8002e;--muted:#9a8fb0;--line:#2e2148;--panel:#20142f;--green:#2a8a4a}
+:root{--purple:#5a2e86;--gold:#ffd76a;--gold2:#c08a2d;--rose:#b8002e;--muted:#7a7686;--line:#e7ddf5;--panel:#ffffff;--green:#2a8a4a}
 *{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
-body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{margin:0;background:#f2ecfb;color:#23202a;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 .top{background:linear-gradient(120deg,#0e0716,#3a1d5e 68%,#b8002e);padding:14px 16px;position:sticky;top:0;z-index:30;box-shadow:0 2px 16px #0008;display:flex;align-items:center;gap:12px}
 .top .logo{font-weight:900;font-size:18px}.top .logo span{color:var(--gold)}
 .bar{flex:1;height:6px;background:#2a1c40;border-radius:3px;overflow:hidden}
@@ -13,7 +13,7 @@ body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMa
 .step-n{font-size:11.5px;color:#e0cdf5;white-space:nowrap}
 /* split — on a phone the FORM comes first; the showcase collapses below it */
 .wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:calc(100vh - 58px);min-height:calc(100dvh - 58px)}
-.left{position:sticky;top:58px;align-self:start;height:calc(100vh - 58px);height:calc(100dvh - 58px);overflow:auto;padding:22px 20px;background:linear-gradient(160deg,#1b1129,#140e20);border-right:1px solid var(--line)}
+.left{position:sticky;top:58px;align-self:start;height:calc(100vh - 58px);height:calc(100dvh - 58px);overflow:auto;padding:22px 20px;background:#fff;border-right:1px solid var(--line)}
 .right{padding:22px 20px 60px}
 @media(max-width:900px){
   .wrap{grid-template-columns:1fr}
@@ -22,52 +22,52 @@ body{margin:0;background:#17101f;color:#eee;font:16px/1.55 -apple-system,BlinkMa
 }
 .show-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-weight:800}
 .show-t{font-size:24px;font-weight:900;margin:5px 0 8px;line-height:1.2}
-.show-p{font-size:14px;color:#cbb9e6;line-height:1.6}
-.mock{margin:16px 0;background:var(--panel);border:1px solid #3a2a55;border-radius:14px;padding:14px}
+.show-p{font-size:14px;color:#7a7686;line-height:1.6}
+.mock{margin:16px 0;background:var(--panel);border:1px solid #e7ddf5;border-radius:14px;padding:14px}
 .mock .mh{font-size:12px;color:var(--muted);margin-bottom:8px}
-.auto{margin-top:14px;background:#160c28;border:1px solid var(--gold2);border-left:4px solid var(--gold);border-radius:11px;padding:12px 14px}
-.auto b.hd{color:var(--gold);display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
-.auto p{margin:0;font-size:13px;color:#e6ddf5;line-height:1.55}
+.auto{margin-top:14px;background:#fff8ea;border:1px solid var(--gold2);border-left:4px solid var(--gold);border-radius:11px;padding:12px 14px}
+.auto b.hd{color:#8a6a1e;display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
+.auto p{margin:0;font-size:13px;color:#23202a;line-height:1.55}
 .more{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.6}
-.more b{color:#cbb9e6}
+.more b{color:#7a7686}
 h2{margin:0 0 4px;font-size:22px}h2:focus{outline:none}
 .sub{color:var(--muted);font-size:13.5px;margin-bottom:16px}
 label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px;font-weight:700}
-input[type=text],input[type=email],input[type=number],input[type=url],select,textarea{width:100%;background:#120c1c;border:1px solid #43305f;border-radius:10px;color:#fff;font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;padding:11px 12px}
+input[type=text],input[type=email],input[type=number],input[type=url],select,textarea{width:100%;background:#f7f2fc;border:1px solid #e7ddf5;border-radius:10px;color:#23202a;font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;padding:11px 12px}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 .btn:focus-visible,.hit:focus-visible,.logo-drop:focus-visible,.toggle:focus-visible,.linkchip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.hit{background:var(--panel);border:1px solid #3a2a55;border-radius:11px;padding:10px 12px;margin:7px 0;cursor:pointer;display:flex;align-items:center;gap:11px}
+.hit{background:var(--panel);border:1px solid #e7ddf5;border-radius:11px;padding:10px 12px;margin:7px 0;cursor:pointer;display:flex;align-items:center;gap:11px}
 .hit:hover{border-color:var(--gold2)}
-.hit.on{border-color:var(--gold);background:#241634}
+.hit.on{border-color:var(--gold2);background:#fff5db}
 .mono{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--rose));display:grid;place-items:center;font-weight:900;font-size:15px;flex:none;color:#fff}
 .hit .nm{font-weight:800;font-size:14.5px}
-.hit .lo{font-size:12.5px;color:#cbb9e6;font-weight:600}
+.hit .lo{font-size:12.5px;color:#7a7686;font-weight:600}
 .hit .ch{font-size:11.5px;color:var(--muted)}
-.logo-drop{border:1px dashed #43305f;border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:#160c28}
+.logo-drop{border:1px dashed #cbb3e6;border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:#f7f2fc}
 .logo-drop img{max-width:110px;max-height:110px;border-radius:10px;display:block;margin:0 auto 8px}
-.consent{background:#101a12;border:1px solid #1f7a4d55;border-left:4px solid var(--green);border-radius:10px;padding:11px 13px;font-size:12.5px;color:#bfe6c9;margin-top:10px;line-height:1.55}
-.skipbar{background:#160c28;border:1px solid #3a2a55;border-radius:11px;padding:11px 13px;font-size:12.5px;color:#cbb9e6;line-height:1.55;margin-bottom:14px}
-.skipbar b{color:var(--gold)}
+.consent{background:#eef7f0;border:1px solid #1f7a4d55;border-left:4px solid var(--green);border-radius:10px;padding:11px 13px;font-size:12.5px;color:#1f6f43;margin-top:10px;line-height:1.55}
+.skipbar{background:#fff8ea;border:1px solid #e7ddf5;border-radius:11px;padding:11px 13px;font-size:12.5px;color:#7a7686;line-height:1.55;margin-bottom:14px}
+.skipbar b{color:#8a6a1e}
 .days{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 @media(max-width:560px){.days{grid-template-columns:1fr}}
-.day{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid #3a2a55;border-radius:10px;padding:8px 11px}
-.day span{width:38px;font-weight:800;font-size:13px;color:var(--gold)}
+.day{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid #e7ddf5;border-radius:10px;padding:8px 11px}
+.day span{width:38px;font-weight:800;font-size:13px;color:#8a6a1e}
 .day input{padding:8px 9px;font-size:14px}
-.toggle{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid #3a2a55;border-radius:11px;padding:11px 13px;margin:8px 0;cursor:pointer}
+.toggle{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid #e7ddf5;border-radius:11px;padding:11px 13px;margin:8px 0;cursor:pointer}
 .toggle input{width:18px;height:18px;accent-color:var(--green);flex:none}
 .toggle.off{opacity:.6}
 .toggle .t{font-weight:800;font-size:14px}.toggle .d{font-size:12px;color:var(--muted)}
-.linkchip{display:inline-flex;align-items:center;gap:6px;background:#241634;border:1px solid var(--gold2);color:var(--gold);border-radius:20px;padding:5px 11px;font-size:12.5px;font-weight:700;margin:3px 4px 3px 0;cursor:pointer}
-.preview{background:#120c1c;border:1px solid #43305f;border-radius:11px;padding:13px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;color:#e6ddf5}
+.linkchip{display:inline-flex;align-items:center;gap:6px;background:#fff8ea;border:1px solid var(--gold2);color:#8a6a1e;border-radius:20px;padding:5px 11px;font-size:12.5px;font-weight:700;margin:3px 4px 3px 0;cursor:pointer}
+.preview{background:#f7f2fc;border:1px solid #e7ddf5;border-radius:11px;padding:13px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;color:#23202a}
 .nav{display:flex;gap:9px;margin-top:22px}
 .btn{flex:1;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:14.5px;cursor:pointer}
 .btn.go{background:var(--gold);color:#3a1d00}
-.btn.back{background:#2a1c40;color:#e0cdf5;flex:0 0 92px}
-.btn.ghost{background:#2a1c40;color:#cbb9e6;flex:0 0 auto;padding:10px 14px;font-size:13px}
+.btn.back{background:#efe9f7;color:#5a2e86;flex:0 0 92px}
+.btn.ghost{background:#efe9f7;color:#5a2e86;flex:0 0 auto;padding:10px 14px;font-size:13px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .honest{margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.6}
-.honest b{color:#cbb9e6}
-.saved{font-size:11px;color:#7fbf95;margin-top:10px}
+.honest b{color:#7a7686}
+.saved{font-size:11px;color:#2a8a4a;margin-top:10px}
 .done{text-align:center;padding:26px 8px}
 .done .big{font-size:44px}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#000d;color:#fff;padding:11px 17px;border-radius:13px;font-size:13px;max-width:88%;text-align:center;opacity:0;transition:.2s;z-index:80;pointer-events:none}#toast.on{opacity:1}
@@ -142,53 +142,53 @@ function save(){ try{ var c=Object.assign({},S); c.logo=null; localStorage.setIt
 var LEFT=[
  {h:"Step 1 · Your band, found",t:"You're already in here.",
   p:"We seeded <b>963 Dead tribute bands</b> — every one we could find, with your city and your public page. Find yourself and claim it. Nobody has to type your history from scratch.",
-  mock:'<div class="mh">The directory</div><div style="font-size:13px;color:#cbb9e6">963 bands · 11 chapters · your city already listed</div>',
+  mock:'<div class="mh">The directory</div><div style="font-size:13px;color:#7a7686">963 bands · 11 chapters · your city already listed</div>',
   auto:["We never posted your logo","We list your <b>name</b> and your <b>public page</b> — facts. <b>Your artwork is yours.</b> It appears only when you upload it, in the next step."]},
 
  {h:"Step 2 · Your mark",t:"Your logo. Your permission.",
   p:"Upload it and it's on your band page, your merch, your show cards, your ads. We will never take it from the internet — <b>you hand it to us, and you can pull it back any time.</b>",
-  mock:'<div class="mh">Your band page</div><div style="display:flex;gap:11px;align-items:center"><div class="mono" id="mkMono">?</div><div><div style="font-weight:800" id="mkName">Your Band</div><div style="font-size:12px;color:#9a8fb0" id="mkCity">Your City</div></div></div>',
+  mock:'<div class="mh">Your band page</div><div style="display:flex;gap:11px;align-items:center"><div class="mono" id="mkMono">?</div><div><div style="font-weight:800" id="mkName">Your Band</div><div style="font-size:12px;color:#7a7686" id="mkCity">Your City</div></div></div>',
   auto:["Automation you're turning on","Your logo auto-populates <b>every show card, poster, ad, and merch mock</b> across dead.dance. Upload once."]},
 
  {h:"Step 3 · Your calendar",t:"Every gig, everywhere, once.",
   p:"Paste your schedule link or your dates. From then on your shows appear on the <b>map</b>, the <b>chapter calendar</b> (a chapter is your region — yours is below), the <b>Near You</b> feed, and every fan who tuned in to you.",
-  mock:'<div class="mh">Shows on the map</div><div style="font-size:13px;color:#cbb9e6">🗺️ your dates, plotted · 🔔 fans notified · 📅 one calendar</div>',
+  mock:'<div class="mh">Shows on the map</div><div style="font-size:13px;color:#7a7686">🗺️ your dates, plotted · 🔔 fans notified · 📅 one calendar</div>',
   auto:["Automation you're turning on","<b>Post once, appear everywhere.</b> Add a date and it lands on the map, the chapter calendar, and the feeds of everyone tuned in to your band."],
   cta:{hd:"Tease your setlist",p:"For your next show, drop your songs and how long each runs — we <b>reveal them to your fans one at a time</b> and count them down to showtime. It's the reason bands hand us their fan list.",btn:"🎵 Tease your set to your fans →"}},
 
  {h:"Step 4 · Your store",t:"A merch store that runs itself.",
   p:"Shirts, stickers, posters, and — when you're ready — <b>Print-the-Vinyl</b>: a fan orders your own live show pressed to a real record, one at a time, and it ships to them. No inventory, no boxes in the van.",
-  mock:'<div class="mh">Your store</div><div style="font-size:13px;color:#cbb9e6">👕 Tour tees · 🎵 Print-the-Vinyl on demand · 🎟️ ticket bundles</div>',
+  mock:'<div class="mh">Your store</div><div style="font-size:13px;color:#7a7686">👕 Tour tees · 🎵 Print-the-Vinyl on demand · 🎟️ ticket bundles</div>',
   auto:["Automation you're turning on","Every show you add spins up a <b>show-specific merch card</b> — the shirt, the poster, the date. It closes when the night ends."]},
 
  {h:"Step 5 · Your price",t:"Monday isn't Friday.",
   p:"Set what you charge to play, <b>per day of the week</b>. Venues and wedding planners search dead.dance for a Dead band on a Thursday — and you show up with a real number.",
-  mock:'<div class="mh">Booking search</div><div style="font-size:13px;color:#cbb9e6">“Who plays around here?” → <b>your band, your night, your price</b></div>',
+  mock:'<div class="mh">Booking search</div><div style="font-size:13px;color:#7a7686">“Who plays around here?” → <b>your band, your night, your price</b></div>',
   auto:["Nothing here is a commitment","These are <b>starting points, not offers.</b> A number only shows when a host searches your region for that night, and you can change it any time."]},
 
  {h:"Step 6 · Getting paid",t:"Your money, straight to you.",
   p:"Tickets, merch, bookings — paid to you. <b>We never take a cut of your door.</b> Any platform fee sits with the ticket buyer, never with the band. That's a house rule, not a promo.",
-  mock:'<div class="mh">The house rule</div><div style="font-size:13.5px;color:#e6ddf5">🔒 <b>We do not charge the band. Ever.</b></div>',
+  mock:'<div class="mh">The house rule</div><div style="font-size:13.5px;color:#23202a">🔒 <b>We do not charge the band. Ever.</b></div>',
   auto:["Our promise","<b>Nothing bills today.</b> Payouts arm when payments are connected <b>and you've signed a short agreement</b> — you'll read it first, and nothing is owed either way."]},
 
  {h:"Step 7 · The automations",t:"We write your ad. Every show.",
   p:"This is the part nobody else does. Add a show, and dead.dance <b>curates the ad for that show</b> — your copy, your art, your ticket link — and serves it to Deadheads near that venue, on the right dates.",
-  mock:'<div class="mh">Auto-curated show ad</div><div style="border:1px solid #3a2a55;border-radius:9px;padding:9px;font-size:12.5px;color:#cbb9e6"><b id="adBand" style="color:#ffd76a">Your Band</b><br><span id="adLine">Friday · The Venue · doors 7, show 8</span><br><span style="color:#9a8fb0">shown to Deadheads within 50 miles</span></div>',
+  mock:'<div class="mh">Auto-curated show ad</div><div style="border:1px solid #e7ddf5;border-radius:9px;padding:9px;font-size:12.5px;color:#7a7686"><b id="adBand" style="color:#8a6a1e">Your Band</b><br><span id="adLine">Friday · The Venue · doors 7, show 8</span><br><span style="color:#7a7686">shown to Deadheads within 50 miles</span></div>',
   auto:["It costs you nothing","<b>You never buy an ad here.</b> You register the show; we write it and show it near the venue, by date. There's <b>no auction and nobody can outbid you</b> — your own show is always the ad in your own town. A human always clicks send."]},
 
  {h:"Step 8 · Your people",t:"Bring your list — or don't.",
   p:"Your email list, your Facebook page, your groups. <b>Every bit of this step is optional</b>, and everything else works without it. If you do import: <b>we never sell, rent, or share your list, and we never mail it without you.</b>",
-  mock:'<div class="mh">Your channels</div><div style="font-size:13px;color:#cbb9e6" id="mkChans">📘 Page · 👥 Groups · 📷 IG · ✖ X · ✉️ Email</div>',
+  mock:'<div class="mh">Your channels</div><div style="font-size:13px;color:#7a7686" id="mkChans">📘 Page · 👥 Groups · 📷 IG · ✖ X · ✉️ Email</div>',
   auto:["What a HyperPost is","<b>One post, sent to every place your fans already follow you.</b> We call that a HyperPost. We write a version for each channel — the long one for email, the right one for each feed — and <b>you click send on every single one.</b>"]},
 
  {h:"Step 9 · Your first HyperPost",t:"We wrote it. You send it.",
   p:"Your calendar, your store, your Friday night — one post, out to everybody you already have. This is your <b>first</b> HyperPost. There will be one for every show.",
-  mock:'<div class="mh">One image per channel</div><div style="font-size:13px;color:#cbb9e6" id="mkSpread">— channels checked</div>',
+  mock:'<div class="mh">One image per channel</div><div style="font-size:13px;color:#7a7686" id="mkSpread">— channels checked</div>',
   auto:["Art is optional","<b>Words are enough.</b> If you do have show art, one image per channel makes each post its own — that's <b id='mkAsk'>5</b> right now. <b>Don't have them? Send it anyway.</b> Add more later and I already know where they go."]},
 
  {h:"Step 10 · Done",t:"You're all set.",
   p:"Your page is live, your logo is yours, your calendar syncs, your store is open, and your ads write themselves. Welcome to the family.",
-  mock:'<div class="mh">What just turned on</div><div style="font-size:13px;color:#cbb9e6">🎸 Band page · 🗺️ Map · 📅 Calendar · 🛍️ Store · 📡 Ads · 🔊 HyperPost · 🎟️ QR</div>',
+  mock:'<div class="mh">What just turned on</div><div style="font-size:13px;color:#7a7686">🎸 Band page · 🗺️ Map · 📅 Calendar · 🛍️ Store · 📡 Ads · 🔊 HyperPost · 🎟️ QR</div>',
   auto:["Our promise","Nothing bills. Nothing mails without you. <b>You can remove your logo, your list, your dates, or your whole band page at any time.</b>"],
   cta:{hd:"One more thing your fans will love",p:"Before your next show, tease your setlist. Reveal a song a day, count them down, and blast the sneak peek to your own list. Your fans show up already buzzing.",btn:"🎵 Tease your setlist →"}}
 ];
@@ -201,7 +201,7 @@ function renderLeft(){
     '<div class="mock">'+L.mock+'</div>'+
     '<div class="auto"><b class="hd">'+L.auto[0]+'</b><p>'+L.auto[1]+'</p></div>'+
     '<div class="more"><b>And this is more than a tribute-band listing:</b> the live Grateful Dead archive that plays, DeadDance Karaoke, the games, a group for every region, real-time setlist broadcast, and a marketplace — <b>your fans are already in here.</b></div>'+
-    (L.cta ? '<div class="auto" style="border-color:#f0c96b66;background:#2a2011"><b class="hd" style="color:#ffd76a">🎵 '+L.cta.hd+'</b><p>'+L.cta.p+'</p><a href="'+setlistHref()+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;background:#f0a500;color:#3a1d00;font-weight:800;border-radius:11px;padding:11px 16px;text-decoration:none;font-size:13.5px">'+L.cta.btn+'</a></div>' : '');
+    (L.cta ? '<div class="auto" style="border-color:#e7c98a;background:#fff8ea"><b class="hd" style="color:#8a6a1e">🎵 '+L.cta.hd+'</b><p>'+L.cta.p+'</p><a href="'+setlistHref()+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;background:#f0a500;color:#3a1d00;font-weight:800;border-radius:11px;padding:11px 16px;text-decoration:none;font-size:13.5px">'+L.cta.btn+'</a></div>' : '');
   var b=S.band;
   if(b){ var mn=document.getElementById('mkMono'), nm=document.getElementById('mkName'), ct=document.getElementById('mkCity');
     if(mn){ if(S.logo){mn.outerHTML='<img src="'+esc(S.logo)+'" alt="" style="width:40px;height:40px;border-radius:9px;object-fit:cover">';} else mn.textContent=b.mono; }
@@ -209,10 +209,10 @@ function renderLeft(){
     var ab=document.getElementById('adBand'); if(ab)ab.textContent=b.name;
   }
   var mc=document.getElementById('mkChans'), cn=hpSpread();
-  if(mc)mc.innerHTML=cn?('<b style="color:#ffd76a">'+cn+'</b> channel'+(cn===1?'':'s')+' · '+listCount()+' contacts<br>'+
+  if(mc)mc.innerHTML=cn?('<b style="color:#8a6a1e">'+cn+'</b> channel'+(cn===1?'':'s')+' · '+listCount()+' contacts<br>'+
       CHANS.filter(function(c){return S.chans[c[0]];}).map(function(c){return esc(c[1]);}).join(' · ')):'<span style="color:#b8002e">no channels checked</span>';
   var ms=document.getElementById('mkSpread'), mk=document.getElementById('mkAsk');
-  if(ms)ms.innerHTML='<b style="color:#ffd76a">'+cn+'</b> channel'+(cn===1?'':'s')+' · <b style="color:#ffd76a">'+cn+'</b> post'+(cn===1?'':'s')+' · '+listCount()+' contacts';
+  if(ms)ms.innerHTML='<b style="color:#8a6a1e">'+cn+'</b> channel'+(cn===1?'':'s')+' · <b style="color:#8a6a1e">'+cn+'</b> post'+(cn===1?'':'s')+' · '+listCount()+' contacts';
   if(mk)mk.textContent=cn;
   document.getElementById('bar').style.width=((S.step+1)/LEFT.length*100)+'%';
   document.getElementById('barwrap').setAttribute('aria-valuenow',S.step+1);
@@ -350,8 +350,8 @@ function stepPrice(){
 /* ---------- Step 6 · pay ---------- */
 function stepPay(){
   return '<h2 tabindex="-1">Getting paid</h2><div class="sub">Straight to you.</div>'+
-    '<div class="consent" style="background:#160c28;border-color:var(--gold2);border-left-color:var(--gold);color:#e6ddf5">🔒 <b>No charge to you, or any band. Ever.</b> No override, no fee, no cut out of your door, your guarantee, or your pay. The platform is paid by the <b>venues and the subscribers</b> — a small per-transaction fee — <b>never by the artist.</b> That is a standing house rule.</div>'+
-    '<div class="consent" style="background:#101a12;border-color:#1f7a4d55;border-left-color:var(--green);color:#bfe6c9">💵 <b>Paid at booking — stop waiting to get paid.</b> When a venue books you here, your fee is secured the moment they confirm, and released to you — not 30, 60, or 90 days after the gig, and never by chasing anyone. <span style="color:#9fd6b3">(This arms when payments go live; nothing bills today.)</span></div>'+
+    '<div class="consent" style="background:#fff8ea;border-color:var(--gold2);border-left-color:var(--gold2);color:#23202a">🔒 <b>No charge to you, or any band. Ever.</b> No override, no fee, no cut out of your door, your guarantee, or your pay. The platform is paid by the <b>venues and the subscribers</b> — a small per-transaction fee — <b>never by the artist.</b> That is a standing house rule.</div>'+
+    '<div class="consent" style="background:#eef7f0;border-color:#1f7a4d55;border-left-color:var(--green);color:#1f6f43">💵 <b>Paid at booking — stop waiting to get paid.</b> When a venue books you here, your fee is secured the moment they confirm, and released to you — not 30, 60, or 90 days after the gig, and never by chasing anyone. <span style="color:#2a8a4a">(This arms when payments go live; nothing bills today.)</span></div>'+
     '<label for="pe">Payout email or account name</label>'+
     '<input type="text" id="pe" value="'+esc(S.payout)+'" placeholder="where the money goes" oninput="S.payout=this.value;save()">'+
     '<div class="skipbar" style="margin-top:14px">📄 <b>One thing to know now, not at the end:</b> before money can actually move, there\'s a <b>short agreement to sign</b> — plain language, no fee, no exclusivity, cancel whenever. Michael or your regional Ambassador (a volunteer from your scene) will walk you through it. <b>Nothing is owed either way.</b></div>'+
@@ -391,10 +391,10 @@ function stepLists(){
   return '<h2 tabindex="-1">Your people</h2><div class="sub">Import once. <b>They stay yours.</b></div>'+
     '<div class="skipbar">✅ <b>All of this is optional — you can skip the whole step.</b> Your page, calendar, store, booking price and show ads all work without importing a single contact. Add your list later, or never.</div>'+
     '<div class="consent" style="margin-bottom:14px">🔒 <b>Before you paste anything.</b> Your list is <b>not our list.</b> We never sell it, rent it, share it, or use it for our own marketing. We never mail it without you — you click send on every message. You can export or delete it in one click, and deleting it removes it from our side too.</div>'+
-    '<label for="le">✉️ Email list <span style="color:var(--gold)" id="cntEmail">'+listCount()+'</span> <span style="font-weight:400">contacts</span></label>'+
+    '<label for="le">✉️ Email list <span style="color:#8a6a1e" id="cntEmail">'+listCount()+'</span> <span style="font-weight:400">contacts</span></label>'+
     '<textarea id="le" rows="3" placeholder="paste addresses, or a CSV export — one per line" oninput="S.lists.email=this.value;hpTick()" onchange="render()">'+esc(S.lists.email)+'</textarea>'+
     '<div id="gate" style="display:'+(listCount()?'block':'none')+'">'+
-      '<label class="toggle" style="background:#0e1a12;border-color:#1f7a4d55;margin-top:10px" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
+      '<label class="toggle" style="background:#eef7f0;border-color:#1f7a4d55;margin-top:10px" tabindex="0" onkeydown="if(event.key===\' \'){event.preventDefault();this.querySelector(\'input\').click();}">'+
         '<input type="checkbox" '+(S.listOK?'checked':'')+' onchange="S.listOK=this.checked;save();hpTick()">'+
         '<div><div class="t" style="font-size:13px">I have each person\'s permission to email them.</div>'+
         '<div class="d">They signed up with us, or asked to hear from the band. You\'re responsible for that permission — and every email we draft carries your address and a one-click unsubscribe, because the law requires it.</div></div></label></div>'+
@@ -413,7 +413,7 @@ function stepLists(){
       '<input type="checkbox" '+(S.chans[c[0]]?'checked':'')+' onchange="S.chans[\''+c[0]+'\']=this.checked;save();hpTick()">'+
       '<div><div class="t">'+c[1]+'</div></div></label>'; }).join('')+
     '<label class="toggle off" style="cursor:default"><input type="checkbox" disabled>'+
-      '<div><div class="t">💬 Text your list <span style="color:var(--gold);font-size:11px">— NOT YET</span></div>'+
+      '<div><div class="t">💬 Text your list <span style="color:#8a6a1e;font-size:11px">— NOT YET</span></div>'+
       '<div class="d">We won\'t let you upload phone numbers, and we won\'t text your fans for you. Federal law (the TCPA) requires each person\'s written consent to receive texts, with a record of it — and the fines run per message. When fans can opt in to your texts <b>here</b>, on the record, we\'ll switch it on. Not before.</div></div></label>'+
     '<div class="honest"><b>Our promise:</b> nothing sends today. This loads the list. <b>A human clicks send, every time.</b></div>'+
     '<div class="saved">✓ Saved on this device as you go — you can close this and come back.</div>';
@@ -451,8 +451,8 @@ function stepHyper(){
   var ns=nextShow();
   var short='🌹 '+b.name+' — my calendar + merch, all in one place on dead.dance. Next show: '+((ns&&ns.venue)||'see the calendar')+'.';
   var ask = have>=need
-    ? '<b style="color:var(--gold)">'+have+' images for '+need+' channels.</b> Every post gets its own.'
-    : '<b style="color:var(--gold)">Words are enough</b> — you can send this right now. If you have show art, <b>'+need+' images</b> means each channel gets its own. You\'ve added <b>'+have+'</b>. Add more later and I already know where they go.';
+    ? '<b style="color:#8a6a1e">'+have+' images for '+need+' channels.</b> Every post gets its own.'
+    : '<b style="color:#8a6a1e">Words are enough</b> — you can send this right now. If you have show art, <b>'+need+' images</b> means each channel gets its own. You\'ve added <b>'+have+'</b>. Add more later and I already know where they go.';
   return '<h2 tabindex="-1">Your first HyperPost</h2>'+
     '<div class="sub"><b>A HyperPost is one message, sent to every place your fans already follow you.</b> We wrote yours. Edit anything. <b>You click send.</b></div>'+
     '<label>What your people will see</label>'+
@@ -465,7 +465,7 @@ function stepHyper(){
       '<div class="honest">Leave the %WORDS% in — they turn into your links. Delete one and that link is simply left out.</div></div>'+
     (listCount()?'<div class="consent" style="margin-top:14px">✉️ <b>The email version</b> automatically carries your band\'s mailing address and a one-click <b>unsubscribe</b>. That\'s federal law (CAN-SPAM), and we won\'t send one without it. Anyone who unsubscribes is never mailed again.</div>':'')+
     '<label style="margin-top:14px">💬 The short version, for feeds</label>'+
-    '<div class="mock" style="margin:0"><div style="font-size:13px;color:#cbb9e6">'+esc(short)+'</div></div>'+
+    '<div class="mock" style="margin:0"><div style="font-size:13px;color:#7a7686">'+esc(short)+'</div></div>'+
     '<label style="margin-top:14px">📸 Show art <span style="font-weight:400">(optional)</span></label>'+
     '<div class="logo-drop" tabindex="0" role="button" aria-label="Add show art" onclick="document.getElementById(\'mf\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();document.getElementById(\'mf\').click();}">'+
       '<div style="font-size:30px">'+(have?'📸':'🖼️')+'</div>'+
@@ -474,7 +474,7 @@ function stepHyper(){
     '</div><input type="file" id="mf" accept="image/*" multiple style="display:none" onchange="hpMedia(this.files)">'+
     '<div class="auto" style="margin-top:12px"><b class="hd">Art is optional</b><p>'+ask+'</p></div>'+
     '<div class="honest"><b>Nothing sends from this screen.</b> Your post is saved as a draft. You — or your Ambassador — open it, look at it, and click send. '+
-      (listCount()&&!S.listOK?'<br><b style="color:var(--gold)">⚠️ Confirm permission for your email list on the previous step before anything can go out.</b>':'')+'</div>';
+      (listCount()&&!S.listOK?'<br><b style="color:#8a6a1e">⚠️ Confirm permission for your email list on the previous step before anything can go out.</b>':'')+'</div>';
 }
 
 /* ---------- Step 10 ---------- */
