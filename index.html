@@ -136,6 +136,11 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .wrap{display:grid;grid-template-columns:288px 1fr 210px;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:stretch}   /* stretch: left column matches the map card height → flush static rectangle */
 .wrap.si{grid-template-columns:288px 1fr}   /* signed in: OAuth column collapses, back to 2-col */
 .wrap>#signupCard{align-self:start;margin-bottom:0}   /* OAuth rides the top-right, near the blank menu */
+#signupCard{display:flex;flex-direction:column;gap:12px}   /* desktop: two cards stacked in the top-right column */
+#signupCard .oauthcard{display:flex;align-items:center;gap:8px;margin-bottom:0}
+#signupCard .oauthcard .orose{font-size:20px;flex:0 0 auto}
+#signupCard .oauthcard button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:820px){ #signupCard{flex-direction:row;gap:10px} #signupCard .oauthcard{flex:1 1 0;min-width:0;padding:11px 10px} #signupCard .oauthcard button{padding:11px 6px!important;font-size:13px!important} }
 .left{display:flex;flex-direction:column}
 #calCard{flex:0 0 auto}
 #adRollCard{flex:1 1 auto}   /* the Ad fills the rest of the left column so its bottom lines up with the Map/List card */
@@ -1038,9 +1043,9 @@ body.dd-insider .dd-only{display:block}
   </div>
 
   <!-- ===================== OAUTH (signed-out only) — rides the TOP-RIGHT column, near the blank menu ===================== -->
-  <div class="card" id="signupCard" style="display:none">
-    <div style="display:flex;align-items:center;gap:9px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
-    <div style="display:flex;align-items:center;gap:9px;margin-top:8px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
+  <div id="signupCard" style="display:none">
+    <div class="card oauthcard"><span class="orose">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
+    <div class="card oauthcard"><span class="orose">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
   </div>
 
   <!-- ===================== FRIENDS (social network — curated · synthesized · mirrored) ===================== -->

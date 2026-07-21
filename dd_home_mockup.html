@@ -19,7 +19,14 @@
   /* grid */
   .grid{display:grid;grid-template-columns:288px 1fr 300px;gap:18px;max-width:1220px;margin:0 auto;padding:16px;align-items:start}
   @media(max-width:1080px){.grid{grid-template-columns:260px 1fr}.rail{display:none}}
-  @media(max-width:800px){.grid{grid-template-columns:1fr}.side{display:none}}
+  .menuscrim{position:fixed;inset:0;background:rgba(20,12,30,.42);z-index:149;display:none}
+  @media(max-width:800px){
+    .grid{grid-template-columns:1fr}
+    .side{position:fixed;top:52px;left:0;bottom:0;width:84vw;max-width:320px;background:#fff;z-index:150;transform:translateX(-103%);transition:transform .25s ease;overflow:auto;box-shadow:0 12px 40px #0005;border-right:1px solid var(--line);padding:14px 10px 34px;margin:0;border-radius:0}
+    .side.open{transform:none}
+    .menuscrim.on{display:block}
+    .rail{display:block}   /* Birthdays + Add friends reachable on mobile, below the feed */
+  }
   /* left sidebar */
   .side .nav a{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:11px;font-weight:700;font-size:14.5px;cursor:pointer}
   .side .nav a:hover{background:#eee7f8}
@@ -125,7 +132,7 @@
   <div class="logo">🌹</div>
   <input class="search" placeholder="Search heads, shows, tapes, art…">
   <span class="sp"></span>
-  <div class="ic">▦</div>
+  <div class="ic menubtn" onclick="toggleSideMenu()" title="Menu">▦</div>
   <div class="ic">💬</div>
   <div class="ic">🔔<span class="badge">19</span></div>
   <div class="ic avat" id="topAvat" onclick="toggleAcct(event)">M</div>
@@ -222,7 +229,7 @@
       <div class="bd"><div class="gift">🎁</div><div><b>Luke Issa</b> and <b>3 others</b> have birthdays today.</div></div>
     </div>
     <div class="card">
-      <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">Friends <button onclick="var p=document.querySelector('.pymk');if(p)p.scrollIntoView({behavior:'smooth',block:'center'})" style="border:0;background:#e9e5ef;color:#5a2e86;font-weight:800;font-size:12px;border-radius:9px;padding:6px 11px;cursor:pointer">🌹 Add friends</button></h3>
+      <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">Friends <button onclick="openFriendsMgr()" style="border:0;background:#e9e5ef;color:#5a2e86;font-weight:800;font-size:12px;border-radius:9px;padding:6px 11px;cursor:pointer">🌹 Add friends</button></h3>
       <div class="con"><div class="av" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">KD<span class="dot"></span></div><b>Kara Diaz</b></div>
       <div class="con"><div class="av" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">MH<span class="dot"></span></div><b>Matt Hartle</b></div>
       <div class="con"><div class="av" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">RG</div><b>Robbie G.</b></div>
@@ -242,8 +249,21 @@
   </div>
 </div>
 
+<!-- ADD FRIENDS — real Suggestions + Requests (DDPymk / DDFriends) -->
+<div class="friendsov" id="friendsOv" onclick="if(event.target===this)closeFriendsMgr()">
+  <div class="friendsbox">
+    <div class="mghd"><b>🌹 Add friends</b><button onclick="closeFriendsMgr()" aria-label="Close">×</button></div>
+    <div class="mgbody">
+      <div id="mgrReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="mgrReq"></div></div>
+      <div class="mgsec">People you may know</div><div id="mgrSug"><div class="mgempty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- HYPERPOST FAB -->
 <button class="hpfab" onclick="openCompose()" title="HyperPost">📡</button>
+
+<div class="menuscrim" id="menuScrim" onclick="closeSideMenu()"></div>
 
 <!-- OUR BOTTOM MENU (the 7) -->
 <nav class="footnav">
@@ -269,6 +289,10 @@
 <script>
 function openFbInfo(){ document.getElementById('fbInfo').classList.add('on'); }
 function closeFbInfo(){ document.getElementById('fbInfo').classList.remove('on'); }
+/* mobile FB menu — slide the sidebar in as the Menu screen */
+window.toggleSideMenu=function(){ var s=document.querySelector('.side'), sc=document.getElementById('menuScrim'); if(!s)return; var open=!s.classList.contains('open'); s.classList.toggle('open',open); if(sc)sc.classList.toggle('on',open); };
+window.closeSideMenu=function(){ var s=document.querySelector('.side'), sc=document.getElementById('menuScrim'); if(s)s.classList.remove('open'); if(sc)sc.classList.remove('on'); };
+(function(){ try{ var nav=document.querySelector('.side .nav'); if(nav) nav.addEventListener('click',function(e){ if(e.target.closest('a')) setTimeout(closeSideMenu,10); }); }catch(e){} })();
 function toast(m){ var t=document.createElement('div'); t.innerHTML=m;
   t.style.cssText='position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1b1e26;color:#fff;padding:11px 18px;border-radius:12px;font-weight:800;font-size:13.5px;z-index:99;box-shadow:0 10px 30px #0006;max-width:88vw;text-align:center';
   document.body.appendChild(t); setTimeout(function(){t.style.transition='.35s';t.style.opacity=0;setTimeout(function(){t.remove();},360);},2200); }
@@ -300,6 +324,23 @@ function wireFriendsData(){
 }
 window.pymkAdd=function(id,name,btn){ try{ if(window.DDFriends&&DDFriends.send&&id) DDFriends.send(id,name); }catch(e){} if(btn){btn.textContent='✓ Requested';btn.disabled=true;btn.style.opacity=.6;} toast('🌹 Friend request sent'); };
 window.frRespond=function(reqId,accept,arg){ try{ if(window.DDFriends&&DDFriends.respond) DDFriends.respond(reqId,accept); }catch(e){} if(accept){ toast('🌹 You\'re friends now'); } else { if(arg&&arg.remove)arg.remove(); toast('Request deleted.'); } };
+
+/* ---- Add friends overlay: REAL Suggestions + Requests (DDPymk / DDFriends) ---- */
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.friendsov{display:none;position:fixed;inset:0;z-index:120;background:rgba(20,12,30,.5);align-items:flex-start;justify-content:center;padding:36px 12px;overflow:auto}.friendsov.on{display:flex}.friendsbox{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px #0006}.mghd{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.mghd b{font-size:18px}.mghd button{border:0;background:#efeaf4;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;line-height:1}.mgbody{padding:8px 16px 20px}.mgsec{font-size:13px;font-weight:800;color:#7a2e86;margin:14px 2px 6px}.mgrow{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #f2eef7}.mgav{width:52px;height:52px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7a3cc0,#3a1f57);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}.mginfo{flex:1;min-width:0}.mginfo b{font-size:15px;display:block}.mginfo span{color:#7a7285;font-size:12.5px}.mgacts{display:flex;gap:8px;flex:none}.mgadd{border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgrm{border:0;background:#e9e5ef;color:#333;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgempty{color:#9a93a8;font-size:13px;padding:14px 2px}</style>'); }catch(e){} })();
+function _mgRow(name,reason,acts,id){ var av=(String(name||'?').charAt(0)||'?').toUpperCase(); return '<div class="mgrow" id="'+id+'"><div class="mgav">'+_esc(av)+'</div><div class="mginfo"><b>'+_esc(name)+'</b><span>'+_esc(reason)+'</span></div><div class="mgacts">'+acts+'</div></div>'; }
+window.openFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(!ov)return; ov.classList.add('on'); loadMgrRequests(); loadMgrSuggestions(); };
+window.closeFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(ov)ov.classList.remove('on'); };
+window.mgrConfirm=function(reqId,rowId){ try{ frRespond(reqId,true); }catch(e){} var c=document.getElementById(rowId); if(c){ var a=c.querySelector('.mgacts'); if(a)a.innerHTML='<span style="color:#1f7a4d;font-weight:800;font-size:13px">🌹 Friends</span>'; } };
+function loadMgrSuggestions(){ var host=document.getElementById('mgrSug'); if(!host)return; host.innerHTML='<div class="mgempty">Loading…</div>';
+  if(!(window.DDPymk&&DDPymk.suggestions)){ host.innerHTML='<div class="mgempty">Suggestions loading…</div>'; return; }
+  DDPymk.suggestions(20).then(function(list){ if(!list||!list.length){ host.innerHTML='<div class="mgempty">No suggestions yet 🌹</div>'; return; }
+    host.innerHTML=list.map(function(p,i){ var id='ms-'+i; var nm=String(p.name||'A Deadhead'); var acts='<button class="mgadd" onclick="pymkAdd(\''+(p.id||'')+'\',\''+nm.replace(/\x27/g,'')+'\',this)">Add friend</button><button class="mgrm" onclick="var c=document.getElementById(\''+id+'\');if(c)c.remove()">Remove</button>'; return _mgRow(nm, p.reason||((p.mutual||0)+' mutual heads'), acts, id); }).join(''); })
+    .catch(function(){ host.innerHTML='<div class="mgempty">Couldn’t load suggestions</div>'; }); }
+function loadMgrRequests(){ var host=document.getElementById('mgrReq'), sec=document.getElementById('mgrReqSec'); if(!host)return;
+  if(!(window.DDFriends&&DDFriends.incoming)){ if(sec)sec.style.display='none'; return; }
+  DDFriends.incoming().then(function(rows){ if(!rows||!rows.length){ if(sec)sec.style.display='none'; return; } if(sec)sec.style.display='block';
+    host.innerHTML=rows.map(function(r,i){ var id='mr-'+i; var nm=String(r.from_name||r.name||'A head'); var acts='<button class="mgadd" onclick="mgrConfirm(\''+r.id+'\',\''+id+'\')">Confirm</button><button class="mgrm" onclick="frRespond(\''+r.id+'\',false,document.getElementById(\''+id+'\'))">Delete</button>'; return _mgRow(nm,'🌹 sent you a request',acts,id); }).join(''); })
+    .catch(function(){ if(sec)sec.style.display='none'; }); }
 setTimeout(wireFriendsData, 500);
 
 /* ---- copy my DeadDance id (auth uid) — for seeding a test friend ---- */
