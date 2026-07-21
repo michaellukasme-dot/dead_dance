@@ -410,11 +410,7 @@
         '</div>' +
         /* region controls + legend moved BELOW the map (Musikfest-style — the chapter picker recenters the map like North/South) */
         '<div class="showmap-region">' +
-          '<button class="showmap-loc">📍 Use my location</button>' +
-          '<select class="showmap-select" aria-label="Region">' +
-            '<option value="__nation__">National</option>' +
-            CHAPTERS.map(function (ch) { return '<option value="' + esc(ch.name) + '">' + esc(shortName(ch.name)) + '</option>'; }).join('') +
-          '</select>' +
+          /* redundant Use-my-location + region dropdown removed — the top Calendar pills are the one control set; only the mileage stays */
           '<select class="showmap-radius" hidden aria-label="Radius (miles)">' +
             [25,50,100,200,300].map(function(m){ return '<option value="'+m+'"'+(m===50?' selected':'')+'>'+m+' mi</option>'; }).join('') +
           '</select>' +
@@ -436,7 +432,7 @@
     var nearEl = host.querySelector(".showmap-near");
     var radiusSel = host.querySelector(".showmap-radius");
     function showRadius(on){ if (radiusSel) radiusSel.hidden = !on; }
-    var sel = host.querySelector(".showmap-select");
+    var sel = host.querySelector(".showmap-select") || { value: '', addEventListener: function () {} };   /* region dropdown removed — safe stub so existing sel.value writes no-op */
     var backBtn = host.querySelector(".showmap-back") || { hidden: true, addEventListener: function () {} };   /* back pill removed — "National" now lives in the dropdown */
     var farrahEl = host.querySelector("#farrahMap");
     var panel = host.querySelector("#showmapPanel");
@@ -666,10 +662,13 @@
       drawBadges(false); regionRow.hidden = false; backBtn.hidden = false; showRadius(true);
       animateTo(tvb, 600, "*");                 // '*' = show every dot inside the radius view
       markYou(lat, lng, tvb[2]);
-      var n = SHOWS.filter(function (s) { return s._ll && haversineMi(lat, lng, s._ll[0], s._ll[1]) <= mi; }).length;
+      var near = SHOWS.filter(function (s) { return s._ll && haversineMi(lat, lng, s._ll[0], s._ll[1]) <= mi; })
+        .sort(function (a, b) { return haversineMi(lat, lng, a._ll[0], a._ll[1]) - haversineMi(lat, lng, b._ll[0], b._ll[1]); });
+      var n = near.length;
       nearEl.textContent = n + (n === 1 ? " show" : " shows") + " within " + mi + " mi";
       setSum(n + ' show' + (n !== 1 ? 's' : '') + ' · ' + mi + ' mi');
       if (radiusSel) radiusSel.value = String(mi);
+      renderPanel({ name: 'Near you', shows: near });   // ALWAYS show the nearest shows to buy — list no longer disappears in Local mode
     }
     function useLocation() {
       if (!navigator.geolocation) { nearEl.textContent = "Location off — pick a chapter"; return; }
@@ -715,7 +714,7 @@
       backout: function () { try { toNation(); } catch (e) {} }      // sparse local chapter → zoom out so the nearest shows are visible
     };
     backBtn.addEventListener("click", toNation);
-    host.querySelector(".showmap-loc").addEventListener("click", function () { clearYou(); useLocation(); });
+    var _locBtn = host.querySelector(".showmap-loc"); if (_locBtn) _locBtn.addEventListener("click", function () { clearYou(); useLocation(); });
     if (radiusSel) radiusSel.addEventListener("change", function () { zoomToRadius(+radiusSel.value || 50); });
     sel.addEventListener("change", function () { if (sel.value === "__nation__") { showRadius(false); toNation(); } else if (sel.value) { showRadius(false); drill(sel.value); } });
     wrap.addEventListener("mouseleave", hidePop);
