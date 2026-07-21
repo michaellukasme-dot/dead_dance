@@ -133,7 +133,9 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .sharebar span{display:block;height:100%;background:#fff;border-radius:999px}
 .top .friendsbtn:hover{transform:scale(1.06)}
 /* layout */
-.wrap{display:grid;grid-template-columns:288px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:start}
+.wrap{display:grid;grid-template-columns:288px 1fr 210px;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:start}
+.wrap.si{grid-template-columns:288px 1fr}   /* signed in: OAuth column collapses, back to 2-col */
+.wrap>#signupCard{align-self:start;margin-bottom:0}   /* OAuth rides the top-right, near the blank menu */
 .center,.left{min-width:0}   /* let grid columns shrink to fit — no more content clipped off the right edge */
 .ddnav{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:8px;margin-bottom:14px;box-shadow:0 1px 3px #0000000a}
 .ddnav a{display:flex;align-items:center;gap:12px;padding:8px 9px;border-radius:10px;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;text-decoration:none}
@@ -146,7 +148,18 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .hpfab{position:fixed;right:18px;bottom:80px;z-index:60;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:23px;cursor:pointer;box-shadow:0 8px 22px #5a2e8566;display:flex;align-items:center;justify-content:center}
 .hpfab:hover{transform:scale(1.06)}.hpfab:active{transform:scale(.94)}
 /* narrow screens: CALENDAR/MAP first — the fb-enhancement line, then the calendar + QR, then the feed */
-@media(max-width:820px){ .wrap{grid-template-columns:1fr} .wrap>.fb-strip{order:1} .wrap>.left{order:2} .wrap>.center{order:3} }
+@media(max-width:820px){
+  /* single column; dissolve .left so its cards reorder alongside map + OAuth + ad.
+     Signed-out order Michael asked for: Calendar → FB(OAuth) → Map/List → Advertisement. */
+  .wrap{display:flex;flex-direction:column;grid-template-columns:none}
+  .wrap>.left{display:contents}
+  .wrap>.fb-strip{order:0}
+  #calCard{order:1}
+  .wrap>#signupCard{order:2}
+  .wrap>.center{order:3}
+  .wrap>#adRollCard{order:4}
+  #profCard{order:5}
+}
 /* Facebook-enhancement card (dismissible) */
 .fb-strip{grid-column:1/-1;position:relative;background:#eef2ff;border:1px solid #cfd8f5;color:#23306a;border-radius:14px;padding:11px 32px 11px 13px;font-size:13px;line-height:1.5;margin:0 0 14px}
 .fb-strip b{color:#182254}
@@ -475,7 +488,7 @@ body{padding-bottom:64px}
 .socialscroll{max-width:620px;margin:0 auto;padding:14px}
 .calvt{background:#3a2a55;border:0;color:#fff;border-radius:9px;padding:4px 9px;font-size:16px;line-height:1;cursor:pointer;margin-left:2px;flex:0 0 auto}
 .calvt:active{transform:scale(.92)}
-.adroll{position:relative;overflow:hidden;padding:0;height:216px}   /* head 92 + body 100 + dots 24 — LOCKED so the card never resizes the page */
+.adroll{position:relative;overflow:hidden;padding:0;height:470px}   /* TALL fixed card — bottom lines up with the map/list card; LOCKED so band vs partner slide never resizes the page */
 .adroll-tag{position:absolute;top:8px;right:8px;z-index:3;background:#00000059;color:#fff;font-size:9px;font-weight:800;letter-spacing:.08em;border-radius:5px;padding:2px 6px}
 .adroll-head{position:relative;height:92px;display:flex;align-items:center;justify-content:center;font-size:44px}
 .adroll-head img.adlogo{position:absolute;inset:0;margin:auto;max-width:82%;max-height:74px;object-fit:contain;filter:drop-shadow(0 1px 4px #0007)}
@@ -488,6 +501,18 @@ body{padding-bottom:64px}
 .adroll-dots{display:flex;gap:4px;justify-content:center;padding:8px 0 10px;background:#fff}
 .adroll-dots i{width:6px;height:6px;border-radius:50%;background:#00000022;display:inline-block}
 .adroll-dots i.on{background:var(--rose,#b8002e)}
+/* --- band-recruitment slide (Upload your Logo + the band's unique fan-invite QR) --- */
+.adroll-view{height:calc(100% - 26px)}
+.adroll-slide{height:100%;display:flex;flex-direction:column}
+.adroll-body.band{height:auto;flex:1;text-align:center;padding:11px 14px 6px;display:flex;flex-direction:column;align-items:center}
+.adroll-body.band b{white-space:normal;line-height:1.16;font-size:15px;max-height:2.4em;overflow:hidden}
+.adlogo-up{display:block;width:100%;margin:9px 0 7px;background:var(--gold,#f0a500);color:#23202a;border:0;border-radius:10px;padding:10px;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 2px 8px #f0a50055}
+.adroll-body.band .off{white-space:normal;color:var(--rose,#b8002e);font-weight:800;font-size:12px;line-height:1.3;margin:0 0 2px;max-height:none}
+.adqr-cap{font-size:12px;color:var(--accent,#5a2e86);font-weight:800;margin:8px 0 7px}
+.adqr{display:flex;justify-content:center;align-items:center}
+.adqr canvas{border-radius:10px}
+/* non-band slide: center the short content in the tall frame so the empty space reads as intentional */
+.adroll-slide.plain{justify-content:flex-start}
 /* ad-swap effects — a mix cycled through like a slide deck (fixed 216px card contains them) */
 .adroll-view{perspective:1000px}
 .adroll-slide{will-change:transform,opacity,filter;backface-visibility:hidden}
@@ -674,6 +699,7 @@ body{padding-bottom:64px}
 .aitem b{font-size:14px;display:block}.aitem i{font-size:11.5px;color:var(--muted);font-style:normal}
 .dd-only{display:none}
 body.dd-insider .dd-only{display:block}
+#calList{display:none}   /* calendar is a calendar; the show LIST lives in the map/list card */
 .morelist .mo{display:none}
 .morelist[open] .mc{display:none}
 .morelist[open] .mo{display:inline}
@@ -797,10 +823,10 @@ body.dd-insider .dd-only{display:block}
   <div class="logo"><img src="rose-32.png" alt="DeadDance" style="height:22px;width:22px;border-radius:6px;vertical-align:-5px;margin-right:7px">DeadDance</div>
   <input class="search" id="ddSearch" autocomplete="off" placeholder="Search heads, shows, tapes, art…" oninput="ddSearchInput(this.value)" onkeydown="if(event.key==='Escape'){this.blur();ddSearchClose();}">
   <div id="ddSearchRes" class="ddsr"></div>
-  <button class="cbtn" onclick="requireSignin(function(){openApps()})" title="Menu" aria-label="Menu">▦</button>
-  <button class="chatbtn" onclick="requireSignin(function(){if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')})" title="Family chat" aria-label="Family chat">💬</button>
-  <button class="cbtn" onclick="requireSignin(function(){openNotifs()})" title="Notifications" aria-label="Notifications"><span style="position:relative">🔔<span id="topNotifBadge" style="position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;background:#e11;color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px">0</span></span></button>
-  <button class="cbtn avat" onclick="requireSignin(function(){openProfMenu()})" title="You" aria-label="You">🌹</button>
+  <button class="cbtn authbtn" onclick="requireSignin(function(){openApps()})" title="Menu" aria-label="Menu">▦</button>
+  <button class="chatbtn authbtn" onclick="requireSignin(function(){if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')})" title="Family chat" aria-label="Family chat">💬</button>
+  <button class="cbtn authbtn" onclick="requireSignin(function(){openNotifs()})" title="Notifications" aria-label="Notifications"><span style="position:relative">🔔<span id="topNotifBadge" style="position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;background:#e11;color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px">0</span></span></button>
+  <button class="cbtn avat authbtn" onclick="requireSignin(function(){openProfMenu()})" title="You" aria-label="You">🌹</button>
 </div>
 
 <div class="wrap">
@@ -858,7 +884,6 @@ body.dd-insider .dd-only{display:block}
         <button class="cnav" onclick="calNav(-1)" aria-label="Previous month">‹</button>
         <span class="mo" id="calMo" style="min-width:118px;text-align:center;display:inline-block"></span>
         <button class="cnav" onclick="calNav(1)" aria-label="Next month">›</button>
-        <button id="calViewToggle" class="calvt" onclick="calView(CAL_VIEW==='grid'?'list':'grid')" title="Showing Month — tap for the Upcoming list" aria-label="Toggle Month grid or Upcoming list">📅</button>
         <span class="dd-scope"><button class="on" data-scope="local" onclick="setScope('local')">📍 Local</button><button data-scope="national" onclick="setScope('national')">National</button><button data-scope="my" onclick="setScope('my')">My Calendar</button></span>
       </div>
       <div class="grid" id="calGrid" style="display:none"></div>
@@ -866,7 +891,7 @@ body.dd-insider .dd-only{display:block}
       <div id="localFam" style="font-size:11px;color:#e0cdf5;margin-top:2px;text-align:center">📍 finding your Local Family…</div>
     </div>
 
-    <div class="card">
+    <div class="card" id="profCard" style="display:none">
       <svg class="qrbig" id="qr" viewBox="0 0 100 100" aria-label="My profile QR" onclick="profile('me')" style="cursor:pointer"></svg>
       <div style="text-align:center;font-size:11px;color:var(--accent);font-weight:700;margin-top:5px;cursor:pointer" onclick="profile('me')">tap your QR — it's your whole profile ›</div>
       <div id="signState" style="text-align:center;font-size:11px;font-weight:800;margin-top:7px"></div>
@@ -874,11 +899,6 @@ body.dd-insider .dd-only{display:block}
         <button class="btn gold sm" style="flex:1" onclick="inviteFamily()">🌹 Invite Friends</button>
         <button class="btn sm" style="flex:1;background:#5a2e86;color:#fff;border-color:#5a2e86" onclick="ddSheet('band_onboard.html?src=selfclaim','🌹 Band Install')">🎤 I am a Band</button>
       </div>
-    </div>
-
-    <div class="card" id="signupCard" style="display:none">
-      <div style="display:flex;align-items:center;gap:9px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
-      <div style="display:flex;align-items:center;gap:9px;margin-top:8px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
     </div>
 
     <div class="card adroll" id="adRollCard" style="display:none"><span class="adroll-tag">AD</span><div class="adroll-view" id="adRollView"></div><div class="adroll-dots" id="adRollDots"></div></div>
@@ -948,8 +968,26 @@ body.dd-insider .dd-only{display:block}
         var a=pool[CUR[tok]%pool.length]; CUR[tok]++; return a; }
       function adRender(a){ var v=document.getElementById('adRollView'); if(!v||!a)return; curAd=a; window.__curAd=a;
         var fx=FX[fxi++ % FX.length];   // cycle the swap effect like a slide deck
-        v.innerHTML='<div class="adroll-slide adfx-'+fx+'" onclick="adRollTap()"><div class="adroll-head" style="background:'+a.bg+'">'+adHead(a)+'</div><div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div></div>';
+        var body, plain='';
+        if(a.stagefill){
+          /* BAND slide = the recruitment card: Upload your Logo (→ the ad) + the band's OWN unique fan-invite QR */
+          body='<div class="adroll-body band">'
+             +'<b>'+a.biz+'</b>'
+             +'<button class="adlogo-up" onclick="event.stopPropagation();adUploadLogo()">⬆︎ Upload your Logo</button>'
+             +'<div class="off">'+a.off+'</div>'
+             +'<div class="adqr-cap">Invite your fans with this QR</div>'
+             +'<div class="adqr" id="adRollQR"></div>'
+             +'</div>';
+        } else {
+          plain=' plain';
+          body='<div class="adroll-body"><b>'+a.biz+'</b><div class="off">'+a.off+'</div><div class="adroll-cta">'+a.cta+'</div></div>';
+        }
+        v.innerHTML='<div class="adroll-slide'+plain+' adfx-'+fx+'" onclick="adRollTap()"><div class="adroll-head" style="background:'+a.bg+'">'+adHead(a)+'</div>'+body+'</div>';
+        if(a.stagefill && window.DDQR){ try{ DDQR.into('adRollQR','https://deaddance.app/'+_slug(a.biz),{css:130,size:220,mark:'dd',link:false}); }catch(e){} }
         var d=document.getElementById('adRollDots'); if(d) d.innerHTML='<i class="on"></i><i></i><i></i>'; }
+      window.adUploadLogo=function(){ var a=window.__curAd; if(!a)return;
+        try{ ddSheet('band_onboard.html?src=adlogo&band='+encodeURIComponent(a.biz),'🎤 Upload your Logo'); }
+        catch(e){ if(window.toast) toast('⬆︎ Upload your logo to claim '+a.biz+'’s StageFill page ›'); } };
       window.adRollTap=function(){ var a=window.__curAd; if(!a||!window.toast)return;
         if(a.pitch){ toast('📣 Advertise on DeadDance — pitch your festival or fill your room. LESS / MORE / MOST. 🌹'); }
         else if(a.stagefill){ toast((a.ic||'🌹')+' '+a.biz+' plays Musikfest — claim your free StageFill page & sell tickets ›'); }
@@ -960,7 +998,11 @@ body.dd-insider .dd-only{display:block}
       function adStop(){ if(at){ clearInterval(at); at=null; } }
       function upd(){ try{ var ready=window.DDMe&&DDMe.ready&&DDMe.ready(); var si=ready?(DDMe.signedIn&&DDMe.signedIn()):cachedSignedIn();
         var c=document.getElementById('signupCard'); if(c) c.style.display=si?'none':'';
-        var ad=document.getElementById('adRollCard'); if(ad){ ad.style.display=si?'':'none'; if(si) adStart(); else adStop(); }
+        var wrap=document.querySelector('.wrap'); if(wrap) wrap.classList.toggle('si', !!si);   /* collapse the OAuth column when signed in */
+        var pf=document.getElementById('profCard'); if(pf) pf.style.display=si?'':'none';        /* profile QR is a signed-in card */
+        document.querySelectorAll('.top .authbtn').forEach(function(b){ b.style.display=si?'':'none'; });
+        /* the rolling ad is the PUBLIC store — it lives on the signed-out home (band recruitment). */
+        var ad=document.getElementById('adRollCard'); if(ad){ ad.style.display=si?'none':''; if(si) adStop(); else adStart(); }
         var ss=document.getElementById('signState');
         if(ss){ if(si){ var nm=(window.ME&&ME.name&&ME.name!=='You')?(' · '+ME.name):''; ss.innerHTML='<span style="color:#3fbf6a">● Signed in</span>'+nm; } else { ss.innerHTML='<span style="color:#b9a7e6;cursor:pointer" onclick="openSignin()">🔒 Not signed in — Sign in ›</span>'; } }
       }catch(e){} }
@@ -977,6 +1019,12 @@ body.dd-insider .dd-only{display:block}
 
     <!-- ===== US SHOW MAP — upcoming shows plotted by venue (dd_showmap.js) ===== -->
     <div id="showMap"></div>
+  </div>
+
+  <!-- ===================== OAUTH (signed-out only) — rides the TOP-RIGHT column, near the blank menu ===================== -->
+  <div class="card" id="signupCard" style="display:none">
+    <div style="display:flex;align-items:center;gap:9px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
+    <div style="display:flex;align-items:center;gap:9px;margin-top:8px"><span style="font-size:22px;flex:0 0 auto">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
   </div>
 
   <!-- ===================== FRIENDS (social network — curated · synthesized · mirrored) ===================== -->
