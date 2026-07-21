@@ -222,7 +222,7 @@
       <div class="bd"><div class="gift">🎁</div><div><b>Luke Issa</b> and <b>3 others</b> have birthdays today.</div></div>
     </div>
     <div class="card">
-      <h3>Contacts</h3>
+      <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">Friends <button onclick="var p=document.querySelector('.pymk');if(p)p.scrollIntoView({behavior:'smooth',block:'center'})" style="border:0;background:#e9e5ef;color:#5a2e86;font-weight:800;font-size:12px;border-radius:9px;padding:6px 11px;cursor:pointer">🌹 Add friends</button></h3>
       <div class="con"><div class="av" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">KD<span class="dot"></span></div><b>Kara Diaz</b></div>
       <div class="con"><div class="av" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">MH<span class="dot"></span></div><b>Matt Hartle</b></div>
       <div class="con"><div class="av" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">RG</div><b>Robbie G.</b></div>
@@ -264,6 +264,7 @@
 <script src="dd_pymk.js"></script>
 <script src="dd_friends.js"></script>
 <script src="dd_feed.js"></script>
+<script src="dd_reels.js"></script>
 <script src="qr.js"></script>
 <script>
 function openFbInfo(){ document.getElementById('fbInfo').classList.add('on'); }
@@ -364,11 +365,35 @@ function loadReactions(rows){ if(!(window.DDFeed&&DDFeed.reactCounts))return; va
     ids.forEach(function(id){ var post=document.querySelector('.post[data-pid="'+id+'"]'); if(!post)return; var lb=post.querySelector('.likebtn'); if(!lb)return;
       var n=(counts[id]&&counts[id].like)||0; var lc=lb.querySelector('.lct'); if(lc)lc.textContent=n?('· '+n):'';
       if(mine[id]&&mine[id].like){ lb.classList.add('liked'); lb.style.color='#2f7bf6'; } }); }); }).catch(function(){}); }
+/* ---- REAL reels: horizontal video shelf, uploaded to Storage, spliced into the feed ---- */
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.reelshelf{padding:12px 4px 12px 14px}.reelshd{display:flex;align-items:center;gap:8px;padding:0 8px 10px 2px}.reelshd b{font-size:16px;color:#1a1320}.reelshd span{color:#7a7285;font-size:12px}.reelrow{display:flex;gap:10px;overflow-x:auto;padding:2px 8px 8px 0;scroll-snap-type:x mandatory}.reeltile{flex:0 0 150px;scroll-snap-align:center;position:relative}.reeltile video{width:150px;height:266px;object-fit:cover;border-radius:14px;background:#000;display:block;cursor:pointer}.reeltile .rk{position:absolute;top:8px;left:8px;background:rgba(20,10,25,.6);color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:7px}.reeltile .rspk{position:absolute;top:8px;right:8px;background:rgba(20,10,25,.6);color:#fff;font-size:12px;padding:3px 6px;border-radius:7px}.reelmeta{font-size:11px;font-weight:700;color:#1a1320;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}.reeltile.up .reelup{width:150px;height:266px;border:2px dashed #d9cfe6;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7a2e86;font-size:30px;font-weight:900;cursor:pointer;background:#faf7ff}.reelup span{font-size:13px;margin-top:4px}.reelup small{font-size:10px;color:#9a90b0;font-weight:600}.reelempty{color:#7a7285;font-size:12px;padding:2px 10px 4px}</style>'); }catch(e){} })();
+function reelTile(r){ var poster=r.poster_url?(' poster="'+_esc(r.poster_url)+'"'):''; var tag=(r.kind==='original')?'🌹 Original':'Gathered'; var label=_esc(r.band||r.caption||(r.kind==='original'?'DeadDance':'From the family'));
+  return '<div class="reeltile"><span class="rk">'+tag+'</span><span class="rspk">🔇</span><video muted loop playsinline preload="metadata"'+poster+' src="'+_esc(r.video_url)+'" onclick="reelTap(this)"></video><div class="reelmeta">'+label+'</div></div>'; }
+function reelUploadTile(){ return '<div class="reeltile up" onclick="document.getElementById(\'reelUp\').click()"><div class="reelup">＋<span>Upload a clip</span><small>video only</small></div></div><input type="file" id="reelUp" accept="video/*" style="display:none" onchange="reelUpload(this)">'; }
+var _reelIO=null;
+function reelObserve(){ var row=document.getElementById('reelRow'); if(!row)return; try{ if(_reelIO)_reelIO.disconnect();
+  _reelIO=new IntersectionObserver(function(ents){ ents.forEach(function(e){ var v=e.target; if(e.isIntersecting&&e.intersectionRatio>0.6){ v.muted=(v.dataset.on!=='1'); v.play&&v.play().catch(function(){}); } else { v.pause&&v.pause(); } }); },{root:row,threshold:[0,0.6,1]});
+  row.querySelectorAll('video').forEach(function(v){ _reelIO.observe(v); }); }catch(e){} }
+window.reelTap=function(v){ var tile=v.closest('.reeltile'), spk=tile&&tile.querySelector('.rspk');
+  if(v.muted){ v.muted=false; v.dataset.on='1'; if(spk)spk.textContent='🔊'; v.play&&v.play().catch(function(){}); } else { v.muted=true; v.dataset.on=''; if(spk)spk.textContent='🔇'; } };
+window.reelUpload=function(inp){ var f=inp.files&&inp.files[0]; if(!f)return;
+  if(!(window.DDReels&&DDReels.post)){ toast('Reels loading…'); return; }
+  if(window.DDFeed&&DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to post a reel 🌹'); return; }
+  toast('🎬 Uploading your clip…'); DDReels.post(f,{kind:'original'}).then(function(){ toast('🌹 Reel posted'); reelsBuild(); }).catch(function(){ toast('Upload failed — try a shorter video'); }); };
+function reelsBuild(){ var host=document.getElementById('reelsShelf'); if(!host||!window.DDReels)return;
+  var hd='<div class="reelshd">🎬 <b>Reels</b><span>the family in motion — tap for sound</span></div>';
+  DDReels.list(24).then(function(list){
+    host.innerHTML=hd+'<div class="reelrow" id="reelRow">'+(list||[]).map(reelTile).join('')+reelUploadTile()+'</div>'+((list&&list.length)?'':'<div class="reelempty">Be the first — drop a clip. 🌹</div>');
+    reelObserve(); }).catch(function(){}); }
 function loadFeed(){ if(!(window.DDFeed&&DDFeed.feed))return;
   DDFeed.feed(30).then(function(rows){ var host=document.getElementById('realFeed'); if(!host)return;
-    host.innerHTML=(rows&&rows.length)?rows.map(postCard).join(''):''; loadReactions(rows); loadCommentCounts(rows); }).catch(function(){}); }
+    var cards=(rows&&rows.length)?rows.map(postCard):[];
+    var shelf='<div class="card reelshelf" id="reelsShelf"></div>';
+    if(cards.length>=3) cards.splice(3,0,shelf); else cards.push(shelf);   // reels break up the posts
+    host.innerHTML=cards.join(''); loadReactions(rows); loadCommentCounts(rows); reelsBuild(); }).catch(function(){}); }
 setTimeout(function(){ loadFeed();
   try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(){ loadFeed(); }); }catch(e){}
+  try{ if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(function(){ reelsBuild(); }); }catch(e){}
   try{ if(window.DDFeed&&DDFeed.subscribeComments) DDFeed.subscribeComments(function(nc){ if(!nc)return; var box=document.querySelector('.post[data-pid="'+nc.post_id+'"] .comments'); if(box&&box.style.display!=='none'){ box.dataset.loaded=''; renderComments(nc.post_id,box); } var b=document.querySelector('.post[data-pid="'+nc.post_id+'"] .cct'); if(b){ if(!DDFeed.commentCounts){return;} DDFeed.commentCounts([nc.post_id]).then(function(c){ var n=c[nc.post_id]||0; b.textContent=n?('· '+n):''; }); } }); }catch(e){}
 }, 600);
 </script>
