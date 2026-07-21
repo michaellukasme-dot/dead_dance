@@ -578,38 +578,50 @@
       if (window.toast) window.toast("🎟️ " + s.band + " — secure checkout. (Demo)");
     }
 
-    /* --- the drill panel (Rosebud show list) --- */
+    /* --- the drill panel (Rosebud show list) — fixed-height, two-column, paginated --- */
+    var PPAGE = 0, PCHNAME = null, PER_PAGE = 8;   // 2 columns × 4 rows per page → card never grows
+    function showTime(s){ return s.time || s.t || s.showtime || ""; }   // render TIME plainly when the date carries one
+    function panelRowHTML(s){
+      var id = showId(s), done = notified(id), tm = showTime(s);
+      var vt = esc(s.venue) + ' · ' + esc(s.city) + (tm ? ' · <span class="ptime">' + esc(tm) + '</span>' : '');
+      return '<div class="prow">' +
+        '<div class="pdt">' + esc(fmtDate(s.date).split(" ")[0]) + '<small>' + esc(fmtDate(s.date).split(" ")[1]) + '</small></div>' +
+        '<div class="pinfo"><b>' + esc(s.band) + '</b><span>' + vt + '</span></div>' +
+        '<button class="ptix" data-i="' + SHOWS.indexOf(s) + '">🎟️ Tickets</button>' +
+        '<button class="pnotify' + (done ? ' done' : '') + '" data-id="' + id + '">' + (done ? '✓' : '🔔') + '</button>' +
+        '</div>';
+    }
     function renderPanel(ch) {
       var fests = festsFor(ch);
-      var _rowArr = ch.shows.map(function (s) {
-        var id = showId(s), done = notified(id);
-        return '<div class="prow">' +
-          '<div class="pdt">' + esc(fmtDate(s.date).split(" ")[0]) + '<small>' + esc(fmtDate(s.date).split(" ")[1]) + '</small></div>' +
-          '<div class="pinfo"><b>' + esc(s.band) + '</b><span>' + esc(s.venue) + ' · ' + esc(s.city) + '</span></div>' +
-          '<button class="ptix" data-i="' + SHOWS.indexOf(s) + '">🎟️ Tickets</button>' +
-          '<button class="pnotify' + (done ? ' done' : '') + '" data-id="' + id + '">' + (done ? '✓' : '🔔') + '</button>' +
-          '</div>';
-      });
-      var _LIM = 5;   // show the next few, fold the rest into an accordion so the list never runs long
-      var rows = (_rowArr.length <= _LIM) ? _rowArr.join("")
-        : _rowArr.slice(0, _LIM).join("") +
-          '<details class="pmore"><summary style="cursor:pointer;list-style:none;color:var(--purple2,#5a2e86);font-weight:800;font-size:13px;padding:11px 0;text-align:center">Show ' + (_rowArr.length - _LIM) + ' more ↓</summary>' +
-          _rowArr.slice(_LIM).join("") + '</details>';
+      if (PCHNAME !== ch.name) { PCHNAME = ch.name; PPAGE = 0; }   // reset paging when the chapter changes
+      var arr = ch.shows, pages = Math.max(1, Math.ceil(arr.length / PER_PAGE));
+      if (PPAGE >= pages) PPAGE = pages - 1; if (PPAGE < 0) PPAGE = 0;
+      var start = PPAGE * PER_PAGE;
+      var pageRows = arr.slice(start, start + PER_PAGE).map(panelRowHTML).join("");
       var fhtml = fests.length ? ('<div class="pfhead">🎆 Summer festivals</div>' + fests.map(function (f) {
         var when = f.start ? (f.start.slice(5) + (f.end && f.end !== f.start ? ("–" + f.end.slice(5)) : "")) : "Summer";
         return '<div class="pfrow"><div class="pfdt">🎆<small>' + esc(f.days || "") + 'd</small></div>' +
           '<div class="pinfo"><b>' + esc(f.name) + '</b><span>' + esc(f.city || "") + ' · ' + esc(when) + '</span></div>' +
           '<span class="pftag">Festival</span></div>';
       }).join("")) : "";
-      if (!ch.shows.length && !fests.length) {
+      var nav = (arr.length > PER_PAGE) ?
+        ('<div class="smnav"><span class="smpg">Page ' + (PPAGE + 1) + ' of ' + pages + ' · ' + arr.length + ' shows</span>' +
+         '<button class="smprev"' + (PPAGE <= 0 ? ' disabled' : '') + '>‹ Previous</button>' +
+         '<button class="smnext"' + (PPAGE >= pages - 1 ? ' disabled' : '') + '>Next ›</button></div>') : "";
+      if (!arr.length && !fests.length) {
         panel.innerHTML = '<button class="paddbig" data-ch="' + esc(ch.name) + '">📅 Be the first to post a date in ' + esc(shortName(ch.name)) + '</button>';
       } else {
-        panel.innerHTML = fhtml + rows + '<button class="padd" data-ch="' + esc(ch.name) + '">＋ Add a date in ' + esc(shortName(ch.name)) + '</button>';
+        panel.innerHTML = fhtml + nav + '<div class="smlist">' + pageRows + '</div>' +
+          '<button class="padd" data-ch="' + esc(ch.name) + '">＋ Add a date in ' + esc(shortName(ch.name)) + '</button>' +
+          '<div class="smfoot"><button class="smband">🎤 I am a Band</button></div>';
       }
       panel.hidden = false;
       panel.querySelectorAll(".ptix").forEach(function (b) { b.onclick = function () { buyTicket(SHOWS[+b.getAttribute("data-i")]); }; });
       panel.querySelectorAll(".pnotify").forEach(function (b) { b.onclick = function () { setNotified(b.getAttribute("data-id")); b.classList.add("done"); b.textContent = "✓"; if (window.toast) window.toast("🔔 Noted — we'll ping you."); }; });
       panel.querySelectorAll(".padd,.paddbig").forEach(function (b) { b.onclick = function () { addDate(b.getAttribute("data-ch")); }; });
+      var pv = panel.querySelector(".smprev"); if (pv) pv.onclick = function () { if (PPAGE > 0) { PPAGE--; renderPanel(ch); } };
+      var nx = panel.querySelector(".smnext"); if (nx) nx.onclick = function () { if (PPAGE < pages - 1) { PPAGE++; renderPanel(ch); } };
+      var bd = panel.querySelector(".smband"); if (bd) bd.onclick = function () { try { if (window.ddSheet) window.ddSheet('band_onboard.html?src=selfclaim', '🎤 Band Install'); else if (window.toast) window.toast('🎤 Claim your StageFill page ›'); } catch (e) {} };
     }
 
     /* --- levels --- */
