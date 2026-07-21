@@ -7,7 +7,7 @@
 (function (root) {
   function client() { try { return root.ddClient && root.ddClient(); } catch (e) { return null; } }
   function myId() { try { var u = (root.DDMe && root.DDMe.id && root.DDMe.id()); if (u) return String(u); var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
-  function myName() { try { return (root.ME && root.ME.name && root.ME.name !== 'You') ? root.ME.name : 'A friend'; } catch (e) { return 'A friend'; } }
+  function myName() { try { return (root.DDMe && root.DDMe.name && root.DDMe.name()) || ((root.ME && root.ME.name && root.ME.name !== 'You') ? root.ME.name : null) || (root.localStorage && localStorage.getItem('dd.myname')) || 'A friend'; } catch (e) { return 'A friend'; } }
   function ready() { return !!(client() && myId()); }
 
   function send(toId, toName) {

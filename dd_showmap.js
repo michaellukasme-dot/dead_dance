@@ -607,7 +607,19 @@
          '<button class="smprev"' + (PPAGE <= 0 ? ' disabled' : '') + '>‹ Previous</button>' +
          '<button class="smnext"' + (PPAGE >= pages - 1 ? ' disabled' : '') + '>Next ›</button></div>') : "";
       if (!arr.length && !fests.length) {
-        panel.innerHTML = '<button class="paddbig" data-ch="' + esc(ch.name) + '">📅 Be the first to post a date in ' + esc(shortName(ch.name)) + '</button>';
+        // RULE: a chapter with no shows yet never shows a dead list — fill it with the NEAREST shows to buy
+        var origin = (typeof userLoc !== 'undefined' && userLoc) ? userLoc : (ch.c || null);
+        var nearest = origin ? SHOWS.filter(function (s) { return s._ll; })
+          .sort(function (a, b) { return haversineMi(origin[0], origin[1], a._ll[0], a._ll[1]) - haversineMi(origin[0], origin[1], b._ll[0], b._ll[1]); })
+          .slice(0, PER_PAGE) : [];
+        if (nearest.length) {
+          panel.innerHTML = '<div class="pfhead">No shows in ' + esc(shortName(ch.name)) + ' yet — nearest shows to buy 🌹</div>' +
+            '<div class="smlist">' + nearest.map(panelRowHTML).join('') + '</div>' +
+            '<button class="padd" data-ch="' + esc(ch.name) + '">＋ Add the first date in ' + esc(shortName(ch.name)) + '</button>' +
+            '<div class="smfoot"><button class="smband">🎤 I am a Band</button></div>';
+        } else {
+          panel.innerHTML = '<button class="paddbig" data-ch="' + esc(ch.name) + '">📅 Be the first to post a date in ' + esc(shortName(ch.name)) + '</button>';
+        }
       } else {
         panel.innerHTML = fhtml + nav + '<div class="smlist">' + pageRows + '</div>' +
           '<button class="padd" data-ch="' + esc(ch.name) + '">＋ Add a date in ' + esc(shortName(ch.name)) + '</button>' +
@@ -625,7 +637,7 @@
     /* --- levels --- */
     function toNation() {
       level = "nation"; clearYou();
-      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "national"); });
+      host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === "national"); });
       backBtn.hidden = true; regionRow.hidden = false; panel.hidden = true; showRadius(false); try { sel.value = "__nation__"; } catch (e) {}   /* dropdown shows National at nation level */
       animateTo(FULL_VB.slice(), 560, null, function () { drawBadges(true); });
       var lit = CHAPTERS.filter(function (c) { return c.shows.length; }), tot = 0;
@@ -637,7 +649,7 @@
     function drill(chapterName) {
       var ch = chapterByName(chapterName); if (!ch) return;
       level = chapterName;
-      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
+      host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === "local"); });
       drawBadges(false); clearYou(); showRadius(false);
       regionRow.hidden = false; backBtn.hidden = false; sel.value = ch.name;
       nearEl.textContent = ch.shows.length ? (ch.shows.length + (ch.shows.length === 1 ? " show" : " shows")) : "waiting — seed it";
@@ -658,7 +670,7 @@
       var latSpan = mi / 69, lngSpan = mi / (69 * Math.max(0.25, Math.cos(lat * Math.PI / 180)));
       var tvb = boxToVB({ latMin: lat - latSpan, latMax: lat + latSpan, lngMin: lng - lngSpan, lngMax: lng + lngSpan });
       level = "radius";
-      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
+      host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === "local"); });
       drawBadges(false); regionRow.hidden = false; backBtn.hidden = false; showRadius(true);
       animateTo(tvb, 600, "*");                 // '*' = show every dot inside the radius view
       markYou(lat, lng, tvb[2]);
@@ -682,7 +694,7 @@
     function setMode(m) {
       if (m === "national") { toNation(); return; }
       // Near me → GPS radius (default 50 mi). The chapter dropdown still drills a chapter manually.
-      host.querySelectorAll(".showmap-seg button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === "local"); });
+      host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === "local"); });
       regionRow.hidden = false; backBtn.hidden = false; drawBadges(false);
       useLocation();
     }

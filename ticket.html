@@ -175,6 +175,26 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
   drawBars(); setInterval(drawBars,4000);
 
   // Buy → Stripe Checkout handoff (hosted/PCI-compliant; keys set up outside the app). Preview flips to "in your wallet".
+  // Enroll the just-bought show into the reminder routine + My Tickets. dd_tixnotify.js is
+  // loaded by index.html, so when ticket.html is a sheet/iframe we reach it via parent/top.
+  function armReminder(){
+    try{
+      var cb=null; try{ cb=(window.parent&&window.parent.CURBUY)||(window.top&&window.top.CURBUY)||window.CURBUY||null; }catch(e){}
+      var show={
+        band: (cb&&cb.band)||band,
+        venue: (cb&&cb.venue)||venue,
+        city: (cb&&cb.city)||'',
+        date: (cb&&cb.date)||date||'',
+        time: (cb&&cb.time)||'',
+        coords: (cb&&cb.coords)||null
+      };
+      var TN=null;
+      try{ if(window.DDTixNotify) TN=window.DDTixNotify; }catch(e){}
+      try{ if(!TN&&window.parent&&window.parent.DDTixNotify) TN=window.parent.DDTixNotify; }catch(e){}
+      try{ if(!TN&&window.top&&window.top.DDTixNotify) TN=window.top.DDTixNotify; }catch(e){}
+      if(TN&&TN.onPurchase) TN.onPurchase(show);
+    }catch(e){}
+  }
   window.startCheckout=function(){
     if(url){ try{ window.open(url,'_blank','noopener'); }catch(e){} return; }
     var bb=document.getElementById('buybar');
@@ -182,6 +202,7 @@ body{background:#14161c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
     setTimeout(function(){
       bb.classList.add('hidden');
       document.getElementById('issuedNote').classList.remove('hidden');
+      armReminder();
       try{ if(window.parent&&window.parent.toast) window.parent.toast('🎟️ Ticket issued — it lives on your phone now. 🌹'); }catch(e){}
     }, 750);
   };

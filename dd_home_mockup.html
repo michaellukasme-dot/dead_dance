@@ -181,7 +181,7 @@
       <a onclick="openAppSheet('you')"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
       <a onclick="openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
       <a onclick="openAppSheet('dealer')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
-      <a onclick="var s=document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
+      <a onclick="var s=document.getElementById('reelsShelf')||document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
       <a onclick="openAppSheet('shakedown')"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
       <a onclick="openAppSheet('apps')"><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
       <div class="sep"></div>
@@ -283,8 +283,8 @@
   <button class="fn on"><span class="ic">👥</span><span class="lb">Friends</span></button>
   <button class="fn" onclick="openAppSheet('dealer')"><span class="ic">💎</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="openAppSheet('games')"><span class="ic">🎮</span><span class="lb">Games</span></button>
-  <button class="fn" onclick="openAppSheet('records')"><span class="ic">💿</span><span class="lb">Records</span></button>
-  <button class="fn" onclick="openAppSheet('alerts')"><span class="ic">🔔<span class="b">3</span></span><span class="lb">Alerts</span></button>
+  <button class="fn" onclick="openAppSheet('records')" style="display:none"><!-- hidden for launch — no records yet --><span class="ic">💿</span><span class="lb">Records</span></button>
+  <button class="fn" onclick="openAppSheet('alerts')"><span class="ic">🔔<span class="b" id="alertsNavBadge" style="display:none"></span></span><span class="lb">Alerts</span></button>
   <button class="fn" onclick="openAppSheet('you')"><span class="ic">🪪</span><span class="lb">You</span></button>
 </nav>
 
@@ -452,9 +452,15 @@ function reelsBuild(){ var host=document.getElementById('reelsShelf'); if(!host|
   DDReels.list(24).then(function(list){
     host.innerHTML=hd+'<div class="reelrow" id="reelRow">'+(list||[]).map(reelTile).join('')+reelUploadTile()+'</div>'+((list&&list.length)?'':'<div class="reelempty">Be the first — drop a clip. 🌹</div>');
     reelObserve(); }).catch(function(){}); }
+function emptyFeedCard(){ return '<div class="card" style="text-align:center;padding:26px 18px">'+
+  '<div style="font-size:34px">🌹</div>'+
+  '<div style="font-size:15px;font-weight:800;color:var(--ink);margin-top:8px">The family\'s feed is warming up</div>'+
+  '<div style="font-size:13px;color:#6b6478;margin-top:4px">Be the first to post.</div>'+
+  '<button class="hp" style="margin-top:14px" onclick="openCompose()">📡 Post the first one</button>'+
+  '</div>'; }
 function loadFeed(){ if(!(window.DDFeed&&DDFeed.feed))return;
   DDFeed.feed(30).then(function(rows){ var host=document.getElementById('realFeed'); if(!host)return;
-    var cards=(rows&&rows.length)?rows.map(postCard):[];
+    var cards=(rows&&rows.length)?rows.map(postCard):[emptyFeedCard()];
     var shelf='<div class="card reelshelf" id="reelsShelf"></div>';
     if(cards.length>=3) cards.splice(3,0,shelf); else cards.push(shelf);   // reels break up the posts
     host.innerHTML=cards.join(''); loadReactions(rows); loadCommentCounts(rows); reelsBuild(); }).catch(function(){}); }
@@ -504,9 +510,10 @@ function loadNotifs(){
       return '<div class="mgrow"><div class="mgav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div class="mginfo"><b>'+_esc(nm)+'</b><span>'+_esc(snip)+' · '+_ago(p.created_at)+'</span></div></div>'; }).join('');
   }).catch(function(){ fh.innerHTML='<div class="mgempty">Couldn’t load activity</div>'; }); }
 }
-function updateNotifBadge(){ var b=document.getElementById('notifBadge'); if(!b)return;
-  if(!(window.DDFriends&&DDFriends.incoming)){ b.style.display='none'; return; }
-  DDFriends.incoming().then(function(rows){ var n=(rows&&rows.length)||0; if(n>0){ b.textContent=String(n); b.style.display=''; } else { b.style.display='none'; } }).catch(function(){ b.style.display='none'; }); }
+function updateNotifBadge(){ var b=document.getElementById('notifBadge'); var nav=document.getElementById('alertsNavBadge');
+  function setNav(n){ if(!nav)return; if(n>0){ nav.textContent=String(n); nav.style.display=''; } else { nav.style.display='none'; } }
+  if(!(window.DDFriends&&DDFriends.incoming)){ if(b)b.style.display='none'; setNav(0); return; }
+  DDFriends.incoming().then(function(rows){ var n=(rows&&rows.length)||0; if(b){ if(n>0){ b.textContent=String(n); b.style.display=''; } else { b.style.display='none'; } } setNav(n); }).catch(function(){ if(b)b.style.display='none'; setNav(0); }); }
 
 /* ---- 3) Top-bar search → filter the visible feed client-side (Enter) ---- */
 window.filterFeed=function(q){ q=String(q||'').trim().toLowerCase();

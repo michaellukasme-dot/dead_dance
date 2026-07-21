@@ -9,6 +9,7 @@
   function myId() { try { var u = (root.DDMe && root.DDMe.id && root.DDMe.id()); if (u) return String(u); var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
   function myName() {
     try {
+      var dm = (root.DDMe && root.DDMe.name && root.DDMe.name()); if (dm) return dm;
       if (root.ME && root.ME.name && root.ME.name !== 'You') return root.ME.name;
       var n = root.localStorage && localStorage.getItem('dd.myname'); return n || 'A head';
     } catch (e) { return 'A head'; }
