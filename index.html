@@ -1168,6 +1168,8 @@ body.dd-insider .dd-only{display:block}
   try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
   function fire(){ try{
     if(go==='dealer'&&window.openReader) return openReader('groups');
+    if(go==='shakedown'&&window.openReader) return openReader('market');
+    if(go==='apps'&&window.openApps) return openApps();
     if(go==='games'&&window.openGame) return openGame();
     if(go==='records'&&window.ddSheet) return ddSheet('record_store.html','💿 DeadDance Records');
     if(go==='alerts'&&window.openNotifs) return openNotifs();

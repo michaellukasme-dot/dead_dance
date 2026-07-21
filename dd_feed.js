@@ -73,6 +73,35 @@
       .catch(function () { return 0; });
   }
 
+  // ---- REAL comments (dd_post_comments) ----
+  function comment(postId, body) {
+    var c = client(), id = myId();
+    if (!c || !id || !postId) return Promise.reject('no-backend');
+    var b = String(body == null ? '' : body).trim();
+    if (!b) return Promise.reject('empty');
+    return c.rpc('dd_comment_add', { p_post_id: String(postId), p_author_id: id, p_author_name: myName(), p_body: b })
+      .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+  }
+  function comments(postId) {
+    var c = client(); if (!c || !postId) return Promise.resolve([]);
+    return c.rpc('dd_comments_get', { p_post_id: String(postId) })
+      .then(function (r) { return (r && r.data) || []; }).catch(function () { return []; });
+  }
+  function commentCounts(ids) {
+    var c = client(); if (!c || !ids || !ids.length) return Promise.resolve({});
+    return c.rpc('dd_comment_counts', { p_ids: ids.map(String) })
+      .then(function (r) { var o = {}; ((r && r.data) || []).forEach(function (row) { o[row.post_id] = Number(row.n || 0); }); return o; })
+      .catch(function () { return {}; });
+  }
+  var cchan = null;
+  function subscribeComments(onChange) {
+    var c = client(); if (!c || cchan) return;
+    try { cchan = c.channel('dd_comments_live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dd_post_comments' },
+        function (p) { try { onChange && onChange(p && p.new); } catch (e) {} })
+      .subscribe(); } catch (e) {}
+  }
+
   var chan = null;
   function subscribe(onChange) {
     var c = client(); if (!c || chan) return;
@@ -97,5 +126,5 @@
     } catch (e) {}
   }
 
-  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, myReactions: myReactions, renameMine: renameMine, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole };
+  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, myReactions: myReactions, renameMine: renameMine, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole, comment: comment, comments: comments, commentCounts: commentCounts, subscribeComments: subscribeComments };
 })(typeof window !== 'undefined' ? window : this);

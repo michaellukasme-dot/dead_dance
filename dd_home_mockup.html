@@ -171,18 +171,18 @@
   <!-- LEFT SIDEBAR -->
   <aside class="side">
     <nav class="nav">
-      <a><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
-      <a><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
-      <a><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
-      <a><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
-      <a><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
-      <a><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
+      <a onclick="location.href='index.html#go=you'"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
+      <a onclick="location.href='claude_ai.html'"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
+      <a onclick="location.href='index.html#go=dealer'"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
+      <a onclick="var s=document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
+      <a onclick="location.href='index.html#go=shakedown'"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
+      <a onclick="location.href='index.html#go=apps'"><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
       <div class="sep"></div>
       <div class="sc">Your shortcuts</div>
-      <a><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
-      <a><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
-      <a><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
-      <a><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
+      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
+      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
+      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
+      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
     </nav>
   </aside>
 
@@ -203,13 +203,6 @@
     </div></div>
 
     <div id="realFeed"></div>
-
-    <div class="card post">
-      <div class="ph"><div class="av">K</div><div style="flex:1"><b>Kara Diaz</b> <span style="color:var(--muted);font-weight:600">was at</span> <b>Volksplatz</b><div class="t">Musikfest · 2h · 🌹</div></div><div style="color:var(--muted);cursor:pointer">···</div></div>
-      <div class="body">The jam went to another galaxy tonight. If you weren’t on the north side you missed it. 🌹⚡</div>
-      <div class="img">🌹</div>
-      <div class="acts"><button>👍 Like <span style="color:var(--muted);font-weight:600">· 48</span></button><button>💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div>
-    </div>
 
     <div class="card pymk">
       <div class="h">🧑‍🤝‍🧑 Heads you may know</div>
@@ -341,8 +334,26 @@ function _ago(iso){ try{ var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1
   if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }catch(e){ return ''; } }
 function postCard(p){ var nm=p.author_name||'A head';
   var avh=(nm.charAt(0)||'?').toUpperCase(); var pid=_esc(p.id||'');
-  return '<div class="card post" data-pid="'+pid+'"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button class="likebtn" data-pid="'+pid+'" onclick="toggleLike(this)">👍 Like <span class="lct" style="color:var(--muted);font-weight:600"></span></button><button class="cmtbtn" data-pid="'+pid+'" onclick="openCompose()">💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div></div>';
+  return '<div class="card post" data-pid="'+pid+'"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button class="likebtn" data-pid="'+pid+'" onclick="toggleLike(this)">👍 Like <span class="lct" style="color:var(--muted);font-weight:600"></span></button><button class="cmtbtn" data-pid="'+pid+'" onclick="toggleComments(this)">💬 Comment <span class="cct" style="color:var(--muted);font-weight:600"></span></button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div><div class="comments" data-pid="'+pid+'" style="display:none"></div></div>';
 }
+/* ---- REAL comments (dd_post_comments) ---- */
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.comments{border-top:1px solid #eee;margin-top:8px;padding-top:9px}.cmt{display:flex;gap:8px;margin-bottom:8px}.cmt .cav{width:30px;height:30px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7a3cc0,#3a1f57);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}.cmt .cbody{background:#f0eef5;border-radius:14px;padding:7px 11px;font-size:13.5px;line-height:1.35}.cmt .cbody b{margin-right:5px}.cmt .ct{color:#9a93a8;font-size:11px;font-weight:600;margin-top:2px}.cempty{color:#9a93a8;font-size:12.5px;padding:2px 2px 8px}.crow{display:flex;gap:7px;align-items:center;margin-top:4px}.cinput{flex:1;border:1px solid #e2dcec;border-radius:999px;padding:8px 13px;font:inherit;font-size:13.5px;outline:none}.csend{border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13px;border-radius:999px;padding:8px 14px;cursor:pointer}</style>'); }catch(e){} })();
+function _cmtRow(c){ var nm=c.author_name||'A head'; return '<div class="cmt"><div class="cav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div><div class="cbody"><b>'+_esc(nm)+'</b>'+_esc(c.body)+'</div><div class="ct">'+_ago(c.created_at)+'</div></div></div>'; }
+window.toggleComments=function(btn){ var pid=btn.getAttribute('data-pid'); var post=document.querySelector('.post[data-pid="'+pid+'"]'); if(!post)return; var box=post.querySelector('.comments'); if(!box)return;
+  if(box.style.display==='none'){ box.style.display='block'; if(!box.dataset.loaded) renderComments(pid,box); var inp=box.querySelector('.cinput'); if(inp)inp.focus(); }
+  else box.style.display='none'; };
+function renderComments(pid,box){ box.dataset.loaded='1';
+  box.innerHTML='<div class="clist"><div class="cempty">Loading…</div></div><div class="crow"><input class="cinput" placeholder="Write a comment…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();sendComment(\''+pid+'\',this);}"><button class="csend" onclick="sendComment(\''+pid+'\',this.parentNode.querySelector(\'.cinput\'))">Post</button></div>';
+  if(!(window.DDFeed&&DDFeed.comments)){ var l0=box.querySelector('.clist'); if(l0)l0.innerHTML=''; return; }
+  DDFeed.comments(pid).then(function(list){ var l=box.querySelector('.clist'); if(l) l.innerHTML=(list&&list.length)?list.map(_cmtRow).join(''):'<div class="cempty">Be the first to comment 🌹</div>'; }); }
+window.sendComment=function(pid,inp){ var v=(inp&&inp.value||'').trim(); if(!v)return;
+  if(!(window.DDFeed&&DDFeed.comment)){ toast('Comments loading…'); return; }
+  if(DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to comment 🌹'); return; }
+  inp.value=''; DDFeed.comment(pid,v).then(function(){ var box=document.querySelector('.post[data-pid="'+pid+'"] .comments'); if(box){ box.dataset.loaded=''; renderComments(pid,box); } bumpCommentCount(pid,1); })
+    .catch(function(){ toast('Couldn’t comment — try again'); inp.value=v; }); };
+function bumpCommentCount(pid,delta){ var b=document.querySelector('.post[data-pid="'+pid+'"] .cct'); if(!b)return; var n=(parseInt((b.textContent||'').replace(/\D/g,''),10)||0)+delta; b.textContent=n?('· '+n):''; }
+function loadCommentCounts(rows){ if(!(window.DDFeed&&DDFeed.commentCounts))return; var ids=(rows||[]).map(function(r){return r.id;}).filter(Boolean); if(!ids.length)return;
+  DDFeed.commentCounts(ids).then(function(counts){ ids.forEach(function(id){ var b=document.querySelector('.post[data-pid="'+id+'"] .cct'); if(b){ var n=counts[id]||0; b.textContent=n?('· '+n):''; } }); }).catch(function(){}); }
 /* ---- REAL likes (dd_post_react) — toggle + true counts + this device's own state ---- */
 window.toggleLike=function(btn){ var pid=btn&&btn.getAttribute('data-pid'); if(!pid||!(window.DDFeed&&DDFeed.react))return;
   var on=!btn.classList.contains('liked'); btn.classList.toggle('liked',on); btn.style.color=on?'#2f7bf6':'';
@@ -355,7 +366,10 @@ function loadReactions(rows){ if(!(window.DDFeed&&DDFeed.reactCounts))return; va
       if(mine[id]&&mine[id].like){ lb.classList.add('liked'); lb.style.color='#2f7bf6'; } }); }); }).catch(function(){}); }
 function loadFeed(){ if(!(window.DDFeed&&DDFeed.feed))return;
   DDFeed.feed(30).then(function(rows){ var host=document.getElementById('realFeed'); if(!host)return;
-    host.innerHTML=(rows&&rows.length)?rows.map(postCard).join(''):''; loadReactions(rows); }).catch(function(){}); }
-setTimeout(function(){ loadFeed(); try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(){ loadFeed(); }); }catch(e){} }, 600);
+    host.innerHTML=(rows&&rows.length)?rows.map(postCard).join(''):''; loadReactions(rows); loadCommentCounts(rows); }).catch(function(){}); }
+setTimeout(function(){ loadFeed();
+  try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(){ loadFeed(); }); }catch(e){}
+  try{ if(window.DDFeed&&DDFeed.subscribeComments) DDFeed.subscribeComments(function(nc){ if(!nc)return; var box=document.querySelector('.post[data-pid="'+nc.post_id+'"] .comments'); if(box&&box.style.display!=='none'){ box.dataset.loaded=''; renderComments(nc.post_id,box); } var b=document.querySelector('.post[data-pid="'+nc.post_id+'"] .cct'); if(b){ if(!DDFeed.commentCounts){return;} DDFeed.commentCounts([nc.post_id]).then(function(c){ var n=c[nc.post_id]||0; b.textContent=n?('· '+n):''; }); } }); }catch(e){}
+}, 600);
 </script>
 </body></html>
