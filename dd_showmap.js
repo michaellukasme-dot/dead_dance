@@ -596,8 +596,11 @@
       if (PCHNAME !== ch.name) { PCHNAME = ch.name; PPAGE = 0; }   // reset paging when the chapter changes
       var arr = ch.shows, pages = Math.max(1, Math.ceil(arr.length / PER_PAGE));
       if (PPAGE >= pages) PPAGE = pages - 1; if (PPAGE < 0) PPAGE = 0;
-      var start = PPAGE * PER_PAGE;
-      var pageRows = arr.slice(start, start + PER_PAGE).map(panelRowHTML).join("");
+      var start = PPAGE * PER_PAGE, paginate = arr.length > PER_PAGE;
+      var cells = arr.slice(start, start + PER_PAGE).map(panelRowHTML);
+      // pad the last page with invisible filler rows so every page is the SAME height → no jitter on Prev/Next
+      if (paginate) { while (cells.length < PER_PAGE) cells.push('<div class="prow" style="visibility:hidden" aria-hidden="true"><div class="pdt">·<small>·</small></div><div class="pinfo"><b>·</b><span>·</span></div><button class="ptix">·</button><button class="pnotify">·</button></div>'); }
+      var pageRows = cells.join("");
       var fhtml = fests.length ? ('<div class="pfhead">🎆 Summer festivals</div>' + fests.map(function (f) {
         var when = f.start ? (f.start.slice(5) + (f.end && f.end !== f.start ? ("–" + f.end.slice(5)) : "")) : "Summer";
         return '<div class="pfrow"><div class="pfdt">🎆<small>' + esc(f.days || "") + 'd</small></div>' +
