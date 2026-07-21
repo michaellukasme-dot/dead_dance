@@ -91,7 +91,7 @@
   // Map shape for dd_showmap.js: {band, venue, city, date, real, coords}
   root.dealMapRows = function () {
     return root.DEAL_SHOWS_PUBLIC.filter(function (s) { return s.coords; }).map(function (s) {
-      return { band: s.project, venue: s.venue, city: s.city + ", " + s.state, date: s.date, real: true, coords: s.coords };
+      return { band: s.project, venue: s.venue, city: s.city + ", " + s.state, date: s.date, time: s.time, real: true, coords: s.coords };
     });
   };
 })(typeof window !== "undefined" ? window : this);

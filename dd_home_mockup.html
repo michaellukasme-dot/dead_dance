@@ -130,11 +130,11 @@
 <!-- TOP BAR -->
 <div class="top">
   <div class="logo">🌹</div>
-  <input class="search" placeholder="Search heads, shows, tapes, art…">
+  <input class="search" id="feedSearch" placeholder="Search heads, shows, tapes, art…" onkeydown="if(event.key==='Enter'){event.preventDefault();filterFeed(this.value);}">
   <span class="sp"></span>
   <div class="ic menubtn" onclick="toggleSideMenu()" title="Menu">▦</div>
-  <div class="ic">💬</div>
-  <div class="ic">🔔<span class="badge">19</span></div>
+  <div class="ic" onclick="openChat()" title="Family chat">💬</div>
+  <div class="ic" onclick="openNotifs()" title="Notifications">🔔<span class="badge" id="notifBadge" style="display:none">0</span></div>
   <div class="ic avat" id="topAvat" onclick="toggleAcct(event)">M</div>
 </div>
 
@@ -178,18 +178,18 @@
   <!-- LEFT SIDEBAR -->
   <aside class="side">
     <nav class="nav">
-      <a onclick="location.href='index.html#go=you'"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
-      <a onclick="location.href='claude_ai.html'"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
-      <a onclick="location.href='index.html#go=dealer'"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
+      <a onclick="openAppSheet('you')"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael I. Lukas</b></a>
+      <a onclick="openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
+      <a onclick="openAppSheet('dealer')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
       <a onclick="var s=document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
-      <a onclick="location.href='index.html#go=shakedown'"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
-      <a onclick="location.href='index.html#go=apps'"><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
+      <a onclick="openAppSheet('shakedown')"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Marketplace · Shakedown</b></a>
+      <a onclick="openAppSheet('apps')"><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
       <div class="sep"></div>
       <div class="sc">Your shortcuts</div>
-      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
-      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
-      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
-      <a onclick="location.href='index.html#go=dealer'"><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
+      <a onclick="openAppSheet('dealer')"><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
+      <a onclick="openAppSheet('dealer')"><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
+      <a onclick="openAppSheet('dealer')"><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
+      <a onclick="openAppSheet('dealer')"><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
     </nav>
   </aside>
 
@@ -201,23 +201,24 @@
       <button class="hp" onclick="openCompose()">📡 HyperPost</button>
     </div>
 
-    <div class="card"><div class="stories">
-      <div class="story mk"><div class="plus">+</div><div class="lbl" style="align-self:flex-start;margin-top:auto">Create story</div></div>
-      <div class="story" style="background:linear-gradient(180deg,#e0577a,#3a1f57)"><div class="head">🎸</div><div class="lbl">Dark Star Orchestra</div></div>
-      <div class="story" style="background:linear-gradient(180deg,#2f7bf6,#12305e)"><div class="head">🌹</div><div class="lbl">Kara Diaz</div></div>
-      <div class="story" style="background:linear-gradient(180deg,#1f9e6b,#123b28)"><div class="head">👑</div><div class="lbl">Robbie G.</div></div>
-      <div class="story" style="background:linear-gradient(180deg,#c08a2d,#5a2e86)"><div class="head">🥁</div><div class="lbl">Oteil &amp; Friends</div></div>
+    <div class="card"><div class="stories" id="storiesRow">
+      <div class="story mk" id="storyCreate" onclick="createStory()"><div class="plus">+</div><div class="lbl" style="align-self:flex-start;margin-top:auto">Create story</div></div>
+      <div class="story" onclick="openBandStory('Dark Star Orchestra')" style="background:linear-gradient(180deg,#e0577a,#3a1f57)"><div class="head">🎸</div><div class="lbl">Dark Star Orchestra</div></div>
+      <div class="story" onclick="openBandStory('Kara Diaz')" style="background:linear-gradient(180deg,#2f7bf6,#12305e)"><div class="head">🌹</div><div class="lbl">Kara Diaz</div></div>
+      <div class="story" onclick="openBandStory('Robbie G.')" style="background:linear-gradient(180deg,#1f9e6b,#123b28)"><div class="head">👑</div><div class="lbl">Robbie G.</div></div>
+      <div class="story" onclick="openBandStory('Oteil &amp; Friends')" style="background:linear-gradient(180deg,#c08a2d,#5a2e86)"><div class="head">🥁</div><div class="lbl">Oteil &amp; Friends</div></div>
     </div></div>
+    <input type="file" id="storyUp" accept="image/*,video/*" style="display:none" onchange="storyUpload(this)">
 
     <div id="realFeed"></div>
 
     <div class="card pymk">
       <div class="h">🧑‍🤝‍🧑 Heads you may know</div>
       <div class="row">
-        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#e0577a,#b8002e)">JV</div><div class="bd"><div class="nm">Jerome Velosky</div><div class="mu">🌹 15 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
-        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">JC</div><div class="bd"><div class="nm">Jake Cohen</div><div class="mu">🌹 8 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
-        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">BC</div><div class="bd"><div class="nm">Brian Cody</div><div class="mu">🌹 3 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
-        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">NJ</div><div class="bd"><div class="nm">Nikki Jam</div><div class="mu">🌹 3 mutual heads</div><button class="add">Add friend</button><button class="rm">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#e0577a,#b8002e)">JV</div><div class="bd"><div class="nm">Jerome Velosky</div><div class="mu">🌹 15 mutual heads</div><button class="add" onclick="pymkAddDemo(this)">Add friend</button><button class="rm" onclick="removeCard(this)">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">JC</div><div class="bd"><div class="nm">Jake Cohen</div><div class="mu">🌹 8 mutual heads</div><button class="add" onclick="pymkAddDemo(this)">Add friend</button><button class="rm" onclick="removeCard(this)">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">BC</div><div class="bd"><div class="nm">Brian Cody</div><div class="mu">🌹 3 mutual heads</div><button class="add" onclick="pymkAddDemo(this)">Add friend</button><button class="rm" onclick="removeCard(this)">Remove</button></div></div>
+        <div class="pk"><div class="ph" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">NJ</div><div class="bd"><div class="nm">Nikki Jam</div><div class="mu">🌹 3 mutual heads</div><button class="add" onclick="pymkAddDemo(this)">Add friend</button><button class="rm" onclick="removeCard(this)">Remove</button></div></div>
       </div>
     </div>
   </main>
@@ -226,7 +227,7 @@
   <aside class="rail">
     <div class="card">
       <h3>🎂 Birthdays</h3>
-      <div class="bd"><div class="gift">🎁</div><div><b>Luke Issa</b> and <b>3 others</b> have birthdays today.</div></div>
+      <div class="bd" id="bdayBody"><div class="gift">🎁</div><div>No birthdays today. We'll light a candle when the family shares theirs. 🌹</div></div>
     </div>
     <div class="card">
       <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">Friends <button onclick="openFriendsMgr()" style="border:0;background:#e9e5ef;color:#5a2e86;font-weight:800;font-size:12px;border-radius:9px;padding:6px 11px;cursor:pointer">🌹 Add friends</button></h3>
@@ -256,6 +257,17 @@
     <div class="mgbody">
       <div id="mgrReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="mgrReq"></div></div>
       <div class="mgsec">People you may know</div><div id="mgrSug"><div class="mgempty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS — real: incoming friend requests + recent feed activity -->
+<div class="notifsov" id="notifsOv" onclick="if(event.target===this)closeNotifs()">
+  <div class="friendsbox">
+    <div class="mghd"><b>🔔 Notifications</b><button onclick="closeNotifs()" aria-label="Close">×</button></div>
+    <div class="mgbody">
+      <div id="notifReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="notifReq"></div></div>
+      <div class="mgsec">Recent activity</div><div id="notifFeed"><div class="mgempty">Loading…</div></div>
     </div>
   </div>
 </div>
@@ -291,6 +303,7 @@
 <script src="dd_friends.js"></script>
 <script src="dd_feed.js"></script>
 <script src="dd_reels.js"></script>
+<script src="lukas_chat.js"></script>
 <script src="qr.js"></script>
 <script>
 function openFbInfo(){ document.getElementById('fbInfo').classList.add('on'); }
@@ -302,8 +315,8 @@ window.closeSideMenu=function(){ var s=document.querySelector('.side'), sc=docum
 /* App sheet — Dealer/Games/Records/Alerts/You render OVER Friends (bare overlay from index.html) and close back to Friends */
 (function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.appsheet{display:none;position:fixed;inset:0;z-index:210;background:#160e24;flex-direction:column}.appsheet.on{display:flex}.appsheethd{display:flex;align-items:center;gap:10px;background:#241634;color:#fff;padding:9px 12px;flex:none;border-bottom:1px solid #ffffff1a}.appsheethd .appx{border:0;background:#ffffff1a;color:#fff;font-weight:800;font-size:14px;border-radius:9px;padding:8px 12px;cursor:pointer}.appsheethd b{font-size:15px}.appsheet iframe{flex:1;width:100%;border:0;background:#160e24}</style>'); }catch(e){} })();
 var _APP_TITLES={dealer:'💎 Dealer',games:'🎮 Games',records:'💿 Records',alerts:'🔔 Alerts',you:'🪪 You'};
-window.openAppSheet=function(which){ var s=document.getElementById('appSheet'), f=document.getElementById('appSheetFrame'), t=document.getElementById('appSheetTitle'); if(!s||!f)return;
-  if(t)t.textContent=_APP_TITLES[which]||''; f.src='index.html#go='+which; s.classList.add('on'); document.body.style.overflow='hidden'; };
+window.openAppSheet=function(which,opts){ opts=opts||{}; var s=document.getElementById('appSheet'), f=document.getElementById('appSheetFrame'), t=document.getElementById('appSheetTitle'); if(!s||!f)return;
+  if(t)t.textContent=opts.title||_APP_TITLES[which]||''; f.src=opts.url||('index.html#go='+which); s.classList.add('on'); document.body.style.overflow='hidden'; };
 window.closeAppSheet=function(){ var s=document.getElementById('appSheet'), f=document.getElementById('appSheetFrame'); if(s)s.classList.remove('on'); if(f)f.src='about:blank'; document.body.style.overflow=''; };
 window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='closeSheet') closeAppSheet(); }catch(x){} });
 function toast(m){ var t=document.createElement('div'); t.innerHTML=m;
@@ -389,7 +402,7 @@ function _ago(iso){ try{ var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1
   if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }catch(e){ return ''; } }
 function postCard(p){ var nm=p.author_name||'A head';
   var avh=(nm.charAt(0)||'?').toUpperCase(); var pid=_esc(p.id||'');
-  return '<div class="card post" data-pid="'+pid+'"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button class="likebtn" data-pid="'+pid+'" onclick="toggleLike(this)">👍 Like <span class="lct" style="color:var(--muted);font-weight:600"></span></button><button class="cmtbtn" data-pid="'+pid+'" onclick="toggleComments(this)">💬 Comment <span class="cct" style="color:var(--muted);font-weight:600"></span></button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div><div class="comments" data-pid="'+pid+'" style="display:none"></div></div>';
+  return '<div class="card post" data-pid="'+pid+'"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div><button class="pkebab" onclick="postMenu(event,this)" aria-label="Post options">···</button></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button class="likebtn" data-pid="'+pid+'" onclick="toggleLike(this)">👍 Like <span class="lct" style="color:var(--muted);font-weight:600"></span></button><button class="cmtbtn" data-pid="'+pid+'" onclick="toggleComments(this)">💬 Comment <span class="cct" style="color:var(--muted);font-weight:600"></span></button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div><div class="comments" data-pid="'+pid+'" style="display:none"></div></div>';
 }
 /* ---- REAL comments (dd_post_comments) ---- */
 (function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.comments{border-top:1px solid #eee;margin-top:8px;padding-top:9px}.cmt{display:flex;gap:8px;margin-bottom:8px}.cmt .cav{width:30px;height:30px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7a3cc0,#3a1f57);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}.cmt .cbody{background:#f0eef5;border-radius:14px;padding:7px 11px;font-size:13.5px;line-height:1.35}.cmt .cbody b{margin-right:5px}.cmt .ct{color:#9a93a8;font-size:11px;font-weight:600;margin-top:2px}.cempty{color:#9a93a8;font-size:12.5px;padding:2px 2px 8px}.crow{display:flex;gap:7px;align-items:center;margin-top:4px}.cinput{flex:1;border:1px solid #e2dcec;border-radius:999px;padding:8px 13px;font:inherit;font-size:13.5px;outline:none}.csend{border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13px;border-radius:999px;padding:8px 14px;cursor:pointer}</style>'); }catch(e){} })();
@@ -450,5 +463,110 @@ setTimeout(function(){ loadFeed();
   try{ if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(function(){ reelsBuild(); }); }catch(e){}
   try{ if(window.DDFeed&&DDFeed.subscribeComments) DDFeed.subscribeComments(function(nc){ if(!nc)return; var box=document.querySelector('.post[data-pid="'+nc.post_id+'"] .comments'); if(box&&box.style.display!=='none'){ box.dataset.loaded=''; renderComments(nc.post_id,box); } var b=document.querySelector('.post[data-pid="'+nc.post_id+'"] .cct'); if(b){ if(!DDFeed.commentCounts){return;} DDFeed.commentCounts([nc.post_id]).then(function(c){ var n=c[nc.post_id]||0; b.textContent=n?('· '+n):''; }); } }); }catch(e){}
 }, 600);
+
+/* ============================================================================
+   NEW WIRING (additive): chat · notifications · search · stories ·
+   post kebab · pymk fallback. All best-effort; reuses existing modules.
+   ============================================================================ */
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>'+
+  '.pkebab{border:0;background:none;color:#9a93a8;font-size:20px;font-weight:900;line-height:1;padding:0 8px;border-radius:8px;cursor:pointer;flex:none;align-self:flex-start;letter-spacing:-1px}'+
+  '.pkebab:hover{background:#f2ecfb;color:#5a2e86}'+
+  '.postmenu{position:absolute;z-index:300;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px #2a1b3d33;padding:6px;min-width:174px}'+
+  '.pmrow{padding:10px 12px;border-radius:9px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:9px}'+
+  '.pmrow:hover{background:#f6f2fb}'+
+  '.notifsov{display:none;position:fixed;inset:0;z-index:130;background:rgba(20,12,30,.5);align-items:flex-start;justify-content:center;padding:36px 12px;overflow:auto}'+
+  '.notifsov.on{display:flex}'+
+  '</style>'); }catch(e){} })();
+
+/* ---- 1) Top-bar 💬 → family chat (LukasChat) ---- */
+window.openChat=function(){ try{ if(window.LukasChat&&LukasChat.open){
+    if(!window._lcInit){ try{ LukasChat.init({app:'dead_dance',brand:{name:'dead_dance',accent:'#b8002e',icon:'🌹'}}); }catch(e){} window._lcInit=true; }
+    LukasChat.open();
+  } else { toast('💬 Chat is loading — try again in a moment'); } }catch(e){ toast('💬 Chat is loading…'); } };
+
+/* ---- 2) Top-bar 🔔 → real notifications (incoming requests + recent activity) ---- */
+window.openNotifs=function(){ var ov=document.getElementById('notifsOv'); if(!ov)return; ov.classList.add('on'); loadNotifs(); };
+window.closeNotifs=function(){ var ov=document.getElementById('notifsOv'); if(ov)ov.classList.remove('on'); };
+function loadNotifs(){
+  var reqHost=document.getElementById('notifReq'), reqSec=document.getElementById('notifReqSec');
+  if(reqHost&&window.DDFriends&&DDFriends.incoming){ DDFriends.incoming().then(function(rows){
+    if(!rows||!rows.length){ if(reqSec)reqSec.style.display='none'; }
+    else { if(reqSec)reqSec.style.display='block';
+      reqHost.innerHTML=rows.map(function(r,i){ var id='nr-'+i; var nm=String(r.from_name||r.name||'A head');
+        var acts='<button class="mgadd" onclick="mgrConfirm(\''+r.id+'\',\''+id+'\')">Confirm</button><button class="mgrm" onclick="frRespond(\''+r.id+'\',false,document.getElementById(\''+id+'\'))">Delete</button>';
+        return _mgRow(nm,'🌹 sent you a request',acts,id); }).join(''); }
+  }).catch(function(){ if(reqSec)reqSec.style.display='none'; }); }
+  var fh=document.getElementById('notifFeed');
+  if(fh&&window.DDFeed&&DDFeed.feed){ DDFeed.feed(12).then(function(rows){
+    if(!rows||!rows.length){ fh.innerHTML='<div class="mgempty">No recent activity yet 🌹</div>'; return; }
+    fh.innerHTML=rows.map(function(p){ var nm=String(p.author_name||'A head'); var body=String(p.body||'');
+      var snip=body.slice(0,72)+(body.length>72?'…':'');
+      return '<div class="mgrow"><div class="mgav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div class="mginfo"><b>'+_esc(nm)+'</b><span>'+_esc(snip)+' · '+_ago(p.created_at)+'</span></div></div>'; }).join('');
+  }).catch(function(){ fh.innerHTML='<div class="mgempty">Couldn’t load activity</div>'; }); }
+}
+function updateNotifBadge(){ var b=document.getElementById('notifBadge'); if(!b)return;
+  if(!(window.DDFriends&&DDFriends.incoming)){ b.style.display='none'; return; }
+  DDFriends.incoming().then(function(rows){ var n=(rows&&rows.length)||0; if(n>0){ b.textContent=String(n); b.style.display=''; } else { b.style.display='none'; } }).catch(function(){ b.style.display='none'; }); }
+
+/* ---- 3) Top-bar search → filter the visible feed client-side (Enter) ---- */
+window.filterFeed=function(q){ q=String(q||'').trim().toLowerCase();
+  var posts=document.querySelectorAll('#realFeed .post'); var shown=0;
+  Array.prototype.forEach.call(posts,function(p){ if(!q){ p.style.display=''; shown++; return; }
+    var hit=((p.textContent||'').toLowerCase().indexOf(q)>=0); p.style.display=hit?'':'none'; if(hit)shown++; });
+  if(!q){ toast('Showing all posts 🌹'); }
+  else { toast(shown?('🔎 '+shown+' matching post'+(shown>1?'s':'')):('No posts match “'+_esc(q)+'”')); } };
+
+/* ---- 4) Stories: real Create-story upload (reuses DDReels storage) + persisted band-family stories ---- */
+window.createStory=function(){ var i=document.getElementById('storyUp'); if(i)i.click(); };
+window.storyUpload=function(inp){ var f=inp.files&&inp.files[0]; if(!f){return;} inp.value='';
+  if(!(window.DDReels&&DDReels.upload)){ toast('Stories loading…'); return; }
+  if(window.DDFeed&&DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to add a story 🌹'); return; }
+  var mt=(((f.type||'').indexOf('video')===0)?'video':'image');
+  toast('📸 Adding your story…');
+  DDReels.upload(f).then(function(url){ if(!url) throw 'no-url';
+    var c=(window.ddClient&&ddClient()); if(!c) throw 'no-client';
+    var mid=(window.ddId&&ddId()&&ddId().id)||null;
+    var mname=(window.DDFeed&&DDFeed.myName&&DDFeed.myName())||null;
+    return c.rpc('dd_story_add',{p_media_url:url,p_media_type:mt,p_caption:null,p_member:mid,p_member_name:mname});
+  }).then(function(){ toast('🌹 Story added'); storiesBuild(); })
+   .catch(function(){ toast('Couldn’t add story — try again'); }); };
+function storyTile(s){ var nm=String(s.member_name||'Story');
+  var head='<div class="head">'+_esc((nm.charAt(0)||'🌹').toUpperCase())+'</div>';
+  var lbl='<div class="lbl">'+_esc(nm)+'</div>';
+  if(s.media_type==='video'){ return '<div class="story real" onclick="viewStory(this)"><video muted loop playsinline preload="metadata" src="'+_esc(s.media_url)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>'+head+lbl+'</div>'; }
+  return '<div class="story real" onclick="viewStory(this)" style="background-image:url(\''+_esc(s.media_url)+'\');background-size:cover;background-position:center">'+head+lbl+'</div>'; }
+function storiesBuild(){ var create=document.getElementById('storyCreate'); if(!create)return;
+  var c=(window.ddClient&&ddClient()); if(!c)return;
+  c.rpc('dd_stories_list',{p_limit:20}).then(function(r){ var list=(r&&r.data)||[];
+    var row=document.getElementById('storiesRow'); if(row){ Array.prototype.forEach.call(row.querySelectorAll('.story.real'),function(el){el.remove();}); }
+    if(!list.length)return; create.insertAdjacentHTML('afterend', list.map(storyTile).join('')); }).catch(function(){}); }
+window.viewStory=function(el){ var v=el&&el.querySelector('video'); if(v){ if(v.muted){ v.muted=false; v.play&&v.play().catch(function(){}); } else { v.muted=true; } } };
+window.openBandStory=function(name){ try{ openAppSheet('dealer'); }catch(e){} };
+
+/* ---- 5) Post ··· kebab → Copy link / Hide ---- */
+window.postMenu=function(ev,btn){ if(ev)ev.stopPropagation(); closePostMenu();
+  var post=btn&&btn.closest('.post'); var pid=post?post.getAttribute('data-pid'):'';
+  var m=document.createElement('div'); m.className='postmenu'; m.id='postMenu';
+  m.innerHTML='<div class="pmrow" onclick="copyPostLink(\''+pid+'\')">🔗 Copy link</div><div class="pmrow" onclick="hidePost(\''+pid+'\')">🚫 Hide post</div>';
+  document.body.appendChild(m);
+  var r=btn.getBoundingClientRect(); var w=m.offsetWidth||174;
+  m.style.top=(r.bottom+window.scrollY+4)+'px'; m.style.left=Math.max(8,(r.right+window.scrollX-w))+'px'; };
+function closePostMenu(){ var m=document.getElementById('postMenu'); if(m)m.remove(); }
+document.addEventListener('click',function(e){ var m=document.getElementById('postMenu'); if(!m)return;
+  if(!m.contains(e.target)&&!(e.target.classList&&e.target.classList.contains('pkebab'))) closePostMenu(); });
+window.copyPostLink=function(pid){ closePostMenu(); var url=location.origin+location.pathname+'#post='+encodeURIComponent(pid||'');
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url); else { var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } }catch(e){}
+  toast('🔗 Post link copied'); };
+window.hidePost=function(pid){ closePostMenu(); var post=document.querySelector('.post[data-pid="'+pid+'"]'); if(post){ post.style.transition='.2s'; post.style.opacity=0; setTimeout(function(){ if(post)post.remove(); },210); } toast('Post hidden from this view'); };
+
+/* ---- 6) PYMK fallback cards (demo names, no real id): honest local actions ---- */
+window.removeCard=function(btn){ var c=btn&&btn.closest('.pk'); if(c)c.remove(); };
+window.pymkAddDemo=function(btn){ if(btn){ btn.textContent='✓ Requested'; btn.disabled=true; btn.style.opacity=.6; } };
+
+/* ---- init: badge + stories + live refresh ---- */
+setTimeout(function(){ try{ updateNotifBadge(); }catch(e){} try{ storiesBuild(); }catch(e){}
+  try{ if(window.DDFriends&&DDFriends.subscribe) DDFriends.subscribe(function(){ updateNotifBadge(); var ov=document.getElementById('notifsOv'); if(ov&&ov.classList.contains('on')) loadNotifs(); }); }catch(e){}
+  try{ if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(function(){ storiesBuild(); }); }catch(e){}
+}, 800);
 </script>
 </body></html>

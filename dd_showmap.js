@@ -184,7 +184,7 @@
     [window.dealMapRows, window.hotSauceMapRows].forEach(function (fn) {
       if (!fn) return;
       fn().forEach(function (r) {
-        SHOWS.push({ band: r.band, venue: r.venue, city: r.city, date: r.date, real: true });
+        SHOWS.push({ band: r.band, venue: r.venue, city: r.city, date: r.date, time: r.time, real: true });
         if (r.coords && !CITY[r.city]) CITY[r.city] = r.coords;
       });
     });
@@ -572,7 +572,8 @@
     }
     function buyTicket(s) {
       hidePop();
-      try { window.CURBUY = { band: s.band, venue: s.venue, price: s.price || "" }; } catch (e) {}
+      try { var _co = null; try { _co = (s.city && CITY[s.city]) ? { lat: CITY[s.city][0], lng: CITY[s.city][1] } : null; } catch (e2) {}
+        window.CURBUY = { band: s.band, venue: s.venue, price: s.price || "", date: s.date || "", time: s.time || showTime(s) || "", coords: _co }; } catch (e) {}
       if (typeof window.buy === "function") { try { window.buy("ticket"); return; } catch (e) {} }
       if (window.toast) window.toast("🎟️ " + s.band + " — secure checkout. (Demo)");
     }
@@ -581,13 +582,12 @@
     var PPAGE = 0, PCHNAME = null, PER_PAGE = 8;   // 2 columns × 4 rows per page → card never grows
     function showTime(s){ return s.time || s.t || s.showtime || ""; }   // render TIME plainly when the date carries one
     function panelRowHTML(s){
-      var id = showId(s), done = notified(id), tm = showTime(s);
+      var tm = showTime(s);   // TIME plainly on every row (Ticketmaster-simple); bell removed — reminders come from buying
       var vt = esc(s.venue) + ' · ' + esc(s.city) + (tm ? ' · <span class="ptime">' + esc(tm) + '</span>' : '');
       return '<div class="prow">' +
         '<div class="pdt">' + esc(fmtDate(s.date).split(" ")[0]) + '<small>' + esc(fmtDate(s.date).split(" ")[1]) + '</small></div>' +
         '<div class="pinfo"><b>' + esc(s.band) + '</b><span>' + vt + '</span></div>' +
         '<button class="ptix" data-i="' + SHOWS.indexOf(s) + '">🎟️ Tickets</button>' +
-        '<button class="pnotify' + (done ? ' done' : '') + '" data-id="' + id + '">' + (done ? '✓' : '🔔') + '</button>' +
         '</div>';
     }
     function renderPanel(ch) {

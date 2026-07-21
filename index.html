@@ -2291,6 +2291,12 @@ function coFallback(){ document.getElementById('checkout').classList.remove('on'
   toast("Secure checkout opens once your Stripe keys are live — nothing was charged."); }
 function coPay(){
   if(CO&&CO.kind==='ticket'&&CO.meta&&CO.meta.band&&typeof calMarkBought==='function')calMarkBought(CO.meta.band);
+  /* purchase → reminder routine: enroll this ticket (3-day + distance-aware day-of reminders) */
+  if(CO&&CO.kind==='ticket'){ try{ if(window.DDTixNotify){ var _m=(CO&&CO.meta)||{}, _c=window.CURBUY||{};
+    window.DDTixNotify.onPurchase({
+      band:_m.band||_c.band||'', venue:_m.venue||_c.venue||'', city:_m.city||_c.city||'',
+      date:_m.date||_c.iso||_c.date||'', time:_m.time||_c.time||'', coords:_m.coords||_c.coords||null
+    }); } }catch(e){} }
   var c=ddClient(),id=ddId();
   if(!c||!id||!CO){ document.getElementById('checkout').classList.remove('on');
     toast('Tap 💬 to sign in — then one tap opens secure Stripe checkout.'); return; }
@@ -4064,6 +4070,7 @@ function ddAddFriend(id,name,btn){
 <script src="dd_launch.js" defer></script>
 <script src="dd_miracle.js" defer></script>
 <script src="dd_tickets.js" defer></script>
+<script src="dd_tixnotify.js" defer></script>
 <script src="dd_join.js" defer></script>
 <script src="dd_feed.js" defer></script>
 <script src="dd_pymk.js"></script>
