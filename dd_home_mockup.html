@@ -256,11 +256,11 @@
 <nav class="footnav">
   <button class="fn" onclick="location.href='index.html'"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn on"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn"><span class="ic">💎</span><span class="lb">Dealer</span></button>
-  <button class="fn"><span class="ic">🎮</span><span class="lb">Games</span></button>
-  <button class="fn"><span class="ic">💿</span><span class="lb">Records</span></button>
-  <button class="fn"><span class="ic">🔔<span class="b">3</span></span><span class="lb">Alerts</span></button>
-  <button class="fn"><span class="ic">🪪</span><span class="lb">You</span></button>
+  <button class="fn" onclick="location.href='index.html#go=dealer'"><span class="ic">💎</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="location.href='index.html#go=games'"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn" onclick="location.href='index.html#go=records'"><span class="ic">💿</span><span class="lb">Records</span></button>
+  <button class="fn" onclick="location.href='index.html#go=alerts'"><span class="ic">🔔<span class="b">3</span></span><span class="lb">Alerts</span></button>
+  <button class="fn" onclick="location.href='index.html#go=you'"><span class="ic">🪪</span><span class="lb">You</span></button>
 </nav>
 
 <!-- data layer (shares the signed-in Supabase session on this origin) -->
@@ -340,12 +340,22 @@ function _esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ret
 function _ago(iso){ try{ var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
   if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }catch(e){ return ''; } }
 function postCard(p){ var nm=p.author_name||'A head';
-  var avh=(nm.charAt(0)||'?').toUpperCase();
-  return '<div class="card post"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button>👍 Like</button><button>💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div></div>';
+  var avh=(nm.charAt(0)||'?').toUpperCase(); var pid=_esc(p.id||'');
+  return '<div class="card post" data-pid="'+pid+'"><div class="ph"><div class="av">'+_esc(avh)+'</div><div style="flex:1"><b>'+_esc(nm)+'</b>'+(p.role?' <span style="color:var(--muted);font-weight:600;font-size:11px">· '+_esc(p.role)+'</span>':'')+'<div class="t">'+_ago(p.created_at)+' · 🌹</div></div></div><div class="body">'+_esc(p.body)+'</div><div class="acts"><button class="likebtn" data-pid="'+pid+'" onclick="toggleLike(this)">👍 Like <span class="lct" style="color:var(--muted);font-weight:600"></span></button><button class="cmtbtn" data-pid="'+pid+'" onclick="openCompose()">💬 Comment</button><button class="rad" onclick="openCompose()">📡 HyperPost</button></div></div>';
 }
+/* ---- REAL likes (dd_post_react) — toggle + true counts + this device's own state ---- */
+window.toggleLike=function(btn){ var pid=btn&&btn.getAttribute('data-pid'); if(!pid||!(window.DDFeed&&DDFeed.react))return;
+  var on=!btn.classList.contains('liked'); btn.classList.toggle('liked',on); btn.style.color=on?'#2f7bf6':'';
+  DDFeed.react(pid,on,'like').then(function(n){ var c=btn.querySelector('.lct'); if(c)c.textContent=n?('· '+n):''; })
+    .catch(function(){ btn.classList.toggle('liked',!on); btn.style.color=(!on)?'#2f7bf6':''; if(window.toast)toast('Sign in to like 🌹'); }); };
+function loadReactions(rows){ if(!(window.DDFeed&&DDFeed.reactCounts))return; var ids=(rows||[]).map(function(r){return r.id;}).filter(Boolean); if(!ids.length)return;
+  DDFeed.reactCounts(ids).then(function(counts){ (DDFeed.myReactions?DDFeed.myReactions(ids):Promise.resolve({})).then(function(mine){
+    ids.forEach(function(id){ var post=document.querySelector('.post[data-pid="'+id+'"]'); if(!post)return; var lb=post.querySelector('.likebtn'); if(!lb)return;
+      var n=(counts[id]&&counts[id].like)||0; var lc=lb.querySelector('.lct'); if(lc)lc.textContent=n?('· '+n):'';
+      if(mine[id]&&mine[id].like){ lb.classList.add('liked'); lb.style.color='#2f7bf6'; } }); }); }).catch(function(){}); }
 function loadFeed(){ if(!(window.DDFeed&&DDFeed.feed))return;
   DDFeed.feed(30).then(function(rows){ var host=document.getElementById('realFeed'); if(!host)return;
-    host.innerHTML=(rows&&rows.length)?rows.map(postCard).join(''):''; }).catch(function(){}); }
+    host.innerHTML=(rows&&rows.length)?rows.map(postCard).join(''):''; loadReactions(rows); }).catch(function(){}); }
 setTimeout(function(){ loadFeed(); try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(){ loadFeed(); }); }catch(e){} }, 600);
 </script>
 </body></html>

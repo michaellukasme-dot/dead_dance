@@ -1163,6 +1163,18 @@ body.dd-insider .dd-only{display:block}
 <button id="createfab" onclick="requireSignin(function(){openCreate()})" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
 <script>window.openFriends=function(){var v=document.getElementById('socialView');if(v){v.classList.add('on');v.scrollTop=0;}try{document.querySelectorAll('.footnav .fn').forEach(function(b){b.classList.remove('fnon');});}catch(e){}};window.closeFriends=function(){var v=document.getElementById('socialView');if(v)v.classList.remove('on');};
+/* bottom-nav intents arriving from the Friends page (dd_home_mockup.html) — #go=dealer|games|records|alerts|you */
+(function(){ try{ var m=(location.hash||'').match(/go=(\w+)/); if(!m) return; var go=m[1];
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  function fire(){ try{
+    if(go==='dealer'&&window.openReader) return openReader('groups');
+    if(go==='games'&&window.openGame) return openGame();
+    if(go==='records'&&window.ddSheet) return ddSheet('record_store.html','💿 DeadDance Records');
+    if(go==='alerts'&&window.openNotifs) return openNotifs();
+    if(go==='you'&&window.profile) return profile('me');
+  }catch(e){} }
+  setTimeout(fire, 650);
+}catch(e){} })();
 /* ===== Walled garden: Home is open to all; everything else requires Google/Facebook sign-in ===== */
 var DD_GATE_ON=true;   /* one-line safety valve — set false to disable the gate entirely */
 function ddIsSignedIn(){ try{ return !!(window.DDMe && DDMe.signedIn && DDMe.signedIn()); }catch(e){ return false; } }
