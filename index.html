@@ -2146,7 +2146,7 @@ function qrBuild(){drawQR(document.getElementById('qr'),ME.img);var nq=document.
 
 /* ---------------- the QR PROFILE — portable, shareable, Facebook-style ---------------- */
 function friendsBuild(){var el=document.getElementById('friendsRow');if(!el)return;
- el.innerHTML=MYFRIENDS.map(function(fr,i){return '<div class="fchip" onclick="profile('+i+')"><div class="fav">'+fr.ic+'</div><div class="fnm">'+fr.name.split(' ')[0]+'</div></div>';}).join("");}
+ el.innerHTML=MYFRIENDS.map(function(fr,i){var fid=String(fr.id||'').replace(/'/g,''),fnm=String(fr.name||'').replace(/'/g,'');return '<div class="fchip" onclick="profile('+i+')"><div class="fav">'+fr.ic+'</div><div class="fnm">'+fr.name.split(' ')[0]+'</div><button title="Message" onclick="event.stopPropagation();DDDM.open(\''+fid+'\',\''+fnm+'\')" style="border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:12px;padding:2px 6px;margin-top:3px;cursor:pointer">💬</button></div>';}).join("");}
 /* REAL friends — merge accepted friendships (dd_friends) into the list so they show + persist */
 function ddRefreshFriends(){ try{ if(!(window.DDFriends&&DDFriends.friends)) return;
   DDFriends.friends().then(function(rows){ if(!rows||!rows.length){ return; }
@@ -2169,7 +2169,7 @@ function profile(who){
  var nm=me?'You':f.name, safe=nm.replace(/'/g,"");
  var actions = me
   ? '<div class="prow"><button class="btn" onclick="changePhoto()">📷 Change photo</button><button class="btn ghost" onclick="hyperConsole(\'your profile\')">📡 HyperPost</button><button class="btn ghost" onclick="toast(\'↗ Your QR is copied — your whole profile in one code. Share it anywhere.\')">↗ Share QR</button></div>'
-  : '<div class="prow"><button class="btn" onclick="hyperConsole(\''+safe+'\')">📡 HyperPost</button><button class="btn ghost" onclick="buy(\'ticket\')">🎟️ Sell / transfer a tix</button><button class="btn ghost" onclick="toast(\'🔔 JGB show subscriptions unlock when the license clears.\')">🔔 Subscribe</button></div>';
+  : '<div class="prow"><button class="btn" onclick="DDDM.open(\''+(f.id?String(f.id).replace(/\x27/g,""):"")+'\',\''+safe+'\')">💬 Message</button><button class="btn ghost" onclick="hyperConsole(\''+safe+'\')">📡 HyperPost</button><button class="btn ghost" onclick="buy(\'ticket\')">🎟️ Sell / transfer a tix</button><button class="btn ghost" onclick="toast(\'🔔 JGB show subscriptions unlock when the license clears.\')">🔔 Subscribe</button></div>';
  document.getElementById('profBody').innerHTML=
   '<svg id="profQR" class="pqr" viewBox="0 0 100 100"></svg>'+
   '<div class="pname">'+nm+'</div><div class="pchap">📍 '+(f.chapter||'Mid-Atlantic')+' family</div>'+
@@ -4055,6 +4055,7 @@ function ddAddFriend(id,name,btn){
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lukas_chat.js"></script>
 <script src="dd_me.js"></script>
+<script src="dd_dm.js"></script>
 <script src="guitar_facts.js"></script>
 <script src="band_facts.js"></script>
 <script src="deal_shows.js"></script>

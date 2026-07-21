@@ -231,11 +231,11 @@
     </div>
     <div class="card">
       <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">Friends <button onclick="openFriendsMgr()" style="border:0;background:#e9e5ef;color:#5a2e86;font-weight:800;font-size:12px;border-radius:9px;padding:6px 11px;cursor:pointer">🌹 Add friends</button></h3>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">KD<span class="dot"></span></div><b>Kara Diaz</b></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">MH<span class="dot"></span></div><b>Matt Hartle</b></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">RG</div><b>Robbie G.</b></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">GA<span class="dot"></span></div><b>Glen Arndt</b></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#e0577a,#b8002e)">NJ</div><b>Nikki Jam</b></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">KD<span class="dot"></span></div><b>Kara Diaz</b><button class="conmsg" title="Message" onclick="DDDM.open('','Kara Diaz')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">MH<span class="dot"></span></div><b>Matt Hartle</b><button class="conmsg" title="Message" onclick="DDDM.open('','Matt Hartle')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">RG</div><b>Robbie G.</b><button class="conmsg" title="Message" onclick="DDDM.open('','Robbie G.')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">GA<span class="dot"></span></div><b>Glen Arndt</b><button class="conmsg" title="Message" onclick="DDDM.open('','Glen Arndt')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
+      <div class="con"><div class="av" style="background:linear-gradient(135deg,#e0577a,#b8002e)">NJ</div><b>Nikki Jam</b><button class="conmsg" title="Message" onclick="DDDM.open('','Nikki Jam')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
     </div>
   </aside>
 </div>
@@ -308,6 +308,7 @@
 <script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
 <script src="dd_pymk.js"></script>
 <script src="dd_friends.js"></script>
+<script src="dd_dm.js"></script>
 <script src="dd_feed.js"></script>
 <script src="dd_reels.js"></script>
 <script src="lukas_chat.js"></script>
