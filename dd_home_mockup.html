@@ -181,7 +181,7 @@
   <!-- LEFT SIDEBAR -->
   <aside class="side">
     <nav class="nav">
-      <a onclick="toggleAcct(event)"><span class="gi" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">🌹</span><b>Michael Lukas</b></a>
+      <a onclick="openFriendsMgr()"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">👥</span><b>Friends</b></a>
       <a onclick="openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
       <a onclick="openAppSheet('dealer')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
       <a onclick="var s=document.getElementById('reelsShelf')||document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
@@ -229,16 +229,8 @@
   <!-- RIGHT RAIL (mockup — the "later" Messenger/Birthdays column) -->
   <aside class="rail">
     <div class="card">
-      <h3>🎂 Birthdays</h3>
-      <div class="bd" id="bdayBody"><div class="gift">🎁</div><div>No birthdays today. We'll light a candle when the family shares theirs. 🌹</div></div>
-    </div>
-    <div class="card">
-      <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">Friends <button onclick="openFriendsMgr()" style="border:0;background:#e9e5ef;color:#5a2e86;font-weight:800;font-size:12px;border-radius:9px;padding:6px 11px;cursor:pointer">🌹 Add friends</button></h3>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#c08a2d,#b8002e)">KD<span class="dot"></span></div><b>Kara Diaz</b><button class="conmsg" title="Message" onclick="DDDM.open('','Kara Diaz')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#2f7bf6,#12305e)">MH<span class="dot"></span></div><b>Matt Hartle</b><button class="conmsg" title="Message" onclick="DDDM.open('','Matt Hartle')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">RG</div><b>Robbie G.</b><button class="conmsg" title="Message" onclick="DDDM.open('','Robbie G.')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">GA<span class="dot"></span></div><b>Glen Arndt</b><button class="conmsg" title="Message" onclick="DDDM.open('','Glen Arndt')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
-      <div class="con"><div class="av" style="background:linear-gradient(135deg,#e0577a,#b8002e)">NJ</div><b>Nikki Jam</b><button class="conmsg" title="Message" onclick="DDDM.open('','Nikki Jam')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>
+      <h3>💬 Messages</h3>
+      <div id="railMsgs"><div class="con" style="cursor:default"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">🌹</div><b style="font-weight:600">Your messages live here — add friends to start 🌹</b></div></div>
     </div>
   </aside>
 </div>
@@ -256,18 +248,32 @@
 <!-- ADD FRIENDS — real Suggestions + Requests (DDPymk / DDFriends) -->
 <div class="friendsov" id="friendsOv" onclick="if(event.target===this)closeFriendsMgr()">
   <div class="friendsbox">
-    <div class="mghd"><b>🌹 Add friends</b><button onclick="closeFriendsMgr()" aria-label="Close">×</button></div>
+    <div class="mghd"><b>🌹 Friends</b><button onclick="closeFriendsMgr()" aria-label="Close">×</button></div>
+    <div class="fmtabs">
+      <button class="fmtab on" id="fmtabInvite" onclick="friendsTab('invite')">Invite</button>
+      <button class="fmtab" id="fmtabFriends" onclick="friendsTab('friends')">Friends</button>
+    </div>
     <div class="mgbody">
-      <div class="mgsec">Invite friends</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-        <button onclick="inviteVia('email')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">📧 Email</button>
-        <button onclick="inviteVia('sms')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">💬 Text</button>
-        <button onclick="inviteVia('fb')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">🅕 Facebook</button>
-        <button onclick="inviteVia('copy')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">🔗 Copy link</button>
+      <!-- INVITE TAB -->
+      <div id="fmpaneInvite">
+        <div class="mgsec">Invite friends</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <button onclick="inviteVia('email')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">📧 Email</button>
+          <button onclick="inviteVia('sms')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">💬 Text</button>
+          <button onclick="inviteVia('fb')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">🅕 Facebook</button>
+          <button onclick="inviteVia('copy')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">🔗 Copy link</button>
+          <button onclick="inviteVia('post')" style="flex:1 1 96px;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:10px;padding:10px;cursor:pointer">📡 Post</button>
+        </div>
+        <div style="font-size:11.5px;color:#7a7686;margin:0 2px 8px">Bring your heads onto the map — every friend grows the family. 🌹</div>
       </div>
-      <div style="font-size:11.5px;color:#7a7686;margin:0 2px 8px">Bring your heads onto the map — every friend grows the family. 🌹</div>
-      <div id="mgrReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="mgrReq"></div></div>
-      <div class="mgsec">People you may know</div><div id="mgrSug"><div class="mgempty">Loading…</div></div>
+      <!-- FRIENDS TAB -->
+      <div id="fmpaneFriends" style="display:none">
+        <div id="mgrReqSec" style="display:none"><div class="mgsec">Pending invites</div><div id="mgrReq"></div></div>
+        <div class="mgsec">Suggested friends</div><div id="mgrSug"><div class="mgempty">Loading…</div></div>
+        <div class="mgsec">Your friends</div><div id="mgrFriends"><div class="mgempty">Loading…</div></div>
+        <div class="mgsec">🎂 Birthdays</div>
+        <div id="mgrBdays" class="mgempty">No birthdays today. We'll light a candle when the family shares theirs. 🌹</div>
+      </div>
     </div>
   </div>
 </div>
@@ -363,10 +369,35 @@ window.pymkAdd=function(id,name,btn){ try{ if(window.DDFriends&&DDFriends.send&&
 window.frRespond=function(reqId,accept,arg){ try{ if(window.DDFriends&&DDFriends.respond) DDFriends.respond(reqId,accept); }catch(e){} if(accept){ toast('🌹 You\'re friends now'); } else { if(arg&&arg.remove)arg.remove(); toast('Request deleted.'); } };
 
 /* ---- Add friends overlay: REAL Suggestions + Requests (DDPymk / DDFriends) ---- */
-(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.friendsov{display:none;position:fixed;inset:0;z-index:120;background:rgba(20,12,30,.5);align-items:flex-start;justify-content:center;padding:36px 12px;overflow:auto}.friendsov.on{display:flex}.friendsbox{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px #0006}.mghd{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.mghd b{font-size:18px}.mghd button{border:0;background:#efeaf4;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;line-height:1}.mgbody{padding:8px 16px 20px}.mgsec{font-size:13px;font-weight:800;color:#7a2e86;margin:14px 2px 6px}.mgrow{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #f2eef7}.mgav{width:52px;height:52px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7a3cc0,#3a1f57);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}.mginfo{flex:1;min-width:0}.mginfo b{font-size:15px;display:block}.mginfo span{color:#7a7285;font-size:12.5px}.mgacts{display:flex;gap:8px;flex:none}.mgadd{border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgrm{border:0;background:#e9e5ef;color:#333;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgempty{color:#9a93a8;font-size:13px;padding:14px 2px}</style>'); }catch(e){} })();
+(function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.friendsov{display:none;position:fixed;inset:0;z-index:120;background:rgba(20,12,30,.5);align-items:flex-start;justify-content:center;padding:36px 12px;overflow:auto}.friendsov.on{display:flex}.friendsbox{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px #0006}.mghd{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.mghd b{font-size:18px}.mghd button{border:0;background:#efeaf4;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;line-height:1}.mgbody{padding:8px 16px 20px}.mgsec{font-size:13px;font-weight:800;color:#7a2e86;margin:14px 2px 6px}.mgrow{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #f2eef7}.mgav{width:52px;height:52px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7a3cc0,#3a1f57);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}.mginfo{flex:1;min-width:0}.mginfo b{font-size:15px;display:block}.mginfo span{color:#7a7285;font-size:12.5px}.mgacts{display:flex;gap:8px;flex:none}.mgadd{border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgrm{border:0;background:#e9e5ef;color:#333;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgempty{color:#9a93a8;font-size:13px;padding:14px 2px}.fmtabs{display:flex;gap:6px;padding:8px 16px 0;border-bottom:1px solid #eee}.fmtab{border:0;background:none;font-weight:800;font-size:14px;color:#9a93a8;padding:9px 8px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}.fmtab.on{color:#7a2e86;border-bottom-color:#7a3cc0}</style>'); }catch(e){} })();
 function _mgRow(name,reason,acts,id){ var av=(String(name||'?').charAt(0)||'?').toUpperCase(); return '<div class="mgrow" id="'+id+'"><div class="mgav">'+_esc(av)+'</div><div class="mginfo"><b>'+_esc(name)+'</b><span>'+_esc(reason)+'</span></div><div class="mgacts">'+acts+'</div></div>'; }
-window.openFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(!ov)return; ov.classList.add('on'); loadMgrRequests(); loadMgrSuggestions(); };
+window.openFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(!ov)return; ov.classList.add('on'); friendsTab('invite'); loadMgrRequests(); loadMgrSuggestions(); loadMgrFriends(); };
 window.closeFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(ov)ov.classList.remove('on'); };
+/* two-tab modal: Invite (default) / Friends */
+window.friendsTab=function(which){ var inv=(which!=='friends');
+  var pi=document.getElementById('fmpaneInvite'), pf=document.getElementById('fmpaneFriends'), ti=document.getElementById('fmtabInvite'), tf=document.getElementById('fmtabFriends');
+  if(pi)pi.style.display=inv?'':'none'; if(pf)pf.style.display=inv?'none':'';
+  if(ti)ti.classList.toggle('on',inv); if(tf)tf.classList.toggle('on',!inv); };
+/* tolerant field readers for a friend row (RPC dd_friends_list shape may vary) */
+function _frName(f){ try{ return String((f&&(f.friend_name||f.name||f.member_name||f.display_name||f.to_name||f.from_name))||'A friend'); }catch(e){ return 'A friend'; } }
+function _frId(f){ try{ return String((f&&(f.friend_id||f.friend_uid||f.id||f.uid||f.member_id||f.other_id||f.friend))||''); }catch(e){ return ''; } }
+/* Your friends — reuse DDFriends.friends(); .mgrow/.mgav/.mginfo styles */
+function loadMgrFriends(){ var host=document.getElementById('mgrFriends'); if(!host)return; host.innerHTML='<div class="mgempty">Loading…</div>';
+  if(!(window.DDFriends&&DDFriends.friends)){ host.innerHTML='<div class="mgempty">No friends yet — invite some 🌹</div>'; return; }
+  DDFriends.friends().then(function(list){ if(!list||!list.length){ host.innerHTML='<div class="mgempty">No friends yet — invite some 🌹</div>'; return; }
+    host.innerHTML=list.map(function(f,i){ var nm=_frName(f); var id=_frId(f);
+      var acts='<button class="mgadd" onclick="DDDM.open(\''+id+'\',\''+nm.replace(/\x27/g,'')+'\')">💬 Message</button>';
+      return _mgRow(nm,'🌹 Friend',acts,'mf-'+i); }).join(''); })
+    .catch(function(){ host.innerHTML='<div class="mgempty">No friends yet — invite some 🌹</div>'; }); }
+/* Right rail — Messages side: friends as DM targets */
+function loadRailMessages(){ var host=document.getElementById('railMsgs'); if(!host)return;
+  var empty='<div class="con" style="cursor:default"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">🌹</div><b style="font-weight:600">Your messages live here — add friends to start 🌹</b></div>';
+  if(!(window.DDFriends&&DDFriends.friends)){ host.innerHTML=empty; return; }
+  DDFriends.friends().then(function(list){ if(!list||!list.length){ host.innerHTML=empty; return; }
+    var G=['linear-gradient(135deg,#c08a2d,#b8002e)','linear-gradient(135deg,#2f7bf6,#12305e)','linear-gradient(135deg,#1f9e6b,#123b28)','linear-gradient(135deg,#7a3cc0,#3a1f57)','linear-gradient(135deg,#e0577a,#b8002e)'];
+    host.innerHTML=list.map(function(f,i){ var nm=_frName(f); var id=_frId(f); var av=(String(nm).charAt(0)||'🌹').toUpperCase();
+      return '<div class="con"><div class="av" style="background:'+G[i%5]+'">'+_esc(av)+'</div><b>'+_esc(nm)+'</b><button title="Message" onclick="DDDM.open(\''+id+'\',\''+String(nm).replace(/\x27/g,'')+'\')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>'; }).join(''); })
+    .catch(function(){ host.innerHTML=empty; }); }
 /* REAL invite facility — Email / Text / Facebook / Copy link */
 window.inviteVia=function(how){ var link='https://deaddance.app/?utm_source=invite&utm_medium=friends';
   var msg='Come see what we built — the whole Grateful Dead & jam family on one map. 🌹 '+link;
@@ -375,6 +406,10 @@ window.inviteVia=function(how){ var link='https://deaddance.app/?utm_source=invi
     if(how==='sms'){ location.href='sms:?&body='+encodeURIComponent(msg); return; }
     if(how==='fb'){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link),'_blank','noopener'); return; }
     if(how==='copy'){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(msg).then(function(){ toast('🌹 Invite link copied — paste it to your heads'); },function(){ toast('🌹 '+link); }); } else { toast('🌹 '+link); } return; }
+    if(how==='post'){ try{ closeFriendsMgr(); }catch(e){}
+      if(typeof openCompose==='function'){ openCompose(); var t=document.getElementById('composeText'); if(t){ t.value=msg; try{ t.setSelectionRange(0,0); t.focus(); }catch(x){} } return; }
+      if(navigator.share){ navigator.share({title:'DeadDance',text:msg,url:link}).catch(function(){}); return; }
+      toast('🌹 '+link); return; }
     if(navigator.share){ navigator.share({title:'DeadDance',text:'Join the family on DeadDance 🌹',url:link}).catch(function(){}); }
   }catch(e){ if(window.toast) toast('🌹 Share: '+link); } };
 window.mgrConfirm=function(reqId,rowId){ try{ frRespond(reqId,true); }catch(e){} var c=document.getElementById(rowId); if(c){ var a=c.querySelector('.mgacts'); if(a)a.innerHTML='<span style="color:#1f7a4d;font-weight:800;font-size:13px">🌹 Friends</span>'; } };
@@ -592,8 +627,8 @@ window.removeCard=function(btn){ var c=btn&&btn.closest('.pk'); if(c)c.remove();
 window.pymkAddDemo=function(btn){ if(btn){ btn.textContent='✓ Requested'; btn.disabled=true; btn.style.opacity=.6; } };
 
 /* ---- init: badge + stories + live refresh ---- */
-setTimeout(function(){ try{ updateNotifBadge(); }catch(e){} try{ storiesBuild(); }catch(e){}
-  try{ if(window.DDFriends&&DDFriends.subscribe) DDFriends.subscribe(function(){ updateNotifBadge(); var ov=document.getElementById('notifsOv'); if(ov&&ov.classList.contains('on')) loadNotifs(); }); }catch(e){}
+setTimeout(function(){ try{ updateNotifBadge(); }catch(e){} try{ storiesBuild(); }catch(e){} try{ loadRailMessages(); }catch(e){}
+  try{ if(window.DDFriends&&DDFriends.subscribe) DDFriends.subscribe(function(){ updateNotifBadge(); try{ loadRailMessages(); }catch(e){} var ov=document.getElementById('notifsOv'); if(ov&&ov.classList.contains('on')) loadNotifs(); var fo=document.getElementById('friendsOv'); if(fo&&fo.classList.contains('on')){ try{ loadMgrFriends(); loadMgrRequests(); }catch(e){} } }); }catch(e){}
   try{ if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(function(){ storiesBuild(); }); }catch(e){}
 }, 800);
 </script>
