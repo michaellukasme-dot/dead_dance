@@ -936,7 +936,7 @@ body.dd-insider .dd-only{display:block}
          /logos (see logos/LOGOS_manifest.md); until a file exists, the emoji shows. LET THEM ROLL. 🌹 */
       function _slug(s){ return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
       var AD_BETHLEHEM=[
-        {logo:'logos/tee_printer.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Jay\'s Customz Print',      off:'Custom screen printing · 50 Broad St, Bethlehem',  cta:'Get yours ›', beth:true},
+        {logo:'logos/jay_customz.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Jay\'s Customz T-Shirt Printing', off:'Custom graphic tees to match your footwear & much more · 50 Broad St', cta:'Shop now ›', url:'https://jayscustomzprint.company.site', beth:true},
         {logo:'logos/city_of_bethlehem.png', ic:'🏛️', bg:'linear-gradient(135deg,#5a2e86,#241535)', biz:'City of Bethlehem',         off:'Welcome to Musikfest 2026 — Christmas City, USA', cta:'Visit ›', beth:true},
         {logo:'logos/artsquest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'ArtsQuest',                 off:'16 stages · 400+ acts · all free',                cta:'Plan your fest ›', beth:true},
         {logo:'logos/hotel_bethlehem.png',   ic:'🏨', bg:'linear-gradient(135deg,#c79a3a,#8a6a1f)', biz:'Hotel Bethlehem',           off:'Welcome to Hotel Bethlehem — 437 Main St, since 1922', cta:'Step into the lobby ›', beth:true},
@@ -1012,7 +1012,9 @@ body.dd-insider .dd-only{display:block}
       window.adUploadLogo=function(){ var a=window.__curAd; if(!a)return;
         try{ ddSheet('band_onboard.html?src=adlogo&band='+encodeURIComponent(a.biz),'🎤 Upload your Logo'); }
         catch(e){ if(window.toast) toast('⬆︎ Upload your logo to claim '+a.biz+'’s StageFill page ›'); } };
-      window.adRollTap=function(){ var a=window.__curAd; if(!a||!window.toast)return;
+      window.adRollTap=function(){ var a=window.__curAd; if(!a)return;
+        if(a.url){ try{ window.open(a.url,'_blank','noopener'); }catch(e){} return; }   // partner ad → open their site (e.g. Jay's Customz)
+        if(!window.toast)return;
         if(a.pitch){ toast('📣 Advertise on DeadDance — pitch your festival or fill your room. LESS / MORE / MOST. 🌹'); }
         else if(a.stagefill){ toast((a.ic||'🌹')+' '+a.biz+' plays Musikfest — claim your free StageFill page & sell tickets ›'); }
         else{ toast((a.ic||'🌹')+' '+a.biz+' — '+(a.off||'')+' ›'); } };
