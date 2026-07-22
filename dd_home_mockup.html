@@ -135,7 +135,7 @@
   <div class="logo">🌹&nbsp;&nbsp;&nbsp;&nbsp;<span class="bname">DeadDance</span></div>
   <input class="search" id="feedSearch" placeholder="Search heads, shows, tapes, art…" onkeydown="if(event.key==='Enter'){event.preventDefault();filterFeed(this.value);}">
   <span class="sp"></span>
-  <div class="ic menubtn" onclick="toggleSideMenu()" title="Menu">▦</div>
+  <div class="ic menubtn" onclick="openAppSheet('apps')" title="Menu">▦</div>
   <div class="ic" onclick="openChat()" title="Family chat">💬</div>
   <div class="ic" onclick="openNotifs()" title="Notifications">🔔<span class="badge" id="notifBadge" style="display:none">0</span></div>
   <div class="ic avat" id="topAvat" onclick="toggleAcct(event)">M</div>
@@ -291,8 +291,7 @@
   </div>
 </div>
 
-<!-- HYPERPOST FAB -->
-<button class="hpfab" onclick="openCompose()" title="HyperPost">📡</button>
+<!-- Satellite (HyperPost FAB) removed per owner — the composer card's "📡 HyperPost" button covers it. -->
 
 <div class="menuscrim" id="menuScrim" onclick="closeSideMenu()"></div>
 
@@ -594,7 +593,7 @@ setTimeout(function(){ loadFeed();
 
 /* ---- 1) Top-bar 💬 → family chat (LukasChat) ---- */
 window.openChat=function(){ try{ if(window.LukasChat&&LukasChat.open){
-    if(!window._lcInit){ try{ LukasChat.init({app:'dead_dance',brand:{name:'dead_dance',accent:'#b8002e',icon:'🌹'}}); }catch(e){} window._lcInit=true; }
+    if(!window._lcInit){ try{ LukasChat.init({app:'dead_dance',brand:{name:'dead_dance',accent:'#b8002e',icon:'🌹'},launcher:false}); }catch(e){} window._lcInit=true; }  /* launcher:false — no redundant floating rose; the top 💬 opens chat */
     LukasChat.open();
   } else { toast('💬 Chat is loading — try again in a moment'); } }catch(e){ toast('💬 Chat is loading…'); } };
 
