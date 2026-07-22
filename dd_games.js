@@ -1,4 +1,4 @@
-/* dd_games.js — Shakedown Games hub + the reusable Game Shell, with the first playable game
+/* dd_games.js — DeadDance Games hub + the reusable Game Shell, with the first playable game
    (Dead Song-Title Word Scramble). Self-contained: injects its own styles + overlay, overrides
    the footnav's openGame() to open the hub. Points (Roses 🌹) bank locally → Shakedown discounts.
    One-tap Share via FFShare. Hanz & Franz emcee. Honest-state: leaderboard is local/demo until backend. */
@@ -46,7 +46,7 @@
   if (window.GDBands && GDBands.TRIVIA && GDBands.TRIVIA.length) {
     TRIVIA = TRIVIA.concat(GDBands.TRIVIA);
   }
-  var S={score:0,streak:0,round:0,rounds:5,answer:'',timer:null,left:0,gameName:'Shakedown Games'};
+  var S={score:0,streak:0,round:0,rounds:5,answer:'',timer:null,left:0,gameName:'DeadDance Games'};
 
   function css(){ if(document.getElementById('ddg-css')) return; var s=document.createElement('style'); s.id='ddg-css';
     s.textContent=
@@ -82,7 +82,7 @@
 
   function open(){ css(); render(lobby()); ov().classList.add('on'); }
   function close(){ clearInterval(S.timer); var o=document.getElementById('ddgov'); if(o) o.classList.remove('on'); }
-  function render(body){ ov().innerHTML='<div class="ddg-wrap"><div class="ddg-top"><div class="ddg-title">🎮 Shakedown Games</div><button class="ddg-x" onclick="DDGames.close()">✕</button></div>'+body+'</div>';
+  function render(body){ ov().innerHTML='<div class="ddg-wrap"><div class="ddg-top"><div class="ddg-title">🎮 DeadDance Games</div><button class="ddg-x" onclick="DDGames.close()">✕</button></div>'+body+'</div>';
     if(window.FFShare&&FFShare.wire) FFShare.wire(document.getElementById('ddgov')); }
 
   function lobby(){
