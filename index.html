@@ -1020,7 +1020,9 @@ body.dd-insider .dd-only{display:block}
         else{ toast((a.ic||'🌹')+' '+a.biz+' — '+(a.off||'')+' ›'); } };
       function adNext(){ adRender(nextAd()); }
       var _pooledMF=false;
-      function adStart(){ if(!_pooledMF && (window.MF_RETAILERS||window.DD_MUSIKFEST)){ buildPools(); _pooledMF=!!(window.DD_MUSIKFEST&&window.DD_MUSIKFEST.length); } adRender(nextAd()); if(at)clearInterval(at); at=setInterval(adNext,5200); }
+      function adStart(){ if(!_pooledMF && (window.MF_RETAILERS||window.DD_MUSIKFEST)){ buildPools(); _pooledMF=!!(window.DD_MUSIKFEST&&window.DD_MUSIKFEST.length); }
+        var want=null; try{ var q=(new URLSearchParams(location.search).get('ad')||'').toLowerCase(); if(q){ var all=(POOL_PARTNER||[]).concat(POOL_DD||[],POOL_SF||[]); for(var i=0;i<all.length;i++){ if(String(all[i].biz||'').toLowerCase().indexOf(q)>=0){ want=all[i]; break; } } } }catch(e){}   // ?ad=jay → show that partner's ad first (no waiting)
+        adRender(want||nextAd()); if(at)clearInterval(at); at=setInterval(adNext,5200); }
       function adStop(){ if(at){ clearInterval(at); at=null; } }
       function upd(){ try{ var ready=window.DDMe&&DDMe.ready&&DDMe.ready(); var si=ready?(DDMe.signedIn&&DDMe.signedIn()):cachedSignedIn();
         var c=document.getElementById('signupCard'); if(c) c.style.display=si?'none':'';
@@ -4063,6 +4065,8 @@ function ddAddFriend(id,name,btn){
 <script src="dd_hyperpost.js" defer></script>
 <script src="dd_checkin.js" defer></script>
 <script src="dd_setup_agent.js" defer></script>
+<script>/* deep-link: ?setup=printer|band|store|druc opens the Claude install agent straight to that flow (Jay's email link) */
+window.addEventListener('load',function(){ try{ var f=new URLSearchParams(location.search).get('setup'); if(!f)return; var n=0,iv=setInterval(function(){ if(window.DDSetup){ clearInterval(iv); try{ DDSetup.open(f); }catch(e){} } else if(++n>24){ clearInterval(iv); } },250); }catch(e){} });</script>
 <script src="dd_showmap.js" defer></script>
 <script src="dd_friends.js" defer></script>
 <script src="dd_attrib.js" defer></script>

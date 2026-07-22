@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>dead_dance · QR maker</title>
+<style>
+  :root{ --ink:#1a1320; --mut:#7a7285; --line:#ece7f0; --rose:#b0143c; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font:16px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink);
+        background:#faf8fc; padding:22px 16px 60px; }
+  .wrap{ max-width:460px; margin:0 auto; }
+  h1{ font-size:20px; margin:0 0 4px; }
+  .sub{ color:var(--mut); font-size:13px; margin:0 0 18px; }
+  label{ display:block; font-size:12px; font-weight:800; color:var(--mut); letter-spacing:.02em; text-transform:uppercase; margin:14px 0 6px; }
+  input{ width:100%; padding:12px 13px; font-size:15px; border:1.5px solid var(--line); border-radius:12px; background:#fff; color:var(--ink); }
+  input:focus{ outline:none; border-color:var(--rose); }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:20px; text-align:center; margin-top:18px; box-shadow:0 6px 24px rgba(26,19,32,.06); }
+  #qr{ display:inline-block; min-height:210px; }
+  .caplink{ font-size:12px; color:var(--mut); word-break:break-all; margin:10px 0 0; }
+  .row{ display:flex; gap:10px; margin-top:16px; }
+  button{ flex:1; padding:13px; font-size:15px; font-weight:800; border:0; border-radius:13px; cursor:pointer; }
+  .dl{ background:var(--rose); color:#fff; }
+  .cp{ background:#f1edf6; color:var(--ink); }
+  .presets{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .presets button{ flex:0 1 auto; padding:8px 12px; font-size:12.5px; font-weight:700; background:#f1edf6; color:var(--ink); border-radius:10px; }
+  .tip{ font-size:12.5px; color:var(--mut); margin-top:18px; text-align:center; }
+  .ok{ color:#0a7d3c; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌹 QR maker</h1>
+  <p class="sub">Type any link → get a branded, scannable DeadDance QR → download the PNG and drop it in an email or print it.</p>
+
+  <label for="u">Link</label>
+  <input id="u" type="url" spellcheck="false" autocapitalize="off"
+         value="https://deaddance.app/index.html?setup=printer">
+
+  <div class="presets">
+    <button data-u="https://deaddance.app/index.html?setup=printer">Jay's shop (setup)</button>
+    <button data-u="https://deaddance.app/index.html?ad=jay">Jay's ad</button>
+    <button data-u="https://deaddance.app/">DeadDance home</button>
+  </div>
+
+  <div class="card">
+    <div id="qr"></div>
+    <p class="caplink" id="cap"></p>
+    <div class="row">
+      <button class="dl" id="dl">⬇ Download PNG</button>
+      <button class="cp" id="cp">Copy link</button>
+    </div>
+  </div>
+
+  <p class="tip" id="tip">Tip: after Download, drag the PNG from your Downloads straight into the email.</p>
+</div>
+
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+<script>
+  var U = document.getElementById('u'), QR = document.getElementById('qr'),
+      CAP = document.getElementById('cap'), TIP = document.getElementById('tip');
+  function fileName(url){
+    try{ var h=new URL(url); var s=(h.pathname+h.search).replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'');
+         return ('deaddance-'+(s||'link')).slice(0,48)+'.png'; }catch(e){ return 'deaddance-qr.png'; }
+  }
+  function render(){
+    var url=(U.value||'').trim(); CAP.textContent=url;
+    if(!/^https?:\/\//i.test(url)){ QR.innerHTML='<div style="color:#b0143c;font-size:13px;padding:40px 0">Enter a full link starting with https://</div>'; return; }
+    if(window.DDQR) DDQR.into(QR, url, { css:210, size:420, mark:'dd', link:false });
+  }
+  U.addEventListener('input', render);
+  document.querySelectorAll('.presets button').forEach(function(b){
+    b.addEventListener('click', function(){ U.value=b.getAttribute('data-u'); render(); });
+  });
+  document.getElementById('dl').addEventListener('click', function(){
+    var url=(U.value||'').trim();
+    if(window.DDQR) DDQR.save(url, { mark:'dd', size:640 }, fileName(url)).then(function(ok){
+      TIP.innerHTML = ok ? '<span class="ok">Saved ✓</span> — now drag it from Downloads into the email.'
+                         : 'Could not save — check the link and try again.';
+    });
+  });
+  document.getElementById('cp').addEventListener('click', function(){
+    var url=(U.value||'').trim();
+    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function(){
+      TIP.innerHTML='<span class="ok">Link copied ✓</span>'; }).catch(function(){ TIP.textContent='Copy not available — select the link above manually.'; });
+  });
+  render();
+</script>
+</body>
+</html>
