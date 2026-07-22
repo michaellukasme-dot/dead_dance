@@ -1374,6 +1374,7 @@ window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='d
   <div class="appscols">
    <div class="appssecs">
     <div class="asec">Social</div>
+    <a class="aitem" onclick="coGo('appsov',function(){ if(window.DDSetup)DDSetup.open('home'); })"><span>✳</span><div><b>Set up with Claude</b><i>HyperPost, band, store, invites — I'll walk you through.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openMap()})"><span>🎟️</span><div><b>Shows</b><i>The calendar / ticket store.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('groups')})"><span>📡</span><div><b>Groups</b><i>Your family, mirrored.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){location.href='dd_home_mockup.html'})"><span>👥</span><div><b>Friends</b><i>Your heads.</i></div></a>
@@ -4059,6 +4060,7 @@ function ddAddFriend(id,name,btn){
 <script src="dd_spread.js" defer></script>
 <script src="dd_hyperpost.js" defer></script>
 <script src="dd_checkin.js" defer></script>
+<script src="dd_setup_agent.js" defer></script>
 <script src="dd_showmap.js" defer></script>
 <script src="dd_friends.js" defer></script>
 <script src="dd_attrib.js" defer></script>

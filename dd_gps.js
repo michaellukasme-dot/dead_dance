@@ -165,7 +165,7 @@
 
     return { center: function () { if (last) centerOn(last, walkZoom); }, stop: function () { h.stop(); }, get following() { return following; }, get last() { return last; },
       // manual override: drop the ONE dot where the user taps and ignore device fixes until cleared (festival GPS insurance)
-      setManual: function (la, lo) { manualLock = true; var f = { lat: la, lng: lo, rawAcc: 8, acc: 8, manual: true }; last = f; drawYou(f); centerOn(f, walkZoom); if (opts.onFix) { try { opts.onFix(f); } catch (e) {} } },
+      setManual: function (la, lo) { manualLock = true; var f = { lat: la, lng: lo, rawAcc: 8, acc: 8, manual: true }; last = f; drawYou(f); following = false; setBtn(false); if (opts.onFix) { try { opts.onFix(f); } catch (e) {} } },  // NO recenter — the user tapped a visible spot; leave the map (and all fixed fest pins) put
       clearManual: function () { manualLock = false; }, get manual() { return manualLock; } };
   }
 

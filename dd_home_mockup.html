@@ -149,7 +149,7 @@
   </div>
   <div class="acctcard">
     <a class="acctrow" onclick="copyMyId()"><span class="ai">🪪</span><span>Copy my DeadDance id</span></a>
-    <a class="acctrow" onclick="document.getElementById('acctMenu').classList.remove('on');openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="ai">✳</span><span>Claude AI</span><span class="ch">›</span></a>
+    <a class="acctrow" onclick="document.getElementById('acctMenu').classList.remove('on'); if(window.DDSetup){DDSetup.open('home')}else{openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})}"><span class="ai">✳</span><span>Claude AI — set me up</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('⚙️ Settings &amp; privacy')"><span class="ai">⚙️</span><span>Settings &amp; privacy</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('❓ Help &amp; support')"><span class="ai">❓</span><span>Help &amp; support</span><span class="ch">›</span></a>
     <a class="acctrow" onclick="toast('🚩 Report a problem')"><span class="ai">🚩</span><span>Report a problem</span></a>
@@ -182,7 +182,7 @@
   <aside class="side">
     <nav class="nav">
       <a onclick="openFriendsMgr()"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">👥</span><b>Friends</b></a>
-      <a onclick="openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
+      <a onclick="if(window.DDSetup){DDSetup.open('home')}else{openAppSheet('claudeai',{url:'claude_ai.html',title:'✳ Claude AI'})}"><span class="gi" style="background:linear-gradient(135deg,#d97757,#7a3cc0)">✳</span><b>Claude AI</b></a>
       <a onclick="openAppSheet('dealer')"><span class="gi" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">📡</span><b>Groups</b></a>
       <a onclick="var s=document.getElementById('reelsShelf')||document.querySelector('.stories');if(s)s.scrollIntoView({behavior:'smooth',block:'center'})"><span class="gi" style="background:linear-gradient(135deg,#e0577a,#7a3cc0)">🎬</span><b>Reels</b></a>
       <a onclick="openAppSheet('shakedown')"><span class="gi" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🛍️</span><b>Shop</b></a>
@@ -330,6 +330,10 @@
 <script src="dd_pymk.js"></script>
 <script src="dd_friends.js"></script>
 <script src="dd_notify.js"></script>
+<script src="dd_spread.js"></script>
+<script src="dd_hyperpost.js"></script>
+<script src="dd_checkin.js"></script>
+<script src="dd_setup_agent.js"></script>
 <script src="dd_bday.js"></script>
 <script src="dd_dm.js"></script>
 <script src="dd_feed.js"></script>
