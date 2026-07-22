@@ -1185,7 +1185,7 @@ body.dd-insider .dd-only{display:block}
     if(go==='dealer'&&window.openReader){ openReader('groups'); watch('#reader',offOn); return; }
     if(go==='shakedown'&&window.openReader){ openReader('market'); watch('#reader',offOn); return; }
     if(go==='apps'&&window.openApps){ openApps(); watch('#appsov',offOn); return; }
-    if(go==='games'&&window.openGame){ openGame(); watch('#game',offOn); return; }
+    if(go==='games'&&window.openGame){ openGame(); watch('#ddgov',offOn); return; }   /* Games opens DDGames' #ddgov (window.openGame is overridden in dd_games.js), NOT #game */
     if(go==='records'&&window.ddSheet){ ddSheet('record_store.html','💿 DeadDance Records'); watch('#ddsheet',offDisp); return; }
     if(go==='alerts'&&window.openNotifs){ openNotifs(); watch('#notifov',offOn); return; }
     if(go==='you'&&window.profile){ profile('me'); watch('#profile',offOn); return; }
