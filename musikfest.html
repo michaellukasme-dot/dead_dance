@@ -974,12 +974,12 @@ window.mfCheckIn=function(){ if(!window.DDCheckin){ if(window.toast)toast('Check
   var near=mfNearestStage(); var venue='', band='';
   if(near && near.mi<0.16){ venue=mfCleanStage(near.stage.n); band=mfActOnNow(near.stage.n); }
   else { venue='Musikfest'; band=mfActOnNow(''); }        // GPS off / not near a stage → still lets them check in to the fest
-  DDCheckin.open({ venue:venue, band:band }); };
+  DDCheckin.open({ venue:venue, band:band, group:'musikfest' }); };   // check-ins post to the DD Musikfest group thread
 /* GPS notification: entering a venue offers a check-in (once per stage per session) */
 var _ciNudged={};
 function mfCheckinNudge(){ try{ var near=mfNearestStage(); if(!near||near.mi>0.09) return; var key=near.stage.n; if(_ciNudged[key]) return; _ciNudged[key]=1;
   var band=mfActOnNow(near.stage.n), vn=mfCleanStage(near.stage.n);
-  if(window.DDCheckin && DDCheckin.druc && DDCheckin.druc().on){ DDCheckin.autoCheckin({venue:vn,band:band}); return; }   // DRUC on → recurring-approved auto check-in
+  if(window.DDCheckin && DDCheckin.druc && DDCheckin.druc().on){ DDCheckin.autoCheckin({venue:vn,band:band,group:'musikfest'}); return; }   // DRUC on → recurring-approved auto check-in to the Musikfest group
   mfToast('📍 You’re at <b>'+esc(vn)+'</b>'+(band?(' — '+esc(band)+' is on'):'')+'. <span style="text-decoration:underline;cursor:pointer" onclick="mfCheckIn()">Check in →</span>', true);
 }catch(e){} }
 
@@ -993,9 +993,18 @@ var _silverDismissed='';
 function mfSilverTick(){ try{ var f=document.getElementById('silverFloat'); if(!f) return; var a=mfSilverActNow();
   if(!a){ f.classList.remove('on'); return; }
   var key=a.b+'|'+a.t+'|'+a.d; if(key===_silverDismissed) return;   // respect the member's dismissal of THIS act
-  renderAsks(a); f.classList.add('on');
+  renderAsks(a); f.classList.add('on'); try{ mfSilverCrowdRefresh(); }catch(e){}   // refresh the crowd count near-real-time even when the act is unchanged
 }catch(e){} }
 window.silverDismiss=function(){ var f=document.getElementById('silverFloat'); if(!f) return; _silverDismissed=f.getAttribute('data-k')||''; f.classList.remove('on'); };
+/* ref the crowd count + Cookies hang on: this stage on this day */
+function mfSurroundRefOf(a){ return String((a&&a.st||'')+'|'+(a&&a.d||'')).toLowerCase().replace(/[^a-z0-9|]+/g,'-'); }
+/* Waze-style: how many angles the crowd has already ringed this stage with, + the personal ask + the Cookie reward */
+function mfSilverCrowdRefresh(){ try{ var el=document.getElementById('silverCrowd'); if(!el) return; var ref=window._mfSurroundRef; if(!ref) return;
+  var nm=(typeof myFirst==='function'&&myFirst())||''; var c=(window.ddClient&&ddClient());
+  function paint(n){ el.innerHTML=(n>0?('🍪 <b>'+n+'</b> angle'+(n===1?'':'s')+' around it — '):'🍪 ')+'I need yours'+(nm?(', '+esc(nm)):'')+' — snap the stage · <b>+25 Cookies</b>'; }
+  if(!c){ paint(0); return; }
+  c.rpc('dd_surround_count',{p_ref:ref}).then(function(r){ paint(Number((r&&r.data)||0)); }).catch(function(){ paint(0); });
+}catch(e){} }
 setInterval(function(){ try{ mfSilverTick(); }catch(e){} }, 60000);   // re-check the "on now" act each minute
 setTimeout(function(){ try{ mfSilverTick(); }catch(e){} }, 900);       // and once shortly after load
 // ===== Claude on the mic — the app WRITES specific asks for whoever's on now; the shot IS the send =====
@@ -1013,8 +1022,15 @@ function typeInto(el,text,cb){ var i=0; (function step(){ if(i<=text.length){ el
 window.renderAsks=function(a){ var host=document.getElementById('silverFloat'); if(!host)return;
   if(!a){ host.innerHTML=''; host.removeAttribute('data-k'); host.classList.remove('on'); return; }
   var key=a.b+'|'+a.t+'|'+a.d; if(host.getAttribute('data-k')===key) return; host.setAttribute('data-k',key);   // don't re-type on every refresh
+  window._mfSurroundRef=mfSurroundRefOf(a);   // this stage/day's ring — the ref the crowd count + Cookies hang on
   var asks=askList(a);
-  host.innerHTML='<button class="svx" onclick="silverDismiss()" aria-label="Dismiss">×</button><div style="display:flex;align-items:center;gap:7px;margin:0 26px 9px 0"><img src="claude-mark.svg" alt="" style="width:20px;height:20px;flex:none"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Silver’s working the room — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div><button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four of us, four sides of '+esc(a.st)+', one shot.</span></span></button><div id="askBubbles"></div>';
+  host.innerHTML='<button class="svx" onclick="silverDismiss()" aria-label="Dismiss">×</button>'
+    +'<div style="display:flex;align-items:center;gap:7px;margin:0 26px 7px 0"><img src="claude-mark.svg" alt="" style="width:20px;height:20px;flex:none"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Silver’s working the room — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div>'
+    +'<div id="silverCrowd" style="font-size:12px;color:#8a5a00;font-weight:800;margin:0 4px 9px 0">🍪 Loading the ring…</div>'
+    +'<button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 8px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four sides of '+esc(a.st)+', one shot. <b>+25 Cookies</b></span></span></button>'
+    +'<button type="button" onclick="mfCheckIn()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e0d3f2;background:linear-gradient(100deg,#f5efff,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">📍</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#5a2e86">Check in — in your voice</span><span style="display:block;font-size:11.5px;color:#8a7bbf">Posts to the DeadDance Musikfest group.</span></span></button>'
+    +'<div id="askBubbles"></div>';
+  try{ mfSilverCrowdRefresh(); }catch(e){}
   var wrap=document.getElementById('askBubbles'), idx=0;
   function addBubble(ask){ var b=document.createElement('button'); b.type='button'; b.onclick=function(){ askCapture(ask.cap); };
     b.style.cssText='display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;border:1px solid #f0d0dc;background:linear-gradient(100deg,#fff,#fdf4f7);border-radius:13px;padding:9px 11px;margin:0 0 7px;cursor:pointer;font:inherit';
@@ -1305,7 +1321,9 @@ window.addPhotos=function(input){ var files=input.files; if(!files||!files.lengt
         var _cell=null; try{ if(typeof currentCell==='function'&&window.YOU) _cell=currentCell(window.YOU); }catch(e){}
         DDPhotos.save(f,{lat:lat,lng:lng,exif:ex,cell:_cell}).then(function(r){
           pushPhoto({id:r.id,url:r.localUrl,lat:lat,lng:lng,exif:ex});
-          try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){} if(askCap){ try{ cookieCelebrate(askCap); }catch(e){} }
+          try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} try{ mfPerf('photo',1,'dd'); }catch(e){} if(askCap){ try{ cookieCelebrate(askCap); }catch(e){}
+            try{ if(window._mfSurroundRef && window.DDCoins && DDCoins.feed){ DDCoins.feed('mf_surround', window._mfSurroundRef).then(function(){ try{ mfSilverCrowdRefresh(); }catch(e){} }); } }catch(e){}   // real +25 Cookies for adding your angle → crowd count ticks up
+          }
         }).catch(function(){ /* even if persist hiccups, still show it */ pushPhoto({url:URL.createObjectURL(f),lat:lat,lng:lng,exif:ex}); });
       } else { pushPhoto({url:URL.createObjectURL(f),lat:lat,lng:lng,exif:ex}); try{ if(window.DDCoins&&DDCoins.pop) DDCoins.pop(5); }catch(e){} }
     };

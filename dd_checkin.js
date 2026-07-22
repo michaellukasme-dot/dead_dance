@@ -59,9 +59,13 @@
   }
 
   // the SEND: DD feed + default multi-network HyperPost (spread if images, else the one)
-  function send(text, images) {
+  function send(text, images, opts) {
+    opts = opts || {};
     text = (text || '').trim(); if (!text) return false;
-    try { if (root.DDFeed && DDFeed.post) DDFeed.post(text); } catch (e) {}                 // 1) writes to the DD post
+    try {
+      if (opts.group && root.DDFeed && DDFeed.groupPost) DDFeed.groupPost(opts.group, text); // 1a) festival check-ins land in that group's thread (e.g. the DD Musikfest group)
+      else if (root.DDFeed && DDFeed.post) DDFeed.post(text);                                // 1b) otherwise the general DD feed
+    } catch (e) {}
     try {
       if (images && images.length && root.DDHyper && DDHyper.spread) DDHyper.spread(images, text); // 2a) SPREAD (differentiated per network)
       else if (root.DDHyper && DDHyper.post) DDHyper.post(text);                            // 2b) the one, fanned to the networks
@@ -121,9 +125,9 @@
       var txt = (ta.value || '').trim();
       if (!txt) { if (root.toast) toast('Say a couple words first 🌹'); return; }
       if (root.DDFeed && DDFeed.ready && !DDFeed.ready()) { if (root.toast) toast('Sign in to check in 🌹'); return; }
-      send(txt, _imgs);
+      send(txt, _imgs, { group: ctx.group });
       close();
-      if (root.toast) toast('📍 Checked in — on your feed and your networks 🌹');
+      if (root.toast) toast(ctx.group ? '📍 Checked in — posted to the Musikfest group 🌹' : '📍 Checked in — on your feed and your networks 🌹');
     };
     setTimeout(function () { try { ta.focus(); } catch (e) {} }, 60);
   }
@@ -179,7 +183,7 @@
     if (!d.on) { open(ctx); return; }                 // no standing consent → the member taps it themselves
     var txt = line(ctx); var cancelled = false;
     if (root.toast) toast('📍 Auto-checking you in: “' + txt.slice(0, 44) + '…” — tap to undo 🌹');
-    var t = setTimeout(function () { if (!cancelled) send(txt, null); }, 4200);   // soft-send with an undo window
+    var t = setTimeout(function () { if (!cancelled) send(txt, null, { group: ctx.group }); }, 4200);   // soft-send with an undo window
     try { var el = document.querySelector('.dd-toast, #mfToast'); if (el) el.onclick = function () { cancelled = true; clearTimeout(t); if (root.toast) toast('Undone — not posted.'); }; } catch (e) {}
   }
 
