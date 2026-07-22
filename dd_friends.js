@@ -14,7 +14,9 @@
     var c = client(), id = myId();
     if (!c || !id) return Promise.reject('no-backend');
     return c.rpc('dd_friend_send', { p_to_id: String(toId), p_to_name: toName || null, p_from_name: myName() })
-      .then(function (r) { if (r && r.error) throw r.error; return r && r.data; });
+      .then(function (r) { if (r && r.error) throw r.error; var reqId = r && r.data;
+        try { if (root.DDNotify) root.DDNotify.add(String(toId), { type: 'friend_request', actor_id: myId(), actor_name: myName(), title: myName(), body: 'sent you a friend request', ref: reqId, icon: '🌹', dedupe: true }); } catch (e) {}
+        return reqId; });
   }
   function respond(reqId, accept) {
     var c = client(), id = myId();

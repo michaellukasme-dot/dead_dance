@@ -31,6 +31,9 @@
     } catch (e) { return '🌹'; }
   }
   function _pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function _slug(s) { return String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  // the group a check-in posts to: an explicit group wins (e.g. 'musikfest'); otherwise the band's own group (DEAL → 'deal')
+  function _groupFor(ctx) { return (ctx && ctx.group) ? ctx.group : (ctx && ctx.band ? _slug(ctx.band) : ''); }
   function _myId() { try { var u = (root.DDMe && root.DDMe.id && root.DDMe.id()); if (u) return String(u); var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
 
   // the line — varied phrasing, in the member's voice, band optional
@@ -71,6 +74,7 @@
       else if (root.DDHyper && DDHyper.post) DDHyper.post(text);                            // 2b) the one, fanned to the networks
     } catch (e) {}
     try { if (root.DDHyper && DDHyper.learn) DDHyper.learn(text); } catch (e) {}            // 3) the voice learns
+    try { if (root.DDNotify && root.DDNotify.notifyFriends) root.DDNotify.notifyFriends({ type: 'checkin', title: _me(), body: 'checked in: “' + text.slice(0, 60) + '”', icon: '📍', ref: opts.group || '' }); } catch (e) {}   // 4) tell your friends (the merged notifications thread)
     return true;
   }
 
@@ -91,7 +95,7 @@
         '<div id="ciImgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>' +
         '<div style="display:flex;gap:8px;align-items:center;margin-top:11px">' +
           '<button id="ciRe" style="border:1px solid #e2dcec;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:11px;padding:11px 13px;cursor:pointer">↻ Rephrase</button>' +
-          '<button id="ciPhoto" style="border:1px solid #e2dcec;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:11px;padding:11px 13px;cursor:pointer">📷 Photo</button>' +
+          '<button id="ciPhoto" style="border:1px solid #e2dcec;background:#faf7ff;color:#5a2e86;font-weight:800;font-size:13px;border-radius:11px;padding:11px 13px;cursor:pointer">📸 Stage photo</button>' +
           '<button id="ciSend" style="flex:1;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:12px;cursor:pointer">🌹 Check in &amp; post</button>' +
         '</div>' +
         '<div style="font-size:11px;color:#9a93a8;text-align:center;margin-top:8px">Posts to your DeadDance feed + fans out to your networks — the spread if you add photos, else the one.</div>' +
@@ -125,9 +129,10 @@
       var txt = (ta.value || '').trim();
       if (!txt) { if (root.toast) toast('Say a couple words first 🌹'); return; }
       if (root.DDFeed && DDFeed.ready && !DDFeed.ready()) { if (root.toast) toast('Sign in to check in 🌹'); return; }
-      send(txt, _imgs, { group: ctx.group });
+      var g = _groupFor(ctx);
+      send(txt, _imgs, { group: g });
       close();
-      if (root.toast) toast(ctx.group ? '📍 Checked in — posted to the Musikfest group 🌹' : '📍 Checked in — on your feed and your networks 🌹');
+      if (root.toast) toast(g ? ('📍 Checked in — posted to the ' + (ctx.band || 'group') + ' group 🌹') : '📍 Checked in — on your feed and your networks 🌹');
     };
     setTimeout(function () { try { ta.focus(); } catch (e) {} }, 60);
   }
@@ -183,7 +188,7 @@
     if (!d.on) { open(ctx); return; }                 // no standing consent → the member taps it themselves
     var txt = line(ctx); var cancelled = false;
     if (root.toast) toast('📍 Auto-checking you in: “' + txt.slice(0, 44) + '…” — tap to undo 🌹');
-    var t = setTimeout(function () { if (!cancelled) send(txt, null, { group: ctx.group }); }, 4200);   // soft-send with an undo window
+    var t = setTimeout(function () { if (!cancelled) send(txt, null, { group: _groupFor(ctx) }); }, 4200);   // soft-send with an undo window
     try { var el = document.querySelector('.dd-toast, #mfToast'); if (el) el.onclick = function () { cancelled = true; clearTimeout(t); if (root.toast) toast('Undone — not posted.'); }; } catch (e) {}
   }
 

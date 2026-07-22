@@ -284,9 +284,7 @@
   <div class="friendsbox">
     <div class="mghd"><b>🔔 Notifications</b><button onclick="closeNotifs()" aria-label="Close">×</button></div>
     <div class="mgbody">
-      <div id="notifReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="notifReq"></div></div>
-      <div id="notifBdaySec" style="display:none"><div class="mgsec">🎂 Birthdays today</div><div id="notifBday"></div></div>
-      <div class="mgsec">Recent activity</div><div id="notifFeed"><div class="mgempty">Loading…</div></div>
+      <div id="ddNotifHost"></div>
     </div>
   </div>
 </div>
@@ -316,7 +314,7 @@
   <button class="fn" onclick="openAppSheet('games')"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="openAppSheet('records')" style="display:none"><!-- hidden for launch — no records yet --><span class="ic">💿</span><span class="lb">Records</span></button>
   <button class="fn" onclick="openNotifs()"><span class="ic">🔔<span class="b" id="alertsNavBadge" style="display:none"></span></span><span class="lb">Alerts</span></button>
-  <button class="fn" onclick="openAppSheet('you')"><span class="ic">🪪</span><span class="lb">You</span></button>
+  <button class="fn" onclick="openAppSheet('you')"><span class="ic" id="navqr" style="display:flex;align-items:center;justify-content:center"></span><span class="lb">You</span></button>
 </nav>
 
 <!-- APP SHEET — Dealer/Games/Records/Alerts/You open OVER Friends, close back to Friends -->
@@ -331,12 +329,15 @@
 <script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
 <script src="dd_pymk.js"></script>
 <script src="dd_friends.js"></script>
+<script src="dd_notify.js"></script>
 <script src="dd_bday.js"></script>
 <script src="dd_dm.js"></script>
 <script src="dd_feed.js"></script>
 <script src="dd_reels.js"></script>
 <script src="lukas_chat.js"></script>
 <script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+<script>window.addEventListener('load',function(){ setTimeout(function(){ try{ if(window.DDQR){ var id=(window.DDMe&&DDMe.id&&DDMe.id())||''; DDQR.into('navqr','https://deaddance.app/'+(id?('u/'+encodeURIComponent(id)):''),{mark:'dd',size:120,css:22,link:false}); } }catch(e){} }, 800); });</script>
 <script>
 function openFbInfo(){ document.getElementById('fbInfo').classList.add('on'); }
 function closeFbInfo(){ document.getElementById('fbInfo').classList.remove('on'); }
@@ -613,35 +614,13 @@ window.openChat=function(){ try{ if(window.LukasChat&&LukasChat.open){
 /* ---- 2) Top-bar 🔔 → real notifications (incoming requests + recent activity) ---- */
 window.openNotifs=function(){ var ov=document.getElementById('notifsOv'); if(!ov)return; ov.classList.add('on'); loadNotifs(); };
 window.closeNotifs=function(){ var ov=document.getElementById('notifsOv'); if(ov)ov.classList.remove('on'); };
-function loadNotifs(){
-  var reqHost=document.getElementById('notifReq'), reqSec=document.getElementById('notifReqSec');
-  if(reqHost&&window.DDFriends&&DDFriends.incoming){ DDFriends.incoming().then(function(rows){
-    if(!rows||!rows.length){ if(reqSec)reqSec.style.display='none'; }
-    else { if(reqSec)reqSec.style.display='block';
-      reqHost.innerHTML=rows.map(function(r,i){ var id='nr-'+i; var nm=String(r.from_name||r.name||'A head');
-        var acts='<button class="mgadd" onclick="mgrConfirm(\''+r.id+'\',\''+id+'\')">Confirm</button><button class="mgrm" onclick="frRespond(\''+r.id+'\',false,document.getElementById(\''+id+'\'))">Delete</button>';
-        return _mgRow(nm,'🌹 sent you a request',acts,id); }).join(''); }
-  }).catch(function(){ if(reqSec)reqSec.style.display='none'; }); }
-  var bh=document.getElementById('notifBday'), bsec=document.getElementById('notifBdaySec');
-  if(bh&&window.DDBday&&DDBday.friends){ DDBday.friends().then(function(r){ var t=(r&&r.today)||[];
-    if(!t.length){ if(bsec)bsec.style.display='none'; return; }
-    if(bsec)bsec.style.display='block';
-    bh.innerHTML=t.map(function(p){ var nm=String(p.name||'A head');
-      return '<div class="mgrow"><div class="mgav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div class="mginfo"><b>'+_esc(nm)+'</b><span>🎂 has a birthday today — send a rose 🌹</span></div><div class="mgacts"><button class="mgadd" onclick="notifWish(\''+_esc(nm).replace(/\x27/g,'')+'\')">🎂 Wish</button></div></div>'; }).join('');
-  }).catch(function(){ if(bsec)bsec.style.display='none'; }); }
-  var fh=document.getElementById('notifFeed');
-  if(fh&&window.DDFeed&&DDFeed.feed){ DDFeed.feed(12).then(function(rows){
-    if(!rows||!rows.length){ fh.innerHTML='<div class="mgempty">No recent activity yet 🌹</div>'; return; }
-    fh.innerHTML=rows.map(function(p){ var nm=String(p.author_name||'A head'); var body=String(p.body||'');
-      var snip=body.slice(0,72)+(body.length>72?'…':'');
-      return '<div class="mgrow"><div class="mgav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div class="mginfo"><b>'+_esc(nm)+'</b><span>'+_esc(snip)+' · '+_ago(p.created_at)+'</span></div></div>'; }).join('');
-  }).catch(function(){ fh.innerHTML='<div class="mgempty">Couldn’t load activity</div>'; }); }
-}
+function loadNotifs(){ try{ if(window.DDNotify) DDNotify.render('ddNotifHost'); }catch(e){} }
 window.notifWish=function(name){ try{ var first=String(name||'').split(' ')[0]; if(window.toast)toast('🎂 Wished '+first+' a happy birthday 🌹'); if(window.DDFeed&&DDFeed.post&&(!DDFeed.ready||DDFeed.ready())) DDFeed.post('🎂 Happy birthday '+name+'! 🌹').catch(function(){}); }catch(e){} };
 function updateNotifBadge(){ var b=document.getElementById('notifBadge'); var nav=document.getElementById('alertsNavBadge');
   function setNav(n){ if(!nav)return; if(n>0){ nav.textContent=String(n); nav.style.display=''; } else { nav.style.display='none'; } }
   if(!(window.DDFriends&&DDFriends.incoming)){ if(b)b.style.display='none'; setNav(0); return; }
-  DDFriends.incoming().then(function(rows){ var n=(rows&&rows.length)||0; if(b){ if(n>0){ b.textContent=String(n); b.style.display=''; } else { b.style.display='none'; } } setNav(n); }).catch(function(){ if(b)b.style.display='none'; setNav(0); }); }
+  DDFriends.incoming().then(function(rows){ var n=(rows&&rows.length)||0; if(b){ if(n>0){ b.textContent=String(n); b.style.display=''; } else { b.style.display='none'; } } setNav(n); }).catch(function(){ if(b)b.style.display='none'; setNav(0); });
+  try{ if(window.DDNotify) DDNotify.paintBadges(); }catch(e){} }
 
 /* ---- 3) Top-bar search → filter the visible feed client-side (Enter) ---- */
 window.filterFeed=function(q){ q=String(q||'').trim().toLowerCase();
@@ -797,7 +776,7 @@ window.removeCard=function(btn){ var c=btn&&btn.closest('.pk'); if(c)c.remove();
 window.pymkAddDemo=function(btn){ if(btn){ btn.textContent='✓ Requested'; btn.disabled=true; btn.style.opacity=.6; } };
 
 /* ---- init: badge + stories + live refresh ---- */
-setTimeout(function(){ try{ updateNotifBadge(); }catch(e){} try{ storiesBuild(); }catch(e){} try{ loadRailMessages(); }catch(e){}
+setTimeout(function(){ try{ updateNotifBadge(); }catch(e){} try{ if(window.DDNotify){ DDNotify.paintBadges(); DDNotify.subscribe(function(){ DDNotify.paintBadges(); }); } }catch(e){} try{ storiesBuild(); }catch(e){} try{ loadRailMessages(); }catch(e){}
   try{ if(window.DDFriends&&DDFriends.subscribe) DDFriends.subscribe(function(){ updateNotifBadge(); try{ loadRailMessages(); }catch(e){} var ov=document.getElementById('notifsOv'); if(ov&&ov.classList.contains('on')) loadNotifs(); var fo=document.getElementById('friendsOv'); if(fo&&fo.classList.contains('on')){ try{ loadMgrFriends(); loadMgrRequests(); }catch(e){} } }); }catch(e){}
   try{ if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(function(){ storiesBuild(); }); }catch(e){}
 }, 800);

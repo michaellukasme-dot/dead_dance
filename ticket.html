@@ -109,6 +109,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     <div class="issuedNote hidden" id="issuedNote">✓ In your wallet · device-bound · works offline at the gate</div>
 
     <div class="foot"><span class="rose">🌹</span> Your ticket. Your friends. No toll booth.</div>
+    <button class="tmb" onclick="ddCheckInHere()" style="border-color:#b8002e;color:#b8002e">📍 Check in — in your voice</button>
     <button class="tmb" onclick="bandPerm(1)">🎤 That's my band — sell my tickets</button>
   </div>
 
@@ -225,6 +226,11 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   };
   window.bandPermClose=function(){ var p=document.getElementById('bandPerm'); if(p)p.classList.remove('on'); };
   window.bandSetup=function(){ try{ location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(String(band||'')); }catch(e){} };
+  // Check in on this event → voiced post to the band's own group (DEAL → 'deal'), asks for a stage photo.
+  // The check-in stack lives on the app shell (parent), so delegate to it; graceful if opened standalone.
+  window.ddCheckInHere=function(){ var C=window.DDCheckin||(window.parent&&window.parent.DDCheckin)||(window.top&&window.top.DDCheckin);
+    if(C&&C.open){ C.open({ band:band, venue:String(venue||'').split('·')[0].trim() }); }
+    else { try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Open this show in the DeadDance app to check in 🌹'); }catch(e){ alert('Open in the DeadDance app to check in.'); } } };
   // Close the ticket modal → return to Home. Prefer the parent's direct close; fall back to postMessage.
   window.ddTixDismiss=function(){
     try{ if(window.parent&&window.parent!==window&&typeof window.parent.ddTixClose==='function'){ window.parent.ddTixClose(); return; } }catch(e){}

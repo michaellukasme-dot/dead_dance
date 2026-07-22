@@ -705,7 +705,7 @@ body{padding-bottom:64px}
 .shrow{display:flex;gap:8px;flex-wrap:wrap}
 .shto{flex:1;min-width:70px;background:#faf7f2;border:1px solid var(--line);border-radius:12px;padding:10px 6px;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:4px}
 .shto span{font-size:20px}
-.cbtn{background:#ffffff26;border:0;color:#fff;font-size:16px;width:38px;height:38px;border-radius:50%;cursor:pointer;position:relative;flex:none}
+.cbtn{background:#efeaf4;border:0;color:#3a1f57;font-size:16px;width:40px;height:40px;border-radius:50%;cursor:pointer;position:relative;flex:none}
 .cbtn:active{transform:scale(.94)}.cbtn.avat{background:linear-gradient(135deg,#c08a2d,#b8002e)}
 .cbtn.avat::after{content:"⌄";position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;line-height:13px;text-align:center;font-size:11px;font-weight:900;color:#3a1f57;background:#fff;border-radius:50%;box-shadow:0 1px 3px #0004}
 .cbadge{position:absolute;top:-3px;right:-3px;background:var(--rose);color:#fff;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 3px}
@@ -846,7 +846,7 @@ body.dd-insider .dd-only{display:block}
   <input class="search" id="ddSearch" autocomplete="off" placeholder="Search heads, shows, tapes, art…" oninput="ddSearchInput(this.value)" onkeydown="if(event.key==='Escape'){this.blur();ddSearchClose();}">
   <div id="ddSearchRes" class="ddsr"></div>
   <button class="cbtn authbtn" onclick="requireSignin(function(){openApps()})" title="Menu" aria-label="Menu">▦</button>
-  <button class="chatbtn authbtn" onclick="requireSignin(function(){if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')})" title="Family chat" aria-label="Family chat">💬</button>
+  <button class="cbtn authbtn" onclick="requireSignin(function(){if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')})" title="Family chat" aria-label="Family chat">💬</button>
   <button class="cbtn authbtn" onclick="requireSignin(function(){openNotifs()})" title="Notifications" aria-label="Notifications"><span style="position:relative">🔔<span id="topNotifBadge" style="position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;background:#e11;color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px">0</span></span></button>
   <button class="cbtn avat authbtn" onclick="requireSignin(function(){openProfMenu()})" title="You" aria-label="You">🌹</button>
 </div>
@@ -1162,7 +1162,7 @@ body.dd-insider .dd-only{display:block}
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, GD Archive, Art"><span class="ic">♠️</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, GD Archive, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="requireSignin(function(){openGame()})"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" style="display:none" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><!-- hidden for launch — no records yet --><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
   <button class="fn" onclick="requireSignin(function(){openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
@@ -1482,19 +1482,7 @@ window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='d
 <div class="cornerov" id="notifov" onclick="if(event.target===this)coClose('notifov')">
  <div class="cpanel notifs">
   <div class="cphd">Notifications <button class="shx" onclick="coClose('notifov')">×</button></div>
-  <div id="frReqs"></div>
-  <div class="asec">New</div>
-  <div class="nitem nclk" onclick="notifGo(openMap)" title="Open the show"><span>🎟️</span><div><b>Splintered Sunlight</b> plays Ardmore tomorrow — 11 mi from you.<i>2h</i></div><em class="nchev">›</em></div>
-  <div class="nitem nclk" onclick="notifGo(openMap)" title="See the calendar"><span>🎸</span><div><b>The China Cats</b> posted a new date: Vets Hall, Jul 18.<i>5h</i></div><em class="nchev">›</em></div>
-  <div class="nitem nclk" onclick="notifGo(function(){window.openMiracle&&openMiracle();})" title="Open the Miracle bucket"><span>🍀</span><div>A <b>Miracle ticket</b> just dropped in your chapter bucket.<i>6h</i></div><em class="nchev">›</em></div>
-  <div class="asec">Earlier</div>
-  <div class="nitem" id="nfrJen"><span>🌹</span><div><b>Jen Rund</b> sent you a friend request.<i>1d</i>
-    <div style="display:flex;gap:8px;margin-top:7px">
-      <button onclick="acceptFriend('Jen Rund')" style="border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">✓ Accept</button>
-      <button onclick="declineFriend()" style="border:0;background:#ece7db;color:#555;font-weight:800;font-size:12px;border-radius:8px;padding:6px 13px;cursor:pointer">Decline</button>
-    </div></div></div>
-  <div class="nitem nclk" onclick="notifGo(openSynth)" title="Read the Daily Synthesis"><span>📰</span><div>Your <b>Daily Synthesis</b> is ready — the whole bus in one read.<i>1d</i></div><em class="nchev">›</em></div>
-  <div class="nitem nclk" onclick="notifGo(function(){profile('me');})" title="Open your profile"><span>🐝</span><div><b>Michele</b> welcomed you to the family.<i>2d</i></div><em class="nchev">›</em></div>
+  <div id="ddNotifHost"></div>
  </div>
 </div>
 
@@ -3321,7 +3309,7 @@ function moreToggle(b){ var t=b.previousElementSibling; if(!t)return; var clampe
 /* top-right corner: ▦ menu · 🔔 notifications · profile */
 function openApps(){ var e=document.getElementById('appsov'); if(e)e.classList.add('on'); }
 function openCreate(){ var e=document.getElementById('createov'); if(e)e.classList.add('on'); }
-function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); if(typeof loadFriendReqs==='function')loadFriendReqs(); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; }
+function openNotifs(){ var e=document.getElementById('notifov'); if(e)e.classList.add('on'); if(typeof loadFriendReqs==='function')loadFriendReqs(); var b=document.getElementById('notifBadge'); if(b)b.style.display='none'; try{ if(window.DDNotify) DDNotify.render('ddNotifHost'); }catch(_e){} }
 function coClose(id){ var e=document.getElementById(id); if(e)e.classList.remove('on'); }
 function coGo(id,fn){ coClose(id); try{fn();}catch(e){} }
 /* Menu length management — Consoles + Team tools show ONLY for DD people (employees, influencers, venues, bands, acts). Normal users never see them. */
@@ -3530,6 +3518,7 @@ function ddBackfillMyName(){                                  // rewrite my past
     ddBackfillMyName();                                       // already-named heads: fix old posts' stored name for everyone
   } }catch(e){} }
   setTimeout(go,1600); setTimeout(go,4200); })();
+setTimeout(function(){ try{ if(window.DDNotify){ DDNotify.paintBadges(); DDNotify.subscribe(function(){ DDNotify.paintBadges(); }); } }catch(e){} },1600);
 
 /* ---------------- blog Local / National toggle ---------------- */
 function feedScope(which){
@@ -4069,6 +4058,7 @@ function ddAddFriend(id,name,btn){
 <script src="qr.js" defer></script>
 <script src="dd_spread.js" defer></script>
 <script src="dd_hyperpost.js" defer></script>
+<script src="dd_checkin.js" defer></script>
 <script src="dd_showmap.js" defer></script>
 <script src="dd_friends.js" defer></script>
 <script src="dd_attrib.js" defer></script>
@@ -4083,6 +4073,7 @@ function ddAddFriend(id,name,btn){
 <script src="dd_tixnotify.js" defer></script>
 <script src="dd_join.js" defer></script>
 <script src="dd_feed.js" defer></script>
+<script src="dd_notify.js" defer></script>
 <script src="dd_pymk.js"></script>
 <script>
 /* ---------- People & bands you may know — "you were both there" (dd_pymk.js) ---------- */
