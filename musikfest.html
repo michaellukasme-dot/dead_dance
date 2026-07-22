@@ -272,6 +272,14 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   </div>
 
   <div class="carbadge" id="carBadge" style="display:none"></div>
+  <style>
+  .silverfloat{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:250;width:min(440px,94vw);background:#fff;border:1px solid #eadff2;border-radius:16px;box-shadow:0 14px 44px rgba(20,10,35,.28);padding:12px 13px 13px;display:none;transform:translateX(-50%)}
+  .silverfloat.on{display:block;animation:svpop .28s cubic-bezier(.2,.9,.3,1.1)}
+  .silverfloat .svx{position:absolute;top:8px;right:9px;border:0;background:#f2ecfb;color:#5a2e86;width:26px;height:26px;border-radius:8px;font-size:15px;line-height:1;cursor:pointer}
+  @keyframes svpop{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+  </style>
+  <!-- Silver's asks float over the map by ACT-ON-NOW (GPS-prioritized), seen at the right moment — not buried in a curtain -->
+  <div class="silverfloat" id="silverFloat"></div>
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
@@ -321,7 +329,6 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
       <span class="mfdaylbl"></span>
       <button class="mfarrow" onclick="stageDay(1)" aria-label="Next day">Day ›</button>
     </div>
-    <div id="askStrip"></div>
     <div class="sched" id="fullSched"></div>
     <div id="schMore"></div>
     <div style="display:flex;gap:10px;margin:14px 0 4px;align-items:stretch">
@@ -938,7 +945,7 @@ window.refresh=function(){ if(!MF.length)return;
  var aw=hm(aEl?aEl.value:'00:00'), dw=hm(dEl?dEl.value:'23:59');
  rows=rows.filter(function(r){ var mm=mins(r.t); return mm>=aw && mm<=dw; });   // ARRIVE→DEPART window shrinks the pocket
  rows.sort(function(a,b){ return mins(a.t)-mins(b.t); });
- try{ renderAsks(rows[0]||null); }catch(e){}
+ try{ if(typeof mfSilverTick==='function') mfSilverTick(); }catch(e){}   // Silver's asks now float on the map by ACT-ON-NOW, not buried in this curtain
  var ddN=MF.filter(function(r){ return r.d===day && r.sc==='dd'; }).length;
  var cnt=document.getElementById('ddCount'); if(cnt)cnt.textContent=rows.length+' set'+(rows.length===1?'':'s')+(ddN?(' · '+ddN+' 🌹'):'');
  var shown=schExpand?rows:rows.slice(0,SCH_MAX), cs=catchStore();
@@ -975,6 +982,22 @@ function mfCheckinNudge(){ try{ var near=mfNearestStage(); if(!near||near.mi>0.0
   if(window.DDCheckin && DDCheckin.druc && DDCheckin.druc().on){ DDCheckin.autoCheckin({venue:vn,band:band}); return; }   // DRUC on → recurring-approved auto check-in
   mfToast('📍 You’re at <b>'+esc(vn)+'</b>'+(band?(' — '+esc(band)+' is on'):'')+'. <span style="text-decoration:underline;cursor:pointer" onclick="mfCheckIn()">Check in →</span>', true);
 }catch(e){} }
+
+/* ===== SILVER'S ASKS — float over the map by ACT-ON-NOW (GPS-prioritized), seen at the right moment ===== */
+function mfSilverActNow(){ if(!MF.length) return null; var day=todayISO(); if(DAYS.indexOf(day)<0) day=DAYS[curDayIdx]||DAYS[0];
+  var nm=nowMins(); var rows=MF.filter(function(r){ var mm=mins(r.t); return r.d===day && mm<=nm+10 && mm>=nm-95; });
+  var near=mfNearestStage(); if(near && near.mi<0.16){ var key=String(near.stage.n).toLowerCase().split(/[\s@(]/)[0]; var hit=rows.filter(function(r){ return String(r.st||'').toLowerCase().indexOf(key)>=0; }); if(hit.length) rows=hit; }   // standing at a stage → its act wins
+  rows.sort(function(a,b){ return Math.abs(mins(a.t)-nm)-Math.abs(mins(b.t)-nm); });
+  return rows[0]||null; }
+var _silverDismissed='';
+function mfSilverTick(){ try{ var f=document.getElementById('silverFloat'); if(!f) return; var a=mfSilverActNow();
+  if(!a){ f.classList.remove('on'); return; }
+  var key=a.b+'|'+a.t+'|'+a.d; if(key===_silverDismissed) return;   // respect the member's dismissal of THIS act
+  renderAsks(a); f.classList.add('on');
+}catch(e){} }
+window.silverDismiss=function(){ var f=document.getElementById('silverFloat'); if(!f) return; _silverDismissed=f.getAttribute('data-k')||''; f.classList.remove('on'); };
+setInterval(function(){ try{ mfSilverTick(); }catch(e){} }, 60000);   // re-check the "on now" act each minute
+setTimeout(function(){ try{ mfSilverTick(); }catch(e){} }, 900);       // and once shortly after load
 // ===== Claude on the mic — the app WRITES specific asks for whoever's on now; the shot IS the send =====
 var MF_SONGS=['Cumberland Blues','Sugar Magnolia','Fire on the Mountain',"Truckin'",'Bertha','Scarlet Begonias','Ripple',"Franklin's Tower",'Deal','Eyes of the World','Shakedown Street','Sugaree'];
 function askList(a){ var song=MF_SONGS[Math.floor(Math.random()*MF_SONGS.length)];
@@ -987,11 +1010,11 @@ function askList(a){ var song=MF_SONGS[Math.floor(Math.random()*MF_SONGS.length)
   return out;   // each ask = a shot Claude wants + the caption it posts to the family
 }
 function typeInto(el,text,cb){ var i=0; (function step(){ if(i<=text.length){ el.textContent=text.slice(0,i); i++; setTimeout(step,15); } else if(cb) cb(); })(); }
-window.renderAsks=function(a){ var host=document.getElementById('askStrip'); if(!host)return;
-  if(!a){ host.innerHTML=''; host.removeAttribute('data-k'); return; }
+window.renderAsks=function(a){ var host=document.getElementById('silverFloat'); if(!host)return;
+  if(!a){ host.innerHTML=''; host.removeAttribute('data-k'); host.classList.remove('on'); return; }
   var key=a.b+'|'+a.t+'|'+a.d; if(host.getAttribute('data-k')===key) return; host.setAttribute('data-k',key);   // don't re-type on every refresh
   var asks=askList(a);
-  host.innerHTML='<div style="margin:2px 0 10px"><div style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><img src="claude-mark.svg" alt="" style="width:20px;height:20px"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Silver’s working the room — tap one, shoot it, it posts</span></div><button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four of us, four sides of '+esc(a.st)+', one shot.</span></span></button><div id="askBubbles"></div></div>';
+  host.innerHTML='<button class="svx" onclick="silverDismiss()" aria-label="Dismiss">×</button><div style="display:flex;align-items:center;gap:7px;margin:0 26px 9px 0"><img src="claude-mark.svg" alt="" style="width:20px;height:20px;flex:none"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Silver’s working the room — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div><button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four of us, four sides of '+esc(a.st)+', one shot.</span></span></button><div id="askBubbles"></div>';
   var wrap=document.getElementById('askBubbles'), idx=0;
   function addBubble(ask){ var b=document.createElement('button'); b.type='button'; b.onclick=function(){ askCapture(ask.cap); };
     b.style.cssText='display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;border:1px solid #f0d0dc;background:linear-gradient(100deg,#fff,#fdf4f7);border-radius:13px;padding:9px 11px;margin:0 0 7px;cursor:pointer;font:inherit';
@@ -1209,7 +1232,7 @@ function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus(
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
+  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); mfSilverTick(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
 function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
