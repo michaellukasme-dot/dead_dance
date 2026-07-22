@@ -41,6 +41,25 @@
       .catch(function () { return []; });
   }
 
+  // ---- PER-GROUP threads (dd_group_feed / dd_group_post_create) ----
+  // one group's own thread; resolves [] if the migration isn't run yet (honest, non-breaking).
+  function groupFeed(slug, limit) {
+    var c = client(); slug = String(slug || '').trim(); if (!c || !slug) return Promise.resolve([]);
+    return c.rpc('dd_group_feed', { p_group_slug: slug, p_limit: limit || 50 })
+      .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || []; })
+      .catch(function () { return []; });
+  }
+  // post a message tagged to a group thread
+  function groupPost(slug, body) {
+    var c = client(), id = myId(); slug = String(slug || '').trim();
+    if (!c || !id) return Promise.reject('no-backend');
+    if (!slug) return Promise.reject('no-group');
+    var b = String(body == null ? '' : body).trim();
+    if (!b) return Promise.reject('empty');
+    return c.rpc('dd_group_post_create', { p_author_id: id, p_author_name: myName(), p_role: myRole(), p_body: b, p_group_slug: slug })
+      .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
+  }
+
   // toggle a like on/off; resolves the true new count
   function react(postId, on, kind) {
     var c = client(), id = myId();
@@ -127,5 +146,5 @@
     } catch (e) {}
   }
 
-  root.DDFeed = { ready: ready, post: post, feed: feed, react: react, reactCounts: reactCounts, myReactions: myReactions, renameMine: renameMine, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole, comment: comment, comments: comments, commentCounts: commentCounts, subscribeComments: subscribeComments };
+  root.DDFeed = { ready: ready, post: post, feed: feed, groupFeed: groupFeed, groupPost: groupPost, react: react, reactCounts: reactCounts, myReactions: myReactions, renameMine: renameMine, subscribe: subscribe, subscribeReactions: subscribeReactions, unsubscribe: unsubscribe, myName: myName, myRole: myRole, comment: comment, comments: comments, commentCounts: commentCounts, subscribeComments: subscribeComments };
 })(typeof window !== 'undefined' ? window : this);

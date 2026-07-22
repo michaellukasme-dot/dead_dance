@@ -189,10 +189,10 @@
       <a onclick="openAppSheet('apps')"><span class="gi" style="background:#ece7f2;color:#5a2e86">⌄</span><b>See more</b></a>
       <div class="sep"></div>
       <div class="sc">Your shortcuts</div>
-      <a onclick="openGroupThread('Grateful Dead Forever','💀')"><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
-      <a onclick="openGroupThread('I Love The Grateful Dead!','🌹')"><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
-      <a onclick="openGroupThread('Deadhead Life','⚡')"><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
-      <a onclick="openGroupThread('Dead Lot','🐻')"><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
+      <a onclick="openGroupThread('Grateful Dead Forever','💀','grateful-dead-forever')"><span class="gi sq" style="background:linear-gradient(135deg,#b8002e,#3a1f57)">💀</span><b>Grateful Dead Forever</b></a>
+      <a onclick="openGroupThread('I Love The Grateful Dead!','🌹','i-love-the-grateful-dead')"><span class="gi sq" style="background:linear-gradient(135deg,#7a3cc0,#b8002e)">🌹</span><b>I Love The Grateful Dead!</b></a>
+      <a onclick="openGroupThread('Deadhead Life','⚡','deadhead-life')"><span class="gi sq" style="background:linear-gradient(135deg,#2f7bf6,#5a2e86)">⚡</span><b>Deadhead Life</b></a>
+      <a onclick="openGroupThread('Dead Lot','🐻','dead-lot')"><span class="gi sq" style="background:linear-gradient(135deg,#1f9e6b,#123b28)">🐻</span><b>Dead Lot</b></a>
     </nav>
   </aside>
 
@@ -585,7 +585,7 @@ function loadFeed(){ if(!(window.DDFeed&&DDFeed.feed))return;
     if(cards.length>=3) cards.splice(3,0,shelf); else cards.push(shelf);   // reels break up the posts
     host.innerHTML=cards.join(''); loadReactions(rows); loadCommentCounts(rows); reelsBuild(); }).catch(function(){}); }
 setTimeout(function(){ loadFeed();
-  try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(){ loadFeed(); }); }catch(e){}
+  try{ if(window.DDFeed&&DDFeed.subscribe) DDFeed.subscribe(function(np){ loadFeed(); try{ if(typeof _curGroup!=='undefined'&&_curGroup&&np&&np.group_slug===_curGroup){ var gov=document.getElementById('groupOv'); if(gov&&gov.classList.contains('on')&&typeof renderGroupThread==='function') renderGroupThread(); } }catch(e){} }); }catch(e){}
   try{ if(window.DDReels&&DDReels.subscribe) DDReels.subscribe(function(){ reelsBuild(); }); }catch(e){}
   try{ if(window.DDFeed&&DDFeed.subscribeComments) DDFeed.subscribeComments(function(nc){ if(!nc)return; var box=document.querySelector('.post[data-pid="'+nc.post_id+'"] .comments'); if(box&&box.style.display!=='none'){ box.dataset.loaded=''; renderComments(nc.post_id,box); } var b=document.querySelector('.post[data-pid="'+nc.post_id+'"] .cct'); if(b){ if(!DDFeed.commentCounts){return;} DDFeed.commentCounts([nc.post_id]).then(function(c){ var n=c[nc.post_id]||0; b.textContent=n?('· '+n):''; }); } }); }catch(e){}
 }, 600);
@@ -760,20 +760,36 @@ function groupWireCounts(container,rows){ var ids=(rows||[]).map(function(r){ret
   if(window.DDFeed&&DDFeed.commentCounts){ DDFeed.commentCounts(ids).then(function(c){ ids.forEach(function(id){ var b=container.querySelector('.post[data-pid="'+id+'"] .cct'); if(b){ var n=c[id]||0; b.textContent=n?('· '+n):''; } }); }).catch(function(){}); }
 }
 
-window.openGroupThread=function(name,ic){ var ov=document.getElementById('groupOv'); if(!ov)return;
+var _curGroup=null, _curGroupName=null;
+function _groupComposeHTML(name){ return '<div class="card composer" style="margin-bottom:12px"><div class="av">M</div>'+
+  '<input id="groupComposeInput" placeholder="Post to '+_esc(name)+'…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();groupPostSubmit();}">'+
+  '<button class="hp" onclick="groupPostSubmit()">📡 Post</button></div>'; }
+function renderGroupThread(){ var host=document.getElementById('groupThread'); if(!host||!_curGroup)return;
+  var compose=_groupComposeHTML(_curGroupName);
+  host.innerHTML=compose+'<div class="mgempty">Loading the thread…</div>';
+  if(!(window.DDFeed&&DDFeed.groupFeed)){ host.innerHTML=compose+'<div class="mgempty">Thread is warming up 🌹</div>'; return; }
+  DDFeed.groupFeed(_curGroup,30).then(function(rows){
+    if(!rows||!rows.length){ host.innerHTML=compose+'<div class="mgempty" style="text-align:center;padding:18px 10px">Be the first to post in <b>'+_esc(_curGroupName)+'</b> 🌹</div>'; return; }
+    host.innerHTML=compose+rows.map(groupPostCard).join(''); groupWireCounts(host,rows);
+  }).catch(function(){ host.innerHTML=compose+'<div class="mgempty">Thread is warming up 🌹</div>'; });
+}
+window.groupPostSubmit=function(){ var inp=document.getElementById('groupComposeInput'); var v=(inp&&inp.value||'').trim(); if(!v)return;
+  if(!(window.DDFeed&&DDFeed.groupPost)){ toast('Posting is loading…'); return; }
+  if(DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to post 🌹'); return; }
+  if(inp)inp.value='';
+  DDFeed.groupPost(_curGroup,v).then(function(){ try{ if(window.DDCoins)DDCoins.feed('post'); }catch(e){} renderGroupThread(); toast('📡 Posted to '+_curGroupName+' 🌹'); })
+    .catch(function(){ toast('Couldn’t post — try again'); if(inp)inp.value=v; }); };
+window.openGroupThread=function(name,ic,slug){ var ov=document.getElementById('groupOv'); if(!ov)return;
+  _curGroup=slug||''; _curGroupName=name;
   document.getElementById('groupName').textContent=name;
   document.getElementById('groupIc').textContent=ic||'🌹';
   var s=GROUP_SYNTH[name]||{title:"Today on the bus",body:"Claude reads this group every day and writes the recap right here — the noise from scattered threads, cut to one clean read. Today's synthesis lands when the run completes.",clips:[]};
   var clips=(s.clips||[]).map(function(c){ return '<div class="sclip">“<b>'+_esc(c.s)+'</b>” — '+_esc(c.by||'a head')+'</div>'; }).join('');
   document.getElementById('groupSynth').innerHTML='<div class="synthcard"><div class="sh">📰 Synthesis of the day · Claude reads '+_esc(name)+'</div><div class="st">'+_esc(s.title)+'</div><div class="sb">'+_esc(s.body)+'</div>'+clips+'<button class="samp" onclick="closeGroup();openCompose()">📣 HyperPost today’s synthesis — carry it home ▸</button><div class="spend">Representative recap until today’s synthesis job runs — never scraped, always credited.</div></div>';
-  var host=document.getElementById('groupThread'); host.innerHTML='<div class="mgempty">Loading the thread…</div>';
-  if(window.DDFeed&&DDFeed.feed){ DDFeed.feed(30).then(function(rows){
-    if(!rows||!rows.length){ host.innerHTML='<div class="mgempty" style="text-align:center;padding:20px">No posts in the thread yet — <a onclick="closeGroup();openCompose()" style="color:#7a3cc0;font-weight:800;cursor:pointer">start one 🌹</a></div>'; return; }
-    host.innerHTML=rows.map(groupPostCard).join(''); groupWireCounts(host,rows);
-  }).catch(function(){ host.innerHTML='<div class="mgempty">Thread is warming up 🌹</div>'; }); }
-  else { host.innerHTML='<div class="mgempty">Thread is warming up 🌹</div>'; }
+  renderGroupThread();
   ov.classList.add('on'); document.body.style.overflow='hidden'; };
-window.closeGroup=function(){ var ov=document.getElementById('groupOv'); if(ov)ov.classList.remove('on'); document.body.style.overflow=''; };
+window.closeGroup=function(){ var ov=document.getElementById('groupOv'); if(ov)ov.classList.remove('on'); document.body.style.overflow=''; _curGroup=null; };
+/* live refresh of an open group thread is handled inside the main feed subscribe (below) — DDFeed.subscribe is a singleton */
 window.hidePost=function(pid){ closePostMenu(); var post=document.querySelector('.post[data-pid="'+pid+'"]'); if(post){ post.style.transition='.2s'; post.style.opacity=0; setTimeout(function(){ if(post)post.remove(); },210); } toast('Post hidden from this view'); };
 
 /* ---- 6) PYMK fallback cards (demo names, no real id): honest local actions ---- */
