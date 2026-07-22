@@ -272,7 +272,8 @@
         <div class="mgsec">Suggested friends</div><div id="mgrSug"><div class="mgempty">Loading…</div></div>
         <div class="mgsec">Your friends</div><div id="mgrFriends"><div class="mgempty">Loading…</div></div>
         <div class="mgsec">🎂 Birthdays</div>
-        <div id="mgrBdays" class="mgempty">No birthdays today. We'll light a candle when the family shares theirs. 🌹</div>
+        <div id="mgrBdayMine"></div>
+        <div id="mgrBdays"><div class="mgempty">Loading…</div></div>
       </div>
     </div>
   </div>
@@ -284,6 +285,7 @@
     <div class="mghd"><b>🔔 Notifications</b><button onclick="closeNotifs()" aria-label="Close">×</button></div>
     <div class="mgbody">
       <div id="notifReqSec" style="display:none"><div class="mgsec">Friend requests</div><div id="notifReq"></div></div>
+      <div id="notifBdaySec" style="display:none"><div class="mgsec">🎂 Birthdays today</div><div id="notifBday"></div></div>
       <div class="mgsec">Recent activity</div><div id="notifFeed"><div class="mgempty">Loading…</div></div>
     </div>
   </div>
@@ -301,7 +303,7 @@
   <button class="fn" onclick="openAppSheet('dealer')"><span class="ic">💎</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="openAppSheet('games')"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" onclick="openAppSheet('records')" style="display:none"><!-- hidden for launch — no records yet --><span class="ic">💿</span><span class="lb">Records</span></button>
-  <button class="fn" onclick="openAppSheet('alerts')"><span class="ic">🔔<span class="b" id="alertsNavBadge" style="display:none"></span></span><span class="lb">Alerts</span></button>
+  <button class="fn" onclick="openNotifs()"><span class="ic">🔔<span class="b" id="alertsNavBadge" style="display:none"></span></span><span class="lb">Alerts</span></button>
   <button class="fn" onclick="openAppSheet('you')"><span class="ic">🪪</span><span class="lb">You</span></button>
 </nav>
 
@@ -317,6 +319,7 @@
 <script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
 <script src="dd_pymk.js"></script>
 <script src="dd_friends.js"></script>
+<script src="dd_bday.js"></script>
 <script src="dd_dm.js"></script>
 <script src="dd_feed.js"></script>
 <script src="dd_reels.js"></script>
@@ -371,13 +374,14 @@ window.frRespond=function(reqId,accept,arg){ try{ if(window.DDFriends&&DDFriends
 /* ---- Add friends overlay: REAL Suggestions + Requests (DDPymk / DDFriends) ---- */
 (function(){ try{ document.head.insertAdjacentHTML('beforeend','<style>.friendsov{display:none;position:fixed;inset:0;z-index:120;background:rgba(20,12,30,.5);align-items:flex-start;justify-content:center;padding:36px 12px;overflow:auto}.friendsov.on{display:flex}.friendsbox{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px #0006}.mghd{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.mghd b{font-size:18px}.mghd button{border:0;background:#efeaf4;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;line-height:1}.mgbody{padding:8px 16px 20px}.mgsec{font-size:13px;font-weight:800;color:#7a2e86;margin:14px 2px 6px}.mgrow{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid #f2eef7}.mgav{width:52px;height:52px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7a3cc0,#3a1f57);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}.mginfo{flex:1;min-width:0}.mginfo b{font-size:15px;display:block}.mginfo span{color:#7a7285;font-size:12.5px}.mgacts{display:flex;gap:8px;flex:none}.mgadd{border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgrm{border:0;background:#e9e5ef;color:#333;font-weight:800;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer}.mgempty{color:#9a93a8;font-size:13px;padding:14px 2px}.fmtabs{display:flex;gap:6px;padding:8px 16px 0;border-bottom:1px solid #eee}.fmtab{border:0;background:none;font-weight:800;font-size:14px;color:#9a93a8;padding:9px 8px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}.fmtab.on{color:#7a2e86;border-bottom-color:#7a3cc0}</style>'); }catch(e){} })();
 function _mgRow(name,reason,acts,id){ var av=(String(name||'?').charAt(0)||'?').toUpperCase(); return '<div class="mgrow" id="'+id+'"><div class="mgav">'+_esc(av)+'</div><div class="mginfo"><b>'+_esc(name)+'</b><span>'+_esc(reason)+'</span></div><div class="mgacts">'+acts+'</div></div>'; }
-window.openFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(!ov)return; ov.classList.add('on'); friendsTab('invite'); loadMgrRequests(); loadMgrSuggestions(); loadMgrFriends(); };
+window.openFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(!ov)return; ov.classList.add('on'); friendsTab('invite'); loadMgrRequests(); loadMgrSuggestions(); loadMgrFriends(); _bdayEditing=false; try{ loadMgrBdays(); }catch(e){} };
 window.closeFriendsMgr=function(){ var ov=document.getElementById('friendsOv'); if(ov)ov.classList.remove('on'); };
 /* two-tab modal: Invite (default) / Friends */
 window.friendsTab=function(which){ var inv=(which!=='friends');
   var pi=document.getElementById('fmpaneInvite'), pf=document.getElementById('fmpaneFriends'), ti=document.getElementById('fmtabInvite'), tf=document.getElementById('fmtabFriends');
   if(pi)pi.style.display=inv?'':'none'; if(pf)pf.style.display=inv?'none':'';
-  if(ti)ti.classList.toggle('on',inv); if(tf)tf.classList.toggle('on',!inv); };
+  if(ti)ti.classList.toggle('on',inv); if(tf)tf.classList.toggle('on',!inv);
+  if(!inv){ try{ loadMgrBdays(); }catch(e){} } };
 /* tolerant field readers for a friend row (RPC dd_friends_list shape may vary) */
 function _frName(f){ try{ return String((f&&(f.friend_name||f.name||f.member_name||f.display_name||f.to_name||f.from_name))||'A friend'); }catch(e){ return 'A friend'; } }
 function _frId(f){ try{ return String((f&&(f.friend_id||f.friend_uid||f.id||f.uid||f.member_id||f.other_id||f.friend))||''); }catch(e){ return ''; } }
@@ -423,6 +427,54 @@ function loadMgrRequests(){ var host=document.getElementById('mgrReq'), sec=docu
   DDFriends.incoming().then(function(rows){ if(!rows||!rows.length){ if(sec)sec.style.display='none'; return; } if(sec)sec.style.display='block';
     host.innerHTML=rows.map(function(r,i){ var id='mr-'+i; var nm=String(r.from_name||r.name||'A head'); var acts='<button class="mgadd" onclick="mgrConfirm(\''+r.id+'\',\''+id+'\')">Confirm</button><button class="mgrm" onclick="frRespond(\''+r.id+'\',false,document.getElementById(\''+id+'\'))">Delete</button>'; return _mgRow(nm,'🌹 sent you a request',acts,id); }).join(''); })
     .catch(function(){ if(sec)sec.style.display='none'; }); }
+/* ---- REAL birthdays (DDBday): capture yours + friends' Today / Upcoming ---- */
+var _BMON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var _bdayMine=null, _bdayEditing=false;
+function _jstr(s){ return String(s==null?'':s).replace(/[\\'"\r\n]/g,''); }
+function _bdayLabel(b){ try{ return _BMON[(b.month|0)-1]+' '+(b.day|0); }catch(e){ return ''; } }
+function _bdayLong(f){ var s=_BMON[(f.month|0)-1]+' '+(f.day|0); if(f.year) s+=', '+f.year; if(f.ageTurning) s+=' · turns '+f.ageTurning; return s; }
+function _bdayShort(f){ var s=_BMON[(f.month|0)-1]+' '+(f.day|0); if(f.ageTurning) s+=' · turns '+f.ageTurning; return s; }
+function _bdayForm(cur){
+  var mo=''; for(var i=1;i<=12;i++){ mo+='<option value="'+i+'"'+((cur&&cur.month===i)?' selected':'')+'>'+_BMON[i-1]+'</option>'; }
+  var dy=''; for(var d=1;d<=31;d++){ dy+='<option value="'+d+'"'+((cur&&cur.day===d)?' selected':'')+'>'+d+'</option>'; }
+  var fs='border:1px solid #e7ddf5;background:#fff;border-radius:9px;padding:8px 9px;font-size:13px';
+  return '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:8px 2px 4px">'+
+    '<select id="bdayMo" style="'+fs+'">'+mo+'</select>'+
+    '<select id="bdayDy" style="'+fs+'">'+dy+'</select>'+
+    '<input id="bdayYr" type="number" inputmode="numeric" placeholder="Year (optional)" value="'+((cur&&cur.year)||'')+'" style="'+fs+';width:130px">'+
+    '<button class="mgadd" onclick="bdaySave()">Save 🌹</button>'+
+    '<button class="mgrm" onclick="bdayCancel()">Cancel</button>'+
+  '</div>';
+}
+function _renderBdayMine(){ var host=document.getElementById('mgrBdayMine'); if(!host)return;
+  if(_bdayEditing){ host.innerHTML=_bdayForm(_bdayMine); return; }
+  if(_bdayMine){ host.innerHTML='<div class="mgrow"><div class="mgav">🎂</div><div class="mginfo"><b>Your birthday</b><span>'+_esc(_bdayLabel(_bdayMine))+((_bdayMine.year)?(' · '+_bdayMine.year):'')+'</span></div><div class="mgacts"><button class="mgrm" onclick="bdayShowForm()">Edit</button></div></div>'; }
+  else { host.innerHTML='<div style="padding:6px 2px 4px"><button class="mgadd" onclick="bdayShowForm()">🎂 Add your birthday</button></div>'; }
+}
+window.bdayShowForm=function(){ _bdayEditing=true; _renderBdayMine(); };
+window.bdayCancel=function(){ _bdayEditing=false; _renderBdayMine(); };
+window.bdaySave=function(){ var mo=document.getElementById('bdayMo'), dy=document.getElementById('bdayDy'), yr=document.getElementById('bdayYr');
+  if(!mo||!dy)return; var m=parseInt(mo.value,10), d=parseInt(dy.value,10), y=(yr&&yr.value)?parseInt(yr.value,10):null;
+  if(!(window.DDBday&&DDBday.set)){ toast('Birthdays are loading — try again 🌹'); return; }
+  DDBday.set(m,d,y).then(function(){ _bdayEditing=false; toast('🎂 Birthday saved — the family will celebrate 🌹'); loadMgrBdays(); })
+    .catch(function(){ toast('Sign in to save your birthday 🌹'); }); };
+window.bdayWish=function(id,name){ var first=String(name||'a friend').split(/\s+/)[0]||name;
+  toast('🎂 Wished '+_esc(first)+' a happy birthday 🌹');
+  try{ if(window.DDFeed&&DDFeed.post){ DDFeed.post('🎂 Happy birthday '+name+'! 🌹').catch(function(){}); } }catch(e){} };
+function loadMgrBdays(){ var host=document.getElementById('mgrBdays'), mineHost=document.getElementById('mgrBdayMine');
+  if(!(window.DDBday&&DDBday.mine)){ if(mineHost){ _bdayMine=null; _renderBdayMine(); } if(host)host.innerHTML='<div class="mgempty">No birthdays today — add yours so the family can celebrate 🌹</div>'; return; }
+  try{ DDBday.mine().then(function(b){ _bdayMine=b; if(!_bdayEditing)_renderBdayMine(); }).catch(function(){ _renderBdayMine(); }); }catch(e){}
+  if(host)host.innerHTML='<div class="mgempty">Loading…</div>';
+  try{ DDBday.friends().then(function(res){ if(!host)return; var today=(res&&res.today)||[], up=(res&&res.upcoming)||[];
+    if(!today.length&&!up.length){ host.innerHTML='<div class="mgempty">No birthdays today — add yours so the family can celebrate 🌹</div>'; return; }
+    var html='';
+    if(today.length){ html+='<div class="mgsec" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span>🎂 Today\'s birthdays</span><span style="font-weight:600;color:#7a7285;font-size:11.5px">Send a rose 🌹</span></div>';
+      html+=today.map(function(f,i){ var acts='<button class="mgadd" onclick="bdayWish(\''+_jstr(f.id)+'\',\''+_jstr(f.name)+'\')">🎂 Wish</button>'; return _mgRow(f.name,'🎂 Today · '+_bdayLong(f),acts,'bt-'+i); }).join(''); }
+    if(up.length){ html+='<div class="mgsec" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span>Upcoming birthdays</span><span style="font-weight:600;color:#7a7285;font-size:11.5px">The next few on the bus</span></div>';
+      html+=up.map(function(f,i){ var acts='<button class="mgadd" onclick="DDDM.open(\''+_jstr(f.id)+'\',\''+_jstr(f.name)+'\')">💬 Message</button>'; return _mgRow(f.name,_bdayShort(f),acts,'bu-'+i); }).join(''); }
+    host.innerHTML=html;
+  }).catch(function(){ if(host)host.innerHTML='<div class="mgempty">No birthdays today — add yours so the family can celebrate 🌹</div>'; }); }catch(e){}
+}
 setTimeout(wireFriendsData, 500);
 
 /* ---- copy my DeadDance id (auth uid) — for seeding a test friend ---- */
@@ -558,6 +610,13 @@ function loadNotifs(){
         var acts='<button class="mgadd" onclick="mgrConfirm(\''+r.id+'\',\''+id+'\')">Confirm</button><button class="mgrm" onclick="frRespond(\''+r.id+'\',false,document.getElementById(\''+id+'\'))">Delete</button>';
         return _mgRow(nm,'🌹 sent you a request',acts,id); }).join(''); }
   }).catch(function(){ if(reqSec)reqSec.style.display='none'; }); }
+  var bh=document.getElementById('notifBday'), bsec=document.getElementById('notifBdaySec');
+  if(bh&&window.DDBday&&DDBday.friends){ DDBday.friends().then(function(r){ var t=(r&&r.today)||[];
+    if(!t.length){ if(bsec)bsec.style.display='none'; return; }
+    if(bsec)bsec.style.display='block';
+    bh.innerHTML=t.map(function(p){ var nm=String(p.name||'A head');
+      return '<div class="mgrow"><div class="mgav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div class="mginfo"><b>'+_esc(nm)+'</b><span>🎂 has a birthday today — send a rose 🌹</span></div><div class="mgacts"><button class="mgadd" onclick="notifWish(\''+_esc(nm).replace(/\x27/g,'')+'\')">🎂 Wish</button></div></div>'; }).join('');
+  }).catch(function(){ if(bsec)bsec.style.display='none'; }); }
   var fh=document.getElementById('notifFeed');
   if(fh&&window.DDFeed&&DDFeed.feed){ DDFeed.feed(12).then(function(rows){
     if(!rows||!rows.length){ fh.innerHTML='<div class="mgempty">No recent activity yet 🌹</div>'; return; }
@@ -566,6 +625,7 @@ function loadNotifs(){
       return '<div class="mgrow"><div class="mgav">'+_esc((nm.charAt(0)||'?').toUpperCase())+'</div><div class="mginfo"><b>'+_esc(nm)+'</b><span>'+_esc(snip)+' · '+_ago(p.created_at)+'</span></div></div>'; }).join('');
   }).catch(function(){ fh.innerHTML='<div class="mgempty">Couldn’t load activity</div>'; }); }
 }
+window.notifWish=function(name){ try{ var first=String(name||'').split(' ')[0]; if(window.toast)toast('🎂 Wished '+first+' a happy birthday 🌹'); if(window.DDFeed&&DDFeed.post&&(!DDFeed.ready||DDFeed.ready())) DDFeed.post('🎂 Happy birthday '+name+'! 🌹').catch(function(){}); }catch(e){} };
 function updateNotifBadge(){ var b=document.getElementById('notifBadge'); var nav=document.getElementById('alertsNavBadge');
   function setNav(n){ if(!nav)return; if(n>0){ nav.textContent=String(n); nav.style.display=''; } else { nav.style.display='none'; } }
   if(!(window.DDFriends&&DDFriends.incoming)){ if(b)b.style.display='none'; setNav(0); return; }
