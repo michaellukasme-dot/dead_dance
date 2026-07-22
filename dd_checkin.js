@@ -31,6 +31,7 @@
     } catch (e) { return '🌹'; }
   }
   function _pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function _myId() { try { var u = (root.DDMe && root.DDMe.id && root.DDMe.id()); if (u) return String(u); var i = root.ddId && root.ddId(); return (i && i.id) ? String(i.id) : null; } catch (e) { return null; } }
 
   // the line — varied phrasing, in the member's voice, band optional
   function line(ctx) {
@@ -136,13 +137,12 @@
   function setDruc(nets) {
     var m = { on: true, nets: nets || [], ts: new Date().toISOString(), ver: DRUC_VER };
     try { localStorage.setItem('dd.druc.autopost', JSON.stringify(m)); } catch (e) {}
-    // TODO(logged mandate — DRUC element #6): also write this to a server Authorization Center
-    // (timestamp + scope + disclosure version) before relying on auto-post at scale.
-    try { if (root.ddClient && root.ddClient()) root.ddClient().rpc('dd_druc_grant', { p_scope: 'checkin_autopost', p_nets: (nets || []).join(','), p_ver: DRUC_VER }).catch(function () {}); } catch (e) {}
+    // logged mandate (DRUC element #6): record it in the server Authorization Center (dd_druc.sql)
+    try { var id = _myId(); if (id && root.ddClient && root.ddClient()) root.ddClient().rpc('dd_druc_grant', { p_member_id: id, p_scope: 'checkin_autopost', p_nets: (nets || []).join(','), p_ver: DRUC_VER }).catch(function () {}); } catch (e) {}
     return m;
   }
   function revokeDruc() { try { localStorage.setItem('dd.druc.autopost', JSON.stringify({ on: false, nets: [] })); } catch (e) {}
-    try { if (root.ddClient && root.ddClient()) root.ddClient().rpc('dd_druc_revoke', { p_scope: 'checkin_autopost' }).catch(function () {}); } catch (e) {} }
+    try { var id = _myId(); if (id && root.ddClient && root.ddClient()) root.ddClient().rpc('dd_druc_revoke', { p_member_id: id, p_scope: 'checkin_autopost' }).catch(function () {}); } catch (e) {} }
 
   // the one honest screen (from STANDING_authorization_consent_standard.md): boxes OFF by default, one confirm.
   function drucScreen(onGranted) {
