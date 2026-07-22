@@ -134,6 +134,18 @@ body.mfapp .wrap>.back{display:none}
 .mf-grab{display:none}
 body.mfapp .mf-grab{display:flex;position:sticky;top:0;z-index:4;justify-content:center;align-items:center;height:32px;margin:0 -13px 4px;background:#faf8fc;border-radius:20px 20px 0 0;cursor:pointer;touch-action:none}
 body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3cbe0}
+/* ============ BAR 2 · CURTAIN TABS — one full-page panel at a time ============ */
+.curtainbar{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:0;z-index:3;background:#faf8fc;padding:10px 0 9px;margin:6px 0 4px;border-bottom:1px solid var(--line)}
+body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf-grab, 32px) so the tab row is never hidden */
+.curtainbar::-webkit-scrollbar{display:none}
+.mftab{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--purple);border-radius:999px;padding:8px 13px;font-weight:800;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.mftab.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+.mfcurtain{display:none}
+.mfcurtain.on{display:block}
+.mfdayrow{display:flex;gap:8px;align-items:center;margin:8px 0 10px}
+.mfdayrow .mfarrow{border:0;background:#f1eef7;color:var(--purple);border-radius:10px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer;flex:none;white-space:nowrap}
+.mfdaylbl{flex:1;text-align:center;font-weight:800;font-size:13px;color:var(--ink)}
+.curtitle{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 9px}
 </style></head>
 <body class="mfapp">
 <div class="mf-map" id="mfMapZone">
@@ -151,11 +163,13 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
     <!-- EVENT QR — in front of the title. This IS the event: scan/tap it and you land right on this map.
          StageFill standard: every event's QR sits in front of its %TITLE%. -->
     <div id="mfqr" onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="This event’s map QR — scan me, or tap to share" style="width:56px;height:56px;background:#fff;border-radius:10px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;overflow:hidden"></div>
+    <button onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="Share this map + QR with other heads" aria-label="Share the map with other heads" style="border:0;background:#fff;border-radius:10px;width:40px;height:40px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;display:flex;align-items:center;justify-content:center;color:#5a2e86;padding:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
     <h1 style="margin:0">Musikfest</h1>
     <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:25px;right:84px;display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
     <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:18px;right:20px;border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="MUSIKFEST_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
   </div>
   <div class="mflayers">
+    <button class="mflay" onclick="mfCheckIn()" title="Check in where you are — post it in your own voice" style="background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;border-color:transparent;font-weight:800">📍 Check In</button>
     <span class="mfll">🗺 Show on map</span>
     <button class="mflay" onclick="mfCenterSide('S')" title="Center on the South Side (SteelStacks)">⬇ Southside</button>
     <button class="mflay" onclick="mfCenterSide('N')" title="Center on the North Side (Main St)">⬆ Northside</button>
@@ -164,7 +178,6 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
     <span style="width:1px;height:20px;background:var(--line);margin:0 3px"></span>
     <button id="trackBtn" class="mflay" onclick="toggleTrack()">⏸ Auto-Tracking</button>
-    <button class="mflay" onclick="nearestBathroom()" title="Nearest bathroom" aria-label="Nearest bathroom">🚻</button>
     <button class="mflay" onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos">📷</button>
     <button class="mflay" onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" style="vertical-align:-3px"><path d="M13 3l8 7-8 7v-4.2C7.2 12.8 4 15 2 19c.6-7 4.6-10.4 11-10.9V3z"/></svg></button>
     <button id="parkBtn" class="mflay" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking">🅿️</button>
@@ -271,57 +284,120 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
   <!-- Platz-decoded + Shops lists removed — that info now lives on the map pin toasts -->
   <div id="northList" hidden></div><div id="southList" hidden></div><div id="shopList" hidden></div>
 
-  <details class="mfsec"><summary>Ticketed headliners · Wind Creek Steel Stage</summary>
+  <!-- ===== BAR 2 · CURTAIN TABS — one full-page panel below the two bars at a time ===== -->
+  <div class="curtainbar" id="mfCurtainBar">
+    <button class="mftab" data-cur="cur_windcreek" onclick="mfCurtain('cur_windcreek')">🎟 Wind Creek Steel Stage</button>
+    <button class="mftab on" data-cur="cur_plan" onclick="mfCurtain('cur_plan')">📋 Plan Your Day</button>
+    <button class="mftab" data-cur="cur_dead" onclick="mfCurtain('cur_dead')">🌹 Dead &amp; Jam Band</button>
+    <button class="mftab" data-cur="cur_stage" onclick="mfCurtain('cur_stage')">🎪 Browse stage</button>
+    <button class="mftab" data-cur="cur_earlier" onclick="mfCurtain('cur_earlier')">⏱ Earlier</button>
+    <button class="mftab" data-cur="cur_lineup" onclick="mfCurtain('cur_lineup')">🎫 Browse the Whole Lineup</button>
+    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">My Sets 🌹</button>
+    <button class="mftab" data-cur="cur_locals" onclick="mfCurtain('cur_locals')">💡 Locals</button>
+  </div>
+
+  <!-- 1 · Wind Creek Steel Stage (ticketed headliners) -->
+  <div class="mfcurtain" id="cur_windcreek">
+    <div class="curtitle">Ticketed headliners · Wind Creek Steel Stage</div>
     <div class="sched" id="sched"></div>
-  </details>
+  </div>
 
-  <div class="sec">Plan your day — pick your window</div>
-  <div style="display:flex;flex-direction:column;gap:9px;margin:6px 0 4px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <label style="font-size:12px;font-weight:800;color:var(--muted);width:52px">DATE</label>
-      <select id="planDate" onchange="planDateChange()" style="flex:1;font:inherit;font-weight:700;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)"></select>
+  <!-- 2 · Plan Your Day -->
+  <div class="mfcurtain on" id="cur_plan">
+    <div class="curtitle">Plan your day — pick your window</div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin:6px 0 4px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <label style="font-size:12px;font-weight:800;color:var(--muted);width:52px">DATE</label>
+        <select id="planDate" onchange="planDateChange()" style="flex:1;font:inherit;font-weight:700;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)"></select>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:800;color:var(--muted)">ARRIVE</label><input type="time" id="planArr" value="12:00" onchange="refresh()" style="flex:1;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:#fff;color:var(--ink)"></div>
+        <div style="flex:1;display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:800;color:var(--muted)">DEPART</label><input type="time" id="planDep" value="23:30" onchange="refresh()" style="flex:1;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:#fff;color:var(--ink)"></div>
+      </div>
+      <span id="ddCount" style="font-size:11.5px;color:var(--muted);font-weight:700"></span>
     </div>
-    <div style="display:flex;gap:10px">
-      <div style="flex:1;display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:800;color:var(--muted)">ARRIVE</label><input type="time" id="planArr" value="12:00" onchange="refresh()" style="flex:1;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:#fff;color:var(--ink)"></div>
-      <div style="flex:1;display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:800;color:var(--muted)">DEPART</label><input type="time" id="planDep" value="23:30" onchange="refresh()" style="flex:1;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:#fff;color:var(--ink)"></div>
+    <div class="mfdayrow">
+      <button class="mfarrow" onclick="stageDay(-1)" aria-label="Previous day">‹ Day</button>
+      <span class="mfdaylbl"></span>
+      <button class="mfarrow" onclick="stageDay(1)" aria-label="Next day">Day ›</button>
     </div>
-    <span id="ddCount" style="font-size:11.5px;color:var(--muted);font-weight:700"></span>
+    <div id="askStrip"></div>
+    <div class="sched" id="fullSched"></div>
+    <div id="schMore"></div>
+    <div style="display:flex;gap:10px;margin:14px 0 4px;align-items:stretch">
+      <button onclick="try{ddLaunchPost&&ddLaunchPost()}catch(e){}" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
+        <div style="color:#241535;font-weight:900;font-size:13px">🚀 I Launched DeadDance</div>
+        <div style="color:#7a6a2e;font-size:11.5px;margin-top:2px">Invite 10 deadhead friends ›</div>
+      </button>
+      <button onclick="adOpen()" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#f3eeff,#fff);border:1px solid #d9c9f0;border-left:5px solid #5a2e86;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
+        <div style="color:#241535;font-weight:900;font-size:13px">📣 Claim your shop</div>
+        <div style="color:#5a2e86;font-size:11.5px;margin-top:2px">Reach every visitor · from $99 ›</div>
+      </button>
+    </div>
   </div>
-  <div class="pills">
-    <button class="pill on" id="pill_all" onclick="setPill('all')">📋 List</button>
-    <button class="pill" id="pill_dead" onclick="setPill('dead')" title="Dead &amp; jam only" aria-label="Dead and jam only">🌹</button>
-    <button class="pill" id="pill_stage" onclick="setPill('stage')">🎪 Browse stage</button>
-    <button class="pill" id="pill_earlier" onclick="showEarlier()" style="margin-left:auto;font-size:12px;opacity:.85">⏱ Earlier</button>
-  </div>
-  <div id="stageBar" style="display:none;gap:8px;align-items:center;margin:8px 0 2px">
-    <button class="pill" onclick="stageDay(-1)" aria-label="Previous day" style="padding:8px 12px">‹ Day</button>
-    <select id="stagePick" onchange="refresh()" style="flex:1;min-width:0;font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink)"></select>
-    <button class="pill" onclick="stageDay(1)" aria-label="Next day" style="padding:8px 12px">Day ›</button>
-  </div>
-  <div id="askStrip"></div>
-  <div class="sched" id="fullSched"></div>
-  <div id="schMore"></div>
 
-  <div class="sec">My sets — the acts I'm catching 🌹</div>
-  <div id="mySets"></div>
+  <!-- 3 · Dead & Jam Band (this day, Dead/jam only) -->
+  <div class="mfcurtain" id="cur_dead">
+    <div class="curtitle">🌹 Dead &amp; Jam Band</div>
+    <div class="mfdayrow">
+      <button class="mfarrow" onclick="mfDayArrow(-1)" aria-label="Previous day">‹ Day</button>
+      <span class="mfdaylbl"></span>
+      <button class="mfarrow" onclick="mfDayArrow(1)" aria-label="Next day">Day ›</button>
+    </div>
+    <div class="sched" id="deadSched"></div>
+  </div>
 
-  <details class="mfsec" id="browseSec"><summary>🎫 Browse the whole lineup — all <span id="brCount">…</span> sets</summary>
-    <div style="font-size:12.5px;color:#4a4356;margin:2px 0 9px;line-height:1.5">Plan the whole week on your laptop or your phone — search any act, filter by day or stage. Everything at once (their app can't do this).</div>
+  <!-- 4 · Browse stage (one stage, one day) -->
+  <div class="mfcurtain" id="cur_stage">
+    <div class="curtitle">🎪 Browse stage</div>
+    <select id="stagePick2" onchange="renderSchedInto('stage','stageSched')" style="width:100%;font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink);margin-bottom:4px"></select>
+    <div class="mfdayrow">
+      <button class="mfarrow" onclick="mfDayArrow(-1)" aria-label="Previous day">‹ Day</button>
+      <span class="mfdaylbl"></span>
+      <button class="mfarrow" onclick="mfDayArrow(1)" aria-label="Next day">Day ›</button>
+    </div>
+    <div class="sched" id="stageSched"></div>
+  </div>
+
+  <!-- 5 · Earlier (whole day from 00:00) -->
+  <div class="mfcurtain" id="cur_earlier">
+    <div class="curtitle">⏱ Earlier — the whole day from the top</div>
+    <div class="mfdayrow">
+      <button class="mfarrow" onclick="mfDayArrow(-1)" aria-label="Previous day">‹ Day</button>
+      <span class="mfdaylbl"></span>
+      <button class="mfarrow" onclick="mfDayArrow(1)" aria-label="Next day">Day ›</button>
+    </div>
+    <div class="sched" id="earlierSched"></div>
+  </div>
+
+  <!-- 6 · Browse the Whole Lineup (one day at a time; search + stage filter) -->
+  <div class="mfcurtain" id="cur_lineup">
+    <div class="curtitle">🎫 Browse the whole lineup — all <span id="brCount">…</span> sets</div>
+    <div style="font-size:12.5px;color:#4a4356;margin:2px 0 9px;line-height:1.5">Search any act, filter by stage, page one day at a time.</div>
     <input id="brSearch" placeholder="Search an act or stage…" oninput="renderBrowse()" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink);margin-bottom:8px">
+    <div class="mfdayrow">
+      <button class="mfarrow" onclick="brDayArrow(-1)" aria-label="Previous day">‹ Day</button>
+      <span class="mfdaylbl" id="brDayLbl"></span>
+      <button class="mfarrow" onclick="brDayArrow(1)" aria-label="Next day">Day ›</button>
+    </div>
     <div class="brbar">
       <select id="brDay" class="rsel" onchange="renderBrowse()"></select>
       <select id="brStage" class="rsel" onchange="renderBrowse()"></select>
       <button class="pill" id="brDead" onclick="brToggleDead()">🌹 Dead &amp; jam</button>
     </div>
     <div id="brResults" class="brgrid"></div>
-  </details>
+  </div>
 
-  <details class="mfsec" id="parkSec"><summary>Parking — drive to a lot</summary>
-    <div id="lotList"></div>
-  </details>
+  <!-- 7 · My Sets -->
+  <div class="mfcurtain" id="cur_mysets">
+    <div class="curtitle">My sets — the acts I'm catching 🌹</div>
+    <div id="mySets"></div>
+  </div>
 
-  <details class="mfsec" id="localsSec"><summary>What the locals know (and you don't yet)</summary>
-  <div class="tips"><ul style="margin:0;padding-left:18px">
+  <!-- 8 · Locals -->
+  <div class="mfcurtain" id="cur_locals">
+    <div class="curtitle">What the locals know (and you don't yet)</div>
+    <div class="tips"><ul style="margin:0;padding-left:18px">
     <li><b>The real scene is the North Side.</b> Across the river on <b>Main Street</b> and the platze <b>just below it</b> — that's where the biggest, best tents are, and where you run into folks you haven't seen in years.</li>
     <li><b>Best seat in town: the Bethlehem library.</b> Catch a show from there — the view is spectacular.</li>
     <li><b>90% of Musikfest is free.</b> Only the <b>Wind Creek Steel Stage</b> costs money — everything else is un-gated.</li>
@@ -331,17 +407,12 @@ body.mfapp .mf-grab>span{width:42px;height:5px;border-radius:3px;background:#d3c
     <li><b>Food &amp; beer run on 50¢ paper tickets</b>, sold in blocks of 20 at every platz. Buy a strip first.</li>
     <li><b>Rookie trap:</b> <b>Americaplatz (free Levitt lawn) ≠ Steel Stage (paid)</b> — they're 150 ft apart at SteelStacks.</li>
   </ul></div>
-  </details>
+  </div>
 
-  <div style="display:flex;gap:10px;margin:14px 0;align-items:stretch">
-    <button onclick="try{ddLaunchPost&&ddLaunchPost()}catch(e){}" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
-      <div style="color:#241535;font-weight:900;font-size:13px">🚀 I Launched DeadDance</div>
-      <div style="color:#7a6a2e;font-size:11.5px;margin-top:2px">Invite 10 deadhead friends ›</div>
-    </button>
-    <button onclick="adOpen()" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#f3eeff,#fff);border:1px solid #d9c9f0;border-left:5px solid #5a2e86;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
-      <div style="color:#241535;font-weight:900;font-size:13px">📣 Claim your shop</div>
-      <div style="color:#5a2e86;font-size:11.5px;margin-top:2px">Reach every visitor · from $99 ›</div>
-    </button>
+  <!-- Parking — reached from the map's "🅿️ Lots" button (openMfSec → cur_park) -->
+  <div class="mfcurtain" id="cur_park">
+    <div class="curtitle">Parking — drive to a lot</div>
+    <div id="parkSec"><div id="lotList"></div></div>
   </div>
 
   <div class="foot"><img src="dd-512.png" style="width:20px;vertical-align:middle;margin-right:5px">
@@ -355,6 +426,9 @@ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.c
 window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
 </script>
 <script src="dd_feed.js"></script>
+<script src="dd_spread.js"></script>
+<script src="dd_hyperpost.js"></script>
+<script src="dd_checkin.js"></script>
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
@@ -812,7 +886,11 @@ window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureM
 // Southside / Northside action-bar buttons → recenter on that side's stages, reserving room for the
 // bottom sheet (paddingBottomRight) so the side you pick is never hidden behind it.
 // Festival Bar pill → open that section of the card (Parking lots, Locals tips) + scroll to it
-window.openMfSec=function(id){ try{ var d=document.getElementById(id); if(!d)return; if(d.tagName==='DETAILS') d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} };
+window.openMfSec=function(id){ try{
+  var CUR_FOR_SEC={ localsSec:'cur_locals', parkSec:'cur_park' };   // Bar 1 buttons → activate the matching curtain if one exists
+  var cur=CUR_FOR_SEC[id];
+  if(cur && document.getElementById(cur) && window.mfCurtain){ mfCurtain(cur); return; }
+  var d=document.getElementById(id); if(!d)return; if(d.tagName==='DETAILS') d.open=true; d.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} };
 window.mfCenterSide=function(side){ try{ if(typeof ensureMap==='function') ensureMap(); if(!window.LMAP)return;
   var pts=STAGES.filter(function(s){return s.side===side;}).map(function(s){return [s.lat,s.lng];});
   if(!pts.length)return;
@@ -870,7 +948,33 @@ window.refresh=function(){ if(!MF.length)return;
    return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span></div>';
  }).join('') : '<div class="srow"><span class="g">Nothing '+(PILL==='dead'?'Dead/jam ':'')+'left today — tap › for the next day.</span></div>';
  document.getElementById('schMore').innerHTML = (rows.length>SCH_MAX) ? ('<button class="lmore" onclick="schToggle()">'+(schExpand?'Show less ↑':('Show '+(rows.length-SCH_MAX)+' more ↓'))+'</button>') : '';
+ try{ if(typeof syncCurtainDayLabels==='function') syncCurtainDayLabels(); }catch(e){}   // keep the curtain day arrows' label in sync
 };
+
+/* ===== CHECK IN — GPS-aware, self-post in your own voice (dd_checkin.js + DRUC-gated fan-out) ===== */
+function mfCleanStage(n){ return String(n||'')
+  .replace(/^(IBEW\s*\d+\s*|NJM\s*|PNC\s*|Guardian Life\s*|Martin Guitar\s*|Air Products\s*|Highmark Blue Shield\s*|Service Electric\s*|Yuengling\s*)/,'')
+  .replace(/\s*@.*$/,'').replace(/\s*\(.*$/,'').trim() || n; }
+function mfNearestStage(){ if(!(window.WALK&&WALK.last)) return null; var best=null,bd=1e9;
+  STAGES.forEach(function(s){ if(s.lat==null)return; var d=hav(WALK.last[0],WALK.last[1],s.lat,s.lng); if(d<bd){ bd=d; best=s; } });
+  return best?{stage:best,mi:bd}:null; }
+function mfActOnNow(venueName){ if(!MF.length) return ''; var day=todayISO(); if(DAYS.indexOf(day)<0) day=DAYS[curDayIdx]||DAYS[0];
+  var nm=nowMins(); var rows=MF.filter(function(r){ var mm=mins(r.t); return r.d===day && mm<=nm+10 && mm>=nm-95; });
+  if(venueName){ var key=String(venueName).toLowerCase().split(/[\s@(]/)[0]; var hit=rows.filter(function(r){ return String(r.st||'').toLowerCase().indexOf(key)>=0; }); if(hit.length) rows=hit; }
+  rows.sort(function(a,b){ return Math.abs(mins(a.t)-nm)-Math.abs(mins(b.t)-nm); });
+  return rows.length?rows[0].b:''; }
+window.mfCheckIn=function(){ if(!window.DDCheckin){ if(window.toast)toast('Check-in is loading — one sec 🌹'); return; }
+  var near=mfNearestStage(); var venue='', band='';
+  if(near && near.mi<0.16){ venue=mfCleanStage(near.stage.n); band=mfActOnNow(near.stage.n); }
+  else { venue='Musikfest'; band=mfActOnNow(''); }        // GPS off / not near a stage → still lets them check in to the fest
+  DDCheckin.open({ venue:venue, band:band }); };
+/* GPS notification: entering a venue offers a check-in (once per stage per session) */
+var _ciNudged={};
+function mfCheckinNudge(){ try{ var near=mfNearestStage(); if(!near||near.mi>0.09) return; var key=near.stage.n; if(_ciNudged[key]) return; _ciNudged[key]=1;
+  var band=mfActOnNow(near.stage.n), vn=mfCleanStage(near.stage.n);
+  if(window.DDCheckin && DDCheckin.druc && DDCheckin.druc().on){ DDCheckin.autoCheckin({venue:vn,band:band}); return; }   // DRUC on → recurring-approved auto check-in
+  mfToast('📍 You’re at <b>'+esc(vn)+'</b>'+(band?(' — '+esc(band)+' is on'):'')+'. <span style="text-decoration:underline;cursor:pointer" onclick="mfCheckIn()">Check in →</span>', true);
+}catch(e){} }
 // ===== Claude on the mic — the app WRITES specific asks for whoever's on now; the shot IS the send =====
 var MF_SONGS=['Cumberland Blues','Sugar Magnolia','Fire on the Mountain',"Truckin'",'Bertha','Scarlet Begonias','Ripple',"Franklin's Tower",'Deal','Eyes of the World','Shakedown Street','Sugaree'];
 function askList(a){ var song=MF_SONGS[Math.floor(Math.random()*MF_SONGS.length)];
@@ -931,6 +1035,7 @@ window.renderBrowse=function(){ if(!MF.length)return;
     return '<div class="brcard'+(r.sc==='dd'?' dd':'')+'"><div class="bb">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</div><div class="bm">'+esc(dayLabel(r.d))+' · '+esc(String(r.t).replace(':00',''))+' · '+esc(r.st)+'</div></div>';
   }).join('')+(rows.length>700?'<div style="color:var(--muted);font-size:12px;padding:6px">Showing first 700 — narrow with search.</div>':'')
    : '<div style="color:var(--muted);padding:10px">No acts match — clear the filters.</div>';
+  try{ var _bl=document.getElementById('brDayLbl'); if(_bl){ var _dv=document.getElementById('brDay').value; _bl.textContent=(_dv==='all')?'All days':dayLabel(_dv); } }catch(e){}
 };
 browseInit();
 // every stage label breathes between its NAME and its GPS coordinates — so you know it's real, and locatable
@@ -1104,7 +1209,7 @@ function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus(
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
+  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
 function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
@@ -1237,6 +1342,53 @@ try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
   return '<div class="card"><div class="nm">🅿️ '+esc(o.n)+'</div><div class="where">'+esc(o.side)+' · short walk or the free shuttle to the stages.</div><a class="dir" href="'+driveUrl(o)+'" target="_blank" rel="noopener">🚗 Drive here</a></div>';
 }).join(''); }catch(e){}
 renderPark();
+
+/* ============ BAR 2 CURTAIN CONTROLLER — one full-page panel at a time; page days with ‹ › ============
+   Schedule curtains share #planDate as the single "active day". cur_plan reuses refresh()/#fullSched
+   (arrive→depart window); cur_dead / cur_stage / cur_earlier render into their OWN containers via
+   renderSchedInto(), which reuses the SAME .srow markup (schRowHTML) — catch checkbox, band bio ⓘ,
+   🌹 dead highlight — exactly like refresh(). */
+var MF_CUR='cur_plan';
+function mfActiveDay(){ var s=document.getElementById('planDate'); return (s&&s.value)?s.value:(DAYS[curDayIdx]||DAYS[0]); }
+function schRowHTML(r,cs){ var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!(window.BAND_INFO&&BAND_INFO[r.b]);
+  var bspan='<span class="b'+(bio?' hasbio':'')+'"'+(bio?' data-b="'+esc(r.b)+'" onclick="bandInfo(this.getAttribute(\'data-b\'))" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px"':'')+'>'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+(bio?' ⓘ':'')+'</span>';
+  return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span></div>'; }
+function ensureStagePick(){ var sp=document.getElementById('stagePick2'); if(sp&&!sp.options.length&&MF.length){ var st=Array.from(new Set(MF.map(function(r){return r.st;}))).sort(); sp.innerHTML=st.map(function(s){return '<option>'+esc(s)+'</option>';}).join(''); } }
+window.renderSchedInto=function(mode,containerId){ var host=document.getElementById(containerId); if(!host)return;
+  if(!MF.length){ host.innerHTML=''; return; }
+  var day=mfActiveDay(), rows=MF.filter(function(r){ return r.d===day; });
+  if(mode==='dead') rows=rows.filter(function(r){ return r.sc==='dd'; });                                  // 🌹 Dead/jam only
+  if(mode==='stage'){ var sp=document.getElementById('stagePick2'); if(sp&&sp.value) rows=rows.filter(function(r){ return r.st===sp.value; }); }   // one chosen stage
+  // mode 'earlier' → the whole day from 00:00 (no arrive/depart window)
+  rows.sort(function(a,b){ return mins(a.t)-mins(b.t); });
+  var cs=catchStore();
+  host.innerHTML = rows.length ? rows.map(function(r){ return schRowHTML(r,cs); }).join('')
+    : '<div class="srow"><span class="g">Nothing '+(mode==='dead'?'Dead/jam ':'')+'here on this day — tap Day › for the next day.</span></div>';
+  try{ drawMap(); }catch(e){} };
+function syncCurtainDayLabels(){ try{ var lab=dayLabel(mfActiveDay());
+  document.querySelectorAll('.mfcurtain .mfdaylbl').forEach(function(el){ if(el.id==='brDayLbl')return; el.textContent=lab; }); }catch(e){} }
+function mfRenderCurtain(id){ PILL=(id==='cur_dead')?'dead':'all';                                          // map dead-only dimming follows the Dead curtain
+  if(id==='cur_plan'){ refresh(); }
+  else if(id==='cur_dead'){ renderSchedInto('dead','deadSched'); }
+  else if(id==='cur_stage'){ ensureStagePick(); renderSchedInto('stage','stageSched'); }
+  else if(id==='cur_earlier'){ renderSchedInto('earlier','earlierSched'); }
+  else if(id==='cur_lineup'){ renderBrowse(); }
+  else if(id==='cur_mysets'){ renderMySets(); }
+  syncCurtainDayLabels(); }
+window.mfCurtain=function(id){ var el=document.getElementById(id); if(!el)return;
+  document.querySelectorAll('.mfcurtain').forEach(function(c){ c.classList.remove('on'); });
+  el.classList.add('on'); MF_CUR=id;
+  document.querySelectorAll('#mfCurtainBar .mftab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-cur')===id); });
+  try{ mfRenderCurtain(id); }catch(e){} };
+window.mfDayArrow=function(n){ var s=document.getElementById('planDate'); if(!s||!s.options.length)return;   // step the shared day, re-render the active schedule curtain
+  s.selectedIndex=Math.max(0,Math.min(s.options.length-1,s.selectedIndex+n));
+  var i=DAYS.indexOf(s.value); if(i>=0) curDayIdx=i;
+  try{ mfRenderCurtain(MF_CUR); }catch(e){} };
+window.brDayArrow=function(n){ var s=document.getElementById('brDay'); if(!s||!s.options.length)return;      // step #brDay (skip the 'all' option at index 0)
+  s.selectedIndex=Math.max(1,Math.min(s.options.length-1,s.selectedIndex+n)); renderBrowse(); };
+try{ var _bd=document.getElementById('brDay'); if(_bd&&DAYS.length){ _bd.value=DAYS[0]; } }catch(e){}          // lineup defaults to the first day, not "All days"
+try{ ensureStagePick(); }catch(e){}
+try{ mfCurtain('cur_plan'); }catch(e){}                                                                       // default the page to Plan Your Day open
 
 // ── REFINE MODE — the QR/link (?refine=1) drops locals straight into an accuracy-calibration walk.
 // A toast explains the mission; walking feeds the map real GPS so every stage/shop pin gets sharper.
