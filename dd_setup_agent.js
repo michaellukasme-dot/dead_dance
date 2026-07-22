@@ -108,6 +108,14 @@
     if(call('openAppSheet','shakedown')) return; if(call('openReader','market')) return; if(call('ddSheet','tshirt_shop.html','🛍️ Your Store')) return;
     try{ location.href='band_store.html'; }catch(e){}
   }
+  // Print partner: HyperPost the bundle offer to the Musikfest acts (credited to the partner), + the DD Musikfest group.
+  function actPrinterSend(){ progress(6);
+    var txt='🖨️ Playing Musikfest? Get your band merch printed local + fast — Jay’s Customz, 50 Broad St, Bethlehem. DeadDance bands pick a bundle: The Dozen (12 tees) $200 · The Merch Table (36) $540 · The Tour Kit (72) $1,150 — plugs into your free DeadDance store. Claim yours 🌹 deaddance.app';
+    try{ if(root.DDFeed && DDFeed.groupPost) DDFeed.groupPost('musikfest', txt); else if(root.DDFeed && DDFeed.post) DDFeed.post(txt); }catch(e){}
+    try{ if(root.DDHyper && DDHyper.post) DDHyper.post(txt); }catch(e){}          // fan out to the partner's networks
+    done(['✅ Sent — your bundle offer is HyperPosting to the Musikfest acts, credited to you.','Each act lands on their DeadDance page and can order your bundles from their store curtain. 🌹'],
+      [{label:'Back to setup menu', go:'home', style:'go'},{label:'Close', run:close, style:'ghost'}]);
+  }
 
   // ---- the flows (Claude is the brains sequencing the posts flow) ----
   var FLOWS = {
@@ -118,7 +126,30 @@
         {label:'👥 Invite my Facebook friends', go:'invite'},
         {label:'🎸 Set up my band + its comms', go:'band'},
         {label:'🛍️ Set up my store', go:'store'},
+        {label:'🖨️ I’m a print / merch partner', go:'printer'},
         {label:'Not now', run:close, style:'ghost'}
+      ]); }); },
+
+    printer: function(){ progress(1); say([
+        '🖨️ You’re a <b>print partner</b> — I’ll set you up in three taps: your bundles, your pricing, and a broadcast to the Musikfest acts.',
+        'Here are your <b>LESS / MORE / MOST</b> bundles (edit the prices anytime):',
+        '• <b>The Dozen</b> — 12 tees · 1 side · ≤4 colors · 4-day — <b>$200</b>',
+        '• <b>The Merch Table</b> — 36 tees · front+back + a poster — <b>$540</b>',
+        '• <b>The Tour Kit</b> — 72 tees · full color · +100 stickers — <b>$1,150</b>',
+        'Look good?'
+      ], function(){ choices([
+        {label:'Yes — draft my broadcast to the acts', go:'printerCampaign', style:'go'},
+        {label:'Set my own prices first', run:actStore},
+        {label:'Back', go:'home', style:'ghost'}
+      ]); }); },
+    printerCampaign: function(){ progress(4); say([
+        '📣 Here’s the note I’ll send the <b>~600 Musikfest acts</b>, credited to you:',
+        '“Playing Musikfest? Get your merch printed <b>local + fast</b> — Jay’s Customz, 50 Broad St. DeadDance bands pick a bundle: The Dozen $200 · The Merch Table $540 · The Tour Kit $1,150 — and it plugs into your free DeadDance store. 🌹”',
+        'It HyperPosts to each act’s DeadDance page (and emails anyone opted in — never scraped). Send it?'
+      ], function(){ choices([
+        {label:'🚀 HyperPost it to the acts', run:actPrinterSend, style:'go'},
+        {label:'Tweak the wording', run:actContent},
+        {label:'Back', go:'home', style:'ghost'}
       ]); }); },
 
     druc: function(){ progress(1); say([

@@ -149,6 +149,7 @@ body.dd-band{background:#f2ecfb;color:var(--dd-ink);overflow:hidden;
         <span class="cart" id="cart">Cart · 0</span>
       </div>
       <button class="pbtn ghost" style="width:100%;justify-content:center;margin-bottom:6px" onclick="editStore()">✎ Edit my store with Claude</button>
+      <div id="storeProvider"></div>
       <div id="storeGrid"></div>
       <div class="foot" id="storeFoot"></div>
     </div>
@@ -173,6 +174,7 @@ body.dd-band{background:#f2ecfb;color:var(--dd-ink);overflow:hidden;
 <script src="dd_me.js"></script>
 <script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
 <script src="dd_bands.js"></script>
+<script src="dd_providers.js"></script>
 <script src="dd_shows.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
@@ -239,8 +241,12 @@ function paintHero(){
     document.getElementById('hero').insertBefore(img, document.getElementById('heroPh').nextSibling);
     wrap.innerHTML='';
   } else {
-    // no uploaded logo yet — tasteful placeholder + a way to add one
-    wrap.innerHTML = '<button class="addlogo" onclick="addLogo()">＋ Add your logo</button>';
+    // unclaimed / no logo yet — this is the conversion moment: invite them to CLAIM their free page (Jay's HyperPost lands here)
+    var bn = (BAND.name||'your band').replace(/[<>&"]/g,'');
+    wrap.innerHTML = '<div style="text-align:center;max-width:360px;margin:0 auto">'
+      + '<div style="font-size:14.5px;font-weight:900;color:#fff;text-shadow:0 1px 8px #000b">🌹 This is <b>'+bn+'</b>’s free DeadDance page</div>'
+      + '<div style="font-size:12.5px;color:#f0e9fb;margin:5px 0 12px;text-shadow:0 1px 8px #000b;line-height:1.45">Your art, your schedule, and your merch store — all on one page. Claim it in a minute; Claude walks you through it.</div>'
+      + '<button class="addlogo" onclick="addLogo()">Claim '+bn+' ›</button></div>';
   }
 }
 function addLogo(){ location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(BAND.slug); }
@@ -364,7 +370,26 @@ function renderStore(){
   });
   host.innerHTML=html;
   document.getElementById('storeFoot').textContent='© '+(new Date().getFullYear())+' '+BAND.name+' · a DeadDance store — your logo on demand.';
+  try{ renderProvider(); }catch(e){}
 }
+/* the chapter's LOCAL print partner + their LESS/MORE/MOST bundles (dd_providers) — this is what makes it fulfillable + per-chapter */
+function renderProvider(){ var host=document.getElementById('storeProvider'); if(!host||!window.DDProviders) return;
+  DDProviders.forRegionWithBundles(BAND.region||'').then(function(p){
+    if(!p){ host.innerHTML=''; return; }
+    var site=String(p.contact_site||'').replace(/'/g,'');
+    var bs=(p.bundles||[]).map(function(b){ var nm=String(b.name||'').replace(/'/g,'');
+      return '<button onclick="orderBundle(\''+site+'\',\''+nm+'\')" style="text-align:left;border:1px solid #efe0c8;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:11px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font:inherit">'
+        +'<span style="font-size:10.5px;font-weight:900;letter-spacing:.06em;color:#a9781f">'+esc(b.tier||'')+'</span>'
+        +'<span style="font-size:14px;font-weight:800;color:#1a1320">'+esc(b.name||'')+' · $'+(b.price!=null?b.price:'')+'</span>'
+        +'<span style="font-size:11.5px;color:#8a6a2e">'+esc(b.descr||'')+'</span></button>'; }).join('');
+    host.innerHTML='<div style="background:#fffdf6;border:1px solid #e3c583;border-radius:14px;padding:13px;margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:900;color:#8a5a00">🖨️ Printed local by '+esc(p.name)+(p.region?(' · '+esc(p.region)):'')+'</div>'
+      +'<div style="font-size:12px;color:#7a6a3a;margin:3px 0 10px">'+esc(p.blurb||'')+'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:8px">'+bs+'</div>'
+      +'<div style="font-size:11px;color:#9a8a5a;margin-top:9px">Pick a bundle — your merch, printed fast in your chapter.'+(p.contact_phone?(' · '+esc(p.contact_phone)):'')+'</div></div>';
+  }).catch(function(){});
+}
+window.orderBundle=function(site,name){ toast('🖨️ '+name+' — routing to your chapter printer 🌹'); if(site){ try{ window.open(site,'_blank','noopener'); }catch(e){} } };
 function addToCart(i){ CART++; document.getElementById('cart').textContent='Cart · '+CART; toast('🛒 Added '+MERCH[i].n); }
 function editStore(){
   if(window.DDSetup && DDSetup.open){ DDSetup.open('store'); return; }
