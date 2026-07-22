@@ -112,7 +112,7 @@
     opts = opts || {};
     var L = w.L; if (!L || !map) return start(opts);          // no Leaflet? just run the core watch
     var walkZoom = opts.walkZoom || 18;                        // block-level: where a walker wants to be
-    var following = false, firstLock = false, you = null, ring = null, hdg = null, ctrl = null;
+    var following = false, firstLock = false, you = null, ring = null, hdg = null, ctrl = null, manualLock = false;
 
     function drawYou(f) {
       var ll = [f.lat, f.lng];
@@ -133,6 +133,7 @@
       q: opts.q, lockAcc: opts.lockAcc, dropAcc: opts.dropAcc, timeout: opts.timeout,
       onError: opts.onError,
       onFix: function (f) {
+        if (manualLock) return;                                  // a manual pin is set → ignore device fixes until cleared
         last = f; drawYou(f);
         if (!firstLock) { firstLock = true; if (opts.autoZoom !== false) centerOn(f, walkZoom); }  // center + walking-zoom on the VERY FIRST fix (any accuracy), then follow — never sit parked on the default view
         else if (following) { try { map.panTo([f.lat, f.lng], { animate: true }); } catch (e) {} }
@@ -162,7 +163,10 @@
     map.addControl(new Ctl());
     function setBtn(on) { if (ctrl) ctrl.style.background = on ? "#1f6fe0" : "#fff"; if (ctrl) ctrl.style.color = on ? "#fff" : "#000"; }
 
-    return { center: function () { if (last) centerOn(last, walkZoom); }, stop: function () { h.stop(); }, get following() { return following; }, get last() { return last; } };
+    return { center: function () { if (last) centerOn(last, walkZoom); }, stop: function () { h.stop(); }, get following() { return following; }, get last() { return last; },
+      // manual override: drop the ONE dot where the user taps and ignore device fixes until cleared (festival GPS insurance)
+      setManual: function (la, lo) { manualLock = true; var f = { lat: la, lng: lo, rawAcc: 8, acc: 8, manual: true }; last = f; drawYou(f); centerOn(f, walkZoom); if (opts.onFix) { try { opts.onFix(f); } catch (e) {} } },
+      clearManual: function () { manualLock = false; }, get manual() { return manualLock; } };
   }
 
   w.DDGPS = { start: start, attach: attach, Kalman: Kalman };

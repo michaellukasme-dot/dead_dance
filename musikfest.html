@@ -178,6 +178,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
     <span style="width:1px;height:20px;background:var(--line);margin:0 3px"></span>
     <button id="trackBtn" class="mflay" onclick="toggleTrack()">⏸ Auto-Tracking</button>
+    <button id="setLocBtn" class="mflay" onclick="mfSetLocationMode()" title="Set my location — tap the map exactly where you are">📌 Set my spot</button>
     <button class="mflay" onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos">📷</button>
     <button class="mflay" onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" style="vertical-align:-3px"><path d="M13 3l8 7-8 7v-4.2C7.2 12.8 4 15 2 19c.6-7 4.6-10.4 11-10.9V3z"/></svg></button>
     <button id="parkBtn" class="mflay" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking">🅿️</button>
@@ -1249,6 +1250,7 @@ function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus(
     fmtStat();
   }
   try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); mfSilverTick(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
+  try{ if(WALK.on && !window._mfLocConfirmShown && !window._manualYou){ window._mfLocConfirmShown=true; setTimeout(function(){ try{ mfLocConfirm(); }catch(e){} }, 1300); } }catch(e){}   // one quiet "is this you?" after the first fix
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
 function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
@@ -1266,8 +1268,37 @@ function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
   else if(window.DDGPS){ WALK.gps=DDGPS.start({q:2.5,lockAcc:20,onFix:onFix,onError:onGeoErr}); }
   else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:8000,timeout:30000}); }
 }
+/* MANUAL LOCATION — festival GPS insurance: tap the map to set your spot; GPS pauses until you re-enable Auto-Tracking */
+window.mfSetLocationMode=function(){ if(!window.LMAP){ try{ mfToast('Map still loading — one sec 🌹'); }catch(e){} return; }
+  var b=document.getElementById('setLocBtn'); if(b){ b.classList.add('on'); b.style.background='#7a3cc0'; b.style.color='#fff'; }
+  try{ LMAP.getContainer().style.cursor='crosshair'; }catch(e){}
+  mfToast('📌 Tap the map <b>exactly where you are</b>.', true);
+  LMAP.once('click', function(e){ try{ mfPlaceManual(e.latlng.lat, e.latlng.lng); }catch(err){} }); };
+function mfPlaceManual(lat,lng){
+  try{ LMAP.getContainer().style.cursor=''; }catch(e){}
+  var b=document.getElementById('setLocBtn'); if(b){ b.classList.remove('on'); b.style.background=''; b.style.color=''; }
+  window.YOU=[lat,lng]; window.YOU_ACC=8; WALK.last=[lat,lng];
+  if(WALK.gps && WALK.gps.setManual){ WALK.gps.setManual(lat,lng); }               // move the single dot + pause device fixes
+  WALK.on=false; var t=document.getElementById('trackBtn'); if(t){ t.textContent='▶ Auto-Tracking'; t.classList.remove('on'); t.style.background=''; t.style.color=''; }
+  try{ if(window.DDSteps) DDSteps.stop(); }catch(e){}
+  try{ mfLockMap(); }catch(e){} try{ mfCheckinNudge(); }catch(e){} try{ mfSilverTick(); }catch(e){} try{ carBadge(); }catch(e){} try{ fmtStat(); }catch(e){}
+  mfToast('📍 Location set. GPS is paused — tap <b>Auto-Tracking</b> to use GPS again. 🌹', true);
+}
+/* Auto-Tracking on + a fix in → one quiet "is this you?" so a wrong fix never traps you. Once per session, dismissible. */
+function mfLocConfirm(){ if(window._mfLocConfirmed || window._manualYou || !window.YOU) return;
+  var near=mfNearestStage(); var where=(near && near.mi<0.2)? mfCleanStage(near.stage.n) : 'this spot';
+  var el=document.getElementById('mfLocConfirm');
+  if(!el){ el=document.createElement('div'); el.id='mfLocConfirm';
+    el.style.cssText='position:fixed;left:50%;top:calc(96px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:255;background:#fff;border:1px solid #e6dff2;border-radius:16px;box-shadow:0 12px 40px rgba(20,10,35,.28);width:min(440px,94vw);padding:12px 13px;display:flex;flex-direction:column;gap:9px';
+    document.body.appendChild(el); }
+  el.innerHTML='<div style="font-size:13.5px;font-weight:800;color:#1a1320">📍 Got you at <b>'+esc(where)+'</b> — right?</div>'
+    +'<div style="display:flex;gap:8px"><button onclick="mfLocOk()" style="flex:1;border:0;background:#1f7a4d;color:#fff;font-weight:800;font-size:13.5px;border-radius:11px;padding:10px;cursor:pointer">✓ That’s me</button>'
+    +'<button onclick="var e=document.getElementById(\'mfLocConfirm\');if(e)e.remove();mfSetLocationMode()" style="flex:1;border:0;background:#7a3cc0;color:#fff;font-weight:800;font-size:13.5px;border-radius:11px;padding:10px;cursor:pointer">📌 Set my spot</button></div>';
+  el.style.display='flex'; }
+window.mfLocOk=function(){ window._mfLocConfirmed=true; var el=document.getElementById('mfLocConfirm'); if(el)el.remove(); try{ mfToast('📍 Locked in — enjoy the fest 🌹'); }catch(e){} };
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
   if(WALK.on){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
+    try{ if(WALK.gps && WALK.gps.clearManual) WALK.gps.clearManual(); }catch(e){}   // resuming GPS clears any manual pin
     walkStatus('🛰️ Finding you… <b>allow location if your phone asks.</b>',true);   // instant feedback — never "nothing"
     startWatch(); try{ if(window.DDSteps) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} fmtStat(); }
   else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; try{ if(window.DDSteps) DDSteps.stop(); }catch(e){} var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
