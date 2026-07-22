@@ -621,8 +621,15 @@ window.finish=function(){
     try{ if(window.DDBands){ DDBands.upsert({ name:b.name, city:b.city, state:b.state,
         region:b.chapterName||b.chapter||null, about:S.about||null, links:S.homepage||null, logo:S.logo||null }); } }catch(e){}
   }catch(e){}
+  /* remember the claimed band name so we can land them on THEIR page (before we wipe device state) */
+  var _bn=(S.band&&S.band.name)||S.newName||'';
   S.lists={email:'',fbpage:'',fbgroups:''}; S.listOK=false; S.logo=null; save();   // don't leave PII sitting on the device
-  toast('🌹 Installed — your claim is in. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.'); };
+  toast('🌹 Installed — your claim is in. Michael or your Ambassador will reach out with the short agreement — nothing is owed until you sign, and nothing sends until you click.');
+  /* LAND THE NEWLY-CLAIMED BAND ON THEIR OWN PAGE — full-screen hero + curtain (store, schedule, tools, Claude). */
+  try{
+    var _slug=(window.DDBands&&DDBands.slugify)?DDBands.slugify(_bn):String(_bn||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    setTimeout(function(){ location.href='band.html?band='+encodeURIComponent(_slug||_bn); }, 900);
+  }catch(e){ try{ location.href='band.html?band='+encodeURIComponent(_bn); }catch(_){} } };
 
 /* ---------- region: stamp the origination chapter so support/referrals route to the right Ambassador ---------- */
 function persistRegion(b){ try{ if(b&&b.chapter){ localStorage.setItem('dd.chapter',b.chapter); if(b.chapterName)localStorage.setItem('dd.chapterName',b.chapterName); } }catch(e){} }

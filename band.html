@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>dd_%band% — DeadDance</title>
+<meta name="theme-color" content="#0e0a16">
+<link rel="stylesheet" href="dd_theme.css">
+<style>
+/* ---- dd_%band% band template — full-screen HERO + a CURTAIN that pulls up from the bottom.
+   Modeled on jayscustomzprint.company.site: the band's art fills the screen; everything
+   (Schedule, Store, Tools, the Claude install wizard) lives in a sheet the fan drags up. ---- */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body.dd-band{background:#f2ecfb;color:var(--dd-ink);overflow:hidden;
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* ---------- HERO ---------- */
+.hero{position:fixed;inset:0;overflow:hidden;background:#0e0a16}
+.hero .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.hero .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#3a1f57,#5a2e86 44%,#b8002e);}
+.hero .ph .mono{font-size:22vw;font-weight:900;letter-spacing:-.03em;color:#ffffff22;user-select:none;line-height:1}
+.hero .scrim{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(0,0,0,.28) 0%,rgba(0,0,0,0) 26%,rgba(0,0,0,0) 46%,rgba(0,0,0,.72) 100%)}
+.hero .top{position:absolute;top:calc(env(safe-area-inset-top,0) + 14px);left:16px;right:16px;
+  display:flex;align-items:center;gap:8px;z-index:3}
+.hero .top .brand{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:13px;
+  letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.hero .top .brand img{width:26px;height:26px;border-radius:7px}
+.hero .top .sp{flex:1}
+.iconbtn{width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;font-size:18px;
+  background:rgba(255,255,255,.16);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center}
+.iconbtn:active{transform:scale(.94)}
+.hero .name{position:absolute;left:20px;right:20px;bottom:190px;z-index:3;color:#fff}
+.hero .name h1{margin:0;font-size:clamp(34px,10vw,68px);font-weight:900;letter-spacing:-.02em;
+  line-height:1.02;text-shadow:0 2px 18px rgba(0,0,0,.55)}
+.hero .name .tag{margin:8px 0 0;font-size:15px;font-weight:600;opacity:.94;text-shadow:0 1px 8px rgba(0,0,0,.6);max-width:34ch}
+.hero .addlogo{display:inline-flex;align-items:center;gap:7px;margin-top:14px;
+  background:#fff;color:var(--dd-ink);border:0;border-radius:999px;padding:11px 18px;font-weight:800;font-size:14px;cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,0,0,.28)}
+
+/* ---------- CURTAIN (bottom sheet) ---------- */
+.curtain{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;
+  border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(27,18,38,.28);
+  height:88vh;transform:translateY(calc(88vh - 148px));
+  transition:transform .34s cubic-bezier(.22,.7,.28,1);display:flex;flex-direction:column;
+  touch-action:none;will-change:transform}
+.curtain.open{transform:translateY(0)}
+.curtain .grip{padding:9px 0 3px;cursor:grab;flex:0 0 auto}
+.curtain .grip .bar{width:44px;height:5px;border-radius:3px;background:var(--dd-line-2);margin:0 auto}
+.tabs{display:flex;gap:6px;padding:6px 12px 10px;flex:0 0 auto;border-bottom:1px solid var(--dd-line)}
+.tab{flex:1;border:0;background:var(--dd-panel2);color:var(--dd-muted);border-radius:12px;
+  padding:11px 6px;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--dd-ink);color:#fff}
+.sheetbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px}
+.pane{display:none}.pane.on{display:block}
+
+/* shared */
+.h{font-size:20px;font-weight:900;letter-spacing:-.01em;margin:2px 0 3px}
+.sub{color:var(--dd-muted);font-size:13.5px;margin:0 0 14px}
+.empty{border:1.5px dashed var(--dd-line-2);border-radius:14px;padding:26px 18px;text-align:center;background:#faf8fd}
+.empty .em{font-size:30px}.empty p{color:var(--dd-muted);margin:8px 0 14px;font-size:14px}
+.pbtn{display:inline-flex;align-items:center;gap:7px;background:var(--dd-rose-deep);color:#fff;border:0;
+  border-radius:11px;padding:11px 18px;font-weight:800;font-size:14px;cursor:pointer}
+.pbtn.ghost{background:#fff;color:var(--dd-ink);border:1px solid var(--dd-line-2)}
+.pbtn.claude{background:linear-gradient(100deg,#5a2e86,#b8002e);width:100%;justify-content:center;margin-top:6px;padding:13px}
+
+/* Schedule */
+.show{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--dd-line);
+  border-radius:13px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--dd-shadow)}
+.show .dt{flex:0 0 52px;text-align:center;background:var(--dd-panel2);border-radius:10px;padding:6px 2px}
+.show .dt .mo{font-size:10.5px;font-weight:800;color:var(--dd-rose-deep);text-transform:uppercase;letter-spacing:.06em}
+.show .dt .dy{font-size:20px;font-weight:900;line-height:1}
+.show .mid{flex:1;min-width:0}
+.show .vn{font-weight:800;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.show .ci{color:var(--dd-muted);font-size:12.5px}
+.show .tix{flex:0 0 auto;background:var(--dd-ink);color:#fff;border:0;border-radius:9px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer}
+
+/* Store */
+.storebar{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.storebar .cart{margin-left:auto;background:var(--dd-rose-deep);color:#fff;border-radius:999px;padding:6px 13px;font-weight:800;font-size:12.5px}
+.sect{display:flex;align-items:center;gap:10px;margin:20px 0 8px}
+.sect h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--dd-ink);margin:0;font-weight:900;white-space:nowrap}
+.sect .ln{flex:1;height:2px;border-radius:2px;background:var(--dd-line-2)}
+.sect .ct{font-size:11px;color:var(--dd-muted);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.prod{background:#fff;border:1px solid var(--dd-line);border-radius:13px;overflow:hidden;box-shadow:var(--dd-shadow)}
+.mock{aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative}
+.mock .lg{width:52%;height:52%;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
+.mock .mono{width:46%;height:46%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px}
+.mock .ptype{position:absolute;bottom:7px;left:9px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.pinfo{padding:10px 11px}
+.pinfo .pn{font-weight:800;font-size:13px;line-height:1.2}
+.pinfo .pr{color:var(--dd-muted);font-size:12.5px;margin-top:1px}
+.pinfo .add{margin-top:8px;width:100%;background:var(--dd-ink);color:#fff;border:0;border-radius:8px;padding:8px;font-weight:800;font-size:12px;cursor:pointer}
+
+/* Tools */
+.tool{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:#fff;border:1px solid var(--dd-line);
+  border-radius:13px;padding:14px 15px;margin-bottom:10px;cursor:pointer;box-shadow:var(--dd-shadow)}
+.tool .ic{font-size:22px;flex:0 0 auto}
+.tool .tt{flex:1}.tool .tt b{display:block;font-size:14.5px;font-weight:800}
+.tool .tt span{color:var(--dd-muted);font-size:12.5px}
+.tool .ch{color:var(--dd-faint);font-size:18px}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(88vh + 14px);transform:translateX(-50%) translateY(10px);
+  background:var(--dd-ink);color:#fff;padding:11px 16px;border-radius:12px;font-size:13.5px;font-weight:700;
+  max-width:82vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{color:var(--dd-faint);font-size:11.5px;text-align:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--dd-line)}
+</style></head>
+<body class="dd-band">
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="hero">
+  <div class="ph" id="heroPh"><div class="mono" id="phMono">DD</div></div>
+  <div class="scrim"></div>
+  <div class="top">
+    <span class="brand"><img src="dd-32.png" alt="DeadDance">DeadDance</span>
+    <span class="sp"></span>
+    <button class="iconbtn" title="Share" onclick="shareBand()">&#8681;</button>
+    <button class="iconbtn" title="Give a rose" onclick="giveRose()">🌹</button>
+  </div>
+  <div class="name">
+    <h1 id="bName">Your Band</h1>
+    <p class="tag" id="bTag">Live shows, merch, and one page that's all yours.</p>
+    <div id="addLogoWrap"></div>
+  </div>
+</section>
+
+<!-- ===================== CURTAIN ===================== -->
+<section class="curtain" id="curtain">
+  <div class="grip" id="grip"><div class="bar"></div></div>
+  <div class="tabs">
+    <button class="tab on" data-pane="schedule" onclick="showPane('schedule')">📅 Schedule</button>
+    <button class="tab" data-pane="store" onclick="showPane('store')">🛍️ Store</button>
+    <button class="tab" data-pane="tools" onclick="showPane('tools')">🛠️ Tools</button>
+  </div>
+  <div class="sheetbody">
+    <!-- SCHEDULE -->
+    <div class="pane on" id="pane-schedule">
+      <div class="h">Upcoming shows</div>
+      <p class="sub" id="schedSub">The band's next dates.</p>
+      <div id="schedList"></div>
+    </div>
+    <!-- STORE -->
+    <div class="pane" id="pane-store">
+      <div class="storebar">
+        <div><div class="h" style="margin:0">The store</div><p class="sub" style="margin:0">Your logo on the goods — printed &amp; shipped on demand.</p></div>
+        <span class="cart" id="cart">Cart · 0</span>
+      </div>
+      <button class="pbtn ghost" style="width:100%;justify-content:center;margin-bottom:6px" onclick="editStore()">✎ Edit my store with Claude</button>
+      <div id="storeGrid"></div>
+      <div class="foot" id="storeFoot"></div>
+    </div>
+    <!-- TOOLS -->
+    <div class="pane" id="pane-tools">
+      <div class="h">Tools</div>
+      <p class="sub">Everything to run your page.</p>
+      <button class="tool" onclick="toolPost()"><span class="ic">📡</span><span class="tt"><b>Post / HyperPost</b><span>Fan one post out to every network at once.</span></span><span class="ch">›</span></button>
+      <button class="tool" onclick="toolInvite()"><span class="ic">👥</span><span class="tt"><b>Invite fans</b><span>Bring your people onto your page.</span></span><span class="ch">›</span></button>
+      <button class="tool" onclick="toolPoster()"><span class="ic">🖼️</span><span class="tt"><b>Make a poster</b><span>A show poster with your art, in a tap.</span></span><span class="ch">›</span></button>
+      <button class="tool" onclick="toolShows()"><span class="ic">📅</span><span class="tt"><b>Manage shows</b><span>Add or edit your tour dates.</span></span><span class="ch">›</span></button>
+      <button class="pbtn claude" onclick="setupClaude()">✳ Set up with Claude</button>
+    </div>
+  </div>
+</section>
+
+<div id="toast"></div>
+
+<!-- ===================== DATA LAYER ===================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _DDC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _DDC;}; }catch(e){}</script>
+<script src="dd_me.js"></script>
+<script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
+<script src="dd_bands.js"></script>
+<script src="dd_shows.js"></script>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+<script src="dd_feed.js"></script>
+<script src="dd_spread.js"></script>
+<script src="dd_hyperpost.js"></script>
+<script src="dd_checkin.js"></script>
+<script src="dd_setup_agent.js"></script>
+
+<!-- ===================== PAGE ===================== -->
+<script>
+/* ---------- read the band from the URL (?band=name-or-slug, ?logo=url), fall back to a demo band ---------- */
+function qp(k){ try{ return new URLSearchParams(location.search).get(k); }catch(e){ return null; } }
+function slugify(s){ if(window.DDBands&&DDBands.slugify) return DDBands.slugify(s);
+  return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60); }
+function monogram(n){ return (n||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2)
+  .map(function(w){return w[0].toUpperCase();}).join('')||'DD'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+var BAND = { name: qp('band') || 'Demo Band', slug:'', logo: qp('logo') || null, region:null, homepage:null };
+BAND.slug = slugify(BAND.name);
+
+/* ---------- the merch catalogue — REUSED from band_store.html (its POOL / MERCH catalog of {n,price,cat,bg,fg,core}).
+   In production a print-on-demand API composites the band's uploaded logo onto real product photos. ---------- */
+var MERCH = [
+  {n:'Classic Tee',price:28,cat:'Tops',bg:'#1b1226',fg:'#fff',core:1},
+  {n:'Pullover Hoodie',price:54,cat:'Tops',bg:'#20242b',fg:'#fff',core:1},
+  {n:'Premium Tri-Blend Tee',price:32,cat:'Tops',bg:'#3a1f57',fg:'#fff'},
+  {n:'Long Sleeve Tee',price:36,cat:'Tops',bg:'#0e2a24',fg:'#fff'},
+  {n:'Baseball Raglan',price:34,cat:'Tops',bg:'#f2eee7',fg:'#1b1226'},
+  {n:'Tank Top',price:26,cat:'Tops',bg:'#7a1020',fg:'#fff'},
+  {n:'Zip Hoodie',price:58,cat:'Tops',bg:'#161616',fg:'#fff'},
+  {n:'Crewneck Sweatshirt',price:48,cat:'Tops',bg:'#6a3d1a',fg:'#fff'},
+  {n:'Dad Hat',price:30,cat:'Headwear',bg:'#243b2a',fg:'#fff'},
+  {n:'Trucker Cap',price:28,cat:'Headwear',bg:'#20242b',fg:'#fff'},
+  {n:'Snapback',price:32,cat:'Headwear',bg:'#1b1226',fg:'#fff'},
+  {n:'Beanie',price:26,cat:'Headwear',bg:'#3a1f57',fg:'#fff'},
+  {n:'Bucket Hat',price:30,cat:'Headwear',bg:'#0e2a24',fg:'#fff'},
+  {n:'Show Poster (18×24)',price:22,cat:'Home & Extras',bg:'#f2eee7',fg:'#1b1226',core:1},
+  {n:'Sticker Pack',price:8,cat:'Home & Extras',bg:'#e6e0f0',fg:'#1b1226',core:1},
+  {n:'Coffee Mug',price:18,cat:'Home & Extras',bg:'#ffffff',fg:'#1b1226'},
+  {n:'Tote Bag',price:24,cat:'Home & Extras',bg:'#e8e2d4',fg:'#1b1226'},
+  {n:'Enamel Pin',price:12,cat:'Home & Extras',bg:'#161616',fg:'#fff'},
+  {n:'Woven Patch',price:10,cat:'Home & Extras',bg:'#243b2a',fg:'#fff'},
+  {n:'Bandana',price:16,cat:'Home & Extras',bg:'#3a1f57',fg:'#fff'},
+  {n:'Wall Tapestry',price:45,cat:'Home & Extras',bg:'#20242b',fg:'#fff'},
+  {n:'Water Bottle',price:26,cat:'Home & Extras',bg:'#0e2a24',fg:'#fff'}
+];
+var CATS = ['Tops','Headwear','Home & Extras'];
+
+function toast(msg){ var t=document.getElementById('toast'); if(!t)return; t.textContent=msg; t.classList.add('on');
+  clearTimeout(toast._t); toast._t=setTimeout(function(){ t.classList.remove('on'); }, 2600); }
+
+/* ---------- HERO ---------- */
+function paintHero(){
+  document.getElementById('bName').textContent = BAND.name;
+  document.getElementById('phMono').textContent = monogram(BAND.name);
+  document.title = 'dd_' + BAND.name + ' — DeadDance';
+  var wrap = document.getElementById('addLogoWrap');
+  if(BAND.logo){
+    var img = document.createElement('img');
+    img.className='art'; img.alt=BAND.name; img.src=BAND.logo;
+    img.onerror = function(){ try{ img.remove(); }catch(e){} };   // fall back to the placeholder gradient beneath
+    document.getElementById('hero').insertBefore(img, document.getElementById('heroPh').nextSibling);
+    wrap.innerHTML='';
+  } else {
+    // no uploaded logo yet — tasteful placeholder + a way to add one
+    wrap.innerHTML = '<button class="addlogo" onclick="addLogo()">＋ Add your logo</button>';
+  }
+}
+function addLogo(){ location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(BAND.slug); }
+function shareBand(){
+  var url = location.href;
+  if(navigator.share){ navigator.share({title:BAND.name+' · DeadDance', url:url}).catch(function(){}); return; }
+  try{ (navigator.clipboard&&navigator.clipboard.writeText(url)); }catch(e){}
+  toast('⧉ Link copied — share your page 🌹');
+}
+function giveRose(){ toast('🌹 Rose sent to '+BAND.name); }
+
+/* ---------- pull the real band record (logo/region) from the directory, then repaint ---------- */
+function loadBand(){
+  if(!(window.DDBands && DDBands.list)) return;
+  DDBands.list().then(function(rows){
+    var hit=(rows||[]).filter(function(b){ return slugify(b.name)===BAND.slug || slugify(b.slug||'')===BAND.slug; })[0];
+    if(!hit) return;
+    BAND.name = hit.name || BAND.name;
+    BAND.region = hit.region || BAND.region;
+    BAND.homepage = hit.homepage || hit.links || BAND.homepage;
+    if(!BAND.logo && hit.logo) BAND.logo = hit.logo;   // don't stomp a ?logo= override
+    // repaint hero name + logo (remove any prior art first)
+    var old=document.querySelector('#hero .art'); if(old) old.remove();
+    paintHero();
+    renderStore(); renderSchedule();
+  }).catch(function(){});
+}
+
+/* ---------- CURTAIN: drag/tap up like the Musikfest map sheet ---------- */
+(function(){
+  var sheet=document.getElementById('curtain'), grip=document.getElementById('grip');
+  var COLLAPSED=null, startY=0, startT=0, dragging=false;
+  function collapsedOffset(){ return sheet.offsetHeight - 148; }        // handle + tabs peek above the fold
+  function setY(px){ sheet.style.transition='none'; sheet.style.transform='translateY('+px+'px)'; }
+  function release(px){
+    sheet.style.transition='';
+    var open = px < collapsedOffset()*0.5;
+    sheet.classList.toggle('open', open);
+    sheet.style.transform='';
+  }
+  function down(e){ dragging=true; startY=(e.touches?e.touches[0].clientY:e.clientY);
+    startT = sheet.classList.contains('open') ? 0 : collapsedOffset();
+    grip.style.cursor='grabbing'; }
+  function move(e){ if(!dragging)return; var y=(e.touches?e.touches[0].clientY:e.clientY);
+    var px=Math.max(0, Math.min(collapsedOffset(), startT + (y-startY))); setY(px);
+    if(e.cancelable) e.preventDefault(); }
+  function up(e){ if(!dragging)return; dragging=false; grip.style.cursor='grab';
+    var y=(e.changedTouches?e.changedTouches[0].clientY:e.clientY);
+    var moved=Math.abs(y-startY);
+    if(moved<6){ sheet.classList.toggle('open'); sheet.style.transform=''; return; }  // a tap = toggle
+    var px=Math.max(0, Math.min(collapsedOffset(), startT + (y-startY))); release(px); }
+  grip.addEventListener('mousedown', down); window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+  grip.addEventListener('touchstart', down, {passive:true}); grip.addEventListener('touchmove', move, {passive:false}); grip.addEventListener('touchend', up);
+})();
+
+function showPane(name){
+  var opening = !document.getElementById('curtain').classList.contains('open');
+  [].forEach.call(document.querySelectorAll('.tab'), function(b){ b.classList.toggle('on', b.getAttribute('data-pane')===name); });
+  [].forEach.call(document.querySelectorAll('.pane'), function(p){ p.classList.toggle('on', p.id==='pane-'+name); });
+  document.getElementById('curtain').classList.add('open');   // tapping a tab always opens the curtain
+  if(opening){ /* first open — content already rendered */ }
+}
+
+/* ---------- SCHEDULE ---------- */
+function fmtShow(s){
+  var d = s.date || s.p_date || s.day || '';
+  var dt = new Date((d||'').length<=10 ? d+'T00:00:00' : d);
+  var mo = isNaN(dt) ? '' : dt.toLocaleString(undefined,{month:'short'});
+  var dy = isNaN(dt) ? '' : dt.getDate();
+  var venue = s.venue || s.venue_name || 'TBA';
+  var city = [s.city, s.state].filter(Boolean).join(', ');
+  return '<div class="show">'+
+    '<div class="dt"><div class="mo">'+esc(mo)+'</div><div class="dy">'+esc(dy)+'</div></div>'+
+    '<div class="mid"><div class="vn">'+esc(venue)+'</div><div class="ci">'+esc(city||s.time||'')+'</div></div>'+
+    '<button class="tix" onclick="tix()">🎟 Tickets</button></div>';
+}
+function scheduleEmpty(){
+  return '<div class="empty"><div class="em">📅</div><p>No dates yet — add your shows so fans know where to find you.</p>'+
+    '<button class="pbtn" onclick="addDate()">＋ Add a date</button></div>';
+}
+function renderSchedule(){
+  var host=document.getElementById('schedList');
+  host.innerHTML='<div class="empty"><div class="em">⏳</div><p>Loading dates…</p></div>';
+  var done=function(rows){
+    var mine=(rows||[]).filter(function(s){
+      var bn=s.band_name||s.band||''; return slugify(bn)===BAND.slug || (s.band_id && BAND.id && s.band_id===BAND.id);
+    });
+    if(!mine.length){ host.innerHTML=scheduleEmpty(); return; }
+    host.innerHTML = mine.map(fmtShow).join('');
+  };
+  if(window.DDShows && DDShows.upcoming){ DDShows.upcoming(60, BAND.region).then(done).catch(function(){ host.innerHTML=scheduleEmpty(); }); }
+  else { host.innerHTML=scheduleEmpty(); }
+}
+function addDate(){
+  if(window.openGig){ try{ window.openGig(); return; }catch(e){} }
+  location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(BAND.slug);
+}
+function tix(){ toast('🎟 Tickets go live once this show is published.'); }
+
+/* ---------- STORE ---------- */
+var CART=0;
+function prodCard(p,i){
+  var light=(p.fg==='#fff');
+  var badge = light ? '#ffffff' : '#00000010';
+  var art = BAND.logo
+    ? '<img class="lg" src="'+esc(BAND.logo)+'" alt="'+esc(BAND.name)+'">'
+    : '<div class="mono" style="background:'+(light?'#ffffff22':'#00000010')+';color:'+p.fg+';border:1.5px solid '+(light?'#ffffff55':'#00000022')+'">'+monogram(BAND.name)+'</div>';
+  return '<div class="prod">'+
+    '<div class="mock" style="background:'+p.bg+'">'+art+
+      '<span class="ptype" style="color:'+(light?'#ffffff99':'#0007')+'">'+esc(p.n.split(' ')[0])+'</span></div>'+
+    '<div class="pinfo"><div class="pn">'+esc(p.n)+'</div><div class="pr">$'+p.price.toFixed(2)+'</div>'+
+    '<button class="add" onclick="addToCart('+i+')">Add</button></div></div>';
+}
+function renderStore(){
+  var host=document.getElementById('storeGrid'), html='';
+  CATS.forEach(function(cat){
+    var items=MERCH.filter(function(p){return p.cat===cat;});
+    if(!items.length) return;
+    html+='<div class="sect"><h3>'+esc(cat)+'</h3><span class="ln"></span><span class="ct">'+items.length+' items</span></div>';
+    html+='<div class="grid">'+items.map(function(p){ return prodCard(p, MERCH.indexOf(p)); }).join('')+'</div>';
+  });
+  host.innerHTML=html;
+  document.getElementById('storeFoot').textContent='© '+(new Date().getFullYear())+' '+BAND.name+' · a DeadDance store — your logo on demand.';
+}
+function addToCart(i){ CART++; document.getElementById('cart').textContent='Cart · '+CART; toast('🛒 Added '+MERCH[i].n); }
+function editStore(){
+  if(window.DDSetup && DDSetup.open){ DDSetup.open('store'); return; }
+  location.href='band_store.html?band='+encodeURIComponent(BAND.slug);
+}
+
+/* ---------- TOOLS ---------- */
+function toolPost(){
+  if(window.DDHyper && DDHyper.go){ DDHyper.go(''); return; }
+  if(window.hyperConsole){ try{ window.hyperConsole('dead.dance'); return; }catch(e){} }
+  toast('📡 HyperPost — write once, send everywhere.');
+}
+function toolInvite(){
+  if(window.DDSetup && DDSetup.open){ DDSetup.open('invite'); return; }
+  toast('👥 Invite tool opens here — email, text, or your FB friends.');
+}
+function toolPoster(){ location.href='poster_maker.html?band='+encodeURIComponent(BAND.slug); }
+function toolShows(){ location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(BAND.slug); }
+function setupClaude(){
+  if(window.DDSetup && DDSetup.open){ DDSetup.open('band'); return; }
+  toast('✳ The Claude install wizard opens here.');
+}
+
+/* ---------- boot ---------- */
+paintHero();
+renderStore();
+renderSchedule();
+loadBand();
+</script>
+</body></html>
