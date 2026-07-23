@@ -444,12 +444,16 @@
 
     /* --- Radiating FESTIVAL pins on the map (each shows until its end date, then vanishes).
            Tap → that festival's map, identical to opening it from the dropdown. Add more here. --- */
+    /* ⚠️ FAUX MARKETING PLACEMENT — the National + Chapter spots below are NOT geographically exact.
+       They're spread so BOTH festivals always read side-by-side and look great at each zoom. The TRUE
+       location lives ONLY in the event map (musikfest.html / allentownfair.html) and never changes —
+       tapping a beacon always opens the correct map. [ch]=chapter/Local pos, [nat]=National pos.
+       (Aug 10 reminder restores nothing here — these are intentional display offsets.) */
     var SM_FESTS = [
-      { name: "Musikfest 2026",            lat: 40.617,  lng: -75.376,  emoji: "🎪", end: "2026-08-09", href: "musikfest.html" },
-      // ⚠️ TEMP DISPLAY OFFSET — true location is 40.6047,-75.4785 but that overlaps Musikfest on the map.
-      //    Pushed well NW so both beacons clearly separate. Tapping still opens the CORRECT fairgrounds map.
-      //    RESTORE the real coords after Musikfest ends (Aug 9). [reminder set for Aug 10]
-      { name: "The Great Allentown Fair",  lat: 41.2, lng: -76.0, emoji: "🎡", end: "2026-09-07", href: "allentownfair.html" }
+      { name: "Musikfest 2026",           emoji: "🎪", end: "2026-08-09", href: "musikfest.html",
+        ch: [40.617, -75.376], nat: [43.2, -75.6] },
+      { name: "The Great Allentown Fair", emoji: "🎡", end: "2026-09-07", href: "allentownfair.html",
+        ch: [41.2, -76.0],     nat: [44.4, -77.2] }
     ];
     /* --- dots: sized as fraction of viewBox → constant on-screen. mode: 'nation' faint, 'chapter' bold+labels --- */
     function drawDots(vbW, chapterName) {
@@ -486,11 +490,11 @@
            always read — national or chapter zoom. Each shows until its end date, then vanishes. --- */
     function drawFests(vbW, isCh) {
       if (!festG) return;
-      if (!isCh) { festG.innerHTML = ""; return; }   // festivals are LOCAL — show on the chapter/Local map only, not the National overview (the badge covers the region there)
       var fhtml = "";
       SM_FESTS.forEach(function (F) {
         if (TODAY_ISO > F.end) return;
-        var fp = project(F.lat, F.lng),
+        var pos = isCh ? F.ch : F.nat;                 // faux position per zoom level — both always visible together
+        var fp = project(pos[0], pos[1]),
             fr   = (isCh ? 0.032 : 0.015) * vbW,   // pulse ring
             halo = (isCh ? 0.034 : 0.017) * vbW,   // white disc behind the emoji
             fe   = (isCh ? 0.050 : 0.028) * vbW;   // emoji size
