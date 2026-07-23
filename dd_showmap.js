@@ -461,6 +461,16 @@
         }
         html += '</g>';
       });
+      // ── Musikfest festival pin — radiates like the show dots, until the fest ends (Aug 9, 2026).
+      //    Tap → the Musikfest map, identical to the dropdown's "🎪 Musikfest 2026". ──
+      if (TODAY_ISO <= "2026-08-09") {
+        var fp = project(40.617, -75.376), fr = (isCh ? 0.013 : 0.0095) * vbW, fe = (isCh ? 0.030 : 0.023) * vbW;
+        html += '<g class="smfest" tabindex="0" role="button" aria-label="Musikfest 2026 — open the festival map" style="cursor:pointer"' +
+          ' onclick="event.stopPropagation();try{window.ddSheet?ddSheet(\'musikfest.html\',\'🎪 Musikfest 2026\'):window.open(\'musikfest.html\',\'_blank\',\'noopener\')}catch(e){}">' +
+          '<circle class="smfestpulse" cx="' + fp[0] + '" cy="' + fp[1] + '" r="' + fr.toFixed(1) + '"></circle>' +
+          '<text class="smfestic" x="' + fp[0] + '" y="' + fp[1] + '" text-anchor="middle" dominant-baseline="central" style="font-size:' + fe.toFixed(1) + 'px">🎪</text>' +
+          '</g>';
+      }
       dotsG.innerHTML = html;
       if (isCh) dotsG.querySelectorAll(".smdot").forEach(function (g) {
         var i = +g.getAttribute("data-i");
