@@ -275,7 +275,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div class="carbadge" id="carBadge" style="display:none"></div>
   <style>
   .silverfloat{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:250;width:min(440px,94vw);background:#fff;border:1px solid #eadff2;border-radius:16px;box-shadow:0 14px 44px rgba(20,10,35,.28);padding:12px 13px 13px;display:none;transform:translateX(-50%)}
-  .silverfloat.on{display:block;animation:svpop .28s cubic-bezier(.2,.9,.3,1.1)}
+  .silverfloat,.silverfloat.on{display:none!important;pointer-events:none}   /* REMOVED 2026-07-23 per request — panel overlaid the curtain and blocked taps; rework pending */
   .silverfloat .svx{position:absolute;top:8px;right:9px;border:0;background:#f2ecfb;color:#5a2e86;width:26px;height:26px;border-radius:8px;font-size:15px;line-height:1;cursor:pointer}
   @keyframes svpop{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
   </style>
@@ -997,7 +997,8 @@ function mfSilverActNow(){ if(!MF.length) return null; var day=todayISO(); if(DA
   rows.sort(function(a,b){ return Math.abs(mins(a.t)-nm)-Math.abs(mins(b.t)-nm); });
   return rows[0]||null; }
 var _silverDismissed='';
-function mfSilverTick(){ try{ var f=document.getElementById('silverFloat'); if(!f) return; var a=mfSilverActNow();
+function mfSilverTick(){ return;   /* Silver's asks DISABLED 2026-07-23 per request — was blocking curtain taps; rework pending */
+  try{ var f=document.getElementById('silverFloat'); if(!f) return; var a=mfSilverActNow();
   if(!a){ f.classList.remove('on'); return; }
   var key=a.b+'|'+a.t+'|'+a.d; if(key===_silverDismissed) return;   // respect the member's dismissal of THIS act
   renderAsks(a); f.classList.add('on'); try{ mfSilverCrowdRefresh(); }catch(e){}   // refresh the crowd count near-real-time even when the act is unchanged
