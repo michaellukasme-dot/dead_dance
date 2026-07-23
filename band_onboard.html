@@ -99,6 +99,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold2)}
 <script src="dd_profile.js"></script>
 <script src="dd_join.js"></script>
 <script src="dd_bands.js"></script>
+<script src="dd_roster.js"></script>
 <script src="dd_logoguess.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
@@ -121,7 +122,7 @@ var DEF={step:0,band:null,logo:null,logoLost:false,email:'',homepage:'',payout:'
   price:{Mon:250,Tue:250,Wed:300,Thu:400,Fri:600,Sat:700,Sun:350},
   auto:{ads:true,setlist:true,drip:true,calendar:true,dtb:true,followup:true,hyperpost:true,invite:true,qr:true},
   lists:{email:'',fbpage:'',fbgroups:'',ig:'',x:'',web:'',otherSites:''}, listOK:false,
-  chans:{fbpage:true,fbgroups:true,ig:true,x:true,email:true}, media:0, post:''};
+  chans:{fbpage:true,fbgroups:true,ig:true,x:true,email:true}, media:0, post:'', roster:[], _role:'guitar', _other:''};
 var S=JSON.parse(JSON.stringify(DEF));
 try{ var sv=JSON.parse(localStorage.getItem('dd.bandonboard')||'null');
      if(sv&&typeof sv==='object'&&!Array.isArray(sv)) S=Object.assign(S,sv); }catch(e){}
@@ -149,6 +150,11 @@ var LEFT=[
   p:"Upload it and it's on your band page, your merch, your show cards, your ads. We will never take it from the internet — <b>you hand it to us, and you can pull it back any time.</b>",
   mock:'<div class="mh">Your band page</div><div style="display:flex;gap:11px;align-items:center"><div class="mono" id="mkMono">?</div><div><div style="font-weight:800" id="mkName">Your Band</div><div style="font-size:12px;color:#7a7686" id="mkCity">Your City</div></div></div>',
   auto:["Automation you're turning on","Your logo auto-populates <b>every show card, poster, ad, and merch mock</b> across dead.dance. Upload once."]},
+
+ {h:"Your band, in the flesh",t:"A band is a roster.",
+  p:"Add your players — name and instrument — and each becomes a <b>DeadDance invite</b> to your band group. One person can sit in many bands. It's also how <b>Owsley</b> calls them out on stage: <i>“catch the guitarist mid-solo.”</i> Sound, lights &amp; camera crew belong here too.",
+  mock:'<div class="mh">Your roster</div><div style="font-size:13px;color:#7a7686">🎸 guitar · 🥁 drums · 🎵 bass · 🎹 keys — each one an invite</div>',
+  auto:["Automation you're turning on","Every member you add becomes an <b>invite</b> to your band group and powers Owsley's on-stage shout-outs — real names, real instruments, never guessed."]},
 
  {h:"Step 3 · Your calendar",t:"Every gig, everywhere, once.",
   p:"Paste your schedule link or your dates. From then on your shows appear on the <b>map</b>, the <b>chapter calendar</b> (a chapter is your region — yours is below), the <b>Near You</b> feed, and every fan who tuned in to you.",
@@ -584,7 +590,38 @@ function renderClaimConfirm(){
 window.claimYes=function(){ S.claimSeen=true; var g=claimGuessUrl(); if(g)S.logoGuess=g; S.step=1; save(); render(); toast('🌹 Welcome, '+((S.band&&S.band.name)||'')+' — let’s make it yours.'); };
 window.claimNo=function(){ S.claimSeen=true; S.fromClaim=false; S.band=null; S.step=0; save(); render(); };
 
-var STEPS=[stepFind,stepLogo,stepCal,stepStore,stepPrice,stepPay,stepAuto,stepLists,stepHyper,stepDone];
+/* ---------- Step: your band IS a roster (each member = a DD invite; powers Owsley's on-stage shout-outs) ---------- */
+var ROLES=[{v:'guitar',lb:'🎸 Guitar'},{v:'bass',lb:'🎵 Bass'},{v:'drums',lb:'🥁 Drums'},{v:'keys',lb:'🎹 Keys'},{v:'vocals',lb:'🎤 Vocals'}];
+function _rolebtn(v,lb){ var on=(S._role===v); return '<button type="button" onclick="setRole(\''+v+'\')" style="display:inline-block;margin:0 6px 6px 0;padding:8px 12px;border:1.5px solid '+(on?'transparent':'#d9cef0')+';border-radius:999px;background:'+(on?'linear-gradient(135deg,#b8002e,#7a3cc0)':'#fff')+';color:'+(on?'#fff':'#3a1f57')+';font-weight:800;font-size:13px;cursor:pointer">'+lb+'</button>'; }
+function stepRoster(){
+  S.roster=S.roster||[]; S._role=S._role||'guitar';
+  var band=(S.band&&S.band.name)||'your band';
+  var chips=ROLES.map(function(r){ return _rolebtn(r.v,r.lb); }).join('')+_rolebtn('__other__','＋ Other');
+  var custom=(S._role==='__other__')?'<input id="rmOther" placeholder="type it — Hurdy Gurdy, washboard, theremin…" style="margin-top:8px" value="'+esc(S._other||'')+'" oninput="S._other=this.value;save()">':'';
+  var list=S.roster.length? '<div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">'+S.roster.map(function(m,i){
+      return '<div style="display:flex;align-items:center;gap:9px;background:#faf7fd;border:1px solid #ece3f7;border-radius:11px;padding:8px 11px"><b style="color:#241535">'+esc(m.name)+'</b><span style="font-size:12px;color:#8a8296;font-weight:700">'+esc(m.role)+'</span><button onclick="rosterDrop('+i+')" aria-label="Remove" style="margin-left:auto;border:0;background:#f3e2e8;color:#b8002e;width:26px;height:26px;border-radius:8px;font-size:15px;cursor:pointer">×</button></div>'; }).join('')+'</div>' : '';
+  return '<h2 tabindex="-1">Your band</h2><div class="sub">A band <b>is</b> a roster. Who plays in <b>'+esc(band)+'</b>? Each one you add gets an invite: <i>“'+esc(band)+' invited you to DeadDance.”</i></div>'+
+    '<div class="skipbar">✅ Optional — add them now or later from your page. This is what lets <b>Owsley</b> call your players out on stage: <i>“catch '+((S.roster[0]&&esc(S.roster[0].name))||'your guitarist')+' mid-solo.”</i> Sound, lights &amp; camera crew can be added on your page too.</div>'+
+    '<label for="rmN">Bandmate</label>'+
+    '<input id="rmN" placeholder="name — e.g. Matt Hartle" autocomplete="off">'+
+    '<label style="margin-top:10px">Instrument</label>'+
+    '<div>'+chips+'</div>'+custom+
+    '<button class="btn go" style="margin-top:12px;width:100%;justify-content:center" onclick="rosterInvite()">✉️ Add + invite</button>'+
+    list;
+}
+window.setRole=function(v){ S._role=v; save(); render(); };
+window.rosterInvite=function(){
+  var el=document.getElementById('rmN'); var name=(el&&el.value||'').trim();
+  var role=(S._role==='__other__')?((S._other||'').trim()||'other'):S._role;
+  var band=(S.band&&S.band.name)||S.newName||'';
+  if(!name){ toast('Add a name 🌹'); return; }
+  S.roster=S.roster||[]; S.roster.push({name:name, role:role}); S._other=''; save();
+  try{ if(window.DDRoster&&band){ DDRoster.add(band, name, role, 'play'); } }catch(e){}   // the roster row IS the pending invite
+  toast('✉️ '+name+' added — invite queued for '+(band||'your band'));
+  render();
+};
+window.rosterDrop=function(i){ S.roster=S.roster||[]; S.roster.splice(i,1); save(); render(); };
+var STEPS=[stepFind,stepLogo,stepRoster,stepCal,stepStore,stepPrice,stepPay,stepAuto,stepLists,stepHyper,stepDone];
 
 function canNext(){
   if(S.step===0) return !!S.band;
