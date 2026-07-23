@@ -524,6 +524,13 @@ body{padding-bottom:64px}
 .adqr canvas{border-radius:10px}
 /* non-band slide: center the short content in the tall frame so the empty space reads as intentional */
 .adroll-slide.plain{justify-content:flex-start}
+/* Musikfest 2026 poster ad — the FULL poster (Doug Boehm) fills the ad's length, contained so nothing is cropped */
+.adroll-slide.poster{height:100%;display:flex;flex-direction:column;background:#140f1c;cursor:pointer}
+.adroll-slide.poster .posterimg{flex:1 1 auto;width:100%;min-height:0;object-fit:contain;display:block}
+.adroll-slide.poster .poster-cap{flex:0 0 auto;background:#fff;padding:8px 12px 10px;text-align:center}
+.adroll-slide.poster .poster-cap b{display:block;font-size:13.5px;color:var(--ink,#1a1320);line-height:1.2;white-space:normal}
+.adroll-slide.poster .poster-cap .by{display:block;font-size:11px;color:var(--rose,#b8002e);font-weight:800;margin-top:2px;line-height:1.25}
+.adroll-slide.poster .poster-cap .cta{display:block;font-size:11px;color:var(--accent,#5a2e86);font-weight:800;margin-top:4px}
 /* ad-swap effects — a mix cycled through like a slide deck (fixed 216px card contains them) */
 .adroll-view{perspective:1000px}
 .adroll-slide{will-change:transform,opacity,filter;backface-visibility:hidden}
@@ -969,7 +976,7 @@ body.dd-insider .dd-only{display:block}
         {logo:'logos/grateful_fred.png',      ic:'💀', bg:'linear-gradient(135deg,#b8002e,#241535)', biz:'Grateful Fred', off:'Officially licensed Stealie badges · buy more save more', cta:'Shop ›'}
       ];
       var AD_PITCH={ic:'📣', bg:'linear-gradient(135deg,#f0a500,#c79a3a)', biz:'Advertise here', off:'Pitch your festival · fill your room — the whole Dead family sees it', house:true, pitch:true, cta:'Buy a spot · LESS / MORE / MOST ›'};
-      var AD_POSTER={logo:'MUSIKFEST_poster.jpg', ic:'🎨', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Musikfest 2026 Poster Artist', off:'The official festival poster — signed prints', cta:'Get a print ›', beth:true};
+      var AD_POSTER={poster:'MUSIKFEST_poster.jpg', ic:'🎨', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Musikfest 2026 — “Music Unites”', off:'Official festival poster by artist Doug Boehm · celebrating America 250', cta:'See the 2026 poster ›', url:'https://www.artsquest.org/doug-boehm-returns-as-musikfest-poster-artist-with-2026-design-celebrating-america-250/', beth:true};
       var AD_ACI={logo:'logos/aci_consulting.png', ic:'📊', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'Abboud Consulting Inc. (ACI)', off:'Strategy & operations consulting', cta:'Get in touch ›', beth:true};   // 2× roll (added twice to the partner pool)
       function adHead(a){ return (a.ic||'🌹') + (a.logo ? '<img class="adlogo" src="'+a.logo+'" alt="" onerror="this.remove()">' : ''); }
       /* Every Musikfest act → a rolling ad inviting them onto StageFill (618 acts, deduped by band).
@@ -993,6 +1000,14 @@ body.dd-insider .dd-only{display:block}
       function adRender(a){ var v=document.getElementById('adRollView'); if(!v||!a)return; curAd=a; window.__curAd=a;
         var fx=FX[fxi++ % FX.length];   // cycle the swap effect like a slide deck
         var body, plain='';
+        if(a.poster){   // the Musikfest 2026 poster ad — show the WHOLE poster full-length (Doug Boehm), never cropped
+          v.innerHTML='<div class="adroll-slide poster adfx-'+fx+'" onclick="adRollTap()">'
+            +'<img class="posterimg" src="'+a.poster+'" alt="Musikfest 2026 poster by Doug Boehm" onerror="this.style.display=\'none\'">'
+            +'<div class="poster-cap"><b>'+a.biz+'</b><span class="by">'+a.off+'</span><span class="cta">'+a.cta+'</span></div>'
+            +'</div>';
+          var pdt=document.getElementById('adRollDots'); if(pdt) pdt.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
         if(a.stagefill){
           /* BAND slide = the recruitment card: Upload your Logo (→ the ad) + the band's OWN unique fan-invite QR */
           body='<div class="adroll-body band">'
