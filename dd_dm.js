@@ -117,6 +117,7 @@
   function send() {
     var inp = document.getElementById("ddm-input"); if (!inp) return;
     var txt = (inp.value || "").trim(); if (!txt) return;
+    try { if (w.DDHyper && DDHyper.learn) DDHyper.learn(txt); } catch (e) {}   // learn my voice from real messages too
     var c = client(); if (!c || !curThread) { toast("Message didn’t send — try again"); return; }
     inp.disabled = true;
     try {

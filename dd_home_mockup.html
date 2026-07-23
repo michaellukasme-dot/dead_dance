@@ -336,6 +336,7 @@
 <script src="dd_setup_agent.js"></script>
 <script src="dd_bday.js"></script>
 <script src="dd_dm.js"></script>
+<script src="dd_muse.js"></script>
 <script src="dd_feed.js"></script>
 <script src="dd_reels.js"></script>
 <script src="lukas_chat.js"></script>
@@ -522,6 +523,7 @@ function openCompose(){ var t=document.getElementById('composeText'); if(t)t.val
 function closeCompose(){ document.getElementById('composeOv').classList.remove('on'); }
 function postSubmit(){ var t=document.getElementById('composeText'); var txt=(t&&t.value||'').trim();
   if(!txt){ toast('Write something first 🌹'); return; }
+  try{ if(window.DDHyper&&DDHyper.learn) DDHyper.learn(txt); }catch(e){}   /* learn my voice from what I actually write */
   var btn=document.querySelector('.composego');
   if(!(window.DDFeed&&DDFeed.post)){ toast('Feed is loading — try again in a moment'); return; }
   if(window.DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to post 🌹'); return; }
@@ -554,6 +556,7 @@ function renderComments(pid,box){ box.dataset.loaded='1';
 window.sendComment=function(pid,inp){ var v=(inp&&inp.value||'').trim(); if(!v)return;
   if(!(window.DDFeed&&DDFeed.comment)){ toast('Comments loading…'); return; }
   if(DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to comment 🌹'); return; }
+  try{ if(window.DDHyper&&DDHyper.learn) DDHyper.learn(v); }catch(e){}
   inp.value=''; DDFeed.comment(pid,v).then(function(){ var box=document.querySelector('.post[data-pid="'+pid+'"] .comments'); if(box){ box.dataset.loaded=''; renderComments(pid,box); } bumpCommentCount(pid,1); })
     .catch(function(){ toast('Couldn’t comment — try again'); inp.value=v; }); };
 function bumpCommentCount(pid,delta){ var b=document.querySelector('.post[data-pid="'+pid+'"] .cct'); if(!b)return; var n=(parseInt((b.textContent||'').replace(/\D/g,''),10)||0)+delta; b.textContent=n?('· '+n):''; }
@@ -750,6 +753,7 @@ function groupRenderComments(pid,box){ box.dataset.loaded='1';
 window.groupSendComment=function(inp){ var v=(inp&&inp.value||'').trim(); if(!v)return; var post=inp.closest('.post'); if(!post)return; var pid=post.getAttribute('data-pid');
   if(!(window.DDFeed&&DDFeed.comment)){ toast('Comments loading…'); return; }
   if(DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to comment 🌹'); return; }
+  try{ if(window.DDHyper&&DDHyper.learn) DDHyper.learn(v); }catch(e){}
   inp.value=''; DDFeed.comment(pid,v).then(function(){ var box=post.querySelector('.comments'); if(box){ box.dataset.loaded=''; groupRenderComments(pid,box); } var b=post.querySelector('.cct'); if(b){ var n=(parseInt((b.textContent||'').replace(/\D/g,''),10)||0)+1; b.textContent=n?('· '+n):''; } })
     .catch(function(){ toast('Couldn’t comment — try again'); inp.value=v; }); };
 window.groupToggleComments=groupToggleComments;
@@ -781,6 +785,7 @@ function renderGroupThread(){ var host=document.getElementById('groupThread'); i
 window.groupPostSubmit=function(){ var inp=document.getElementById('groupComposeInput'); var v=(inp&&inp.value||'').trim(); if(!v)return;
   if(!(window.DDFeed&&DDFeed.groupPost)){ toast('Posting is loading…'); return; }
   if(DDFeed.ready&&!DDFeed.ready()){ toast('Sign in to post 🌹'); return; }
+  try{ if(window.DDHyper&&DDHyper.learn) DDHyper.learn(v); }catch(e){}
   if(inp)inp.value='';
   DDFeed.groupPost(_curGroup,v).then(function(){ try{ if(window.DDCoins)DDCoins.feed('post'); }catch(e){} renderGroupThread(); toast('📡 Posted to '+_curGroupName+' 🌹'); })
     .catch(function(){ toast('Couldn’t post — try again'); if(inp)inp.value=v; }); };
