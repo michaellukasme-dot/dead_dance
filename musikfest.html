@@ -278,9 +278,26 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   .silverfloat,.silverfloat.on{display:none!important;pointer-events:none}   /* REMOVED 2026-07-23 per request — panel overlaid the curtain and blocked taps; rework pending */
   .silverfloat .svx{position:absolute;top:8px;right:9px;border:0;background:#f2ecfb;color:#5a2e86;width:26px;height:26px;border-radius:8px;font-size:15px;line-height:1;cursor:pointer}
   @keyframes svpop{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+  /* ===== Crowdsource ASK toast — ONE at a time, context+location aware, floats OVER THE MAP, expires if ignored ===== */
+  #mfAsk{position:fixed;left:50%;top:88px;transform:translateX(-50%) translateY(-10px);z-index:270;width:min(440px,92vw);opacity:0;pointer-events:none;transition:opacity .32s ease,transform .32s cubic-bezier(.2,.9,.3,1.1)}
+  #mfAsk.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  #mfAsk .ask-card{position:relative;pointer-events:auto;overflow:hidden;background:rgba(26,17,38,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;border:1px solid #ffffff2b;border-radius:16px;box-shadow:0 16px 44px #000a;padding:13px 14px 15px}
+  #mfAsk .ask-hd{display:flex;align-items:center;gap:8px;margin-right:26px}
+  #mfAsk .ask-hd img{width:19px;height:19px;flex:none}
+  #mfAsk .ask-hd .who{font-size:10.5px;font-weight:800;color:#e2d3fb;line-height:1.25}
+  #mfAsk .ask-hd .who b{color:#fff}
+  #mfAsk .ask-txt{font-size:14px;font-weight:700;line-height:1.36;margin:9px 0 12px}
+  #mfAsk .ask-txt b{color:#ffd76a}
+  #mfAsk .ask-cta{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f0a500,#e0577a);color:#241018;border:0;border-radius:11px;font-weight:900;font-size:13px;padding:9px 15px;cursor:pointer;box-shadow:0 3px 10px #0006}
+  #mfAsk .ask-cta:active{transform:scale(.96)}
+  #mfAsk .ask-meta{font-size:11px;color:#d9c9f2;font-weight:700;margin-top:9px}
+  #mfAsk .ask-x{position:absolute;top:8px;right:8px;border:0;background:#ffffff20;color:#fff;width:26px;height:26px;border-radius:8px;font-size:15px;line-height:1;cursor:pointer}
+  #mfAsk .ask-bar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,#f0a500,#e0577a);transform-origin:left;animation:askExp linear forwards}
+  @keyframes askExp{from{transform:scaleX(1)}to{transform:scaleX(0)}}
   </style>
   <!-- Silver's asks float over the map by ACT-ON-NOW (GPS-prioritized), seen at the right moment — not buried in a curtain -->
   <div class="silverfloat" id="silverFloat"></div>
+  <div id="mfAsk" aria-live="polite"></div>   <!-- one crowdsource ask at a time, floats over the map, expires if ignored -->
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
@@ -1015,6 +1032,51 @@ function mfSilverCrowdRefresh(){ try{ var el=document.getElementById('silverCrow
 }catch(e){} }
 setInterval(function(){ try{ mfSilverTick(); }catch(e){} }, 60000);   // re-check the "on now" act each minute
 setTimeout(function(){ try{ mfSilverTick(); }catch(e){} }, 900);       // and once shortly after load
+
+/* ===== Crowdsource ASK — Waze ethos: ONE tap, ephemeral, infrequent. No road danger in DD,
+   but we protect the SHOW: a single context+location ask, floated over the map, gone in ~10s if ignored. ===== */
+var _askTimer=null, _askBusy=false, _askRot=0, _askLastKey='', _askLastAt=0;
+var ASK_EXPIRE=10000;         // ignored → fades in 10s
+var ASK_MINGAP=240000;        // at most one ask every ~4 min — never nag during a set
+function _askName(){ try{ return (typeof myFirst==='function'&&myFirst())||''; }catch(e){ return ''; } }
+function mfAskLine(a, n){
+  var nm=_askName(), band=esc(a.b||'the band'), stage=esc(a.st||'the stage'), who=nm?('<b>'+esc(nm)+'</b>, '):'';
+  var lines=[
+    { txt: who+'I’m making a collage with '+(n>0?('<b>'+n+'</b> friends'):'the family')+' around '+stage+' — grab <b>'+band+'</b> from your angle.', cta:'📷 Add my shot', act:'photo' },
+    { txt: '<b>'+band+'</b>’s on at '+stage+' — one wide shot of the crowd, arms up?', cta:'📷 Grab it', act:'photo' },
+    { txt: (n>0?('<b>'+n+'</b> angles already ring '+stage+'. '):'')+'Catch the one nobody else has — stage-left.', cta:'📷 My angle', act:'photo' },
+    { txt: who+'at '+stage+' for <b>'+band+'</b>? Check in — the family will feel it.', cta:'📣 Check in', act:'checkin' }
+  ];
+  return lines[_askRot % lines.length];
+}
+function mfAskRender(a, n){
+  var host=document.getElementById('mfAsk'); if(!host) return;
+  var L=mfAskLine(a,n); _askRot++;
+  host.innerHTML='<div class="ask-card">'
+    +'<button class="ask-x" onclick="mfAskClose(false)" aria-label="Not now">×</button>'
+    +'<div class="ask-hd"><img src="claude-mark.svg" alt=""><span class="who">Silver’s on the mic — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div>'
+    +'<div class="ask-txt">'+L.txt+'</div>'
+    +'<button class="ask-cta" onclick="mfAskDo(\''+L.act+'\')">'+L.cta+'</button>'
+    +'<span class="ask-meta">🍪 +25 · one tap</span>'
+    +'<div class="ask-bar" style="animation-duration:'+ASK_EXPIRE+'ms"></div>'
+    +'</div>';
+  host.classList.add('on'); _askBusy=true; _askLastAt=Date.now();
+  clearTimeout(_askTimer); _askTimer=setTimeout(function(){ mfAskClose(false); }, ASK_EXPIRE);
+}
+window.mfAskClose=function(kept){ var h=document.getElementById('mfAsk'); if(h) h.classList.remove('on'); clearTimeout(_askTimer); _askBusy=false; };
+window.mfAskDo=function(act){ if(act==='photo'){ var p=document.getElementById('photoIn'); if(p)p.click(); } else if(act==='checkin'){ try{ mfCheckIn(); }catch(e){} } window.mfAskClose(true); };
+function mfAskTick(){
+  if(_askBusy) return;                                   // one at a time — never stack
+  if(Date.now()-_askLastAt < ASK_MINGAP) return;         // protect the show — long gaps between asks
+  if(document.hidden) return;                            // not while the tab's away
+  var a=(typeof mfSilverActNow==='function')&&mfSilverActNow(); if(!a) return;   // nothing on now near you → stay silent
+  var ref=mfSurroundRefOf(a), c=(window.ddClient&&ddClient());
+  function go(n){ mfAskRender(a,n); _askLastKey=a.b+'|'+a.st+'|'+a.t; }
+  if(!c){ go(0); return; }
+  try{ c.rpc('dd_surround_count',{p_ref:ref}).then(function(r){ go(Number((r&&r.data)||0)); }).catch(function(){ go(0); }); }catch(e){ go(0); }
+}
+setTimeout(function(){ try{ mfAskTick(); }catch(e){} }, 20000);    // first ask, gentle — 20s after the map opens
+setInterval(function(){ try{ mfAskTick(); }catch(e){} }, 60000);   // check each minute; ASK_MINGAP keeps it to ~1 every 4 min
 // ===== Claude on the mic — the app WRITES specific asks for whoever's on now; the shot IS the send =====
 var MF_SONGS=['Cumberland Blues','Sugar Magnolia','Fire on the Mountain',"Truckin'",'Bertha','Scarlet Begonias','Ripple',"Franklin's Tower",'Deal','Eyes of the World','Shakedown Street','Sugaree'];
 function askList(a){ var song=MF_SONGS[Math.floor(Math.random()*MF_SONGS.length)];
