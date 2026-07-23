@@ -58,7 +58,18 @@
       "#ddm-comp{display:flex;padding:7px 8px;border-top:1px solid #eee;gap:6px;align-items:center;background:#fff}" +
       "#ddm-input{flex:1;min-width:0;border:1px solid #e7e0d2;border-radius:20px;padding:9px 13px;font-size:14px;outline:none}" +
       "#ddm-send{background:" + ac + ";color:#fff;border:0;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;flex:none;font-weight:600}" +
-      "#ddm-send:active{transform:scale(.94)}";
+      "#ddm-send:active{transform:scale(.94)}" +
+      ".ddm-age-wrap{position:fixed;inset:0;z-index:10001;background:rgba(20,10,25,.55);display:flex;align-items:center;justify-content:center;padding:20px}" +
+      ".ddm-age-card{background:#fff;border-radius:18px;max-width:340px;width:100%;padding:20px 18px;box-shadow:0 20px 60px rgba(0,0,0,.4);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}" +
+      ".ddm-age-h{font-weight:800;font-size:17px;color:#1a1320;margin-bottom:6px}" +
+      ".ddm-age-b{font-size:13px;color:#4a4356;line-height:1.5;margin-bottom:12px}" +
+      ".ddm-age-in{width:100%;box-sizing:border-box;border:1.5px solid #e7ddf5;border-radius:12px;padding:12px 14px;font-size:20px;letter-spacing:.18em;text-align:center;outline:none;margin-bottom:12px}" +
+      ".ddm-age-in:focus{border-color:#7a3cc0}" +
+      ".ddm-age-row{display:flex;gap:8px}" +
+      ".ddm-age-cancel{flex:1;border:1px solid #e7ddf5;background:#faf7ff;color:#5a2e86;font-weight:700;border-radius:11px;padding:11px;font-size:13.5px;cursor:pointer}" +
+      ".ddm-age-go{flex:1.4;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-weight:800;border-radius:11px;padding:11px;font-size:13.5px;cursor:pointer}" +
+      ".ddm-age-go:disabled{opacity:.6}" +
+      ".ddm-age-note{font-size:12px;color:#b8002e;margin-top:9px;min-height:15px;text-align:center}";
     var s = document.createElement("style"); s.id = "ddm-css"; s.textContent = css; document.head.appendChild(s);
   }
   function buildDom() {
@@ -138,12 +149,69 @@
   function stopPoll() { if (poll) { clearInterval(poll); poll = null; } }
 
   // =========================================================================
+  // AGE GATE  → dd_dm_enable  (the ONLY path to dm_ok=true; verified server-side)
+  // =========================================================================
+  var _ageCb = null;
+  function persistEnabled(v) { w.DD_DM_ENABLED = !!v; try { localStorage.setItem("dd_dm_enabled", v ? "1" : "0"); } catch (e) {} }
+  function hydrate() {
+    // server truth wins: DDMe profile carries dm_ok once loaded
+    try { var dm = w.DDMe && DDMe.get && DDMe.get("dm_ok"); if (dm === true) { w.DD_DM_ENABLED = true; return; } if (dm === false) { /* keep local fallback below */ } } catch (e) {}
+    try { if (localStorage.getItem("dd_dm_enabled") === "1") { w.DD_DM_ENABLED = true; } } catch (e) {}
+  }
+  function ageClose() { var el = document.getElementById("ddm-age"); if (el && el.parentNode) el.parentNode.removeChild(el); }
+  function ageCancel() { _ageCb = null; ageClose(); }
+  function ageGate(onOk) {
+    injectCss(); ageClose(); _ageCb = onOk || null;
+    var wrap = document.createElement("div"); wrap.id = "ddm-age"; wrap.className = "ddm-age-wrap";
+    wrap.innerHTML =
+      '<div class="ddm-age-card">' +
+        '<div class="ddm-age-h">🌹 Unlock Direct Messages</div>' +
+        '<div class="ddm-age-b">DMs are private, and only for friends 18 and older. Enter your birth year to unlock them — we keep your eligibility, never your birthday, never a post.</div>' +
+        '<input id="ddm-age-yr" class="ddm-age-in" inputmode="numeric" maxlength="4" placeholder="YYYY" onkeydown="if(event.key===\'Enter\')DDDM._ageGo()">' +
+        '<div class="ddm-age-row">' +
+          '<button class="ddm-age-cancel" onclick="DDDM._ageCancel()">Not now</button>' +
+          '<button class="ddm-age-go" onclick="DDDM._ageGo()">Unlock DMs</button>' +
+        '</div><div class="ddm-age-note" id="ddm-age-note"></div>' +
+      '</div>';
+    try { wrap.addEventListener("click", function (e) { if (e.target === wrap) ageCancel(); }); } catch (e) {}
+    try { document.body.appendChild(wrap); } catch (e) {}
+    setTimeout(function () { var i = document.getElementById("ddm-age-yr"); if (i) try { i.focus(); } catch (e) {} }, 40);
+  }
+  function ageGo() {
+    var i = document.getElementById("ddm-age-yr"), note = document.getElementById("ddm-age-note");
+    var yr = parseInt(String(i && i.value || "").replace(/\D/g, ""), 10);
+    var yrNow = new Date().getFullYear();
+    if (!yr || yr < 1900 || yr > yrNow) { if (note) note.textContent = "Enter a valid 4-digit year."; return; }
+    if (!myId()) { if (note) note.textContent = "Sign in first to unlock DMs."; return; }
+    var c = client(); if (!c) { if (note) note.textContent = "Need a connection — try again with signal."; return; }
+    var go = document.querySelector(".ddm-age-go"); if (go) { go.disabled = true; go.textContent = "Checking…"; }
+    try {
+      c.rpc("dd_dm_enable", { p_birth_year: yr }).then(function (r) {
+        if (go) { go.disabled = false; go.textContent = "Unlock DMs"; }
+        if (r && r.error) { if (note) note.textContent = r.error.message || "Try again."; return; }
+        var ok = (r && r.data) === true;
+        if (!ok) { persistEnabled(false); if (note) note.textContent = "DMs are limited to friends 18 and older."; return; }
+        persistEnabled(true);
+        var cb = _ageCb; _ageCb = null; ageClose(); toast("💬 Direct messages unlocked 🌹");
+        if (typeof cb === "function") try { cb(); } catch (e) {}
+      }).catch(function () { if (go) { go.disabled = false; go.textContent = "Unlock DMs"; } if (note) note.textContent = "Try again."; });
+    } catch (e) { if (go) { go.disabled = false; go.textContent = "Unlock DMs"; } }
+  }
+  // ---- inbox: real recent conversations (dd_dm_threads_list) ----
+  function recent() {
+    var c = client(); if (!c || !myId()) return Promise.resolve([]);
+    try { return c.rpc("dd_dm_threads_list", {}).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; }); }
+    catch (e) { return Promise.resolve([]); }
+  }
+
+  // =========================================================================
   // PUBLIC
   // =========================================================================
   function open(friendUid, friendName) {
     try {
       if (!enabled()) {
-        toast("💬 Friend messaging is coming soon — unlocks with age verification 🌹");
+        if (!myId()) { toast("Sign in to message your friends"); return; }
+        ageGate(function () { open(friendUid, friendName); });   // verify age, then open the thread
         return;
       }
       if (!myId()) { toast("Sign in to message your friends"); return; }
@@ -175,5 +243,11 @@
     } catch (e) {}
   }
 
-  w.DDDM = { enabled: enabled, open: open, close: close, _send: send };
+  w.DDDM = { enabled: enabled, open: open, close: close, _send: send,
+             verify: ageGate, recent: recent, hydrate: hydrate,
+             _ageGo: ageGo, _ageCancel: ageCancel };
+
+  // pick up dm_ok from the server profile as soon as it loads (and on sign-in changes)
+  try { hydrate(); } catch (e) {}
+  try { if (w.DDMe && DDMe.onChange) DDMe.onChange(function () { try { hydrate(); } catch (e) {} }); } catch (e) {}
 })(window);

@@ -411,15 +411,26 @@ function loadMgrFriends(){ var host=document.getElementById('mgrFriends'); if(!h
       var acts='<button class="mgadd" onclick="DDDM.open(\''+id+'\',\''+nm.replace(/\x27/g,'')+'\')">💬 Message</button>';
       return _mgRow(nm,'🌹 Friend',acts,'mf-'+i); }).join(''); })
     .catch(function(){ host.innerHTML='<div class="mgempty">No friends yet — invite some 🌹</div>'; }); }
-/* Right rail — Messages side: friends as DM targets */
+/* Right rail — Messages: REAL inbox (recent conversations) + friends to start new ones */
+var _railG=['linear-gradient(135deg,#c08a2d,#b8002e)','linear-gradient(135deg,#2f7bf6,#12305e)','linear-gradient(135deg,#1f9e6b,#123b28)','linear-gradient(135deg,#7a3cc0,#3a1f57)','linear-gradient(135deg,#e0577a,#b8002e)'];
+function _railChip(id,nm,i,sub){ var av=(String(nm).charAt(0)||'🌹').toUpperCase(); var q=String(nm).replace(/\x27/g,'');
+  return '<div class="con" onclick="DDDM.open(\''+id+'\',\''+q+'\')"><div class="av" style="background:'+_railG[i%5]+'">'+_esc(av)+'</div>'+
+    '<div style="flex:1;min-width:0"><b>'+_esc(nm)+'</b>'+(sub?'<div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(sub)+'</div>':'')+'</div>'+
+    '<button title="Message" onclick="event.stopPropagation();DDDM.open(\''+id+'\',\''+q+'\')" style="border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>'; }
 function loadRailMessages(){ var host=document.getElementById('railMsgs'); if(!host)return;
   var empty='<div class="con" style="cursor:default"><div class="av" style="background:linear-gradient(135deg,#7a3cc0,#3a1f57)">🌹</div><b style="font-weight:600">Your messages live here — add friends to start 🌹</b></div>';
-  if(!(window.DDFriends&&DDFriends.friends)){ host.innerHTML=empty; return; }
-  DDFriends.friends().then(function(list){ if(!list||!list.length){ host.innerHTML=empty; return; }
-    var G=['linear-gradient(135deg,#c08a2d,#b8002e)','linear-gradient(135deg,#2f7bf6,#12305e)','linear-gradient(135deg,#1f9e6b,#123b28)','linear-gradient(135deg,#7a3cc0,#3a1f57)','linear-gradient(135deg,#e0577a,#b8002e)'];
-    host.innerHTML=list.map(function(f,i){ var nm=_frName(f); var id=_frId(f); var av=(String(nm).charAt(0)||'🌹').toUpperCase();
-      return '<div class="con"><div class="av" style="background:'+G[i%5]+'">'+_esc(av)+'</div><b>'+_esc(nm)+'</b><button title="Message" onclick="DDDM.open(\''+id+'\',\''+String(nm).replace(/\x27/g,'')+'\')" style="margin-left:auto;border:0;background:#f0e9f7;color:#5a2e86;border-radius:8px;font-size:13px;padding:4px 8px;cursor:pointer">💬</button></div>'; }).join(''); })
-    .catch(function(){ host.innerHTML=empty; }); }
+  var recentP=(window.DDDM&&DDDM.recent)?DDDM.recent():Promise.resolve([]);
+  recentP.then(function(threads){ threads=threads||[];
+    var seen={}; var openHtml=threads.filter(function(t){return t&&t.other_id;}).map(function(t,i){ seen[String(t.other_id)]=1; return _railChip(t.other_id,t.other_name||'friend',i,'Open conversation'); }).join('');
+    if(!(window.DDFriends&&DDFriends.friends)){ host.innerHTML=openHtml||empty; return; }
+    DDFriends.friends().then(function(list){ list=list||[];
+      var friendHtml=list.filter(function(f){ var id=_frId(f); return id&&!seen[id]; }).map(function(f,i){ return _railChip(_frId(f),_frName(f),i+threads.length,''); }).join('');
+      host.innerHTML=(openHtml+friendHtml)||empty; })
+    .catch(function(){ host.innerHTML=openHtml||empty; }); })
+  .catch(function(){
+    if(!(window.DDFriends&&DDFriends.friends)){ host.innerHTML=empty; return; }
+    DDFriends.friends().then(function(list){ if(!list||!list.length){ host.innerHTML=empty; return; }
+      host.innerHTML=list.map(function(f,i){ return _railChip(_frId(f),_frName(f),i,''); }).join(''); }).catch(function(){ host.innerHTML=empty; }); }); }
 /* REAL invite facility — Email / Text / Facebook / Copy link */
 window.inviteVia=function(how){ var link='https://deaddance.app/?utm_source=invite&utm_medium=friends';
   var msg='Come see what we built — the whole Grateful Dead & jam family on one map. 🌹 '+link;
@@ -701,22 +712,32 @@ window.copyPostLink=function(pid){ closePostMenu(); var url=location.origin+loca
   '.synthcard .spend{font-size:11px;color:#9a8a5a;margin-top:8px}'+
   '</style>'); }catch(e){} })();
 
-/* honest-state: representative daily synthesis until the per-group synthesis job runs.
-   Framed clearly as "Claude reads the group · today" — same posture as the store's Daily Synthesis. */
-var GROUP_SYNTH={
- 'Grateful Dead Forever':{title:"Barton Hall keeps the family up tonight",
-   body:"The room is deep on 5/8/77 again — a Scarlet › Fire that never quits and where the Morning Dew ranks all-time. Between the tape talk, heads are trading rides for the Ardmore run and floating a couple stubs at face.",
-   clips:[{s:"The '77 Dew is the one that undoes me every listen",by:"Kara"},{s:"Two at face for Ardmore Friday — DM me",by:"Pat"}]},
- 'I Love The Grateful Dead!':{title:"First-show stories and a Bertha singalong",
-   body:"A warm one today — new heads posting their first-show memories, an old thread on the best Bertha openers back to life, and a run of lot photos from the weekend.",
-   clips:[{s:"My first was '89 JFK — never came back the same",by:"Robin"},{s:"Bertha into Greatest Story, every time",by:"Sage"}]},
- 'Deadhead Life':{title:"Lot kitchens, patches, and the long drive",
-   body:"Everyday-life bus talk: grilled-cheese setups on the lot, a patch-jacket build in progress, and folks planning the miles for the summer run. Generous and easy.",
-   clips:[{s:"Griddle + cast iron = lot legend status",by:"Gus"},{s:"Sewed 14 patches this week, jacket's almost full",by:"Iris"}]},
- 'Dead Lot':{title:"Shakedown is buzzing before doors",
-   body:"Vendors and heads syncing up: a new Greyhound Rock print drop, someone hunting a hand-dyed wrap, and the usual where-to-park wisdom for the next stop.",
-   clips:[{s:"New print drop at the north lot — cash or Venmo",by:"Tessa"},{s:"Anybody got a spare wrap in blues?",by:"Leo"}]}
-};
+/* Group synthesis is REAL, not fabricated. It comes from public.dd_group_synth
+   (written by the daily "Claude reads the group" job). Until that job has written a
+   recap for a group, the card shows an honest "no synthesis yet" state — never invented
+   quotes or activity. See renderGroupSynth(). */
+/* current-user avatar chip (image if we have one, else initial) — kills the hardcoded "M" */
+function _myAv(){ try{
+  var url=(window.DDMe&&DDMe.avatar&&DDMe.avatar())||'';
+  var nm=(window.DDFeed&&DDFeed.myName&&DDFeed.myName())||(window.DDMe&&DDMe.name&&DDMe.name())||'';
+  if(url) return '<img src="'+_esc(url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  return _esc((nm.charAt(0)||'🌹').toUpperCase());
+}catch(e){ return '🌹'; } }
+/* fetch real synthesis for the open group; honest empty state when none exists */
+function renderGroupSynth(name,slug){ var gs=document.getElementById('groupSynth'); if(!gs)return;
+  var head='<div class="sh">📰 Synthesis of the day · Claude reads '+_esc(name)+'</div>';
+  gs.innerHTML='<div class="synthcard">'+head+'<div class="sb">Reading the group…</div></div>';
+  var cl=(window.ddClient&&ddClient());
+  if(!cl||!slug){ gs.innerHTML='<div class="synthcard">'+head+'<div class="sb">No synthesis yet. Claude writes a clean daily recap of this group once the thread has enough to summarize — it lands here automatically, never fabricated.</div></div>'; return; }
+  cl.rpc('dd_group_synth_get',{p_slug:slug}).then(function(r){ var row=(r&&r.data&&r.data[0])||null;
+    if(row&&(row.title||row.body)){ var cs=Array.isArray(row.clips)?row.clips:[];
+      var clips=cs.map(function(c){ return '<div class="sclip">“<b>'+_esc(c.s||c.quote||'')+'</b>” — '+_esc(c.by||c.name||'a head')+'</div>'; }).join('');
+      gs.innerHTML='<div class="synthcard">'+head+(row.title?'<div class="st">'+_esc(row.title)+'</div>':'')+'<div class="sb">'+_esc(row.body||'')+'</div>'+clips+'<button class="samp" onclick="closeGroup();openCompose()">📣 HyperPost today’s synthesis — carry it home ▸</button><div class="spend">Updated '+_ago(row.updated_at)+' · never scraped, always credited.</div></div>';
+    } else {
+      gs.innerHTML='<div class="synthcard">'+head+'<div class="sb">No synthesis yet today. Claude writes a clean daily recap of this group once the thread has enough to summarize — it lands here automatically, never fabricated.</div></div>';
+    }
+  }).catch(function(){ gs.innerHTML='<div class="synthcard">'+head+'<div class="sb">Synthesis is warming up 🌹</div></div>'; });
+}
 
 /* self-contained comment handlers for the group thread (scope by closest('.post') so the hidden main feed is never touched) */
 function groupToggleComments(btn){ var post=btn.closest('.post'); if(!post)return; var box=post.querySelector('.comments'); if(!box)return;
@@ -745,7 +766,7 @@ function groupWireCounts(container,rows){ var ids=(rows||[]).map(function(r){ret
 }
 
 var _curGroup=null, _curGroupName=null;
-function _groupComposeHTML(name){ return '<div class="card composer" style="margin-bottom:12px"><div class="av">M</div>'+
+function _groupComposeHTML(name){ return '<div class="card composer" style="margin-bottom:12px"><div class="av" style="background:#fff">'+_myAv()+'</div>'+
   '<input id="groupComposeInput" placeholder="Post to '+_esc(name)+'…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();groupPostSubmit();}">'+
   '<button class="hp" onclick="groupPostSubmit()">📡 Post</button></div>'; }
 function renderGroupThread(){ var host=document.getElementById('groupThread'); if(!host||!_curGroup)return;
@@ -767,9 +788,7 @@ window.openGroupThread=function(name,ic,slug){ var ov=document.getElementById('g
   _curGroup=slug||''; _curGroupName=name;
   document.getElementById('groupName').textContent=name;
   document.getElementById('groupIc').textContent=ic||'🌹';
-  var s=GROUP_SYNTH[name]||{title:"Today on the bus",body:"Claude reads this group every day and writes the recap right here — the noise from scattered threads, cut to one clean read. Today's synthesis lands when the run completes.",clips:[]};
-  var clips=(s.clips||[]).map(function(c){ return '<div class="sclip">“<b>'+_esc(c.s)+'</b>” — '+_esc(c.by||'a head')+'</div>'; }).join('');
-  document.getElementById('groupSynth').innerHTML='<div class="synthcard"><div class="sh">📰 Synthesis of the day · Claude reads '+_esc(name)+'</div><div class="st">'+_esc(s.title)+'</div><div class="sb">'+_esc(s.body)+'</div>'+clips+'<button class="samp" onclick="closeGroup();openCompose()">📣 HyperPost today’s synthesis — carry it home ▸</button><div class="spend">Representative recap until today’s synthesis job runs — never scraped, always credited.</div></div>';
+  renderGroupSynth(name,_curGroup);
   renderGroupThread();
   ov.classList.add('on'); document.body.style.overflow='hidden'; };
 window.closeGroup=function(){ var ov=document.getElementById('groupOv'); if(ov)ov.classList.remove('on'); document.body.style.overflow=''; _curGroup=null; };

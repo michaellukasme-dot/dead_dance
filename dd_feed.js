@@ -99,7 +99,7 @@
     if (!c || !id || !postId) return Promise.reject('no-backend');
     var b = String(body == null ? '' : body).trim();
     if (!b) return Promise.reject('empty');
-    return c.rpc('dd_comment_add', { p_post_id: String(postId), p_author_id: id, p_author_name: myName(), p_body: b })
+    return c.rpc('dd_comment_add', { p_post_id: String(postId), p_body: b })
       .then(function (r) { if (r && r.error) throw r.error; return (r && r.data) || null; });
   }
   function comments(postId) {

@@ -40,7 +40,7 @@
       return c.from("dd_profile").select("*").eq("uid", uid).maybeSingle().then(function (r) {
         var row = (r && r.data) || null;
         me = { uid: uid, email: email };
-        if (row) { me.name = row.name || ""; me.email = row.email || email; me.avatar = row.avatar_url || ""; me.chapter = row.chapter || ""; me.role = row.role || ""; me.home = row.home || ""; }
+        if (row) { me.name = row.name || ""; me.email = row.email || email; me.avatar = row.avatar_url || ""; me.chapter = row.chapter || ""; me.role = row.role || ""; me.home = row.home || ""; me.dm_ok = row.dm_ok === true; }
         if (!row) {                                                                     // first sign-in on this account → seed the row
           var localName = ""; try { localName = localStorage.getItem("dd.myname") || ""; } catch (e) {}
           me.name = me.name || localName;

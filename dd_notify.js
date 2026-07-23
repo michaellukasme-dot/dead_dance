@@ -24,8 +24,8 @@
   function notifyFriends(p) {
     if (!(root.DDFriends && DDFriends.friends)) return Promise.resolve(0);
     return DDFriends.friends().then(function (fs) {
-      var mine = myId(); var list = (fs || []).filter(function (f) { return f && f.id && String(f.id) !== String(mine); });
-      return Promise.all(list.map(function (f) { return add(f.id, p); })).then(function () { return list.length; });
+      var mine = myId(); var list = (fs || []).filter(function (f) { var fid = f && (f.friend_id || f.id); return fid && String(fid) !== String(mine); });
+      return Promise.all(list.map(function (f) { return add(f.friend_id || f.id, p); })).then(function () { return list.length; });
     }).catch(function () { return 0; });
   }
   function list(limit) { var c = C(), id = myId(); if (!c || !id) return Promise.resolve([]); return c.rpc('dd_notify_list', { p_member: id, p_limit: limit || 60 }).then(function (r) { return (r && r.data) || []; }).catch(function () { return []; }); }
