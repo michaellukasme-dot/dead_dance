@@ -457,7 +457,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
-<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script>
+<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
 <script src="dd_contest.js"></script>
@@ -1039,25 +1039,31 @@ var _askTimer=null, _askBusy=false, _askRot=0, _askLastKey='', _askLastAt=0;
 var ASK_EXPIRE=10000;         // ignored → fades in 10s
 var ASK_MINGAP=240000;        // at most one ask every ~4 min — never nag during a set
 function _askName(){ try{ return (typeof myFirst==='function'&&myFirst())||''; }catch(e){ return ''; } }
-function mfAskLine(a, n){
-  var nm=_askName(), band=esc(a.b||'the band'), stage=esc(a.st||'the stage'), who=nm?('<b>'+esc(nm)+'</b>, '):'';
-  var lines=[
-    { txt: who+'I’m making a collage with '+(n>0?('<b>'+n+'</b> friends'):'the family')+' around '+stage+' — grab <b>'+band+'</b> from your angle.', cta:'📷 Add my shot', act:'photo' },
-    { txt: '<b>'+band+'</b>’s on at '+stage+' — one wide shot of the crowd, arms up?', cta:'📷 Grab it', act:'photo' },
-    { txt: (n>0?('<b>'+n+'</b> angles already ring '+stage+'. '):'')+'Catch the one nobody else has — stage-left.', cta:'📷 My angle', act:'photo' },
-    { txt: who+'at '+stage+' for <b>'+band+'</b>? Check in — the family will feel it.', cta:'📣 Check in', act:'checkin' }
-  ];
-  return lines[_askRot % lines.length];
+/* ONE consistent frame, every time (the Waze discipline): only %name% %band% %stage% %count% vary.
+   Don't be cute — be consistent. After a few asks, the pattern is muscle memory. */
+/* Owsley uses the richest REAL data the band has given — never invents a member or a song.
+   member ← the band's roster (dd_roster).  song ← the setlist tease if it's running (dd_setlist_now).
+   Neither present → the ask degrades to band+stage. Nothing is guessed. */
+function mfAskLine(a, n, member, song){
+  var nm=_askName(), who=nm?(esc(nm)+', '):'', band=esc(a.b||'the band'), stage=esc(a.st||'the stage');
+  var mtxt = member ? (member.instrument ? (esc(member.name)+' on '+esc(member.instrument)) : esc(member.name)) : '';
+  var action;
+  if(mtxt&&song) action='catch <b>'+mtxt+'</b> mid-solo during <b>'+esc(song)+'</b>';
+  else if(mtxt)  action='catch <b>'+mtxt+'</b> mid-solo';
+  else if(song)  action='grab the room during <b>'+esc(song)+'</b>';
+  else           action='grab your angle';
+  return { txt: who+action+' — <b>'+band+'</b> at '+stage+'.',
+           meta: (n>0? ('🍪 +25 · '+n+' angle'+(n===1?'':'s')+' so far') : '🍪 +25 · be the first angle') };
 }
-function mfAskRender(a, n){
+function mfAskRender(a, data){
   var host=document.getElementById('mfAsk'); if(!host) return;
-  var L=mfAskLine(a,n); _askRot++;
+  data=data||{}; var L=mfAskLine(a, data.n||0, data.member, data.song);
   host.innerHTML='<div class="ask-card">'
     +'<button class="ask-x" onclick="mfAskClose(false)" aria-label="Not now">×</button>'
-    +'<div class="ask-hd"><img src="claude-mark.svg" alt=""><span class="who">Silver’s on the mic — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div>'
+    +'<div class="ask-hd"><span style="font-size:17px;line-height:1">🐻</span><span class="who">Owsley’s asking</span></div>'
     +'<div class="ask-txt">'+L.txt+'</div>'
-    +'<button class="ask-cta" onclick="mfAskDo(\''+L.act+'\')">'+L.cta+'</button>'
-    +'<span class="ask-meta">🍪 +25 · one tap</span>'
+    +'<button class="ask-cta" onclick="mfAskDo(\'photo\')">📷 Add my shot</button>'
+    +'<span class="ask-meta">'+L.meta+'</span>'
     +'<div class="ask-bar" style="animation-duration:'+ASK_EXPIRE+'ms"></div>'
     +'</div>';
   host.classList.add('on'); _askBusy=true; _askLastAt=Date.now();
@@ -1071,9 +1077,12 @@ function mfAskTick(){
   if(document.hidden) return;                            // not while the tab's away
   var a=(typeof mfSilverActNow==='function')&&mfSilverActNow(); if(!a) return;   // nothing on now near you → stay silent
   var ref=mfSurroundRefOf(a), c=(window.ddClient&&ddClient());
-  function go(n){ mfAskRender(a,n); _askLastKey=a.b+'|'+a.st+'|'+a.t; }
-  if(!c){ go(0); return; }
-  try{ c.rpc('dd_surround_count',{p_ref:ref}).then(function(r){ go(Number((r&&r.data)||0)); }).catch(function(){ go(0); }); }catch(e){ go(0); }
+  // gather every REAL datum in parallel; render with whatever the band has given
+  var pN=(c? c.rpc('dd_surround_count',{p_ref:ref}).then(function(r){return Number((r&&r.data)||0);}).catch(function(){return 0;}) : Promise.resolve(0));
+  var pM=(window.DDRoster? DDRoster.pick(a.b).catch(function(){return null;}) : Promise.resolve(null));    // a real member + instrument, or null
+  var pS=(window.DDSetlist? DDSetlist.now(a.b).catch(function(){return null;}) : Promise.resolve(null));   // the song on now, or null
+  Promise.all([pN,pM,pS]).then(function(res){ mfAskRender(a,{n:res[0],member:res[1],song:res[2]}); _askLastKey=a.b+'|'+a.st+'|'+a.t; })
+    .catch(function(){ mfAskRender(a,{n:0}); });
 }
 setTimeout(function(){ try{ mfAskTick(); }catch(e){} }, 20000);    // first ask, gentle — 20s after the map opens
 setInterval(function(){ try{ mfAskTick(); }catch(e){} }, 60000);   // check each minute; ASK_MINGAP keeps it to ~1 every 4 min
@@ -1095,7 +1104,7 @@ window.renderAsks=function(a){ var host=document.getElementById('silverFloat'); 
   window._mfSurroundRef=mfSurroundRefOf(a);   // this stage/day's ring — the ref the crowd count + Cookies hang on
   var asks=askList(a);
   host.innerHTML='<button class="svx" onclick="silverDismiss()" aria-label="Dismiss">×</button>'
-    +'<div style="display:flex;align-items:center;gap:7px;margin:0 26px 7px 0"><img src="claude-mark.svg" alt="" style="width:20px;height:20px;flex:none"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Silver’s working the room — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div>'
+    +'<div style="display:flex;align-items:center;gap:7px;margin:0 26px 7px 0"><img src="claude-mark.svg" alt="" style="width:20px;height:20px;flex:none"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Owsley’s working the room — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div>'
     +'<div id="silverCrowd" style="font-size:12px;color:#8a5a00;font-weight:800;margin:0 4px 9px 0">🍪 Loading the ring…</div>'
     +'<button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 8px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four sides of '+esc(a.st)+', one shot. <b>+25 Cookies</b></span></span></button>'
     +'<button type="button" onclick="mfCheckIn()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e0d3f2;background:linear-gradient(100deg,#f5efff,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">📍</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#5a2e86">Check in — in your voice</span><span style="display:block;font-size:11.5px;color:#8a7bbf">Posts to the DeadDance Musikfest group.</span></span></button>'

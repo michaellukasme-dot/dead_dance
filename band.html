@@ -161,12 +161,100 @@ body.dd-band{background:#f2ecfb;color:var(--dd-ink);overflow:hidden;
       <button class="tool" onclick="toolInvite()"><span class="ic">👥</span><span class="tt"><b>Invite fans</b><span>Bring your people onto your page.</span></span><span class="ch">›</span></button>
       <button class="tool" onclick="toolPoster()"><span class="ic">🖼️</span><span class="tt"><b>Make a poster</b><span>A show poster with your art, in a tap.</span></span><span class="ch">›</span></button>
       <button class="tool" onclick="toolShows()"><span class="ic">📅</span><span class="tt"><b>Manage shows</b><span>Add or edit your tour dates.</span></span><span class="ch">›</span></button>
+      <button class="tool" onclick="toolRoster()"><span class="ic">🎸</span><span class="tt"><b>Band roster</b><span>Your lineup + crew — powers Owsley's on-stage shout-outs.</span></span><span class="ch">›</span></button>
+      <button class="tool" onclick="toolSetlist()"><span class="ic">🎶</span><span class="tt"><b>Setlist tease</b><span>Drop your set; we tease it to fans, song by song.</span></span><span class="ch">›</span></button>
       <button class="pbtn claude" onclick="setupClaude()">✳ Set up with Claude</button>
     </div>
   </div>
 </section>
 
 <div id="toast"></div>
+
+<!-- ===================== ROSTER + SETLIST EDITORS ===================== -->
+<style>
+  .rlov{position:fixed;inset:0;z-index:120;background:#140f1ccc;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
+  .rlov.on{display:flex}
+  .rlpanel{background:#fff;width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto;box-shadow:0 -10px 40px #0007}
+  .rlhd{display:flex;align-items:center;justify-content:space-between;font-size:18px;font-weight:900;color:#241535}
+  .rlhd button{border:0;background:#f1ecf7;color:#5a2e86;width:30px;height:30px;border-radius:9px;font-size:17px;cursor:pointer}
+  .rlsub{font-size:12.5px;color:#7a7285;margin:6px 0 12px;line-height:1.4}
+  .rlrow{display:flex;gap:8px;align-items:center;margin:8px 0}
+  .rlrow input,.rlrow select,.rlpanel textarea{font:inherit;font-size:14px;border:1.5px solid #ece7f0;border-radius:11px;padding:10px 11px;color:#241535;background:#fff}
+  .rlrow input{flex:1;min-width:0}.rlrow select{flex:0 0 auto}
+  .rlpanel textarea{width:100%;box-sizing:border-box;resize:vertical}
+  .rlrow button,.rl-go{border:0;background:linear-gradient(135deg,#b8002e,#7a3cc0);color:#fff;font-weight:800;font-size:13.5px;border-radius:11px;padding:10px 15px;cursor:pointer;flex:0 0 auto}
+  .rl-go.ghost{background:#f1ecf7;color:#5a2e86}
+  .rllist{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+  .rlitem{display:flex;align-items:center;gap:9px;background:#faf8fc;border:1px solid #ece7f0;border-radius:11px;padding:8px 11px}
+  .rlitem b{font-size:14px;color:#241535}.rlitem span{font-size:12px;color:#8a8296;font-weight:700}
+  .rlitem button{margin-left:auto;border:0;background:#f3e2e8;color:#b8002e;width:26px;height:26px;border-radius:8px;font-size:15px;cursor:pointer}
+  .rlempty{font-size:13px;color:#9a93a5;text-align:center;padding:14px}
+  .rllab{font-size:12px;font-weight:800;color:#7a7285}
+</style>
+
+<div class="rlov" id="rosterOv" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="rlpanel">
+    <div class="rlhd">🎸 Band roster <button onclick="document.getElementById('rosterOv').classList.remove('on')" aria-label="Close">×</button></div>
+    <p class="rlsub">Your players and crew. Owsley uses this to name a member on stage — <i>“catch Matt on guitar mid-solo.”</i> Crew (sound, lights, camera, manager) live here too, but only players get the mid-solo shout.</p>
+    <div class="rlrow">
+      <input id="rmName" placeholder="Name — e.g. Matt Hartle" autocomplete="off">
+      <select id="rmRole">
+        <optgroup label="Plays"><option value="guitar">guitar</option><option value="bass">bass</option><option value="drums">drums</option><option value="keys">keys</option><option value="vocals">vocals</option><option value="pedal steel">pedal steel</option><option value="sax">sax</option><option value="percussion">percussion</option><option value="mandolin">mandolin</option></optgroup>
+        <optgroup label="Crew"><option value="sound">sound</option><option value="lighting">lighting</option><option value="camera">camera</option><option value="manager">manager</option></optgroup>
+      </select>
+      <button onclick="rosterAdd()">Add</button>
+    </div>
+    <div id="rosterList" class="rllist"></div>
+  </div>
+</div>
+
+<div class="rlov" id="setlistOv" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="rlpanel">
+    <div class="rlhd">🎶 Setlist tease <button onclick="document.getElementById('setlistOv').classList.remove('on')" aria-label="Close">×</button></div>
+    <p class="rlsub">One song per line, in order. Hit <b>Start the drip</b> when you take the stage — we release it to fans song by song, and Owsley knows what’s on right now.</p>
+    <textarea id="slText" rows="8" placeholder="Truckin'&#10;Sugaree&#10;Fire on the Mountain&#10;Eyes of the World&#10;…"></textarea>
+    <div class="rlrow"><span class="rllab">Minutes per song</span><input id="slMin" type="number" min="1" value="7" style="width:80px;flex:0 0 auto"></div>
+    <div class="rlrow">
+      <button class="rl-go ghost" onclick="setlistSave(false)">Save set</button>
+      <button class="rl-go" onclick="setlistSave(true)">▶ Save + start the drip</button>
+    </div>
+    <div id="slStatus" class="rlsub" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<script>
+/* ---- Roster + Setlist editors (band's own page) ---- */
+function toolRoster(){ document.getElementById('rosterOv').classList.add('on'); rosterRefresh(); }
+function toolSetlist(){ document.getElementById('setlistOv').classList.add('on'); setlistLoad(); }
+function rosterRefresh(){ var h=document.getElementById('rosterList'); if(!h) return;
+  if(!window.DDRoster){ h.innerHTML='<div class="rlempty">Roster backend isn’t live yet — run dd_roster_setlist.sql.</div>'; return; }
+  DDRoster.forBand(BAND.name).then(function(rows){
+    if(!rows||!rows.length){ h.innerHTML='<div class="rlempty">No one yet — add your lineup + crew above. 🌹</div>'; return; }
+    h.innerHTML=rows.map(function(m){ return '<div class="rlitem"><b>'+esc(m.member_name)+'</b><span>'+esc(m.instrument||'')+((m.kind==='crew')?' · crew':'')+'</span><button onclick="rosterDel(\''+m.id+'\')" aria-label="Remove">×</button></div>'; }).join(''); });
+}
+function rosterAdd(){ var n=(document.getElementById('rmName').value||'').trim(); var sel=document.getElementById('rmRole');
+  var opt=sel.options[sel.selectedIndex]; var role=opt.value; var kind=(opt.parentNode&&opt.parentNode.label==='Crew')?'crew':'play';
+  if(!n){ toast('Add a name 🌹'); return; }
+  if(!window.DDRoster){ toast('Roster backend not live yet'); return; }
+  DDRoster.add(BAND.name, n, role, kind).then(function(id){ if(id){ document.getElementById('rmName').value=''; toast('Added '+n); rosterRefresh(); } else toast('Sign in to edit the roster'); });
+}
+function rosterDel(id){ if(!window.DDRoster) return; DDRoster.remove(id).then(function(){ rosterRefresh(); }); }
+function setlistLoad(){ if(!window.DDSetlist) return; DDSetlist.get(BAND.name).then(function(s){ if(!s) return;
+  try{ document.getElementById('slText').value=(s.songs||[]).join('\n'); if(s.drip_min) document.getElementById('slMin').value=s.drip_min;
+    var st=document.getElementById('slStatus'); if(st&&s.drip_start) st.textContent='▶ Dripping since '+new Date(s.drip_start).toLocaleTimeString(); }catch(e){} });
+}
+function setlistSave(startNow){
+  var songs=(document.getElementById('slText').value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean);
+  var min=parseInt(document.getElementById('slMin').value,10)||null;
+  if(!songs.length){ toast('Add a song or two 🌹'); return; }
+  if(!window.DDSetlist){ toast('Setlist backend not live yet'); return; }
+  var start=startNow? new Date().toISOString() : null;
+  DDSetlist.set(BAND.name, songs, start, min).then(function(id){
+    if(id){ toast(startNow?'▶ Drip started — Owsley knows the set':'Set saved 🌹');
+      var st=document.getElementById('slStatus'); if(st) st.textContent=songs.length+' songs saved'+(startNow?' · dripping now':' · not started');
+    } else toast('Sign in to save the set'); });
+}
+</script>
 
 <!-- ===================== DATA LAYER ===================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -175,6 +263,8 @@ body.dd-band{background:#f2ecfb;color:var(--dd-ink);overflow:hidden;
 <script>window.ddId=function(){ try{ var u=(window.DDMe&&DDMe.id&&DDMe.id())||null; return u?{id:u}:null; }catch(e){ return null; } };</script>
 <script src="dd_bands.js"></script>
 <script src="dd_providers.js"></script>
+<script src="dd_roster.js"></script>
+<script src="dd_setlist.js"></script>
 <script src="dd_shows.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
