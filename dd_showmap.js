@@ -449,7 +449,7 @@
       // ⚠️ TEMP DISPLAY OFFSET — true location is 40.6047,-75.4785 but that overlaps Musikfest on the map.
       //    Pushed well NW so both beacons clearly separate. Tapping still opens the CORRECT fairgrounds map.
       //    RESTORE the real coords after Musikfest ends (Aug 9). [reminder set for Aug 10]
-      { name: "The Great Allentown Fair",  lat: 42.0, lng: -77.6, emoji: "🎡", end: "2026-09-07", href: "allentownfair.html" }
+      { name: "The Great Allentown Fair",  lat: 38.3, lng: -77.6, emoji: "🎡", end: "2026-09-07", href: "allentownfair.html" }
     ];
     /* --- dots: sized as fraction of viewBox → constant on-screen. mode: 'nation' faint, 'chapter' bold+labels --- */
     function drawDots(vbW, chapterName) {
