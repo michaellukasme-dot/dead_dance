@@ -525,12 +525,24 @@ body{padding-bottom:64px}
 /* non-band slide: center the short content in the tall frame so the empty space reads as intentional */
 .adroll-slide.plain{justify-content:flex-start}
 /* Musikfest 2026 poster ad — the FULL poster (Doug Boehm) fills the ad's length, contained so nothing is cropped */
-.adroll-slide.poster{height:100%;display:flex;flex-direction:column;background:#140f1c;cursor:pointer}
-.adroll-slide.poster .posterimg{flex:1 1 auto;width:100%;min-height:0;object-fit:contain;display:block}
-.adroll-slide.poster .poster-cap{flex:0 0 auto;background:#fff;padding:8px 12px 10px;text-align:center}
-.adroll-slide.poster .poster-cap b{display:block;font-size:13.5px;color:var(--ink,#1a1320);line-height:1.2;white-space:normal}
-.adroll-slide.poster .poster-cap .by{display:block;font-size:11px;color:var(--rose,#b8002e);font-weight:800;margin-top:2px;line-height:1.25}
-.adroll-slide.poster .poster-cap .cta{display:block;font-size:11px;color:var(--accent,#5a2e86);font-weight:800;margin-top:4px}
+/* Doug Boehm's Musikfest 2026 poster — the masterpiece: a framed gallery print on a gallery wall */
+.adroll-slide.poster{height:100%;display:flex;flex-direction:column;background:radial-gradient(125% 85% at 50% 18%,#2c1c30 0%,#140f1c 68%);cursor:pointer;position:relative}
+.adroll-slide.poster::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#b8002e 0%,#f0a500 55%,#5a2e86 100%);z-index:3}
+.adroll-slide.poster .posterimg{flex:1 1 auto;width:auto;max-width:80%;min-height:0;object-fit:contain;display:block;margin:22px auto 14px;background:#fff;padding:7px;border-radius:3px;box-shadow:0 16px 38px rgba(0,0,0,.55),0 3px 8px rgba(0,0,0,.45)}
+.adroll-slide.poster .poster-cap{flex:0 0 auto;background:#fff;padding:12px 14px 16px;text-align:center}
+.adroll-slide.poster .poster-cap b{display:block;font-size:14.5px;color:#241535;line-height:1.2;font-weight:800;white-space:normal}
+.adroll-slide.poster .poster-cap .by{display:block;font-size:11.5px;color:#6c6478;font-weight:700;margin-top:4px;line-height:1.25}
+.adroll-slide.poster .poster-cap .by b{color:#241535;font-weight:800}
+.adroll-slide.poster .poster-cap .cta{display:inline-block;margin-top:11px;font-size:9.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#9a0f34;background:linear-gradient(135deg,#fff6de,#ffe7ef);border:1px solid #f0d3b8;border-radius:999px;padding:5px 13px}
+/* Official Musikfest partner card — premium, uniform sponsor plate (these are the ads we sell) */
+.adroll-slide.partner{height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#ffffff 0%,#fbfaff 100%);cursor:pointer;position:relative}
+.adroll-slide.partner::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#b8002e 0%,#f0a500 55%,#5a2e86 100%);z-index:2}
+.adroll-slide.partner .pplate{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:30px 28px 20px}
+.adroll-slide.partner .pplate img{max-width:84%;max-height:122px;object-fit:contain}
+.adroll-slide.partner .pcap{flex:0 0 auto;text-align:center;padding:12px 16px 20px;border-top:1px solid #f1ecf7}
+.adroll-slide.partner .pcap b{display:block;font-size:15px;color:#241535;line-height:1.2;font-weight:800;letter-spacing:.005em}
+.adroll-slide.partner .pcap .sub{display:block;font-size:11px;color:#8a8296;font-weight:700;margin-top:3px;line-height:1.3}
+.adroll-slide.partner .pcap .ppill{display:inline-block;margin-top:11px;font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#9a0f34;background:linear-gradient(135deg,#fff6de,#ffe7ef);border:1px solid #f0d3b8;border-radius:999px;padding:5px 13px;box-shadow:0 1px 4px rgba(184,0,46,.10)}
 /* ad-swap effects — a mix cycled through like a slide deck (fixed 216px card contains them) */
 .adroll-view{perspective:1000px}
 .adroll-slide{will-change:transform,opacity,filter;backface-visibility:hidden}
@@ -942,24 +954,42 @@ body.dd-insider .dd-only{display:block}
          Civic anchors + all in-footprint retailers + our own houses + national. Logos drop into
          /logos (see logos/LOGOS_manifest.md); until a file exists, the emoji shows. LET THEM ROLL. 🌹 */
       function _slug(s){ return String(s||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+      /* Official Musikfest 2026 partners — real sponsor logos on light cards (the roll DeadDance
+         wants to join). Jay's Customz (our own partner) + ArtsQuest lead; then the official partners. */
+      var _MFLB='linear-gradient(135deg,#ffffff,#eef0f4)';   // light card so dark-on-transparent sponsor logos read
       var AD_BETHLEHEM=[
         {logo:'logos/jay_customz.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Jay\'s Customz T-Shirt Printing', off:'Custom graphic tees to match your footwear & much more · 50 Broad St', cta:'Shop now ›', url:'https://jayscustomzprint.company.site', beth:true},
-        {logo:'logos/city_of_bethlehem.png', ic:'🏛️', bg:'linear-gradient(135deg,#5a2e86,#241535)', biz:'City of Bethlehem',         off:'Welcome to Musikfest 2026 — Christmas City, USA', cta:'Visit ›', beth:true},
-        {logo:'logos/artsquest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'ArtsQuest',                 off:'16 stages · 400+ acts · all free',                cta:'Plan your fest ›', beth:true},
-        {logo:'logos/hotel_bethlehem.png',   ic:'🏨', bg:'linear-gradient(135deg,#c79a3a,#8a6a1f)', biz:'Hotel Bethlehem',           off:'Welcome to Hotel Bethlehem — 437 Main St, since 1922', cta:'Step into the lobby ›', beth:true},
-        {logo:'logos/steelstacks.png',       ic:'🏭', bg:'linear-gradient(135deg,#4a4a55,#20202a)', biz:'SteelStacks',               off:'South Side stages under the blast furnaces',      cta:'What\'s on ›', beth:true},
-        {logo:'logos/industrial_museum.png', ic:'⚙️', bg:'linear-gradient(135deg,#8a6a1f,#4a3410)', biz:'Nat\'l Museum of Industrial History', off:'Where the steel was made — open all fest', cta:'Step inside ›', beth:true},
-        {logo:'logos/bethlehem_police.png',  ic:'🚓', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'Bethlehem Police Department',off:'Keeping Musikfest safe · lost & found · here to help', cta:'Safety info ›', beth:true},
-        {logo:'logos/bethlehem_fire.png',    ic:'🚒', bg:'linear-gradient(135deg,#b8002e,#6e0018)', biz:'Bethlehem Fire Department', off:'First on scene, all festival long — stay safe out there', cta:'Fire safety ›', beth:true},
-        {logo:'logos/basd.png',              ic:'🏫', bg:'linear-gradient(135deg,#7a1f2e,#3a0f16)', biz:'Bethlehem Area School District', off:'Where Bethlehem\'s students shine', cta:'Explore BASD ›', beth:true},
-        {logo:'logos/moravian_academy.png',  ic:'🎓', bg:'linear-gradient(135deg,#0f5a4a,#0a2f28)', biz:'Moravian Academy',          off:'PreK–12 in Bethlehem — educating since 1742', cta:'Discover the school ›', beth:true},
-        {logo:'logos/potts_hot_dog.png',     ic:'🌭', bg:'linear-gradient(135deg,#c9431f,#7a1f0e)', biz:'Potts Hot Dogs',           off:'A Lehigh Valley institution — dogs done right', cta:'Grab a dog ›', beth:true},
-        {logo:'logos/lehigh_pizza.png',      ic:'🍕', bg:'linear-gradient(135deg,#b8002e,#7a1f0e)', biz:'Lehigh Pizza',             off:'Bethlehem slices, hot and fast', cta:'Order a pie ›', beth:true},
-        {logo:'logos/westgate_pizza.png',    ic:'🍕', bg:'linear-gradient(135deg,#8a6a1f,#4a3410)', biz:'Westgate Pizza',           off:'Lehigh Valley pizza & subs', cta:'Order up ›', beth:true},
-        {logo:'logos/allentown_fair.png',    ic:'🎡', bg:'linear-gradient(135deg,#5a2e86,#b8002e)', biz:'The Great Allentown Fair', off:'Rides, grandstand shows & fair food — end of summer', cta:'See the lineup ›', beth:true},
-        {logo:'logos/vallos_bakery.png',     ic:'🥖', bg:'linear-gradient(135deg,#8a5a1f,#4a3410)', biz:'Vallos Bakery',            off:'Fresh-baked, the Lehigh Valley way', cta:'Grab a loaf ›', beth:true},
-        {logo:'logos/st_george_allentown.png', ic:'⛪', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'St. George Orthodox Church', off:'Allentown · all are welcome', cta:'Visit ›', beth:true},
-        {logo:'logos/st_paul_emmaus.png',    ic:'⛪', bg:'linear-gradient(135deg,#5a2e86,#2a1440)', biz:'St. Paul (Emmaus)',        off:'A community in Emmaus · all are welcome', cta:'Visit ›', beth:true}
+        {logo:'logos/artsquest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'ArtsQuest',                 off:'16 stages · 500+ acts · all free',                cta:'Plan your fest ›', beth:true},
+        {logo:'logos/mf_airproducts.webp',   ic:'🏭', bg:_MFLB, biz:'Air Products',            off:'Lehigh Valley’s own · Americaplatz @ Levitt',      cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_pnc.webp',           ic:'🏦', bg:_MFLB, biz:'PNC',                     off:'PNC Plaza · Steel Stage sponsor',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_yuengling.webp',     ic:'🍺', bg:_MFLB, biz:'Yuengling',               off:'America’s oldest brewery · Lagerplatz',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_windcreek.webp',     ic:'🎰', bg:_MFLB, biz:'Wind Creek Bethlehem',    off:'Wind Creek Steel Stage sponsor',                   cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_martinguitar.webp',  ic:'🎸', bg:_MFLB, biz:'Martin Guitar',           off:'Handcrafted in Nazareth, PA since 1833 · Handwerkplatz', cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_lvhn.webp',          ic:'⚕️', bg:_MFLB, biz:'Lehigh Valley Health Network', off:'Official Musikfest 2026 partner',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_highmark.webp',      ic:'⚕️', bg:_MFLB, biz:'Highmark Blue Shield',     off:'Highmark Blue Shield Community Stage',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_capitalbluecross.png',ic:'⚕️',bg:_MFLB, biz:'Capital Blue Cross',       off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_crayola.webp',       ic:'🖍️', bg:_MFLB, biz:'Crayola',                 off:'Made in Easton, PA · Creativity Tent',             cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_lutron.png',         ic:'💡', bg:_MFLB, biz:'Lutron',                  off:'Coopersburg, PA · Lutron Jazz Cabaret',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_guardian.png',       ic:'🛡️', bg:_MFLB, biz:'The Guardian Life Insurance Co.', off:'Zinzenplatz sponsor',                       cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_ibew375.png',        ic:'⚡', bg:_MFLB, biz:'IBEW Local 375',           off:'IBEW Local 375 Liederplatz sponsor',               cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_sectv.webp',         ic:'📺', bg:_MFLB, biz:'Service Electric',        off:'Festplatz sponsor · Lehigh Valley’s hometown cable', cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_wfmz.webp',          ic:'📺', bg:_MFLB, biz:'WFMZ-TV 69 News',         off:'Official Musikfest 2026 media partner',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_6abc.webp',          ic:'📺', bg:_MFLB, biz:'6abc',                    off:'Official Musikfest 2026 media partner',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_shift4.png',         ic:'💳', bg:_MFLB, biz:'Shift4',                  off:'Allentown, PA · powering payments',                cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_hotelbethlehem.png', ic:'🏨', bg:_MFLB, biz:'Historic Hotel Bethlehem', off:'437 Main St · since 1922',                       cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_lehighu.png',        ic:'🎓', bg:_MFLB, biz:'Lehigh University',       off:'Bethlehem, PA',                                    cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_moravianu.webp',     ic:'🎓', bg:_MFLB, biz:'Moravian University',     off:'Bethlehem, PA · since 1742',                       cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_moravianchurch.png', ic:'⛪', bg:_MFLB, biz:'Moravian Church Settlements', off:'UNESCO World Heritage · Bethlehem',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_discoverlv.png',     ic:'🧭', bg:_MFLB, biz:'Discover Lehigh Valley',  off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_morningcall.png',    ic:'📰', bg:_MFLB, biz:'The Morning Call',        off:'Lehigh Valley news · media partner',               cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_b104.webp',          ic:'📻', bg:_MFLB, biz:'B104',                    off:'Lehigh Valley radio · media partner',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_catcountry.png',     ic:'📻', bg:_MFLB, biz:'Cat Country 96',          off:'Lehigh Valley country radio',                      cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_wzzo.webp',          ic:'📻', bg:_MFLB, biz:'WZZO',                    off:'Lehigh Valley rock radio',                         cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_sysco.webp',         ic:'🍽️', bg:_MFLB, biz:'Sysco',                  off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_monster.webp',       ic:'🥤', bg:_MFLB, biz:'Monster Energy',          off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_united.png',         ic:'✈️', bg:_MFLB, biz:'United Airlines',         off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_palottery.png',      ic:'🎟️', bg:_MFLB, biz:'Pennsylvania Lottery',   off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_banko.png',          ic:'🍺', bg:_MFLB, biz:'Banko Beverage Co.',      off:'Lehigh Valley · official Musikfest 2026 partner',  cta:'Musikfest 2026 partner ›', beth:true}
       ];
       var _KIC={brewery:'🍺',hotel:'🏨',bar:'🍸',shop:'🛍️',restaurant:'🍽️',historic:'🏛️'};
       function bethRetail(){ var out=[]; try{ (window.MF_RETAILERS||[]).forEach(function(r){ out.push({
@@ -1003,9 +1033,18 @@ body.dd-insider .dd-only{display:block}
         if(a.poster){   // the Musikfest 2026 poster ad — show the WHOLE poster full-length (Doug Boehm), never cropped
           v.innerHTML='<div class="adroll-slide poster adfx-'+fx+'" onclick="adRollTap()">'
             +'<img class="posterimg" src="'+a.poster+'" alt="Musikfest 2026 poster by Doug Boehm" onerror="this.style.display=\'none\'">'
-            +'<div class="poster-cap"><b>'+a.biz+'</b><span class="by">'+a.off+'</span><span class="cta">'+a.cta+'</span></div>'
+            +'<div class="poster-cap"><b>'+a.biz+'</b><span class="by">Original poster art by <b>Doug Boehm</b></span><span class="cta">★ Celebrating America 250</span></div>'
             +'</div>';
           var pdt=document.getElementById('adRollDots'); if(pdt) pdt.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
+        if(a.logo && a.logo.indexOf('logos/mf_')===0){   // official Musikfest partner → premium, uniform sponsor card
+          var _psub = a.off && a.off.toLowerCase().indexOf('official musikfest')<0;
+          v.innerHTML='<div class="adroll-slide partner adfx-'+fx+'" onclick="adRollTap()">'
+            +'<div class="pplate"><img src="'+a.logo+'" alt="'+a.biz+'" onerror="this.style.display=\'none\'"></div>'
+            +'<div class="pcap"><b>'+a.biz+'</b>'+(_psub?'<span class="sub">'+a.off+'</span>':'')+'<span class="ppill">★ Official Musikfest 2026 Partner</span></div>'
+            +'</div>';
+          var pmd=document.getElementById('adRollDots'); if(pmd) pmd.innerHTML='<i class="on"></i><i></i><i></i>';
           return;
         }
         if(a.stagefill){
