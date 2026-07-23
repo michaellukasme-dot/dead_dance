@@ -163,6 +163,7 @@ body.dd-band{background:#f2ecfb;color:var(--dd-ink);overflow:hidden;
       <button class="tool" onclick="toolShows()"><span class="ic">📅</span><span class="tt"><b>Manage shows</b><span>Add or edit your tour dates.</span></span><span class="ch">›</span></button>
       <button class="tool" onclick="toolRoster()"><span class="ic">🎸</span><span class="tt"><b>Band roster</b><span>Your lineup + crew — powers Owsley's on-stage shout-outs.</span></span><span class="ch">›</span></button>
       <button class="tool" onclick="toolSetlist()"><span class="ic">🎶</span><span class="tt"><b>Setlist tease</b><span>Drop your set; we tease it to fans, song by song.</span></span><span class="ch">›</span></button>
+      <button class="tool" onclick="toolGetPaid()"><span class="ic">💵</span><span class="tt"><b>Get paid</b><span>Connect your bank — ticket &amp; merch money lands direct.</span></span><span class="ch">›</span></button>
       <button class="pbtn claude" onclick="setupClaude()">✳ Set up with Claude</button>
     </div>
   </div>
@@ -254,6 +255,17 @@ function setlistSave(startNow){
       var st=document.getElementById('slStatus'); if(st) st.textContent=songs.length+' songs saved'+(startNow?' · dripping now':' · not started');
     } else toast('Sign in to save the set'); });
 }
+/* ---- Get paid: Stripe Connect onboarding for this band ---- */
+function toolGetPaid(){
+  if(!window.DDPay){ toast('Payments still loading — one sec 🌹'); return; }
+  toast('Opening secure Stripe setup…');
+  DDPay.onboard('band', BAND.name, BAND.slug).catch(function(){ toast('Sign in first, then tap Get paid'); });
+}
+/* returning from Stripe onboarding → confirm the store is live */
+(function(){ try{ var q=new URLSearchParams(location.search);
+  if(q.get('connect')==='done' && window.DDPay){ DDPay.status(BAND.slug).then(function(s){
+    toast(s&&s.charges_enabled ? '✅ You’re set up — ticket & merch money lands in your account.' : '⏳ Almost there — Stripe is verifying. Money will flow once approved.'); }); }
+}catch(e){} })();
 </script>
 
 <!-- ===================== DATA LAYER ===================== -->
@@ -265,6 +277,7 @@ function setlistSave(startNow){
 <script src="dd_providers.js"></script>
 <script src="dd_roster.js"></script>
 <script src="dd_setlist.js"></script>
+<script src="dd_pay.js"></script>
 <script src="dd_shows.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>

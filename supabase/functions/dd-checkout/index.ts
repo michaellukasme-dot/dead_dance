@@ -72,6 +72,17 @@ Deno.serve(async (req) => {
     const { data: order } = await svc.from("chat_order").select("*").eq("id", orderId).single();
     if (!order || order.status !== "pending") return json({ error: "bad_order" }, 400);
 
+    // ── CONNECT: route this sale to the band/partner and keep the platform fee ──
+    let payIntentData: Record<string, unknown> | undefined;
+    if (order.merchant_slug) {
+      const { data: mrows } = await svc.rpc("dd_merchant_get", { p_slug: order.merchant_slug });
+      const m = (mrows && mrows[0]) || null;
+      if (!m?.stripe_account_id || !m.charges_enabled) return json({ error: "merchant_not_ready" }, 400);  // never take money we can't route
+      const fee = Math.max(0, Math.round(order.amount_cents * (m.fee_bps ?? 1500) / 10000));
+      await svc.from("chat_order").update({ app_fee_cents: fee }).eq("id", orderId);
+      payIntentData = { application_fee_amount: fee, transfer_data: { destination: m.stripe_account_id } };
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{
@@ -82,6 +93,7 @@ Deno.serve(async (req) => {
         },
         quantity: order.qty,
       }],
+      payment_intent_data: payIntentData,
       client_reference_id: orderId,
       metadata: { order_id: orderId, kind: order.kind, supabase_uid: uid },
       success_url: `${APP_URL}/index.html?order=ok`,

@@ -71,6 +71,18 @@ Deno.serve(async (req) => {
           .eq("stripe_payment_intent", ch.payment_intent as string);
         break;
       }
+      case "account.updated": {
+        // a band/partner finished (or changed) Connect onboarding → flip their store live
+        const acct = event.data.object as Stripe.Account;
+        const slug = (acct.metadata?.slug as string) || "";
+        if (slug) {
+          await svc.rpc("dd_merchant_set_stripe", {
+            p_slug: slug, p_account: acct.id,
+            p_charges: !!acct.charges_enabled, p_payouts: !!acct.payouts_enabled,
+          });
+        }
+        break;
+      }
     }
     return new Response("ok", { status: 200 });
   } catch (e) {
