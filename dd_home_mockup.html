@@ -374,7 +374,8 @@ function setAvatars(url,name){ var img=url?('<img src="'+url+'" alt="" style="wi
   var an=document.getElementById('acctName'); if(an&&name) an.textContent=name;
   if(img) document.querySelectorAll('.composer .av').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; }); }
 function wireFriendsData(){
-  try{ if(window.DDMe){ DDMe.load&&DDMe.load(); DDMe.onChange(function(me){ if(me) setAvatars(me.avatar, me.name); }); } }catch(e){}
+  try{ var _im=localStorage.getItem('dd.me.img')||localStorage.getItem('dd.profile.img')||''; var _nm=localStorage.getItem('dd.myname')||''; if(_im||_nm) setAvatars(_im,_nm); }catch(e){}   // mirror Home's avatar from the same localStorage → Friends shows your photo, never the "M"
+  try{ if(window.DDMe){ DDMe.load&&DDMe.load(); DDMe.onChange(function(me){ if(me) setAvatars(me.avatar||localStorage.getItem('dd.me.img')||localStorage.getItem('dd.profile.img'), me.name||localStorage.getItem('dd.myname')); }); } }catch(e){}
   try{ if(window.DDPymk&&DDPymk.suggestions){ DDPymk.suggestions(8).then(function(list){ if(!list||!list.length)return; var row=document.querySelector('.pymk .row'); if(!row)return;
     var G=['linear-gradient(135deg,#e0577a,#b8002e)','linear-gradient(135deg,#7a3cc0,#3a1f57)','linear-gradient(135deg,#1f9e6b,#123b28)','linear-gradient(135deg,#2f7bf6,#12305e)'];
     row.innerHTML=list.map(function(p,i){ return '<div class="pk" id="pk-'+i+'"><div class="ph" style="background:'+G[i%4]+'">'+_mono(p.name)+'</div><div class="bd"><div class="nm">'+(p.name||'A Deadhead')+'</div><div class="mu">🌹 '+(p.reason||((p.mutual||0)+' mutual heads'))+'</div><button class="add" onclick="pymkAdd(\''+(p.id||'')+'\',\''+String(p.name||'').replace(/\x27/g,'')+'\',this)">Add friend</button><button class="rm" onclick="var c=document.getElementById(\'pk-'+i+'\'); if(c)c.remove();">Remove</button></div></div>'; }).join('');
