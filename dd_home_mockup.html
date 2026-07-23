@@ -370,9 +370,9 @@ function ddSignOut(){ try{ if(window.DDMe&&DDMe.signOut) DDMe.signOut(); }catch(
 /* ---- live data wiring (best-effort; the sample layout stays if the backend isn't ready) ---- */
 function _mono(n){ return String(n||'?').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'🌹'; }
 function setAvatars(url,name){ var img=url?('<img src="'+url+'" alt="" style="width:100%;height:100%;object-fit:cover">'):null;
-  ['topAvat','acctAv'].forEach(function(id){ var el=document.getElementById(id); if(el&&img){ el.innerHTML=img; el.style.padding='0'; el.style.overflow='hidden'; } });
-  var an=document.getElementById('acctName'); if(an&&name) an.textContent=name;
-  if(img) document.querySelectorAll('.composer .av').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; }); }
+  if(img){ ['topAvat','acctAv','composeAv'].forEach(function(id){ var el=document.getElementById(id); if(el){ el.innerHTML=img; el.style.padding='0'; el.style.overflow='hidden'; el.style.background='#fff'; } });
+    document.querySelectorAll('.composer .av, .composerow .cav').forEach(function(el){ el.innerHTML=img; el.style.overflow='hidden'; el.style.background='#fff'; }); }
+  var an=document.getElementById('acctName'); if(an&&name) an.textContent=name; }
 function wireFriendsData(){
   try{ var _im=localStorage.getItem('dd.me.img')||localStorage.getItem('dd.profile.img')||''; var _nm=localStorage.getItem('dd.myname')||''; if(_im||_nm) setAvatars(_im,_nm); }catch(e){}   // mirror Home's avatar from the same localStorage → Friends shows your photo, never the "M"
   try{ if(window.DDMe){ DDMe.load&&DDMe.load(); DDMe.onChange(function(me){ if(me) setAvatars(me.avatar||localStorage.getItem('dd.me.img')||localStorage.getItem('dd.profile.img'), me.name||localStorage.getItem('dd.myname')); }); } }catch(e){}
