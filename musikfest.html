@@ -176,6 +176,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <button class="mflay on" data-f="stage" onclick="mfChip(this)">🌹 Stages</button>
     <button class="mflay" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
+    <button class="mflay" data-f="aid" onclick="mfChip(this)">⛑️ First Aid</button>
     <span style="width:1px;height:20px;background:var(--line);margin:0 3px"></span>
     <button id="trackBtn" class="mflay" onclick="toggleTrack()">⏸ Auto-Tracking</button>
     <button class="mflay" onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos">📷</button>
@@ -284,7 +285,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
   <!-- map + filter chips + distance pill relocated to the fixed top zone (.mf-map) in app mode -->
-  <input type="hidden" id="mf_f_stage"><input type="hidden" id="mf_f_shop"><input type="hidden" id="mf_f_food"><input type="hidden" id="mf_f_potty">
+  <input type="hidden" id="mf_f_stage"><input type="hidden" id="mf_f_shop"><input type="hidden" id="mf_f_food"><input type="hidden" id="mf_f_potty"><input type="hidden" id="mf_f_aid">
 
 
   <div id="parkBox" style="text-align:center;margin:12px 0"></div>
@@ -446,27 +447,28 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_launch.js"></script>
 <script>
 var STAGES=[
- // NORTH (free)
- {n:"IBEW 375 Liederplatz",side:"N",free:1,lat:40.6220,lng:-75.3818,where:"The courtyard <b>behind the Sun Inn</b> (556 Main St) — walk through, it's not on Main St itself."},
- {n:"Main Street Stage",side:"N",free:1,lat:40.6211,lng:-75.3820,where:"On <b>Main St</b> (closed to cars at night), ~500 block near Market St."},
- {n:"Yuengling Lagerplatz",side:"N",free:1,lat:40.6203,lng:-75.3830,where:"Main St at the edge of the Colonial Industrial Quarter — beer + a stage."},
- {n:"Guardian Life Zinzenplatz",side:"N",free:1,lat:40.6190,lng:-75.3810,where:"By <b>Central Moravian Church</b>, Church &amp; Main."},
- {n:"Volksplatz",side:"N",free:1,jam:1,where:"Down the hill in the <b>Colonial Industrial Quarter</b>, off Spring St along the Monocacy Creek. Jam central.",lat:40.6203,lng:-75.3841},
- {n:"Service Electric Festplatz",side:"N",free:1,lat:40.6206,lng:-75.3839,where:"Polka/German tent, Spring St side of the Colonial Industrial Quarter."},
- {n:"Martin Guitar Handwerkplatz",side:"N",free:1,lat:40.6205,lng:-75.3836,where:"The 18th-c. <b>Luckenbach Mill</b> (459 Old York Rd) — artisans + the 'Cast in Bronze' bell tower."},
- {n:"NJM Familienplatz",side:"N",free:1,lat:40.6202,lng:-75.3835,where:"Kids' area in the Colonial Industrial Quarter, near Spring St."},
- {n:"Plaza Tropical",side:"N",free:1,lat:40.6199,lng:-75.3839,where:"Latin stage at the west end, near Spring St / the Sand Island approach."},
- {n:"Ice House ComedyPlatz",side:"N",free:1,lat:40.6166,lng:-75.3832,where:"The Ice House, <b>56 River St on Sand Island</b> — a separate river island, not on Main St."},
- {n:"Hotel Bethlehem Platz",side:"N",free:1,lat:40.6201,lng:-75.3823,where:"At the Historic Hotel Bethlehem, 437 Main St."},
- {n:"PNC Stadtplatz",side:"N",free:1,lat:40.6200,lng:-75.3800,where:"<b>Payrow Plaza by City Hall</b> (10 E Church St) — the northernmost, easy-to-miss stage."},
- {n:"Central Moravian Church / Old Chapel",side:"N",free:1,lat:40.6188,lng:-75.3812,where:"73 W Church St — nightly chamber &amp; classical."},
- // SOUTH
- {n:"Wind Creek Steel Stage",side:"S",free:0,lat:40.6152,lng:-75.3730,where:"The amphitheater off <b>Founders Way</b>, just west of the blast furnaces. The one ticketed venue."},
- {n:"Air Products Americaplatz @ Levitt Pavilion",side:"S",free:1,jam:1,lat:40.6167,lng:-75.3708,where:"789 E First St, SteelStacks — a <b>free</b> lawn stage. Don't confuse it with the paid Steel Stage next door."},
- {n:"Highmark Blue Shield Community Stage",side:"S",free:1,lat:40.6161,lng:-75.3715,where:"In Air Products Town Square, between the Visitor Center &amp; ArtsQuest Center."},
- {n:"Musikfest Café (PNC Series)",side:"S",free:1,lat:40.6157,lng:-75.3718,where:"Inside the ArtsQuest Center, 101 Founders Way (indoor, A/C)."},
- {n:"Williams Brew Stage",side:"S",free:1,lat:40.6156,lng:-75.3716,where:"At the ArtsQuest Center, Founders Way / Second St."},
- {n:"Lyrikplatz + Lutron Jazz Cabaret",side:"S",free:1,lat:40.6157,lng:-75.3720,where:"Inside the ArtsQuest Center (Frank Banko Alehouse Cinemas)."}
+ // NORTH (free) — coordinates are EXACT (Google Maps right-click → copy), provided by Michael 2026-07-23
+ {n:"IBEW Local 375 Liederplatz",side:"N",free:1,lat:40.62165516199015,lng:-75.38135321209411,where:"The courtyard <b>behind the Sun Inn</b> (556 Main St) — walk through; it's not on Main St itself."},
+ {n:"Main Street Stage",side:"N",free:1,lat:40.62173297570262,lng:-75.38190270860275,where:"On <b>Main St</b> (~500 block near Market St) — the Moravian ‘Bethlehem Main Street’ stage."},
+ {n:"Vesper Concert Series",side:"N",free:1,lat:40.619137994459265,lng:-75.38183762664599,where:"By <b>Central Moravian Church</b>, 73 W Church St — nightly chamber &amp; classical."},
+ {n:"Hotel Bethlehem Platz",side:"N",free:1,lat:40.62001206785794,lng:-75.38217656978621,where:"At the <b>Historic Hotel Bethlehem</b>, 437 Main St."},
+ {n:"PNC Stadtplatz",side:"N",free:1,lat:40.61792884070416,lng:-75.37860132628923,where:"<b>Payrow Plaza by City Hall</b> (10 E Church St)."},
+ {n:"Handwerkplatz",side:"N",free:1,lat:40.62026781243216,lng:-75.38398048560234,where:"The 18th-c. <b>Luckenbach Mill</b> (459 Old York Rd) — artisans + the ‘Cast in Bronze’ bell tower. (Presented by the ArtsQuest Creative Factory.)"},
+ {n:"Familienplatz",side:"N",free:1,lat:40.6195989965615,lng:-75.38322523283168,where:"Kids' &amp; family area in the Colonial Industrial Quarter, near Spring St."},
+ {n:"Service Electric Festplatz",side:"N",free:1,lat:40.61885373668897,lng:-75.38378915490927,where:"Polka/German tent, Spring St side of the Colonial Industrial Quarter."},
+ {n:"Yuengling Lagerplatz",side:"N",free:1,lat:40.61818490664305,lng:-75.38380425996199,where:"At the edge of the <b>Colonial Industrial Quarter</b> — beer + a stage."},
+ {n:"Plaza Tropical",side:"N",free:1,lat:40.61733643831984,lng:-75.38394020547393,where:"Latin stage in the Colonial Industrial Quarter, near Spring St."},
+ {n:"Guardian Life Zinzenplatz",side:"N",free:1,lat:40.616610263199064,lng:-75.38446384739493,where:"The Guardian Life stage in the <b>lower Colonial Industrial Quarter</b>, along the Monocacy Creek toward the Lehigh."},
+ {n:"Sand Island — The Ice House",side:"N",free:1,lat:40.61619363146837,lng:-75.3817289055007,where:"The <b>Charles A. Brown Ice House</b>, 56 River St on Sand Island — a river island, not on Main St."},
+ {n:"ComedyPlatz (Stand-Up Comedy)",side:"N",free:1,lat:40.616144373842666,lng:-75.38193356035647,where:"Stand-up comedy at the Ice House on <b>Sand Island</b>."},
+ // SOUTH (SteelStacks)
+ {n:"Wind Creek Steel Stage at PNC Plaza",side:"S",free:0,lat:40.61450899708398,lng:-75.37147088973724,where:"The ticketed amphitheater on the SteelStacks campus by the Lehigh River — the one paid venue."},
+ {n:"Air Products Americaplatz at Levitt Pavilion",side:"S",free:1,jam:1,lat:40.61479448696134,lng:-75.36829888824602,where:"The <b>free</b> Levitt lawn stage under the blast furnaces — don't confuse it with the paid Steel Stage."},
+ {n:"Highmark Blue Shield Community Stage",side:"S",free:1,lat:40.61431741767585,lng:-75.36787331553037,where:"In Air Products Town Square, between the Visitor Center &amp; ArtsQuest Center."},
+ {n:"Frank Banko Alehouse Cinemas",side:"S",free:1,lat:40.61415213303438,lng:-75.36758130979148,where:"Indoor cinema stage inside the <b>ArtsQuest Center</b>, 101 Founders Way (A/C)."},
+ {n:"Lutron Jazz Cabaret",side:"S",free:1,lat:40.61415213303438,lng:-75.36778097306541,where:"The jazz cabaret at Frank Banko Alehouse Cinemas, inside the ArtsQuest Center."},
+ {n:"Lyrikplatz at Frank Banko Alehouse Cinemas",side:"S",free:1,lat:40.61414455470893,lng:-75.36763621719182,where:"Singer-songwriter stage inside the ArtsQuest Center (Frank Banko Alehouse Cinemas)."},
+ {n:"Musikfest Café",side:"S",free:1,lat:40.61417486800559,lng:-75.36751641922744,where:"Inside the <b>ArtsQuest Center</b>, 101 Founders Way — indoor, A/C (PNC series)."}
 ];
 var SCHED=[
  ["Jul 30","Grupo Niche","salsa · Preview Night"],["Jul 31","Russell Dickerson","country"],
@@ -555,13 +557,13 @@ function stageKey(s){ var n=s.n.toLowerCase();
 function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!=='undefined')?DAYS[curDayIdx]:null, set={};
  (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!day||r.d===day)) set[r.st]=true; }); return set; }
 /* Real map — Leaflet + OpenStreetMap (the hardened TCTP map engine). Clean streets, real geography. */
-var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null, LG_FOOD=null, LG_POTTY=null, LG_DIR=null, MF_MAPON={stage:true,shop:false,food:false,potty:false};
+var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null, LG_FOOD=null, LG_POTTY=null, LG_AID=null, LG_DIR=null, MF_MAPON={stage:true,shop:false,food:false,potty:false,aid:false};
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
   LMAP=L.map(el,{zoomControl:true,scrollWheelZoom:true});
   try{ L.Popup.mergeOptions({autoPan:true,keepInView:true,autoPanPadding:[16,18],maxWidth:240}); }catch(e){}   // every pin popup pans itself fully into the map frame
   if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
-  LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_DIR=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup(); LG_FOOD=L.layerGroup(); LG_POTTY=L.layerGroup();
+  LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_DIR=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup(); LG_FOOD=L.layerGroup(); LG_POTTY=L.layerGroup(); LG_AID=L.layerGroup();
   // Fit the WHOLE footprint but reserve room at the bottom for the Musikfest sheet, so the SOUTH SIDE
   // (SteelStacks) is never hidden behind it. Content sits higher, centered vertically in the visible frame.
   try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{paddingTopLeft:[24,48], paddingBottomRight:[24,200]}); }catch(e){ LMAP.setView([40.6172,-75.3762],15); }
@@ -601,7 +603,7 @@ function drawMap(){ ensureMap(); if(!LMAP)return;
     var _act=actAtStage(s.n), _nm=String(s.n).replace(/[\x27"\\]/g,''), _poster=(/levitt/i.test(s.n)?'levitt_poster.jpg':''), _hk=hereKey(s);
     m.bindPopup('<b>'+(isDead?'🌹 ':'')+esc(s.n)+'</b>'+(_act?'<br><span style="color:#b8002e;font-weight:800;font-size:12.5px">🎵 Now: '+esc(_act)+'</span>':'')+'<br><span style="font-size:12px;color:#555">'+String(s.where||'').replace(/<[^>]+>/g,'')+'</span><br><button onclick="mfDirectTo('+s.lat+','+s.lng+',\''+_nm+'\')" style="border:0;background:#5a2e86;color:#fff;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;margin-top:4px">🚶 Directions</button>'+(_poster?'<button onclick="openPoster(\''+_poster+'\')" style="border:0;background:#f0a500;color:#3a1d00;border-radius:8px;padding:6px 11px;font-weight:800;cursor:pointer;margin:4px 0 0 6px">🖼️ Poster</button>':'')+'<div class="mfhere" data-sk="'+_hk+'" style="margin-top:7px;border-top:1px solid #eee;padding-top:6px;font-size:12.5px">'+roseHereHtml(_hk)+'</div>');
   });
-  drawShops(); drawFood(); drawPotty(); mfApplyMapFilter();
+  drawShops(); drawFood(); drawPotty(); drawAid(); mfApplyMapFilter();
   updateYou(); updatePath(); updatePhotos(); try{ mfRoseTotal(); }catch(e){}
 }
 // ── LISTING / TOAST RULE (Michael, 2026-07-16) ────────────────────────────────────────────
@@ -644,7 +646,12 @@ function drawPotty(){ if(!LG_POTTY)return; LG_POTTY.clearLayers();
   });
 }
 function mfSetMapFilter(f){ MF_MAPON[f]=!MF_MAPON[f]; var el=document.getElementById('mf_f_'+f); if(el) el.classList.toggle('on',!!MF_MAPON[f]); mfApplyMapFilter(); }   // independent on/off toggle
-function mfApplyMapFilter(){ if(!LMAP)return; var lm={stage:LG_STAGE,shop:LG_SHOP,food:LG_FOOD,potty:LG_POTTY};
+function drawAid(){ if(!LG_AID)return; LG_AID.clearLayers();
+  (typeof FIRSTAID!=='undefined'?FIRSTAID:[]).forEach(function(b){
+    var ic=L.divIcon({className:'mfaid',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:6px;background:#b8002e;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:900;box-shadow:0 1px 4px #0006">✚</div>'});
+    L.marker([b.lat,b.lng],{icon:ic}).addTo(LG_AID).bindTooltip('⛑️ '+(b.n||'First Aid'),{direction:'top',opacity:.95}).bindPopup('<b>⛑️ '+esc(b.n||'First Aid')+'</b>'+_mfDirBtn(b.lat,b.lng,b.n||'First Aid')); });
+}
+function mfApplyMapFilter(){ if(!LMAP)return; var lm={stage:LG_STAGE,shop:LG_SHOP,food:LG_FOOD,potty:LG_POTTY,aid:LG_AID};
   Object.keys(lm).forEach(function(k){ var lg=lm[k]; if(!lg)return; try{ if(MF_MAPON[k]){ if(!LMAP.hasLayer(lg)) lg.addTo(LMAP); } else if(LMAP.hasLayer(lg)) LMAP.removeLayer(lg); }catch(e){} }); }   // show ALL toggled-on layers
 function mfDirectTo(lat,lng,name){ try{ ensureMap(); if(!LMAP||!LG_DIR)return; LG_DIR.clearLayers();
   if(!window.YOU){ mfToast('📍 Tap “🥾 Start my walk” first — then I draw the line from you.'); try{ LMAP.setView([lat,lng],17,{animate:true}); }catch(e){} return; }
@@ -1087,10 +1094,18 @@ function hav(a,b,c,d){ var R=3958.8, tR=Math.PI/180, dLa=(c-a)*tR, dLo=(d-b)*tR,
   var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); } // miles
 function prettyDist(mi){ return mi<0.19 ? (Math.round(mi*5280)+' ft') : (mi.toFixed(mi<10?2:1)+' mi'); }
 var STAGE_BY_KEY={}; STAGES.forEach(function(s){ var k=stageKey(s); if(k&&!STAGE_BY_KEY[k])STAGE_BY_KEY[k]=s; });
-var BATHROOMS=[  // approx from ArtsQuest campus maps — exact layout to confirm with ArtsQuest/John
- {n:"Colonial Industrial Quarter",lat:40.6179,lng:-75.3809},{n:"Main St / Sun Inn",lat:40.6188,lng:-75.3800},
- {n:"Payrow Plaza (Stadtplatz)",lat:40.6213,lng:-75.3783},{n:"SteelStacks Visitor Center",lat:40.6164,lng:-75.3712},
- {n:"ArtsQuest Center",lat:40.6157,lng:-75.3718},{n:"Levitt / Americaplatz",lat:40.6167,lng:-75.3708}];
+var BATHROOMS=[  // EXACT (Google Maps right-click → copy), provided by Michael 2026-07-23
+ {n:"Restrooms — North Side",side:"N",lat:40.61887229042404,lng:-75.38324915813887},
+ {n:"Restrooms — North Side",side:"N",lat:40.61710987676785,lng:-75.38309839088646},
+ {n:"Restrooms — North Side",side:"N",lat:40.6167322106536,lng:-75.38344515558546},
+ {n:"Restrooms — North Side",side:"N",lat:40.61672648842333,lng:-75.3835280775787},
+ {n:"Restrooms — North Side",side:"N",lat:40.618621768640764,lng:-75.37875514010189},
+ {n:"Restrooms — South Side",side:"S",lat:40.6150325356952,lng:-75.37202864402879},
+ {n:"Restrooms — South Side",side:"S",lat:40.614693336779084,lng:-75.36944517775297},
+ {n:"Restrooms — South Side",side:"S",lat:40.61422352393839,lng:-75.36767321782723}];
+var FIRSTAID=[  // EXACT (Google Maps right-click → copy), provided by Michael 2026-07-23
+ {n:"First Aid — North Side",side:"N",lat:40.618288639097266,lng:-75.38397284101822},
+ {n:"First Aid — South Side",side:"S",lat:40.615133905153606,lng:-75.3714790796394}];
 
 var WALK={on:false,miles:0,gain:0,last:null,lastAlt:null,watch:null,path:[]};
 function fmtStat(){ var mi=WALK.miles.toFixed(2), ft=Math.round(WALK.gain);
