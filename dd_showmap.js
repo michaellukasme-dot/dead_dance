@@ -446,7 +446,9 @@
            Tap → that festival's map, identical to opening it from the dropdown. Add more here. --- */
     var SM_FESTS = [
       { name: "Musikfest 2026",            lat: 40.617,  lng: -75.376,  emoji: "🎪", end: "2026-08-09", href: "musikfest.html" },
-      { name: "The Great Allentown Fair",  lat: 40.6047, lng: -75.4785, emoji: "🎡", end: "2026-09-07", href: "allentownfair.html" }
+      // ⚠️ TEMP DISPLAY OFFSET — true location is 40.6047,-75.4785 but that overlaps Musikfest on the map.
+      //    Nudged NW so both beacons read. RESTORE the real coords after Musikfest ends (Aug 9). [reminder set]
+      { name: "The Great Allentown Fair",  lat: 40.90, lng: -75.80, emoji: "🎡", end: "2026-09-07", href: "allentownfair.html" }
     ];
     /* --- dots: sized as fraction of viewBox → constant on-screen. mode: 'nation' faint, 'chapter' bold+labels --- */
     function drawDots(vbW, chapterName) {
