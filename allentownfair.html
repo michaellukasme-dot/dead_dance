@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Great Allentown Fair 2026 · DeadDance</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{ --purple:#241535; --purple2:#5a2e86; --rose:#b8002e; --gold:#f0a500; --line:#ece7f0; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#1a1320; background:#0e0a16; }
+  .afhead{ position:sticky; top:0; z-index:20; background:linear-gradient(90deg,#241535,#3a1f57); color:#fff; padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px; display:flex; align-items:center; gap:12px; }
+  .afhead .back{ color:#e2d3fb; text-decoration:none; font-weight:800; font-size:13px; }
+  .afhead h1{ margin:0; font-size:19px; font-weight:900; letter-spacing:-.01em; }
+  .afhead .x{ margin-left:auto; background:#ffffff22; border:0; color:#fff; width:32px; height:32px; border-radius:50%; font-size:17px; cursor:pointer; }
+  #amap{ height:56vh; width:100%; background:#e9e3f2; }
+  .leaflet-attribution-flag{ display:none!important; }
+  .afsheet{ background:#fff; border-radius:20px 20px 0 0; margin-top:-18px; position:relative; z-index:10; padding:18px 18px calc(24px + env(safe-area-inset-bottom,0px)); box-shadow:0 -8px 30px #0006; min-height:44vh; }
+  .afsheet .grab{ width:44px; height:5px; border-radius:3px; background:#e2dcec; margin:0 auto 14px; }
+  .afsheet h2{ margin:0 0 3px; font-size:20px; color:#241535; }
+  .afmeta{ color:#7a7285; font-weight:700; font-size:13px; margin-bottom:14px; }
+  .afmeta b{ color:#b8002e; }
+  .afcard{ background:#faf7fd; border:1px solid #ece3f7; border-left:3px solid var(--gold); border-radius:12px; padding:12px 14px; font-size:13.5px; color:#4a4356; line-height:1.5; }
+  .afcard b{ color:#5a2e86; }
+  .afrow{ display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; }
+  .afrow a{ text-decoration:none; }
+  .afbtn{ background:linear-gradient(135deg,#b8002e,#7a3cc0); color:#fff; border:0; border-radius:12px; font-weight:800; font-size:13.5px; padding:11px 15px; cursor:pointer; }
+  .afbtn.ghost{ background:#f1ecf7; color:#5a2e86; }
+</style>
+</head>
+<body>
+  <div class="afhead">
+    <a class="back" href="index.html" onclick="return afBack(event)">‹ Dead Dance</a>
+    <h1>🎡 Great Allentown Fair 2026</h1>
+    <button class="x" onclick="afBack(event)" aria-label="Close">×</button>
+  </div>
+  <div id="amap"></div>
+  <div class="afsheet">
+    <div class="grab"></div>
+    <h2>The Great Allentown Fair</h2>
+    <div class="afmeta"><b>Sept 2–7, 2026</b> · Allentown Fairgrounds · 302 N 17th St, Allentown, PA</div>
+    <div class="afcard">🌹 <b>Full festival map coming soon.</b> Stages, vendors, the grandstand, gates, restrooms &amp; first aid will land here the same way Musikfest did — pinpoint, from the source. For now, here's where the Fair lives.</div>
+    <div class="afrow">
+      <a href="https://www.google.com/maps/dir/?api=1&destination=40.6047,-75.4785&travelmode=driving" target="_blank" rel="noopener"><button class="afbtn">🚗 Directions</button></a>
+      <a href="https://www.allentownfair.com/" target="_blank" rel="noopener"><button class="afbtn ghost">Fair site ›</button></a>
+    </div>
+  </div>
+
+<script src="dd_map.js"></script>
+<script>
+/* close INSIDE the DeadDance sheet (iframe) → land back on the app; standalone → go home */
+window.afBack=function(e){ try{ if(window.parent && window.parent!==window && window.parent.ddSheetClose){ if(e&&e.preventDefault)e.preventDefault(); window.parent.ddSheetClose(); return false; } }catch(err){} return true; };
+(function(){
+  try{
+    var FG=[40.6047,-75.4785];   // Allentown Fairgrounds — refine with Google right-click when we build it out
+    var map=L.map('amap',{zoomControl:true,scrollWheelZoom:true}).setView(FG,16);
+    if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
+    var ic=L.divIcon({className:'affg',iconSize:[40,40],iconAnchor:[20,20],html:'<div style="width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid #7a3cc0;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px #0006">🎡</div>'});
+    L.marker(FG,{icon:ic}).addTo(map).bindPopup('<b>🎡 The Great Allentown Fair</b><br><span style="font-size:12px;color:#555">Sept 2–7, 2026 · 302 N 17th St</span>');
+    setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },250);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

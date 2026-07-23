@@ -403,6 +403,7 @@
             '<g class="sm-you"></g>' +
             '<g class="sm-dots"></g>' +
             '<g class="sm-badges"></g>' +
+            '<g class="sm-fests"></g>' +
           '</svg>' +
           '<div class="showmap-pop" id="showmapPop" hidden></div>' +
           '<button class="smfab" type="button" onclick="try{window.openMap&&window.openMap()}catch(e){}" title="The bus map — every chapter glowing" aria-label="Open the bus map">🚌</button>' +
@@ -425,6 +426,7 @@
     var svg = host.querySelector(".showmap-svg");
     var dotsG = host.querySelector(".sm-dots");
     var badgeG = host.querySelector(".sm-badges");
+    var festG = host.querySelector(".sm-fests");
     var youG = host.querySelector(".sm-you");
     var pop = host.querySelector("#showmapPop");
     var wrap = host.querySelector(".showmap-wrap");
@@ -440,6 +442,12 @@
     function farrah(html) { farrahEl.innerHTML = '🎙️ ' + html; }
     function setSum(t) { var e = host.querySelector("#mapSum"); if (e) e.textContent = t; }   // compact count on the header line
 
+    /* --- Radiating FESTIVAL pins on the map (each shows until its end date, then vanishes).
+           Tap → that festival's map, identical to opening it from the dropdown. Add more here. --- */
+    var SM_FESTS = [
+      { name: "Musikfest 2026",            lat: 40.617,  lng: -75.376,  emoji: "🎪", end: "2026-08-09", href: "musikfest.html" },
+      { name: "The Great Allentown Fair",  lat: 40.6047, lng: -75.4785, emoji: "🎡", end: "2026-09-07", href: "allentownfair.html" }
+    ];
     /* --- dots: sized as fraction of viewBox → constant on-screen. mode: 'nation' faint, 'chapter' bold+labels --- */
     function drawDots(vbW, chapterName) {
       var isCh = !!chapterName;
@@ -461,23 +469,36 @@
         }
         html += '</g>';
       });
-      // ── Musikfest festival pin — radiates like the show dots, until the fest ends (Aug 9, 2026).
-      //    Tap → the Musikfest map, identical to the dropdown's "🎪 Musikfest 2026". ──
-      if (TODAY_ISO <= "2026-08-09") {
-        var fp = project(40.617, -75.376), fr = (isCh ? 0.013 : 0.0095) * vbW, fe = (isCh ? 0.030 : 0.023) * vbW;
-        html += '<g class="smfest" tabindex="0" role="button" aria-label="Musikfest 2026 — open the festival map" style="cursor:pointer"' +
-          ' onclick="event.stopPropagation();try{window.ddSheet?ddSheet(\'musikfest.html\',\'🎪 Musikfest 2026\'):window.open(\'musikfest.html\',\'_blank\',\'noopener\')}catch(e){}">' +
-          '<circle class="smfestpulse" cx="' + fp[0] + '" cy="' + fp[1] + '" r="' + fr.toFixed(1) + '"></circle>' +
-          '<text class="smfestic" x="' + fp[0] + '" y="' + fp[1] + '" text-anchor="middle" dominant-baseline="central" style="font-size:' + fe.toFixed(1) + 'px">🎪</text>' +
-          '</g>';
-      }
       dotsG.innerHTML = html;
+      drawFests(vbW, isCh);   // festival beacons render into their OWN top layer (above badges → never covered)
       if (isCh) dotsG.querySelectorAll(".smdot").forEach(function (g) {
         var i = +g.getAttribute("data-i");
         g.addEventListener("click", function (e) { e.stopPropagation(); showPop(i, g); });
         g.addEventListener("mouseenter", function () { showPop(i, g); });
         g.addEventListener("focus", function () { showPop(i, g); });
       });
+    }
+
+    /* --- Festival beacons: their OWN top layer (above dots + badges), white halo + big emoji so they
+           always read — national or chapter zoom. Each shows until its end date, then vanishes. --- */
+    function drawFests(vbW, isCh) {
+      if (!festG) return;
+      var fhtml = "";
+      SM_FESTS.forEach(function (F) {
+        if (TODAY_ISO > F.end) return;
+        var fp = project(F.lat, F.lng),
+            fr   = (isCh ? 0.032 : 0.015) * vbW,   // pulse ring
+            halo = (isCh ? 0.034 : 0.017) * vbW,   // white disc behind the emoji
+            fe   = (isCh ? 0.050 : 0.028) * vbW;   // emoji size
+        var ttl = (F.emoji + " " + F.name).replace(/'/g, "");
+        fhtml += '<g class="smfest" tabindex="0" role="button" aria-label="' + esc(F.name) + ' — open the festival map" style="cursor:pointer"' +
+          ' onclick="event.stopPropagation();try{window.ddSheet?ddSheet(\'' + F.href + '\',\'' + ttl + '\'):window.open(\'' + F.href + '\',\'_blank\',\'noopener\')}catch(e){}">' +
+          '<circle class="smfestpulse" cx="' + fp[0] + '" cy="' + fp[1] + '" r="' + fr.toFixed(1) + '"></circle>' +
+          '<circle class="smfesthalo" cx="' + fp[0] + '" cy="' + fp[1] + '" r="' + halo.toFixed(1) + '"></circle>' +
+          '<text class="smfestic" x="' + fp[0] + '" y="' + fp[1] + '" text-anchor="middle" dominant-baseline="central" style="font-size:' + fe.toFixed(1) + 'px">' + F.emoji + '</text>' +
+          '</g>';
+      });
+      festG.innerHTML = fhtml;
     }
 
     /* --- chapter badges (national only): lit=count, dim=+ (tap to seed) --- */
