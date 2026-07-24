@@ -53,6 +53,8 @@
       ".ddm-msg{margin:7px 4px;max-width:84%}.ddm-msg.mine{margin-left:auto;text-align:right}" +
       ".ddm-m-top{display:flex;gap:6px;align-items:center;font-size:11px;color:#999;margin-bottom:2px}.ddm-msg.mine .ddm-m-top{justify-content:flex-end}" +
       ".ddm-m-nm{font-weight:600;color:#555}" +
+      ".ddm-m-av{display:inline-flex;width:18px;height:18px;border-radius:50%;background:#c9b8e6;color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center;overflow:hidden;vertical-align:middle;margin-right:5px;flex:none}" +
+      ".ddm-msg.mine .ddm-m-top{flex-direction:row-reverse}.ddm-msg.mine .ddm-m-av{margin-right:0;margin-left:5px}" +
       ".ddm-m-body{display:inline-block;background:#f1f1f3;border-radius:12px;padding:7px 11px;white-space:pre-wrap;word-break:break-word}" +
       ".ddm-msg.mine .ddm-m-body{background:" + ac + ";color:#fff}" +
       "#ddm-comp{display:flex;padding:7px 8px;border-top:1px solid #eee;gap:6px;align-items:center;background:#fff}" +
@@ -99,8 +101,9 @@
       var tm = "";
       try { tm = when.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + when.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); } catch (e) {}
       var nm = mine ? myName() : (curName || "friend");
+      var av = '<span class="ddm-m-av" data-ava="' + esc(m.sender_id || "") + '">' + esc((String(nm).charAt(0) || "🌹").toUpperCase()) + '</span>';
       html += '<div class="ddm-msg' + (mine ? " mine" : "") + '"><div class="ddm-m-top">' +
-        '<span class="ddm-m-nm">' + esc(nm) + '</span><span class="ddm-m-tm">' + esc(tm) + '</span></div>' +
+        av + '<span class="ddm-m-nm">' + esc(nm) + '</span><span class="ddm-m-tm">' + esc(tm) + '</span></div>' +
         '<div class="ddm-m-body">' + esc(m.body) + '</div></div>';
     });
     box.innerHTML = html; box.scrollTop = box.scrollHeight;

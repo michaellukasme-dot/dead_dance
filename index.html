@@ -3562,7 +3562,7 @@ function ddFeedPostHTML(p){
   var myPhoto=(mine&&window.ME&&ME.img)?ME.img:'';
   var av=myPhoto?('<img src="'+myPhoto+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">'):((nm.trim()[0]||'🌹').toUpperCase());
   var pid=p.id||'';
-  return '<div class="post"'+(pid?(' data-pid="'+pid+'"'):'')+'><div class="posthead"><div class="pav"'+(mine?' data-me-av':'')+(myPhoto?' style="overflow:hidden;padding:0;background:#fff"':'')+'>'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
+  return '<div class="post"'+(pid?(' data-pid="'+pid+'"'):'')+'><div class="posthead"><div class="pav"'+(mine?' data-me-av':'')+((!mine&&p.author_id)?(' data-ava="'+String(p.author_id).replace(/"/g,'')+'"'):'')+(myPhoto?' style="overflow:hidden;padding:0;background:#fff"':'')+'>'+av+'</div><div class="pwho"><b>'+nm+'</b>'+
     '<span>'+(tag?('<span class="grp">'+tag+'</span> · '):'')+ddFeedRelTime(p.created_at)+(p._me?' · you':'')+'</span></div></div>'+
     '<div class="txt">'+body+'</div>'+
     '<div class="acts"><button class="act ddlike"'+(pid?(' onclick="ddLike(this,\''+pid+'\')"'):' onclick="like(this)"')+'>👍 <span>0</span></button>'+
@@ -4413,6 +4413,8 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_qrmark.js" defer></script>
 <script src="dd_bandtoast.js" defer></script>
 <script src="helptest.js" defer></script>
+<script src="dd_ava.js"></script>
+<script src="dd_muse.js"></script>
 <script>
   /* ===== PWA update prompt — "🌹 There's an update to DeadDance" when a new version ships ===== */
   var DD_SWREG=null;

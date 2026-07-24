@@ -20,7 +20,10 @@
     var id = box.id || "";
     if (id === "composeText") return "post";
     if (id === "groupComposeInput") return "group";
-    if (id === "ddm-input") return "dm";
+    if (id === "ddm-input" || id === "lc-input") return "dm";
+    // other social composers across the app (share notes, road reports, crowdsource asks, band-onboard post)
+    if (id === "shSay" || id === "shNote" || id === "crqText" || id === "rdMsg" || id === "pt") return "post";
+    if (id === "npReply") return "comment";
     if (box.classList && box.classList.contains("cinput")) return "comment";
     return "";
   }
@@ -108,7 +111,8 @@
     b.classList.add("hi"); setTimeout(function () { try { b.classList.remove("hi"); } catch (e) {} }, 2600);
   }
   function scan() {
-    ["#composeText", "#groupComposeInput", "#ddm-input"].forEach(function (sel) { var el = document.querySelector(sel); if (el) wrap(el); });
+    ["#composeText", "#groupComposeInput", "#ddm-input", "#lc-input", "#npReply",
+     "#shSay", "#shNote", "#crqText", "#rdMsg", "#pt"].forEach(function (sel) { var el = document.querySelector(sel); if (el) wrap(el); });
     try { document.querySelectorAll(".cinput").forEach(wrap); } catch (e) {}
   }
 
