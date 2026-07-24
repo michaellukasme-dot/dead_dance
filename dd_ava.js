@@ -17,7 +17,8 @@
 
   function client() { try { return (w.ddClient && ddClient()) || null; } catch (e) { return null; } }
   function myId() { try { return (w.DDMe && DDMe.id && DDMe.id()) || null; } catch (e) { return null; } }
-  function myAva() { try { return (w.DDMe && DDMe.avatar && DDMe.avatar()) || ""; } catch (e) { return ""; } }
+  function myAva() { try { var a = (w.DDMe && DDMe.avatar && DDMe.avatar()) || ""; if (a) return a;
+    return localStorage.getItem("dd.me.img") || localStorage.getItem("dd.profile.img") || ""; } catch (e) { return ""; } }
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function persist() { if (saveT) return; saveT = setTimeout(function () { saveT = null; try { localStorage.setItem(LS, JSON.stringify(mem)); } catch (e) {} }, 400); }
 
