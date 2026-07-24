@@ -80,14 +80,18 @@
       ".muse-wrap.ta{display:block;flex:none;width:100%}" +
       ".muse-wrap>input,.muse-wrap>textarea{flex:1;min-width:0}" +
       ".muse-wrap.ta>textarea{width:100%;box-sizing:border-box}" +
-      ".muse-mark{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;border-radius:50%;" +
-      "background:#fff;box-shadow:0 1px 5px rgba(120,60,192,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:4}" +
-      ".muse-wrap.ta .muse-mark{top:auto;bottom:9px;transform:none}" +
-      ".muse-mark img{width:17px;height:17px;display:block;pointer-events:none}" +
+      ".muse-mark{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:8px;" +
+      "background:#fff;box-shadow:0 2px 7px rgba(217,119,87,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:6}" +
+      ".muse-wrap.ta .muse-mark{top:9px;bottom:auto;transform:none;width:32px;height:32px}" +   /* top-right, clear of the resize grip */
+      ".muse-mark img{width:100%;height:100%;display:block;pointer-events:none;border-radius:8px}" +
       ".muse-mark.busy{animation:musefade .7s infinite}" +
-      "@keyframes musefade{0%,100%{opacity:1}50%{opacity:.35}}" +
-      "input.muse-pad{padding-right:36px!important}" +
-      "textarea.muse-pad{padding-right:14px}";
+      "@keyframes musefade{0%,100%{opacity:1}50%{opacity:.4}}" +
+      "@keyframes musenudge{0%,70%,100%{transform:translateY(-50%) scale(1)}82%{transform:translateY(-50%) scale(1.18)}}" +
+      "@keyframes musenudgeta{0%,70%,100%{transform:scale(1)}82%{transform:scale(1.18)}}" +
+      ".muse-mark.hi{animation:musenudge 1.1s ease 2}" +
+      ".muse-wrap.ta .muse-mark.hi{animation:musenudgeta 1.1s ease 2}" +
+      "input.muse-pad{padding-right:40px!important}" +
+      "textarea.muse-pad{padding-right:14px;padding-top:12px}";
     document.head.appendChild(s);
   }
   function wrap(box) {
@@ -101,6 +105,7 @@
     b.innerHTML = '<img src="claude-mark.svg" alt="Claude">';
     b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); flow(box, b); });
     holder.appendChild(b);
+    b.classList.add("hi"); setTimeout(function () { try { b.classList.remove("hi"); } catch (e) {} }, 2600);
   }
   function scan() {
     ["#composeText", "#groupComposeInput", "#ddm-input"].forEach(function (sel) { var el = document.querySelector(sel); if (el) wrap(el); });
