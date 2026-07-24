@@ -176,6 +176,7 @@
   });
   // HISTORIC curtain — this show is over, so the bottom pills relive the night
   var HISTPILLS=[
+    {l:'🎟️ Ticket',   fn:'cafeTicket'},
     {l:'🎶 Setlist',   fn:'cafeSetlist'},
     {l:'🎸 Roster',    fn:'cafeRoster'},
     {l:'🎧 Listen',    fn:'cafeListen'},
@@ -211,7 +212,8 @@
     CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
       +'<div class="sh-done"><span class="big">🎟</span><b>You\'re in — Section '+sec+'</b>'
       +'<span>Dark Star Orchestra · Musikfest Café · Jul 15, 2025</span>'
-      +'<span>Your ticket lives in your DeadDance wallet. 🌹</span></div>';
+      +'<span>Your ticket lives in your DeadDance wallet. 🌹</span></div>'
+      +'<button class="sh-buy" onclick="cafeTicket()">🎟️ Open your ticket ▸</button>';
   };
   window.cafeSetlist=function(){ var d=window.CORNELL77; if(!d){return;}
     var sets=d.sets.map(function(s){ return '<div style="margin-top:13px"><div style="font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#7a3cc0">'+s.name+'</div>'
@@ -291,6 +293,20 @@
     SHEET.classList.add('on');
     try{ if(window.DDQR) DDQR.into('cafePassQR', EVENT_URL, {css:200,size:400,mark:'dd',link:false}); }catch(e){}
   };
+  // the DSO ticket — the ticket.html keepsake/pass, light-purple backdrop, docked left
+  window.cafeTicket=function(){
+    var url='ticket.html?band='+encodeURIComponent('Dark Star Orchestra')
+      +'&sub='+encodeURIComponent("Grateful Dead Tribute · Cornell '77")
+      +'&venue='+encodeURIComponent('Musikfest Café · 3rd Floor · ArtsQuest')
+      +'&date='+encodeURIComponent('Tue Jul 15, 2025')
+      +'&price='+encodeURIComponent('$75')+'&gate='+encodeURIComponent('Gate A');
+    var ov=document.getElementById('cafeTixOv');
+    if(!ov){ ov=document.createElement('div'); ov.id='cafeTixOv'; ov.style.cssText='position:fixed;inset:0;z-index:60';
+      var f=document.createElement('iframe'); f.id='cafeTixFrame'; f.setAttribute('allowtransparency','true'); f.style.cssText='width:100%;height:100%;border:0;background:transparent';
+      ov.appendChild(f); document.body.appendChild(ov); }
+    document.getElementById('cafeTixFrame').src=url; ov.style.display='block'; window.cafeClose();
+  };
+  window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='ddTixClose'){ var ov=document.getElementById('cafeTixOv'); if(ov)ov.style.display='none'; } }catch(x){} });
   window.cafeClose=function(){ SHEET.classList.remove('on'); };
   window.cafeLegend=function(){ var l=document.getElementById('legend'); var min=l.classList.toggle('min');
     var b=l.querySelector('.lg-toggle'); if(b) b.textContent=min?'Show Map Legend ⌃':'Hide Map Legend ⌄'; };
