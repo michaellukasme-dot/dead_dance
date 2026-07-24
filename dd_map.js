@@ -40,8 +40,8 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
     var purple = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, className: 'dd-purple-tiles' });  // 🌹 DeadDance brand
     purple.addTo(map);   // default to our purple — no Satellite (doesn't help the walk, per Issa)
 
-    // toggle: 🌹 DeadDance (purple) ⇄ 🗺 Map (plain geo), top-right
-    try { L.control.layers({ "🌹 DeadDance": purple, "🗺 Map": base }, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {}
+    // toggle: brand (purple) ⇄ 🗺 Map (plain geo), top-right. Brand label is per-page overridable (white-label maps set w.DD_MAP_BRAND).
+    try { var _lyr = {}; _lyr[w.DD_MAP_BRAND || "🌹 DeadDance"] = purple; _lyr["🗺 Map"] = base; L.control.layers(_lyr, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {}
 
     var errs = 0, swapped = false;
     function watch(layer) { layer.on("tileerror", function () {

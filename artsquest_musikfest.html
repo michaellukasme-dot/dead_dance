@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Musikfest 2026 · Find Every Platz · DeadDance</title>
+<title>Musikfest 2026 · ArtsQuest · Find Every Platz</title>
 <meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -149,8 +149,8 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 .curtitle{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 9px}
 </style></head>
 <body class="mfapp">
+<script>window.DD_MAP_BRAND="🎡 ArtsQuest";</script>
 <div class="mf-map" id="mfMapZone">
-  <a class="mf-back" href="index.html" onclick="return mfBack(event)">‹ Dead Dance</a>
   <div class="mf-chips" id="mfChips">
     <button class="mfchip" data-f="now" onclick="mfChip(this)">🌹 Acts on Now</button>
   </div>
@@ -159,14 +159,12 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 </div>
 <div class="wrap">
   <div class="mf-grab" id="mfGrab" onpointerdown="mfDragStart(event)"><span></span></div>
-  <a class="back" href="index.html" onclick="return mfBack(event)">‹ Explore DeadDance</a>
   <div class="hero" style="position:relative;display:flex;align-items:center;gap:12px">
     <!-- EVENT QR — in front of the title. This IS the event: scan/tap it and you land right on this map.
          StageFill standard: every event's QR sits in front of its %TITLE%. -->
     <div id="mfqr" onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="This event’s map QR — scan me, or tap to share" style="width:56px;height:56px;background:#fff;border-radius:10px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;overflow:hidden"></div>
     <button onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="Share this map + QR with other heads" aria-label="Share the map with other heads" style="border:0;background:#fff;border-radius:10px;width:40px;height:40px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;display:flex;align-items:center;justify-content:center;color:#5a2e86;padding:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
-    <h1 style="margin:0">Musikfest</h1>
-    <div id="roseTotal" title="Dead Heads here" style="position:absolute;top:50%;right:84px;transform:translateY(-50%);display:flex;align-items:center;gap:2px;font-weight:900;font-size:18px;color:#b8002e;line-height:1;z-index:2"><span style="font-size:20px">🌹</span><span id="roseTotalN">0</span></div>
+    <h1 style="margin:0">ArtsQuest MusikFest</h1>
     <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:50%;right:20px;transform:translateY(-50%);border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="MUSIKFEST_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
   </div>
   <div class="mflayers">
@@ -315,11 +313,11 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div class="curtainbar" id="mfCurtainBar">
     <button class="mftab" data-cur="cur_windcreek" onclick="mfCurtain('cur_windcreek')">🎟 Wind Creek Steel Stage</button>
     <button class="mftab on" data-cur="cur_plan" onclick="mfCurtain('cur_plan')">📋 Plan Your Day</button>
-    <button class="mftab" data-cur="cur_dead" onclick="mfCurtain('cur_dead')">🌹 Dead &amp; Jam Band</button>
+    <button class="mftab" data-cur="cur_dead" onclick="mfCurtain('cur_dead')">🎸 Tribute &amp; Jam Bands</button>
     <button class="mftab" data-cur="cur_stage" onclick="mfCurtain('cur_stage')">🎪 Browse stage</button>
     <button class="mftab" data-cur="cur_earlier" onclick="mfCurtain('cur_earlier')">⏱ Earlier</button>
     <button class="mftab" data-cur="cur_lineup" onclick="mfCurtain('cur_lineup')">🎫 Browse the Whole Lineup</button>
-    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">My Sets 🌹</button>
+    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">My Sets</button>
     <button class="mftab" data-cur="cur_locals" onclick="mfCurtain('cur_locals')">💡 Locals</button>
   </div>
 
@@ -351,9 +349,9 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <div class="sched" id="fullSched"></div>
     <div id="schMore"></div>
     <div style="display:flex;gap:10px;margin:14px 0 4px;align-items:stretch">
-      <button onclick="try{ddLaunchPost&&ddLaunchPost()}catch(e){}" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
-        <div style="color:#241535;font-weight:900;font-size:13px">🚀 I Launched DeadDance</div>
-        <div style="color:#7a6a2e;font-size:11.5px;margin-top:2px">Invite 10 deadhead friends ›</div>
+      <button onclick="try{mfShareMap&&mfShareMap()}catch(e){}" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
+        <div style="color:#241535;font-weight:900;font-size:13px">🎡 Share Musikfest</div>
+        <div style="color:#7a6a2e;font-size:11.5px;margin-top:2px">Send the map to your friends ›</div>
       </button>
       <button onclick="adOpen()" style="flex:1;min-width:0;text-align:left;background:linear-gradient(100deg,#f3eeff,#fff);border:1px solid #d9c9f0;border-left:5px solid #5a2e86;border-radius:14px;padding:11px 12px;cursor:pointer;font:inherit">
         <div style="color:#241535;font-weight:900;font-size:13px">📣 Claim your shop</div>
@@ -911,7 +909,7 @@ crewRefresh(); renderJoin();
 try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:56,caption:false}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
 window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
-  if(navigator.share){ navigator.share({title:'Musikfest 2026 — the DeadDance map',url:url}).catch(function(){}); }
+  if(navigator.share){ navigator.share({title:"Musikfest 2026 — the official ArtsQuest map",url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); mfToast('🔗 Map link copied — paste it anywhere.'); }catch(e){ mfToast(url); } } };
 window._mfLocked=false;
 function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{ LMAP.setMaxBounds(L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]])); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the fest footprint; zoom stays free
@@ -1109,7 +1107,7 @@ window.renderAsks=function(a){ var host=document.getElementById('silverFloat'); 
     +'<div style="display:flex;align-items:center;gap:7px;margin:0 26px 7px 0"><img src="claude-mark.svg" alt="" style="width:20px;height:20px;flex:none"><span style="font-weight:900;font-size:12.5px;color:#5a2e86">📸 Owsley’s working the room — <b>'+esc(a.b)+'</b> at '+esc(a.st)+', on now</span></div>'
     +'<div id="silverCrowd" style="font-size:12px;color:#8a5a00;font-weight:800;margin:0 4px 9px 0">🍪 Loading the ring…</div>'
     +'<button type="button" onclick="surroundSend()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e6c34a;background:linear-gradient(100deg,#fff8ec,#fff);border-radius:13px;padding:10px 12px;margin:0 0 8px;cursor:pointer;font:inherit"><span style="font-size:20px">🎡</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#8a5a00">Surround the Stage — grab your angle</span><span style="display:block;font-size:11.5px;color:#9a7b3a">Four sides of '+esc(a.st)+', one shot. <b>+25 Cookies</b></span></span></button>'
-    +'<button type="button" onclick="mfCheckIn()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e0d3f2;background:linear-gradient(100deg,#f5efff,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">📍</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#5a2e86">Check in — in your voice</span><span style="display:block;font-size:11.5px;color:#8a7bbf">Posts to the DeadDance Musikfest group.</span></span></button>'
+    +'<button type="button" onclick="mfCheckIn()" style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:1px solid #e0d3f2;background:linear-gradient(100deg,#f5efff,#fff);border-radius:13px;padding:10px 12px;margin:0 0 9px;cursor:pointer;font:inherit"><span style="font-size:20px">📍</span><span style="flex:1"><span style="display:block;font-size:13px;font-weight:900;color:#5a2e86">Check in — in your voice</span><span style="display:block;font-size:11.5px;color:#8a7bbf">Posts to the Musikfest board.</span></span></button>'
     +'<div id="askBubbles"></div>';
   try{ mfSilverCrowdRefresh(); }catch(e){}
   var wrap=document.getElementById('askBubbles'), idx=0;
@@ -1346,7 +1344,7 @@ function walkStatus(msg,persist){ var el=document.getElementById('ddWalkStat');
   if(!el){ el=document.createElement('div'); el.id='ddWalkStat'; el.style.cssText='position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:215;pointer-events:none;background:#241535;color:#fff;font-weight:800;font-size:13px;line-height:1.4;padding:11px 32px 11px 16px;border-radius:13px;box-shadow:0 6px 20px #0006;max-width:90%;text-align:center'; document.body.appendChild(el); }
   el.innerHTML='<button onclick="this.parentNode.style.display=&quot;none&quot;" aria-label="Dismiss" style="position:absolute;top:3px;right:7px;pointer-events:auto;background:none;border:0;color:#fff;opacity:.75;font-size:15px;line-height:1;cursor:pointer;padding:2px">✕</button>'+msg; el.style.display='block'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.display='none'; }, persist?7000:4500); }
 function onGeoErr(e){ var c=e&&e.code;
-  if(c===1) walkStatus('📍 <b>Location is off for this app.</b> Allow Location for deaddance.app in your browser/phone settings, then tap Start my walk again.',true);
+  if(c===1) walkStatus('📍 <b>Location is off for this app.</b> Allow Location for this map in your browser/phone settings, then tap Start my walk again.',true);
   else if(c===3) walkStatus('🛰️ Still finding you — step into the open and hold still a few seconds…',true);
   else walkStatus('📍 Can’t reach GPS right here — try stepping outside, then tap Start my walk again.',true); }
 function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
