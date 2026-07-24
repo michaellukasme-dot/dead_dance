@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Games & Puzzles · DeadDance</title>
+<style>
+  :root{--rose:#b8002e;--purple:#5a2e86;--accent:#7a3cc0;--gold:#c79a3a;--ink:#23202a;--muted:#7a7686;--bg:#f2ecfb;--card:#fff;--line:#e7ddf5}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:680px;margin:0 auto;padding:0 14px 40px}
+  /* cookie jar header */
+  .jar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#241535,#3a1f57);color:#fff;margin:0 -14px 14px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 14px #0005}
+  .jar .cj{flex:none;width:46px;height:46px;border-radius:50%;background:#ffffff18;display:flex;align-items:center;justify-content:center;font-size:24px}
+  .jar .jt{flex:1;min-width:0}
+  .jar .jt b{display:block;font-size:20px;font-weight:900;line-height:1}
+  .jar .jt span{display:block;font-size:11.5px;color:#c9b8e6;font-weight:700;margin-top:3px}
+  .jar .board{flex:none;border:0;background:linear-gradient(180deg,#ffe1a0,#f0a500);color:#2a1c00;font-weight:900;font-size:12px;border-radius:999px;padding:9px 13px;cursor:pointer}
+  .lead{font-size:12.5px;color:var(--muted);font-weight:600;margin:0 2px 14px;line-height:1.5}
+  /* sections */
+  .sec{margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+  .sec b{font-size:16px;font-weight:900;color:#241535}
+  .sec i{font-size:11.5px;color:var(--muted);font-weight:700;font-style:normal}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
+  .tile{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px;cursor:pointer;display:flex;flex-direction:column;gap:8px;min-height:112px;transition:transform .12s,box-shadow .12s}
+  .tile:active{transform:scale(.97)}
+  .tile:hover{box-shadow:0 8px 22px rgba(90,46,134,.14)}
+  .tile .ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff}
+  .tile .nm{font-size:14px;font-weight:800;color:#241535;line-height:1.15}
+  .tile .ds{font-size:11px;color:var(--muted);line-height:1.35}
+  .tile .flag{position:absolute;top:9px;right:9px;font-size:8.5px;font-weight:900;letter-spacing:.05em;border-radius:999px;padding:3px 7px}
+  .tile .flag.play{color:#fff;background:#1f9e6b}
+  .tile .flag.soon{color:#8a7fa0;background:#f0ecf6}
+  /* coin pop */
+  .coin{position:fixed;z-index:9000;font-size:26px;pointer-events:none;animation:coinpop 1s cubic-bezier(.2,.8,.3,1) forwards}
+  .coin .plus{position:absolute;left:50%;top:-6px;transform:translateX(-50%);font-size:14px;font-weight:900;color:#f0a500;text-shadow:0 1px 2px #0006;white-space:nowrap}
+  @keyframes coinpop{0%{transform:translateY(0) scale(.6) rotateY(0);opacity:0}18%{opacity:1;transform:translateY(-26px) scale(1.15) rotateY(180deg)}55%{transform:translateY(-40px) scale(1) rotateY(360deg)}100%{transform:translateY(-92px) scale(.85) rotateY(540deg);opacity:0}}
+  /* modal (Deadle + board) */
+  .ov{position:fixed;inset:0;z-index:40;background:rgba(20,12,30,.55);display:none;align-items:center;justify-content:center;padding:14px}
+  .ov.on{display:flex}
+  .card2{background:#fff;width:100%;max-width:420px;max-height:92vh;overflow:auto;border-radius:18px;box-shadow:0 20px 60px #0007;padding:16px 16px 20px;position:relative}
+  .card2 .x{position:absolute;top:11px;right:12px;border:0;background:#f0ecf6;color:#6a5f86;width:32px;height:32px;border-radius:16px;font-size:18px;cursor:pointer}
+  .card2 h2{font-size:19px;font-weight:900;color:#241535}
+  .card2 .sub{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px}
+  /* deadle */
+  .dl-rows{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;margin:15px auto;width:min(300px,86vw)}
+  .dl-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .dl-c{aspect-ratio:1;border:2px solid #e0d8ee;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-transform:uppercase;color:#241535;background:#fff}
+  .dl-c.hit{background:#1f9e6b;border-color:#1f9e6b;color:#fff}
+  .dl-c.warm{background:#e0a83a;border-color:#e0a83a;color:#fff}
+  .dl-c.miss{background:#b7aec6;border-color:#b7aec6;color:#fff}
+  .dl-c.pop{animation:cpop .18s ease}
+  @keyframes cpop{50%{transform:scale(1.12)}}
+  .kb{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .kb .kr{display:flex;gap:5px;justify-content:center}
+  .kb button{flex:1;max-width:38px;border:0;background:#e9e2f5;color:#241535;border-radius:7px;padding:11px 0;font-size:13px;font-weight:800;cursor:pointer}
+  .kb button.wide{max-width:58px;font-size:11px}
+  .kb button.hit{background:#1f9e6b;color:#fff}.kb button.warm{background:#e0a83a;color:#fff}.kb button.miss{background:#c7bfd6;color:#fff}
+  .dl-msg{text-align:center;font-size:13px;font-weight:800;min-height:20px;margin-top:8px;color:var(--rose)}
+  .dl-lv{display:flex;gap:7px;justify-content:center;margin-top:6px}
+  .dl-lv button{border:1.5px solid var(--line);background:#faf7ff;color:var(--purple);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:800;cursor:pointer}
+  .dl-lv button.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+  /* board */
+  .bd-tabs{display:flex;gap:6px;margin:14px 0 10px}
+  .bd-tabs button{flex:1;border:1.5px solid var(--line);background:#faf7ff;color:var(--purple);border-radius:10px;padding:9px;font-size:12.5px;font-weight:800;cursor:pointer}
+  .bd-tabs button.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .bd-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #f2eef7}
+  .bd-row .rk{width:22px;font-weight:900;color:var(--accent)}
+  .bd-row .who{flex:1;font-weight:700;font-size:13.5px}
+  .bd-row .pts{font-weight:900;color:#c58a1e}
+  .bd-note{font-size:12px;color:var(--muted);line-height:1.5;padding:12px 4px 2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="jar">
+    <div class="cj">🍪</div>
+    <div class="jt"><b id="ckTotal">0</b><span id="ckTier">Nibbler · feed Cookie a crumb to climb</span></div>
+    <button class="board" onclick="openBoard()">🏆 Board</button>
+  </div>
+  <div class="lead">Play the family. <b>Multiplayer, multi-level, one board a day</b> — everyone gets the same puzzle. Win Cookies 🍪, climb Local → Regional → National.</div>
+  <div id="sections"></div>
+</div>
+
+<div class="ov" id="dlOv"><div class="card2" id="dlCard"></div></div>
+<div class="ov" id="bdOv"><div class="card2" id="bdCard"></div></div>
+
+<script>
+(function(){
+  "use strict";
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+
+  // ---------- Cookie ledger (unified game points; syncs to the Cookie Jar) ----------
+  var CK_KEY='dd.cookies';
+  function ckGet(){ try{ return parseInt(localStorage.getItem(CK_KEY)||'0',10)||0; }catch(e){ return 0; } }
+  function ckSet(n){ try{ localStorage.setItem(CK_KEY, String(n)); }catch(e){} }
+  var TIERS=[['Nibbler',0],['Snacker',250],['Feaster',1000],['Baker',3000],["Cookie's Chosen",7500]];
+  function tier(t){ var L=TIERS[0]; for(var i=0;i<TIERS.length;i++){ if(t>=TIERS[i][1]) L=TIERS[i]; } var nx=TIERS[TIERS.indexOf(L)+1];
+    return { name:L[0], next:nx?('· '+(nx[1]-t)+' 🍪 to '+nx[0]):'· top of the jar 🌹' }; }
+  function paintJar(){ var t=ckGet(); $('ckTotal').textContent=t.toLocaleString(); var L=tier(t); $('ckTier').textContent=L.name+' '+L.next; }
+  // award N cookies at (x,y) with the Mario coin pop
+  function award(n, x, y, reason){
+    n=Math.max(0,n|0); if(!n) return; ckSet(ckGet()+n); paintJar();
+    coinPop(n, x, y);
+  }
+  function coinPop(n, x, y){
+    x=(x==null)?window.innerWidth/2:x; y=(y==null)?window.innerHeight/2:y;
+    var el=document.createElement('div'); el.className='coin'; el.style.left=(x-13)+'px'; el.style.top=(y-13)+'px';
+    el.innerHTML='🍪<span class="plus">+'+n+'</span>'; document.body.appendChild(el);
+    setTimeout(function(){ try{ el.remove(); }catch(e){} }, 1050);
+  }
+
+  // ---------- the catalog: five sections ----------
+  var C={
+    'Wordplay':{ic:'🔤', tint:'#7a3cc0', items:[
+      {n:'Deadle', d:'Five letters. Guess the Dead word.', c:'#7a3cc0', play:'deadle', flag:'play'},
+      {n:'Songbook Search', d:'Find the songs & albums in the grid.', c:'#5a2e86', flag:'soon', cook:6},
+      {n:'Setlist Climb', d:'Opener → closer, one song at a time.', c:'#8a4fd0', flag:'soon', cook:6},
+      {n:'Connections', d:'Four that share an album · writer · decade.', c:'#3a5da8', flag:'soon', cook:8}
+    ]},
+    'Knowledge':{ic:'🧠', tint:'#b8002e', items:[
+      {n:'Dead Trivia', d:"Tonight's show-specific round · live boards.", c:'#b8002e', href:'dead_karaoke.html', flag:'play'},
+      {n:'Pinpoint the Show', d:'Name the night from escalating clues.', c:'#d0344f', flag:'soon', cook:10},
+      {n:'Song ↔ Album', d:'Match each song to the record it lives on.', c:'#1f9e6b', flag:'soon', cook:6}
+    ]},
+    'Audio':{ic:'🎧', tint:'#2b8a8a', items:[
+      {n:'Name That Tune', d:'From the Archive — name it fast.', c:'#2b8a8a', href:'index.html#go=games', flag:'play'},
+      {n:'Dead Karaoke', d:'Sing the songbook · climb the board.', c:'#1f7d7d', href:'dead_karaoke.html', flag:'play'}
+    ]},
+    'Visual':{ic:'🎨', tint:'#c58a1e', items:[
+      {n:'Logo Guess', d:'Name the band from the logo.', c:'#c58a1e', href:'index.html#go=games', flag:'play'},
+      {n:'Stealie Sudoku', d:'Sudoku with stealies, bears & roses.', c:'#e8631a', flag:'soon', cook:8},
+      {n:'Seat the Band', d:'Put each player on their instrument.', c:'#a06a1e', flag:'soon', cook:8}
+    ]},
+    'Puzzles':{ic:'🧩', tint:'#5a2e86', sub:'daily · the whole family plays the same board', items:[
+      {n:'Deadle', d:'Wordle, Dead-style.', c:'#7a3cc0', play:'deadle', flag:'play'},
+      {n:'Songbook Search', d:'Daily word search.', c:'#5a2e86', flag:'soon', cook:6},
+      {n:'Song ↔ Album', d:'Match & pair, timed.', c:'#1f9e6b', flag:'soon', cook:6},
+      {n:'Setlist Climb', d:'Word-ladder the set.', c:'#8a4fd0', flag:'soon', cook:6},
+      {n:'Pinpoint the Show', d:'Guess the night.', c:'#b8002e', flag:'soon', cook:10},
+      {n:'Connections', d:'Four groups of four.', c:'#3a5da8', flag:'soon', cook:8},
+      {n:'Stealie Sudoku', d:'Roses for numerals.', c:'#e8631a', flag:'soon', cook:8},
+      {n:'Seat the Band', d:'Logic-grid the roster.', c:'#2b8a8a', flag:'soon', cook:8}
+    ]}
+  };
+  function render(){
+    var H='';
+    Object.keys(C).forEach(function(k){ var s=C[k];
+      H+='<div class="sec"><b>'+s.ic+' '+k+'</b>'+(s.sub?'<i>· '+s.sub+'</i>':'')+'</div><div class="grid">';
+      s.items.forEach(function(it,i){ var id='t_'+k.replace(/\W/g,'')+'_'+i;
+        H+='<div class="tile" id="'+id+'"><span class="flag '+it.flag+'">'+(it.flag==='play'?'PLAY':'SOON')+'</span>'
+          +'<div class="ico" style="background:'+it.c+'">'+(s.ic)+'</div>'
+          +'<div class="nm">'+esc(it.n)+'</div><div class="ds">'+esc(it.d)+'</div></div>';
+      });
+      H+='</div>';
+    });
+    $('sections').innerHTML=H;
+    // wire taps
+    Object.keys(C).forEach(function(k){ var s=C[k];
+      s.items.forEach(function(it,i){ var el=$('t_'+k.replace(/\W/g,'')+'_'+i); if(!el)return;
+        el.onclick=function(ev){
+          if(it.play==='deadle') return openDeadle();
+          if(it.href){ try{ (window.top||window).location.href=it.href; }catch(e){ location.href=it.href; } return; }   // break out of the sheet iframe → full-screen game
+          // "soon" games still reward curiosity with a crumb (once per day per tile)
+          var kd='dd.crumb.'+it.n+'.'+today(); var got=false; try{ got=localStorage.getItem(kd)==='1'; }catch(e){}
+          if(!got){ try{ localStorage.setItem(kd,'1'); }catch(e){} award(it.cook||3, ev.clientX, ev.clientY, 'peek'); msgToast('🍪 +'+(it.cook||3)+' for the peek — '+it.n+' drops soon'); }
+          else msgToast('🧩 '+it.n+' — coming soon. Check back daily.');
+        };
+      });
+    });
+  }
+  function today(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }   // LOCAL date — same basis as dseed()
+  var _tt=null;
+  function msgToast(m){ var t=$('gToast'); if(!t){ t=document.createElement('div'); t.id='gToast'; t.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:9500;background:#241535ee;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;box-shadow:0 6px 18px #0006;opacity:0;transition:.2s;max-width:90%;text-align:center'; document.body.appendChild(t); }
+    t.textContent=m; t.style.opacity='1'; clearTimeout(_tt); _tt=setTimeout(function(){ t.style.opacity='0'; },2200); }
+
+  // ---------- DEADLE (Wordle, Dead-style) — date-seeded, multi-level, awards Cookies ----------
+  var WORDS_EASY=["DANCE","ROSES","BEARS","LOSER","TIGER","RIDER","STEAL","TRUCK","SUGAR","WHEEL","STARS","CANDY"];
+  var WORDS_HEAD=["WHEEL","RIVER","STARS","STEAL","KEITH","DONNA","TERPS","CANDY"];
+  var DL={ level:'easy', row:0, col:0, done:false, guesses:[], answer:'' };
+  function dseed(){ var d=new Date(); return d.getFullYear()*372 + d.getMonth()*31 + d.getDate(); }
+  function pickAnswer(){ var list=(DL.level==='head')?WORDS_HEAD:WORDS_EASY; return list[dseed()%list.length]; }
+  function dlKey(){ return 'dd.deadle.'+today()+'.'+DL.level; }   // per-day AND per-level → no re-earn by level-swap
+  function openDeadle(){
+    DL={ level:DL.level||'easy', row:0, col:0, done:false, awarded:false, guesses:[], answer:pickAnswer() };
+    var rec=null; try{ rec=JSON.parse(localStorage.getItem(dlKey())||'null'); }catch(e){}
+    renderDeadle(); $('dlOv').classList.add('on');
+    if(rec){ DL.guesses=rec.guesses||[]; DL.row=DL.guesses.length; DL.done=!!rec.done; DL.awarded=!!rec.awarded; replayDeadle(rec); }
+  }
+  function renderDeadle(){
+    var rows='';
+    for(var r=0;r<6;r++){ rows+='<div class="dl-row">'; for(var c=0;c<5;c++){ rows+='<div class="dl-c" id="dl-'+r+'-'+c+'"></div>'; } rows+='</div>'; }
+    var kbrows=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+    var kb='<div class="kb">';
+    kbrows.forEach(function(row,ri){ kb+='<div class="kr">';
+      if(ri===2) kb+='<button class="wide" data-k="ENTER">enter</button>';
+      row.split('').forEach(function(ch){ kb+='<button id="k-'+ch+'" data-k="'+ch+'">'+ch+'</button>'; });
+      if(ri===2) kb+='<button class="wide" data-k="DEL">⌫</button>';
+      kb+='</div>';
+    }); kb+='</div>';
+    $('dlCard').innerHTML='<button class="x" onclick="dlClose()">✕</button>'
+      +'<h2>🌹 Deadle</h2><div class="sub">Five letters from the Dead world · same word for everyone today</div>'
+      +'<div class="dl-lv"><button id="lvE" class="'+(DL.level==='easy'?'on':'')+'" onclick="dlLevel(\'easy\')">Easy</button><button id="lvH" class="'+(DL.level==='head'?'on':'')+'" onclick="dlLevel(\'head\')">Head · ×1.5 🍪</button></div>'
+      +'<div class="dl-rows">'+rows+'</div><div class="dl-msg" id="dlMsg"></div>'+kb;
+    // wire keyboard
+    Array.prototype.forEach.call($('dlCard').querySelectorAll('.kb button'),function(b){ b.onclick=function(){ dlKey(b.getAttribute('data-k')); }; });
+  }
+  window.dlLevel=function(lv){ if(DL.row>0&&!DL.done)return; DL.level=lv; openDeadle(); };
+  window.dlClose=function(){ $('dlOv').classList.remove('on'); };
+  function setCell(r,c,ch,cls){ var el=$('dl-'+r+'-'+c); if(!el)return; el.textContent=ch||''; el.className='dl-c'+(cls?(' '+cls):'')+(ch?' pop':''); }
+  function dlKey(k){
+    if(DL.done)return;
+    if(k==='ENTER') return dlSubmit();
+    if(k==='DEL'){ if(DL.col>0){ DL.col--; setCell(DL.row,DL.col,''); } return; }
+    if(/^[A-Z]$/.test(k) && DL.col<5){ setCell(DL.row,DL.col,k); DL.col++; }
+  }
+  document.addEventListener('keydown',function(e){ if(!$('dlOv').classList.contains('on'))return; var k=e.key.toUpperCase();
+    if(k==='ENTER')dlKey('ENTER'); else if(k==='BACKSPACE')dlKey('DEL'); else if(/^[A-Z]$/.test(k))dlKey(k); });
+  function evaluate(guess, ans){
+    var res=['miss','miss','miss','miss','miss'], a=ans.split(''), used=[0,0,0,0,0];
+    for(var i=0;i<5;i++){ if(guess[i]===a[i]){ res[i]='hit'; used[i]=1; a[i]=null; } }
+    for(i=0;i<5;i++){ if(res[i]==='hit')continue; var j=a.indexOf(guess[i]); if(j>=0){ res[i]='warm'; a[j]=null; } }
+    return res;
+  }
+  function dlSubmit(){
+    if(DL.col<5){ dlMsg('Not enough letters'); return; }
+    var guess=''; for(var c=0;c<5;c++){ guess+=$('dl-'+DL.row+'-'+c).textContent; }
+    var res=evaluate(guess, DL.answer);
+    for(c=0;c<5;c++){ setCell(DL.row,c,guess[c],res[c]); var kb=$('k-'+guess[c]); if(kb){ if(res[c]==='hit')kb.className='hit'; else if(res[c]==='warm'&&kb.className!=='hit')kb.className='warm'; else if(!kb.className)kb.className='miss'; } }
+    DL.guesses.push(guess); var win=(guess===DL.answer);
+    if(win||DL.guesses.length>=6){ DL.done=true; finishDeadle(win); }
+    DL.row++; DL.col=0;
+    try{ localStorage.setItem(dlKey(), JSON.stringify({guesses:DL.guesses,done:DL.done,awarded:DL.awarded})); }catch(e){}
+  }
+  function finishDeadle(win){
+    if(win){
+      if(!DL.awarded){ DL.awarded=true; var base=[100,60,40,25,15,10][DL.guesses.length-1]||10; var pts=Math.round(base*(DL.level==='head'?1.5:1));
+        var rect=$('dlCard').getBoundingClientRect(); award(pts, rect.left+rect.width/2, rect.top+90, 'deadle'); dlMsg('🌹 Got it — +'+pts+' 🍪'); }
+      else dlMsg('Solved today 🌹 — come back tomorrow');
+    }
+    else dlMsg('The word was '+DL.answer+' 🌹');
+  }
+  function replayDeadle(seen){ (seen.guesses||[]).forEach(function(g,r){ var res=evaluate(g,DL.answer); for(var c=0;c<5;c++){ setCell(r,c,g[c],res[c]); var kb=$('k-'+g[c]); if(kb){ if(res[c]==='hit')kb.className='hit'; else if(res[c]==='warm'&&kb.className!=='hit')kb.className='warm'; else if(!kb.className)kb.className='miss'; } } });
+    if(seen.done){ dlMsg(seen.guesses.indexOf(DL.answer)>=0?'Solved today 🌹 — come back tomorrow':'The word was '+DL.answer+' 🌹'); } }
+  function dlMsg(m){ var el=$('dlMsg'); if(el)el.textContent=m; }
+
+  // ---------- BOARD — Local / Regional / National ----------
+  window.openBoard=function(){ renderBoard('national'); $('bdOv').classList.add('on'); };
+  window.bdClose=function(){ $('bdOv').classList.remove('on'); };
+  function renderBoard(scope){
+    var me=(function(){ try{ return localStorage.getItem('dd.myname')||'You'; }catch(e){ return 'You'; } })();
+    var mine=ckGet();
+    var rows='<div class="bd-row"><span class="rk">1</span><span class="who">'+esc(me)+' <span style="color:#8a7fa0;font-weight:600">· you</span></span><span class="pts">'+mine.toLocaleString()+' 🍪</span></div>';
+    var note = scope==='local' ? 'Your <b>chapter</b> board. As heads in your area play the daily puzzles, they stack up here — head-to-head on the same board.'
+      : scope==='regional' ? 'Your <b>region</b> — nearby chapters, ranked. Win the region, represent it nationally.'
+      : 'The <b>national</b> jar — every chapter, every head. Climb from Nibbler to Cookie’s Chosen.';
+    $('bdCard').innerHTML='<button class="x" onclick="bdClose()">✕</button>'
+      +'<h2>🏆 The Board</h2><div class="sub">Cookies won across every game & puzzle</div>'
+      +'<div class="bd-tabs"><button class="'+(scope==='local'?'on':'')+'" onclick="bdTab(\'local\')">📍 Local</button><button class="'+(scope==='regional'?'on':'')+'" onclick="bdTab(\'regional\')">🧭 Regional</button><button class="'+(scope==='national'?'on':'')+'" onclick="bdTab(\'national\')">🌎 National</button></div>'
+      +rows+'<div class="bd-note">'+note+' Your wins count toward the family jar when you’re signed in. 🌹</div>';
+  }
+  window.bdTab=function(s){ renderBoard(s); };
+
+  paintJar(); render();
+})();
+</script>
+</body>
+</html>
