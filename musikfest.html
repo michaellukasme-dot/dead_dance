@@ -128,7 +128,7 @@ body.mfapp .mf-statpill:empty{display:none}
 body.mfapp .leaflet-top.leaflet-right{top:58px}
 body.mfapp .leaflet-top.leaflet-left{top:96px}   /* clear the distance pill */
 /* the draggable bottom sheet — animate TOP (never transform: keeps fixed modals viewport-correct) */
-body.mfapp .wrap{position:fixed;left:0;right:0;top:52vh;bottom:0;max-width:none;margin:0;padding:0 13px 90px;background:#faf8fc;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px #0004;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:20;transition:top .3s cubic-bezier(.32,.72,0,1);will-change:top}
+body.mfapp .wrap{position:fixed;left:0;right:0;top:52vh;bottom:0;max-width:none;margin:0;padding:0 13px 90px;background:#faf8fc;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px #0004;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;z-index:20;transition:top .3s cubic-bezier(.32,.72,0,1);will-change:top}
 body.mfapp.mf-drag .wrap{transition:none}
 body.mfapp .wrap>.back{display:none}
 .mf-grab{display:none}

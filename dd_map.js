@@ -36,12 +36,14 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
     var url = usingKey ? mt("streets-v2", "png", k) : OSM.url;
     var attr = usingKey ? ATTR : OSM.attribution;
     var mz = usingKey ? 20 : OSM.maxZoom;
+    var plain = !!w.DD_MAP_PLAIN;                                                                                       // white-label maps (e.g. ArtsQuest) show plain tiles — no purple skin
     var base   = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true });                               // 🗺 plain geo
-    var purple = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, className: 'dd-purple-tiles' });  // 🌹 DeadDance brand
-    purple.addTo(map);   // default to our purple — no Satellite (doesn't help the walk, per Issa)
+    var purple = plain ? L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true })                        // plain (no filter) when DD_MAP_PLAIN
+                       : L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, className: 'dd-purple-tiles' });  // 🌹 DeadDance brand
+    (plain ? base : purple).addTo(map);   // DeadDance defaults to purple; white-label defaults to plain
 
-    // toggle: brand (purple) ⇄ 🗺 Map (plain geo), top-right. Brand label is per-page overridable (white-label maps set w.DD_MAP_BRAND).
-    try { var _lyr = {}; _lyr[w.DD_MAP_BRAND || "🌹 DeadDance"] = purple; _lyr["🗺 Map"] = base; L.control.layers(_lyr, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {}
+    // toggle: brand (purple) ⇄ 🗺 Map (plain geo), top-right — skip on plain white-label maps (both looks are identical there)
+    if (!plain) { try { var _lyr = {}; _lyr[w.DD_MAP_BRAND || "🌹 DeadDance"] = purple; _lyr["🗺 Map"] = base; L.control.layers(_lyr, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {} }
 
     var errs = 0, swapped = false;
     function watch(layer) { layer.on("tileerror", function () {
@@ -49,10 +51,10 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
       errs++;
       if (usingKey && !swapped && errs >= 6) { swapped = true;                     // keyed provider failing → never leave a blank map
         try { map.removeLayer(base); map.removeLayer(purple); } catch (e) {}
-        L.tileLayer(OSM.url, { attribution: OSM.attribution, maxZoom: OSM.maxZoom, className: 'dd-purple-tiles' }).addTo(map);
+        L.tileLayer(OSM.url, plain ? { attribution: OSM.attribution, maxZoom: OSM.maxZoom } : { attribution: OSM.attribution, maxZoom: OSM.maxZoom, className: 'dd-purple-tiles' }).addTo(map);
       }
     }); }
     watch(base); watch(purple);
-    return purple;
+    return plain ? base : purple;
   };
 })(window);

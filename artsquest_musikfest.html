@@ -128,7 +128,7 @@ body.mfapp .mf-statpill:empty{display:none}
 body.mfapp .leaflet-top.leaflet-right{top:58px}
 body.mfapp .leaflet-top.leaflet-left{top:96px}   /* clear the distance pill */
 /* the draggable bottom sheet — animate TOP (never transform: keeps fixed modals viewport-correct) */
-body.mfapp .wrap{position:fixed;left:0;right:0;top:52vh;bottom:0;max-width:none;margin:0;padding:0 13px 90px;background:#faf8fc;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px #0004;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:20;transition:top .3s cubic-bezier(.32,.72,0,1);will-change:top}
+body.mfapp .wrap{position:fixed;left:0;right:0;top:52vh;bottom:0;max-width:none;margin:0;padding:0 13px 90px;background:#faf8fc;border-radius:20px 20px 0 0;box-shadow:0 -10px 40px #0004;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;z-index:20;transition:top .3s cubic-bezier(.32,.72,0,1);will-change:top}
 body.mfapp.mf-drag .wrap{transition:none}
 body.mfapp .wrap>.back{display:none}
 .mf-grab{display:none}
@@ -149,7 +149,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 .curtitle{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 9px}
 </style></head>
 <body class="mfapp">
-<script>window.DD_MAP_BRAND="🎡 ArtsQuest";</script>
+<script>window.DD_MAP_BRAND="🎡 ArtsQuest";window.DD_MAP_PLAIN=true;</script>
 <div class="mf-map" id="mfMapZone">
   <div class="mf-chips" id="mfChips">
     <button class="mfchip" onclick="mfActsNowModal()">Acts on Now</button>
@@ -159,12 +159,12 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 </div>
 <div class="wrap">
   <div class="mf-grab" id="mfGrab" onpointerdown="mfDragStart(event)"><span></span></div>
-  <div class="hero" style="position:relative;display:flex;align-items:center;gap:12px">
+  <div class="hero" style="position:relative;display:flex;align-items:center;gap:12px;padding-right:60px">
     <!-- EVENT QR — in front of the title. This IS the event: scan/tap it and you land right on this map.
          StageFill standard: every event's QR sits in front of its %TITLE%. -->
     <div id="mfqr" onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="This event’s map QR — scan me, or tap to share" style="width:56px;height:56px;background:#fff;border-radius:10px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;overflow:hidden"></div>
     <button onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="Share this map + QR with other heads" aria-label="Share the map with other heads" style="border:0;background:#fff;border-radius:10px;width:40px;height:40px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;display:flex;align-items:center;justify-content:center;color:#5a2e86;padding:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
-    <h1 style="margin:0">ArtsQuest MusikFest</h1>
+    <h1 style="margin:0;flex:1;min-width:0;font-size:clamp(18px,5vw,32px);line-height:1.03;overflow-wrap:break-word">ArtsQuest MusikFest</h1>
     <button onclick="openPoster()" title="See the official Musikfest 2026 poster" aria-label="Open the official poster" style="position:absolute;top:50%;right:20px;transform:translateY(-50%);border:0;background:#fff;border-radius:12px;padding:5px;cursor:pointer;box-shadow:0 2px 8px #0002;line-height:0;z-index:2"><img src="MUSIKFEST_poster.jpg" alt="Poster" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🖼️',style:'font-size:30px'}))" style="width:46px;height:60px;object-fit:cover;border-radius:8px;display:block"></button>
   </div>
   <div class="mflayers">
