@@ -568,6 +568,22 @@ body{padding-bottom:64px}
 .adroll-slide.falcon .fc-cap b{display:block;font-size:16px;color:#fff;font-weight:800;letter-spacing:.02em}
 .adroll-slide.falcon .fc-cap .sub{display:block;font-size:11px;color:#b9b2c4;font-weight:700;margin-top:4px;line-height:1.3}
 .adroll-slide.falcon .fc-cap .fpill{display:inline-block;margin-top:11px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#1a1a1f;background:linear-gradient(180deg,#f4f6f8,#aeb4bd);border:1px solid #cfd4da;border-radius:999px;padding:5px 13px;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+/* Triple Crown Trek Planner — layered mountain ridges + a rising sun (pure CSS/SVG scene) */
+.adroll-slide.trek{height:100%;display:flex;flex-direction:column;cursor:pointer;background:#123a2b}
+.adroll-slide.trek .tk-scene{flex:1 1 auto;min-height:0;position:relative;overflow:hidden}
+.adroll-slide.trek .tk-scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.adroll-slide.trek .tk-cap{flex:0 0 auto;text-align:center;background:#0e2a20;padding:13px 16px 17px;border-top:1px solid #ffffff14}
+.adroll-slide.trek .tk-cap b{display:block;font-size:16px;color:#fff;font-weight:800;letter-spacing:.01em}
+.adroll-slide.trek .tk-cap .sub{display:block;font-size:11px;color:#a9d6bf;font-weight:700;margin-top:4px;line-height:1.35}
+.adroll-slide.trek .tk-cap .tpill{display:inline-block;margin-top:11px;font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#123a2b;background:linear-gradient(180deg,#ffe1a0,#f0a500);border:1px solid #e8b53a;border-radius:999px;padding:5px 13px;box-shadow:0 2px 7px rgba(240,165,0,.4)}
+/* Electric Trade School — a glowing bolt over faint circuit traces on industrial navy */
+.adroll-slide.trade{height:100%;display:flex;flex-direction:column;cursor:pointer;background:#0c1830}
+.adroll-slide.trade .td-scene{flex:1 1 auto;min-height:0;position:relative;overflow:hidden}
+.adroll-slide.trade .td-scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.adroll-slide.trade .td-cap{flex:0 0 auto;text-align:center;background:#0a1428;padding:13px 16px 17px;border-top:1px solid #ffffff12}
+.adroll-slide.trade .td-cap b{display:block;font-size:16px;color:#fff;font-weight:800;letter-spacing:.01em}
+.adroll-slide.trade .td-cap .sub{display:block;font-size:11px;color:#9fb6e0;font-weight:700;margin-top:4px;line-height:1.35}
+.adroll-slide.trade .td-cap .tpill{display:inline-block;margin-top:11px;font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#1a1006;background:linear-gradient(180deg,#ffcf7a,#f0781e);border:1px solid #e8631a;border-radius:999px;padding:5px 13px;box-shadow:0 2px 8px rgba(240,120,30,.45)}
 /* ad-swap effects — a mix cycled through like a slide deck (fixed 216px card contains them) */
 .adroll-view{perspective:1000px}
 .adroll-slide{will-change:transform,opacity,filter;backface-visibility:hidden}
@@ -1022,7 +1038,9 @@ body.dd-insider .dd-only{display:block}
         biz:r.n, off:r.head||r.line||'', cta:(r.coupon?('🎟️ '+r.coupon+' ›'):'Find it on Main ›'), beth:true }); }); }catch(e){} return out; }
       var AD_HOUSE=[
         {ic:'🌹', biz:'DeadDance', off:'The calendar & map of every Dead & jam show — free', qr:'https://deaddance.app/musikfest.html', url:'https://deaddance.app/musikfest.html', house:true},
-        {falcon:true, ic:'🚗', biz:'Ford-Falcon Friends', off:'1963–65 Falcon lovers · parts · meets · the registry', url:'https://ford-falcon.com', cta:'Join the club ›', house:true}
+        {falcon:true, ic:'🚗', biz:'Ford-Falcon Friends', off:'1963–65 Falcon lovers · parts · meets · the registry', url:'https://ford-falcon.com', cta:'Join the club ›', house:true},
+        {trek:true, ic:'⛰️', biz:'Triple Crown Trek Planner', off:'Appalachian · Continental Divide · Pacific Crest — one plan', cta:'Plan your thru-hike ›', house:true},
+        {trade:true, ic:'⚡', biz:'Electric Trade School', off:'VOTECH · IBEW · JATC — Journeyman, Master, Lineman', cta:'Start your apprenticeship ›', house:true}
       ];
       var AD_NATIONAL=[
         {logo:'logos/peach_fest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Peach Music Festival', off:'3 days of jams · on sale now', cta:'Get tickets ›'},
@@ -1088,6 +1106,43 @@ body.dd-insider .dd-only{display:block}
             +'<div class="fc-cap"><b>Ford-Falcon Friends</b><span class="sub">'+(a.off||'')+'</span><span class="fpill">ford-falcon.com ›</span></div>'
             +'</div>';
           var fdt=document.getElementById('adRollDots'); if(fdt) fdt.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
+        if(a.trek){   // Triple Crown Trek Planner — sunrise over three layered ridgelines, a dashed trail climbing (pure SVG)
+          var TREK='<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'
+            +'<defs><linearGradient id="tksky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f3527"/><stop offset="1" stop-color="#215844"/></linearGradient>'
+            +'<radialGradient id="tksun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff4cc"/><stop offset="55%" stop-color="#ffd166"/><stop offset="100%" stop-color="#f0a500"/></radialGradient></defs>'
+            +'<rect width="300" height="150" fill="url(#tksky)"/>'
+            +'<circle cx="150" cy="70" r="34" fill="url(#tksun)" opacity="0.35"/><circle cx="150" cy="70" r="21" fill="url(#tksun)"/>'
+            +'<path d="M0,116 L46,84 L96,108 L150,72 L206,104 L256,82 L300,108 L300,150 L0,150 Z" fill="#2f7357"/>'
+            +'<path d="M0,132 L58,104 L112,124 L168,98 L226,122 L300,100 L300,150 L0,150 Z" fill="#215a44"/>'
+            +'<path d="M150,72 l11,12 l-11,-4 l-10,7 Z" fill="#eaf5ee" opacity="0.9"/>'
+            +'<path d="M0,150 L40,124 L92,142 L150,116 L212,140 L268,122 L300,136 L300,150 Z" fill="#0f3527"/>'
+            +'<path d="M150,150 C150,138 130,134 138,124 C146,115 164,116 159,104 C156,97 150,96 152,88" fill="none" stroke="#ead9a8" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.5 5.5" opacity="0.9"/>'
+            +'</svg>';
+          v.innerHTML='<div class="adroll-slide trek adfx-'+fx+'" onclick="adRollTap()">'
+            +'<div class="tk-scene">'+TREK+'</div>'
+            +'<div class="tk-cap"><b>Triple Crown Trek Planner</b><span class="sub">Appalachian · Continental Divide · Pacific Crest</span><span class="tpill">7,900 miles · one plan ›</span></div>'
+            +'</div>';
+          var tkd=document.getElementById('adRollDots'); if(tkd) tkd.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
+        if(a.trade){   // Electric Trade School — a glowing bolt over faint circuit traces (pure SVG)
+          var TRADE='<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'
+            +'<defs><radialGradient id="tdbg" cx="50%" cy="42%" r="72%"><stop offset="0" stop-color="#1b3160"/><stop offset="62%" stop-color="#0c1830"/><stop offset="100%" stop-color="#060d1e"/></radialGradient>'
+            +'<linearGradient id="tdbolt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd98a"/><stop offset="45%" stop-color="#f5911e"/><stop offset="100%" stop-color="#e8631a"/></linearGradient>'
+            +'<filter id="tdglow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
+            +'<rect width="300" height="150" fill="url(#tdbg)"/>'
+            +'<g stroke="#3a5da8" stroke-width="1.2" fill="none" opacity="0.45" stroke-linecap="round">'
+            +'<path d="M8,30 H58 V66"/><path d="M292,34 H236 V78"/><path d="M20,120 H72 V92"/><path d="M280,116 H224 V88"/><path d="M8,92 H40"/><path d="M292,100 H262"/></g>'
+            +'<g fill="#5c86d6" opacity="0.65"><circle cx="58" cy="66" r="2.4"/><circle cx="236" cy="78" r="2.4"/><circle cx="72" cy="92" r="2.4"/><circle cx="224" cy="88" r="2.4"/><circle cx="40" cy="92" r="2.4"/><circle cx="262" cy="100" r="2.4"/></g>'
+            +'<path filter="url(#tdglow)" d="M162,22 L116,80 L146,80 L134,128 L192,64 L160,64 Z" fill="url(#tdbolt)" stroke="#ffe6b0" stroke-width="1.3" stroke-linejoin="round"/>'
+            +'</svg>';
+          v.innerHTML='<div class="adroll-slide trade adfx-'+fx+'" onclick="adRollTap()">'
+            +'<div class="td-scene">'+TRADE+'</div>'
+            +'<div class="td-cap"><b>Electric Trade School</b><span class="sub">VOTECH · IBEW · JATC</span><span class="tpill">Journeyman · Master · Lineman ›</span></div>'
+            +'</div>';
+          var tdd=document.getElementById('adRollDots'); if(tdd) tdd.innerHTML='<i class="on"></i><i></i><i></i>';
           return;
         }
         if(a.stagefill){
