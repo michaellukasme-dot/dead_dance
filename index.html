@@ -1263,7 +1263,7 @@ body.dd-insider .dd-only{display:block}
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
   <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, GD Archive, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="requireSignin(function(){openGame()})"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" style="display:none" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><!-- hidden for launch — no records yet --><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
   <button class="fn" onclick="requireSignin(function(){openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
@@ -1360,7 +1360,6 @@ window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='d
         <button class="rtab" data-t="bands" onclick="readerTab('bands')">🎸 Bands</button>
         <button class="rtab" data-t="groups" onclick="readerTab('groups')">📡 Groups</button>
         <button class="rtab" data-t="market" onclick="readerTab('market')">Shop</button>
-        <button class="rtab" data-t="archive" onclick="readerTab('archive')">🎵 GD Archive</button>
         <button class="rtab" data-t="art" onclick="readerTab('art')">🎨 Art</button>
       </div>
       <button class="rexp" onclick="readerExpand(this)" title="Expand to full screen" aria-label="Expand">⤢</button>
@@ -1482,7 +1481,6 @@ window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='d
     <a class="aitem" onclick="coGo('appsov',function(){openReader('bands')})"><span>🎸</span><div><b>Bands</b><i>The rolodex.</i></div></a>
     <div class="asec">Play &amp; listen</div>
     <a class="aitem" onclick="coGo('appsov',function(){window.openGame&&openGame()})"><span>🎮</span><div><b>Games</b><i>Name That Tune.</i></div></a>
-    <a class="aitem" onclick="coGo('appsov',function(){openReader('archive')})"><span>🎵</span><div><b>GD Archive</b><i>Every show.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('live_reports.html','🚗 Live Reports')})"><span>🚗</span><div><b>Live Reports</b><i>Report &amp; confirm — earn Cookies 🍪.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('guitars.html','🎸 Jerry\'s Guitars')})"><span>🎸</span><div><b>Jerry's Guitars</b><i>Seven groups. Your photos.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('bands.html','🎸 Jerry\'s Bands')})"><span>🎼</span><div><b>Jerry's Bands</b><i>1961–1995. Every one.</i></div></a>
@@ -4415,6 +4413,7 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="helptest.js" defer></script>
 <script src="dd_ava.js"></script>
 <script src="dd_muse.js"></script>
+<script src="dd_listen.js"></script>
 <script>
   /* ===== PWA update prompt — "🌹 There's an update to DeadDance" when a new version ships ===== */
   var DD_SWREG=null;
