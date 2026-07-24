@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>Musikfest Café · Find Your Section · DeadDance</title>
 <script src="cornell77.js"></script>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
 <style>
   :root{--ink:#1a1320;--purple:#241535;--rose:#b8002e;--gold:#f0a500;--accent:#5a2e86}
   *{box-sizing:border-box}
@@ -16,6 +18,8 @@
   .hd .ti b{display:block;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hd .ti span{display:block;font-size:11.5px;color:#c9b8e6;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hd .lv{flex:none;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#2a1c00;background:linear-gradient(180deg,#ffe1a0,#f0a500);border-radius:999px;padding:5px 10px}
+  .hd .eqr{flex:none;width:38px;height:38px;border-radius:8px;background:#fff;padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 5px rgba(0,0,0,.25)}
+  .hd .eqr canvas{width:100%;height:100%;display:block;border-radius:4px}
   .chips{flex:none;display:flex;gap:7px;padding:9px 12px;overflow-x:auto;background:#160c28;-webkit-overflow-scrolling:touch;box-shadow:0 2px 8px #0005;z-index:19}
   .chips::-webkit-scrollbar{display:none}
   .chip{flex:none;border:1.5px solid #ffffff26;background:#ffffff12;color:#eadff7;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:.15s;display:flex;align-items:center;gap:6px}
@@ -61,6 +65,7 @@
 <div id="app">
   <div class="hd">
     <button class="bk" onclick="(window.history.length>1)?history.back():location.href='index.html'" aria-label="Back">‹</button>
+    <div class="eqr" id="cafeEventQR" onclick="cafeEventPass()" title="This night’s pass — tap or scan for access"></div>
     <div class="ti"><b>🌹 Dark Star Orchestra — Cornell '77</b><span>Musikfest Café · 3rd Floor · ArtsQuest · Tue Jul 15, 2025</span></div>
     <span class="lv">StageFill</span>
   </div>
@@ -83,6 +88,8 @@
 (function(){
   "use strict";
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  // ONE stable QR for the whole event lifecycle: ticket in → pass on the floor → key to the historical night
+  var EVENT_URL='https://deaddance.app/mf_cafe.html';
 
   // Price tiers (from ArtsQuest's live ticketing) + GA standing. bright = shade when a pill is picked.
   var TIER={ ga:{bright:'#2b8a8a',price:75}, t132:{bright:'#7a3cc0',price:132.18}, t121:{bright:'#5a8f4e',price:121.38},
@@ -167,8 +174,18 @@
     c.onclick=function(){ Object.keys(CH).forEach(function(k){ CH[k].classList.remove('on'); }); c.classList.add('on'); shade(tp.k); };
     chipsEl.appendChild(c);
   });
-  ['🎶 Setlist','🅿️ Parking'].forEach(function(lbl){ var c=document.createElement('button'); c.className='chip act'; c.textContent=lbl;
-    c.onclick=function(){ if(lbl.indexOf('Setlist')>=0) window.cafeSetlist(); else window.cafePark(); }; chipsEl.appendChild(c); });
+  // HISTORIC curtain — this show is over, so the bottom pills relive the night
+  var HISTPILLS=[
+    {l:'🎶 Setlist',   fn:'cafeSetlist'},
+    {l:'🎸 Roster',    fn:'cafeRoster'},
+    {l:'🎧 Listen',    fn:'cafeListen'},
+    {l:'🧠 Trivia',    fn:'cafeTrivia'},
+    {l:'📖 The Story', fn:'cafeStory'},
+    {l:'📸 Photos',    fn:'cafePhotos'},
+    {l:'🅿️ Parking',   fn:'cafePark'}
+  ];
+  HISTPILLS.forEach(function(p){ var c=document.createElement('button'); c.className='chip act'; c.textContent=p.l;
+    c.onclick=function(){ try{ (window[p.fn]||function(){})(); }catch(e){} }; chipsEl.appendChild(c); });
 
   // ---- ticketing sheets ----
   var SHEET=document.getElementById('buySheet'), CARD=document.getElementById('buyCard');
@@ -190,6 +207,7 @@
     SHEET.classList.add('on');
   };
   window.cafePay=function(sec){
+    try{ localStorage.setItem('dd.cafe.ticket','1'); }catch(e){}   // you hold a ticket → your pass now unlocks this night
     CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
       +'<div class="sh-done"><span class="big">🎟</span><b>You\'re in — Section '+sec+'</b>'
       +'<span>Dark Star Orchestra · Musikfest Café · Jul 15, 2025</span>'
@@ -203,6 +221,75 @@
       +'<div class="sh-ve">'+esc(d.band)+' · '+esc(d.venue)+' · 5/8/77 · Betty Board</div>'
       +'<div style="max-height:54vh;overflow:auto;margin-top:4px">'+sets+facts+'</div>';
     SHEET.classList.add('on');
+  };
+  // ---- HISTORIC curtain sheets ----
+  window.cafeRoster=function(){ var d=window.CORNELL77; if(!d)return;
+    var dso=(d.dso||[]).map(function(m){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px solid #f2eef7"><b>'+esc(m.n)+'</b><span style="color:#8a7fa0;font-weight:600;font-size:12px;text-align:right">'+esc(m.role)+'</span></div>'; }).join('');
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🎸 The Roster — that night</div><div class="sh-ve">Dark Star Orchestra · Musikfest Café · Jul 15, 2025</div>'
+      +'<div style="max-height:52vh;overflow:auto;margin-top:8px">'+dso
+      +'<div style="margin-top:13px;font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#7a3cc0">The ’77 Dead they channeled</div>'
+      +'<div style="font-size:12.5px;color:#4a4356;line-height:1.5;margin-top:5px">'+esc(d.lineup)+'</div></div>';
+    SHEET.classList.add('on'); };
+  window.cafeStory=function(){ var d=window.CORNELL77; if(!d)return;
+    var facts=(d.facts||[]).map(function(f){ return '<div style="display:flex;gap:8px;font-size:13px;color:#3a3346;line-height:1.5;padding:6px 0;border-bottom:1px solid #f4f0f8"><span>🌹</span><span>'+esc(f)+'</span></div>'; }).join('');
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">📖 The Story of 5/8/77</div><div class="sh-ve">Barton Hall, Cornell University · the most famous Dead show ever</div>'
+      +'<div style="max-height:54vh;overflow:auto;margin-top:8px">'+facts+'</div>';
+    SHEET.classList.add('on'); };
+  // Listen — the ACTUAL 5/8/77, in show order, NO shuffle (auto-advances)
+  var _au=null, _ti=-1;
+  window.cafeListen=function(){ var d=window.CORNELL77; if(!d||!d.archive)return;
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🎧 Listen — the actual 5/8/77</div>'
+      +'<div class="sh-ve">Grateful Dead · Betty Board · Internet Archive · plays in order, no shuffle</div>'
+      +'<div id="cafeNow" style="font-size:12px;font-weight:800;color:#b8002e;margin:9px 0;min-height:16px"></div>'
+      +'<div id="cafeList" style="max-height:48vh;overflow:auto"></div>';
+    SHEET.classList.add('on'); paintList(); };
+  function paintList(){ var A=window.CORNELL77.archive, L=document.getElementById('cafeList'), N=document.getElementById('cafeNow'); if(!L)return;
+    L.innerHTML=A.tracks.map(function(tk,i){ var on=(i===_ti);
+      return '<div onclick="cafePlay('+i+')" style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:9px;cursor:pointer;'+(on?'background:#efe7fa;':'')+'">'
+        +'<span style="width:22px;height:22px;border-radius:50%;background:'+(on?'#7a3cc0':'#eee')+';color:'+(on?'#fff':'#7a3cc0')+';font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">'+(on?'▶':(i+1))+'</span>'
+        +'<span style="flex:1;font-size:13px;font-weight:'+(on?800:600)+'">'+esc(tk.t)+'</span>'
+        +'<span style="font-size:11px;color:#8a7fa0;font-weight:700;flex:none">'+tk.len+'</span></div>'; }).join('');
+    if(N) N.textContent=(_ti>=0&&A.tracks[_ti])?('▶ Now playing · '+A.tracks[_ti].t):'Tap a song — the show plays in order from there'; }
+  window.cafePlay=function(i){ var A=window.CORNELL77.archive; if(!A||!A.tracks[i])return; _ti=i;
+    if(!_au){ _au=new Audio(); _au.addEventListener('ended',function(){ if(_ti+1<A.tracks.length) window.cafePlay(_ti+1); }); }
+    _au.src=A.base+A.tracks[i].f; var p=_au.play(); if(p&&p.catch)p.catch(function(){}); paintList(); };
+  // Trivia — the Cornell '77 bank, one question at a time
+  var _qi=0;
+  window.cafeTrivia=function(){ _qi=0; renderQ(); SHEET.classList.add('on'); };
+  function renderQ(){ var d=window.CORNELL77; if(!d||!d.trivia)return; var q=d.trivia[_qi];
+    if(!q){ CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button><div class="sh-done"><span class="big">🧠</span><b>That’s the set</b><span>You know Cornell ’77.</span></div><button class="sh-buy" onclick="cafeTrivia()">Play again ▸</button>'; return; }
+    var choices=q.choices.map(function(c,i){ return '<button onclick="cafeAns('+i+')" style="display:block;width:100%;text-align:left;margin-top:8px;border:1.5px solid #e7ddf5;background:#faf7ff;border-radius:11px;padding:11px 13px;font-size:13.5px;font-weight:700;color:#3a3346;cursor:pointer">'+esc(c)+'</button>'; }).join('');
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🧠 Cornell ’77 Trivia</div><div class="sh-ve">Question '+(_qi+1)+' of '+d.trivia.length+'</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#241535;margin:14px 0 2px">'+esc(q.q)+'</div>'+choices
+      +'<div id="cafeQf" style="min-height:18px;margin-top:11px;font-size:12.5px;font-weight:700"></div>'; }
+  window.cafeAns=function(i){ var d=window.CORNELL77, q=d.trivia[_qi], ok=(i===q.a), f=document.getElementById('cafeQf');
+    if(f) f.innerHTML=(ok?'<span style="color:#1f9e6b">✓ Right.</span> ':'<span style="color:#b8002e">✗ It’s '+esc(q.choices[q.a])+'.</span> ')+'<span style="color:#6a5f86">'+esc(q.fact||'')+'</span>';
+    setTimeout(function(){ _qi++; renderQ(); }, 2000); };
+  // Photos — honest crowd-sourced collage (no scraped/fake images)
+  window.cafePhotos=function(){
+    var tiles=[0,1,2,3,4,5].map(function(){ return '<div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#efe7fa,#f7eef6);display:flex;align-items:center;justify-content:center;color:#c9b8e6;font-size:22px">🌹</div>'; }).join('');
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">📸 Photos from the night</div><div class="sh-ve">Dark Star Orchestra · Musikfest Café · Jul 15, 2025</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:12px 0">'+tiles+'</div>'
+      +'<button class="sh-buy" onclick="cafeClose()">📷 Add your shots from the night</button>'
+      +'<div class="sh-fine">Were you there? Your photos build the collage — credited to you, never scraped.</div>';
+    SHEET.classList.add('on'); };
+  // the EVENT PASS — the same QR across the whole lifecycle (top-left of the curtain)
+  function attended(){ try{ return localStorage.getItem('dd.cafe.ticket')==='1'; }catch(e){ return false; } }
+  window.cafeEventPass=function(){ var were=attended();
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🎟️ This Night’s Pass</div>'
+      +'<div class="sh-ve">Dark Star Orchestra — Cornell ’77 · Musikfest Café · Jul 15, 2025</div>'
+      +'<div id="cafePassQR" style="display:flex;justify-content:center;margin:16px 0"></div>'
+      +'<div class="sh-fine">'+(were
+        ? '✓ <b style="color:#1f9e6b">You were here.</b> The same QR that got you in the door now unlocks the whole night — setlist, roster, the audio, the photos — for good.'
+        : 'One QR for the life of the show: your ticket in, your pass on the floor, and — after the last note — your key to relive this night. Hold a ticket and your DeadDance QR grants access.')+'</div>';
+    SHEET.classList.add('on');
+    try{ if(window.DDQR) DDQR.into('cafePassQR', EVENT_URL, {css:200,size:400,mark:'dd',link:false}); }catch(e){}
   };
   window.cafeClose=function(){ SHEET.classList.remove('on'); };
   window.cafeLegend=function(){ var l=document.getElementById('legend'); var min=l.classList.toggle('min');
@@ -270,6 +357,8 @@
   window.cafeParkYes=function(lat,lng){ saveCar(lat,lng); var t=document.getElementById('parkAsk'); if(t)t.classList.remove('on'); if(document.getElementById('buySheet').classList.contains('on')) window.cafePark(); };
 
   buildFloor(); shade('all');
+  // render the event pass QR in the header (top-left of the curtain)
+  try{ if(window.DDQR) DDQR.into('cafeEventQR', EVENT_URL, {css:32,size:150,mark:'dd',link:false}); }catch(e){}
 })();
 </script>
 </body>

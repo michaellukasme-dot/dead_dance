@@ -959,6 +959,7 @@ body.dd-insider .dd-only{display:block}
           <optgroup label="Festivals">
             <option value="__musikfest__">🎪 Musikfest 2026</option>
             <option value="__fifa__">⚽ Philadelphia World Cup</option>
+            <option value="__dsocafe__">🌹 DSO — Cornell '77 · Musikfest Café</option>
           </optgroup>
         </select>
       </div>
@@ -2016,6 +2017,8 @@ function calAct(v){
    if(window.ddSheet){ ddSheet('oteil_kimock_summer.html','🥁 John Kimock · Summer ’26'); } else { window.open('oteil_kimock_summer.html','_blank','noopener'); } return; }
  if(v==='__fifa__'){ var sf=document.getElementById('calAct'); if(sf)sf.value='all';        /* showcase: Philadelphia World Cup 2026 companion */
    if(window.ddSheet){ ddSheet('fifa_philadelphia.html','⚽ Philadelphia 2026'); } else { window.open('fifa_philadelphia.html','_blank','noopener'); } return; }
+ if(v==='__dsocafe__'){ var sdc=document.getElementById('calAct'); if(sdc)sdc.value='all';   /* ArtsQuest · DSO Cornell '77 at Musikfest Café — indoor StageFill floor map */
+   if(window.ddSheet){ ddSheet('mf_cafe.html','🌹 DSO — Cornell \'77 · Musikfest Café'); } else { window.open('mf_cafe.html','_blank','noopener'); } return; }
  CAL_ACT=v||'all'; CAL_SEL=null;
  if(CAL_ACT!=='all'){
    if(typeof setScope==='function') setScope('national');                 /* pull ALL of the act's dates into the list */

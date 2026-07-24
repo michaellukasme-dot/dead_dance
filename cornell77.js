@@ -55,6 +55,44 @@
       "A decades-long friendly debate follows it: legend, or “overrated”? Heads still argue it."
     ],
 
+    // Dark Star Orchestra — the lineup that recreated it at Musikfest Café, 7/15/25
+    dso: [
+      { n: "Jeff Mattson", role: "Lead guitar · vocals (the Jerry chair)" },
+      { n: "Rob Eaton", role: "Rhythm guitar · vocals (the Bob chair)" },
+      { n: "Rob Barraco", role: "Keyboards · vocals" },
+      { n: "Skip Vangelas", role: "Bass" },
+      { n: "Rob Koritz", role: "Drums" },
+      { n: "Dino English", role: "Drums" },
+      { n: "Lisa Mackey", role: "Vocals" }
+    ],
+
+    // the ACTUAL 5/8/77 Betty Board on the Internet Archive — real streamable MP3s
+    archive: {
+      id: "gd77-05-08.sbd.hicks.4982.sbeok.shnf",
+      base: "https://archive.org/download/gd77-05-08.sbd.hicks.4982.sbeok.shnf/",
+      // FULL show, IN ORDER (no shuffle) — plays top to bottom like the night itself
+      tracks: [
+        { t: "New Minglewood Blues", len: "6:21", f: "gd77-05-08eaton-d1t01.mp3" },
+        { t: "Loser", len: "8:52", f: "gd77-05-08eaton-d1t02.mp3" },
+        { t: "El Paso", len: "5:18", f: "gd77-05-08eaton-d1t03.mp3" },
+        { t: "They Love Each Other", len: "9:11", f: "gd77-05-08eaton-d1t04.mp3" },
+        { t: "Jack Straw", len: "8:07", f: "gd77-05-08eaton-d1t05.mp3" },
+        { t: "Deal", len: "7:26", f: "gd77-05-08eaton-d1t06.mp3" },
+        { t: "Lazy Lightning › Supplication", len: "9:00", f: "gd77-05-08eaton-d1t07.mp3" },
+        { t: "Brown-Eyed Women", len: "6:49", f: "gd77-05-08eaton-d1t08.mp3" },
+        { t: "Mama Tried", len: "3:05", f: "gd77-05-08eaton-d1t09.mp3" },
+        { t: "Row Jimmy", len: "13:44", f: "gd77-05-08eaton-d2t01.mp3" },
+        { t: "Dancin' in the Streets", len: "16:35", f: "gd77-05-08eaton-d2t02.mp3" },
+        { t: "Scarlet Begonias › Fire on the Mountain", len: "25:55", f: "gd77-05-08eaton-d2t04.mp3" },
+        { t: "Estimated Prophet", len: "9:46", f: "gd77-05-08eaton-d3t01.mp3" },
+        { t: "St. Stephen", len: "4:58", f: "gd77-05-08eaton-d3t03.mp3" },
+        { t: "Not Fade Away", len: "16:22", f: "gd77-05-08eaton-d3t04.mp3" },
+        { t: "St. Stephen (reprise)", len: "1:53", f: "gd77-05-08eaton-d3t05.mp3" },
+        { t: "Morning Dew", len: "13:50", f: "gd77-05-08eaton-d3t06.mp3" },
+        { t: "One More Saturday Night", len: "6:10", f: "gd77-05-08eaton-d3t07.mp3" }
+      ]
+    },
+
     // multiple-choice bank (answer = index). Feeds Dead Karaoke / the show trivia panel.
     trivia: [
       { q: "Where did the Grateful Dead play on 5/8/77?", choices: ["Barton Hall, Cornell", "Winterland, SF", "The Spectrum, Philly", "Red Rocks"], a: 0,
