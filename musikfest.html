@@ -152,7 +152,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 <div class="mf-map" id="mfMapZone">
   <a class="mf-back" href="index.html" onclick="return mfBack(event)">‹ Dead Dance</a>
   <div class="mf-chips" id="mfChips">
-    <button class="mfchip" data-f="now" onclick="mfChip(this)">🌹 Acts on Now</button>
+    <button class="mfchip" onclick="mfActsNowModal()">Acts on Now</button>
   </div>
   <div id="lmap" aria-label="Musikfest stage map"></div>
   <span id="trackStat" class="mf-statpill"></span>
@@ -365,7 +365,8 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <!-- 3 · Dead & Jam Band (this day, Dead/jam only) -->
   <div class="mfcurtain" id="cur_dead">
     <div class="curtitle">🌹 Dead &amp; Jam Band</div>
-    <div class="mfdayrow">
+    <label style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--purple);cursor:pointer;margin:0 0 8px"><input type="checkbox" id="deadAll" checked onchange="mfDeadAllToggle()" style="width:16px;height:16px;accent-color:#b8002e"> All dates — every Dead &amp; Jam set</label>
+    <div class="mfdayrow" id="deadDayRow" style="display:none">
       <button class="mfarrow" onclick="mfDayArrow(-1)" aria-label="Previous day">‹ Day</button>
       <span class="mfdaylbl"></span>
       <button class="mfarrow" onclick="mfDayArrow(1)" aria-label="Next day">Day ›</button>
@@ -996,6 +997,40 @@ function mfActOnNow(venueName){ if(!MF.length) return ''; var day=todayISO(); if
   if(venueName){ var key=String(venueName).toLowerCase().split(/[\s@(]/)[0]; var hit=rows.filter(function(r){ return String(r.st||'').toLowerCase().indexOf(key)>=0; }); if(hit.length) rows=hit; }
   rows.sort(function(a,b){ return Math.abs(mins(a.t)-nm)-Math.abs(mins(b.t)-nm); });
   return rows.length?rows[0].b:''; }
+window.mfActsNowModal=function(){
+  if(!MF.length){ try{ mfToast('Lineup still loading — one sec.'); }catch(e){} return; }
+  var day=todayISO(); if(DAYS.indexOf(day)<0) day=DAYS[curDayIdx]||DAYS[0];
+  var nm=nowMins();
+  var d=new Date(), h=d.getHours(), mi=d.getMinutes(), ap=h<12?'AM':'PM', h12=((h+11)%12)+1;
+  var tstr=h12+':'+String(mi).padStart(2,'0')+' '+ap;
+  var stages=(window.MF_STAGES&&MF_STAGES.length)?MF_STAGES.slice():Array.from(new Set(MF.map(function(r){return r.st;})));
+  function actAt(st){ var rows=MF.filter(function(r){ var mm=mins(r.t); return r.d===day && r.st===st && mm<=nm+10 && mm>=nm-95; }); rows.sort(function(a,b){ return Math.abs(mins(a.t)-nm)-Math.abs(mins(b.t)-nm); }); return rows[0]||null; }
+  var list=stages.map(function(st){ return {st:st, a:actAt(st)}; });
+  list.sort(function(x,y){ return ((x.a?0:1)-(y.a?0:1)) || String(x.st).localeCompare(String(y.st)); });
+  var rowsHtml=list.map(function(o){
+    var a=o.a, dead=a&&a.sc==='dd';
+    var nm2=(typeof mfCleanStage==='function')?mfCleanStage(o.st):o.st;
+    var band = a ? ((dead?'🌹 ':'')+esc(a.b)) : '<span style="color:#b7aecb">between sets</span>';
+    var t = a ? esc(String(a.t).replace(':00','')) : '';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f4f1f9;'+(dead?'background:#fdeaef':'')+'">'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;color:#241535">'+esc(nm2)+'</div>'
+      +'<div style="font-size:13px;font-weight:'+(a?'800':'600')+';color:'+(dead?'#b8002e':(a?'#241535':'#b7aecb'))+'">'+band+'</div></div>'
+      +'<div style="font-size:12px;color:#8a7bbf;font-weight:800;flex:none">'+t+'</div></div>';
+  }).join('');
+  var onN=list.filter(function(o){return o.a;}).length;
+  var scrim=document.getElementById('mfANScrim'); if(scrim) scrim.remove();
+  scrim=document.createElement('div'); scrim.id='mfANScrim';
+  scrim.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(20,12,30,.55);display:flex;align-items:flex-start;justify-content:center;padding:max(40px,env(safe-area-inset-top,0px)) 12px 20px;overflow-y:auto';
+  scrim.onclick=function(e){ if(e.target===scrim) mfActsNowClose(); };
+  scrim.innerHTML='<div style="background:#fff;border-radius:18px;max-width:520px;width:100%;box-shadow:0 20px 60px #0008;overflow:hidden">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee">'
+    +'<div><div style="font-weight:900;font-size:16px;color:#241535">Acts on Now</div>'
+    +'<div style="font-size:12px;color:#8a7bbf;font-weight:700">'+esc(dayLabel(day))+' · '+tstr+' · '+onN+' of '+stages.length+' stages live</div></div>'
+    +'<button onclick="mfActsNowClose()" aria-label="Close" style="border:0;background:#f1eef7;color:#5a2e86;width:32px;height:32px;border-radius:10px;font-size:16px;cursor:pointer">✕</button></div>'
+    +'<div style="max-height:72vh;overflow-y:auto">'+rowsHtml+'</div></div>';
+  document.body.appendChild(scrim);
+};
+window.mfActsNowClose=function(){ var s=document.getElementById('mfANScrim'); if(s) s.remove(); };
 window.mfCheckIn=function(){ if(!window.DDCheckin){ if(window.toast)toast('Check-in is loading — one sec 🌹'); return; }
   var near=mfNearestStage(); var venue='', band='';
   if(near && near.mi<0.16){ venue=mfCleanStage(near.stage.n); band=mfActOnNow(near.stage.n); }
@@ -1486,6 +1521,13 @@ function schRowHTML(r,cs){ var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!(wi
 function ensureStagePick(){ var sp=document.getElementById('stagePick2'); if(sp&&!sp.options.length&&MF.length){ var st=Array.from(new Set(MF.map(function(r){return r.st;}))).sort(); sp.innerHTML=st.map(function(s){return '<option>'+esc(s)+'</option>';}).join(''); } }
 window.renderSchedInto=function(mode,containerId){ var host=document.getElementById(containerId); if(!host)return;
   if(!MF.length){ host.innerHTML=''; return; }
+  if(mode==='dead'){ var _da=document.getElementById('deadAll'); if(_da&&_da.checked){
+    var _cs=catchStore();
+    var _dd=MF.filter(function(r){ return r.sc==='dd'; }).sort(function(a,b){ return (DAYS.indexOf(a.d)-DAYS.indexOf(b.d))||(mins(a.t)-mins(b.t)); });
+    var _out='',_last=null; _dd.forEach(function(r){ if(r.d!==_last){ _last=r.d; _out+='<div class="curtitle" style="margin:12px 0 5px">'+esc(dayLabel(r.d))+'</div>'; } _out+=schRowHTML(r,_cs); });
+    host.innerHTML = _dd.length ? _out : '<div class="srow"><span class="g">No Dead/jam acts listed yet.</span></div>';
+    try{ drawMap(); }catch(e){} return;
+  } }
   var day=mfActiveDay(), rows=MF.filter(function(r){ return r.d===day; });
   if(mode==='dead') rows=rows.filter(function(r){ return r.sc==='dd'; });                                  // 🌹 Dead/jam only
   if(mode==='stage'){ var sp=document.getElementById('stagePick2'); if(sp&&sp.value) rows=rows.filter(function(r){ return r.st===sp.value; }); }   // one chosen stage
@@ -1514,6 +1556,7 @@ window.mfDayArrow=function(n){ var s=document.getElementById('planDate'); if(!s|
   s.selectedIndex=Math.max(0,Math.min(s.options.length-1,s.selectedIndex+n));
   var i=DAYS.indexOf(s.value); if(i>=0) curDayIdx=i;
   try{ mfRenderCurtain(MF_CUR); }catch(e){} };
+window.mfDeadAllToggle=function(){ var da=document.getElementById('deadAll'), dr=document.getElementById('deadDayRow'); if(dr) dr.style.display=(da&&da.checked)?'none':'flex'; try{ renderSchedInto('dead','deadSched'); syncCurtainDayLabels(); }catch(e){} };
 window.brDayArrow=function(n){ var s=document.getElementById('brDay'); if(!s||!s.options.length)return;      // step #brDay (skip the 'all' option at index 0)
   s.selectedIndex=Math.max(1,Math.min(s.options.length-1,s.selectedIndex+n)); renderBrowse(); };
 try{ var _bd=document.getElementById('brDay'); if(_bd&&DAYS.length){ _bd.value=DAYS[0]; } }catch(e){}          // lineup defaults to the first day, not "All days"
