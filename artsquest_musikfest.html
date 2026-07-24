@@ -498,7 +498,7 @@ var SCHED=[
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 /* When opened as a full-page overlay (dropdown → ddSheet iframe), "back" CLOSES the overlay
    so you land on the DeadDance app to explore — never loads the app inside this frame.
-   Opened standalone (deaddance.app/musikfest), it just goes home. Re-pick from the dropdown reopens. */
+   Opened standalone (deaddance.app/artsquest_musikfest.html), it just goes home. Re-pick from the dropdown reopens. */
 window.mfBack=function(e){ try{ if(window.parent && window.parent!==window && window.parent.ddSheetClose){ if(e&&e.preventDefault)e.preventDefault(); window.parent.ddSheetClose(); return false; } }catch(err){} return true; };
 function dirUrl(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng+'&travelmode=walking'; }  /* turn-by-turn WALKING from where you stand */
 function driveUrl(o){ return 'https://www.google.com/maps/dir/?api=1&destination='+o.lat+','+o.lng+'&travelmode=driving'; } /* DRIVE to a parking lot */
@@ -844,13 +844,13 @@ function hpBuild(biz){ var a=hpAdFor(biz);
   var subject=(a.head||biz)+' · at Musikfest 2026';
   var html='<div style="font-family:sans-serif;max-width:560px;margin:auto">'+(a.photo?'<img src="'+a.photo+'" style="max-width:100%;border-radius:8px">':'')+
     '<h2>'+esc(a.head||biz)+'</h2><p>'+esc(a.text||'')+'</p>'+(a.coupon?'<p style="font-weight:bold;color:#b8002e">🎟 '+esc(a.coupon)+'</p>':'')+
-    '<p><a href="https://deaddance.app/musikfest">See us live at Musikfest →</a></p></div>';
+    '<p><a href="https://deaddance.app/artsquest_musikfest.html">See us live at Musikfest →</a></p></div>';
   return {subject:subject, html:html, ad:a}; }
 window.hpOpen=function(biz){ HP_BIZ=biz; var b=hpBuild(biz), a=b.ad;
   document.getElementById('hpSub').textContent='For '+biz+' — send it yourself-free, or paste it into your own tool.';
   document.getElementById('hpPrev').innerHTML=(a.photo?'<img src="'+a.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px">':'')+
     '<b>'+esc(a.head||biz)+'</b><br><span style="color:#4a4356">'+esc(a.text||'')+'</span>'+(a.coupon?'<br><b style="color:#b8002e">🎟 '+esc(a.coupon)+'</b>':'')+
-    '<br><a href="https://deaddance.app/musikfest" style="color:#5a2e86;font-weight:800">See us live at Musikfest →</a>';
+    '<br><a href="https://deaddance.app/artsquest_musikfest.html" style="color:#5a2e86;font-weight:800">See us live at Musikfest →</a>';
   hpSetMode('us'); document.getElementById('hpModal').style.display='block'; };
 window.hpClose=function(){ document.getElementById('hpModal').style.display='none'; };
 window.hpSetMode=function(m){ HP_MODE=m; document.getElementById('hpm_us').classList.toggle('on',m==='us'); document.getElementById('hpm_own').classList.toggle('on',m==='own');
@@ -865,7 +865,7 @@ window.hpSend=function(){ var emails=hpEmails(), a=hpAdFor(HP_BIZ);
   if(!emails.length){ alert('Paste your mailing list first.'); return; }
   if(!document.getElementById('hpOptin').checked){ alert('Please confirm these are your own opted-in customers — that keeps the send compliant.'); return; }
   var subject=(a.head||HP_BIZ)+' · at Musikfest 2026';
-  var html='<div style="font-family:sans-serif">'+(a.photo?'<img src="'+a.photo+'" style="max-width:100%;border-radius:8px">':'')+'<h2>'+esc(a.head||HP_BIZ)+'</h2><p>'+esc(a.text||'')+'</p>'+(a.coupon?'<p><b>🎟 '+esc(a.coupon)+'</b></p>':'')+'<p><a href="https://deaddance.app/musikfest">See us live at Musikfest →</a></p></div>';
+  var html='<div style="font-family:sans-serif">'+(a.photo?'<img src="'+a.photo+'" style="max-width:100%;border-radius:8px">':'')+'<h2>'+esc(a.head||HP_BIZ)+'</h2><p>'+esc(a.text||'')+'</p>'+(a.coupon?'<p><b>🎟 '+esc(a.coupon)+'</b></p>':'')+'<p><a href="https://deaddance.app/artsquest_musikfest.html">See us live at Musikfest →</a></p></div>';
   var payload={ biz:HP_BIZ, subject:subject, html:html, emails:emails, fb:document.getElementById('hpFB').value.trim(), ig:document.getElementById('hpIG').value.trim() };
   try{ localStorage.setItem('dd.hp.'+adSlug(HP_BIZ), JSON.stringify(payload)); }catch(e){}
   if(HP_ENDPOINT){ document.getElementById('hpBtn').textContent='Sending…';
@@ -877,9 +877,9 @@ window.hpSend=function(){ var emails=hpEmails(), a=hpAdFor(HP_BIZ);
   } else { hpClose(); mfToastHTML('📡 <b>List saved — '+emails.length+' contacts.</b><br><span style="font-size:12px;color:#e7ddf3">Your blast is queued and sends the moment the mail service is switched on.</span>'); } };
 renderAds();
 // the buyer's 2'x2' display piece — the QR is the Musikfest festival map DIRECTLY
-window.adWindowQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd',size:2000},'musikfest-window-QR-24in.png'); }catch(e){}
+window.adWindowQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/artsquest_musikfest.html',{size:2000},'musikfest-window-QR-24in.png'); }catch(e){}
   mfToastHTML('🖨️ <b>Your 2′×2′ Musikfest QR</b><br><span style="font-size:12px;color:#e7ddf3">Downloading — print it big for your window. Every scan opens the whole festival map.</span>'); };
-// deep link from a retailer's FB post: deaddance.app/musikfest?ad=<slug> → open the CART, preselect their shop, pre-fill their ad
+// deep link from a retailer's FB post: deaddance.app/artsquest_musikfest.html?ad=<slug> → open the CART, preselect their shop, pre-fill their ad
 (function(){ try{ var m=(location.search.match(/[?&]ad=([^&]+)/)||[])[1]; if(!m)return; m=decodeURIComponent(m);
   setTimeout(function(){ adOpen(); var sel=document.getElementById('adBiz'); if(sel){ for(var i=0;i<sel.options.length;i++){ if(adSlug(sel.options[i].value)===adSlug(m)){ sel.value=sel.options[i].value; adBizChange(); break; } } } }, 450); }catch(e){} })();
 
@@ -907,9 +907,9 @@ window.toggleJoin=function(){ var was=joined(); try{ localStorage.setItem('dd.mu
 crewRefresh(); renderJoin();
 
 // street-team QR — no app, just scan → this map
-try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:56,caption:false}); }catch(e){}
-window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
-window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
+try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/artsquest_musikfest.html',{size:380,css:56,caption:false}); }catch(e){}
+window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/artsquest_musikfest.html',{},'musikfest-map-QR.png'); }catch(e){} };
+window.mfShareMap=function(){ var url='https://deaddance.app/artsquest_musikfest.html';
   if(navigator.share){ navigator.share({title:"Musikfest 2026 — the official ArtsQuest map",url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); mfToast('🔗 Map link copied — paste it anywhere.'); }catch(e){ mfToast(url); } } };
 window._mfLocked=false;
@@ -1486,8 +1486,8 @@ window.postWalk=function(){
   g.fillStyle='#241535'; g.font='800 40px sans-serif';
   g.fillText('↑ '+Math.round(WALK.gain)+' ft   ·   ~'+Math.round(WALK.miles*2100).toLocaleString()+' steps', 44, top+mh+80);
   g.fillStyle='#b8002e'; g.fillText('🌹 '+nSets+' sets caught', 44, top+mh+140);
-  g.fillStyle='#5a2e86'; g.font='800 30px sans-serif'; g.fillText('deaddance.app/musikfest — no app, just scan', 44, H-44);
-  var cap='Walked '+WALK.miles.toFixed(2)+' mi at Musikfest 🌹 '+Math.round(WALK.gain)+' ft, '+nSets+' sets. Find every Platz: deaddance.app/musikfest';
+  g.fillStyle='#5a2e86'; g.font='800 30px sans-serif'; g.fillText('deaddance.app/artsquest_musikfest.html — no app, just scan', 44, H-44);
+  var cap='Walked '+WALK.miles.toFixed(2)+' mi at Musikfest 🌹 '+Math.round(WALK.gain)+' ft, '+nSets+' sets. Find every Platz: deaddance.app/artsquest_musikfest.html';
   cv.toBlob(function(blob){
     var file=new File([blob],'my-musikfest-walk.png',{type:'image/png'});
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file],text:cap}).catch(function(){}); }
