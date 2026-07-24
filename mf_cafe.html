@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Musikfest Café · Find Your Section · DeadDance</title>
+<script src="cornell77.js"></script>
+<style>
+  :root{--ink:#1a1320;--purple:#241535;--rose:#b8002e;--gold:#f0a500;--accent:#5a2e86}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#0d0916}
+  #app{position:fixed;inset:0;display:flex;flex-direction:column}
+  .hd{flex:none;background:linear-gradient(135deg,#241535,#3a1f57);color:#fff;padding:calc(11px + env(safe-area-inset-top,0px)) 14px 11px;display:flex;align-items:center;gap:11px;box-shadow:0 3px 14px #0006;z-index:20}
+  .hd .bk{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:#ffffff1f;color:#fff;font-size:18px;cursor:pointer}
+  .hd .ti{flex:1;min-width:0}
+  .hd .ti b{display:block;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hd .ti span{display:block;font-size:11.5px;color:#c9b8e6;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hd .lv{flex:none;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#2a1c00;background:linear-gradient(180deg,#ffe1a0,#f0a500);border-radius:999px;padding:5px 10px}
+  .chips{flex:none;display:flex;gap:7px;padding:9px 12px;overflow-x:auto;background:#160c28;-webkit-overflow-scrolling:touch;box-shadow:0 2px 8px #0005;z-index:19}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:1.5px solid #ffffff26;background:#ffffff12;color:#eadff7;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap;transition:.15s;display:flex;align-items:center;gap:6px}
+  .chip .sw{width:11px;height:11px;border-radius:3px;flex:none}
+  .chip.on{background:#fff;color:#241535;border-color:#fff}
+  .chip.act{background:#ffffff12}
+  #map{flex:1;min-height:0;position:relative;background:#140c22;display:flex;align-items:center;justify-content:center;padding:12px}
+  #floor{width:100%;height:100%;max-width:640px;display:block}
+  .zone{cursor:pointer;transition:opacity .2s}
+  .zt{font-weight:900;pointer-events:none}.zp{font-weight:800;pointer-events:none}
+  .feat{pointer-events:none}
+  /* legend */
+  .legend{position:absolute;right:10px;bottom:14px;z-index:16;background:#fffffff2;border-radius:12px;box-shadow:0 6px 20px #0005;overflow:hidden;font-size:12px;min-width:150px}
+  .legend .lg-row{display:flex;align-items:center;gap:8px;padding:7px 12px}
+  .legend .sw{width:13px;height:13px;border-radius:4px;flex:none}
+  .legend .lg-b{margin-left:auto;font-weight:800;color:#241535}
+  .legend .lg-none{color:#9a93a8;font-weight:700}
+  .legend .lg-toggle{width:100%;border:0;border-top:1px solid #eee;background:#faf8fd;color:#5a2e86;font-weight:800;font-size:11.5px;padding:8px;cursor:pointer}
+  .legend.min .lg-row{display:none}
+  /* park confirm */
+  .parkask{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:18;background:#241535f2;color:#fff;font-size:13px;font-weight:800;padding:9px 13px;border-radius:999px;box-shadow:0 6px 18px #0007;display:none;align-items:center;gap:6px;-webkit-backdrop-filter:blur(6px)}
+  .parkask.on{display:flex}
+  .parkask button{border:0;border-radius:8px;padding:6px 11px;font-weight:900;font-size:12px;cursor:pointer;background:#f0a500;color:#2a1c00}
+  .parkask button.no{background:#ffffff22;color:#fff;font-weight:800}
+  /* sheet */
+  .sheet{position:fixed;inset:0;z-index:40;background:#1a1220a8;display:none;align-items:flex-end;justify-content:center}
+  .sheet.on{display:flex}
+  .sheetcard{background:#fff;width:min(440px,100%);border-radius:20px 20px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px #0007;animation:su .28s cubic-bezier(.2,.8,.3,1)}
+  @keyframes su{from{transform:translateY(100%)}to{transform:none}}
+  .sh-x{float:right;border:0;background:#f0ecf6;color:#6a5f86;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer}
+  .sh-ev{font-size:15px;font-weight:800;color:#241535}
+  .sh-ve{font-size:11.5px;color:#8a7fa0;font-weight:600;margin-top:2px}
+  .sh-sec{font-size:26px;font-weight:900;color:#241535;margin:16px 0 2px}
+  .sh-price{font-size:15px;font-weight:800;color:#b8002e}
+  .sh-buy{width:100%;margin-top:16px;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,#7a3cc0,#b8002e);cursor:pointer}
+  .sh-buy:active{transform:scale(.98)}
+  .sh-fine{text-align:center;font-size:11px;color:#9a93a8;font-weight:700;margin-top:10px}
+  .sh-done{text-align:center;padding:14px 6px 4px}
+  .sh-done .big{font-size:40px}.sh-done b{display:block;font-size:19px;color:#241535;margin-top:6px}.sh-done span{display:block;font-size:12.5px;color:#8a7fa0;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hd">
+    <button class="bk" onclick="(window.history.length>1)?history.back():location.href='index.html'" aria-label="Back">‹</button>
+    <div class="ti"><b>🌹 Dark Star Orchestra — Cornell '77</b><span>Musikfest Café · 3rd Floor · ArtsQuest · Tue Jul 15, 2025</span></div>
+    <span class="lv">StageFill</span>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div id="map">
+    <div id="floor"></div>
+    <div class="parkask" id="parkAsk"></div>
+    <div class="legend" id="legend">
+      <div class="lg-row"><span class="sw" style="background:#2b8a8a"></span>GA standing<span class="lg-b">$75</span></div>
+      <div class="lg-row"><span class="sw" style="background:#7a3cc0"></span>100–300s<span class="lg-b">$132</span></div>
+      <div class="lg-row"><span class="sw" style="background:#5a8f4e"></span>400–500s<span class="lg-b">$121</span></div>
+      <div class="lg-row"><span class="sw" style="background:#c58a1e"></span>600–700s ▲bal<span class="lg-b">$99</span></div>
+      <div class="lg-row"><span class="sw" style="background:#ded9e6;border:1px solid #ccc4d6"></span><span class="lg-none">800s ▲bal — sold</span></div>
+      <button class="lg-toggle" onclick="cafeLegend()">Hide Map Legend ⌄</button>
+    </div>
+  </div>
+  <div class="sheet" id="buySheet"><div class="sheetcard" id="buyCard"></div></div>
+</div>
+<script>
+(function(){
+  "use strict";
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  // Price tiers (from ArtsQuest's live ticketing) + GA standing. bright = shade when a pill is picked.
+  var TIER={ ga:{bright:'#2b8a8a',price:75}, t132:{bright:'#7a3cc0',price:132.18}, t121:{bright:'#5a8f4e',price:121.38},
+             t99:{bright:'#c58a1e',price:98.75}, sold:{bright:'#b0a9bc',price:null} };
+  // Central GA STANDING lane (stage → back wall) with table columns flanking it: 100/300/400 left,
+  // 200/500 right, 600 far-left, 700/800 upstairs. Stage on the glass wall (top). (viewBox 0 0 525 525)
+  var SEC=[
+    {n:'GA',  x:214,y:162,w:84, h:228,tier:'ga',  vert:1},
+    {n:'100s',x:96, y:120,w:106,h:62, tier:'t132'},
+    {n:'200s',x:312,y:120,w:112,h:62, tier:'t132'},
+    {n:'300s',x:70, y:196,w:132,h:58, tier:'t132'},
+    {n:'400s',x:70, y:262,w:132,h:58, tier:'t121'},
+    {n:'500s',x:312,y:262,w:112,h:58, tier:'t121'},
+    {n:'600s',x:78, y:400,w:104,h:26, tier:'t99', up:1},
+    {n:'700s',x:200,y:400,w:104,h:26, tier:'t99', up:1},
+    {n:'800s',x:322,y:400,w:104,h:26, tier:'sold',up:1}
+  ];
+
+  // ---- draw the floor: Nick's rigid table squares + the DeadDance layer ----
+  function buildFloor(){
+    var s='<svg viewBox="0 0 525 525" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;max-height:calc(100vh - 170px);background:#fff;border-radius:6px">';
+    s+='<rect width="525" height="525" fill="#ffffff"/>';
+    // GLASS WALL (top, Nick's red line) — floor-to-ceiling glass, lit SteelStacks beyond
+    s+='<text x="255" y="46" text-anchor="middle" font-size="10.5" font-weight="800" fill="#3a7d99">◆ GLASS WALL · lit SteelStacks beyond</text>';
+    s+='<rect x="18" y="56" width="489" height="10" fill="#c3e6f2" stroke="#7fbcd6" stroke-width="1.5"/>';
+    for(var gwx=78; gwx<500; gwx+=72){ s+='<line x1="'+gwx+'" y1="56" x2="'+gwx+'" y2="66" stroke="#7fbcd6" stroke-width="1"/>'; }
+    // STAGE against the glass, at the head of the GA lane (elevated, band's back to the glass)
+    s+='<rect x="214" y="72" width="84" height="84" fill="#241535" stroke="#7a3cc0" stroke-width="2"/><text x="256" y="110" text-anchor="middle" font-size="22" fill="#fff">🎤</text><text x="256" y="130" text-anchor="middle" font-size="12" font-weight="900" letter-spacing="1" fill="#fff">STAGE</text>';
+    // Nick's two "Bar" blocks — notched top-left + right-edge vertical
+    s+='<path d="M26,134 H52 V160 H64 V210 H26 Z" fill="#9b9b9b"/><text x="43" y="182" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Bar</text>';
+    s+='<rect x="461" y="266" width="29" height="56" fill="#9b9b9b"/><text x="475.5" y="294" text-anchor="middle" transform="rotate(90 475.5 294)" font-size="14" font-weight="700" fill="#fff">Bar</text>';
+    // STAIRS to the balcony — right-front corner, near the glass
+    s+='<rect x="430" y="74" width="66" height="40" fill="#4a3a1f" stroke="#c58a1e" stroke-width="1.5"/><text x="463" y="91" text-anchor="middle" font-size="11" font-weight="800" fill="#ffe1a0">↑ Stairs</text><text x="463" y="104" text-anchor="middle" font-size="7.5" font-weight="700" fill="#e8cfa0">to balcony</text>';
+    // BALCONY band (2nd level, back wall): 600s/700s/800s tables looking down on the stage
+    s+='<rect x="60" y="394" width="384" height="38" fill="#f6f2fa" stroke="#cbbde2" stroke-width="1"/><text x="252" y="390" text-anchor="middle" font-size="9.5" font-weight="800" fill="#7a5a9a">▲ BALCONY · 2nd level · tables looking down on the stage</text>';
+    // back wall: restrooms + ribbon walking lane; entry left-rear
+    s+='<text x="255" y="452" text-anchor="middle" font-size="9" font-weight="800" fill="#7a5a9a">🚻 Restrooms · ribbon-lined walking lane</text>';
+    s+='<text x="22" y="452" font-size="10" font-weight="900" fill="#1f9e6b">🚪 Entry</text>';
+    // sections — grey rigid table squares + the teal dashed GA standing lane
+    SEC.forEach(function(z){ var ti=TIER[z.tier], cx=z.x+z.w/2, cy=z.y+z.h/2, isGA=(z.n==='GA');
+      var df=isGA?'#e5f3f0':'#e9e9ee', ds=isGA?'#8fcac2':'#c9c9d2';
+      s+='<g class="zone" onclick="cafeZone(\''+z.n+'\')">'
+        +'<rect id="zr-'+z.n+'" x="'+z.x+'" y="'+z.y+'" width="'+z.w+'" height="'+z.h+'" fill="'+df+'" stroke="'+ds+'" stroke-width="1.5"'+(isGA?' stroke-dasharray="5 3"':'')+'/>';
+      if(z.vert){ s+='<text id="zt-'+z.n+'" x="'+cx+'" y="'+cy+'" text-anchor="middle" transform="rotate(-90 '+cx+' '+cy+')" font-size="'+(isGA?13:15)+'" font-weight="800" fill="#1a1320">'+(isGA?'GA · STANDING':z.n)+'</text>'; }
+      else { s+='<text id="zt-'+z.n+'" x="'+cx+'" y="'+(cy+(z.up?4:6))+'" text-anchor="middle" font-size="'+(z.up?12:17)+'" font-weight="800" fill="#1a1320">'+z.n+'</text>'; }
+      s+='<text id="zp-'+z.n+'" x="'+cx+'" y="'+(z.vert?cy+70:cy+(z.up?15:22))+'" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" style="opacity:0"'+(z.vert?(' transform="rotate(-90 '+cx+' '+(cy+70)+')"'):'')+'>'+(ti.price?('$'+Math.round(ti.price)):'sold out')+'</text>';
+      s+='</g>';
+    });
+    s+='</svg>';
+    document.getElementById('floor').innerHTML=s;
+  }
+
+  // ---- price pill → shade the matching sections; 'all' = Nick's plain plan ----
+  var curTier='all';
+  function shade(tier){ curTier=tier;
+    SEC.forEach(function(z){ var ti=TIER[z.tier], r=document.getElementById('zr-'+z.n), t=document.getElementById('zt-'+z.n), p=document.getElementById('zp-'+z.n), g=r&&r.parentNode; if(!r)return;
+      var isGA=(z.n==='GA'), df=isGA?'#e5f3f0':'#e9e9ee', ds=isGA?'#8fcac2':'#c9c9d2', hot=(tier!=='all' && tier===z.tier);
+      if(hot){ r.setAttribute('fill',ti.bright); r.setAttribute('stroke',ti.bright); t.setAttribute('fill','#fff'); p.style.opacity=1; g.style.opacity=1; }
+      else { r.setAttribute('fill',df); r.setAttribute('stroke',ds); t.setAttribute('fill','#1a1320'); p.style.opacity=0; g.style.opacity=(tier==='all'?1:0.35); }
+    });
+  }
+  // tap a panel → light it + open the buy sheet
+  window.cafeZone=function(n){
+    var z=SEC.filter(function(s){return s.n===n;})[0]; if(!z)return; var ti=TIER[z.tier];
+    var r=document.getElementById('zr-'+n); if(r){ r.setAttribute('fill',ti.bright); r.setAttribute('stroke',ti.bright); document.getElementById('zt-'+n).setAttribute('fill','#fff'); document.getElementById('zp-'+n).style.opacity=1; }
+    if(ti.price!=null) window.cafeBuy(n, ti.price); else window.cafeSold(n);
+  };
+
+  // ---- chips ----
+  var chipsEl=document.getElementById('chips');
+  var TIERPILLS=[
+    {k:'all', label:'🎟 All', sw:null},
+    {k:'ga',  label:'$75 · GA standing', sw:'#2b8a8a'},
+    {k:'t132',label:'$132 · 100–300s', sw:'#7a3cc0'},
+    {k:'t121',label:'$121 · 400–500s', sw:'#5a8f4e'},
+    {k:'t99', label:'$99 · 600–700s',  sw:'#c58a1e'},
+    {k:'sold',label:'Sold · 800s', sw:'#b0a9bc'}
+  ];
+  var CH={};
+  TIERPILLS.forEach(function(tp){ var c=document.createElement('button'); c.className='chip'+(tp.k==='all'?' on':'');
+    c.innerHTML=(tp.sw?'<span class="sw" style="background:'+tp.sw+'"></span>':'')+tp.label; CH[tp.k]=c;
+    c.onclick=function(){ Object.keys(CH).forEach(function(k){ CH[k].classList.remove('on'); }); c.classList.add('on'); shade(tp.k); };
+    chipsEl.appendChild(c);
+  });
+  ['🎶 Setlist','🅿️ Parking'].forEach(function(lbl){ var c=document.createElement('button'); c.className='chip act'; c.textContent=lbl;
+    c.onclick=function(){ if(lbl.indexOf('Setlist')>=0) window.cafeSetlist(); else window.cafePark(); }; chipsEl.appendChild(c); });
+
+  // ---- ticketing sheets ----
+  var SHEET=document.getElementById('buySheet'), CARD=document.getElementById('buyCard');
+  window.cafeBuy=function(sec,price){
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🌹 Dark Star Orchestra — Cornell \'77</div>'
+      +'<div class="sh-ve">Musikfest Café · 3rd Floor · ArtsQuest · Jul 15, 2025</div>'
+      +'<div class="sh-sec">Section '+sec+'</div>'
+      +'<div class="sh-price">$'+Number(price).toFixed(2)+' <span style="color:#8a7fa0;font-weight:700;font-size:12px">all-in</span></div>'
+      +'<button class="sh-buy" onclick="cafePay(\''+sec+'\')">🎟 Buy ticket · $'+Number(price).toFixed(2)+'</button>'
+      +'<div class="sh-fine">Two taps. Straight to the band. No POS, no gate.</div>';
+    SHEET.classList.add('on');
+  };
+  window.cafeSold=function(sec){
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🌹 Dark Star Orchestra — Cornell \'77</div><div class="sh-ve">Musikfest Café · Jul 15, 2025</div>'
+      +'<div class="sh-sec">Section '+sec+'</div><div class="sh-price" style="color:#9a93a8">No tickets available</div>'
+      +'<div class="sh-fine">This section sold out. Try the highlighted sections.</div>';
+    SHEET.classList.add('on');
+  };
+  window.cafePay=function(sec){
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-done"><span class="big">🎟</span><b>You\'re in — Section '+sec+'</b>'
+      +'<span>Dark Star Orchestra · Musikfest Café · Jul 15, 2025</span>'
+      +'<span>Your ticket lives in your DeadDance wallet. 🌹</span></div>';
+  };
+  window.cafeSetlist=function(){ var d=window.CORNELL77; if(!d){return;}
+    var sets=d.sets.map(function(s){ return '<div style="margin-top:13px"><div style="font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#7a3cc0">'+s.name+'</div>'
+      + s.songs.map(function(g){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;border-bottom:1px solid #f2eef7"><span>'+esc(g.t)+'</span><span style="color:#8a7fa0;font-weight:700;flex:none">'+g.len+'</span></div>'; }).join('')+'</div>'; }).join('');
+    var facts='<div style="margin-top:14px;font-size:12px;color:#4a4356;line-height:1.55">'+ d.facts.slice(0,4).map(function(f){ return '🌹 '+esc(f); }).join('<br>') +'</div>';
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button><div class="sh-ev">🎶 Set of the night — Cornell \'77</div>'
+      +'<div class="sh-ve">'+esc(d.band)+' · '+esc(d.venue)+' · 5/8/77 · Betty Board</div>'
+      +'<div style="max-height:54vh;overflow:auto;margin-top:4px">'+sets+facts+'</div>';
+    SHEET.classList.add('on');
+  };
+  window.cafeClose=function(){ SHEET.classList.remove('on'); };
+  window.cafeLegend=function(){ var l=document.getElementById('legend'); var min=l.classList.toggle('min');
+    var b=l.querySelector('.lg-toggle'); if(b) b.textContent=min?'Show Map Legend ⌃':'Hide Map Legend ⌄'; };
+  SHEET.addEventListener('click',function(e){ if(e.target===this) window.cafeClose(); });
+
+  // ---- PARKING: two real ArtsQuest lots + GPS auto car-pin (drawn lots + dot on your spot) ----
+  var LOTS=[
+    {n:'Lot A · ArtsQuest / Creative Factory', lat:40.6137881, lng:-75.36999546},
+    {n:'Lot B · West lot (by the Museum)',     lat:40.61388515, lng:-75.37153896}
+  ];
+  var GEO={N:40.6165,S:40.6125,W:-75.3730,E:-75.3670}, ART={lat:40.6156,lng:-75.3684};
+  function proj(lat,lng){ return {x:(lng-GEO.W)/(GEO.E-GEO.W)*300, y:(GEO.N-lat)/(GEO.N-GEO.S)*180}; }
+  function hav(a,b){ var R=6371000,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lng-a.lng)*r,la1=a.lat*r,la2=b.lat*r;
+    var x=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(x)); }
+  var CAR_KEY='dd.cafe.car.gps';
+  function getCar(){ try{ return JSON.parse(localStorage.getItem(CAR_KEY)||'null'); }catch(e){ return null; } }
+  function saveCar(lat,lng){ try{ localStorage.setItem(CAR_KEY,JSON.stringify({lat:lat,lng:lng,t:Date.now()})); }catch(e){} }
+  window.cafeNav=function(lat,lng){ try{ window.open('https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng+'&travelmode=walking','_blank','noopener'); }catch(e){} };
+  function lotSVG(){
+    var A=proj(LOTS[0].lat,LOTS[0].lng), Bp=proj(LOTS[1].lat,LOTS[1].lng), Q=proj(ART.lat,ART.lng);
+    var car=getCar(), cp=null; if(car){ var c=proj(car.lat,car.lng); if(c.x>=8&&c.x<=292&&c.y>=8&&c.y<=172) cp=c; }
+    function lot(p){ return '<rect x="'+(p.x-30)+'" y="'+(p.y-22)+'" width="60" height="44" rx="6" fill="#d9d4e2" stroke="#b7aecb"/>'
+      +'<circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="#5a2e86"/><text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" font-size="11" font-weight="900" fill="#fff">P</text>'; }
+    return '<svg viewBox="0 0 300 180" style="width:100%;height:auto;border-radius:12px;display:block">'
+      +'<rect width="300" height="180" fill="#eceaf1"/>'
+      +'<rect x="0" y="12" width="300" height="11" fill="#cfc9db"/><rect x="0" y="157" width="300" height="11" fill="#cfc9db"/><rect x="195" y="0" width="11" height="180" fill="#cfc9db"/>'
+      +'<text x="6" y="9" font-size="8" fill="#7a7285" font-weight="700">E 1st St</text><text x="6" y="177" font-size="8" fill="#7a7285" font-weight="700">E 2nd St</text><text x="209" y="11" font-size="8" fill="#7a7285" font-weight="700">Founders Way</text>'
+      +'<path d="M'+A.x+','+A.y+' Q'+((A.x+Q.x)/2)+','+(A.y-34)+' '+Q.x+','+Q.y+'" fill="none" stroke="#b8002e" stroke-width="2" stroke-dasharray="1 5" opacity="0.65"/>'
+      +lot(A)+lot(Bp)
+      +'<text x="'+A.x+'" y="'+(A.y+33)+'" text-anchor="middle" font-size="8" font-weight="800" fill="#4a4356">Lot A</text><text x="'+Bp.x+'" y="'+(Bp.y+33)+'" text-anchor="middle" font-size="8" font-weight="800" fill="#4a4356">Lot B</text>'
+      +'<rect x="'+(Q.x-30)+'" y="'+(Q.y-15)+'" width="60" height="30" rx="5" fill="#7a3cc0"/><text x="'+Q.x+'" y="'+(Q.y-1)+'" text-anchor="middle" font-size="9" font-weight="900" fill="#fff">🎤 ArtsQuest</text><text x="'+Q.x+'" y="'+(Q.y+10)+'" text-anchor="middle" font-size="7.5" font-weight="700" fill="#e9dcff">Café · 3rd fl</text>'
+      +(cp?('<circle cx="'+cp.x+'" cy="'+cp.y+'" r="8.5" fill="#f0a500" stroke="#fff" stroke-width="2"/><text x="'+cp.x+'" y="'+(cp.y-12)+'" text-anchor="middle" font-size="8" font-weight="900" fill="#b8002e">YOUR CAR</text>'):'')
+      +'</svg>';
+  }
+  window.cafePark=function(){
+    var car=getCar();
+    var lots=LOTS.map(function(l){ return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #f2eef7"><span style="font-size:16px">🅿️</span><div style="flex:1;min-width:0"><b style="font-size:13px">'+esc(l.n)+'</b></div><button onclick="cafeNav('+l.lat+','+l.lng+')" style="border:0;background:#f0e9f7;color:#5a2e86;font-weight:800;font-size:12px;border-radius:8px;padding:6px 11px;cursor:pointer">Navigate ›</button></div>'; }).join('');
+    var back = car ? '<button class="sh-buy" onclick="cafeNav('+car.lat+','+car.lng+')">🅿️ Back to your car ›</button>' : '';
+    var note = car ? '<div class="sh-fine">📍 Pin dropped where you parked — we caught it the moment you started walking in.</div>'
+                   : '<div class="sh-fine">Park in either lot. When you head in, DeadDance drops your pin automatically — no tapping.</div>';
+    var manual = car ? '' : '<div style="text-align:center;margin-top:8px"><button onclick="cafeParkHere()" style="border:0;background:#241535;color:#fff;font-weight:800;font-size:12.5px;border-radius:10px;padding:9px 14px;cursor:pointer">📍 I’m at my car — remember it</button></div>';
+    CARD.innerHTML='<button class="sh-x" onclick="cafeClose()">✕</button>'
+      +'<div class="sh-ev">🅿️ Where everyone parks</div>'
+      +'<div class="sh-ve">ArtsQuest at SteelStacks · a short walk to the Café, 3rd floor</div>'
+      +'<div style="margin:12px 0 8px">'+lotSVG()+'</div>'+lots+back+note+manual;
+    SHEET.classList.add('on'); armAutoPark();
+  };
+  window.cafeParkHere=function(){ if(!navigator.geolocation)return; navigator.geolocation.getCurrentPosition(function(p){ saveCar(p.coords.latitude,p.coords.longitude); window.cafePark(); },function(){}, {enableHighAccuracy:true,timeout:12000}); };
+  var geoWatch=null,lastStop=null,stopT=0,offered=false;
+  function armAutoPark(){ if(geoWatch||!navigator.geolocation||getCar())return;
+    try{ geoWatch=navigator.geolocation.watchPosition(function(pos){
+      var c=pos.coords, now={lat:c.latitude,lng:c.longitude}, spd=(c.speed!=null&&c.speed>=0)?c.speed:null;
+      if(spd!=null){ if(spd>3){ lastStop=null; return; }
+        if(spd<0.7){ if(!lastStop){ lastStop=now; stopT=Date.now(); } return; }
+        if(spd>=0.9&&spd<=2.6&&lastStop&&!offered&&hav(now,lastStop)>22){ offered=true; offerPark(lastStop); } }
+      else if(lastStop){ if(hav(now,lastStop)>90){ lastStop=now; stopT=Date.now(); }
+        else if(hav(now,lastStop)>25&&!offered&&Date.now()-stopT>18000){ offered=true; offerPark(lastStop); } }
+      else { lastStop=now; stopT=Date.now(); }
+    }, function(){}, {enableHighAccuracy:true,maximumAge:4000,timeout:20000}); }catch(e){}
+  }
+  function offerPark(spot){ var t=document.getElementById('parkAsk'); if(!t)return;
+    t.innerHTML='🅿️ Remember this spot?<button onclick="cafeParkYes('+spot.lat+','+spot.lng+')">Yes</button><button class="no" onclick="document.getElementById(\'parkAsk\').classList.remove(\'on\')">Not now</button>';
+    t.classList.add('on'); }
+  window.cafeParkYes=function(lat,lng){ saveCar(lat,lng); var t=document.getElementById('parkAsk'); if(t)t.classList.remove('on'); if(document.getElementById('buySheet').classList.contains('on')) window.cafePark(); };
+
+  buildFloor(); shade('all');
+})();
+</script>
+</body>
+</html>
