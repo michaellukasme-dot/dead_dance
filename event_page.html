@@ -39,6 +39,9 @@ h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute
 <div id="page"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; }catch(e){}</script>
+
 <script src="qr.js"></script>
 <script src="dd_categories.js"></script>
 <script src="stagefill_events.js"></script>
@@ -99,6 +102,12 @@ function render(E){
   /* QR of this very page */
   try{ if(window.DDQR&&DDQR.into){ DDQR.into('qr',location.href,{size:300,css:60,caption:false}); } }catch(e){}
 }
+
+(function(){ var ev=qs('ev'); if(!ev)return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return;
+  cl.rpc('sf_get',{p_slug:ev}).then(function(r){ if(r&&!r.error&&r.data&&r.data.event){ var d=r.data,e=d.event;
+    E={name:e.name,cat:e.cat,start:e.date_start,end:e.date_end,time:e.start_time,city:e.city,state:e.state,venue:e.venue,lat:e.lat,lng:e.lng,corners:e.corners,
+       acts:(d.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catIcon:'',lat:a.lat,lng:a.lng};})};
+    render(E); } }).catch(function(){}); })();
 function shareEvent(){ var url=location.href; if(navigator.share){ navigator.share({title:(E.name||'Event')+' — StageFill',url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); alert('Link copied.'); }catch(e){ prompt('Copy link:',url); } } }
 </script>
