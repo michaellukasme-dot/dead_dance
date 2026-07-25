@@ -1320,7 +1320,7 @@ body.dd-insider .dd-only{display:block}
   <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
   <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
-  <button class="fn" onclick="requireSignin(function(){ if(window.ddSheet){ ddSheet('games.html','🍪 Games'); } else { openGame(); } })"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn" onclick="requireSignin(function(){ if(window.ddSheet){ ddSheet('games.html','🍪 Games',true); } else { openGame(); } })"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" style="display:none" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><!-- hidden for launch — no records yet --><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
   <button class="fn" onclick="requireSignin(function(){openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
   <button class="fn" onclick="requireSignin(function(){profile('me')})"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
@@ -1342,7 +1342,7 @@ body.dd-insider .dd-only{display:block}
     if(go==='dealer'&&window.openReader){ openReader('groups'); watch('#reader',offOn); return; }
     if(go==='shakedown'&&window.openReader){ openReader('market'); watch('#reader',offOn); return; }
     if(go==='apps'&&window.openApps){ openApps(); watch('#appsov',offOn); return; }
-    if(go==='games'&&window.ddSheet){ ddSheet('games.html','🍪 Games'); watch('#ddsheet',offDisp); return; }   /* Games opens in the reader modal (ddSheet), not a full-page overlay */
+    if(go==='games'&&window.ddSheet){ ddSheet('games.html','🍪 Games',true); watch('#ddsheet',offDisp); return; }   /* Games opens in the reader modal (ddSheet), not a full-page overlay */
     if(go==='records'&&window.ddSheet){ ddSheet('record_store.html','💿 DeadDance Records'); watch('#ddsheet',offDisp); return; }
     if(go==='alerts'&&window.openNotifs){ openNotifs(); watch('#notifov',offOn); return; }
     if(go==='you'&&window.profile){ profile('me'); watch('#profile',offOn); return; }
@@ -1381,12 +1381,16 @@ window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth
 </div>
 <!-- game FAB removed — Games now lives in the bottom menu -->
 <!-- In-app sheet: opens sub-pages (Records, etc.) in a modal so there is no browser-back dead-end in the PWA -->
+<style>#ddsheet.card{display:flex!important;align-items:flex-start;justify-content:center;background:transparent}#ddsheet.card #ddsheet-body{position:relative;inset:auto;top:auto;margin:34px auto;width:min(600px,calc(100% - 28px));height:calc(100% - 68px);max-height:calc(100% - 68px);border-radius:16px;overflow:hidden;box-shadow:0 24px 70px #000b}@media(max-width:560px){#ddsheet.card #ddsheet-body{margin:14px auto;width:calc(100% - 20px);height:calc(100% - 28px)}}</style>
 <div id="ddsheet" style="position:fixed;inset:0;z-index:130;display:none">
   <div style="position:absolute;inset:0;background:#160c28dd" onclick="ddSheetClose()"></div>
-  <div style="position:absolute;inset:0;top:0;display:flex;flex-direction:column">
+  <div id="ddsheet-body" style="position:absolute;inset:0;top:0;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:#2a1650;color:#f3ecff;font-weight:800">
       <span id="ddsheet-t">DeadDance Records</span>
-      <button onclick="ddSheetClose()" aria-label="Close" style="border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer">✕</button>
+      <span style="display:flex;gap:8px;align-items:center">
+        <button onclick="ddSheetExpand()" aria-label="Expand or restore" title="Expand / restore" style="border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:15px;cursor:pointer">⤢</button>
+        <button onclick="ddSheetClose()" aria-label="Close" style="border:0;background:#ffffff22;color:#fff;width:36px;height:36px;border-radius:18px;font-size:17px;cursor:pointer">✕</button>
+      </span>
     </div>
     <iframe id="ddsheet-f" title="Shop sub-page" style="flex:1;width:100%;border:0;background:#fff"></iframe>
   </div>
@@ -1396,7 +1400,8 @@ window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth
   <iframe id="ddtix-f" title="Ticket" allowtransparency="true" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent"></iframe>
 </div>
 <script>
-function ddSheet(url,title){var s=document.getElementById('ddsheet');if(!s)return;try{ if(/^(band_onboard|band_console|venue_ops|venue_console|influencer_console|sales_console)/.test(String(url))&&window.ddMarkInsider) ddMarkInsider(); }catch(e){}document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.style.display='block';document.body.style.overflow='hidden';}
+function ddSheet(url,title,modal){var s=document.getElementById('ddsheet');if(!s)return;try{ if(/^(band_onboard|band_console|venue_ops|venue_console|influencer_console|sales_console)/.test(String(url))&&window.ddMarkInsider) ddMarkInsider(); }catch(e){}document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.classList.toggle('card',!!modal);s.style.display='block';document.body.style.overflow='hidden';}
+function ddSheetExpand(){var s=document.getElementById('ddsheet');if(s)s.classList.toggle('card');}
 function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.style.display='none';document.getElementById('ddsheet-f').src='about:blank';document.body.style.overflow='';}
 /* Ticket = white modal floating over Home: header-less, transparent iframe so Home shows behind the ticket's own scrim */
 function ddTix(url){var s=document.getElementById('ddtix');if(!s)return;document.getElementById('ddtix-f').src=url;s.style.display='block';document.body.style.overflow='hidden';}
@@ -1536,7 +1541,7 @@ window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='d
     <a class="aitem" onclick="coGo('appsov',function(){location.href='dd_home_mockup.html'})"><span>👥</span><div><b>Friends</b><i>Your heads.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){openReader('bands')})"><span>🎸</span><div><b>Bands</b><i>The rolodex.</i></div></a>
     <div class="asec">Play &amp; listen</div>
-    <a class="aitem" onclick="coGo('appsov',function(){ window.ddSheet?ddSheet('games.html','🍪 Games'):(window.openGame&&openGame()); })"><span>🎮</span><div><b>Games</b><i>Name That Tune.</i></div></a>
+    <a class="aitem" onclick="coGo('appsov',function(){ window.ddSheet?ddSheet('games.html','🍪 Games',true):(window.openGame&&openGame()); })"><span>🎮</span><div><b>Games</b><i>Name That Tune.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('live_reports.html','🚗 Live Reports')})"><span>🚗</span><div><b>Live Reports</b><i>Report &amp; confirm — earn Cookies 🍪.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('guitars.html','🎸 Jerry\'s Guitars')})"><span>🎸</span><div><b>Jerry's Guitars</b><i>Seven groups. Your photos.</i></div></a>
     <a class="aitem" onclick="coGo('appsov',function(){ddSheet('bands.html','🎸 Jerry\'s Bands')})"><span>🎼</span><div><b>Jerry's Bands</b><i>1961–1995. Every one.</i></div></a>

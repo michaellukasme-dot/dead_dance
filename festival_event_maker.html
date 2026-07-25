@@ -280,7 +280,7 @@ body.mfdrag .sheet{transition:none}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; }catch(e){}</script>
+<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
 <script src="qr.js"></script>
 <script src="dd_categories.js"></script>
 <script>
@@ -432,7 +432,7 @@ function emPublish(){ emSave(); if(!state.name){ toast('Name your event first.')
   var ev=emPayload(); ev.slug=slug;
   var mine=[]; try{ mine=JSON.parse(localStorage.getItem('dd.sf.myevents')||'[]'); }catch(e){} mine=mine.filter(function(m){return m.slug!==slug;}); mine.unshift(ev);
   try{ localStorage.setItem('dd.sf.myevents',JSON.stringify(mine)); }catch(e){}
-  var payload={ slug:slug, owner:sfDevice(), name:state.name, city:state.city, state:state.state, venue:state.venue, cat:state.cat, start:state.dateStart, end:state.dateEnd, time:state.startTime, lat:ev.lat, lng:ev.lng, corners:state.corners, acts:ev.acts, geofences:sfGeofences(), status:'live' };
+  var payload={ slug:slug, name:state.name, city:state.city, state:state.state, venue:state.venue, cat:state.cat, start:state.dateStart, end:state.dateEnd, time:state.startTime, lat:ev.lat, lng:ev.lng, corners:state.corners, acts:ev.acts, geofences:sfGeofences(), status:'live' };
   var cl=window.ddClient&&ddClient(); var go=function(){ location.href='stagefill_events.html'; };
   if(cl&&cl.rpc){ toast('📡 Publishing…'); cl.rpc('sf_publish',{p:payload}).then(function(r){ if(r&&!r.error&&r.data){ state.slug=r.data; emSave(); toast('✅ Published live \u2014 it\u2019s on the national list.'); setTimeout(go,700); } else { toast('Saved locally (offline).'); setTimeout(go,900); } }).catch(function(){ toast('Saved locally (offline).'); setTimeout(go,900); }); }
   else { toast('✅ Published (local).'); setTimeout(go,800); } }

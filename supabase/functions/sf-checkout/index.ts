@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
     const { data: tt } = await svc.from("sf_ticket_type")
       .select("id, event_id, name, price_cents, currency, qty_total, qty_sold, active").eq("id", ttId).single();
     if (!tt || !tt.active) return json({ error: "ticket_unavailable" }, 400);
+    if (tt.price_cents <= 0) return json({ error: "free_ticket_no_checkout" }, 400);   // free tickets never hit Stripe
     if (tt.qty_total != null && (tt.qty_sold + qty) > tt.qty_total) return json({ error: "sold_out" }, 400);
 
     const { data: ev } = await svc.from("sf_event")
