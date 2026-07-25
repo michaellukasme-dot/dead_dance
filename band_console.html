@@ -80,6 +80,18 @@ input:focus{outline:none;border-color:var(--rose)}
     <button class="btn ghost sm" style="margin-top:10px" onclick="saveBand()">Save band</button>
   </div>
 
+  <!-- selling & plan (freemium) -->
+  <div class="card">
+    <h2>Selling &amp; plan</h2>
+    <div class="sub" id="bpStatus">Unlock everything free — just let DeadDance sell your tickets.</div>
+    <label style="display:flex;align-items:center;gap:9px;font-weight:700;margin:12px 0 3px;cursor:pointer">
+      <input type="checkbox" id="bpTix" onchange="bpToggle(this.checked)" style="width:18px;height:18px;accent-color:#b21e46">
+      Let DeadDance sell my tickets — <b>everything free</b>
+    </label>
+    <div class="sub" style="margin:0 0 12px 27px">You keep selling anywhere else, too.</div>
+    <div class="sub" style="border-top:1px solid #eee;padding-top:10px">Rather keep your own ticketing? <button class="btn ghost sm" onclick="bpSub()" style="margin-left:4px">Subscribe — $20/month</button></div>
+  </div>
+
   <!-- add a gig -->
   <div class="card">
     <h2>➕ Add a gig</h2>
@@ -129,7 +141,7 @@ function saveBand(){
   BAND.city=(document.getElementById('bcity').value||'').trim();
   BAND.slug=slug(BAND.name);
   try{ localStorage.setItem('dd.band.console',JSON.stringify(BAND)); localStorage.setItem('dd.myorg',BAND.name); }catch(e){}
-  toast('🌹 Saved — '+(BAND.name||'your band')); loadKPIs();
+  toast('🌹 Saved — '+(BAND.name||'your band')); loadKPIs(); bpLoad();
 }
 
 /* KPIs */
@@ -218,6 +230,11 @@ function runPlan(gid){
 
 /* boot */
 BAND.slug=BAND.slug||slug(BAND.name);
+function bpBand(){ return BAND.slug||slug(BAND.name)||''; }
+function bpLoad(){ var b=bpBand(); if(!b)return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return; cl.rpc('dd_band_plan_get',{p_band:b}).then(function(r){ if(r&&!r.error&&r.data){ var d=r.data, t=document.getElementById('bpTix'), st=document.getElementById('bpStatus'); if(t)t.checked=!!d.ticketing_enabled; if(st)st.textContent=d.unlocked?(d.subscribed?'✅ Pro active — $20/mo subscription.':'✅ Unlocked — DeadDance is selling your tickets (free).'):'🔒 Locked. Turn on ticketing (free) or subscribe to sell & unlock pro.'; } }).catch(function(){}); }
+function bpToggle(on){ var b=bpBand(); if(!b){ toast('Name your band first 🌹'); var t=document.getElementById('bpTix'); if(t)t.checked=false; return; } var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ toast('Offline — try again.'); return; } cl.rpc('dd_band_ticketing_set',{p_band:b,p_on:!!on}).then(function(r){ if(r&&!r.error){ toast(on?'🎟 DeadDance ticketing ON — unlocked, free.':'Ticketing off.'); bpLoad(); } else { toast('Could not update.'); } }).catch(function(){ toast('Could not update.'); }); }
+function bpSub(){ toast('💳 $20/mo — Stripe checkout opens here once billing is on. For now, flip on free ticketing above.'); }
+try{ bpLoad(); }catch(e){}
 (function(){ function go(){ try{ if(window.DDGigs&&DDGigs.ready()){ loadKPIs(); } else setTimeout(go,1200); }catch(e){} } setTimeout(go,1000); })();
 </script>
 <script src="dd_profile.js"></script>

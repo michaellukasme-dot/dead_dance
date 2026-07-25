@@ -108,6 +108,25 @@ ArtsQuest is the marquee partner, not the gate. StageFill goes **direct to all 8
 This flips the pitch: they don't decide on a map in the abstract; they decide whether to turn on the map they
 already built and love, right before their gates open.
 
+## Band freemium (the DeadDance side) — pay with money OR with your ticketing
+
+Same philosophy as festivals, tuned for bands (`dd_band_plan.sql`). A band **unlocks everything free**
+by turning on DeadDance ticketing; the subscription is the escape hatch for bands that won't cede it:
+
+> **Unlock everything — free.** Turn on DeadDance ticketing and we handle checkout (you keep selling
+> anywhere else, too). *Rather keep your own ticketing? $20/month.*
+
+- `unlocked = ticketing_enabled OR subscribed` — one boolean either way, mirroring `sf_gate`.
+- The console has the ✅ toggle (`dd_band_ticketing_set`); the band page's ticket action gates on
+  `dd_band_plan_get`. Subscription is set only by the billing webhook (`dd_band_subscribe`, service-role).
+- Non-exclusive by design: turning on our ticketing is *presence*, not exclusivity.
+- **Always-free floor:** a band's page + map are free regardless; only pro/selling locks.
+
+Consistent language across the product: **"free" means free to build and use; the subscription is the
+alternative to letting us run ticketing.** Festivals: free to build, subscription due ~14 days before
+the gates. Bands: free with DeadDance ticketing on, else $20/mo. Platform take on tickets is 15%
+(festivals) / a band-friendly rate for acts.
+
 ## Deploy order (Michael runs)
 1. Run `sf_spine.sql` in Supabase; enable Realtime on `sf_event`, `sf_order`.
 2. Deploy `sf-rollup`; schedule it (cron) with `DD_CRON_SECRET`.

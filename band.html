@@ -447,7 +447,7 @@ function addDate(){
   if(window.openGig){ try{ window.openGig(); return; }catch(e){} }
   location.href='band_onboard.html?src=selfclaim&band='+encodeURIComponent(BAND.slug);
 }
-function tix(){ toast('🎟 Tickets go live once this show is published.'); }
+function tix(){ var _b=BAND.slug, _c=window.ddClient&&ddClient(); if(_c&&_c.rpc&&_b){ _c.rpc('dd_band_plan_get',{p_band:_b}).then(function(r){ if(r&&!r.error&&r.data&&r.data.unlocked){ toast('🎟 Tickets go live once this show is published.'); } else { toast('🔒 Turn on DeadDance ticketing (free) in your console — or $20/mo — to sell tickets.'); } }).catch(function(){ toast('🎟 Tickets go live once this show is published.'); }); } else { toast('🎟 Tickets go live once this show is published.'); } }
 
 /* ---------- STORE ---------- */
 var CART=0;
