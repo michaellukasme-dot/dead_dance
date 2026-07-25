@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Festival · Event Maker · StageFill</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--purple:#374151;--purple2:#2f6feb;--rose:#1e57d6;--ink:#1f2430;--muted:#8a92a6;--line:#e4e7ee;--cream:#ffffff;--bg:#f5f6f8}  /* StageFill neutral — a skin (e.g. DeadDance) overrides these */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow-x:hidden}
+body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+/* ---- outdoor map (fixed top) ---- */
+#emMap{position:fixed;left:0;right:0;top:0;height:42vh;z-index:1}
+
+.em-top{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:0;right:0;z-index:5;display:flex;gap:8px;align-items:flex-start;padding:0 12px;pointer-events:none}
+.em-top>*{pointer-events:auto}
+.em-back{background:#fff;color:var(--purple);border:0;border-radius:999px;width:40px;height:40px;font-size:20px;box-shadow:0 2px 8px #0003;cursor:pointer}
+.em-chip{background:#fff;border:0;border-radius:999px;padding:9px 15px;font-weight:800;font-size:14px;box-shadow:0 2px 8px #0003;cursor:pointer;color:var(--ink)}
+.em-stat{background:#fff;border-radius:999px;padding:7px 13px;font-weight:800;font-size:13px;color:var(--rose);box-shadow:0 2px 8px #0003}
+/* ---- sheet ---- */
+.sheet{position:relative;z-index:3;margin-top:calc(42vh - 20px);background:var(--bg);border-radius:20px 20px 0 0;box-shadow:0 -10px 40px #0004;min-height:60vh;padding:0 13px 90px}
+.grab{display:flex;justify-content:center;padding:9px 0 4px}.grab>span{width:44px;height:5px;border-radius:3px;background:#cfd4de}
+.hero{background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px;margin:4px 0 14px}
+#emQR{width:54px;height:54px;background:#fff;border-radius:10px;flex:0 0 auto;box-shadow:0 1px 6px #0003;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.iconbtn{border:0;background:#fff;border-radius:10px;width:40px;height:40px;flex:0 0 auto;box-shadow:0 1px 6px #0003;cursor:pointer;color:var(--purple);display:flex;align-items:center;justify-content:center;padding:0}
+#emName{flex:1;min-width:0;border:2px solid #d5dbe6;border-radius:12px;background:#f1f3f7;padding:12px 14px;font:800 clamp(16px,4.6vw,22px)/1.1 inherit;color:var(--ink)}
+#emName::placeholder{color:#9aa3b5;font-weight:700}
+.cal{flex:0 0 auto;text-align:center;cursor:pointer;user-select:none}
+.cal .m{background:var(--rose);color:#fff;font-size:9px;font-weight:900;letter-spacing:.08em;border-radius:6px 6px 0 0;padding:2px 8px}
+.cal .d{background:#fff;color:var(--ink);font-size:20px;font-weight:900;border:1px solid var(--line);border-top:0;border-radius:0 0 6px 6px;padding:1px 8px 3px}
+.cal input{position:absolute;opacity:0;width:0;height:0}
+.rosecnt{display:flex;align-items:center;gap:3px;font-weight:900;font-size:17px;color:var(--rose)}
+.addbig{border:0;background:#fff;border-radius:14px;width:58px;height:58px;flex:0 0 auto;box-shadow:0 2px 10px #0003;cursor:pointer;color:#1e6cff;font-size:34px;line-height:0;display:flex;align-items:center;justify-content:center}
+.sec{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin:8px 0 12px}
+.corners{position:relative}
+.cornerbox{position:relative;background:#eef1f6;border:2px dashed #c8d0de;border-radius:14px;height:210px;display:flex;align-items:center;justify-content:center;margin:6px 2px}
+.cin{position:absolute;display:flex;gap:5px;z-index:2}
+.cin.tl{top:-14px;left:-2px}.cin.tr{top:-14px;right:-2px}.cin.bl{bottom:-14px;left:-2px}.cin.br{bottom:-14px;right:-2px}
+.cin input{width:74px;border:1px solid var(--line);border-radius:9px;padding:6px 7px;font:700 12px inherit;background:#fff;color:var(--ink);text-align:center}
+.cin input::placeholder{color:#9aa3b5;font-weight:600}
+.floorcard{background:#fff;border-radius:14px;box-shadow:0 3px 14px #0002;padding:20px;text-align:center;max-width:240px}
+.floorcard .t{color:#1e6cff;font-style:italic;font-weight:800;font-size:15px;margin-bottom:14px}
+.floorcard .up{display:inline-flex;align-items:center;gap:12px;cursor:pointer}
+.floorcard .plus{border:1px solid var(--line);border-radius:12px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;color:#1e6cff;font-size:34px}
+#floorImg{max-width:100%;border-radius:12px;display:none;margin:6px auto 0}
+#floorWrap{position:relative;display:inline-block}
+.actlist{margin:8px 2px 0}
+.actrow{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin-bottom:8px}
+.actrow .t{width:58px;font-weight:800;font-size:12px;color:var(--rose)}
+.actrow .n{flex:1;font-weight:800;font-size:13.5px}
+.actrow .g{font-size:11.5px;color:var(--muted);font-weight:700}
+.actrow .x{border:0;background:#eef1f6;color:var(--rose);border-radius:8px;width:26px;height:26px;cursor:pointer;font-size:13px}
+.hint{font-size:12px;color:var(--muted);margin:2px 2px 10px}
+.btnrow{display:flex;gap:9px;margin:16px 2px 4px}
+.btn{flex:1;border:0;border-radius:13px;padding:12px;font-weight:800;font-size:14px;cursor:pointer}
+.btn.p{background:linear-gradient(135deg,var(--purple2),var(--rose));color:#fff}
+.btn.g{background:#eef1f6;color:var(--purple)}
+/* pill-tab curtains — each pill opens its own small section (just like the Festival Map) */
+.curtainbar{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:4;background:var(--bg);padding:8px 0 9px;margin:2px 0 8px;border-bottom:1px solid var(--line)}
+.curtainbar::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;background:#eef1f6;color:var(--purple);border-radius:999px;padding:8px 14px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--ink);color:#fff}
+.cur{display:none}.cur.on{display:block}
+/* modal */
+.scrim{position:fixed;inset:0;z-index:600;background:rgba(20,12,30,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.scrim.on{display:flex}
+.modal{background:#fff;border-radius:18px;max-width:420px;width:100%;box-shadow:0 20px 60px #0008;padding:18px}
+.modal h3{margin:0 0 12px;font-size:17px}
+.modal label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px}
+.modal input,.modal select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}
+.leaflet-marker-icon.cornerpin{filter:hue-rotate(15deg)}
+.actpin{background:var(--rose);color:#fff;border-radius:50% 50% 50% 0;width:24px;height:24px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0005;border:2px solid #fff}
+.actpin span{transform:rotate(45deg);font-size:11px}
+/* range calendar (flight-style: 1st tap = start, 2nd tap = end) */
+.cal .rng{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-top:2px;text-align:center;line-height:1}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:2px 0 10px;font-weight:800;font-size:15px}
+.calhead button{border:0;background:#eef1f6;color:var(--purple);width:34px;height:34px;border-radius:9px;font-size:18px;cursor:pointer}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.calgrid .dow{font-size:10px;font-weight:800;color:var(--muted);text-align:center;padding:2px 0}
+.calgrid .day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;color:var(--ink);background:#f5f6f8}
+.calgrid .day.mute{background:transparent;cursor:default}
+.calgrid .day.in{background:#dce8ff}
+.calgrid .day.start,.calgrid .day.end{background:var(--purple2);color:#fff}
+.calsum{font-size:12.5px;color:var(--ink);font-weight:700;margin:12px 0 2px;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="emMap"></div>
+<div class="em-top">
+  <button class="em-back" onclick="emBack()" aria-label="Back">‹</button>
+  <button class="em-chip" onclick="emActsNow()">🎶 Acts on Now</button>
+  <span class="em-stat" id="emStat">🥾 0.00 mi · 0 acts</span>
+</div>
+
+<div class="sheet">
+  <div class="grab"><span></span></div>
+
+  <div class="hero">
+    <div id="emQR" onclick="emShare()" title="Share this event">▦</div>
+    <button class="iconbtn" onclick="emShare()" aria-label="Share"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
+    <input id="emName" placeholder="Enter Festival Name" oninput="emSave()">
+    <div class="cal" title="Pick start & end dates" onclick="openCal()">
+      <span class="m" id="calM">JUL</span><span class="d" id="calD">17</span>
+      <span class="rng" id="calRange"></span>
+    </div>
+    <span class="rosecnt">📍 <span id="emRose">0</span></span>
+    <button class="addbig" onclick="emAddAct()" aria-label="Add an act">+</button>
+  </div>
+
+  <div class="curtainbar">
+    <button class="tab on" data-t="cur_map" onclick="emTab('cur_map')">🗺 Event Map</button>
+    <button class="tab" data-t="cur_floor" onclick="emTab('cur_floor')">🏛 Indoor</button>
+    <button class="tab" data-t="cur_acts" onclick="emTab('cur_acts')">🎸 Acts</button>
+    <button class="tab" data-t="cur_share" onclick="emTab('cur_share')">🔗 Share</button>
+  </div>
+
+  <div class="cur on" id="cur_map">
+    <div class="sec">Outdoor footprint</div>
+    <div class="hint">Drag the four corner pins on the map to frame your grounds — the lat/lng fields fill in as you go. Or type coordinates to set them exactly.</div>
+    <div class="cornerbox" id="cornerBox">
+      <div class="cin tl"><input id="tl_lat" placeholder="Latitude" onchange="emCornerType('tl')"><input id="tl_lng" placeholder="Longitude" onchange="emCornerType('tl')"></div>
+      <div class="cin tr"><input id="tr_lat" placeholder="Latitude" onchange="emCornerType('tr')"><input id="tr_lng" placeholder="Longitude" onchange="emCornerType('tr')"></div>
+      <div class="cin bl"><input id="bl_lat" placeholder="Latitude" onchange="emCornerType('bl')"><input id="bl_lng" placeholder="Longitude" onchange="emCornerType('bl')"></div>
+      <div class="cin br"><input id="br_lat" placeholder="Latitude" onchange="emCornerType('br')"><input id="br_lng" placeholder="Longitude" onchange="emCornerType('br')"></div>
+      <div style="color:var(--purple);font-weight:800;font-size:13px;text-align:center;opacity:.7">The purple frame = your event footprint.<br>It follows the corner pins above.</div>
+    </div>
+  </div>
+
+  <div class="cur" id="cur_floor">
+    <div class="sec">Indoor floor plan (optional)</div>
+    <div style="display:flex;justify-content:center;margin:6px 0">
+      <div class="floorcard" id="floorCard">
+        <div class="t" id="floorTitle">Indoor Event — Upload Floor Map</div>
+        <label class="up" id="floorUp"><span class="plus">+</span><span style="font-weight:700;color:var(--ink)">Upload Floor Plan</span>
+          <input type="file" accept="image/*" id="floorFile" style="display:none" onchange="emFloor(event)"></label>
+        <div id="floorWrap"><img id="floorImg" alt="Floor plan"></div>
+      </div>
+    </div>
+    <div class="hint" id="floorHint" style="display:none;text-align:center">Tap the plan to drop an act where it plays.</div>
+  </div>
+
+  <div class="cur" id="cur_acts">
+    <div class="sec">Acts &amp; stages</div>
+    <div class="actlist" id="actList"></div>
+    <div class="hint" id="actEmpty">No acts yet — tap the blue ➕ up top to add one.</div>
+  </div>
+
+  <div class="cur" id="cur_share">
+    <div class="sec">Save &amp; share</div>
+    <div class="hint">Save your draft and get a link. Publishing to a live, scannable event map comes in the next pass.</div>
+    <div class="btnrow">
+      <button class="btn g" onclick="emReset()">Start over</button>
+      <button class="btn p" onclick="emShare()">Save &amp; get link</button>
+    </div>
+  </div>
+</div>
+
+<!-- add-act modal -->
+<div class="scrim" id="actScrim">
+  <div class="modal">
+    <h3>Add an act</h3>
+    <label>Act / band</label><input id="a_name" placeholder="e.g. Shakedown Citi">
+    <label>Stage / room</label><input id="a_stage" placeholder="e.g. Main Stage">
+    <label>Category</label><select id="a_cat"></select>
+    <label>Time</label><input id="a_time" type="time" value="20:00">
+    <label>Place it</label>
+    <select id="a_where"><option value="map">On the outdoor map (then tap the map)</option><option value="floor">On the floor plan (then tap the plan)</option></select>
+    <div class="btnrow"><button class="btn g" onclick="emCloseAct()">Cancel</button><button class="btn p" onclick="emAddNext()">Next → place it</button></div>
+  </div>
+</div>
+
+<div class="scrim" id="calScrim">
+  <div class="modal">
+    <h3>Event dates</h3>
+    <div class="calhead"><button onclick="calNav(-1)" aria-label="Prev month">‹</button><span id="calTitle">—</span><button onclick="calNav(1)" aria-label="Next month">›</button></div>
+    <div class="calgrid" id="calGrid"></div>
+    <div class="calsum" id="calSum">Tap a start date.</div>
+    <label>Start time</label><input type="time" id="emTime" value="18:00">
+    <div class="btnrow"><button class="btn g" onclick="calClear()">Clear</button><button class="btn p" onclick="calDone()">Done</button></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="qr.js"></script>
+<script src="dd_categories.js"></script>
+<script>
+var LS='dd.eventmaker.draft';
+var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',corners:null,acts:[],floor:null};
+var map, tiles, cornerMarkers={}, footprint=null, actMarkers=[], placingAct=null, placeMode=null;
+
+function el(id){return document.getElementById(id);}
+function emTab(id){ ['cur_map','cur_floor','cur_acts','cur_share'].forEach(function(x){ var n=el(x); if(n)n.classList.toggle('on',x===id); });
+  document.querySelectorAll('.curtainbar .tab').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-t')===id); });
+  setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },40); }
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+/* ---------- map ---------- */
+function initMap(){
+  map=L.map('emMap',{zoomControl:true,attributionControl:false}).setView([40.6187,-75.3803],15); // Bethlehem default
+  var url='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  tiles=L.tileLayer(url,{maxZoom:19,crossOrigin:true}).addTo(map);   // StageFill-neutral plain street tiles
+  map.on('click',function(e){ if(placeMode==='map') dropActAt(e.latlng.lat,e.latlng.lng); });
+  makeCorners();
+}
+function defaultCorners(){ var b=map.getBounds(), n=b.getNorth(),s=b.getSouth(),w=b.getWest(),e=b.getEast();
+  var dy=(n-s)*.18, dx=(e-w)*.18;
+  return {tl:[n-dy,w+dx],tr:[n-dy,e-dx],bl:[s+dy,w+dx],br:[s+dy,e-dx]}; }
+function makeCorners(){
+  var c=state.corners||defaultCorners(); state.corners=c;
+  ['tl','tr','bl','br'].forEach(function(k){
+    var m=L.marker(c[k],{draggable:true,title:k.toUpperCase()+' corner'}).addTo(map);
+    m.on('drag',function(){ var ll=m.getLatLng(); state.corners[k]=[ll.lat,ll.lng]; drawFootprint(); fillCornerInputs(); });
+    m.on('dragend',emSave);
+    cornerMarkers[k]=m;
+  });
+  drawFootprint(); fillCornerInputs();
+}
+function drawFootprint(){ var c=state.corners; if(!c)return;
+  var pts=[c.tl,c.tr,c.br,c.bl];
+  if(footprint) footprint.setLatLngs(pts);
+  else footprint=L.polygon(pts,{color:'#2f6feb',weight:2,fillColor:'#7aa5f2',fillOpacity:.16}).addTo(map);
+}
+function fillCornerInputs(){ var c=state.corners; ['tl','tr','bl','br'].forEach(function(k){
+  el(k+'_lat').value=c[k][0].toFixed(5); el(k+'_lng').value=c[k][1].toFixed(5); }); }
+function emCornerType(k){ var la=parseFloat(el(k+'_lat').value), ln=parseFloat(el(k+'_lng').value);
+  if(isNaN(la)||isNaN(ln))return; state.corners[k]=[la,ln]; cornerMarkers[k].setLatLng([la,ln]); drawFootprint(); emSave(); }
+
+/* ---------- acts ---------- */
+function emCats(){ var sel=el('a_cat'); if(!sel||!window.DDCats)return; if(sel.options.length)return; sel.innerHTML=DDCats.list().map(function(c){ return '<option value="'+c.key+'">'+c.icon+' '+c.label+'</option>'; }).join(''); }
+function emQR(){ var url=location.origin+location.pathname+'?e='+encodeURIComponent(state.name||'my-event'); try{ if(window.DDQR&&DDQR.into){ DDQR.into('emQR',url,{size:300,css:52,caption:false}); } }catch(e){} }
+function emAddAct(){ emCats(); el('a_name').value=''; el('a_stage').value=''; el('a_time').value='20:00'; el('actScrim').classList.add('on'); }
+function emCloseAct(){ el('actScrim').classList.remove('on'); placingAct=null; placeMode=null; }
+function emAddNext(){
+  var n=el('a_name').value.trim(); if(!n){ el('a_name').focus(); return; }
+  var _c=(window.DDCats?DDCats.list():[]).filter(function(c){return c.key===el('a_cat').value;})[0]||{};
+  placingAct={name:n,stage:el('a_stage').value.trim(),time:el('a_time').value,where:el('a_where').value,cat:_c.key||'',catLabel:_c.label||'',catIcon:_c.icon||'📍'};
+  el('actScrim').classList.remove('on');
+  if(placingAct.where==='floor'){ if(!state.floor){ emTab('cur_floor'); alert('Upload a floor plan first, then place indoor acts on it.'); return; } emTab('cur_floor'); placeMode='floor'; toast('Tap the floor plan where this act plays.'); }
+  else { placeMode='map'; toast('Tap the map where this act plays.'); }
+}
+function dropActAt(lat,lng){ if(!placingAct)return;
+  var a=Object.assign({},placingAct,{lat:lat,lng:lng,id:Date.now()});
+  state.acts.push(a); addActMarker(a); placingAct=null; placeMode=null; renderActs(); emSave();
+}
+function dropActOnFloor(xpct,ypct){ if(!placingAct)return;
+  var a=Object.assign({},placingAct,{xpct:xpct,ypct:ypct,id:Date.now()});
+  state.acts.push(a); placingAct=null; placeMode=null; renderActs(); paintFloorPins(); emSave();
+}
+function addActMarker(a){ if(a.lat==null)return;
+  var icon=L.divIcon({className:'',html:'<div class="actpin"><span>'+((a.catIcon)||'📍')+'</span></div>',iconSize:[24,24],iconAnchor:[12,24]});
+  var m=L.marker([a.lat,a.lng],{icon:icon,title:a.name}).addTo(map); m.bindPopup('<b>'+esc(a.name)+'</b><br>'+esc(a.stage||'')+' · '+esc(a.time||''));
+  actMarkers.push(m); }
+function renderActs(){ var host=el('actList'); host.innerHTML=state.acts.map(function(a){
+    var loc=a.lat!=null?'map':(a.xpct!=null?'floor':'');
+    var meta=[(a.catLabel?((a.catIcon||'')+' '+a.catLabel):''),(a.stage||''),loc].filter(Boolean).join(' · ');
+    return '<div class="actrow"><span class="t">'+esc((a.time||'').replace(':00',''))+'</span>'
+      +'<span class="n">'+esc(a.name)+'<span class="g"> · '+esc(meta)+'</span></span>'
+      +'<button class="x" onclick="emDelAct('+a.id+')">✕</button></div>'; }).join('');
+  el('actEmpty').style.display=state.acts.length?'none':'block';
+  el('emRose').textContent=state.acts.length; el('emStat').textContent='🥾 0.00 mi · '+state.acts.length+' act'+(state.acts.length===1?'':'s'); }
+function emDelAct(id){ state.acts=state.acts.filter(function(a){return a.id!==id;});
+  actMarkers.forEach(function(m){map.removeLayer(m);}); actMarkers=[]; state.acts.forEach(addActMarker);
+  renderActs(); paintFloorPins(); emSave(); }
+
+/* ---------- floor plan ---------- */
+function emFloor(ev){ var f=ev.target.files&&ev.target.files[0]; if(!f)return;
+  var r=new FileReader(); r.onload=function(){ state.floor=r.result; showFloor(); emSave(); }; r.readAsDataURL(f); }
+function showFloor(){ if(!state.floor)return;
+  var img=el('floorImg'); img.src=state.floor; img.style.display='block';
+  el('floorUp').style.display='none'; el('floorTitle').textContent='Indoor floor plan'; el('floorHint').style.display='block';
+  img.onclick=function(e){ if(placeMode!=='floor')return; var r=img.getBoundingClientRect();
+    dropActOnFloor(((e.clientX-r.left)/r.width*100), ((e.clientY-r.top)/r.height*100)); };
+  paintFloorPins(); }
+function paintFloorPins(){ var wrap=el('floorWrap'); wrap.querySelectorAll('.fpin').forEach(function(n){n.remove();});
+  if(!state.floor)return;
+  state.acts.filter(function(a){return a.xpct!=null;}).forEach(function(a){
+    var d=document.createElement('div'); d.className='fpin actpin'; d.style.cssText='position:absolute;left:'+a.xpct+'%;top:'+a.ypct+'%;margin:-12px 0 0 -12px'; d.title=a.name;
+    d.innerHTML='<span>'+((a.catIcon)||'📍')+'</span>'; wrap.appendChild(d); }); }
+
+/* ---------- date range (flight-style) ---------- */
+var calView=new Date(), selStart=null, selEnd=null; calView.setDate(1);
+function openCal(){ if(state.dateStart){ var d=new Date(state.dateStart+'T12:00:00'); calView=new Date(d.getFullYear(),d.getMonth(),1); } else { calView=new Date(); calView.setDate(1); }
+  selStart=state.dateStart||null; selEnd=state.dateEnd||null; el('emTime').value=state.startTime||'18:00'; renderCal(); el('calScrim').classList.add('on'); }
+function calNav(n){ calView.setMonth(calView.getMonth()+n); renderCal(); }
+function _iso(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+function _fmt(k){ return new Date(k+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+function _days(a,b){ return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5)+1; }
+function renderCal(){ var y=calView.getFullYear(), m=calView.getMonth();
+  el('calTitle').textContent=calView.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+  var out=['S','M','T','W','T','F','S'].map(function(d){return '<div class="dow">'+d+'</div>';}).join('');
+  for(var i=0;i<first;i++) out+='<div class="day mute"></div>';
+  for(var d=1;d<=days;d++){ var k=_iso(y,m,d), cls='day';
+    if(selStart&&k===selStart)cls+=' start'; if(selEnd&&k===selEnd)cls+=' end';
+    if(selStart&&selEnd&&k>selStart&&k<selEnd)cls+=' in';
+    out+='<div class="'+cls+'" onclick="calPick(\''+k+'\')">'+d+'</div>'; }
+  el('calGrid').innerHTML=out; el('calSum').textContent=calSummary(); }
+function calPick(k){ if(!selStart||(selStart&&selEnd)){ selStart=k; selEnd=null; }
+  else if(k<selStart){ selStart=k; selEnd=null; } else if(k===selStart){ selEnd=null; } else { selEnd=k; } renderCal(); }
+function calSummary(){ if(!selStart)return 'Tap a start date.'; if(!selEnd)return _fmt(selStart)+' — single day. Tap an end date for a multi-day festival.'; return _fmt(selStart)+' → '+_fmt(selEnd)+' · '+_days(selStart,selEnd)+' days'; }
+function calClear(){ selStart=null; selEnd=null; renderCal(); }
+function calDone(){ state.dateStart=selStart||''; state.dateEnd=selEnd||''; state.startTime=el('emTime').value; el('calScrim').classList.remove('on'); paintCalChip(); emSave(); }
+function paintCalChip(){ if(state.dateStart){ var d=new Date(state.dateStart+'T12:00:00'); el('calM').textContent=d.toLocaleDateString('en-US',{month:'short'}).toUpperCase(); el('calD').textContent=d.getDate(); }
+  var lab=el('calRange'); if(lab){ lab.textContent = (state.dateStart&&state.dateEnd)?(_days(state.dateStart,state.dateEnd)+' days'):(state.dateStart?('1 day · '+(state.startTime||'')):''); } }
+
+/* ---------- misc ---------- */
+function emActsNow(){ emTab('cur_acts'); if(!state.acts.length){ toast('No acts yet — add one with the blue ➕.'); return; }
+  toast(state.acts.length+' act'+(state.acts.length===1?'':'s')+' on this map. During the event this shows who’s playing right now.'); }
+function emShare(){ emSave(); var url=location.origin+location.pathname+'?e='+encodeURIComponent(state.name||'my-event');
+  if(navigator.share){ navigator.share({title:(state.name||'My event')+' — StageFill map',url:url}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(url); toast('🔗 Draft link copied. (Publishing to a live map comes next.)'); }catch(e){ toast(url); } } }
+function emBack(){ if(history.length>1) history.back(); else location.href='index.html'; }
+function emReset(){ if(!confirm('Clear this event and start over?'))return; localStorage.removeItem(LS); location.reload(); }
+function toast(msg){ var t=el('_t'); if(!t){ t=document.createElement('div'); t.id='_t'; t.style.cssText='position:fixed;left:50%;top:calc(46vh);transform:translateX(-50%);z-index:800;background:#241535;color:#fff;font-weight:800;font-size:13px;padding:11px 16px;border-radius:13px;box-shadow:0 8px 24px #0007;max-width:88%;text-align:center;pointer-events:none;opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3400); }
+
+/* ---------- persistence ---------- */
+var _qrT; function emSave(){ state.name=el('emName').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
+function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state=Object.assign(state,s); } }catch(e){}
+  el('emName').value=state.name||'';
+  if(state.date&&!state.dateStart){ state.dateStart=state.date; } paintCalChip();
+  if(state.floor){ showFloor(); }
+  state.acts.forEach(addActMarker); renderActs();
+}
+
+window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); if(state.corners){ fillCornerInputs(); drawFootprint(); } setTimeout(function(){ map.invalidateSize(); },300); });
+</script>
+</body>
+</html>
