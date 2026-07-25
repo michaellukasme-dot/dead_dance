@@ -12,6 +12,12 @@ html,body{margin:0;height:100%;overflow-x:hidden}
 body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
 /* ---- outdoor map (fixed top) ---- */
 #emMap{position:fixed;left:0;right:0;top:0;height:42vh;z-index:1}
+#emCover{position:fixed;left:0;right:0;top:0;height:42vh;z-index:2;overflow:hidden;background:#0a0818}
+#emCover svg{position:absolute;inset:0;width:100%;height:100%}
+#emCover .ov{position:absolute;left:0;right:0;bottom:14px;z-index:2;text-align:center;padding:0 20px}
+#emCover .ov h2{margin:0 0 5px;font-size:clamp(19px,4.4vw,28px);font-weight:900;color:#fff;text-shadow:0 2px 18px #000c}
+#emCover .ov p{margin:0 auto 12px;max-width:460px;font-size:13px;color:#cdbef2;text-shadow:0 1px 8px #000}
+#emCover .ov button{background:linear-gradient(135deg,#4d8bff,#2f6feb);color:#fff;border:0;border-radius:12px;font-weight:800;font-size:14px;padding:11px 20px;cursor:pointer;box-shadow:0 8px 24px #0008}
 
 .em-top{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:0;right:0;z-index:5;display:flex;gap:8px;align-items:flex-start;padding:0 12px;pointer-events:none}
 .em-top>*{pointer-events:auto}
@@ -72,6 +78,9 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 .leaflet-marker-icon.cornerpin{filter:hue-rotate(15deg)}
 .actpin{background:var(--rose);color:#fff;border-radius:50% 50% 50% 0;width:24px;height:24px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0005;border:2px solid #fff}
 .actpin span{transform:rotate(45deg);font-size:11px}
+.fic{position:absolute;transform:translate(-50%,-50%);background:#fff;border:2px solid #2f6feb;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 6px #0004;cursor:grab;touch-action:none;z-index:5}
+.fic .lab{position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:#1f2430;background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 4px;white-space:nowrap;pointer-events:none}
+.fic .fx{position:absolute;top:-8px;right:-8px;width:16px;height:16px;border-radius:50%;border:0;background:#e0563b;color:#fff;font-size:9px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 /* range calendar (flight-style: 1st tap = start, 2nd tap = end) */
 .cal .rng{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-top:2px;text-align:center;line-height:1}
 .calhead{display:flex;align-items:center;justify-content:space-between;margin:2px 0 10px;font-weight:800;font-size:15px}
@@ -98,6 +107,45 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 <body>
 
 <div id="emMap"></div>
+<div id="emCover">
+  <svg viewBox="0 0 800 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="space" cx="46%" cy="50%" r="75%"><stop offset="0%" stop-color="#1a1140"/><stop offset="60%" stop-color="#0a0818"/><stop offset="100%" stop-color="#060410"/></radialGradient>
+      <radialGradient id="sf" cx="40%" cy="35%" r="75%"><stop offset="0%" stop-color="#7db0ff"/><stop offset="60%" stop-color="#2f6feb"/><stop offset="100%" stop-color="#1848b8"/></radialGradient>
+      <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <rect width="800" height="420" fill="url(#space)"/>
+    <g fill="none" stroke="#ffffff12"><ellipse cx="400" cy="210" rx="120" ry="92"/><ellipse cx="400" cy="210" rx="205" ry="140"/><ellipse cx="400" cy="210" rx="300" ry="188"/></g>
+    <g stroke-dasharray="2 7" stroke-width="1.3" opacity=".55">
+      <line x1="400" y1="210" x2="215" y2="272" stroke="#4d8bff"/><line x1="400" y1="210" x2="560" y2="120" stroke="#e1306c"/><line x1="400" y1="210" x2="612" y2="238" stroke="#ff3b3b"/><line x1="400" y1="210" x2="498" y2="304" stroke="#25f4ee"/><line x1="400" y1="210" x2="648" y2="158" stroke="#aaaaaa"/><line x1="400" y1="210" x2="470" y2="108" stroke="#ff6a33"/><line x1="400" y1="210" x2="326" y2="112" stroke="#e6e300"/><line x1="400" y1="210" x2="248" y2="150" stroke="#ffffff"/><line x1="400" y1="210" x2="662" y2="304" stroke="#25d366"/><line x1="400" y1="210" x2="176" y2="200" stroke="#0f9e8e"/>
+    </g>
+    <g font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-weight="800" text-anchor="middle">
+      <g><circle cx="215" cy="272" r="34" fill="#1877f2"/><text x="215" y="277" fill="#fff" font-size="12">Facebook</text></g>
+      <g><circle cx="560" cy="120" r="24" fill="#e1306c"/><text x="560" y="124" fill="#fff" font-size="10">Instagram</text></g>
+      <g><circle cx="612" cy="238" r="26" fill="#ff0000"/><text x="612" y="242" fill="#fff" font-size="10">YouTube</text></g>
+      <g><circle cx="498" cy="304" r="22" fill="#111"/><text x="498" y="308" fill="#fff" font-size="10">TikTok</text></g>
+      <g><circle cx="648" cy="158" r="17" fill="#111"/><text x="648" y="162" fill="#fff" font-size="11">X</text></g>
+      <g><circle cx="470" cy="108" r="19" fill="#ff4500"/><text x="470" y="112" fill="#fff" font-size="9">Reddit</text></g>
+      <g><circle cx="326" cy="112" r="18" fill="#fffc00"/><text x="326" y="116" fill="#111" font-size="8">Snapchat</text></g>
+      <g><circle cx="248" cy="150" r="19" fill="#fff"/><text x="248" y="154" fill="#1a73e8" font-size="10">Google</text></g>
+      <g><circle cx="662" cy="304" r="19" fill="#25d366"/><text x="662" y="308" fill="#fff" font-size="10">SMS</text></g>
+      <g><circle cx="176" cy="200" r="19" fill="#0f9e8e"/><text x="176" y="204" fill="#fff" font-size="10">Email</text></g>
+      <circle cx="400" cy="210" r="46" fill="url(#sf)" filter="url(#glow)"/>
+      <text x="400" y="206" fill="#fff" font-size="15" font-weight="900">StageFill</text>
+      <text x="400" y="224" fill="#dbe8ff" font-size="10">every event, mapped</text>
+      <!-- StageFill's three moons — solid links -->
+      <g stroke="#4d8bff" stroke-width="2.6" opacity=".95"><line x1="400" y1="252" x2="348" y2="302"/><line x1="400" y1="254" x2="400" y2="320"/><line x1="400" y1="252" x2="452" y2="302"/></g>
+      <g><circle cx="348" cy="302" r="23" fill="#12a150"/><text x="348" y="300" font-size="12">🎸</text><text x="348" y="313" fill="#fff" font-size="9" font-weight="900">Bands</text></g>
+      <g><circle cx="400" cy="320" r="23" fill="#e0563b"/><text x="400" y="318" font-size="12">🙌</text><text x="400" y="331" fill="#fff" font-size="9" font-weight="900">Fans</text></g>
+      <g><circle cx="452" cy="302" r="23" fill="#6b46c1"/><text x="452" y="300" font-size="12">🏛</text><text x="452" y="313" fill="#fff" font-size="9" font-weight="900">Venues</text></g>
+    </g>
+  </svg>
+  <div class="ov">
+    <h2>StageFill Event Maker</h2>
+    <p>Name your event and set its place — every stage, potty, shop &amp; act, pinpoint-mapped, on any device.</p>
+    <button onclick="emStart()">Start building →</button>
+  </div>
+</div>
 <div class="em-top">
   <button class="em-back" onclick="emBack()" aria-label="Back">‹</button>
   <button class="em-chip" onclick="emActsNow()">🎶 Acts on Now</button>
@@ -123,6 +171,7 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
     <button class="tab on" data-t="cur_map" onclick="emTab('cur_map')">🗺 Event Map</button>
     <button class="tab" data-t="cur_floor" onclick="emTab('cur_floor')">🏛 Indoor</button>
     <button class="tab" data-t="cur_acts" onclick="emTab('cur_acts')">🎸 Acts</button>
+    <button class="tab" data-t="cur_partners" onclick="emTab('cur_partners')">🤝 Partners</button>
     <button class="tab" data-t="cur_survey" onclick="emTab('cur_survey')">📍 Survey</button>
     <button class="tab" data-t="cur_share" onclick="emTab('cur_share')">🔗 Share</button>
   </div>
@@ -149,13 +198,49 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
         <div id="floorWrap"><img id="floorImg" alt="Floor plan"></div>
       </div>
     </div>
-    <div class="hint" id="floorHint" style="display:none;text-align:center">Tap the plan to drop an act where it plays.</div>
+<div class="hint" id="floorHint" style="display:none;text-align:center">Tap the plan to drop an act where it plays.</div>
+    <div id="floorTools" style="display:none">
+      <div class="sec" style="border-top:1px solid var(--line);padding-top:14px">Place facilities — tap to add, drag onto the plan</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('mens')">🚹 Men’s</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('womens')">🚺 Women’s</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('restroom')">🚻 Restroom</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('stage')">🎪 Stage</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('firstaid')">⛑️ First Aid</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('shop')">🛍 Shop</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('bar')">🍺 Bar</button>
+        <button class="btn g" style="flex:0 0 auto;padding:8px 11px" onclick="fpAdd('exit')">🚪 Exit</button>
+      </div>
+      <div class="hint">Tap a placed icon to label it (Men’s / Women’s). If your plan already prints a restroom or stage, drop our icon right on top of it.</div>
+      <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:6px 0 4px">Stage dimensions (ft)</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="stageW" placeholder="Width" inputmode="decimal" oninput="emSave()" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;background:#fff;color:var(--ink)">
+        <span style="color:var(--muted);font-weight:800">×</span>
+        <input id="stageD" placeholder="Depth" inputmode="decimal" oninput="emSave()" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;background:#fff;color:var(--ink)">
+      </div>
+    </div>
   </div>
 
   <div class="cur" id="cur_acts">
     <div class="sec">Acts &amp; stages</div>
     <div class="actlist" id="actList"></div>
     <div class="hint" id="actEmpty">No acts yet — tap the blue ➕ up top to add one.</div>
+  </div>
+
+  <div class="cur" id="cur_partners">
+    <div class="sec">Partner registration — shops, trucks &amp; street vendors</div>
+    <div class="hint">Your festival's vendors register here and buy an ad. The admin then pins each one's exact spot — the same GPS discovery as the potties &amp; restrooms — so proximity ads fire the moment a fan walks up.</div>
+    <input id="pName" placeholder="Business name — e.g. Yocco's, Aw Shucks" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <select id="pType" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)"><option>Shop</option><option>Food truck</option><option>Street vendor</option></select>
+      <input id="pDays" type="number" min="1" value="3" title="Days" style="width:72px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
+    </div>
+    <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px">Buy ad</label>
+    <select id="pPlan" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)"><option value="none">No ad</option><option value="prox">Proximity — $25 / day</option><option value="roll">Rolling (festival page) — $100 / day</option><option value="both">Both — $125 / day</option></select>
+    <button class="btn p" style="width:100%;margin-top:10px" onclick="pReg()">Register partner</button>
+    <div class="sec" style="border-top:1px solid var(--line);padding-top:14px">Registered partners</div>
+    <div id="pList"></div>
+    <div id="pTotal" style="font-weight:800;color:var(--ink);font-size:13px;margin:8px 2px 0"></div>
   </div>
 
   <div class="cur" id="cur_survey">
@@ -223,11 +308,11 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 <script src="dd_categories.js"></script>
 <script>
 var LS='dd.eventmaker.draft';
-var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,survey:[]};
+var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,floorIcons:[],stageW:'',stageD:'',survey:[],partners:[],started:false};
 var map, tiles, cornerMarkers={}, footprint=null, actMarkers=[], placingAct=null, placeMode=null;
 
 function el(id){return document.getElementById(id);}
-function emTab(id){ ['cur_map','cur_floor','cur_acts','cur_survey','cur_share'].forEach(function(x){ var n=el(x); if(n)n.classList.toggle('on',x===id); });
+function emTab(id){ ['cur_map','cur_floor','cur_acts','cur_partners','cur_survey','cur_share'].forEach(function(x){ var n=el(x); if(n)n.classList.toggle('on',x===id); });
   document.querySelectorAll('.curtainbar .tab').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-t')===id); });
   setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },40); }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -306,9 +391,21 @@ function emFloor(ev){ var f=ev.target.files&&ev.target.files[0]; if(!f)return;
 function showFloor(){ if(!state.floor)return;
   var img=el('floorImg'); img.src=state.floor; img.style.display='block';
   el('floorUp').style.display='none'; el('floorTitle').textContent='Indoor floor plan'; el('floorHint').style.display='block';
+  var ft=el('floorTools'); if(ft) ft.style.display='block';
   img.onclick=function(e){ if(placeMode!=='floor')return; var r=img.getBoundingClientRect();
     dropActOnFloor(((e.clientX-r.left)/r.width*100), ((e.clientY-r.top)/r.height*100)); };
-  paintFloorPins(); }
+  paintFloorPins(); fpRender(); }
+/* ---- indoor facility icons: drag onto the plan, label Men’s/Women’s ---- */
+var FIC={mens:'🚹',womens:'🚺',restroom:'🚻',stage:'🎪',firstaid:'⛑️',shop:'🛍',bar:'🍺',exit:'🚪'};
+var FLAB={mens:'Men’s',womens:'Women’s',restroom:'Restroom',stage:'Stage',firstaid:'First Aid',shop:'Shop',bar:'Bar',exit:'Exit'};
+function fpAdd(type){ if(!state.floor){ toast('Upload a floor plan first.'); return; } state.floorIcons=state.floorIcons||[]; state.floorIcons.push({id:Date.now(),type:type,label:FLAB[type]||type,xpct:50,ypct:50}); fpRender(); emSave(); toast('Drag the '+(FLAB[type]||type)+' onto the plan.'); }
+function fpRender(){ var wrap=el('floorWrap'); if(!wrap)return; wrap.querySelectorAll('.fic').forEach(function(n){n.remove();}); (state.floorIcons||[]).forEach(function(o){ var d=document.createElement('div'); d.className='fic'; d.style.left=o.xpct+'%'; d.style.top=o.ypct+'%'; d.innerHTML='<span class="g">'+(FIC[o.type]||'📍')+'</span><span class="lab">'+esc(o.label||'')+'</span><button class="fx" title="Remove">✕</button>'; fpDrag(d,o); var x=d.querySelector('.fx'); x.addEventListener('pointerdown',function(e){e.stopPropagation();}); x.addEventListener('click',function(e){e.stopPropagation(); state.floorIcons=(state.floorIcons||[]).filter(function(z){return z.id!==o.id;}); fpRender(); emSave();}); wrap.appendChild(d); }); }
+function fpDrag(d,o){ var moved=false;
+  d.addEventListener('pointerdown',function(e){ if(e.target&&e.target.className==='fx')return; e.preventDefault(); e.stopPropagation(); moved=false; d.style.cursor='grabbing'; try{d.setPointerCapture(e.pointerId);}catch(_){}
+    function mv(ev){ moved=true; var img=el('floorImg'), r=img.getBoundingClientRect(); o.xpct=Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100)); o.ypct=Math.max(0,Math.min(100,(ev.clientY-r.top)/r.height*100)); d.style.left=o.xpct+'%'; d.style.top=o.ypct+'%'; }
+    function up(){ d.style.cursor='grab'; d.removeEventListener('pointermove',mv); d.removeEventListener('pointerup',up); if(!moved){ fpLabel(o); } else emSave(); }
+    d.addEventListener('pointermove',mv); d.addEventListener('pointerup',up); }); }
+function fpLabel(o){ var nl=prompt('Label this '+(FLAB[o.type]||'spot')+' (e.g. Men’s, Women’s, Family):', o.label||''); if(nl!==null){ o.label=nl; fpRender(); emSave(); } }
 function paintFloorPins(){ var wrap=el('floorWrap'); wrap.querySelectorAll('.fpin').forEach(function(n){n.remove();});
   if(!state.floor)return;
   state.acts.filter(function(a){return a.xpct!=null;}).forEach(function(a){
@@ -359,6 +456,33 @@ function emPublish(){ emSave(); if(!state.name){ toast('Name your event first.')
   mine.unshift(ev); try{ localStorage.setItem('dd.sf.myevents',JSON.stringify(mine)); }catch(e){}
   toast('✅ Published to StageFill Events.'); setTimeout(function(){ location.href='stagefill_events.html'; },800); }
 function emBack(){ if(history.length>1) history.back(); else location.href='index.html'; }
+/* ===== Partners — ad-sales CRM (register → buy ad → admin pins lat/lon like the potty discovery) ===== */
+var PPLAN={none:['No ad',0],prox:['Proximity · $25/day',25],roll:['Rolling · $100/day',100],both:['Both · $125/day',125]};
+function pRate(plan){ return (PPLAN[plan]||PPLAN.none)[1]; }
+function pReg(){ var n=el('pName').value.trim(); if(!n){ toast('Enter a business name.'); return; } state.partners=state.partners||[];
+  state.partners.push({id:Date.now(),name:n,type:el('pType').value,plan:el('pPlan').value,days:Math.max(1,parseInt(el('pDays').value,10)||1),lat:null,lng:null,acc:null});
+  el('pName').value=''; pRender(); emSave(); toast('✅ '+n+' registered.'); }
+function pRender(){ var host=el('pList'); if(!host)return; state.partners=state.partners||[];
+  if(!state.partners.length){ host.innerHTML='<div class="hint">No partners yet — register your first vendor above.</div>'; if(el('pTotal'))el('pTotal').textContent=''; return; }
+  var tot=0;
+  host.innerHTML=state.partners.map(function(p){ var spend=pRate(p.plan)*p.days; tot+=spend;
+    var loc=p.lat!=null?('📍 '+p.lat.toFixed(5)+', '+p.lng.toFixed(5)+' ±'+p.acc+'m'):'<span style="color:#c0392b;font-weight:800">⚠ needs location</span>';
+    return '<div class="svrow" style="flex-wrap:wrap"><span class="k">'+esc(p.name)+'</span>'
+      +'<span class="c">'+esc(p.type)+' · '+esc((PPLAN[p.plan]||PPLAN.none)[0])+' · '+p.days+'d · $'+spend.toLocaleString()+'</span>'
+      +'<span style="flex-basis:100%;font-size:11px;color:var(--muted);margin-top:2px">'+loc+'</span>'
+      +'<button class="btn g" style="flex:0 0 auto;padding:6px 10px;margin:5px 6px 0 0" onclick="pPin('+p.id+')">📍 Pin location</button>'
+      +'<button class="btn g" style="flex:0 0 auto;padding:6px 10px;margin:5px 0 0" onclick="pDel('+p.id+')">Remove</button></div>'; }).join('');
+  if(el('pTotal'))el('pTotal').textContent='Ad revenue (this festival): $'+tot.toLocaleString(); }
+function pPin(id){ var p=(state.partners||[]).filter(function(x){return x.id===id;})[0]; if(!p)return;
+  if(!navigator.geolocation){ toast('This device has no GPS.'); return; } toast('📡 Stand at '+p.name+' — reading GPS…');
+  navigator.geolocation.getCurrentPosition(function(pos){ p.lat=pos.coords.latitude; p.lng=pos.coords.longitude; p.acc=Math.round(pos.coords.accuracy||0);
+    try{ var ic=L.divIcon({className:'',html:'<div class="actpin" style="background:#12a150"><span>$</span></div>',iconSize:[24,24],iconAnchor:[12,24]}); L.marker([p.lat,p.lng],{icon:ic,title:p.name}).addTo(map).bindPopup('<b>'+esc(p.name)+'</b><br>'+esc(p.type)+' · ad'); }catch(e){}
+    pRender(); emSave(); toast('📍 Pinned '+p.name+' (±'+p.acc+'m).');
+  }, function(err){ toast('📍 Turn on Location to pin. '+(err&&err.message?('('+err.message+')'):'')); }, {enableHighAccuracy:true,timeout:12000,maximumAge:0}); }
+function pDel(id){ state.partners=(state.partners||[]).filter(function(x){return x.id!==id;}); pRender(); emSave(); }
+function emCoverShow(sh){ var c=el('emCover'); if(c) c.style.display=sh?'block':'none'; var t=document.querySelector('.em-top'); if(t) t.style.display=sh?'none':'flex'; }
+function emStart(){ state.started=true; emSave(); emCoverShow(false); emTab('cur_map'); setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },60); }
+function emCoverInit(){ var empty=!(state.name||(state.acts&&state.acts.length)||state.city||(state.survey&&state.survey.length)); emCoverShow(!state.started && empty); }
 /* ===== SURVEY + Cookie Monster — ground-truth GPS capture ===== */
 var SVTYPES=[['geo_nw','🧭 Map corner — NW'],['geo_ne','🧭 Map corner — NE'],['geo_se','🧭 Map corner — SE'],['geo_sw','🧭 Map corner — SW'],['platz','🎪 Platz / stage corner'],['potty','🚻 Potty (restroom)'],['shop_start','🛍 Shop — start of frontage'],['shop_end','🛍 Shop — end of frontage'],['truck','🚚 Food truck / vendor'],['first_aid','⛑️ First aid']];
 function svInit(){ var s=el('svType'); if(s&&!s.options.length){ s.innerHTML=SVTYPES.map(function(t){return '<option value="'+t[0]+'">'+t[1]+'</option>';}).join(''); } }
@@ -397,12 +521,12 @@ function toast(msg){ var t=el('_t'); if(!t){ t=document.createElement('div'); t.
   t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3400); }
 
 /* ---------- persistence ---------- */
-var _qrT; function emSave(){ state.name=el('emName').value; if(el('evCity'))state.city=el('evCity').value; if(el('evState'))state.state=el('evState').value; if(el('evCat'))state.cat=el('evCat').value; if(el('evVenue'))state.venue=el('evVenue').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
+var _qrT; function emSave(){ state.name=el('emName').value; if(el('evCity'))state.city=el('evCity').value; if(el('evState'))state.state=el('evState').value; if(el('evCat'))state.cat=el('evCat').value; if(el('evVenue'))state.venue=el('evVenue').value; if(el('stageW'))state.stageW=el('stageW').value; if(el('stageD'))state.stageD=el('stageD').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
 function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state=Object.assign(state,s); } }catch(e){}
   el('emName').value=state.name||'';
   if(state.date&&!state.dateStart){ state.dateStart=state.date; } paintCalChip();
   if(state.floor){ showFloor(); }
-  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender(); emShareInit();
+  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender(); emShareInit(); pRender(); if(el('stageW'))el('stageW').value=state.stageW||''; if(el('stageD'))el('stageD').value=state.stageD||''; emCoverInit();
 }
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); if(state.corners){ fillCornerInputs(); drawFootprint(); } setTimeout(function(){ map.invalidateSize(); },300); });
