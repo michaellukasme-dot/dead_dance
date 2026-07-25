@@ -178,13 +178,18 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
     <button class="btn g" style="width:100%;margin-top:10px" onclick="svExport()">⬇ Export coordinates (JSON)</button>
   </div>
 
-  <div class="cur" id="cur_share">
-    <div class="sec">Save &amp; share</div>
-    <div class="hint">Save your draft and get a link. Publishing to a live, scannable event map comes in the next pass.</div>
-    <div class="btnrow">
-      <button class="btn g" onclick="emReset()">Start over</button>
-      <button class="btn p" onclick="emShare()">Save &amp; get link</button>
+<div class="cur" id="cur_share">
+    <div class="sec">Publish &amp; share</div>
+    <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:6px 0 4px">City</label>
+    <input id="evCity" placeholder="City" oninput="emSave()" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="evState" placeholder="State (PA)" oninput="emSave()" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
+      <select id="evCat" onchange="emSave()" style="flex:1.5;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)"></select>
     </div>
+    <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px">Venue (optional)</label>
+    <input id="evVenue" placeholder="Venue / grounds" oninput="emSave()" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
+    <div class="btnrow"><button class="btn g" onclick="emShare()">🔗 Event-page link</button><button class="btn p" onclick="emPublish()">Publish to Events →</button></div>
+    <div class="btnrow" style="margin-top:2px"><button class="btn g" onclick="emReset()">Start over</button><a class="btn g" href="stagefill_events.html" style="text-align:center;text-decoration:none;line-height:1.5;color:var(--purple)">Browse all events</a></div>
   </div>
 </div>
 
@@ -218,7 +223,7 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 <script src="dd_categories.js"></script>
 <script>
 var LS='dd.eventmaker.draft';
-var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',corners:null,acts:[],floor:null,survey:[]};
+var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,survey:[]};
 var map, tiles, cornerMarkers={}, footprint=null, actMarkers=[], placingAct=null, placeMode=null;
 
 function el(id){return document.getElementById(id);}
@@ -339,9 +344,20 @@ function paintCalChip(){ if(state.dateStart){ var d=new Date(state.dateStart+'T1
 /* ---------- misc ---------- */
 function emActsNow(){ emTab('cur_acts'); if(!state.acts.length){ toast('No acts yet — add one with the blue ➕.'); return; }
   toast(state.acts.length+' act'+(state.acts.length===1?'':'s')+' on this map. During the event this shows who’s playing right now.'); }
-function emShare(){ emSave(); var url=location.origin+location.pathname+'?e='+encodeURIComponent(state.name||'my-event');
-  if(navigator.share){ navigator.share({title:(state.name||'My event')+' — StageFill map',url:url}).catch(function(){}); }
-  else { try{ navigator.clipboard.writeText(url); toast('🔗 Draft link copied. (Publishing to a live map comes next.)'); }catch(e){ toast(url); } } }
+function emShareInit(){ var sc=el('evCat'); if(sc&&!sc.options.length&&window.DDCats){ sc.innerHTML=DDCats.list().map(function(c){return '<option value="'+c.key+'">'+c.icon+' '+c.label+'</option>';}).join(''); }
+  if(el('evCity'))el('evCity').value=state.city||''; if(el('evState'))el('evState').value=state.state||''; if(el('evVenue'))el('evVenue').value=state.venue||''; if(el('evCat')&&state.cat)el('evCat').value=state.cat; }
+function emCenter(){ if(state.corners&&state.corners.tl){ var c=state.corners; return [(c.tl[0]+c.br[0])/2,(c.tl[1]+c.br[1])/2]; } try{ var ll=map.getCenter(); return [ll.lat,ll.lng]; }catch(e){ return [40.6187,-75.3803]; } }
+function emPayload(){ var ctr=emCenter(); return {name:state.name,city:state.city||'',state:state.state||'',cat:state.cat||'live_music',start:state.dateStart||'',end:state.dateEnd||'',time:state.startTime||'',venue:state.venue||'',lat:ctr[0],lng:ctr[1],corners:state.corners,acts:(state.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catLabel:a.catLabel,catIcon:a.catIcon,lat:a.lat,lng:a.lng};})}; }
+function emEncode(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function emShare(){ emSave(); if(!state.name){ toast('Name your event first.'); emTab('cur_map'); return; }
+  var base=location.pathname.replace(/[^\/]*$/,''); var url=location.origin+base+'event_page.html?d='+emEncode(emPayload());
+  if(navigator.share){ navigator.share({title:state.name+' — StageFill',url:url}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(url); toast('🔗 Event-page link copied.'); }catch(e){ prompt('Copy link:',url); } } }
+function emPublish(){ emSave(); if(!state.name){ toast('Name your event first.'); emTab('cur_map'); return; }
+  var slug=(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'event')+'-'+Date.now().toString(36);
+  var ev=emPayload(); ev.slug=slug; var mine=[]; try{ mine=JSON.parse(localStorage.getItem('dd.sf.myevents')||'[]'); }catch(e){}
+  mine.unshift(ev); try{ localStorage.setItem('dd.sf.myevents',JSON.stringify(mine)); }catch(e){}
+  toast('✅ Published to StageFill Events.'); setTimeout(function(){ location.href='stagefill_events.html'; },800); }
 function emBack(){ if(history.length>1) history.back(); else location.href='index.html'; }
 /* ===== SURVEY + Cookie Monster — ground-truth GPS capture ===== */
 var SVTYPES=[['geo_nw','🧭 Map corner — NW'],['geo_ne','🧭 Map corner — NE'],['geo_se','🧭 Map corner — SE'],['geo_sw','🧭 Map corner — SW'],['platz','🎪 Platz / stage corner'],['potty','🚻 Potty (restroom)'],['shop_start','🛍 Shop — start of frontage'],['shop_end','🛍 Shop — end of frontage'],['truck','🚚 Food truck / vendor'],['first_aid','⛑️ First aid']];
@@ -381,12 +397,12 @@ function toast(msg){ var t=el('_t'); if(!t){ t=document.createElement('div'); t.
   t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3400); }
 
 /* ---------- persistence ---------- */
-var _qrT; function emSave(){ state.name=el('emName').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
+var _qrT; function emSave(){ state.name=el('emName').value; if(el('evCity'))state.city=el('evCity').value; if(el('evState'))state.state=el('evState').value; if(el('evCat'))state.cat=el('evCat').value; if(el('evVenue'))state.venue=el('evVenue').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
 function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state=Object.assign(state,s); } }catch(e){}
   el('emName').value=state.name||'';
   if(state.date&&!state.dateStart){ state.dateStart=state.date; } paintCalChip();
   if(state.floor){ showFloor(); }
-  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender();
+  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender(); emShareInit();
 }
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); if(state.corners){ fillCornerInputs(); drawFootprint(); } setTimeout(function(){ map.invalidateSize(); },300); });

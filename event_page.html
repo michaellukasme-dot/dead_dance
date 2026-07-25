@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Event · StageFill</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--ink:#1f2430;--muted:#8a92a6;--line:#e4e7ee;--bg:#f5f6f8;--accent:#2f6feb;--card:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow-x:hidden}
+body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+.top{position:relative}
+#emMap{height:44vh;min-height:280px;z-index:1}
+.backbtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:5;background:#fff;border:0;border-radius:999px;padding:8px 14px;font-weight:800;font-size:13px;box-shadow:0 2px 8px #0003;cursor:pointer;color:var(--accent);text-decoration:none}
+.wrap{max-width:760px;margin:-26px auto 0;position:relative;z-index:3;padding:0 14px 70px}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 30px #0001;padding:16px;display:flex;gap:14px;align-items:flex-start}
+#qr{width:64px;height:64px;background:#fff;border:1px solid var(--line);border-radius:12px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hgrow{flex:1;min-width:0}
+.cat{display:inline-block;background:#eef2fb;color:var(--accent);font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px}
+h1{margin:8px 0 4px;font-size:clamp(20px,5vw,28px);letter-spacing:-.01em}
+.when{font-weight:800;color:var(--ink);font-size:14px}
+.where{color:var(--muted);font-weight:600;font-size:13px;margin-top:2px}
+.share{margin-top:10px;display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;border:0;border-radius:10px;font-weight:800;font-size:13px;padding:9px 14px;cursor:pointer}
+h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+.act{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px}
+.act .t{width:60px;font-weight:800;color:var(--accent);font-size:12px}
+.act .n{flex:1;font-weight:800;font-size:14px}
+.act .g{font-size:11.5px;color:var(--muted);font-weight:700}
+.empty{color:var(--muted);font-size:13px}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+.foot a{color:var(--accent);text-decoration:none;font-weight:700}
+.miss{max-width:520px;margin:60px auto;text-align:center;padding:0 20px}
+.actpin{background:var(--accent);color:#fff;border-radius:50% 50% 50% 0;width:24px;height:24px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0005;border:2px solid #fff}
+.actpin span{transform:rotate(45deg);font-size:12px}
+</style>
+</head>
+<body>
+<div id="page"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="qr.js"></script>
+<script src="dd_categories.js"></script>
+<script src="stagefill_events.js"></script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function qs(k){ return new URLSearchParams(location.search).get(k); }
+function catLabel(k){ try{ return window.DDCats?DDCats.labelFor(k):k; }catch(e){ return k; } }
+function catIcon(k){ try{ var l=(window.DDCats?DDCats.list():[]).filter(function(c){return c.key===k;})[0]; return l?l.icon:'📍'; }catch(e){ return '📍'; } }
+function fmtDate(s){ if(!s)return ''; return new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtRange(a,b){ if(!a)return ''; if(!b||b===a)return fmtDate(a);
+  var da=new Date(a+'T12:00:00'), db=new Date(b+'T12:00:00');
+  if(da.getMonth()===db.getMonth()&&da.getFullYear()===db.getFullYear()) return da.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'–'+db.getDate()+', '+db.getFullYear();
+  return fmtDate(a)+' – '+fmtDate(b); }
+function fmtTime(t){ if(!t)return ''; var p=t.split(':'),h=+p[0],m=p[1]; var ap=h<12?'AM':'PM',h12=((h+11)%12)+1; return h12+':'+m+' '+ap; }
+
+/* resolve the event: ?d=<encoded maker payload>, or ?ev=<slug> from the seed / local drafts */
+function decode(d){ try{ return JSON.parse(decodeURIComponent(escape(atob(d)))); }catch(e){ return null; } }
+function findEvent(){
+  var d=qs('d'); if(d){ var o=decode(d); if(o) return o; }
+  var ev=qs('ev'); if(ev){
+    var seed=(window.STAGEFILL_EVENTS||[]).filter(function(e){return e.slug===ev;})[0]; if(seed) return seed;
+    try{ var mine=JSON.parse(localStorage.getItem('dd.sf.myevents')||'[]'); var m=mine.filter(function(e){return e.slug===ev;})[0]; if(m) return m; }catch(e){}
+  }
+  return null;
+}
+
+var E=findEvent();
+if(!E){ document.getElementById('page').innerHTML='<div class="miss"><h1>Event not found</h1><p class="empty">This link doesn’t point to a StageFill event yet.</p><p><a href="stagefill_events.html" style="color:#2f6feb;font-weight:800">← Browse all StageFill events</a></p></div>'; }
+else { render(E); }
+
+function render(E){
+  var acts=E.acts||[];
+  var page='<div class="top"><a class="backbtn" href="stagefill_events.html">‹ Events</a><div id="emMap"></div></div>'
+   +'<div class="wrap"><div class="hero">'
+   +'<div id="qr" title="Scan / share">▦</div>'
+   +'<div class="hgrow"><span class="cat">'+catIcon(E.cat)+' '+esc(catLabel(E.cat))+'</span>'
+   +'<h1>'+esc(E.name||'Untitled event')+'</h1>'
+   +'<div class="when">'+esc(fmtRange(E.start||E.dateStart,E.end||E.dateEnd))+(E.time?(' · '+fmtTime(E.time||E.startTime)):'')+'</div>'
+   +'<div class="where">'+[esc(E.venue||''),esc([E.city,E.state].filter(Boolean).join(', '))].filter(Boolean).join(' · ')+'</div>'
+   +'<button class="share" onclick="shareEvent()">Share this event</button></div></div>'
+   +'<h2>'+(acts.length?('Acts &amp; stages · '+acts.length):'Acts &amp; stages')+'</h2>'
+   +'<div id="acts">'+(acts.length?acts.map(function(a){ var t=(a.time||'').replace(':00',''); var meta=[(a.catLabel?((a.catIcon||'')+' '+a.catLabel):''),(a.stage||'')].filter(Boolean).join(' · ');
+       return '<div class="act"><span class="t">'+esc(t)+'</span><span class="n">'+esc(a.name)+(meta?'<span class="g"> · '+esc(meta)+'</span>':'')+'</span></div>'; }).join('')
+       :'<div class="empty">Lineup to be announced.</div>')+'</div>'
+   +'<div class="foot">Powered by <b>StageFill</b> · the event map that works on phone, tablet &amp; computer — no app store, no signal needed. <a href="stagefill_events.html">Browse all events →</a></div></div>';
+  $('page').innerHTML=page;
+
+  /* map */
+  var corners=E.corners, center=[E.lat||40.6187, E.lng||-75.3803];
+  var map=L.map('emMap',{zoomControl:true,attributionControl:false}).setView(center,15);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(map);
+  if(corners&&corners.tl){ var poly=L.polygon([corners.tl,corners.tr,corners.br,corners.bl],{color:'#2f6feb',weight:2,fillColor:'#7aa5f2',fillOpacity:.16}).addTo(map); try{ map.fitBounds(poly.getBounds().pad(0.2)); }catch(e){} }
+  acts.forEach(function(a){ if(a.lat==null)return; var ic=L.divIcon({className:'',html:'<div class="actpin"><span>'+((a.catIcon)||'📍')+'</span></div>',iconSize:[24,24],iconAnchor:[12,24]});
+    L.marker([a.lat,a.lng],{icon:ic,title:a.name}).addTo(map).bindPopup('<b>'+esc(a.name)+'</b><br>'+esc(a.stage||'')+' '+esc(a.time||'')); });
+  setTimeout(function(){ map.invalidateSize(); },250);
+
+  /* QR of this very page */
+  try{ if(window.DDQR&&DDQR.into){ DDQR.into('qr',location.href,{size:300,css:60,caption:false}); } }catch(e){}
+}
+function shareEvent(){ var url=location.href; if(navigator.share){ navigator.share({title:(E.name||'Event')+' — StageFill',url:url}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(url); alert('Link copied.'); }catch(e){ prompt('Copy link:',url); } } }
+</script>
+</body>
+</html>

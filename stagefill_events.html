@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill Events</title>
+<style>
+:root{--ink:#1f2430;--muted:#8a92a6;--line:#e7e9f0;--bg:#f5f6f8;--accent:#2f6feb;--card:#fff}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding:22px 16px 70px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head h1{margin:0;font-size:26px;letter-spacing:-.02em}
+.head .sub{color:var(--muted);font-size:13px;font-weight:600;margin-top:3px}
+.create{background:var(--accent);color:#fff;border:0;border-radius:11px;font-weight:800;font-size:13.5px;padding:11px 15px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.controls{position:sticky;top:0;background:var(--bg);padding:14px 0 10px;z-index:5;margin-top:14px}
+#q{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:15px;background:var(--card)}
+.filters{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.filters select{flex:1;min-width:120px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:13px;font-weight:700;background:var(--card);color:var(--ink)}
+.count{font-size:12px;color:var(--muted);font-weight:700;margin:4px 2px 0}
+.group{margin-top:20px}
+.group .gh{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 2px 9px;position:sticky;top:118px}
+.ev{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px;cursor:pointer;text-decoration:none;color:inherit;transition:box-shadow .15s,transform .06s}
+.ev:hover{box-shadow:0 6px 20px #0000000f}
+.ev:active{transform:scale(.995)}
+.date{flex:0 0 auto;width:52px;text-align:center;border-right:1px solid var(--line);padding-right:12px}
+.date .m{font-size:10.5px;font-weight:800;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.date .d{font-size:22px;font-weight:800;line-height:1}
+.date .y{font-size:10px;color:var(--muted);font-weight:700}
+.info{flex:1;min-width:0}
+.info .n{font-weight:800;font-size:15.5px;letter-spacing:-.01em}
+.info .m{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{flex:0 0 auto;background:#eef2fb;color:var(--accent);font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.mine{background:#fff8ea;border-color:#f0dca6}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div><h1>StageFill Events</h1><div class="sub">Every night out, mapped — nationwide.</div></div>
+    <a class="create" href="festival_event_maker.html">＋ Create an event</a>
+  </div>
+
+  <div class="controls">
+    <input id="q" placeholder="Search events, cities, venues…" oninput="render()">
+    <div class="filters">
+      <select id="fState" onchange="stateChange()"><option value="">All states</option></select>
+      <select id="fCity" onchange="render()"><option value="">All cities</option></select>
+      <select id="fCat" onchange="render()"><option value="">All categories</option></select>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div id="list"></div>
+  <div class="foot">Powered by <b>StageFill</b> · tap any event to open its live map. Made your own? <a href="festival_event_maker.html" style="color:#2f6feb;font-weight:700">Create an event →</a></div>
+</div>
+
+<script src="dd_categories.js"></script>
+<script src="stagefill_events.js"></script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function catLabel(k){ try{ return window.DDCats?DDCats.labelFor(k):k; }catch(e){ return k; } }
+function catIcon(k){ try{ var l=(window.DDCats?DDCats.list():[]).filter(function(c){return c.key===k;})[0]; return l?l.icon:'📍'; }catch(e){ return '📍'; } }
+
+/* merge seed + user-published (localStorage) */
+function allEvents(){ var seed=(window.STAGEFILL_EVENTS||[]).slice();
+  var mine=[]; try{ mine=JSON.parse(localStorage.getItem('dd.sf.myevents')||'[]'); }catch(e){}
+  mine.forEach(function(m){ m._mine=true; }); return mine.concat(seed); }
+function startOf(e){ return e.start||e.dateStart||''; }
+function href(e){ return e.url ? e.url : ('event_page.html?ev='+encodeURIComponent(e.slug||'')); }
+
+var ALL=allEvents();
+
+/* populate filters */
+(function(){
+  var states=Array.from(new Set(ALL.map(function(e){return e.state;}).filter(Boolean))).sort();
+  $('fState').innerHTML='<option value="">All states</option>'+states.map(function(s){return '<option>'+s+'</option>';}).join('');
+  var cats=Array.from(new Set(ALL.map(function(e){return e.cat;}).filter(Boolean)));
+  $('fCat').innerHTML='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+c+'">'+catIcon(c)+' '+esc(catLabel(c))+'</option>';}).join('');
+  fillCities('');
+})();
+function fillCities(state){ var pool=ALL.filter(function(e){return !state||e.state===state;});
+  var cities=Array.from(new Set(pool.map(function(e){return e.city;}).filter(Boolean))).sort();
+  $('fCity').innerHTML='<option value="">All cities</option>'+cities.map(function(c){return '<option>'+esc(c)+'</option>';}).join(''); }
+function stateChange(){ fillCities($('fState').value); render(); }
+
+function fmtMY(s){ return new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'}); }
+function dparts(s){ var d=new Date(s+'T12:00:00'); return {m:d.toLocaleDateString('en-US',{month:'short'}),d:d.getDate(),y:d.getFullYear()}; }
+
+function render(){
+  var q=$('q').value.trim().toLowerCase(), st=$('fState').value, ci=$('fCity').value, ca=$('fCat').value;
+  var list=ALL.filter(function(e){
+    if(st&&e.state!==st)return false; if(ci&&e.city!==ci)return false; if(ca&&e.cat!==ca)return false;
+    if(q){ var hay=((e.name||'')+' '+(e.city||'')+' '+(e.state||'')+' '+(e.venue||'')+' '+catLabel(e.cat)).toLowerCase(); if(hay.indexOf(q)<0)return false; }
+    return true;
+  }).sort(function(a,b){ return (startOf(a)<startOf(b)?-1:startOf(a)>startOf(b)?1:0); });
+
+  $('count').textContent=list.length+' event'+(list.length===1?'':'s');
+  if(!list.length){ $('list').innerHTML='<div class="empty">No events match those filters.<br>Try clearing a filter, or <a href="festival_event_maker.html" style="color:#2f6feb;font-weight:700">create one →</a></div>'; return; }
+
+  var html='', curG=null;
+  list.forEach(function(e){ var g=fmtMY(startOf(e)); if(g!==curG){ if(curG!==null) html+='</div>'; curG=g; html+='<div class="group"><div class="gh">'+g+'</div>'; }
+    var dp=dparts(startOf(e));
+    var range=(e.end&&e.end!==e.start)?(' – '+new Date(e.end+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})):'';
+    html+='<a class="ev'+(e._mine?' mine':'')+'" href="'+href(e)+'">'
+      +'<div class="date"><div class="m">'+dp.m+'</div><div class="d">'+dp.d+'</div><div class="y">'+dp.y+'</div></div>'
+      +'<div class="info"><div class="n">'+esc(e.name)+(e._mine?' <span style="color:#c08a1a;font-size:11px">· yours</span>':'')+'</div>'
+      +'<div class="m">'+esc([e.venue,[e.city,e.state].filter(Boolean).join(', ')].filter(Boolean).join(' · '))+range+'</div></div>'
+      +'<span class="chip">'+catIcon(e.cat)+' '+esc(catLabel(e.cat))+'</span></a>';
+  });
+  if(curG!==null) html+='</div>';
+  $('list').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>
