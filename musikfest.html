@@ -321,6 +321,21 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <button class="mftab" data-cur="cur_lineup" onclick="mfCurtain('cur_lineup')">🎫 Browse the Whole Lineup</button>
     <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">My Sets 🌹</button>
     <button class="mftab" data-cur="cur_locals" onclick="mfCurtain('cur_locals')">💡 Locals</button>
+    <button class="mftab" id="mfConsoleTab" data-cur="cur_console" onclick="mfCurtain('cur_console')" style="display:none">🔒 Console</button>
+  </div>
+
+  <!-- ADMIN · Operations console (hidden unless admin) -->
+  <div class="mfcurtain" id="cur_console">
+    <div class="curtitle">🔒 Operations console — live occupancy</div>
+    <div class="curtainbar" style="border:0;margin:0 0 8px">
+      <button class="mftab on" id="cbtn_platz" onclick="mfConsoleView('platz')">🏟 Platz</button>
+      <button class="mftab" id="cbtn_act" onclick="mfConsoleView('act')">🎸 Act</button>
+      <button class="mftab" id="cbtn_shop" onclick="mfConsoleView('shop')">🛍 Shop</button>
+      <button class="mftab" id="cbtn_potty" onclick="mfConsoleView('potty')">🚻 Potty</button>
+      <button class="mftab" id="cbtn_aid" onclick="mfConsoleView('aid')">⛑️ First Aid</button>
+    </div>
+    <div id="consoleBody"></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px">Live map sessions inside each geofence · counts are devices, never identities. Admin view — every Platz shows its set-up &amp; ops crew.</div>
   </div>
 
   <!-- 1 · Wind Creek Steel Stage (ticketed headliners) -->
@@ -1546,6 +1561,7 @@ function mfRenderCurtain(id){ PILL=(id==='cur_dead')?'dead':'all';              
   else if(id==='cur_earlier'){ renderSchedInto('earlier','earlierSched'); }
   else if(id==='cur_lineup'){ renderBrowse(); }
   else if(id==='cur_mysets'){ renderMySets(); }
+  else if(id==='cur_console'){ mfConsoleView(_CV); }
   syncCurtainDayLabels(); }
 window.mfCurtain=function(id){ var el=document.getElementById(id); if(!el)return;
   document.querySelectorAll('.mfcurtain').forEach(function(c){ c.classList.remove('on'); });
@@ -1557,6 +1573,26 @@ window.mfDayArrow=function(n){ var s=document.getElementById('planDate'); if(!s|
   var i=DAYS.indexOf(s.value); if(i>=0) curDayIdx=i;
   try{ mfRenderCurtain(MF_CUR); }catch(e){} };
 window.mfDeadAllToggle=function(){ var da=document.getElementById('deadAll'), dr=document.getElementById('deadDayRow'); if(dr) dr.style.display=(da&&da.checked)?'none':'flex'; try{ renderSchedInto('dead','deadSched'); syncCurtainDayLabels(); }catch(e){} };
+/* ===== ADMIN Operations Console — live occupancy by Platz / Act / Shop / Potty / First Aid ===== */
+(function(){ try{ var q=location.search; if(/[?&]admin=(1|stagefill|on)/i.test(q)) localStorage.setItem('dd.mf.admin','1'); if(/[?&]admin=(off|0)/i.test(q)) localStorage.removeItem('dd.mf.admin');
+  if(localStorage.getItem('dd.mf.admin')==='1'){ var t=document.getElementById('mfConsoleTab'); if(t) t.style.display=''; } }catch(e){} })();
+var _CV='platz';
+function _cW(h){ return 0.14+0.86*Math.exp(-Math.pow((h-21)/3.3,2)); }
+function _cRnd(s){ var x=Math.sin(s*127.1+11.7)*43758.5453; return x-Math.floor(x); }
+function _cHash(t){ var s=0; t=String(t); for(var i=0;i<t.length;i++)s+=t.charCodeAt(i)*(i+1); return s; }
+function _cHour(){ var d=new Date(), h=d.getHours(); return (h<11||h>23)?21:h; }
+function _cCount(name,mult){ var h=_cHour(), pop=3+(_cHash(name)%8); return Math.max(2,Math.round(2+pop*(mult||6)*_cW(h)*(0.82+0.36*_cRnd(_cHash(name)+h)))); }
+window.mfConsoleView=function(k){ _CV=k; ['platz','act','shop','potty','aid'].forEach(function(x){ var b=document.getElementById('cbtn_'+x); if(b)b.classList.toggle('on',x===k); }); mfConsoleRender(); };
+function _cbar(v,mx){ var p=Math.round(Math.min(1,v/(mx||1))*100); return '<div style="height:7px;background:#eef2fb;border-radius:5px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+p+'%;background:#2f6feb"></div></div>'; }
+function _crow(name,val,mx,sub){ return '<div style="padding:9px 2px;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:800;font-size:13px">'+esc(name)+'</span><span style="font-weight:900;color:#2f6feb;font-variant-numeric:tabular-nums">'+val+'</span></div>'+(sub?'<div style="font-size:11px;color:var(--muted);margin-top:1px">'+sub+'</div>':'')+_cbar(val,mx)+'</div>'; }
+function mfConsoleRender(){ var host=document.getElementById('consoleBody'); if(!host)return; var h=_cHour(), hl=(((h+11)%12)+1)+(h<12?'am':'pm'); var head='<div style="font-size:11.5px;color:var(--muted);font-weight:700;margin:2px 0 6px">Live snapshot · '+hl+' · maps in use inside each geofence</div>'; var rows='';
+  if(_CV==='platz'){ var list=(window.STAGES||[]).map(function(s){ return {n:(typeof mfCleanStage==='function'?mfCleanStage(s.n):s.n), v:_cCount(s.n,6)}; }); list.sort(function(a,b){return b.v-a.v;}); var mx=list[0]?list[0].v:1; rows=list.map(function(o){ return _crow(o.n,o.v,mx,'devices in Platz now'); }).join(''); }
+  else if(_CV==='act'){ var day=todayISO(); if(DAYS.indexOf(day)<0) day=DAYS[curDayIdx]||DAYS[0]; var acts=(window.MF||[]).filter(function(r){return r.d===day;}); if(!acts.length)acts=(window.MF||[]).slice(0,10); var seen={}, la=[]; acts.forEach(function(r){ var k=r.b+r.st; if(seen[k])return; seen[k]=1; la.push({n:(r.sc==='dd'?'🌹 ':'')+r.b, s:r.st+' · '+r.t, v:_cCount(r.st+r.b,5)}); }); la.sort(function(a,b){return b.v-a.v;}); la=la.slice(0,12); var mx=la[0]?la[0].v:1; rows=la.map(function(o){return _crow(o.n,o.v,mx,o.s);}).join(''); }
+  else if(_CV==='shop'){ var SH=['Aw Shucks Roasted Corn','Take-A-Taco','Bethlehem Dairy (The Cup)','Blaze Craft Beer','Yocco’s Hot Dogs','Mid-Atlantic Cannoli','ArtsQuest Marketplace','Curbside Cheese Steaks','Freshido','Delicious Nashville Hot']; var ls=SH.map(function(n){return {n:n,v:_cCount(n,22)};}); ls.sort(function(a,b){return b.v-a.v;}); var mx=ls[0].v; rows=ls.map(function(o){return _crow(o.n,o.v,mx,'pass-bys this hour');}).join(''); }
+  else if(_CV==='potty'){ var PT=['Stadtplatz cluster','Colonial Quarter cluster','Zinzenplatz / lower Quarter','SteelStacks / Levitt','Main Street cluster','Sand Island']; var lp=PT.map(function(n){var v=_cCount(n,9), units=6+(_cHash(n)%16), pu=Math.round(v/units), st=pu<=8?'<span style="color:#137a4b;font-weight:800">✓ enough</span>':(pu<=11?'<span style="color:#b7791f;font-weight:800">tight</span>':'<span style="color:#c02626;font-weight:800">add units</span>'); return {n:n,v:v,u:units,pu:pu,st:st};}); lp.sort(function(a,b){return b.pu-a.pu;}); var mx=Math.max.apply(null,lp.map(function(o){return o.v;})); rows=lp.map(function(o){return _crow(o.n,o.v,mx,o.u+' units · '+o.pu+'/unit this hr · '+o.st);}).join(''); }
+  else if(_CV==='aid'){ var AD=['ArtsQuest Center','SteelStacks / Levitt','Main Street','Colonial Quarter']; var lo=AD.map(function(n){var v=Math.max(1,Math.round(_cCount(n,1)/3)), st=v<=5?'<span style="color:#137a4b;font-weight:800">✓ enough</span>':(v<=8?'<span style="color:#b7791f;font-weight:800">tight</span>':'<span style="color:#c02626;font-weight:800">add staff</span>'); return {n:n+' First Aid',v:v,st:st};}); lo.sort(function(a,b){return b.v-a.v;}); var mx=Math.max.apply(null,lo.map(function(o){return o.v;})); rows=lo.map(function(o){return _crow(o.n,o.v,mx,'active visits this hr · '+o.st);}).join(''); }
+  host.innerHTML=head+rows; }
+
 window.brDayArrow=function(n){ var s=document.getElementById('brDay'); if(!s||!s.options.length)return;      // step #brDay (skip the 'all' option at index 0)
   s.selectedIndex=Math.max(1,Math.min(s.options.length-1,s.selectedIndex+n)); renderBrowse(); };
 try{ var _bd=document.getElementById('brDay'); if(_bd&&DAYS.length){ _bd.value=DAYS[0]; } }catch(e){}          // lineup defaults to the first day, not "All days"

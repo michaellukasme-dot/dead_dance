@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Musikfest — Daily Platz Occupancy Report (Sample)</title>
+<style>
+:root{--ink:#1a1f2b;--muted:#6b7280;--line:#e6e8ee;--bg:#f6f7f9;--accent:#2f6feb;--good:#137a4b;--warn:#b7791f;--bad:#c02626;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:400 14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto;padding:26px 20px 60px}
+.brandbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.brandbar .l b{font-size:20px;letter-spacing:-.01em}
+.brandbar .l span{display:block;color:var(--muted);font-size:12.5px;font-weight:600;margin-top:2px}
+.brandbar .r{text-align:right;font-size:11.5px;color:var(--muted);font-weight:700}
+.tag{display:inline-block;background:#eef2fb;color:var(--accent);font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-top:6px}
+h2{font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;border-top:1px solid var(--line);padding-top:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.kpi .n{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.kpi .k{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
+.kpi .s{font-size:11px;color:var(--accent);font-weight:700;margin-top:5px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+.heat{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto}
+.heat table{min-width:720px}
+.heat th,.heat td{padding:5px 6px;text-align:center;white-space:nowrap}
+.heat thead th{position:sticky;top:0;background:#fafbfc;font-size:10.5px;color:var(--muted);font-weight:800;border-bottom:1px solid var(--line)}
+.heat tbody th{text-align:left;font-weight:700;font-size:11.5px;padding-left:12px;position:sticky;left:0;background:var(--card);border-right:1px solid var(--line);min-width:180px}
+.heat td{color:#fff;font-weight:700;border-radius:4px}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tbl th,.tbl td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl thead th{background:#fafbfc;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+.tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px}
+.ok{background:#e6f4ec;color:var(--good)}.warn{background:#fdf3e2;color:var(--warn)}.bad{background:#fbe9e9;color:var(--bad)}
+.note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:12.5px;color:#3a4152;margin-top:14px}
+.note b{color:var(--ink)}
+.foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+.legend{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-weight:700;margin:8px 2px 0}
+.legend i{width:16px;height:12px;border-radius:3px;display:inline-block}
+@media print{body{background:#fff}.wrap{max-width:none}.note,.kpi,.tbl,.heat{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brandbar">
+    <div class="l"><b>Musikfest 2026 — Daily Platz Occupancy Report</b>
+      <span id="subhead">Operations intelligence · powered by the StageFill event map</span></div>
+    <div class="r">Prepared for<br><b style="color:var(--ink)">ArtsQuest Operations</b><br><span id="repdate"></span></div>
+  </div>
+  <div class="tag">Sample · illustrative synthetic data</div>
+
+  <h2>At a glance</h2>
+  <div class="kpis" id="kpis"></div>
+  <div class="note">Every reading below is derived from live map sessions — a device with the map open, inside a location's geofence. Because the <b>Musikfest set-up &amp; operations crews carry the map in every Platz</b>, each Platz shows staffed coverage from open to close, even before the public arrives.</div>
+
+  <h2>Maps in use — by Platz, by hour</h2>
+  <div class="legend">Fewer <i style="background:#dbe6fb"></i><i style="background:#9dbdf5"></i><i style="background:#5a8bec"></i><i style="background:#2f6feb"></i><i style="background:#16408f"></i> More · each cell = distinct devices with the map open inside that Platz during the hour</div>
+  <div class="heat" id="heat" style="margin-top:8px"></div>
+
+  <h2>Draw by act — concurrent maps at set time</h2>
+  <div class="tbl"><table id="actTbl"></table></div>
+
+  <h2>Shop &amp; vendor foot traffic — pass-bys</h2>
+  <div class="tbl"><table id="shopTbl"></table></div>
+  <div class="note">A <b>pass-by</b> = a map crossing a vendor's 15-metre frontage. It is a reach number (how many people walked the vendor's face), not a sales number — the currency behind the map's advertising value.</div>
+
+  <h2>Facilities — do you have enough?</h2>
+  <div class="tbl"><table id="pottyTbl"></table></div>
+  <div class="note"><b>Potty used</b> = a device dwelling <b>≥ 2 minutes</b> inside a restroom geofence. <b>First-aid visit</b> = a device dwelling ≥ 3 minutes inside a first-aid geofence. Peak-hour demand is compared to each cluster's serviceable throughput to flag where to add units before the rush.</div>
+  <div class="tbl" style="margin-top:16px"><table id="aidTbl"></table></div>
+
+  <h2>How these numbers are made</h2>
+  <div class="note" style="border-left-color:var(--muted)">
+    The StageFill map runs on phone, tablet, and computer with no app-store install and no signal required. Every open session reports, on-device, which Platz geofence it sits in. We count <b>distinct devices per Platz per hour</b> (never identities — no personal data leaves the phone). Dwell rules translate presence into events: ≥2 min in a restroom = a potty use; ≥3 min at first aid = a visit; a 15 m frontage crossing = a vendor pass-by; presence inside a stage geofence during its set = act draw. Figures on this page are a <b>synthetic sample</b> sized to a realistic pilot day to illustrate the report ArtsQuest receives each morning.
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ---- the real Musikfest Platzes ---- */
+var PLATZES=[
+ {n:'PNC Stadtplatz',pop:9,crew:5},
+ {n:'Guardian Life Zinzenplatz',pop:8,crew:5},
+ {n:'Air Products Americaplatz (Levitt)',pop:8,crew:4},
+ {n:'Wind Creek Steel Stage',pop:10,crew:6},
+ {n:'Highmark Community Stage',pop:6,crew:4},
+ {n:'Plaza Tropical',pop:6,crew:3},
+ {n:'Yuengling Lagerplatz',pop:6,crew:4},
+ {n:'Handwerkplatz',pop:4,crew:3},
+ {n:'Main Street Stage',pop:5,crew:3},
+ {n:'Liederplatz (IBEW 375)',pop:5,crew:3},
+ {n:'Service Electric Festplatz',pop:5,crew:3},
+ {n:'Familienplatz',pop:4,crew:3},
+ {n:'Sand Island — Ice House',pop:4,crew:2},
+ {n:'ComedyPlatz',pop:4,crew:2},
+ {n:'Musikfest Café',pop:5,crew:3},
+ {n:'Lyrikplatz',pop:3,crew:2}
+];
+var HOURS=[11,12,13,14,15,16,17,18,19,20,21,22,23];
+function hlabel(h){ var ap=h<12?'a':'p', hh=((h+11)%12)+1; return hh+ap; }
+function rnd(s){ var x=Math.sin(s*127.1+11.7)*43758.5453; return x-Math.floor(x); }
+function weight(h){ return 0.14 + 0.86*Math.exp(-Math.pow((h-21)/3.3,2)); }  // ramps to a ~9pm peak
+function count(pi,h){ var p=PLATZES[pi]; return Math.round(p.crew + p.pop*6.2*weight(h)*(0.78+0.44*rnd(pi*13+h))); }
+
+/* date = next Saturday-ish sample */
+var repDate=new Date(2026,7,1); // Aug 1 2026 (opening Saturday)
+document.getElementById('repdate').textContent=repDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+document.getElementById('subhead').textContent='Operations intelligence · '+repDate.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})+' · powered by the StageFill event map';
+
+/* ---- grid + KPIs ---- */
+var grid=PLATZES.map(function(_,pi){ return HOURS.map(function(h){ return count(pi,h); }); });
+var hourTotals=HOURS.map(function(_,hi){ return grid.reduce(function(a,r){return a+r[hi];},0); });
+var peakTotal=Math.max.apply(null,hourTotals), peakHi=hourTotals.indexOf(peakTotal);
+var platzPeaks=grid.map(function(r){ return Math.max.apply(null,r); });
+var busiestPi=platzPeaks.indexOf(Math.max.apply(null,platzPeaks));
+var uniqueDay=Math.round(peakTotal*3.4);              // rough unique devices across the day
+var maxCell=Math.max.apply(null,grid.map(function(r){return Math.max.apply(null,r);}));
+
+function kpi(n,k,s){ return '<div class="kpi"><div class="n">'+n+'</div><div class="k">'+k+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>'; }
+document.getElementById('kpis').innerHTML=
+  kpi(uniqueDay.toLocaleString(),'Maps in use (day)','across all Platzes')
+ +kpi(peakTotal.toLocaleString(),'Peak concurrent','at '+hlabel(HOURS[peakHi]))
+ +kpi(PLATZES[busiestPi].n.split('(')[0].trim(),'Busiest Platz','peak '+platzPeaks[busiestPi])
+ +kpi(PLATZES.length+' / '+PLATZES.length,'Platzes staffed','crew map coverage')
+ +kpi('11a–11p','Hours reported','open to close');
+
+/* ---- heatmap ---- */
+function heatColor(v){ var t=Math.min(1,v/maxCell); // 0..1
+  var stops=[[219,230,251],[157,189,245],[90,139,236],[47,111,235],[22,64,143]];
+  var seg=Math.min(3,Math.floor(t*4)), f=(t*4)-seg, a=stops[seg], b=stops[seg+1];
+  return 'rgb('+a.map(function(x,i){return Math.round(x+(b[i]-x)*f);}).join(',')+')'; }
+var hh='<table><thead><tr><th>Platz</th>'+HOURS.map(function(h){return '<th>'+hlabel(h)+'</th>';}).join('')+'<th style="color:var(--ink)">Peak</th></tr></thead><tbody>';
+PLATZES.forEach(function(p,pi){ hh+='<tr><th>'+p.n+'</th>'+grid[pi].map(function(v){ return '<td style="background:'+heatColor(v)+'">'+v+'</td>'; }).join('')+'<td style="background:#eef2fb;color:var(--ink)">'+platzPeaks[pi]+'</td></tr>'; });
+hh+='<tr><th style="color:var(--muted)">All Platzes</th>'+hourTotals.map(function(v){return '<td style="background:#fafbfc;color:var(--ink)">'+v+'</td>';}).join('')+'<td style="background:#fafbfc;color:var(--ink)">'+peakTotal+'</td></tr>';
+hh+='</tbody></table>';
+document.getElementById('heat').innerHTML=hh;
+
+/* ---- acts ---- */
+var ACTS=[
+ ['The Britles (Beatles)','Community Stage','8:00p',312],
+ ['Shakedown Citi (Grateful Dead)','PNC Stadtplatz','9:30p',absAt('Stadtplatz')],
+ ['Frontiers (Journey)','Guardian Life Zinzenplatz','8:30p',absAt('Zinzenplatz')],
+ ['Brain Damage (Pink Floyd)','Guardian Life Zinzenplatz','9:00p',absAt('Zinzenplatz')-14],
+ ['Romeo Delight (Van Halen)','PNC Stadtplatz','9:30p',absAt('Stadtplatz')-9],
+ ['Rift (Phish)','Guardian Life Zinzenplatz','9:00p',absAt('Zinzenplatz')-22],
+ ['Life After Dead (Grateful Dead)','Guardian Life Zinzenplatz','9:00p',absAt('Zinzenplatz')-6],
+ ['Liberty Jams (jam)','Plaza Tropical','12:00p',absAt('Tropical')]
+];
+function absAt(key){ for(var i=0;i<PLATZES.length;i++) if(PLATZES[i].n.indexOf(key)>=0) return Math.round(platzPeaks[i]*0.92); return 120; }
+ACTS.sort(function(a,b){return b[3]-a[3];});
+var at='<thead><tr><th>Act</th><th>Platz</th><th>Set</th><th class="num">Concurrent maps</th></tr></thead><tbody>';
+ACTS.forEach(function(a){ at+='<tr><td><b>'+a[0]+'</b></td><td>'+a[1]+'</td><td>'+a[2]+'</td><td class="num">'+a[3]+'</td></tr>'; });
+document.getElementById('actTbl').innerHTML=at+'</tbody>';
+
+/* ---- shops ---- */
+var SHOPS=[['Aw Shucks Roasted Corn',2410],['Take-A-Taco',1980],['Bethlehem Dairy Store (The Cup)',1740],['Blaze Craft Beer',1520],['Yocco’s Hot Dogs',1330],['Mid-Atlantic Cannoli',1210],['ArtsQuest Marketplace',1150],['Delicious Nashville Hot',980],['Curbside Cheese Steaks',870],['Freshido',760]];
+var st='<thead><tr><th>Vendor / shop</th><th class="num">Pass-bys (day)</th><th class="num">Peak hour</th></tr></thead><tbody>';
+SHOPS.forEach(function(s,i){ st+='<tr><td>'+s[0]+'</td><td class="num">'+s[1].toLocaleString()+'</td><td class="num">'+Math.round(s[1]*(0.16+0.03*rnd(i)))+'</td></tr>'; });
+document.getElementById('shopTbl').innerHTML=st+'</tbody>';
+
+/* ---- potty ---- */
+var POTTY=[
+ ['Stadtplatz cluster (Payrow Plaza)',18,'peak 8–10p'],
+ ['Colonial Quarter cluster (Spring St)',22,'peak 8–10p'],
+ ['Zinzenplatz / lower Quarter',20,'peak 9–11p'],
+ ['SteelStacks / Levitt cluster',16,'peak 8–10p'],
+ ['Main Street cluster',10,'peak 7–9p'],
+ ['Sand Island',6,'peak 9–11p']
+];
+function facRow(name,units,uses,note){ var perUnit=Math.round(uses/units/13); // uses per unit per hour avg -> compare to ~9 serviceable/hr peak
+  var peakPerUnit=Math.round((uses*0.14)/units); var status = peakPerUnit<=8?'<span class="pill ok">Adequate</span>':(peakPerUnit<=11?'<span class="pill warn">Tight at peak</span>':'<span class="pill bad">Add units</span>');
+  return '<tr><td><b>'+name+'</b></td><td class="num">'+units+'</td><td class="num">'+uses.toLocaleString()+'</td><td class="num">'+peakPerUnit+'</td><td>'+status+' <span style="color:var(--muted);font-size:11px">'+note+'</span></td></tr>'; }
+var pt='<thead><tr><th>Restroom cluster</th><th class="num">Units</th><th class="num">Uses (day)</th><th class="num">Peak / unit / hr</th><th>Enough?</th></tr></thead><tbody>';
+POTTY.forEach(function(p,i){ var uses=Math.round((900+p[1]*70)*(0.85+0.3*rnd(i+3))); pt+=facRow(p[0],p[1],uses,p[2]); });
+document.getElementById('pottyTbl').innerHTML=pt+'</tbody>';
+
+/* ---- first aid ---- */
+var AID=[
+ ['ArtsQuest Center First Aid',1,'peak 9–11p'],
+ ['SteelStacks / Levitt First Aid',1,'peak 8–10p'],
+ ['Main Street First Aid',1,'peak 7–10p'],
+ ['Colonial Quarter First Aid',1,'peak 8–11p']
+];
+var ah='<thead><tr><th>First-aid station</th><th class="num">Visits (day)</th><th class="num">Peak hour</th><th>Enough?</th></tr></thead><tbody>';
+AID.forEach(function(a,i){ var v=Math.round(18+30*rnd(i+7)); var peak=Math.round(v*0.22); var status=peak<=5?'<span class="pill ok">Adequate</span>':(peak<=8?'<span class="pill warn">Tight at peak</span>':'<span class="pill bad">Add staff</span>');
+  ah+='<tr><td><b>'+a[0]+'</b></td><td class="num">'+v+'</td><td class="num">'+peak+' ('+a[2].replace('peak ','')+')</td><td>'+status+'</td></tr>'; });
+document.getElementById('aidTbl').innerHTML=ah+'</tbody>';
+
+document.getElementById('foot').innerHTML='StageFill occupancy intelligence · counts are distinct devices, never identities — no personal data leaves the phone. Sample figures for demonstration. Generated '+new Date().toLocaleString('en-US');
+</script>
+</body>
+</html>

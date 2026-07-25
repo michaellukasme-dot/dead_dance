@@ -82,6 +82,16 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 .calgrid .day.mute{background:transparent;cursor:default}
 .calgrid .day.in{background:#dce8ff}
 .calgrid .day.start,.calgrid .day.end{background:var(--purple2);color:#fff}
+/* survey + Cookie Monster */
+.svrow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:12px}
+.svrow .k{font-weight:800}
+.svrow .c{color:var(--muted);font-variant-numeric:tabular-nums}
+.svrow .x{margin-left:auto;border:0;background:#eef1f6;color:var(--rose);border-radius:7px;width:24px;height:24px;cursor:pointer}
+.ckmon{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:900;background:#2b2140;color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:94%;width:430px;padding:13px 14px;text-align:center}
+.ckmon .h{font-weight:900;font-size:14px;margin-bottom:9px}
+.ckmon .b{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.ckmon button{border:0;border-radius:10px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer;background:#463a63;color:#fff}
+
 .calsum{font-size:12.5px;color:var(--ink);font-weight:700;margin:12px 0 2px;text-align:center}
 </style>
 </head>
@@ -113,6 +123,7 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
     <button class="tab on" data-t="cur_map" onclick="emTab('cur_map')">🗺 Event Map</button>
     <button class="tab" data-t="cur_floor" onclick="emTab('cur_floor')">🏛 Indoor</button>
     <button class="tab" data-t="cur_acts" onclick="emTab('cur_acts')">🎸 Acts</button>
+    <button class="tab" data-t="cur_survey" onclick="emTab('cur_survey')">📍 Survey</button>
     <button class="tab" data-t="cur_share" onclick="emTab('cur_share')">🔗 Share</button>
   </div>
 
@@ -145,6 +156,26 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
     <div class="sec">Acts &amp; stages</div>
     <div class="actlist" id="actList"></div>
     <div class="hint" id="actEmpty">No acts yet — tap the blue ➕ up top to add one.</div>
+  </div>
+
+  <div class="cur" id="cur_survey">
+    <div class="sec">Ground-truth survey — admin &amp; setup crews</div>
+    <div style="background:#fff;border:1px solid var(--line);border-left:4px solid var(--purple2);border-radius:10px;padding:12px;font-size:12.5px;color:#3a4152;margin-bottom:12px">
+      <b>Festival admin:</b> send your Platz setup crews around with this open on their phones. In each Platz:<br>
+      • Stand on the <b>4 corners of the stage</b> → Capture each.<br>
+      • Walk the vendor row; pause <b>2 min at the START and END of each shop &amp; food truck</b> → Capture.<br>
+      • Sit in <b>each restroom 2 min</b> → Capture (Potty).<br>
+      • Tag every <b>first-aid</b> tent.<br>
+      Flip on <b>🍪 Cookie Monster</b> and it prompts automatically after a 2-minute dwell — the crew just taps what the spot is. Every capture sharpens the live map's proximity.
+    </div>
+    <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px">What are you standing on?</label>
+    <select id="svType" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)"></select>
+    <input id="svLabel" placeholder="Label — e.g. Potty #3, Yocco's, Stage NE" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink);margin-top:8px">
+    <button class="btn p" style="width:100%;margin-top:10px" onclick="svCapture()">📍 Capture my GPS here</button>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:800;color:var(--ink);font-size:13px"><input type="checkbox" id="svCookie" onchange="svCookieToggle()" style="width:auto"> 🍪 Cookie Monster auto-tag (dwell 2 min → it asks)</label>
+    <div class="sec" style="border-top:1px solid var(--line);padding-top:14px">Captured points</div>
+    <div id="svList"></div>
+    <button class="btn g" style="width:100%;margin-top:10px" onclick="svExport()">⬇ Export coordinates (JSON)</button>
   </div>
 
   <div class="cur" id="cur_share">
@@ -187,11 +218,11 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 <script src="dd_categories.js"></script>
 <script>
 var LS='dd.eventmaker.draft';
-var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',corners:null,acts:[],floor:null};
+var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',corners:null,acts:[],floor:null,survey:[]};
 var map, tiles, cornerMarkers={}, footprint=null, actMarkers=[], placingAct=null, placeMode=null;
 
 function el(id){return document.getElementById(id);}
-function emTab(id){ ['cur_map','cur_floor','cur_acts','cur_share'].forEach(function(x){ var n=el(x); if(n)n.classList.toggle('on',x===id); });
+function emTab(id){ ['cur_map','cur_floor','cur_acts','cur_survey','cur_share'].forEach(function(x){ var n=el(x); if(n)n.classList.toggle('on',x===id); });
   document.querySelectorAll('.curtainbar .tab').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-t')===id); });
   setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },40); }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -312,6 +343,39 @@ function emShare(){ emSave(); var url=location.origin+location.pathname+'?e='+en
   if(navigator.share){ navigator.share({title:(state.name||'My event')+' — StageFill map',url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); toast('🔗 Draft link copied. (Publishing to a live map comes next.)'); }catch(e){ toast(url); } } }
 function emBack(){ if(history.length>1) history.back(); else location.href='index.html'; }
+/* ===== SURVEY + Cookie Monster — ground-truth GPS capture ===== */
+var SVTYPES=[['geo_nw','🧭 Map corner — NW'],['geo_ne','🧭 Map corner — NE'],['geo_se','🧭 Map corner — SE'],['geo_sw','🧭 Map corner — SW'],['platz','🎪 Platz / stage corner'],['potty','🚻 Potty (restroom)'],['shop_start','🛍 Shop — start of frontage'],['shop_end','🛍 Shop — end of frontage'],['truck','🚚 Food truck / vendor'],['first_aid','⛑️ First aid']];
+function svInit(){ var s=el('svType'); if(s&&!s.options.length){ s.innerHTML=SVTYPES.map(function(t){return '<option value="'+t[0]+'">'+t[1]+'</option>';}).join(''); } }
+function svLabelFor(k){ for(var i=0;i<SVTYPES.length;i++) if(SVTYPES[i][0]===k) return SVTYPES[i][1]; return k; }
+var svMarkers=[];
+function svCapture(preType){ if(!navigator.geolocation){ toast('This device has no GPS.'); return; }
+  var type=preType||el('svType').value, label=el('svLabel')?el('svLabel').value.trim():'';
+  toast('📡 Reading GPS…');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var la=pos.coords.latitude, ln=pos.coords.longitude, ac=Math.round(pos.coords.accuracy||0);
+    state.survey=state.survey||[]; var p={type:type,label:label,lat:la,lng:ln,acc:ac,ts:Date.now(),id:Date.now()}; state.survey.push(p);
+    if(type.indexOf('geo_')===0){ var mm={geo_nw:'tl',geo_ne:'tr',geo_sw:'bl',geo_se:'br'}[type]; if(mm&&state.corners){ state.corners[mm]=[la,ln]; cornerMarkers[mm].setLatLng([la,ln]); drawFootprint(); fillCornerInputs(); } }
+    svPin(p); svRender(); emSave(); if(el('svLabel'))el('svLabel').value='';
+    toast('📍 Captured '+svLabelFor(type)+(label?' · '+label:'')+' (±'+ac+'m)');
+  }, function(err){ toast('📍 Turn on Location to capture. '+(err&&err.message?('('+err.message+')'):'')); }, {enableHighAccuracy:true,timeout:12000,maximumAge:0}); }
+function svPin(p){ try{ var m=L.circleMarker([p.lat,p.lng],{radius:6,color:'#137a4b',fillColor:'#2fbf71',fillOpacity:.9,weight:2}).addTo(map); m.bindPopup('<b>'+esc(svLabelFor(p.type))+'</b>'+(p.label?'<br>'+esc(p.label):'')+'<br>±'+p.acc+'m'); svMarkers.push(m); }catch(e){} }
+function svRender(){ var host=el('svList'); if(!host)return; state.survey=state.survey||[]; if(!state.survey.length){ host.innerHTML='<div class="hint">No points captured yet.</div>'; return; }
+  host.innerHTML=state.survey.map(function(p){ return '<div class="svrow"><span class="k">'+esc(svLabelFor(p.type))+'</span>'+(p.label?'<span>'+esc(p.label)+'</span>':'')+'<span class="c">'+p.lat.toFixed(5)+', '+p.lng.toFixed(5)+' ±'+p.acc+'m</span><button class="x" onclick="svDel('+p.id+')">✕</button></div>'; }).join(''); }
+function svDel(id){ state.survey=(state.survey||[]).filter(function(p){return p.id!==id;}); svMarkers.forEach(function(m){try{map.removeLayer(m);}catch(e){}}); svMarkers=[]; (state.survey||[]).forEach(svPin); svRender(); emSave(); }
+function svExport(){ state.survey=state.survey||[]; if(!state.survey.length){ toast('Capture some points first.'); return; }
+  var data={event:state.name||'event',captured:new Date().toISOString(),points:state.survey}; var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(state.name||'event').replace(/\s+/g,'_')+'_survey.json'; a.click(); toast('⬇ Exported '+state.survey.length+' coordinates.'); }
+/* Cookie Monster: dwell 2 min in a spot -> a timed request to tag it */
+var _ckId=null,_ckAnchor=null,_ckSince=0,_ckAsked=false,_ckTimer=null;
+function _dist(a,b,c,d){ var R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,s=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2); return 2*R*Math.asin(Math.sqrt(s)); }
+function svCookieToggle(){ var on=el('svCookie')&&el('svCookie').checked; if(on){ if(!navigator.geolocation){ toast('No GPS on this device.'); el('svCookie').checked=false; return; } _ckId=navigator.geolocation.watchPosition(_ckWatch,function(){},{enableHighAccuracy:true,maximumAge:5000}); toast('🍪 Cookie Monster is watching — dwell 2 min in a spot and it will ask.'); } else { if(_ckId!=null)navigator.geolocation.clearWatch(_ckId); _ckId=null; _ckAnchor=null; } }
+function _ckWatch(pos){ var la=pos.coords.latitude, ln=pos.coords.longitude; if(!_ckAnchor||_dist(_ckAnchor[0],_ckAnchor[1],la,ln)>12){ _ckAnchor=[la,ln]; _ckSince=Date.now(); _ckAsked=false; return; } if(!_ckAsked && Date.now()-_ckSince>=120000){ _ckAsked=true; cookieAsk(); } }
+function cookieAsk(){ var old=el('ckmon'); if(old)old.remove(); var d=document.createElement('div'); d.className='ckmon'; d.id='ckmon';
+  d.innerHTML='<div class="h">🍪 You’ve been here 2 minutes — what is this spot?</div><div class="b"><button onclick="cookieTag(\'potty\')">🚻 Potty</button><button onclick="cookieTag(\'shop_start\')">🛍 Shop start</button><button onclick="cookieTag(\'shop_end\')">🛍 Shop end</button><button onclick="cookieTag(\'truck\')">🚚 Truck</button><button onclick="cookieTag(\'first_aid\')">⛑️ First aid</button><button onclick="cookieTag(\'platz\')">🎪 Corner</button><button onclick="cookieClose()">✕</button></div>';
+  document.body.appendChild(d); clearTimeout(_ckTimer); _ckTimer=setTimeout(cookieClose,40000); }
+function cookieTag(t){ cookieClose(); svCapture(t); }
+function cookieClose(){ var d=el('ckmon'); if(d)d.remove(); }
+
 function emReset(){ if(!confirm('Clear this event and start over?'))return; localStorage.removeItem(LS); location.reload(); }
 function toast(msg){ var t=el('_t'); if(!t){ t=document.createElement('div'); t.id='_t'; t.style.cssText='position:fixed;left:50%;top:calc(46vh);transform:translateX(-50%);z-index:800;background:#241535;color:#fff;font-weight:800;font-size:13px;padding:11px 16px;border-radius:13px;box-shadow:0 8px 24px #0007;max-width:88%;text-align:center;pointer-events:none;opacity:0;transition:opacity .2s'; document.body.appendChild(t); }
   t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3400); }
@@ -322,7 +386,7 @@ function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state
   el('emName').value=state.name||'';
   if(state.date&&!state.dateStart){ state.dateStart=state.date; } paintCalChip();
   if(state.floor){ showFloor(); }
-  state.acts.forEach(addActMarker); renderActs();
+  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender();
 }
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); if(state.corners){ fillCornerInputs(); drawFootprint(); } setTimeout(function(){ map.invalidateSize(); },300); });
