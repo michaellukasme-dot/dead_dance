@@ -39,40 +39,37 @@ Deno.serve(async (req) => {
     const qty = Math.max(1, Math.min(20, parseInt(body.qty ?? "1", 10) || 1));
     if (!ttId) return json({ error: "no_ticket_type" }, 400);
 
-    // price + availability, server-side (client cannot tamper)
-    const { data: tt } = await svc.from("sf_ticket_type")
-      .select("id, event_id, name, price_cents, currency, qty_total, qty_sold, active").eq("id", ttId).single();
-    if (!tt || !tt.active) return json({ error: "ticket_unavailable" }, 400);
-    if (tt.price_cents <= 0) return json({ error: "free_ticket_no_checkout" }, 400);   // free tickets never hit Stripe
-    if (tt.qty_total != null && (tt.qty_sold + qty) > tt.qty_total) return json({ error: "sold_out" }, 400);
+    // RESERVE stock atomically (row-locked; counts holds against capacity). Server-computed price —
+    // the client can't tamper, and concurrent buyers for the last seat are serialized here.
+    const { data: rz, error: rErr } = await svc.rpc("sf_reserve", { p_tt: ttId, p_qty: qty, p_buyer: body.buyer ?? null });
+    if (rErr) return json({ error: "reserve_failed" }, 500);
+    if (rz?.error) return json({ error: rz.error, available: rz.available }, 400);   // sold_out / unavailable / free
+
+    const order = { id: rz.order_id as string };
+    const reservedSecs = Number(rz.reserved_secs ?? 1800);
 
     const { data: ev } = await svc.from("sf_event")
-      .select("id, slug, name, stripe_account").eq("id", tt.event_id).single();
+      .select("id, slug, name, stripe_account").eq("id", rz.event_id).single();
     if (!ev) return json({ error: "event_missing" }, 400);
 
-    const amount = tt.price_cents * qty;
-    const fee = Math.round((amount * FEE_BPS) / 10000);
-
-    // pending order (service role; RLS bypassed)
-    const { data: order, error: oErr } = await svc.from("sf_order").insert({
-      event_id: ev.id, ticket_type_id: tt.id, buyer: body.buyer ?? null,
-      qty, amount_cents: amount, fee_cents: fee, status: "pending",
-    }).select("id").single();
-    if (oErr || !order) return json({ error: "order_failed" }, 500);
+    const fee = Number(rz.fee_cents);
 
     // build the session — Connect transfer if the owner has connected; else platform charge
     const line = {
-      quantity: qty,
+      quantity: Number(rz.qty),
       price_data: {
-        currency: tt.currency || "usd",
-        unit_amount: tt.price_cents,
-        product_data: { name: `${ev.name} — ${tt.name}` },
+        currency: rz.currency || "usd",
+        unit_amount: Number(rz.price_cents),
+        product_data: { name: `${ev.name} — ${rz.name}` },
       },
     };
     const params: Record<string, unknown> = {
       mode: "payment",
       line_items: [line],
       customer_email: body.buyer_email ?? undefined,
+      // expire the Stripe session on the SAME clock as the reservation hold, so a stale session
+      // can't be paid after the stock is released back to the pool (no late-payment oversell).
+      expires_at: Math.floor(Date.now() / 1000) + reservedSecs,
       success_url: `${APP_URL}/event_page.html?ev=${encodeURIComponent(ev.slug)}&paid=1`,
       cancel_url: `${APP_URL}/event_page.html?ev=${encodeURIComponent(ev.slug)}`,
       metadata: { order_id: order.id, kind: "sf_ticket" },
