@@ -12,12 +12,14 @@ html,body{margin:0;height:100%;overflow-x:hidden}
 body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
 /* ---- outdoor map (fixed top) ---- */
 #emMap{position:fixed;inset:0;z-index:1}
-#emCover{position:fixed;left:0;right:0;top:0;height:42vh;z-index:2;overflow:hidden;background:#0a0818}
-#emCover svg{position:absolute;inset:0;width:100%;height:100%}
-#emCover .ov{position:absolute;left:0;right:0;bottom:14px;z-index:2;text-align:center;padding:0 20px}
-#emCover .ov h2{margin:0 0 5px;font-size:clamp(19px,4.4vw,28px);font-weight:900;color:#fff;text-shadow:0 2px 18px #000c}
-#emCover .ov p{margin:0 auto 12px;max-width:460px;font-size:13px;color:#cdbef2;text-shadow:0 1px 8px #000}
-#emCover .ov button{background:linear-gradient(135deg,#4d8bff,#2f6feb);color:#fff;border:0;border-radius:12px;font-weight:800;font-size:14px;padding:11px 20px;cursor:pointer;box-shadow:0 8px 24px #0008}
+#emCover{position:fixed;inset:0;z-index:2;overflow:hidden;background:radial-gradient(120% 90% at 50% 46%,#160f2e 0%,#0a0818 60%,#060410 100%)}
+#emCover #ccv{position:absolute;inset:0;width:100%;height:100%}
+.ccnode{position:absolute;transform:translate(-50%,-50%);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-weight:800;line-height:1.05;color:#fff;z-index:3;user-select:none;font-family:inherit}
+.ccnode .sub{font-weight:700;opacity:.92;font-size:.72em;margin-top:1px}
+#emCover .ov{position:absolute;left:0;right:0;top:calc(10px + env(safe-area-inset-top,0px));z-index:6;text-align:center;padding:0 20px;pointer-events:none}
+#emCover .ov h2{margin:0 0 4px;font-size:clamp(18px,4.2vw,26px);font-weight:900;color:#fff;text-shadow:0 2px 18px #000c}
+#emCover .ov p{margin:0 auto 10px;max-width:430px;font-size:12.5px;color:#cdbef2;text-shadow:0 1px 8px #000}
+#emCover .ov button{pointer-events:auto;background:linear-gradient(135deg,#4d8bff,#2f6feb);color:#fff;border:0;border-radius:12px;font-weight:800;font-size:14px;padding:10px 20px;cursor:pointer;box-shadow:0 8px 24px #0008}
 
 .em-top{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:0;right:0;z-index:5;display:flex;gap:8px;align-items:flex-start;padding:0 12px;pointer-events:none}
 .em-top>*{pointer-events:auto}
@@ -109,41 +111,10 @@ body.mfdrag .sheet{transition:none}
 
 <div id="emMap"></div>
 <div id="emCover">
-  <svg viewBox="0 0 800 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <defs>
-      <radialGradient id="space" cx="46%" cy="50%" r="75%"><stop offset="0%" stop-color="#1a1140"/><stop offset="60%" stop-color="#0a0818"/><stop offset="100%" stop-color="#060410"/></radialGradient>
-      <radialGradient id="sf" cx="40%" cy="35%" r="75%"><stop offset="0%" stop-color="#7db0ff"/><stop offset="60%" stop-color="#2f6feb"/><stop offset="100%" stop-color="#1848b8"/></radialGradient>
-      <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    <rect width="800" height="420" fill="url(#space)"/>
-    <g fill="none" stroke="#ffffff12"><ellipse cx="400" cy="210" rx="120" ry="92"/><ellipse cx="400" cy="210" rx="205" ry="140"/><ellipse cx="400" cy="210" rx="300" ry="188"/></g>
-    <g stroke-dasharray="2 7" stroke-width="1.3" opacity=".55">
-      <line x1="400" y1="210" x2="215" y2="272" stroke="#4d8bff"/><line x1="400" y1="210" x2="560" y2="120" stroke="#e1306c"/><line x1="400" y1="210" x2="612" y2="238" stroke="#ff3b3b"/><line x1="400" y1="210" x2="498" y2="304" stroke="#25f4ee"/><line x1="400" y1="210" x2="648" y2="158" stroke="#aaaaaa"/><line x1="400" y1="210" x2="470" y2="108" stroke="#ff6a33"/><line x1="400" y1="210" x2="326" y2="112" stroke="#e6e300"/><line x1="400" y1="210" x2="248" y2="150" stroke="#ffffff"/><line x1="400" y1="210" x2="662" y2="304" stroke="#25d366"/><line x1="400" y1="210" x2="176" y2="200" stroke="#0f9e8e"/>
-    </g>
-    <g font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-weight="800" text-anchor="middle">
-      <g><circle cx="215" cy="272" r="34" fill="#1877f2"/><text x="215" y="277" fill="#fff" font-size="12">Facebook</text></g>
-      <g><circle cx="560" cy="120" r="24" fill="#e1306c"/><text x="560" y="124" fill="#fff" font-size="10">Instagram</text></g>
-      <g><circle cx="612" cy="238" r="26" fill="#ff0000"/><text x="612" y="242" fill="#fff" font-size="10">YouTube</text></g>
-      <g><circle cx="498" cy="304" r="22" fill="#111"/><text x="498" y="308" fill="#fff" font-size="10">TikTok</text></g>
-      <g><circle cx="648" cy="158" r="17" fill="#111"/><text x="648" y="162" fill="#fff" font-size="11">X</text></g>
-      <g><circle cx="470" cy="108" r="19" fill="#ff4500"/><text x="470" y="112" fill="#fff" font-size="9">Reddit</text></g>
-      <g><circle cx="326" cy="112" r="18" fill="#fffc00"/><text x="326" y="116" fill="#111" font-size="8">Snapchat</text></g>
-      <g><circle cx="248" cy="150" r="19" fill="#fff"/><text x="248" y="154" fill="#1a73e8" font-size="10">Google</text></g>
-      <g><circle cx="662" cy="304" r="19" fill="#25d366"/><text x="662" y="308" fill="#fff" font-size="10">SMS</text></g>
-      <g><circle cx="176" cy="200" r="19" fill="#0f9e8e"/><text x="176" y="204" fill="#fff" font-size="10">Email</text></g>
-      <circle cx="400" cy="210" r="46" fill="url(#sf)" filter="url(#glow)"/>
-      <text x="400" y="206" fill="#fff" font-size="15" font-weight="900">StageFill</text>
-      <text x="400" y="224" fill="#dbe8ff" font-size="10">every event, mapped</text>
-      <!-- StageFill's three moons — solid links -->
-      <g stroke="#4d8bff" stroke-width="2.6" opacity=".95"><line x1="400" y1="252" x2="348" y2="302"/><line x1="400" y1="254" x2="400" y2="320"/><line x1="400" y1="252" x2="452" y2="302"/></g>
-      <g><circle cx="348" cy="302" r="23" fill="#12a150"/><text x="348" y="300" font-size="12">🎸</text><text x="348" y="313" fill="#fff" font-size="9" font-weight="900">Bands</text></g>
-      <g><circle cx="400" cy="320" r="23" fill="#e0563b"/><text x="400" y="318" font-size="12">🙌</text><text x="400" y="331" fill="#fff" font-size="9" font-weight="900">Fans</text></g>
-      <g><circle cx="452" cy="302" r="23" fill="#6b46c1"/><text x="452" y="300" font-size="12">🏛</text><text x="452" y="313" fill="#fff" font-size="9" font-weight="900">Venues</text></g>
-    </g>
-  </svg>
+  <canvas id="ccv"></canvas>
   <div class="ov">
     <h2>StageFill Event Maker</h2>
-    <p>Name your event and set its place — every stage, potty, shop &amp; act, pinpoint-mapped, on any device.</p>
+    <p>Original event content flows in — every stage, potty, shop &amp; act, pinpoint-mapped, on any device.</p>
     <button onclick="emStart()">Start building →</button>
   </div>
 </div>
@@ -462,12 +433,12 @@ function emBack(){ if(history.length>1) history.back(); else location.href='inde
 /* draggable curtain — up / down, like the Festival Map */
 (function(){ var sheet,grab,dragY=null,startTop=0,moved=false,curTop=0;
   function H(){return window.innerHeight;} function vh(p){return p/100*H();}
-  function snaps(){return [vh(12),vh(42),vh(82)];}
+  function snaps(){return [vh(12),vh(42),vh(92)];}
   function nearest(px){var a=snaps(),b=a[0];a.forEach(function(v){if(Math.abs(v-px)<Math.abs(b-px))b=v;});return b;}
   function setTop(px){ if(sheet) sheet.style.top=px+'px'; }
   function start(e){ sheet=document.querySelector('.sheet'); if(!sheet)return; dragY=e.clientY; startTop=sheet.getBoundingClientRect().top; moved=false; document.body.classList.add('mfdrag'); window.addEventListener('pointermove',move); window.addEventListener('pointerup',end); e.preventDefault(); }
-  function move(e){ if(dragY==null)return; if(Math.abs(e.clientY-dragY)>3)moved=true; setTop(Math.max(vh(8),Math.min(vh(88),startTop+(e.clientY-dragY)))); }
-  function end(){ if(dragY==null)return; dragY=null; document.body.classList.remove('mfdrag'); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',end); var t=sheet.getBoundingClientRect().top; if(!moved){ curTop=(Math.abs(t-vh(12))<12)?vh(42):vh(12); } else { curTop=nearest(t); } setTop(curTop); setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },320); }
+  function move(e){ if(dragY==null)return; if(Math.abs(e.clientY-dragY)>3)moved=true; setTop(Math.max(vh(8),Math.min(vh(94),startTop+(e.clientY-dragY)))); }
+  function end(){ if(dragY==null)return; dragY=null; document.body.classList.remove('mfdrag'); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',end); var t=sheet.getBoundingClientRect().top; if(!moved){ var st=snaps(),idx=0,bb=1e9; st.forEach(function(v,i){var dd=Math.abs(v-t); if(dd<bb){bb=dd;idx=i;}}); curTop=st[(idx+1)%st.length]; } else { curTop=nearest(t); } setTop(curTop); setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },320); }
   window.addEventListener('load',function(){ sheet=document.querySelector('.sheet'); grab=document.querySelector('.grab'); curTop=vh(42); if(grab) grab.addEventListener('pointerdown',start); });
 })();
 /* ===== Partners — ad-sales CRM (register → buy ad → admin pins lat/lon like the potty discovery) ===== */
@@ -507,9 +478,31 @@ function pinDone(){ el("pinScrim").classList.remove("on"); if(!_pinP){return;} v
   pRender(); emSave(); toast("📍 "+_pinP.name+" validated — "+Object.keys(pts).length+" points."); _pinP=null; }
 function pinCancel(){ el("pinScrim").classList.remove("on"); _pinP=null; }
 function pDel(id){ state.partners=(state.partners||[]).filter(function(x){return x.id!==id;}); pRender(); emSave(); }
-function emCoverShow(sh){ var c=el('emCover'); if(c) c.style.display=sh?'block':'none'; var t=document.querySelector('.em-top'); if(t) t.style.display=sh?'none':'flex'; }
+function emCoverShow(sh){ var c=el('emCover'); if(c) c.style.display=sh?'block':'none'; var t=document.querySelector('.em-top'); if(t) t.style.display=sh?'none':'flex'; if(sh){ ccStart(); } else { ccStop(); } }
 function emStart(){ state.started=true; emSave(); emCoverShow(false); emTab('cur_map'); setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },60); }
 function emCoverInit(){ var empty=!(state.name||(state.acts&&state.acts.length)||state.city||(state.survey&&state.survey.length)); emCoverShow(!state.started && empty); }
+/* animated StageFill universe — moving 'original content', adapted from the DeadDance solar-system */
+var CC={cv:null,ctx:null,run:false,raf:0,tick:0,W:0,H:0,S:0,cx:0,cy:0,built:false,center:null};
+var CC_NET=[{id:'facebook',label:'Facebook',x:.30,y:.60,r:.115,col:'#1877f2',two:1,big:1},{id:'instagram',label:'Instagram',x:.64,y:.30,r:.056,col:'#e1306c'},{id:'youtube',label:'YouTube',x:.80,y:.50,r:.064,col:'#ff0000'},{id:'tiktok',label:'TikTok',x:.69,y:.66,r:.05,col:'#111',ring:'#25f4ee'},{id:'x',label:'X',x:.88,y:.34,r:.036,col:'#111',ring:'#555'},{id:'reddit',label:'Reddit',x:.50,y:.20,r:.044,col:'#ff4500'},{id:'snapchat',label:'Snap',x:.34,y:.24,r:.044,col:'#fffc00',txt:'#111'},{id:'google',label:'Google',x:.21,y:.36,r:.05,col:'#fff',txt:'#1a73e8'},{id:'sms',label:'SMS',x:.87,y:.66,r:.046,col:'#25d366'},{id:'email',label:'Email',x:.14,y:.55,r:.05,col:'#0f9e8e'}];
+var CC_MOON=[{id:'bands',label:'Bands',x:.40,y:.82,r:.052,col:'#12a150'},{id:'fans',label:'Fans',x:.52,y:.88,r:.052,col:'#e0563b'},{id:'venues',label:'Venues',x:.63,y:.82,r:.052,col:'#6b46c1'}];
+var CC_PARTS=[];
+function ccMk(o){ var d=document.createElement('div'); d.className='ccnode'; d.style.background=o.col; if(o.ring)d.style.boxShadow='0 0 0 2px '+o.ring; d.innerHTML='<b style="color:'+(o.txt||'#fff')+'">'+o.label+'</b>'+(o.sub?'<span class="sub" style="color:'+(o.txt||'#fff')+'">'+o.sub+'</span>':''); o.el=d; el('emCover').appendChild(d); }
+function ccBuild(){ if(CC.built)return; CC.cv=el('ccv'); if(!CC.cv)return; CC.ctx=CC.cv.getContext('2d'); CC.center={id:'sf',label:'StageFill',sub:'every event, mapped',x:.50,y:.52,r:.085,col:'radial-gradient(circle at 40% 35%,#7db0ff,#2f6feb 70%)'}; CC_NET.forEach(ccMk); CC_MOON.forEach(ccMk); ccMk(CC.center); CC.center.el.style.fontWeight='900'; CC.built=true; addEventListener('resize',function(){ if(CC.built)ccLayout(); }); }
+function ccLayout(){ if(!CC.cv)return; var box=el('emCover'); CC.W=box.clientWidth; CC.H=box.clientHeight; CC.cv.width=CC.W*devicePixelRatio; CC.cv.height=CC.H*devicePixelRatio; CC.ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); CC.S=Math.min(CC.W,CC.H); CC.cx=CC.center.x*CC.W; CC.cy=CC.center.y*CC.H;
+  function place(o){ var px=o.x*CC.W,py=o.y*CC.H,d=Math.max(30,o.r*CC.S*2); o.el.style.left=px+'px'; o.el.style.top=py+'px'; o.el.style.width=d+'px'; o.el.style.height=d+'px'; o.el.style.fontSize=Math.max(9,o.r*CC.S*0.4*(o.big?1.1:1))+'px'; o.px=px;o.py=py; }
+  CC_NET.forEach(place); CC_MOON.forEach(place); place(CC.center); CC.center.el.style.boxShadow='0 0 '+(CC.center.r*CC.S*1.6)+'px #2f6febcc, inset 0 0 '+(CC.center.r*CC.S*0.6)+'px #ffffff33'; }
+function ccLC(o){ var m={facebook:'#2f6feb',instagram:'#e1306c',youtube:'#ff3b3b',tiktok:'#25f4ee',x:'#aaa',reddit:'#ff6a33',snapchat:'#e6e300',google:'#fff',sms:'#25d366',email:'#0f9e8e'}; return m[o.id]||'#ffffff66'; }
+function ccSpawn(a,b,col){ CC_PARTS.push({a:a,b:b,t:0,sp:0.006+Math.random()*0.01,col:col,sz:1.6+Math.random()*1.7}); }
+function ccFrame(){ if(!CC.run)return; var g=CC.ctx; CC.tick++; g.clearRect(0,0,CC.W,CC.H);
+  g.save(); g.strokeStyle='#ffffff0d'; g.lineWidth=1; for(var i=1;i<=4;i++){ g.beginPath(); g.ellipse(CC.cx,CC.cy,CC.S*0.12*i,CC.S*0.10*i,-0.2,0,Math.PI*2); g.stroke(); } g.restore();
+  CC_NET.forEach(function(o){ g.save(); g.strokeStyle=ccLC(o); g.globalAlpha=.5; g.lineWidth=o.big?2.2:1.1; g.setLineDash([2,7]); g.lineDashOffset=-CC.tick*0.6; g.beginPath(); g.moveTo(CC.cx,CC.cy); g.lineTo(o.px,o.py); g.stroke(); g.restore(); });
+  CC_MOON.forEach(function(o){ g.save(); g.strokeStyle='#4d8bff'; g.globalAlpha=.85; g.lineWidth=2.4; g.beginPath(); g.moveTo(CC.cx,CC.cy); g.lineTo(o.px,o.py); g.stroke(); g.restore(); });
+  var ix=CC.W*0.10,iy=CC.H-24; g.save(); g.strokeStyle='#a071ff66'; g.lineWidth=2; g.setLineDash([2,7]); g.lineDashOffset=CC.tick*0.6; g.beginPath(); g.moveTo(ix,iy); g.lineTo(CC.cx,CC.cy); g.stroke(); g.restore();
+  if(CC.tick%6===0){ CC_NET.forEach(function(o){ ccSpawn(CC.center,o,ccLC(o)); if(o.two) ccSpawn(o,CC.center,'#3b9bff'); }); ccSpawn({px:ix,py:iy},CC.center,'#a071ff'); }
+  for(var j=CC_PARTS.length-1;j>=0;j--){ var p=CC_PARTS[j]; p.t+=p.sp; if(p.t>=1){ CC_PARTS.splice(j,1); continue; } var x=p.a.px+(p.b.px-p.a.px)*p.t, y=p.a.py+(p.b.py-p.a.py)*p.t; g.beginPath(); g.fillStyle=p.col; g.globalAlpha=Math.sin(p.t*Math.PI); g.arc(x,y,p.sz,0,Math.PI*2); g.fill(); g.globalAlpha=1; }
+  CC.raf=requestAnimationFrame(ccFrame); }
+function ccStart(){ ccBuild(); if(!CC.cv)return; ccLayout(); if(!CC.run){ CC.run=true; CC.raf=requestAnimationFrame(ccFrame); } }
+function ccStop(){ CC.run=false; if(CC.raf)cancelAnimationFrame(CC.raf); }
 /* ===== SURVEY + Cookie Monster — ground-truth GPS capture ===== */
 var SVTYPES=[['geo_nw','🧭 Map corner — NW'],['geo_ne','🧭 Map corner — NE'],['geo_se','🧭 Map corner — SE'],['geo_sw','🧭 Map corner — SW'],['platz','🎪 Platz / stage corner'],['potty','🚻 Potty (restroom)'],['shop_start','🛍 Shop — start of frontage'],['shop_end','🛍 Shop — end of frontage'],['truck','🚚 Food truck / vendor'],['first_aid','⛑️ First aid']];
 function svInit(){ var s=el('svType'); if(s&&!s.options.length){ s.innerHTML=SVTYPES.map(function(t){return '<option value="'+t[0]+'">'+t[1]+'</option>';}).join(''); } }
