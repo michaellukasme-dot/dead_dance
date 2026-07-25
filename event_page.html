@@ -45,6 +45,7 @@ h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute
 <script src="qr.js"></script>
 <script src="dd_categories.js"></script>
 <script src="stagefill_events.js"></script>
+<script src="sf_fill.js"></script>
 <script>
 var SF_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM", SF_CHECKOUT="https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/sf-checkout";
 function $(id){return document.getElementById(id);}
@@ -110,7 +111,8 @@ function render(E){
   cl.rpc('sf_get',{p_slug:ev}).then(function(r){ if(r&&!r.error&&r.data&&r.data.event){ var d=r.data,e=d.event;
     E={name:e.name,cat:e.cat,start:e.date_start,end:e.date_end,time:e.start_time,city:e.city,state:e.state,venue:e.venue,lat:e.lat,lng:e.lng,corners:e.corners,
        acts:(d.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catIcon:'',lat:a.lat,lng:a.lng};}),ticket_types:(d.ticket_types||[]),_id:e.id,_isOwner:e.is_owner,_geofences:(d.geofences||[])};
-    render(E); try{ sfPingStart(e.id,d.geofences); }catch(_e){} } }).catch(function(){}); })();
+    render(E); try{ sfPingStart(e.id,d.geofences); }catch(_e){}
+    try{ if(e.is_owner && window.SFFill){ SFFill.mount({slug:ev, side:(qs('ref')==='band'?'band':'venue'), isOwner:true}); } }catch(_e){} } }).catch(function(){}); })();
 function sfFree(){ alert("Free entry — just come to the event. (RSVP coming soon.)"); }
 /* delegated ticket handler — no user data in inline JS; id is validated as a UUID before it reaches sfBuy (no reflected XSS via ?d). */
 document.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest&&ev.target.closest('.sftix'); if(!b)return;
@@ -141,7 +143,7 @@ function sfOccRender(rows){ var hr=new Date().getHours(), byG={};
     +(list.length?list.map(function(o){ return '<div style="display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid #eef1f6"><span style="font-weight:700">'+esc(o.label||o.kind)+'</span><span style="font-weight:900;color:#2f6feb">'+o.dev+(o.uses?(' · '+o.uses+' uses'):'')+'</span></div>'; }).join(''):'<div style="color:#8a92a6;padding:12px 2px">No sessions yet — once fans open the map on-site, this fills in.</div>')
     +'</div>';
   document.body.appendChild(wrap); wrap.querySelector('#_occx').onclick=function(){ wrap.remove(); }; }
-function sfBuy(ttId){ if(!ttId){return;} fetch(SF_CHECKOUT,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+SF_ANON},body:JSON.stringify({ticket_type_id:ttId,qty:1})}).then(function(r){return r.json();}).then(function(d){
+function sfBuy(ttId){ if(!ttId){return;} var ref=qs('ref')||''; ref=(['band','venue','door'].indexOf(ref)>=0)?ref:''; fetch(SF_CHECKOUT,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+SF_ANON},body:JSON.stringify({ticket_type_id:ttId,qty:1,ref:ref})}).then(function(r){return r.json();}).then(function(d){
     if(d&&d.url){ location.href=d.url; return; }
     var e=(d&&d.error)||'';
     if(e==='sold_out'){ alert(d.available>0?('Only '+d.available+' left — try a smaller quantity.'):'Sorry — this ticket is sold out.'); }

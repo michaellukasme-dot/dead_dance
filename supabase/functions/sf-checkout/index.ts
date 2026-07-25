@@ -48,6 +48,11 @@ Deno.serve(async (req) => {
     const order = { id: rz.order_id as string };
     const reservedSecs = Number(rz.reserved_secs ?? 1800);
 
+    // co-promotion attribution: who drove this buyer (band fan-link vs venue patron-link). Side-write only —
+    // does not touch the reservation/capacity path.
+    const ref = ["band", "venue", "door"].includes(String(body.ref)) ? String(body.ref) : "direct";
+    if (ref !== "direct") { try { await svc.from("sf_order").update({ ref_src: ref }).eq("id", order.id); } catch (_e) { /* attribution is best-effort */ } }
+
     const { data: ev } = await svc.from("sf_event")
       .select("id, slug, name, stripe_account").eq("id", rz.event_id).single();
     if (!ev) return json({ error: "event_missing" }, 400);

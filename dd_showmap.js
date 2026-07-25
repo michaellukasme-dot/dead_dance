@@ -181,7 +181,7 @@
     { band: "Life After Dead", venue: "Lost Tavern Brewing", city: "Hellertown, PA", date: "2026-10-31", real: true }
   ];
   try {
-    [window.dealMapRows, window.hotSauceMapRows].forEach(function (fn) {
+    [window.dealMapRows, window.hotSauceMapRows, window.stageFillMapRows].forEach(function (fn) {   // stageFillMapRows: only defined on the StageFill national map; undefined (no-op) on the DeadDance home map
       if (!fn) return;
       fn().forEach(function (r) {
         SHOWS.push({ band: r.band, venue: r.venue, city: r.city, date: r.date, time: r.time, real: true });

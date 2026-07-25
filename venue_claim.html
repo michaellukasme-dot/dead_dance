@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Claim your venue · StageFill</title>
+<style>
+:root{--ink:#1f2430;--muted:#8a92a6;--line:#e7e9f0;--bg:#f6f7f9;--accent:#6d28d9;--accent2:#7c3aed;--gold:#b8860b;--ok:#12a150;--card:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;overflow-x:hidden}
+body{font:400 15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 80px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;color:var(--accent);margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 30px #0000000f;padding:22px}
+.prog{display:flex;gap:6px;margin-bottom:18px}
+.prog i{height:5px;flex:1;border-radius:99px;background:#e7e9f0}.prog i.on{background:var(--accent)}
+h1{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+p.lead{color:var(--muted);margin:0 0 18px;font-size:14px}
+label{display:block;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px}
+input,select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-weight:600;background:#fff;color:var(--ink)}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.opts{display:grid;gap:9px;margin-top:6px}
+.opt{border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;cursor:pointer;display:flex;align-items:center;gap:12px}
+.opt.sel{border-color:var(--accent);background:#f6f3fe}
+.opt .em{font-size:22px}.opt b{font-size:15px}.opt small{display:block;color:var(--muted);font-weight:600;font-size:12.5px}
+.opt .pr{margin-left:auto;font-weight:800;color:var(--gold);font-size:13px;white-space:nowrap}
+.cta{width:100%;margin-top:20px;padding:14px;border:0;border-radius:14px;background:linear-gradient(180deg,var(--accent2),var(--accent));color:#fff;font-weight:800;font-size:16px;cursor:pointer}
+.cta:active{transform:translateY(1px)}
+.ghost{background:none;border:1px solid var(--line);color:var(--accent);font-weight:800;border-radius:12px;padding:11px;width:100%;margin-top:10px;cursor:pointer;font-size:14px}
+.match{background:#f6f3fe;border:1px solid #e7ddfb;border-radius:14px;padding:14px;margin-top:14px;display:flex;align-items:center;gap:12px}
+.match .em{font-size:26px}.match b{font-size:16px}.match small{display:block;color:var(--muted);font-weight:600}
+.err{color:#e0364a;font-weight:700;font-size:13px;margin-top:10px}
+.done .big{font-size:22px;font-weight:800;text-align:center;margin:4px 0 4px}
+.linkbox{display:flex;gap:8px;margin-top:8px}
+.linkbox input{font:600 13px ui-monospace,Menlo,monospace;color:#5b6172}
+.copy{flex:0 0 auto;background:var(--accent);color:#fff;border:0;border-radius:12px;font-weight:800;padding:0 16px;cursor:pointer}
+.snip{margin-top:8px;background:#12151c;color:#c8d0e0;border-radius:12px;padding:12px;font:600 11.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;position:relative}
+.snip button{position:absolute;top:8px;right:8px;background:#2a3040;color:#fff;border:0;border-radius:8px;font-weight:800;font-size:11px;padding:5px 9px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.tile{display:block;text-align:center;text-decoration:none;background:#f4f6fa;border:1px solid var(--line);border-radius:14px;padding:14px 10px;color:var(--ink);font-weight:800;font-size:13px}
+.tile .em{font-size:22px;display:block;margin-bottom:4px}
+.mini{color:var(--muted);font-size:12px;text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">🎟️ StageFill · <span style="color:var(--muted);font-weight:700">Venue setup</span></div>
+  <div class="card" id="card"></div>
+  <div class="mini">Free to set up. You only ever pay if you'd rather we <i>didn't</i> run your ticketing.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var S={ step:0, name:'', city:'', state:'', tier:'', cap:300, ticket:18, ticketing:true, key:'' };
+var TIERS=[
+  {k:'cafe',    em:'☕', t:'Café / small room', s:'Restaurant, bar, coffeehouse — a corner stage', pr:'$20/mo*'},
+  {k:'club',    em:'🎸', t:'Club / music bar',   s:'A room built for live music', pr:'$99/mo*'},
+  {k:'theater', em:'🎭', t:'Theater / hall',      s:'Seated house, larger capacity', pr:'$299/mo*'}
+];
+function prog(n){ var h=''; for(var i=0;i<4;i++) h+='<i class="'+(i<=n?'on':'')+'"></i>'; return '<div class="prog">'+h+'</div>'; }
+
+function render(){
+  if(S.step===0) return step0();
+  if(S.step===1) return step1();
+  if(S.step===2) return step2();
+  if(S.step===3) return done();
+}
+/* 0 · find your room */
+function step0(){
+  $('card').innerHTML=prog(0)+
+    '<h1>Find your room</h1><p class="lead">From the smallest corner stage to the biggest hall — every venue gets a calendar and a box office on StageFill.</p>'+
+    '<label>Venue name</label><input id="n" placeholder="e.g. Ardmore Music Hall" value="'+esc(S.name)+'">'+
+    '<div class="row"><div><label>City</label><input id="c" placeholder="Ardmore" value="'+esc(S.city)+'"></div>'+
+    '<div><label>State</label><input id="s" placeholder="PA" maxlength="2" value="'+esc(S.state)+'"></div></div>'+
+    (S.name?('<div class="match"><span class="em">📍</span><div><b>'+esc(S.name)+'</b><small>'+esc([S.city,S.state].filter(Boolean).join(', ')||'your room')+'</small></div></div>'):'')+
+    '<button class="cta" onclick="claimStart()">That\'s my venue →</button>';
+  ['n','c','s'].forEach(function(id){ var el=$(id); el.oninput=function(){ S.name=$('n').value.trim(); S.city=$('c').value.trim(); S.state=$('s').value.trim().toUpperCase(); }; });
+}
+function claimStart(){ S.name=$('n').value.trim(); S.city=$('c').value.trim(); S.state=$('s').value.trim().toUpperCase();
+  if(!S.name){ shake('Enter your venue name.'); return; } S.step=1; render(); }
+
+/* 1 · what kind of room */
+function step1(){
+  $('card').innerHTML=prog(1)+
+    '<h1>What kind of room?</h1><p class="lead">Sets your size tier. You almost certainly won\'t pay it — see the next step.</p>'+
+    '<div class="opts">'+TIERS.map(function(t){return '<div class="opt'+(S.tier===t.k?' sel':'')+'" onclick="S.tier=\''+t.k+'\';render()"><span class="em">'+t.em+'</span><div><b>'+t.t+'</b><small>'+t.s+'</small></div><span class="pr">'+t.pr+'</span></div>';}).join('')+'</div>'+
+    '<div class="row" style="margin-top:8px"><div><label>Capacity</label><input id="cap" type="number" value="'+S.cap+'"></div>'+
+    '<div><label>Typical ticket</label><input id="tix" type="number" value="'+S.ticket+'"></div></div>'+
+    '<button class="cta" onclick="toTicketing()">Next →</button>'+
+    '<button class="ghost" onclick="S.step=0;render()">← Back</button>';
+}
+function toTicketing(){ if(!S.tier){ shake('Pick your room type.'); return; } S.cap=+($('cap').value)||300; S.ticket=+($('tix').value)||18; S.step=2; render(); }
+
+/* 2 · ticketing choice = the freemium fork */
+function step2(){
+  $('card').innerHTML=prog(2)+
+    '<h1>How you go free</h1><p class="lead">Every venue sells tickets through StageFill — or pays for the room. Letting us run ticketing is free.</p>'+
+    '<div class="opts">'+
+      '<div class="opt'+(S.ticketing?' sel':'')+'" onclick="S.ticketing=true;render()"><span class="em">✅</span><div><b>Let StageFill sell my tickets</b><small>Free. We take 15%; you keep selling anywhere else too. Recommended.</small></div></div>'+
+      '<div class="opt'+(!S.ticketing?' sel':'')+'" onclick="S.ticketing=false;render()"><span class="em">💳</span><div><b>I\'ll sell my own tickets</b><small>Then it\'s a '+({cafe:'$20',club:'$99',theater:'$299'}[S.tier]||'$20')+'/mo subscription for the calendar + door tools.</small></div></div>'+
+    '</div>'+
+    '<button class="cta" onclick="doClaim()" id="claimBtn">Claim '+esc(S.name)+' →</button>'+
+    '<button class="ghost" onclick="S.step=1;render()">← Back</button><div id="err"></div>';
+}
+function doClaim(){ var b=$('claimBtn'); b.textContent='Claiming…'; b.disabled=true;
+  var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ setTimeout(doClaim,300); return; }
+  cl.rpc('sf_venue_claim',{p_name:S.name,p_city:S.city,p_state:S.state,p_tier:S.tier,p_ticketing:S.ticketing}).then(function(r){
+    var d=r&&r.data||{}; if(r&&r.error){ claimErr('Something went wrong — try again.'); return; }
+    if(d.error==='claimed'){ claimErr('This venue is already claimed by someone else. If it\'s yours, contact support.'); return; }
+    if(d.error){ claimErr(d.error==='no_name'?'Enter your venue name.':'Try again.'); return; }
+    S.key=d.key; S.step=3; render();
+  }).catch(function(){ claimErr('Network error — try again.'); }); }
+function claimErr(m){ var b=$('claimBtn'); if(b){ b.textContent='Claim '+S.name+' →'; b.disabled=false; } $('err').innerHTML='<div class="err">'+esc(m)+'</div>'; }
+
+/* 3 · done — the link + embed for their website */
+function done(){
+  var link=location.origin+'/venue.html?v='+encodeURIComponent(S.key);
+  var snip='<iframe src="'+link+'" style="width:100%;height:600px;border:0;border-radius:16px"\n        title="'+esc(S.name)+' — Tickets" loading="lazy"></iframe>';
+  var mk='festival_event_maker.html?v='+encodeURIComponent(S.name)+'&c='+encodeURIComponent(S.city)+'&s='+encodeURIComponent(S.state);
+  $('card').innerHTML='<div class="done">'+prog(3)+
+    '<div style="text-align:center;font-size:40px">🎉</div>'+
+    '<div class="big">'+esc(S.name)+' is live on StageFill</div>'+
+    '<p class="lead" style="text-align:center">Here\'s your box office. Put this link on your website — fans buy in two taps, no app.</p>'+
+    '<label>Your venue link</label><div class="linkbox"><input id="lk" readonly value="'+esc(link)+'"><button class="copy" onclick="cp(\'lk\',this)">Copy</button></div>'+
+    '<label style="margin-top:16px">Embed on your website</label><div class="snip"><button onclick="cp2(this)">Copy</button><span id="snip">'+esc(snip)+'</span></div>'+
+    '<div class="grid2">'+
+      '<a class="tile" href="'+mk+'"><span class="em">➕</span>Add your first show</a>'+
+      '<a class="tile" href="'+mk+'&teach=floor"><span class="em">🏛️</span>Upload floor plan</a>'+
+      '<a class="tile" href="'+esc(link)+'"><span class="em">🎟️</span>View my shop</a>'+
+      '<a class="tile" href="stagefill_map.html"><span class="em">🗺️</span>National map</a>'+
+    '</div>'+
+    '<p class="lead" style="text-align:center;margin-top:16px;font-size:13px">On show night, open <b>Door Mode</b> from any event to scan tickets and sell at the door.</p>'+
+    '</div>';
+}
+function cp(id,btn){ var el=$(id); el.select(); try{ navigator.clipboard.writeText(el.value); }catch(e){ document.execCommand('copy'); } btn.textContent='Copied ✓'; setTimeout(function(){btn.textContent='Copy';},1600); }
+function cp2(btn){ var t=$('snip').textContent; try{ navigator.clipboard.writeText(t); }catch(e){} btn.textContent='Copied ✓'; setTimeout(function(){btn.textContent='Copy';},1600); }
+function shake(m){ alert(m); }
+render();
+</script>
+</body>
+</html>

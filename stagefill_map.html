@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill — National Calendar</title>
+<style>
+/* StageFill-neutral skin over the proven dd_showmap engine (same classes → functions exactly). */
+:root{--purple:#4c1d95;--purple2:#6d28d9;--accent:#7c3aed;--gold:#b8860b;--rose:#6d28d9;--ink:#1f2430;--muted:#8a92a6;--cream:#f6f7f9;--paper:#fff;--card:#fff;--line:#e7e9f0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.bar{background:#2b2b2b;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.bar h1{font-size:clamp(17px,4.4vw,22px);margin:0;font-weight:800}
+.bar .home{margin-left:auto;background:#ffffff1a;color:#fff;border:0;border-radius:999px;font-weight:800;font-size:12px;padding:8px 13px;text-decoration:none}
+.wrap{max-width:620px;margin:14px auto;padding:0 12px 40px}
+.note{font-size:12px;color:#6a6280;margin:10px 2px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#23202a;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;font-weight:700;opacity:0;transition:.2s;pointer-events:none;z-index:99}
+#toast.on{opacity:1}
+#showMap{margin:0 0 14px}
+.showmap-card{background:#fff;color:var(--ink);border-radius:16px;padding:13px 14px 15px;border:1px solid #ece6f2;box-shadow:0 2px 12px rgba(30,18,48,.07)}
+.showmap-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.showmap-head b{font-size:15px;color:var(--ink)}
+.showmap-seg{display:flex;gap:3px;background:#f1ecf7;border-radius:999px;padding:3px;margin-left:auto}
+.showmap-seg button{border:0;background:none;padding:6px 12px;border-radius:999px;font-weight:800;font-size:12px;color:#6a6280;cursor:pointer;white-space:nowrap;transition:.12s}
+.showmap-seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(30,18,48,.16)}
+.showmap-seg button:active{transform:scale(.96)}
+.showmap-x{background:#f3eef8;border:0;color:#6a6280;width:26px;height:26px;border-radius:8px;font-size:14px;line-height:1;cursor:pointer;flex:none}
+.showmap-farrah{font-size:12px;line-height:1.4;color:#4a4356;background:#f7f5ff;border:1px solid #ece6f7;border-left:3px solid var(--gold);border-radius:9px;padding:8px 11px;margin:0 0 9px}
+.showmap-farrah b{color:var(--purple2);font-weight:800}
+.showmap-region{display:flex;align-items:center;gap:8px;margin:0 0 9px;flex-wrap:wrap}
+.showmap-region[hidden]{display:none}
+.showmap-back{border:1px solid #e6e0f0;background:#fff;color:var(--ink);font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.showmap-back[hidden]{display:none}.showmap-back:active{transform:scale(.97)}
+.showmap-loc{border:1px solid #e6e0f0;background:#fff;color:var(--purple2);font-weight:800;font-size:12px;border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.showmap-select{border:1px solid #e6e0f0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--ink);background:#fff;cursor:pointer}
+.showmap-near{font-size:12px;font-weight:800;color:var(--rose)}
+.showmap-legend{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;font-size:10.5px;color:#6a6280;margin-bottom:8px}
+.showmap-sub{font-size:11px;color:#9a7b12;font-weight:800}
+.showmap-legend .lg{font-weight:800}
+.showmap-legend .lg.real{color:var(--purple2)}.showmap-legend .lg.sample{color:#9a8fb0}.showmap-legend .lg.dim{color:#b8a9d4}
+.showmap-honest{font-size:10px;color:#a49bb3;font-style:italic;flex-basis:100%}
+.showmap-wrap{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#faf9fe,#f1ecfa);border:1px solid #efe9f6}
+.showmap-svg{display:block;width:100%;height:auto}
+.us-land{fill:#ede8f7;stroke:#c6b2e4;stroke-width:1.6;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(90,46,134,.10))}
+.us-grat line{stroke:#c6b2e4;stroke-width:.8;opacity:.28}
+.us-states{fill:none;stroke:#bda6e0;stroke-width:1.1;stroke-linejoin:round;stroke-linecap:round;opacity:.9}
+.smdot{cursor:pointer;outline:none}
+.smdot.faint{cursor:default;pointer-events:none}
+.smdot.faint .smcore{opacity:.5}.smdot.faint .smpulse{display:none}
+.smdot .smcore{fill:#6d28d9;stroke:#fff}
+.smdot.sample .smcore{fill:#b79bd6;stroke:#fff}
+.smdot .smpulse{fill:#6d28d9;opacity:.26;transform-box:fill-box;transform-origin:center;animation:smpulse 2.4s ease-out infinite}
+.smdot.sample .smpulse{fill:#b79bd6;opacity:.2}
+.smdot:hover .smcore,.smdot:focus .smcore{stroke:var(--gold)}
+.smdot:focus .smpulse{opacity:.55}
+.smlabel{fill:#4a3a63;font-weight:800;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round;pointer-events:none}
+.smbadge{cursor:pointer;outline:none}
+.smbadge .bdot{fill:#6d28d9;stroke:#fff;stroke-width:2.4;filter:drop-shadow(0 2px 4px rgba(109,40,217,.28))}
+.smbadge .bnum{fill:#fff;font-weight:900;text-anchor:middle;pointer-events:none}
+.smbadge .blbl{fill:#4a3a63;font-weight:800;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round;pointer-events:none}
+.smbadge.dim .bdot{fill:#f4f0fa;stroke:#c3b2e0;stroke-width:2;stroke-dasharray:5 4;filter:none}
+.smbadge.dim .bnum{fill:#a892d4}
+.smbadge.dim .blbl{fill:#9a8fb0}
+.smbadge:hover .bdot,.smbadge:focus .bdot{stroke:var(--gold);stroke-width:3}
+.smbadge:hover .blbl,.smbadge:focus .blbl{fill:var(--purple2)}
+.sm-you .you-dot{fill:#1877f2;stroke:#fff;stroke-width:2}
+.sm-you .you-ring{fill:#1877f2;opacity:.22;transform-box:fill-box;transform-origin:center;animation:smpulse 2.2s ease-out infinite}
+@keyframes smpulse{0%{transform:scale(.7);opacity:.5}70%{transform:scale(2.1);opacity:0}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.smdot .smpulse,.sm-you .you-ring{animation:none;opacity:.32}}
+.showmap-pop{position:absolute;z-index:5;width:210px;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 12px 32px rgba(30,18,48,.22);border:1px solid #ece6f2;padding:10px 12px;font-size:12.5px;line-height:1.4}
+.showmap-pop[hidden]{display:none}
+.pop-band{font-weight:800;font-size:13.5px}
+.pop-band .pop-tag{font-size:9px;font-style:normal;font-weight:800;letter-spacing:.05em;background:#efe7f6;color:var(--accent);border-radius:5px;padding:1px 5px;vertical-align:middle}
+.pop-line{color:#4a4356;margin-top:2px}
+.pop-date{color:var(--rose);font-weight:800;margin-top:4px;font-size:12px}
+.pop-notify{width:100%;margin-top:9px;border:0;border-radius:9px;background:var(--gold);color:#23202a;font-weight:800;font-size:13px;padding:9px;cursor:pointer}
+.pop-notify:active{transform:scale(.97)}
+.pop-notify.done{background:#e7f6ee;color:#15502f}
+.pop-foot{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}
+.showmap-panel{margin-top:11px;display:flex;flex-direction:column;gap:7px}
+.showmap-panel[hidden]{display:none}
+.showmap-panel .prow,.showmap-panel .pfrow{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #ece6f2;border-radius:11px;padding:8px 10px;box-shadow:0 1px 3px rgba(30,18,48,.05)}
+.showmap-panel .pfrow{border-left:3px solid var(--accent)}
+.pdt,.pfdt{width:40px;flex:none;text-align:center;border-radius:8px;padding:5px 0;font-size:11px;font-weight:800;color:#fff;line-height:1;background:linear-gradient(135deg,#6d28d9,#7c3aed)}
+.pdt small,.pfdt small{display:block;font-size:15px;font-weight:900;margin-top:1px}
+.pfdt{background:linear-gradient(135deg,#7c3aed,#6d28d9)}
+.pinfo{flex:1;min-width:0}
+.pinfo b{font-size:13.5px;font-weight:800;color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pinfo b .pop-tag{font-size:9px;font-style:normal;font-weight:800;background:#efe7f6;color:var(--accent);border-radius:5px;padding:1px 5px;margin-left:4px}
+.pinfo span{font-size:11.5px;color:#6a6280;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptix{flex:none;border:0;border-radius:9px;background:var(--gold);color:#23202a;font-weight:800;font-size:12px;padding:7px 10px;cursor:pointer}
+.pnotify{flex:none;border:1px solid #e6e0f0;background:#fff;border-radius:9px;font-size:13px;padding:6px 9px;cursor:pointer}
+.pnotify.done{background:#e7f6ee;border-color:#bfe6cf}
+.pftag{flex:none;font-size:10px;font-weight:800;color:var(--accent);background:#efe7f6;border-radius:6px;padding:3px 7px}
+.pfhead{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.02em;margin:2px 2px -1px}
+.padd{border:1px dashed #cdbbe8;background:#faf7ff;color:var(--purple2);font-weight:800;font-size:12.5px;border-radius:11px;padding:10px;cursor:pointer;margin-top:2px}
+.paddbig{border:2px dashed #cdbbe8;background:#faf7ff;color:var(--purple2);font-weight:800;font-size:14px;border-radius:12px;padding:16px;cursor:pointer;text-align:center}
+.botbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#2b2b2b;color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0))}
+.botbar .pw{margin-left:auto;font-size:11.5px;font-weight:800;opacity:.85}.botbar .pw b{color:#c9b3f5}
+</style></head>
+<body>
+<div class="bar"><span style="font-size:20px">🎟️</span><h1>StageFill — National Calendar</h1><a class="home" href="stagefill_events.html">List view</a></div>
+<div class="wrap">
+  <div id="showMap"></div>
+  <div class="note">Every StageFill venue and festival, rolled up by chapter. Tap a ball to drill into a region; tap National / Near-me to switch scope.</div>
+</div>
+<div id="toast"></div>
+<div class="botbar"><span style="font-size:18px">🎫</span><span class="pw">Powered by <b>StageFill</b></span></div>
+
+<script src="stagefill_events.js"></script>
+<script>
+/* mock the app hooks dd_showmap.js reaches for */
+window.toast=function(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('on');},2600);};
+window.openGig=function(tab,region){ location.href='festival_event_maker.html'; };
+window.buy=function(t){ var s=(window.CURBUY&&window.CURBUY.slug); location.href = s ? ('event_page.html?ev='+encodeURIComponent(s)) : 'stagefill_events.html'; };
+window.DD_FESTIVALS=[];
+
+/* StageFill events → the roll-up map. coords carry lat/lng so any city plots (engine adds it to CITY). */
+window.stageFillMapRows=function(){
+  var rows=[]; function push(e){ if(!e)return; var city=[e.city,e.state].filter(Boolean).join(', '); var d=e.start||e.dateStart||e.date_start||'';
+    var co=(e.lat!=null&&e.lng!=null)?[e.lat,e.lng]:null; if(!city&&!co)return;
+    rows.push({ band:e.name||e.venue||'Event', venue:e.venue||'', city:city, date:d, time:e.time||e.start_time||'', coords:co, slug:e.slug, real:true }); }
+  try{ (window.STAGEFILL_EVENTS||[]).forEach(push); }catch(e){}
+  try{ JSON.parse(localStorage.getItem('dd.sf.myevents')||'[]').forEach(push); }catch(e){}
+  return rows;
+};
+</script>
+<script src="dd_showmap.js"></script>
+</body></html>

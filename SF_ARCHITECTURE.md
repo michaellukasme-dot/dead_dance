@@ -127,8 +127,41 @@ alternative to letting us run ticketing.** Festivals: free to build, subscriptio
 the gates. Bands: free with DeadDance ticketing on, else $20/mo. Platform take on tickets is 15%
 (festivals) / a band-friendly rate for acts.
 
+## Every venue is a ticket-sales shop (`sf_venue.sql`, `venue.html`, `door.html`)
+
+A venue is the general case of an event host — from a corner-guitarist café to MusikFest. The same engine
+that runs a festival runs a 40-seat room.
+
+- **Externalized shop** — `venue.html?v=<key>` lists a venue's live shows, each with **Buy**, and gives the
+  venue a **link to embed on its own website**. `venue_key = slug(name|city|state)`; `sf_venue_get` returns the
+  venue's sellable events (owner also previews locked). *"When the where is fixed → Buy."*
+- **Freemium = the band model.** Free if StageFill runs your ticketing (15% platform fee); a **subscription**
+  is the escape hatch if a venue won't cede ticketing. Tiered by size: café **$20/mo**, club **$99/mo**,
+  theater **$299/mo**, festival = seasonal + the 14-day deadline. The 15% take is the business; the
+  subscription is a wall almost nobody chooses. `ticketing_enabled` defaults **on**.
+- **Door mode** — `door.html?ev=<slug>`, owner-gated. **Check-in**: the door phone's camera scans a fan's
+  ticket QR (jsQR) → `sf_checkin(token)` marks it used (green ✓ / red used/invalid). **Sell at door**:
+  - **Card → Scan-to-Pay** (web, no app): a QR to Stripe hosted checkout; the fan scans and pays on **their
+    own** phone — Apple Pay auto-surfaces on iOS Safari, Google Pay on Android, card fallback. No card data
+    ever touches the venue.
+  - **Cash** → `sf_issue_ticket(tender=cash)` mints a paid ticket + check-in QR (`sf_ticket.html?t=<token>`).
+  - Every `sf_order` carries a unique `checkin_token`; `tender ∈ {stripe,cash,scan}`; `checked_in_at` stamps entry.
+- **Autonomous calendar coach** (`sf_calendar_coach.js`) — owner-only. An **expiring Cookie Monster toast**
+  suggests fill-nights ("your Tuesdays are dark → Tuesday Night Karaoke ≈ $X/mo"); a link opens a **modal**
+  with a full **sample month** and $$ potential, computed from the managed-booking proforma
+  (`nightPL = gate + bar − cost − house`; self-run nights use a host fee, band nights the touring model).
+  Each idea's **Add →** deep-links to the Festival/Event Maker, prefilled.
+
+### Roadmap — native Tap to Pay (separate track)
+Web Scan-to-Pay covers card-at-the-door today with **zero hardware and no app**. **Tap to Pay on iPhone**
+(fan taps card/wallet directly to the employee's phone) requires a **native iOS app** — Apple's Tap to Pay
+entitlement + the Stripe Terminal SDK — so it can't live in the PWA. It's a future native-wrapper project;
+Scan-to-Pay is the v1 and needs nothing installed.
+
 ## Deploy order (Michael runs)
 1. Run `sf_spine.sql` in Supabase; enable Realtime on `sf_event`, `sf_order`.
 2. Deploy `sf-rollup`; schedule it (cron) with `DD_CRON_SECRET`.
 3. Extend + redeploy `dd-checkout` / `dd-webhook` for `sf_order`.
 4. Ship the client wiring (behind `ddClient()` — degrades to local drafts if offline).
+5. Venue layer: run `sf_venue.sql` (after `sf_reserve.sql`); ship `venue.html`, `door.html`, `sf_ticket.html`,
+   `sf_calendar_coach.js`. Door check-in needs camera permission (https only).
