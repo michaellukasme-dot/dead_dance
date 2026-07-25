@@ -76,7 +76,7 @@
   <div class="jar">
     <div class="cj">🍪</div>
     <div class="jt"><b id="ckTotal">0</b><span id="ckTier">Nibbler · feed Cookie a crumb to climb</span></div>
-    <button class="board" onclick="openBoard()">🏆 Board</button>
+    <button class="board" onclick="openBoard()"><svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:-4px" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="2.6" rx="1.3" fill="#c79a3a"/><rect x="5" y="5.6" width="14" height="15.4" rx="3.2" fill="#dbeeff" stroke="#9cc3e6" stroke-width="1.1"/><circle cx="9" cy="12" r="2" fill="#a9743b"/><circle cx="14.2" cy="14.4" r="2" fill="#a9743b"/><circle cx="12" cy="9.8" r="1.7" fill="#a9743b"/><circle cx="8.5" cy="11.6" r=".45" fill="#5a3a1a"/><circle cx="14" cy="14" r=".45" fill="#5a3a1a"/></svg> The Cookie Jar</button>
   </div>
   <div class="lead">Play the family. <b>Multiplayer, multi-level, one board a day</b> — everyone gets the same puzzle. Win Cookies 🍪, climb Local → Regional → National.</div>
   <div id="sections"></div>
@@ -161,7 +161,7 @@
       s.items.forEach(function(it,i){ var el=$('t_'+k.replace(/\W/g,'')+'_'+i); if(!el)return;
         el.onclick=function(ev){
           if(it.play==='deadle') return openDeadle();
-          if(it.href){ try{ (window.top||window).location.href=it.href; }catch(e){ location.href=it.href; } return; }   // break out of the sheet iframe → full-screen game
+          if(it.href){ location.href=it.href; return; }   // open the game INSIDE the modal (stay in the sheet — no full-page break-out, the modal's ✕ still closes it)
           // "soon" games still reward curiosity with a crumb (once per day per tile)
           var kd='dd.crumb.'+it.n+'.'+today(); var got=false; try{ got=localStorage.getItem(kd)==='1'; }catch(e){}
           if(!got){ try{ localStorage.setItem(kd,'1'); }catch(e){} award(it.cook||3, ev.clientX, ev.clientY, 'peek'); msgToast('🍪 +'+(it.cook||3)+' for the peek — '+it.n+' drops soon'); }
@@ -256,7 +256,7 @@
       : scope==='regional' ? 'Your <b>region</b> — nearby chapters, ranked. Win the region, represent it nationally.'
       : 'The <b>national</b> jar — every chapter, every head. Climb from Nibbler to Cookie’s Chosen.';
     $('bdCard').innerHTML='<button class="x" onclick="bdClose()">✕</button>'
-      +'<h2>🏆 The Board</h2><div class="sub">Cookies won across every game & puzzle</div>'
+      +'<h2><svg width="22" height="22" viewBox="0 0 24 24" style="vertical-align:-5px" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="2.6" rx="1.3" fill="#c79a3a"/><rect x="5" y="5.6" width="14" height="15.4" rx="3.2" fill="#dbeeff" stroke="#9cc3e6" stroke-width="1.1"/><circle cx="9" cy="12" r="2" fill="#a9743b"/><circle cx="14.2" cy="14.4" r="2" fill="#a9743b"/><circle cx="12" cy="9.8" r="1.7" fill="#a9743b"/><circle cx="8.5" cy="11.6" r=".45" fill="#5a3a1a"/><circle cx="14" cy="14" r=".45" fill="#5a3a1a"/></svg> The Cookie Jar</h2><div class="sub">Cookies won across every game & puzzle</div>'
       +'<div class="bd-tabs"><button class="'+(scope==='local'?'on':'')+'" onclick="bdTab(\'local\')">📍 Local</button><button class="'+(scope==='regional'?'on':'')+'" onclick="bdTab(\'regional\')">🧭 Regional</button><button class="'+(scope==='national'?'on':'')+'" onclick="bdTab(\'national\')">🌎 National</button></div>'
       +rows+'<div class="bd-note">'+note+' Your wins count toward the family jar when you’re signed in. 🌹</div>';
   }
