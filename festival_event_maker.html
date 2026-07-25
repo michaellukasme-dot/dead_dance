@@ -245,6 +245,8 @@ body.mfdrag .sheet{transition:none}
     </div>
     <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px">Venue (optional)</label>
     <input id="evVenue" placeholder="Venue / grounds" oninput="emSave()" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
+    <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px">General admission ticket ($) — 0 = free</label>
+    <input id="evTicket" type="number" min="0" step="1" placeholder="0" oninput="emSave()" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
     <div class="btnrow"><button class="btn g" onclick="emShare()">🔗 Event-page link</button><button class="btn p" onclick="emPublish()">Publish to Events →</button></div>
     <div class="btnrow" style="margin-top:2px"><button class="btn g" onclick="emReset()">Start over</button><a class="btn g" href="stagefill_events.html" style="text-align:center;text-decoration:none;line-height:1.5;color:var(--purple)">Browse all events</a></div>
   </div>
@@ -283,7 +285,7 @@ body.mfdrag .sheet{transition:none}
 <script src="dd_categories.js"></script>
 <script>
 var LS='dd.eventmaker.draft';
-var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,floorIcons:[],stageW:'',stageD:'',survey:[],partners:[],started:false,slug:''};
+var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,floorIcons:[],stageW:'',stageD:'',survey:[],partners:[],started:false,slug:'',ticketPrice:0};
 var map, tiles, cornerMarkers={}, footprint=null, actMarkers=[], placingAct=null, placeMode=null;
 
 function el(id){return document.getElementById(id);}
@@ -417,9 +419,9 @@ function paintCalChip(){ if(state.dateStart){ var d=new Date(state.dateStart+'T1
 function emActsNow(){ emTab('cur_acts'); if(!state.acts.length){ toast('No acts yet — add one with the blue ➕.'); return; }
   toast(state.acts.length+' act'+(state.acts.length===1?'':'s')+' on this map. During the event this shows who’s playing right now.'); }
 function emShareInit(){ var sc=el('evCat'); if(sc&&!sc.options.length&&window.DDCats){ sc.innerHTML=DDCats.list().map(function(c){return '<option value="'+c.key+'">'+c.icon+' '+c.label+'</option>';}).join(''); }
-  if(el('evCity'))el('evCity').value=state.city||''; if(el('evState'))el('evState').value=state.state||''; if(el('evVenue'))el('evVenue').value=state.venue||''; if(el('evCat')&&state.cat)el('evCat').value=state.cat; }
+  if(el('evCity'))el('evCity').value=state.city||''; if(el('evState'))el('evState').value=state.state||''; if(el('evVenue'))el('evVenue').value=state.venue||''; if(el('evTicket'))el('evTicket').value=state.ticketPrice||''; if(el('evCat')&&state.cat)el('evCat').value=state.cat; }
 function emCenter(){ if(state.corners&&state.corners.tl){ var c=state.corners; return [(c.tl[0]+c.br[0])/2,(c.tl[1]+c.br[1])/2]; } try{ var ll=map.getCenter(); return [ll.lat,ll.lng]; }catch(e){ return [40.6187,-75.3803]; } }
-function emPayload(){ var ctr=emCenter(); return {name:state.name,city:state.city||'',state:state.state||'',cat:state.cat||'live_music',start:state.dateStart||'',end:state.dateEnd||'',time:state.startTime||'',venue:state.venue||'',lat:ctr[0],lng:ctr[1],corners:state.corners,acts:(state.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catLabel:a.catLabel,catIcon:a.catIcon,lat:a.lat,lng:a.lng};})}; }
+function emPayload(){ var ctr=emCenter(); return {name:state.name,city:state.city||'',state:state.state||'',cat:state.cat||'live_music',start:state.dateStart||'',end:state.dateEnd||'',time:state.startTime||'',venue:state.venue||'',lat:ctr[0],lng:ctr[1],corners:state.corners,acts:(state.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catLabel:a.catLabel,catIcon:a.catIcon,lat:a.lat,lng:a.lng};}),ticket_types:(state.ticketPrice>0?[{name:'General',price_cents:Math.round(state.ticketPrice*100),currency:'usd'}]:[])}; }
 function emEncode(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
 function emShare(){ emSave(); if(!state.name){ toast('Name your event first.'); emTab('cur_map'); return; }
   var base=location.pathname.replace(/[^\/]*$/,''); var url=location.origin+base+'event_page.html?d='+emEncode(emPayload());
@@ -552,7 +554,7 @@ function toast(msg){ var t=el('_t'); if(!t){ t=document.createElement('div'); t.
   t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3400); }
 
 /* ---------- persistence ---------- */
-var _qrT; function emSave(){ state.name=el('emName').value; if(el('evCity'))state.city=el('evCity').value; if(el('evState'))state.state=el('evState').value; if(el('evCat'))state.cat=el('evCat').value; if(el('evVenue'))state.venue=el('evVenue').value; if(el('stageW'))state.stageW=el('stageW').value; if(el('stageD'))state.stageD=el('stageD').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
+var _qrT; function emSave(){ state.name=el('emName').value; if(el('evCity'))state.city=el('evCity').value; if(el('evState'))state.state=el('evState').value; if(el('evCat'))state.cat=el('evCat').value; if(el('evVenue'))state.venue=el('evVenue').value; if(el('evTicket'))state.ticketPrice=parseFloat(el('evTicket').value)||0; if(el('stageW'))state.stageW=el('stageW').value; if(el('stageD'))state.stageD=el('stageD').value; try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} clearTimeout(_qrT); _qrT=setTimeout(emQR,350); }
 function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state=Object.assign(state,s); } }catch(e){}
   el('emName').value=state.name||'';
   if(state.date&&!state.dateStart){ state.dateStart=state.date; } paintCalChip();

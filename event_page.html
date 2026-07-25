@@ -46,6 +46,7 @@ h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute
 <script src="dd_categories.js"></script>
 <script src="stagefill_events.js"></script>
 <script>
+var SF_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM", SF_CHECKOUT="https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/sf-checkout";
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function qs(k){ return new URLSearchParams(location.search).get(k); }
@@ -87,6 +88,7 @@ function render(E){
    +'<div id="acts">'+(acts.length?acts.map(function(a){ var t=(a.time||'').replace(':00',''); var meta=[(a.catLabel?((a.catIcon||'')+' '+a.catLabel):''),(a.stage||'')].filter(Boolean).join(' · ');
        return '<div class="act"><span class="t">'+esc(t)+'</span><span class="n">'+esc(a.name)+(meta?'<span class="g"> · '+esc(meta)+'</span>':'')+'</span></div>'; }).join('')
        :'<div class="empty">Lineup to be announced.</div>')+'</div>'
+   +(function(){ var tt=E.ticket_types||[]; if(!tt.length)return ''; return '<h2>Tickets</h2>'+tt.map(function(t){ var pr=(t.price_cents||0); var lbl=pr>0?('Buy '+esc(t.name)+' — $'+(pr/100).toFixed(0)):('Free — '+esc(t.name)); return '<button class="share" style="width:100%;justify-content:center;margin-bottom:8px" onclick="sfBuy(\''+t.id+'\')">'+lbl+'</button>'; }).join(''); })()
    +'<div class="foot">Powered by <b>StageFill</b> · the event map that works on phone, tablet &amp; computer — no app store, no signal needed. <a href="stagefill_events.html">Browse all events →</a></div></div>';
   $('page').innerHTML=page;
 
@@ -106,8 +108,10 @@ function render(E){
 (function(){ var ev=qs('ev'); if(!ev)return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return;
   cl.rpc('sf_get',{p_slug:ev}).then(function(r){ if(r&&!r.error&&r.data&&r.data.event){ var d=r.data,e=d.event;
     E={name:e.name,cat:e.cat,start:e.date_start,end:e.date_end,time:e.start_time,city:e.city,state:e.state,venue:e.venue,lat:e.lat,lng:e.lng,corners:e.corners,
-       acts:(d.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catIcon:'',lat:a.lat,lng:a.lng};})};
+       acts:(d.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catIcon:'',lat:a.lat,lng:a.lng};}),ticket_types:(d.ticket_types||[])};
     render(E); } }).catch(function(){}); })();
+function sfBuy(ttId){ if(!ttId){return;} fetch(SF_CHECKOUT,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+SF_ANON},body:JSON.stringify({ticket_type_id:ttId,qty:1})}).then(function(r){return r.json();}).then(function(d){ if(d&&d.url){ location.href=d.url; } else { alert('Checkout unavailable: '+((d&&d.error)||'try again')); } }).catch(function(){ alert('Checkout unavailable right now.'); }); }
+(function(){ if(qs('paid')==='1'){ var b=document.createElement('div'); b.textContent='✅ Ticket confirmed — see you there!'; b.style.cssText='position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:900;background:#12a150;color:#fff;font-weight:800;padding:10px 16px;border-radius:12px;box-shadow:0 6px 20px #0005'; document.body.appendChild(b); setTimeout(function(){b.remove();},5000); } })();
 function shareEvent(){ var url=location.href; if(navigator.share){ navigator.share({title:(E.name||'Event')+' — StageFill',url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); alert('Link copied.'); }catch(e){ prompt('Copy link:',url); } } }
 </script>
