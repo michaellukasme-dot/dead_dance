@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill × ArtsQuest — Revenue Calculator</title>
+<style>
+:root{--ink:#1f2430;--muted:#8a92a6;--line:#e6e8ef;--bg:#f5f6f8;--accent:#2f6feb;--accent2:#1848b8;--card:#fff;--good:#12a150}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto;padding:22px 16px 70px}
+header h1{margin:0;font-size:24px;letter-spacing:-.02em}
+header .sub{color:var(--muted);font-size:13.5px;font-weight:600;margin-top:3px}
+.grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+@media(min-width:820px){.grid{grid-template-columns:1.05fr .95fr;align-items:start}.results{position:sticky;top:16px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:2px 0 12px}
+.row{margin-bottom:14px}
+.row label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+.row .val{float:right;color:var(--accent);font-weight:800}
+select,input[type=number]{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+/* results */
+.total{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:16px;padding:20px;text-align:center}
+.total .lbl{font-size:12.5px;font-weight:700;opacity:.9;text-transform:uppercase;letter-spacing:.05em}
+.total .big{font-size:clamp(34px,9vw,52px);font-weight:900;line-height:1.05;margin:4px 0 2px}
+.total .adopt{font-size:13px;font-weight:700;opacity:.92}
+.streams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.st{background:#f7f9fc;border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.st .n{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.st .v{font-size:20px;font-weight:900;margin-top:2px}
+.scn{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}
+.scn th,.scn td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line)}
+.scn th:first-child,.scn td:first-child{text-align:left}
+.scn thead th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.scn tr.on td{background:#eef4ff;font-weight:800}
+.scn tfoot td{font-weight:900;border-top:2px solid var(--ink);border-bottom:0}
+.foot{margin-top:16px;font-size:11.5px;color:var(--muted)}
+.reset{background:#eef1f6;color:var(--accent);border:0;border-radius:10px;font-weight:800;font-size:13px;padding:10px 14px;cursor:pointer;margin-top:6px}
+.brand{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:900;font-size:12px;border-radius:8px;padding:3px 9px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="brand">◆ StageFill</span>
+    <h1 style="margin-top:8px">Revenue Calculator — ArtsQuest</h1>
+    <div class="sub">Change any assumption below. The model updates live. This is your model — make it yours.</div>
+  </header>
+
+  <div class="grid">
+    <!-- CONTROLS -->
+    <section class="card controls">
+      <div class="sec">Ticketing</div>
+      <div class="row"><label>Average ticket price</label>
+        <select id="ticket"><option value="10">$10</option><option value="30">$30</option><option value="50">$50</option><option value="75">$75</option><option value="100">$100</option></select></div>
+      <div class="row"><label>ArtsQuest take rate</label>
+        <select id="take"><option value="0.10">10%</option><option value="0.15" selected>15%</option><option value="0.20">20%</option><option value="0.25">25%</option></select></div>
+
+      <div class="sec" style="margin-top:20px">Map subscription &amp; ads</div>
+      <div class="row"><label>Map subscription (per festival / day)</label>
+        <select id="sub"><option value="2500">$2,500</option><option value="5000" selected>$5,000</option><option value="7500">$7,500</option><option value="10000">$10,000</option></select></div>
+      <div class="row"><label>Proximity ad (per day, per ad)</label>
+        <select id="proxP"><option value="25" selected>$25</option><option value="50">$50</option><option value="100">$100</option></select></div>
+      <div class="row"><label>Proximity ads per festival / day <span class="val" id="proxN_v">20</span></label>
+        <input type="range" id="proxN" min="0" max="60" value="20"></div>
+      <div class="row"><label>Rolling ad (per day)</label>
+        <select id="rollP"><option value="100" selected>$100</option><option value="250">$250</option><option value="500">$500</option></select></div>
+      <div class="row"><label>Rolling ads per festival / day <span class="val" id="rollN_v">10</span></label>
+        <input type="range" id="rollN" min="0" max="40" value="10"></div>
+
+      <div class="sec" style="margin-top:20px">Market &amp; reach</div>
+      <div class="row"><label>Avg festival length (days) <span class="val" id="days_v">3</span></label>
+        <input type="range" id="days" min="1" max="14" value="3"></div>
+      <div class="row"><label>US festivals on the platform (total pool)</label>
+        <input type="number" id="fests" value="800" min="1"><div class="hint">800+ major US music festivals (Pollstar).</div></div>
+      <div class="row"><label>US festival attendees / year</label>
+        <input type="number" id="att" value="32000000" min="0" step="1000000"><div class="hint">~32M US festival-goers/yr.</div></div>
+
+      <button class="reset" onclick="reset()">↺ Reset to defaults</button>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="results">
+      <div class="card" style="padding:16px">
+        <div class="row" style="margin:0 0 12px"><label>Adoption — share of festivals live <span class="val" id="adopt_v">35%</span></label>
+          <input type="range" id="adopt" min="0" max="100" value="35"></div>
+        <div class="total">
+          <div class="lbl">ArtsQuest revenue / year</div>
+          <div class="big" id="grand">$0</div>
+          <div class="adopt" id="grandsub">at 35% adoption</div>
+        </div>
+        <div class="streams">
+          <div class="st"><div class="n">① Map subscription</div><div class="v" id="s1">$0</div></div>
+          <div class="st"><div class="n">② Ticketing (take)</div><div class="v" id="s2">$0</div></div>
+          <div class="st"><div class="n">③ Proximity ads</div><div class="v" id="s3">$0</div></div>
+          <div class="st"><div class="n">④ Rolling ads</div><div class="v" id="s4">$0</div></div>
+        </div>
+        <table class="scn" id="scn">
+          <thead><tr><th>Scenario</th><th>Festivals</th><th>Total / yr</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="foot" id="foot"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function money(n){ n=Math.round(n); if(n>=1e9)return '$'+(n/1e9).toFixed(2)+'B'; if(n>=1e6)return '$'+(n/1e6).toFixed(2)+'M'; if(n>=1e3)return '$'+(n/1e3).toFixed(0)+'K'; return '$'+n.toLocaleString(); }
+function num(id){ return parseFloat($(id).value)||0; }
+
+function calc(adopt){
+  var fests=num('fests')*adopt;
+  var festDays=fests*num('days');
+  var s1=festDays*num('sub');
+  var s3=festDays*num('proxN')*num('proxP');
+  var s4=festDays*num('rollN')*num('rollP');
+  var attendees=num('att')*adopt;
+  var s2=attendees*num('ticket')*num('take');
+  return {fests:fests, s1:s1, s2:s2, s3:s3, s4:s4, total:s1+s2+s3+s4};
+}
+function render(){
+  // live slider labels
+  $('proxN_v').textContent=$('proxN').value;
+  $('rollN_v').textContent=$('rollN').value;
+  $('days_v').textContent=$('days').value;
+  var a=num('adopt')/100; $('adopt_v').textContent=Math.round(a*100)+'%';
+  var r=calc(a);
+  $('grand').textContent=money(r.total);
+  $('grandsub').textContent='at '+Math.round(a*100)+'% adoption · '+Math.round(r.fests).toLocaleString()+' festivals';
+  $('s1').textContent=money(r.s1); $('s2').textContent=money(r.s2); $('s3').textContent=money(r.s3); $('s4').textContent=money(r.s4);
+  // scenario table
+  var scn=[['Year 1',0.10],['Year 3',0.35],['Scale',0.75],['Full TAM',1.0]];
+  var cur=Math.round(a*100);
+  var body=scn.map(function(s){ var rr=calc(s[1]); var on=(Math.round(s[1]*100)===cur)?' class="on"':'';
+    return '<tr'+on+'><td>'+s[0]+' ('+Math.round(s[1]*100)+'%)</td><td>'+Math.round(rr.fests).toLocaleString()+'</td><td>'+money(rr.total)+'</td></tr>'; }).join('');
+  $('scn').querySelector('tbody').innerHTML=body;
+  $('foot').innerHTML='Streams: ① festivals × days × subscription · ③ × proximity ads × rate · ④ × rolling ads × rate · ② attendees × ticket × take. Figures are estimates from your inputs.';
+}
+['ticket','take','sub','proxP','proxN','rollP','rollN','days','fests','att','adopt'].forEach(function(id){ $(id).addEventListener('input',render); });
+function reset(){ var d={ticket:'10',take:'0.15',sub:'5000',proxP:'25',proxN:'20',rollP:'100',rollN:'10',days:'3',fests:'800',att:'32000000',adopt:'35'};
+  Object.keys(d).forEach(function(k){ $(k).value=d[k]; }); render(); }
+reset();
+</script>
+</body>
+</html>

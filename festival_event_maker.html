@@ -229,7 +229,7 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 
   <div class="cur" id="cur_partners">
     <div class="sec">Partner registration — shops, trucks &amp; street vendors</div>
-    <div class="hint">Your festival's vendors register here and buy an ad. The admin then pins each one's exact spot — the same GPS discovery as the potties &amp; restrooms — so proximity ads fire the moment a fan walks up.</div>
+    <div class="hint">Vendors register and buy an ad, then validate their own footprint: a fixed shop stands just outside its front door and at its two front corners; trucks &amp; booths do the same at their spot on setup day. Those exact coordinates fire the proximity ad the moment a fan walks up.</div>
     <input id="pName" placeholder="Business name — e.g. Yocco's, Aw Shucks" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
     <div style="display:flex;gap:8px;margin-top:8px">
       <select id="pType" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:#fff;color:var(--ink)"><option>Shop</option><option>Food truck</option><option>Street vendor</option></select>
@@ -279,6 +279,7 @@ body{font:400 15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-
 </div>
 
 <!-- add-act modal -->
+<div class="scrim" id="pinScrim"><div class="modal"><h3 id="pinTitle">Validate location</h3><p id="pinStep" style="font-size:14px;font-weight:800;color:var(--ink);margin:0 0 6px"></p><p style="font-size:12px;color:var(--muted);margin:0 0 14px">Stand still on the exact spot, then capture. Fixed shops self-validate their front door and two corners; trucks &amp; booths do the same at their spot on setup day.</p><div class="btnrow"><button class="btn g" onclick="pinCancel()">Cancel</button><button class="btn p" onclick="pinCapture()">📍 I'm here — capture</button></div></div></div>
 <div class="scrim" id="actScrim">
   <div class="modal">
     <h3>Add an act</h3>
@@ -466,19 +467,32 @@ function pRender(){ var host=el('pList'); if(!host)return; state.partners=state.
   if(!state.partners.length){ host.innerHTML='<div class="hint">No partners yet — register your first vendor above.</div>'; if(el('pTotal'))el('pTotal').textContent=''; return; }
   var tot=0;
   host.innerHTML=state.partners.map(function(p){ var spend=pRate(p.plan)*p.days; tot+=spend;
-    var loc=p.lat!=null?('📍 '+p.lat.toFixed(5)+', '+p.lng.toFixed(5)+' ±'+p.acc+'m'):'<span style="color:#c0392b;font-weight:800">⚠ needs location</span>';
+    var np=p.points?Object.keys(p.points).length:0; var loc=p.lat!=null?('📍 '+p.lat.toFixed(5)+', '+p.lng.toFixed(5)+' · '+np+' pt'+(np===1?'':'s')):'<span style="color:#c0392b;font-weight:800">⚠ needs location</span>';
     return '<div class="svrow" style="flex-wrap:wrap"><span class="k">'+esc(p.name)+'</span>'
       +'<span class="c">'+esc(p.type)+' · '+esc((PPLAN[p.plan]||PPLAN.none)[0])+' · '+p.days+'d · $'+spend.toLocaleString()+'</span>'
       +'<span style="flex-basis:100%;font-size:11px;color:var(--muted);margin-top:2px">'+loc+'</span>'
-      +'<button class="btn g" style="flex:0 0 auto;padding:6px 10px;margin:5px 6px 0 0" onclick="pPin('+p.id+')">📍 Pin location</button>'
+      +'<button class="btn g" style="flex:0 0 auto;padding:6px 10px;margin:5px 6px 0 0" onclick="pPin('+p.id+')">📍 Validate location</button>'
       +'<button class="btn g" style="flex:0 0 auto;padding:6px 10px;margin:5px 0 0" onclick="pDel('+p.id+')">Remove</button></div>'; }).join('');
   if(el('pTotal'))el('pTotal').textContent='Ad revenue (this festival): $'+tot.toLocaleString(); }
-function pPin(id){ var p=(state.partners||[]).filter(function(x){return x.id===id;})[0]; if(!p)return;
-  if(!navigator.geolocation){ toast('This device has no GPS.'); return; } toast('📡 Stand at '+p.name+' — reading GPS…');
-  navigator.geolocation.getCurrentPosition(function(pos){ p.lat=pos.coords.latitude; p.lng=pos.coords.longitude; p.acc=Math.round(pos.coords.accuracy||0);
-    try{ var ic=L.divIcon({className:'',html:'<div class="actpin" style="background:#12a150"><span>$</span></div>',iconSize:[24,24],iconAnchor:[12,24]}); L.marker([p.lat,p.lng],{icon:ic,title:p.name}).addTo(map).bindPopup('<b>'+esc(p.name)+'</b><br>'+esc(p.type)+' · ad'); }catch(e){}
-    pRender(); emSave(); toast('📍 Pinned '+p.name+' (±'+p.acc+'m).');
-  }, function(err){ toast('📍 Turn on Location to pin. '+(err&&err.message?('('+err.message+')'):'')); }, {enableHighAccuracy:true,timeout:12000,maximumAge:0}); }
+/* guided location validation — shops: front door + two corners; trucks/booths: same, at their spot on setup day */
+var PIN_SHOP=[{k:"door",t:"Stand just OUTSIDE your front door."},{k:"c1",t:"Now stand at the LEFT front corner of your shop."},{k:"c2",t:"Now the RIGHT front corner."}];
+var PIN_MOBILE=[{k:"spot",t:"On SETUP DAY, stand at your booth / truck spot."},{k:"c1",t:"Stand at one corner of your footprint."},{k:"c2",t:"Now the opposite corner."}];
+var _pinP=null,_pinSteps=[],_pinIdx=0;
+function pPin(id){ var p=(state.partners||[]).filter(function(x){return x.id===id;})[0]; if(!p)return; if(!navigator.geolocation){ toast("This device has no GPS."); return; }
+  _pinP=p; p.points=p.points||{}; _pinSteps=(p.type==="Shop")?PIN_SHOP:PIN_MOBILE; _pinIdx=0; pinShow(); }
+function pinShow(){ if(!_pinP)return; if(_pinIdx>=_pinSteps.length){ pinDone(); return; } var st=_pinSteps[_pinIdx];
+  el("pinTitle").textContent="Validate "+_pinP.name; el("pinStep").innerHTML="Step "+(_pinIdx+1)+" of "+_pinSteps.length+" — "+esc(st.t); el("pinScrim").classList.add("on"); }
+function pinCapture(){ if(!_pinP)return; var st=_pinSteps[_pinIdx]; toast("📡 Hold still — reading GPS…");
+  navigator.geolocation.getCurrentPosition(function(pos){ _pinP.points[st.k]={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:Math.round(pos.coords.accuracy||0)}; _pinIdx++;
+    if(_pinIdx>=_pinSteps.length){ pinDone(); } else { pinShow(); } }, function(err){ toast("📍 Turn on Location. "+(err&&err.message?("("+err.message+")"):"")); }, {enableHighAccuracy:true,timeout:12000,maximumAge:0}); }
+function pinDone(){ el("pinScrim").classList.remove("on"); if(!_pinP){return;} var pts=_pinP.points||{}, prim=pts.door||pts.spot||pts.c1;
+  if(prim){ _pinP.lat=prim.lat; _pinP.lng=prim.lng; _pinP.acc=prim.acc; }
+  try{ var coords=[]; ["door","spot","c1","c2"].forEach(function(k){ if(pts[k]) coords.push([pts[k].lat,pts[k].lng]); });
+    coords.forEach(function(c){ L.circleMarker(c,{radius:5,color:"#12a150",fillColor:"#2fbf71",fillOpacity:.9,weight:2}).addTo(map); });
+    if(coords.length>=2) L.polyline(coords,{color:"#12a150",weight:2,dashArray:"4 4"}).addTo(map);
+    if(prim){ var ic=L.divIcon({className:"",html:"<div class='actpin' style='background:#12a150'><span>$</span></div>",iconSize:[24,24],iconAnchor:[12,24]}); L.marker([prim.lat,prim.lng],{icon:ic,title:_pinP.name}).addTo(map); } }catch(e){}
+  pRender(); emSave(); toast("📍 "+_pinP.name+" validated — "+Object.keys(pts).length+" points."); _pinP=null; }
+function pinCancel(){ el("pinScrim").classList.remove("on"); _pinP=null; }
 function pDel(id){ state.partners=(state.partners||[]).filter(function(x){return x.id!==id;}); pRender(); emSave(); }
 function emCoverShow(sh){ var c=el('emCover'); if(c) c.style.display=sh?'block':'none'; var t=document.querySelector('.em-top'); if(t) t.style.display=sh?'none':'flex'; }
 function emStart(){ state.started=true; emSave(); emCoverShow(false); emTab('cur_map'); setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },60); }
