@@ -88,7 +88,7 @@ function render(E){
    +'<div id="acts">'+(acts.length?acts.map(function(a){ var t=(a.time||'').replace(':00',''); var meta=[(a.catLabel?((a.catIcon||'')+' '+a.catLabel):''),(a.stage||'')].filter(Boolean).join(' · ');
        return '<div class="act"><span class="t">'+esc(t)+'</span><span class="n">'+esc(a.name)+(meta?'<span class="g"> · '+esc(meta)+'</span>':'')+'</span></div>'; }).join('')
        :'<div class="empty">Lineup to be announced.</div>')+'</div>'
-   +(function(){ var tt=E.ticket_types||[]; if(!tt.length)return ''; return '<h2>Tickets</h2>'+tt.map(function(t){ var pr=(t.price_cents||0); var lbl=pr>0?('Buy '+esc(t.name)+' — $'+(pr/100).toFixed(0)):('Free — '+esc(t.name)); return '<button class="share" style="width:100%;justify-content:center;margin-bottom:8px" onclick="'+(pr>0?('sfBuy(\''+t.id+'\')'):'sfFree()')+'">'+lbl+'</button>'; }).join(''); })()
+   +(function(){ var tt=E.ticket_types||[]; if(!tt.length)return ''; return '<h2>Tickets</h2>'+tt.map(function(t){ var pr=(t.price_cents||0); var lbl=pr>0?('Buy '+esc(t.name)+' — $'+(pr/100).toFixed(0)):('Free — '+esc(t.name)); return '<button class="share sftix" data-tt="'+esc(String(t.id||''))+'" data-free="'+(pr>0?'0':'1')+'" style="width:100%;justify-content:center;margin-bottom:8px">'+lbl+'</button>'; }).join(''); })()
    +(E._isOwner?'<button class="share" style="width:100%;justify-content:center;margin-top:6px;background:#12a150" onclick="sfOccView()">📊 Live occupancy (owner)</button>':'')
    +'<div class="foot">Powered by <b>StageFill</b> · the event map that works on phone, tablet &amp; computer — no app store, no signal needed. <a href="stagefill_events.html">Browse all events →</a></div></div>';
   $('page').innerHTML=page;
@@ -112,6 +112,10 @@ function render(E){
        acts:(d.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catIcon:'',lat:a.lat,lng:a.lng};}),ticket_types:(d.ticket_types||[]),_id:e.id,_isOwner:e.is_owner,_geofences:(d.geofences||[])};
     render(E); try{ sfPingStart(e.id,d.geofences); }catch(_e){} } }).catch(function(){}); })();
 function sfFree(){ alert("Free entry — just come to the event. (RSVP coming soon.)"); }
+/* delegated ticket handler — no user data in inline JS; id is validated as a UUID before it reaches sfBuy (no reflected XSS via ?d). */
+document.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest&&ev.target.closest('.sftix'); if(!b)return;
+  if(b.getAttribute('data-free')==='1'){ sfFree(); return; }
+  var id=b.getAttribute('data-tt')||''; if(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)){ sfBuy(id); } });
 /* ===== occupancy telemetry: privacy-safe geofence ping loop (device = rotating daily hash, never identity) ===== */
 function sfDev(){ try{ var day=new Date().toISOString().slice(0,10), k='dd.pingdev', o=JSON.parse(localStorage.getItem(k)||'null'); if(!o||o.day!==day){ o={day:day,id:(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('d'+Math.random().toString(36).slice(2))}; localStorage.setItem(k,JSON.stringify(o)); } return o.id; }catch(e){ return 'anon'; } }
 function _sfDist(a,b,c,d){ var R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,s=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2); return 2*R*Math.asin(Math.sqrt(s)); }
@@ -124,8 +128,8 @@ function sfPingStart(eid, geofences){ if(_pEvt||!eid||!geofences||!geofences.len
   }, function(){}, {enableHighAccuracy:true, maximumAge:15000});
   _pIn=setInterval(sfPingFlush, 60000); window.addEventListener('pagehide', sfPingFlush); }
 function sfPingFlush(){ if(!_pEvt||!_pBuf.length) return; var batch=_pBuf.splice(0,300), cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('sf_ping_batch',{p_event:_pEvt, p_pings:batch}).catch(function(){}); }
-function sfOccView(){ if(!E._id) return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ alert('Offline.'); return; } var day=new Date().toISOString().slice(0,10);
-  cl.rpc('sf_rollup',{p_event:E._id, p_day:day}).then(function(){ return cl.rpc('sf_occupancy_get',{p_event:E._id, p_day:day}); }).then(function(r){ sfOccRender((r&&r.data)||[]); }).catch(function(){ alert('Could not load occupancy.'); }); }
+function sfOccView(){ if(!E._id) return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ alert('Offline.'); return; } var day=new Date().toISOString().slice(0,10), slug=qs('ev')||'';
+  cl.rpc('sf_rollup_mine',{p_slug:slug}).then(function(){ return cl.rpc('sf_occupancy_get',{p_event:E._id, p_day:day}); }).then(function(r){ sfOccRender((r&&r.data)||[]); }).catch(function(){ alert('Could not load occupancy.'); }); }
 function sfOccRender(rows){ var hr=new Date().getHours(), byG={};
   rows.forEach(function(o){ if(!byG[o.label]) byG[o.label]={label:o.label,kind:o.kind,dev:0,uses:0}; if(o.hour===hr){ byG[o.label].dev+=o.devices; byG[o.label].uses+=o.uses; } });
   var list=Object.keys(byG).map(function(k){return byG[k];}).sort(function(a,b){return b.dev-a.dev;});

@@ -32,23 +32,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // idempotency: first delivery returns true; replays return false → skip.
-    const { data: first } = await svc.rpc("sf_webhook_seen", { p_id: event.id });
-    if (first === false) return ok();
-
+    // tickets: atomic + idempotent fulfillment — seen-marker + paid-flip + qty bump in ONE transaction,
+    // so a transient failure rolls back the idempotency marker and Stripe's retry reprocesses cleanly.
     if (event.type === "checkout.session.completed") {
       const s = event.data.object as Stripe.Checkout.Session;
       if (s.metadata?.kind === "sf_ticket" && s.metadata?.order_id && s.payment_status === "paid") {
-        const orderId = s.metadata.order_id;
-        // flip to paid only if still pending (belt) and read qty/ticket for the atomic bump
-        const { data: order } = await svc.from("sf_order")
-          .select("id, ticket_type_id, qty, status").eq("id", orderId).single();
-        if (order && order.status !== "paid") {
-          await svc.from("sf_order").update({ status: "paid" }).eq("id", orderId).eq("status", "pending");
-          if (order.ticket_type_id) {
-            await svc.rpc("sf_ticket_sold_inc", { p_tt: order.ticket_type_id, p_qty: order.qty ?? 1 });
-          }
-        }
+        const { error } = await svc.rpc("sf_ticket_fulfill", { p_event_id: event.id, p_order: s.metadata.order_id });
+        if (error) return new Response(`fulfill error: ${error.message}`, { status: 500 }); // let Stripe retry
       }
     }
 

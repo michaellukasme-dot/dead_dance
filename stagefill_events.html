@@ -80,9 +80,9 @@ var ALL=allEvents();
 /* populate filters */
 (function(){
   var states=Array.from(new Set(ALL.map(function(e){return e.state;}).filter(Boolean))).sort();
-  $('fState').innerHTML='<option value="">All states</option>'+states.map(function(s){return '<option>'+s+'</option>';}).join('');
+  $('fState').innerHTML='<option value="">All states</option>'+states.map(function(s){return '<option>'+esc(s)+'</option>';}).join('');
   var cats=Array.from(new Set(ALL.map(function(e){return e.cat;}).filter(Boolean)));
-  $('fCat').innerHTML='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+c+'">'+catIcon(c)+' '+esc(catLabel(c))+'</option>';}).join('');
+  $('fCat').innerHTML='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+esc(c)+'">'+catIcon(c)+' '+esc(catLabel(c))+'</option>';}).join('');
   fillCities('');
 })();
 function fillCities(state){ var pool=ALL.filter(function(e){return !state||e.state===state;});
@@ -122,8 +122,8 @@ render();
 function sfLive(){ var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return; cl.rpc('sf_list',{}).then(function(r){ if(!(r&&!r.error&&Array.isArray(r.data)))return;
   var lv=r.data.map(function(e){ return {slug:e.slug,name:e.name,city:e.city,state:e.state,start:e.date_start,end:e.date_end,time:e.start_time,cat:e.cat,venue:e.venue,lat:e.lat,lng:e.lng,_live:true}; });
   var seen={}; lv.forEach(function(e){seen[e.slug]=1;}); ALL=lv.concat(ALL.filter(function(e){return !seen[e.slug];}));
-  var states=Array.from(new Set(ALL.map(function(e){return e.state;}).filter(Boolean))).sort(); $('fState').innerHTML='<option value="">All states</option>'+states.map(function(x){return '<option>'+x+'</option>';}).join('');
-  var cats=Array.from(new Set(ALL.map(function(e){return e.cat;}).filter(Boolean))); $('fCat').innerHTML='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+c+'">'+catIcon(c)+' '+esc(catLabel(c))+'</option>';}).join('');
+  var states=Array.from(new Set(ALL.map(function(e){return e.state;}).filter(Boolean))).sort(); $('fState').innerHTML='<option value="">All states</option>'+states.map(function(x){return '<option>'+esc(x)+'</option>';}).join('');
+  var cats=Array.from(new Set(ALL.map(function(e){return e.cat;}).filter(Boolean))); $('fCat').innerHTML='<option value="">All categories</option>'+cats.map(function(c){return '<option value="'+esc(c)+'">'+catIcon(c)+' '+esc(catLabel(c))+'</option>';}).join('');
   fillCities($('fState').value); render(); }).catch(function(){}); }
 sfLive();
 </script>

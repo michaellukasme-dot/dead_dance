@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
   // cron-secret gate (bearer or ?key=)
   const auth = (req.headers.get("authorization") ?? "").replace("Bearer ", "");
   const url = new URL(req.url);
-  if (CRON_SECRET && auth !== CRON_SECRET && url.searchParams.get("key") !== CRON_SECRET) {
-    return json({ error: "forbidden" }, 403);
+  if (!CRON_SECRET || (auth !== CRON_SECRET && url.searchParams.get("key") !== CRON_SECRET)) {
+    return json({ error: "forbidden" }, 403);   // fail CLOSED if the secret isn't set
   }
 
   let slug: string | null = null;
