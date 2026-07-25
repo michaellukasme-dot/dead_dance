@@ -68,6 +68,9 @@ end $$;
 
 -- ── BLOCKER-1 + BLOCKER-2: public reads project SAFE columns only, and enforce the paywall server-side. ──
 -- Servable to the public = live AND (subscribed OR still in the free window before the festival).
+-- NOTE: the spine's sf_list returned `setof sf_event`; this narrows to safe columns, which is a RETURN-TYPE
+--       change — Postgres requires a drop first (create-or-replace can't change return type). Safe to re-run.
+drop function if exists public.sf_list(text, text, text);
 create or replace function public.sf_list(p_state text default null, p_city text default null, p_cat text default null)
 returns table(slug text, name text, city text, state text, date_start date, date_end date,
               start_time text, cat text, venue text, lat float8, lng float8)
@@ -81,6 +84,8 @@ language sql stable security definer set search_path = public as $$
     and (p_cat   is null or e.cat   = p_cat)
   order by e.date_start asc nulls last, e.created_at desc;
 $$;
+-- drop above wiped the spine's grant — re-issue it.
+grant execute on function public.sf_list(text, text, text) to anon, authenticated;
 
 create or replace function public.sf_get(p_slug text)
 returns jsonb language sql stable security definer set search_path = public as $$
