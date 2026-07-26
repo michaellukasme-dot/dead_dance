@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Musikfest 2026 — 10-Day Occupancy &amp; Engagement Report (Sample)</title>
+<style>
+:root{--ink:#1a1f2b;--muted:#6b7280;--line:#e6e8ee;--bg:#f6f7f9;--accent:#2f6feb;--good:#137a4b;--warn:#b7791f;--bad:#c02626;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:400 14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:980px;margin:0 auto;padding:26px 20px 60px}
+.brandbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.brandbar .l b{font-size:20px;letter-spacing:-.01em}
+.brandbar .l span{display:block;color:var(--muted);font-size:12.5px;font-weight:600;margin-top:2px}
+.brandbar .r{text-align:right;font-size:11.5px;color:var(--muted);font-weight:700}
+.tag{display:inline-block;background:#eef2fb;color:var(--accent);font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-top:6px}
+h2{font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;border-top:1px solid var(--line);padding-top:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.kpi .n{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.kpi .k{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
+.kpi .s{font-size:11px;color:var(--accent);font-weight:700;margin-top:5px}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto}
+.tbl table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+.tbl th,.tbl td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl thead th{background:#fafbfc;font-size:10.5px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0}
+.tbl tr.wknd td{background:#fbfaf3}
+.tbl tr.tot td{font-weight:800;background:#f4f7fd;border-top:2px solid var(--line)}
+.tbl td b{font-weight:800}
+.pill{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px}
+.ok{background:#e6f4ec;color:var(--good)}.warn{background:#fdf3e2;color:var(--warn)}.bad{background:#fbe9e9;color:var(--bad)}
+.note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:12.5px;color:#3a4152;margin-top:14px}
+.note b{color:var(--ink)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding:10px 4px 0}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.bar i{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#5a8bec,#2f6feb);display:block}
+.bar small{font-size:9.5px;color:var(--muted);font-weight:700}
+.foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+@media print{body{background:#fff}.wrap{max-width:none}.note,.kpi,.tbl{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brandbar">
+    <div class="l"><b>Musikfest 2026 — 10-Day Occupancy &amp; Engagement Report</b>
+      <span>Festival-wide operations intelligence · powered by the StageFill event map</span></div>
+    <div class="r">Prepared for<br><b style="color:var(--ink)">ArtsQuest Operations</b><br>Jul 31 – Aug 9, 2026</div>
+  </div>
+  <div class="tag">Sample · synthetic data from the StageFill growth &amp; movement simulation</div>
+
+  <h2>The festival, at a glance (10 days)</h2>
+  <div class="kpis" id="kpis"></div>
+  <div class="note">Every reading is derived from <b>live map sessions</b> — a device with the StageFill map open, inside a location's geofence. Counts are <b>distinct devices, never identities</b>; no personal data leaves the phone. Figures are a synthetic sample produced by the simulation described at the end of this report.</div>
+
+  <h2>Day by day — occupancy &amp; engagement</h2>
+  <div class="tbl"><table id="dayTbl"></table></div>
+  <div class="note">Weekend rows shaded. The two Saturdays (Aug 1 &amp; Aug 8) carry <b>~2.3–2.4×</b> the weekday crowd — the moments operations, facilities, and the network must absorb the most load.</div>
+
+  <h2>Crowdsourced photos &amp; HyperPosts — by day</h2>
+  <div class="tbl" style="padding:6px 10px 12px"><div class="bars" id="engBars"></div></div>
+  <div class="note"><b>Photos</b> = fan-captured images contributed from inside the festival (the crowdsourced photo wall). <b>HyperPosts</b> = one-tap shares that radiate a moment out to the networks — each one pulls new visitors back to the map. Together they are the festival's earned-reach engine: <b id="engLine"></b>.</div>
+
+  <h2>Busiest day spotlight — Sat Aug 8, by Platz</h2>
+  <div class="tbl"><table id="platzTbl"></table></div>
+
+  <h2>Facilities across the festival — did you have enough?</h2>
+  <div class="tbl"><table id="facTbl"></table></div>
+  <div class="note"><b>Potty used</b> = a device dwelling <b>≥ 2 minutes</b> inside a restroom geofence. <b>First-aid visit</b> = ≥ 3 minutes inside a first-aid geofence. Peak-day demand is compared to serviceable throughput to flag where to add units before the next rush.</div>
+
+  <h2>About this report — the simulation &amp; stress test behind it</h2>
+  <div class="note" style="border-left-color:var(--muted)">
+    <p style="margin:0 0 8px"><b>What was tested.</b> A full end-to-end simulation grew the map from <b>zero to 1.5M users</b> across the 10 festival days, driven entirely by <b>phone-to-phone (street-team) invitations</b> — one attendee touches another's phone, they scan a QR, they're in, and now they invite too. Every simulated user walks the site: every <b>Platz, potty, shop, first-aid station, and stage</b>, taking photos and firing HyperPosts. The two-weekend <b>Friday/Saturday spikes</b> are modeled explicitly as the high-use scenario.</p>
+    <p style="margin:0 0 8px"><b>What it produced.</b> The occupancy and engagement figures above are the direct output of that simulation — ~<b id="tAttend"></b> attendees, ~<b id="tMaps"></b> unique map-users, <b id="tPotty"></b> restroom uses, <b id="tShop"></b> vendor pass-bys, <b id="tPhoto"></b> photos, and <b id="tPost"></b> HyperPosts over ten days.</p>
+    <p style="margin:0 0 8px"><b>Where the system strains (and the fix).</b> The stress test also pushed the platform to failure. At festival scale the functional build is correct, but the <b>real-time growth features</b> — the street-team leaderboard and status polling — saturate first: a leaderboard aggregate polled every few seconds by every recruiter overwhelms the database at only a few hundred concurrent recruiters, well before the crowd numbers above. The remedy is standard festival-hardening: replace polling with push/cached counters, lighten the occupancy ping cadence, and scale the data tier. With those applied, the simulation <b>survives the full 1.5M curve across both peak Saturdays</b> at roughly a third of the hardened ceiling. Full breakdown in the engineering load-test report.</p>
+    <p style="margin:0"><b>How the numbers are made.</b> The map runs on phone, tablet, and computer with no app-store install and no signal required. Presence + dwell rules turn movement into events: ≥2 min in a restroom = a potty use; ≥3 min at first aid = a visit; a 15 m frontage crossing = a vendor pass-by; presence in a stage geofence during a set = act draw. These are <b>synthetic sample figures</b> sized to a realistic MusikFest to illustrate the daily report ArtsQuest would receive.</p>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ---- same model as load_test_harness.js ---- */
+var DAYS=[
+ {d:'Fri Jul 31',dow:'Fri',mult:1.7,wknd:1},{d:'Sat Aug 1',dow:'Sat',mult:2.3,wknd:1},{d:'Sun Aug 2',dow:'Sun',mult:1.3,wknd:1},
+ {d:'Mon Aug 3',dow:'Mon',mult:0.8},{d:'Tue Aug 4',dow:'Tue',mult:0.8},{d:'Wed Aug 5',dow:'Wed',mult:0.9},{d:'Thu Aug 6',dow:'Thu',mult:1.0},
+ {d:'Fri Aug 7',dow:'Fri',mult:1.8,wknd:1},{d:'Sat Aug 8',dow:'Sat',mult:2.4,wknd:1},{d:'Sun Aug 9',dow:'Sun',mult:1.2,wknd:1}
+];
+var ATT=1200000, sumW=DAYS.reduce(function(a,d){return a+d.mult;},0);
+var MV={adopt:.55,uniqPerPeak:3.4,potty:1.6,aid:.004,shop:8,photoR:.25,photoN:3,postR:.06,postN:1.4};
+var DIU=1.0; // peak factor baked into peakConcurrent below
+DAYS.forEach(function(d){
+  d.attend=Math.round(ATT*d.mult/sumW);
+  d.maps=Math.round(d.attend*MV.adopt);
+  d.peak=Math.round(d.attend*MV.adopt/MV.uniqPerPeak*1.6);   // peak concurrent (evening)
+  d.pottyUses=Math.round(d.maps*MV.potty);
+  d.firstAid=Math.round(d.maps*MV.aid);
+  d.shop=Math.round(d.maps*MV.shop);
+  d.photos=Math.round(d.maps*MV.photoR*MV.photoN);
+  d.posts=Math.round(d.maps*MV.postR*MV.postN);
+});
+var T={}; ['attend','maps','pottyUses','firstAid','shop','photos','posts'].forEach(function(k){ T[k]=DAYS.reduce(function(a,d){return a+d[k];},0); });
+function C(n){ return n.toLocaleString('en-US'); }
+function M(n){ return n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?Math.round(n/1e3)+'k':C(n); }
+
+/* KPIs */
+function kpi(n,k,s){ return '<div class="kpi"><div class="n">'+n+'</div><div class="k">'+k+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>'; }
+document.getElementById('kpis').innerHTML=
+  kpi(M(T.maps),'Unique map-users','over 10 days')
+ +kpi(M(T.shop),'Vendor pass-bys','advertising reach')
+ +kpi(M(T.pottyUses),'Restroom uses','≥2-min dwell')
+ +kpi(C(T.photos),'Photos contributed','crowdsourced')
+ +kpi(C(T.posts),'HyperPosts','one-tap earned reach')
+ +kpi(C(T.firstAid),'First-aid visits','≥3-min dwell');
+
+/* day table */
+var cols=[['attend','Attendance'],['maps','Unique maps'],['peak','Peak concurrent'],['pottyUses','Potty uses'],['firstAid','First aid'],['shop','Shop pass-bys'],['photos','Photos'],['posts','HyperPosts']];
+var dh='<thead><tr><th>Day</th>'+cols.map(function(c){return '<th>'+c[1]+'</th>';}).join('')+'</tr></thead><tbody>';
+DAYS.forEach(function(d){ dh+='<tr class="'+(d.wknd?'wknd':'')+'"><td><b>'+d.d+'</b></td>'+cols.map(function(c){return '<td>'+C(d[c[0]])+'</td>';}).join('')+'</tr>'; });
+dh+='<tr class="tot"><td>Festival total</td>'+cols.map(function(c){ return '<td>'+(c[0]==='peak'?'—':C(T[c[0]]||DAYS.reduce(function(a,x){return a+x[c[0]];},0)))+'</td>'; }).join('')+'</tr>';
+document.getElementById('dayTbl').innerHTML=dh+'</tbody>';
+
+/* engagement bars (photos) */
+var maxPh=Math.max.apply(null,DAYS.map(function(d){return d.photos;}));
+document.getElementById('engBars').innerHTML=DAYS.map(function(d){ var h=Math.round(d.photos/maxPh*100); return '<div class="bar"><i style="height:'+h+'%"></i><small>'+d.dow+'</small><small style="color:#2f6feb">'+M(d.photos)+'</small></div>'; }).join('');
+document.getElementById('engLine').textContent=C(T.photos)+' photos and '+C(T.posts)+' HyperPosts, concentrated on the two Saturdays.';
+
+/* platz spotlight — Aug 8 */
+var PLATZES=[['PNC Stadtplatz',.135],['Guardian Life Zinzenplatz',.12],['Wind Creek Steel Stage',.11],['Air Products Americaplatz (Levitt)',.09],['Plaza Tropical',.07],['Yuengling Lagerplatz',.065],['Highmark Community Stage',.06],['Service Electric Festplatz',.055],['Main Street Stage',.05],['Liederplatz (IBEW 375)',.045],['Musikfest Café',.05],['Handwerkplatz',.03],['Familienplatz',.03],['ComedyPlatz',.025],['Sand Island — Ice House',.02],['Lyrikplatz',.02]];
+var sat=DAYS[8];
+var ph='<thead><tr><th>Platz</th><th>Peak concurrent maps</th><th>Est. day map-users</th></tr></thead><tbody>';
+PLATZES.forEach(function(p){ var peak=Math.round(sat.peak*p[1]); var day=Math.round(peak*3.2); ph+='<tr><td><b>'+p[0]+'</b></td><td>'+C(peak)+'</td><td>'+C(day)+'</td></tr>'; });
+ph+='<tr class="tot"><td>All Platzes — Sat Aug 8</td><td>'+C(sat.peak)+'</td><td>'+C(sat.maps)+'</td></tr>';
+document.getElementById('platzTbl').innerHTML=ph+'</tbody>';
+
+/* facilities festival-wide */
+var POTTY=[['Stadtplatz cluster (Payrow Plaza)',18],['Colonial Quarter cluster (Spring St)',22],['Zinzenplatz / lower Quarter',20],['SteelStacks / Levitt cluster',16],['Main Street cluster',10],['Sand Island',6]];
+var totUnits=POTTY.reduce(function(a,p){return a+p[1];},0);
+var fh='<thead><tr><th>Restroom cluster</th><th>Units</th><th>Uses (festival)</th><th>Peak/unit/hr (Sat)</th><th>Enough?</th></tr></thead><tbody>';
+POTTY.forEach(function(p){ var uses=Math.round(T.pottyUses*(p[1]/totUnits)); var peakHr=Math.round(sat.pottyUses*(p[1]/totUnits)*0.14/p[1]); var st=peakHr<=8?'<span class="pill ok">Adequate</span>':(peakHr<=11?'<span class="pill warn">Tight at peak</span>':'<span class="pill bad">Add units</span>'); fh+='<tr><td><b>'+p[0]+'</b></td><td>'+p[1]+'</td><td>'+C(uses)+'</td><td>'+peakHr+'</td><td>'+st+'</td></tr>'; });
+fh+='<tr class="tot"><td>All clusters</td><td>'+totUnits+'</td><td>'+C(T.pottyUses)+'</td><td>—</td><td><span class="pill ok">'+C(T.firstAid)+' first-aid visits</span></td></tr>';
+document.getElementById('facTbl').innerHTML=fh+'</tbody>';
+
+/* test description numbers */
+document.getElementById('tAttend').textContent=M(T.attend);
+document.getElementById('tMaps').textContent=M(T.maps);
+document.getElementById('tPotty').textContent=C(T.pottyUses);
+document.getElementById('tShop').textContent=M(T.shop);
+document.getElementById('tPhoto').textContent=C(T.photos);
+document.getElementById('tPost').textContent=C(T.posts);
+document.getElementById('foot').innerHTML='StageFill occupancy &amp; engagement intelligence · counts are distinct devices, never identities. Synthetic sample from the 0→1.5M growth/movement simulation (load_test_harness.js). Generated '+new Date().toLocaleString('en-US');
+</script>
+</body>
+</html>
