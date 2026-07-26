@@ -66,7 +66,7 @@
     "Stuart, FL": [27.20, -80.25], "Tampa, FL": [27.95, -82.46],
     "St. Augustine, FL": [29.90, -81.31], "Bangor, PA": [40.87, -75.21],
     "Easton, PA": [40.69, -75.22], "Allentown, PA": [40.61, -75.49],
-    "Hellertown, PA": [40.58, -75.34]
+    "Bethlehem, PA": [40.58, -75.34]
   };
 
   /* ---- 2. Shows ---- */
@@ -178,7 +178,7 @@
     { band: "Life After Dead", venue: "Musikfest", city: "Bethlehem, PA", date: "2026-08-06", real: true },
     { band: "Life After Dead", venue: "HangDog Outdoor Adventure", city: "Easton, PA", date: "2026-08-22", real: true },
     { band: "Life After Dead", venue: "Weyerbacher Allentown Taproom & Biergarten", city: "Allentown, PA", date: "2026-09-03", real: true },
-    { band: "Life After Dead", venue: "Lost Tavern Brewing", city: "Hellertown, PA", date: "2026-10-31", real: true }
+    { band: "Life After Dead", venue: "Lost Tavern Brewing", city: "Bethlehem, PA", date: "2026-10-31", real: true }
   ];
   try {
     [window.dealMapRows, window.hotSauceMapRows, window.stageFillMapRows].forEach(function (fn) {   // stageFillMapRows: only defined on the StageFill national map; undefined (no-op) on the DeadDance home map

@@ -148,7 +148,7 @@ footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-s
       <option value="business">🏢 A business / venue (3 free, then subscribe)</option>
     </select></div>
   <div id="su_biz" style="display:none">
-    <div class="two"><div class="row"><label>Venue / business name</label><input id="su_org" placeholder="e.g. The Bar, Hellertown"></div>
+    <div class="two"><div class="row"><label>Venue / business name</label><input id="su_org" placeholder="e.g. The Bar, Bethlehem"></div>
       <div class="row"><label>Region</label><select id="su_region"></select></div></div>
   </div>
   <label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:6px 0 2px">
@@ -181,7 +181,7 @@ footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-s
   <div class="sub" id="nwSub"></div>
   <div class="row"><label>Your name</label><input id="nw_name" placeholder="Who's booking"></div>
   <div class="two"><div class="row"><label>Email or phone</label><input id="nw_contact" placeholder="how the act reaches you"></div>
-    <div class="row"><label>Your room / event</label><input id="nw_where" placeholder="e.g. The Bar, Hellertown"></div></div>
+    <div class="row"><label>Your room / event</label><input id="nw_where" placeholder="e.g. The Bar, Bethlehem"></div></div>
   <div class="row"><label>Note to the act (optional)</label><textarea id="nw_note" placeholder="Load-in, set length, parking…"></textarea></div>
   <button class="go" id="nwBtn" onclick="confirmNow()">🎟️ BOOK NOW</button>
   <div class="foot" id="nwFoot"></div>
@@ -232,7 +232,7 @@ var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 /* ---- demo catalog (honest-state: live offline; real browse wires to chat_act_browse on deploy) ---- */
 /* avail = weekdays the act plays (0=Sun..6=Sat); instant=true → BOOK NOW; priceN=$ for instant */
 var DEMO=[
- // ——— the Hellertown bar's week (Mon comedy · Wed Americana duo · Fri KISS · Sat Buffett) ———
+ // ——— the Bethlehem bar's week (Mon comedy · Wed Americana duo · Fri KISS · Sat Buffett) ———
  {name:"Laffs McGee",type:"comedian",genre:"comedy",region:"midatl",fee:"$400/night",priceN:400,instant:true,avail:[1,2,3],bio:"Clean-ish standup, 60 min. Perfect Monday."},
  {name:"The Porch Lights",type:"duo",genre:"original_americana",region:"midatl",fee:"$350/night",priceN:350,instant:true,avail:[2,3,4],bio:"Americana duet — guitar & harmony. Easy midweek."},
  {name:"Detroit Rock Knights",type:"tribute",genre:"kiss",region:"midatl",fee:"$1,400/night",priceN:1400,instant:true,avail:[5,6],bio:"Full KISS spectacle — makeup, fire, the hits."},
