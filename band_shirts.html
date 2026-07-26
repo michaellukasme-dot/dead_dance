@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Band Tees · DeadDance</title>
+<style>
+/* Hanz & Franz spec — LIGHT purple default */
+:root{--ink:#1b1226;--muted:#6a6280;--accent:#6d28d9;--accent2:#7c3aed;--gold:#b07d17;--line:#e6e0f0;--ok:#12a150;--card:#fff;--bg:#f6f4fa}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;overflow-x:hidden}
+body{font:400 15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:radial-gradient(120% 120% at 50% 0,#efe9fb,#f6f4fa 55%)}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 70px}
+.badge{display:inline-block;background:#f1ecf7;border:1px solid var(--line);color:var(--accent);border-radius:999px;font-weight:800;font-size:12px;padding:5px 13px}
+h1{font-size:26px;margin:12px 0 2px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.preview{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center;box-shadow:0 4px 18px rgba(90,46,134,.06)}
+.shirt{width:220px;max-width:70%;margin:0 auto;display:block}
+.logohit{cursor:pointer}
+.pvcap{color:var(--muted);font-size:12.5px;margin-top:6px}
+.pvcap b{color:var(--accent)}
+.prow{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:4px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.pcard{flex:0 0 200px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 4px 18px rgba(90,46,134,.06);transition:.12s}
+.pcard.sel{outline:2.5px solid var(--accent);outline-offset:-2px}
+.imgwrap{position:relative;background:#f4f2f8;padding:12px 10px 6px;text-align:center}
+.pbadge{position:absolute;top:10px;left:10px;background:#e8663f;color:#fff;font-weight:800;font-size:10.5px;padding:4px 9px;border-radius:999px}
+.pheart{position:absolute;top:9px;right:9px;width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:#c3b8d6}
+.pshirt{width:132px;height:auto;display:block;margin:0 auto}
+.pbody{padding:11px 13px 14px}
+.swrow{display:flex;align-items:center;gap:5px;margin-bottom:7px}
+.sw{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1px #00000022}
+.swrow .more{color:var(--muted);font-size:11px;font-weight:700;margin-left:2px}
+.ptitle{font-weight:800;font-size:14px;line-height:1.2}
+.stars{color:#f0a500;font-weight:800;font-size:12.5px;margin-top:5px}.stars span{color:var(--muted);font-weight:600}
+.pprice{font-weight:900;font-size:17px;margin-top:5px}.pprice span{font-size:12px;color:var(--muted);font-weight:700}
+.pmeta{color:var(--muted);font-size:11px;margin-top:5px}.pmeta .rush{color:#8a6d00;font-weight:700}
+.reorder{background:#f6f3fe;border:1px solid #e0d6f7;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:none;align-items:center;gap:12px}
+.reorder.on{display:flex}
+.reorder .rt{flex:1;min-width:0;font-size:13px}.reorder .rt b{color:var(--accent)}
+.reorder button{flex:0 0 auto;background:var(--accent);color:#fff;border:0;border-radius:10px;font-weight:800;font-size:13px;padding:10px 14px;cursor:pointer;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:6px;box-shadow:0 4px 18px rgba(90,46,134,.06)}
+label{display:block;font-weight:800;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:15px;font-weight:600}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.sizes{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.sizerow{display:flex;align-items:center;gap:10px;background:#faf8fd;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.sizerow .lb{font-weight:900;width:34px;color:var(--ink)}
+.sizerow .st{display:flex;align-items:center;gap:8px;margin-left:auto}
+.sizerow button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--accent);font-size:18px;font-weight:800;cursor:pointer}
+.sizerow b{min-width:20px;text-align:center;font-size:16px}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.tot .n{font-size:26px;font-weight:900}
+.cta{width:100%;margin-top:16px;padding:15px;border:0;border-radius:14px;font-weight:800;font-size:16px;cursor:pointer;background:linear-gradient(180deg,#e0b94a,#c79a3a);color:#3a2400}
+.foot{color:var(--muted);font-size:11.5px;margin-top:16px;text-align:center}
+.win{background:#eafaf1;border:1px solid #b7e6cc;color:#12633f;border-radius:16px;padding:18px;margin-top:14px;display:none}
+.win.on{display:block}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ok);color:#fff;font-weight:800;padding:11px 18px;border-radius:999px;opacity:0;transition:.2s;z-index:99;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge" id="hbadge">🎸 DeadDance × your band</span>
+  <h1 id="htitle">Band tees, your logo</h1>
+  <p class="sub">Printed &amp; shipped by a local <b>DeadDance print partner</b> in your chapter. Pick a fabric, drop your logo, choose your size mix.</p>
+  <div class="reorder" id="reorder"></div>
+
+  <div class="preview">
+    <svg class="shirt" viewBox="0 0 200 205" xmlns="http://www.w3.org/2000/svg">
+      <path d="M62 24 L40 40 L26 74 L48 88 L54 74 L54 190 L146 190 L146 74 L152 88 L174 74 L160 40 L138 24 C128 40 112 46 100 46 C88 46 72 40 62 24 Z" fill="#ece9f2" stroke="#d8d0e6" stroke-width="2" stroke-linejoin="round"/>
+      <g id="logoSlot" class="logohit" onclick="pickLogo()">
+        <rect x="72" y="82" width="56" height="56" rx="8" fill="#ffffff" stroke="#c9bde6" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="100" y="106" text-anchor="middle" font-size="24" fill="#8a7fb0" font-weight="800">+</text>
+        <text x="100" y="124" text-anchor="middle" font-size="8.5" fill="#8a7fb0" font-weight="700">upload logo</text>
+      </g>
+    </svg>
+    <div class="pvcap" id="pvcap"><b>Tap the shirt</b> to add your logo — we proof it before anything prints.</div>
+    <input type="file" id="logoFile" accept="image/png,image/jpeg,image/svg+xml" hidden onchange="onLogo(event)">
+  </div>
+
+  <div id="tiers"></div>
+
+  <div class="card">
+    <label>Size mix (e.g. XL 5, L 5, M 2)</label>
+    <div class="sizes" id="sizes"></div>
+    <label>Your chapter (routes to your local DeadDance printer)</label>
+    <select id="chapter" onchange="chapterChange()"></select>
+    <div id="partnerLine" class="foot" style="text-align:left;margin-top:6px"></div>
+    <label id="blabel">Band name</label><input id="band" placeholder="Your band">
+    <label>Contact email or phone</label><input id="contact" placeholder="So we can send the proof + invoice">
+    <label>Or paste a logo link (if you didn't upload)</label><input id="logo" placeholder="Drive / Dropbox / website link">
+    <label>Day you play MusikFest (sets your pickup time)</label><input id="playday" type="date" min="2026-07-30" max="2026-08-09">
+    <label style="display:flex;align-items:flex-start;gap:9px;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--ink);margin-top:16px;cursor:pointer;font-weight:700"><input type="checkbox" id="artok" style="width:auto;flex:0 0 auto;margin-top:2px"> I've reviewed my logo/artwork above and confirm it's correct and ready to print.</label>
+    <div class="tot"><div><div style="color:var(--muted);font-size:12px;font-weight:800">TOTAL</div><div class="n" id="total">$0</div></div>
+      <div style="text-align:right;color:var(--muted);font-size:12.5px;font-weight:700" id="breakdown">0 shirts</div></div>
+    <button class="cta" onclick="place()">Reserve my order →</button>
+    <div class="foot">No charge yet — we email a logo proof and an invoice first. Nothing prints until you approve.</div>
+  </div>
+
+  <div class="win" id="win"></div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(window._tt); window._tt=setTimeout(function(){t.classList.remove('on');},2800); }
+var TIERS=[
+  {k:'less',lvl:'LESS',badge:'Best Seller',name:'Gildan Softstyle blend',price:15,color:'#d1332e',ink:'#fff',rating:'4.5',rn:'10,000+',sw:['#2f6feb','#e7dbc0','#d1332e','#ffffff','#4a9d5b','#5a2e86'],more:67},
+  {k:'more',lvl:'MORE',badge:'Staff Pick',name:'Gildan 100% cotton',price:20,color:'#9a86a6',ink:'#241a2b',rating:'4.7',rn:'10,000+',sw:['#1b2440','#e08a76','#ffffff','#8fae8f','#b7a3d6','#e0982f'],more:61},
+  {k:'most',lvl:'MOST',badge:'Top Rated',name:'Bella+Canvas premium',price:25,color:'#2f5fd0',ink:'#fff',rating:'4.5',rn:'10,000+',sw:['#3a86a8','#8a8f7a','#b3607a','#ffffff','#bcd6bc','#4a2e6e'],more:146}
+];
+var SIZES=['S','M','L','XL','2XL'];
+var SEL='more', LOGO='', CNT={S:0,M:0,L:0,XL:5,'2XL':0};
+var CHAPTERS=['Bay Area','Santa Cruz','Pacific Northwest','SoCal','Rocky Mountain','Lone Star + SW','Great Lakes','Southeast','Mid-Atlantic','Northeast'];
+var QP=new URLSearchParams(location.search), FOR=(QP.get('for')==='venue')?'venue':'band', NAME=QP.get('name')||'';
+
+function shirtSVG(t){ var design = LOGO
+   ? '<image href="'+LOGO+'" x="42" y="47" width="36" height="30" preserveAspectRatio="xMidYMid meet"/>'
+   : '<text x="60" y="55" text-anchor="middle" font-size="7.5" font-style="italic" fill="'+t.ink+'">Your</text>'
+    +'<text x="60" y="66" text-anchor="middle" font-size="11" font-weight="900" letter-spacing=".5" fill="'+t.ink+'">DESIGN</text>'
+    +'<text x="60" y="75" text-anchor="middle" font-size="7" font-style="italic" fill="'+t.ink+'">Here</text>';
+  return '<svg class="pshirt" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">'
+   +'<path d="M40 14 L26 24 L18 44 L30 52 L34 44 L34 108 L86 108 L86 44 L90 52 L102 44 L94 24 L80 14 C74 24 66 27 60 27 C54 27 46 24 40 14 Z" fill="'+t.color+'" stroke="#00000018" stroke-width="1.5" stroke-linejoin="round"/>'+design+'</svg>'; }
+function renderTiers(){ $('tiers').className='prow'; $('tiers').innerHTML=TIERS.map(function(t){ return '<div class="pcard'+(t.k===SEL?' sel':'')+'" onclick="pick(\''+t.k+'\')">'+
+  '<div class="imgwrap"><span class="pbadge">'+t.badge+'</span><span class="pheart">♡</span>'+shirtSVG(t)+'</div>'+
+  '<div class="pbody"><div class="swrow">'+t.sw.map(function(c){return '<span class="sw" style="background:'+c+'"></span>';}).join('')+'<span class="more">+'+t.more+'</span></div>'+
+    '<div class="ptitle">'+esc(t.name)+'</div>'+
+    '<div class="stars">★ '+t.rating+' <span>('+t.rn+')</span></div>'+
+    '<div class="pprice">$'+t.price.toFixed(2)+'<span> /ea</span></div>'+
+    '<div class="pmeta">✓ No minimum · <span class="rush">⚡3-day rush</span></div>'+
+  '</div></div>'; }).join(''); }
+function pick(k){ SEL=k; renderTiers(); calc(); }
+function renderSizes(){ $('sizes').innerHTML=SIZES.map(function(s){ return '<div class="sizerow"><span class="lb">'+s+'</span><span class="st"><button onclick="sadj(\''+s+'\',-1)">–</button><b id="c_'+s+'">'+CNT[s]+'</b><button onclick="sadj(\''+s+'\',1)">+</button></span></div>'; }).join(''); }
+function sadj(s,d){ CNT[s]=Math.max(0,Math.min(500,(CNT[s]||0)+d)); $('c_'+s).textContent=CNT[s]; calc(); }
+function total(){ return SIZES.reduce(function(a,s){return a+(CNT[s]||0);},0); }
+function tier(){ return TIERS.filter(function(t){return t.k===SEL;})[0]; }
+function calc(){ var t=tier(), shirts=total(), tot=t.price*shirts;
+  $('total').textContent='$'+tot.toLocaleString('en-US');
+  var doz=(shirts/12); $('breakdown').textContent=shirts+' shirts · $'+t.price+' ea'+(shirts>=12?(' · '+(Math.round(doz*10)/10)+' dz'):''); }
+
+function renderChapters(){ $('chapter').innerHTML='<option value="">Pick your region…</option>'+CHAPTERS.map(function(c){return '<option>'+esc(c)+'</option>';}).join(''); }
+function chapterChange(){ var ch=$('chapter').value, line=$('partnerLine'); if(!ch){ line.textContent=''; return; }
+  var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return;
+  cl.rpc('sf_print_partner_for',{p_chapter:ch}).then(function(r){ var name=r&&r.data;
+    line.innerHTML = name ? ('🖨️ Printed locally by <b style="color:var(--gold)">'+esc(name)+'</b>') : ('🖨️ We\'re recruiting a printer in '+esc(ch)+' — your order still reserves; we place it locally.'); }).catch(function(){}); }
+
+/* logo upload → live preview on the shirt */
+function pickLogo(){ $('logoFile').click(); }
+function onLogo(ev){ var f=ev.target.files&&ev.target.files[0]; if(!f)return;
+  if(f.size>2*1024*1024){ toast('Logo is large — under 2MB please'); return; }
+  var r=new FileReader(); r.onload=function(){ LOGO=r.result; paintLogo(); }; r.readAsDataURL(f); }
+function paintLogo(){ var slot=$('logoSlot');
+  slot.innerHTML='<clipPath id="lc"><rect x="72" y="82" width="56" height="56" rx="8"/></clipPath>'+
+    '<image href="'+LOGO+'" x="72" y="82" width="56" height="56" preserveAspectRatio="xMidYMid meet" clip-path="url(#lc)"/>'+
+    '<rect x="72" y="82" width="56" height="56" rx="8" fill="none" stroke="#c9bde6" stroke-width="1.5"/>';
+  $('pvcap').innerHTML='<b>Looks good.</b> Tap the shirt to change your logo.'; renderTiers(); }
+
+function place(){ var band=($('band').value||'').trim(); if(!band){ toast('Add your band name'); return; }
+  var shirts=total(); if(shirts<1){ toast('Add at least one shirt to the size mix'); return; }
+  if(!LOGO && !($('logo').value||'').trim()){ toast('Add your logo — tap the shirt or paste a link'); return; }
+  if(!$('artok').checked){ toast('Please confirm your artwork before ordering'); return; }
+  var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ toast('One sec…'); return; }
+  var sizes={}; SIZES.forEach(function(s){ if(CNT[s]>0) sizes[s]=CNT[s]; });
+  cl.rpc('sf_band_merch_create',{p:{tier:SEL,sizes:sizes,band:band,kind:FOR,chapter:($('chapter').value||''),play_day:($('playday').value||''),contact:($('contact').value||'').trim(),logo:(LOGO||($('logo').value||'').trim())}})
+    .then(function(r){ var d=r&&r.data||{}; if(d.ok){ done(d); } else { toast(d.error==='need_band'?'Add your band name':(d.error==='need_sizes'?'Add shirts to the size mix':'Try again')); } })
+    .catch(function(){ toast('Try again'); }); }
+function done(d){ var t=tier(), mix=SIZES.filter(function(s){return CNT[s]>0;}).map(function(s){return CNT[s]+' '+s;}).join(', ');
+  var day=($('playday').value||''); var dayTxt=day?(new Date(day+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})):'the day you play';
+  var pickup = d.partner ? ('🖨️ <b>Pick up:</b> '+esc(d.partner)+(d.partner_city?(' · '+esc(d.partner_city)):'')+' — ready for <b>'+esc(dayTxt)+'</b>. We\'ll text the exact time.')
+                         : ('🖨️ <b>Pick up:</b> your chapter\'s DeadDance printer — we\'ll confirm the shop and time for '+esc(dayTxt)+'.');
+  $('win').classList.add('on');
+  $('win').innerHTML='✅ <b>Order reserved — '+esc(t.lvl)+' · '+d.shirts+' shirts</b>'+
+    '<div style="font-size:13px;margin-top:6px">Mix: '+esc(mix)+'. Total <b>$'+((d.total_cents/100).toLocaleString('en-US'))+'</b> ($'+(d.unit_cents/100)+'/shirt). We email a logo proof + invoice — nothing prints until you approve. 🌹</div>'+
+    '<div style="font-size:13px;margin-top:8px;padding-top:8px;border-top:1px solid #b7e6cc">'+pickup+'</div>';
+  $('win').scrollIntoView({behavior:'smooth'}); saveLast(); toast('🎸 Order reserved!'); }
+
+function applyMode(){ if(FOR==='venue'){ $('hbadge').textContent='🏛 DeadDance × your venue'; $('htitle').textContent='Venue tees, your logo'; $('blabel').textContent='Venue name'; $('band').placeholder='Your venue'; }
+  if(NAME){ $('band').value=NAME; } }
+function saveLast(){ try{ var sizes={}; SIZES.forEach(function(s){ if(CNT[s]>0) sizes[s]=CNT[s]; });
+  localStorage.setItem('dd.merch.last', JSON.stringify({kind:FOR,tier:SEL,sizes:sizes,name:($('band').value||'').trim(),chapter:($('chapter').value||'')})); }catch(e){} }
+function loadReorder(){ try{ var o=JSON.parse(localStorage.getItem('dd.merch.last')||'null'); if(!o||o.kind!==FOR||!o.name)return;
+  var mix=Object.keys(o.sizes||{}).map(function(s){return o.sizes[s]+' '+s;}).join(', '); var t=TIERS.filter(function(x){return x.k===o.tier;})[0];
+  $('reorder').classList.add('on'); $('reorder').innerHTML='<div class="rt">🔁 <b>Reorder</b> '+esc(o.name)+' — '+esc((t?t.lvl:'')+' · '+mix)+'<div style="color:var(--muted);font-size:11.5px;margin-top:2px">Charge to your '+FOR+' account (when billing is on).</div></div><button id="reBtn">Reorder</button>';
+  $('reBtn').onclick=function(){ SEL=o.tier||SEL; SIZES.forEach(function(s){ CNT[s]=(o.sizes&&o.sizes[s])||0; }); if(o.name)$('band').value=o.name; if(o.chapter){ $('chapter').value=o.chapter; chapterChange(); } renderTiers(); renderSizes(); calc(); toast('Prefilled your last run — review & reserve'); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }; }catch(e){} }
+
+applyMode(); renderChapters(); renderTiers(); renderSizes(); calc(); loadReorder();
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Print Partner · DeadDance</title>
+<style>
+/* Hanz & Franz spec — LIGHT purple default */
+:root{--ink:#1b1226;--muted:#6a6280;--accent:#6d28d9;--gold:#b07d17;--card:#fff;--line:#e6e0f0;--ok:#12a150;--bg:#f6f4fa}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;overflow-x:hidden}
+body{font:400 15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:radial-gradient(120% 120% at 50% 0,#efe9fb,#f6f4fa 55%)}
+.wrap{max-width:520px;margin:0 auto;padding:22px 16px 70px}
+.badge{display:inline-block;background:#f1ecf7;border:1px solid var(--line);color:var(--accent);border-radius:999px;font-weight:800;font-size:12px;padding:5px 13px}
+h1{font-size:26px;margin:12px 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.why{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(90,46,134,.06)}
+.why div{margin:8px 0;font-size:13.5px}.why b{color:var(--gold)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(90,46,134,.06)}
+label{display:block;font-weight:800;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 5px}
+input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:15px;font-weight:600}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.cta{width:100%;margin-top:16px;padding:15px;border:0;border-radius:14px;font-weight:800;font-size:16px;cursor:pointer;background:linear-gradient(180deg,#e0b94a,#c79a3a);color:#3a2400}
+.foot{color:var(--muted);font-size:11.5px;margin-top:16px;text-align:center}
+.win{background:#eafaf1;border:1px solid #b7e6cc;color:#12633f;border-radius:16px;padding:18px;margin-top:14px;display:none}
+.win.on{display:block}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ok);color:#fff;font-weight:800;padding:11px 18px;border-radius:999px;opacity:0;transition:.2s;z-index:99;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">🖨️ DeadDance Print Partners</span>
+  <h1>Print for your chapter</h1>
+  <p class="sub">Every chapter needs one local shop — just like Jay Customz runs the Mid-Atlantic. Claim yours.</p>
+
+  <div class="why">
+    <div>👕 <b>Every band tee</b> in your region routes to you — sold by the dozen, logo-proofed, ready to print.</div>
+    <div>🎽 <b>The street-team giveaway shirts</b> at your local festivals print with you too.</div>
+    <div>🤝 <b>DeadDance handles the storefront, orders, and billing.</b> You print and ship. One partner per chapter.</div>
+  </div>
+
+  <div class="card">
+    <label>Chapter</label>
+    <select id="chapter"></select>
+    <div id="taken" class="foot" style="text-align:left;margin-top:6px"></div>
+    <label>Shop / business name</label><input id="name" placeholder="Your print shop">
+    <label>City</label><input id="city" placeholder="City, ST">
+    <label>Contact email or phone</label><input id="contact" placeholder="How DeadDance reaches you">
+    <button class="cta" onclick="apply()">Apply to be the printer →</button>
+    <div class="foot">We review every application and confirm one partner per chapter. No commitment to apply.</div>
+  </div>
+  <div class="win" id="win"></div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(window._tt); window._tt=setTimeout(function(){t.classList.remove('on');},2800); }
+var CHAPTERS=['Bay Area','Santa Cruz','Pacific Northwest','SoCal','Rocky Mountain','Lone Star + SW','Great Lakes','Southeast','Mid-Atlantic','Northeast'];
+$('chapter').innerHTML='<option value="">Pick a chapter…</option>'+CHAPTERS.map(function(c){return '<option>'+esc(c)+'</option>';}).join('');
+$('chapter').onchange=function(){ var ch=$('chapter').value, el=$('taken'); if(!ch){ el.textContent=''; return; }
+  var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return;
+  cl.rpc('sf_print_partner_for',{p_chapter:ch}).then(function(r){ var n=r&&r.data;
+    el.innerHTML = n ? ('⚠️ '+esc(ch)+' is currently served by <b>'+esc(n)+'</b> — you can still apply as backup.') : ('✅ '+esc(ch)+' is <b style="color:#12633f">open</b> — be the first.'); }).catch(function(){}); };
+function apply(){ var ch=$('chapter').value, name=($('name').value||'').trim();
+  if(!ch){ toast('Pick a chapter'); return; } if(!name){ toast('Add your shop name'); return; }
+  var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ toast('One sec…'); return; }
+  cl.rpc('sf_print_partner_apply',{p_chapter:ch,p_name:name,p_city:($('city').value||'').trim(),p_contact:($('contact').value||'').trim()})
+    .then(function(r){ var d=r&&r.data||{}; if(d.ok){ $('win').classList.add('on');
+        $('win').innerHTML='✅ <b>Application in for '+esc(ch)+'</b><div style="font-size:13px;margin-top:6px">'+(d.chapter_taken?('That chapter is currently '+esc(d.current)+'; we\'ll keep you as backup. '):'')+'DeadDance will review and reach out. 🌹</div>';
+        $('win').scrollIntoView({behavior:'smooth'}); toast('🖨️ Applied!'); }
+      else { toast(d.error==='need_fields'?'Add chapter + shop name':'Try again'); } })
+    .catch(function(){ toast('Try again'); }); }
+</script>
+</body>
+</html>

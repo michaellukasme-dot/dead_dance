@@ -118,9 +118,11 @@ function mountEdit(v, evs){
   var mk='festival_event_maker.html?v='+encodeURIComponent(v.name||'')+'&c='+encodeURIComponent(v.city||'')+'&s='+encodeURIComponent(v.state||'');
   $('vedit').innerHTML='<button class="edit" onclick="toggleEdit(event)"><span class="ic">📐</span> Edit venue</button>';
   var door = evs.length ? ('<a href="door.html?ev='+encodeURIComponent(evs[0].slug)+'"><span class="em">🚪</span> Door mode (next show)</a>') : '';
+  var merch='band_shirts.html?for=venue&name='+encodeURIComponent(v.name||'');
   $('editmenu').innerHTML=
     '<a href="'+mk+'"><span class="em">➕</span> Add / edit a show</a>'+
     '<a href="'+mk+'&teach=floor"><span class="em">🏛️</span> Upload floor plan</a>'+
+    '<a href="'+merch+'"><span class="em">👕</span> Order venue tees</a>'+
     door;
 }
 function toggleEdit(e){ if(e)e.stopPropagation(); $('editmenu').classList.toggle('on'); }
