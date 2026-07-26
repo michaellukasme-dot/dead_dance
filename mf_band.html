@@ -62,6 +62,21 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
 .tixbtn{display:block;width:100%;text-align:center;border:0;cursor:pointer;font-weight:800;font-size:15px;padding:13px;border-radius:12px;margin-bottom:8px;background:linear-gradient(180deg,#ffce6b,var(--gold));color:#3a1d00}
 .tixbtn[data-free="1"]{background:#eef6f0;color:#12854f}
 .legal{font-size:11px;color:var(--muted);margin-top:4px}.legal a{color:var(--purple2);font-weight:700}
+.slphone{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;font-size:15px;margin:4px 0 8px}
+.slbtn{width:100%;border:0;cursor:pointer;font-weight:800;font-size:15px;padding:13px;border-radius:12px;background:var(--rose);color:#fff}
+.slbtn.ghost{background:#f2ecf9;color:var(--purple2)}
+.slbtn.go{background:#12854f}
+#slBody .say{font-size:13.5px;color:var(--ink);margin:2px 0 10px}
+.slrow{display:flex;gap:10px;margin:10px 0}
+.slrow label{flex:1;font-size:11.5px;font-weight:800;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.slrow input{border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:14px}
+.slta{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;resize:vertical;margin-bottom:8px}
+.slgig{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f4f0fa;font-size:14px}
+.slgig .d{font-weight:800;color:var(--purple2);white-space:nowrap;min-width:66px}
+.slgig input.slAt{border:1px solid var(--line);border-radius:8px;padding:5px 7px;font:inherit;font-size:13px;width:104px}
+.slbandlink{margin-top:12px;font-size:12px}.slbandlink a{color:var(--purple2);font-weight:800;text-decoration:none}
+.slrem{background:#fff3d6;border:1px solid #f0d9a6;border-left:4px solid var(--gold);border-radius:12px;padding:11px 13px;font-size:13.5px;color:#6a5410;margin:12px 0}
+.slrem a{color:var(--rose);font-weight:800;text-decoration:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -76,19 +91,21 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
 </div>
 
 <div class="wrap">
+  <div id="slRemSlot" style="display:none"></div>
+
   <div class="sec" id="teaseSec" style="display:none">
     <h2 id="teaseHead">Setlist tease</h2>
     <div class="tease" id="tease"></div>
   </div>
 
-  <div class="sec">
+  <div class="sec" id="rosterSec">
     <h2>The roster</h2>
     <div class="roster" id="roster"></div>
   </div>
 
   <div id="tixSlot"></div>
 
-  <div class="sec">
+  <div class="sec" id="qrSec">
     <div class="qrcard">
       <div class="qrbox"><div id="walkQR">▦</div></div>
       <div class="cap">
@@ -98,7 +115,7 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
     </div>
   </div>
 
-  <div class="sec">
+  <div class="sec" id="linksSec">
     <h2>Find them</h2>
     <div class="links" id="links"></div>
   </div>
@@ -117,9 +134,20 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
   </div>
 </div>
 
+<!-- Set List — shows the setlist if the band configured one, else a fan-registration prompt -->
+<div class="mbg" id="slbg" onclick="if(event.target===this)slClose()">
+  <div class="modal">
+    <div id="slBody"></div>
+    <button class="mclose" onclick="slClose()">Close</button>
+  </div>
+</div>
+
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
+<script src="dd_mf_bands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="dd_notify.js"></script>
+<script src="dd_setlist_reminder.js"></script>
 <script>
 /* StageFill ticketing spine — same client + endpoints as event_page.html. A band that lets us
    sell tickets gets the full treatment: Pre-Event (tickets on sale) → Live (doors) → Historical. */
@@ -127,8 +155,8 @@ var SF_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
     SF_CHECKOUT="https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/sf-checkout";
 (function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co", SF_ANON); window.ddClient=function(){return C;}; }catch(e){} })();
 
-/* ---- band seed (research 2026-07-26; unverified rosters flagged, filled after outreach) ---- */
-var BANDS={
+/* ---- band seed: shared dd_mf_bands.js (single source), with the inline copy as a safety fallback ---- */
+var BANDS=window.DD_MF_BANDS||{
   "rift":{name:"Rift",kind:"Philadelphia Phish Tribute",home:"Philadelphia, PA",
     members:[{n:"Sean Coyne",r:"Guitar"},{n:"John Hildenbrand",r:"Keys"},{n:"Matt Agostini",r:"Bass"},{n:"Matt Elberson",r:"Drums"}],
     set:{date:"2026-08-05",time:"",stage:""}, /* on lineup; day/stage TBD */
@@ -198,7 +226,21 @@ function render(){
   document.getElementById('bname').textContent=B.name;
   document.getElementById('kind').textContent=B.kind+(B.home?(' · '+B.home):'');
   document.title=B.name+' — MusikFest 2026';
+
+  /* TIER:  less ($0, just listed) · more ($20, full purple page) · most ($30, own background). */
+  var TIER=(P('tier')||B.tier||'more').toLowerCase();
+  if(TIER==='less'){ renderListed(); return; }
+
   var S=state();
+
+  /* MOST tier ($30): the band's own image replaces the purple hero; a dark scrim keeps the name
+     + pills legible on top. Ignored on lower tiers (the upgrade is what unlocks it). */
+  var bg=B.bg||P('bg'), hero=document.querySelector('.hero');
+  if(TIER==='most' && bg && /^https?:\/\//i.test(bg) && hero){
+    var safe=encodeURI(bg).replace(/["\\]/g,'');
+    hero.style.backgroundImage="linear-gradient(180deg,rgba(20,13,26,.40),rgba(20,13,26,.84)),url(\""+safe+"\")";
+    hero.style.backgroundSize="cover"; hero.style.backgroundPosition="center";
+  }
 
   /* state bar + set line */
   var sb=document.getElementById('statebar'), sl=document.getElementById('setline');
@@ -232,9 +274,9 @@ function render(){
     pills.push(coming);
   }else{
     if(B.recording) pills.push('<a class="pill rose" href="'+esc(B.recording)+'" target="_blank" rel="noopener">▶ Recording</a>');
-    if(B.tease&&B.tease.length) pills.push('<button class="pill" onclick="document.getElementById(\'teaseSec\').scrollIntoView({behavior:\'smooth\'})">🎵 Setlist</button>');
     pills.push(coming);
   }
+  pills.push('<button class="pill" onclick="slOpen()">🎵 Set List</button>');   // setlist / live-text-me pill on every state
   document.getElementById('pills').innerHTML=pills.filter(Boolean).join('');
 
   /* setlist tease (or, historical, "the setlist that night") */
@@ -276,6 +318,16 @@ function render(){
        else { document.getElementById('walkQR').textContent='QR'; } }catch(e){ document.getElementById('walkQR').textContent='QR'; }
 }
 
+/* LESS tier ($0) — just in the festival list, like the non-Dead acts. A compact card, no full page. */
+function renderListed(){
+  var setTxt=(B.set&&B.set.date)?fmtDate(B.set.date)+(B.set.stage?(' · '+B.set.stage):''):'MusikFest 2026';
+  document.getElementById('statebar').innerHTML='<span class="statebar st-future">🌹 Playing MusikFest 2026</span>';
+  document.getElementById('setline').innerHTML='<b>'+esc(setTxt)+'</b>';
+  document.getElementById('pills').innerHTML='<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">🗺 See the full lineup</a>';
+  ['teaseSec','rosterSec','tixSlot','qrSec','linksSec'].forEach(function(id){ var e=document.getElementById(id); if(e)e.style.display='none'; });
+  document.getElementById('conf').textContent='Listed at MusikFest — upgrade to MORE ($20) for a full band page.';
+}
+
 function fmtDate(iso){ try{ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric'}); }catch(e){ return iso; } }
 function tick(){ var el=document.getElementById('cd'); if(!el) return; var b=setBounds(); if(!b){ el.textContent='Upcoming'; return; }
   var ms=b.start-now(); if(ms<=0){ el.textContent='Starting…'; return; }
@@ -290,6 +342,112 @@ window.csOpen=function(){ var l=document.getElementById('csList');
   document.getElementById('mbg').classList.add('on'); };
 window.csClose=function(){ document.getElementById('mbg').classList.remove('on'); };
 
+/* ===== Set List — ONE clean pill, terse modal. Fans get each song texted live; a BAND MEMBER
+   builds & auto-schedules the list (same pill, contextual — no separate band button). ===== */
+function slIsBand(){ return P('role')==='band'||P('member')==='1'||P('bandmode')==='1'; }
+function slGet(){ try{ var ls=(JSON.parse(localStorage.getItem('dd.setlist')||'{}'))[slug]; if(ls) return ls; }catch(e){} return B.setlist||null; }
+function slPut(o){ try{ var all=JSON.parse(localStorage.getItem('dd.setlist')||'{}'); all[slug]=o; localStorage.setItem('dd.setlist',JSON.stringify(all)); }catch(e){} B.setlist=o; }
+function slVal(id){ var e=document.getElementById(id); return e?e.value:''; }
+function hm2m(s){ var p=String(s||'').split(':'); return (+p[0]||0)*60+(+p[1]||0); }
+function m2hm(m){ m=((m%1440)+1440)%1440; var h=Math.floor(m/60), mi=m%60; return (h<10?'0':'')+h+':'+(mi<10?'0':'')+mi; }
+function to24hm(t){ var x=/(\d+):(\d+)\s*(AM|PM)?/i.exec(t||''); if(!x) return ''; var h=+x[1],mi=x[2],ap=(x[3]||'').toUpperCase(); if(ap==='PM'&&h<12)h+=12; if(ap==='AM'&&h===12)h=0; return (h<10?'0':'')+h+':'+mi; }
+function fmt12(hm){ var m=hm2m(hm), h=Math.floor(m/60), mi=m%60, ap=h<12?'AM':'PM', h12=((h+11)%12)+1; return h12+':'+(mi<10?'0':'')+mi+' '+ap; }
+
+window.slOpen=function(){
+  var saved=slGet();
+  if(slIsBand()) slEditor(saved);
+  else if(saved&&saved.songs&&saved.songs.length) slFanList(saved);
+  else slFanForm();
+  document.getElementById('slbg').classList.add('on');
+};
+window.slClose=function(){ document.getElementById('slbg').classList.remove('on'); };
+
+/* fan: register for live song-by-song texts */
+function slFanForm(){
+  document.getElementById('slBody').innerHTML='<h3>'+esc(B.name)+' — Set List</h3>'
+    +'<div class="sub">If '+esc(B.name)+' permits, we text you the set list as they play each song.</div>'
+    +'<div class="say">Register as a '+esc(B.name)+' fan to receive the setlist as they play each song — every tune lands on your phone the moment it starts.</div>'
+    +'<input class="slphone" id="slPhone" type="tel" inputmode="tel" placeholder="Your mobile number" autocomplete="tel">'
+    +'<button class="slbtn" onclick="slRegister()">🎵 Text me the setlist</button>'
+    +'<div class="legal">You’re registering as a '+esc(B.name)+' fan. '+esc(B.name)+' controls whether live texts are sent; message &amp; data rates may apply — opt out anytime.</div>'
+    +'<div class="slbandlink"><a href="#" onclick="slEditor(slGet());return false;">🎤 In the band? Build your live setlist →</a></div>';
+}
+window.slRegister=function(){
+  var el=document.getElementById('slPhone'), digits=((el&&el.value)||'').replace(/[^0-9]/g,'');
+  if(digits.length<10){ if(el){ el.style.borderColor='#b8002e'; el.focus(); } return; }
+  try{ var k='dd.setlistfans', o=JSON.parse(localStorage.getItem(k)||'{}'); (o[slug]=o[slug]||[]).push({p:digits,t:Date.now()}); localStorage.setItem(k,JSON.stringify(o)); }catch(e){}
+  try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_fan',{band:slug,phone:digits}); }catch(e){}
+  document.getElementById('slBody').innerHTML='<h3>🌹 You’re on the list!</h3><div class="sub">If '+esc(B.name)+' opts in, you’ll get each song as they play it — live from the stage.</div>';
+};
+
+/* fan: the scheduled setlist (terse rows: time · song), with a register CTA while upcoming/live */
+function slFanList(saved){
+  var hist=state()==='historical';
+  document.getElementById('slBody').innerHTML='<h3>'+esc(B.name)+' — Set List</h3>'
+    +'<div class="sub">'+(hist?'The set they played':'Each song texts you the moment they play it')+'</div>'
+    + saved.songs.map(function(r){ return '<div class="slgig"><span class="d">'+esc(r.at?fmt12(r.at):'')+'</span><span>'+esc(r.n)+'</span></div>'; }).join('')
+    + (hist?'':'<button class="slbtn" style="margin-top:12px" onclick="slFanForm()">🎵 Text me each song live</button>')
+    +'<div class="slbandlink"><a href="#" onclick="slEditor(slGet());return false;">🎤 In the band? Edit the setlist →</a></div>';
+}
+
+/* band member: build + auto-schedule the texts to match the set window */
+window.slEditor=function(saved){
+  var st=(saved&&saved.win&&saved.win.s)|| to24hm(B.set&&B.set.time) || '12:00';
+  var en=(saved&&saved.win&&saved.win.e)|| m2hm(hm2m(st)+60);
+  var songs=(saved&&saved.songs)? saved.songs.map(function(x){return x.n;}).join('\n') : '';
+  document.getElementById('slBody').innerHTML='<h3>'+esc(B.name)+' — build your Set List</h3>'
+    +'<div class="sub">No rush — even in the van on the way up. Type your songs, or paste the text you’d fire off — set your slot and we time each fan text for you.</div>'
+    +'<div class="slrow"><label>On stage<input type="time" id="slStart" value="'+esc(st)+'"></label><label>Off stage<input type="time" id="slEnd" value="'+esc(en)+'"></label></div>'
+    +'<textarea id="slSongs" class="slta" rows="7" placeholder="One song per line, in order:\nSuzy Greenberg\nTweezer\nYou Enjoy Myself" oninput="slAutoTime()">'+esc(songs)+'</textarea>'
+    +'<button class="slbtn ghost" onclick="slAutoTime()">⏱ Auto-time the texts</button>'
+    +'<div class="sub" style="margin-top:14px">…or just paste your text reply</div>'
+    +'<textarea id="slText" class="slta" rows="3" placeholder="Suzy Greenberg 2:30, Wolfmans Brother 4:55, Tweezer 9:10 …"></textarea>'
+    +'<button class="slbtn ghost" onclick="slFromText()">📩 Fill from text</button>'
+    +'<div id="slSched"></div>'
+    +'<button class="slbtn go" style="margin-top:10px" onclick="slSaveSet()">✓ Save &amp; schedule</button>';
+  if(saved&&saved.songs&&saved.songs.length) slRenderSched(saved.songs); else slAutoTime();
+};
+/* parse a free-text / SMS reply → songs with durations → cumulative start times from the set start.
+   "Suzy Greenberg 2:30, Wolfmans Brother 4:55" → each song's text fires when it starts.
+   (Same parser a Twilio inbound-SMS webhook would call server-side.) */
+function slParseText(text, startHM){
+  var start=hm2m(startHM||'12:00'), items=String(text||'').split(/[,\n;]+/).map(function(s){return s.trim();}).filter(Boolean), rows=[], cumSec=0;
+  items.forEach(function(it){
+    var durSec=0, name=it, m=it.match(/(\d{1,2}):(\d{2})/);
+    if(m){ durSec=(+m[1])*60+(+m[2]); name=it.slice(0,m.index); }
+    else { var m2=it.match(/(\d{1,3})\s*(?:minutes?|mins?|m)\b/i); if(m2){ durSec=(+m2[1])*60; name=it.slice(0,m2.index); } }
+    name=name.replace(/[-–—:]+$/,'').replace(/\b(?:minutes?|mins?)\b/ig,'').trim();
+    if(!name) return;
+    rows.push({ n:name, at:m2hm(start+Math.round(cumSec/60)) });
+    cumSec += durSec || 240;   // default 4 min if a duration wasn't given
+  });
+  return rows;
+}
+window.slFromText=function(){
+  var rows=slParseText(slVal('slText'), slVal('slStart')||'12:00'); if(!rows.length) return;
+  document.getElementById('slSongs').value=rows.map(function(r){return r.n;}).join('\n');
+  slRenderSched(rows);
+};
+function slSongsNow(){ return (slVal('slSongs')||'').split('\n').map(function(x){return x.trim();}).filter(Boolean); }
+window.slAutoTime=function(){
+  var songs=slSongsNow(), sMin=hm2m(slVal('slStart')||'12:00'), eMin=hm2m(slVal('slEnd')||'13:00');
+  if(eMin<=sMin) eMin=sMin+60; var n=songs.length, W=eMin-sMin;
+  slRenderSched(songs.map(function(nm,i){ return {n:nm, at:m2hm(sMin+Math.round((i+1)*W/(n+1)))}; }));
+};
+function slRenderSched(rows){
+  document.getElementById('slSched').innerHTML = rows.length
+    ? '<div class="sub" style="margin-top:10px">Texts fire at:</div>'+rows.map(function(r,i){ return '<div class="slgig"><input type="time" class="slAt" data-i="'+i+'" value="'+esc(r.at||'')+'"><span>'+esc(r.n)+'</span></div>'; }).join('')
+    : '';
+}
+window.slSaveSet=function(){
+  var songs=slSongsNow(); if(!songs.length) return;
+  var ats=[].slice.call(document.querySelectorAll('#slSched .slAt'));
+  var out=songs.map(function(nm,i){ return {n:nm, at:(ats[i]&&ats[i].value)||''}; });
+  slPut({win:{s:slVal('slStart'),e:slVal('slEnd')}, songs:out});
+  try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_set',{band:slug,songs:out.length}); }catch(e){}
+  document.getElementById('slBody').innerHTML='<h3>🌹 Set List scheduled!</h3><div class="sub">'+out.length+' song'+(out.length===1?'':'s')+' — fans who opt in get each one texted the moment you play it. Reopen Set List anytime to edit.</div>';
+};
+
 /* ---- StageFill buy spine (same contract as event_page.html) ---- */
 function sfBuy(ttId){ fetch(SF_CHECKOUT,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+SF_ANON},body:JSON.stringify({ticket_type_id:ttId,qty:1,ref:'band'})})
   .then(function(r){return r.json();}).then(function(d){ if(d&&d.url){ location.href=d.url; } else { alert('Checkout unavailable right now.'); } }).catch(function(){ alert('Checkout unavailable right now.'); }); }
@@ -301,6 +459,14 @@ document.addEventListener('click',function(ev){ var b=ev.target&&ev.target.close
   if(b.getAttribute('data-free')==='1'){ sfRSVP(id); } else { sfBuy(id); } });
 
 render();
+
+/* PRE-SHOW ROUTINE: if this band's set is within the window and no setlist is entered yet, remind
+   the band group (all members). On the band's own page (role=band) also show an inline banner. */
+try{ if(window.DDSetlistReminder){
+  var _rem=DDSetlistReminder.due(slug, B, {forceMember: slIsBand()?true:null});
+  if(_rem){ if(slIsBand()){ DDSetlistReminder.fire(_rem); DDSetlistReminder.banner('slRemSlot', _rem); }
+            else if(_rem.member===true){ DDSetlistReminder.fire(_rem); } }
+} }catch(e){}
 
 /* live ticketed event: ?ev=<slug> pulls a real StageFill event and gives it the same treatment */
 (function(){ var ev=P('ev'); if(!ev) return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)) return;
