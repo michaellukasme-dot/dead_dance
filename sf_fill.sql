@@ -9,9 +9,11 @@ alter table public.sf_order add column if not exists ref_src text default 'direc
 create or replace function public.sf_fill_status(p_slug text)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare v_id uuid; v_start date; v_cap int; v_sold int; v_days int; v_behind boolean := false;
+        v_me text := nullif(auth.uid()::text,'');
 begin
-  select id, date_start into v_id, v_start from public.sf_event where slug = p_slug and status = 'live';
-  if v_id is null then return jsonb_build_object('error','not_found'); end if;
+  select id, date_start into v_id, v_start from public.sf_event
+    where slug = p_slug and status = 'live' and owner = v_me;   -- owner-only: sales + channel mix are private business data
+  if v_id is null then return jsonb_build_object('error','forbidden'); end if;
   select nullif(sum(qty_total),0), coalesce(sum(qty_sold),0)::int
     into v_cap, v_sold
     from public.sf_ticket_type where event_id = v_id and active;      -- sum(qty_total) is NULL if every tier is unlimited

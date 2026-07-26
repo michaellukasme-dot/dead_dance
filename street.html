@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DeadDance Street Team</title>
+<style>
+:root{--ink:#f4ecff;--muted:#b6a9d6;--accent:#c79a3a;--purple:#3a1f57;--purple2:#5a2e86;--ok:#39d98a;--card:#2a1b3d}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;overflow-x:hidden}
+body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:radial-gradient(120% 120% at 50% 0,#4a2a6e,#231238 60%,#1a0f2b)}
+.wrap{max-width:440px;margin:0 auto;padding:20px 16px 60px;text-align:center}
+.badge{display:inline-block;background:#ffffff14;border:1px solid #ffffff22;border-radius:999px;font-weight:800;font-size:12px;padding:5px 13px;letter-spacing:.03em}
+h1{font-size:24px;margin:12px 0 2px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.qrcard{background:#fff;border-radius:22px;padding:18px;box-shadow:0 16px 50px #0007;display:inline-block}
+#qr{width:250px;height:250px;display:flex;align-items:center;justify-content:center}
+.qrcap{color:#3a1f57;font-weight:800;font-size:13px;margin-top:8px}
+.touch{color:var(--muted);font-size:13px;margin:14px 6px 20px}
+.touch b{color:#fff}
+.counter{background:var(--card);border:1px solid #ffffff1f;border-radius:18px;padding:18px;margin-bottom:14px}
+.big{font-size:44px;font-weight:900;line-height:1;color:#fff}
+.big span{font-size:18px;color:var(--muted);font-weight:800}
+.goal{color:var(--muted);font-size:13px;margin-top:4px}
+.bar{height:12px;background:#ffffff1a;border-radius:99px;overflow:hidden;margin:12px 0 4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#c79a3a,#efc65a);transition:width .5s}
+.cta{width:100%;margin-top:14px;padding:14px;border:0;border-radius:14px;font-weight:800;font-size:16px;cursor:pointer;background:linear-gradient(180deg,#e0b94a,#c79a3a);color:#3a2400}
+.cta[disabled]{opacity:.5;filter:grayscale(.4)}
+.cta.ghost{background:#ffffff14;color:#fff;border:1px solid #ffffff26}
+.cookies{background:var(--card);border:1px solid #ffffff1f;border-radius:18px;padding:16px;margin-bottom:14px}
+.cookies .row{display:flex;align-items:center;justify-content:space-between}
+.cookies .n{font-size:26px;font-weight:900}
+.win{background:linear-gradient(180deg,#1e5b3a,#154a2e);border:1px solid #39d98a55;border-radius:16px;padding:16px;margin-bottom:14px}
+.win .code{font:900 26px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#fff;margin:6px 0}
+.sheet{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;z-index:60}
+.sheet.on{display:flex}
+.sheetc{background:#241436;width:100%;max-width:440px;margin:0 auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0));border:1px solid #ffffff22}
+.sheetc h3{margin:0 0 10px}
+label{display:block;text-align:left;font-weight:800;font-size:12px;color:var(--muted);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.04em}
+input,select{width:100%;padding:12px;border:1px solid #ffffff26;border-radius:12px;background:#1a0f2b;color:#fff;font-size:15px;font-weight:600}
+.sizes{display:flex;gap:7px}.sizes button{flex:1;padding:11px;border-radius:10px;border:1px solid #ffffff26;background:#1a0f2b;color:#fff;font-weight:800;cursor:pointer}
+.sizes button.on{background:var(--accent);color:#3a2400;border-color:var(--accent)}
+.x{float:right;background:0;border:0;color:var(--muted);font-size:22px;cursor:pointer}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#39d98a;color:#0a2417;font-weight:800;padding:11px 18px;border-radius:999px;opacity:0;transition:.2s;z-index:99;pointer-events:none}
+#toast.on{opacity:1}
+.foot{color:var(--muted);font-size:11.5px;margin-top:18px}
+.mapout{display:block;text-align:center;background:#ffffff14;border:1px solid #ffffff26;color:#fff;text-decoration:none;font-weight:800;font-size:14px;padding:12px;border-radius:14px;margin:0 0 16px}
+.handle{display:flex;gap:8px;margin-top:12px}
+.handle input{flex:1}
+.handle button{flex:0 0 auto;background:#ffffff1f;color:#fff;border:1px solid #ffffff2e;border-radius:12px;font-weight:800;padding:0 16px;cursor:pointer}
+.brow{display:flex;align-items:center;gap:9px;padding:9px 4px;border-top:1px solid #ffffff14;font-size:14px}
+.brow b{flex:1;text-align:left;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow span{font-weight:900;color:var(--accent)}
+.brow.me b{color:var(--accent)}
+.mini-c{background:var(--accent);color:#3a2400;border:0;border-radius:999px;font-weight:800;font-size:12px;padding:7px 13px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">🌹 DeadDance Street Team</span>
+  <h1>Spread the family</h1>
+  <div class="sub">Every phone you touch grows the scene — and earns you Cookies.</div>
+
+  <div class="qrcard"><div id="qr">…</div><div class="qrcap">📲 Have them scan this</div></div>
+  <div class="touch"><b>Touch phones:</b> they point their camera here, tap the link, and they're in — instantly one of the family, with their own code to keep it going.</div>
+
+  <a class="mapout" href="artsquest_musikfest.html">🎪 Go straight to the MusikFest map →</a>
+
+  <div class="counter">
+    <div class="big" id="signN">0<span> / 20</span></div>
+    <div class="goal">signups to a <b>free MusikFest T-shirt</b> — <b>first 1,000 recruiters only</b></div>
+    <div class="bar"><i id="signBar" style="width:0%"></i></div>
+    <button class="cta" id="claimBtn" disabled onclick="openClaim()">🎽 Claim free shirt</button>
+    <div class="handle"><input id="handle" placeholder="Your street name (for the leaderboard)" maxlength="24"><button onclick="setHandle()">Save</button></div>
+  </div>
+
+  <div class="win" id="pickup" style="display:none"></div>
+  <div id="board"></div>
+  <div id="friends"></div>
+
+  <div class="cookies">
+    <div class="row"><div><div class="goal" style="text-align:left">🍪 Your Cookies</div><div class="n" id="ckN">0</div></div>
+      <button class="cta ghost" style="width:auto;margin:0;padding:10px 14px" onclick="openRedeem()">Redeem shirt →</button></div>
+    <div class="bar"><i id="ckBar" style="width:0%"></i></div>
+    <div class="goal" id="ckGoal" style="text-align:left">The program never ends — <b>250 Cookies</b> = a shirt printed &amp; shipped by Jay, any time.</div>
+  </div>
+
+  <button class="cta ghost" style="margin-top:16px" onclick="openScan()">🎽 On the street team? Scan a winner's shirt →</button>
+
+  <div class="foot">Free shirt: pick it up from any street-team member at MusikFest (first 1,000 recruiters). After that, keep recruiting for Cookies — shirts ship to your door, printed by Jay Customz.</div>
+</div>
+
+<div class="sheet" id="sheet"><div class="sheetc" id="sheetc"></div></div>
+<div class="sheet" id="scan"><div class="sheetc"><button class="x" onclick="closeScan()">✕</button><h3>🎽 Hand off a shirt — scan the winner's code</h3><video id="svid" playsinline muted style="width:100%;border-radius:12px;background:#000;aspect-ratio:3/4;object-fit:cover"></video><div id="sres"></div><p class="foot" style="margin-top:10px">Touch phones: they show their code, you scan it, the shirt is theirs. One scan closes the loop.</p></div></div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; }catch(e){}</script>
+<script src="qr.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function qs(k){ return new URLSearchParams(location.search).get(k); }
+function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(window._tt); window._tt=setTimeout(function(){t.classList.remove('on');},2600); }
+var ME=null, LASTSIGN=null, SIZE='L';
+
+function boot(){ if(!(window._SFC&&_SFC.auth)){ setTimeout(boot,300); return; }
+  _SFC.auth.getSession().then(function(r){ var s=r&&r.data&&r.data.session;
+    if(s&&s.user){ start(s.user.id); } else { _SFC.auth.signInAnonymously().then(function(r2){ start(r2&&r2.data&&r2.data.user&&r2.data.user.id); }); } }); }
+function start(uid){ ME=uid; if(!ME){ setTimeout(boot,400); return; }
+  var url=location.origin+'/street.html?st='+encodeURIComponent(ME);
+  try{ if(window.DDQR&&DDQR.into) DDQR.into('qr',url,{size:250,css:60,caption:false}); }catch(e){ $('qr').textContent='QR'; }
+  var ref=qs('st')||'';
+  _SFC.rpc('sf_street_join',{p_ref:ref}).then(refresh).catch(refresh);
+  setInterval(refresh, 4500);   // live buzz counter
+}
+function refresh(){ if(!ME)return; _SFC.rpc('sf_street_me').then(function(r){ var d=r&&r.data; if(!d||d.error)return; paint(d); }).catch(function(){}); loadBoard(); loadFriends(); }
+
+/* ---- MusikFest Recruiter Cup ---- */
+function loadBoard(){ _SFC.rpc('sf_street_board').then(function(r){ renderBoard((r&&r.data&&r.data.board)||[]); }).catch(function(){}); }
+function renderBoard(b){ if(!b.length){ $('board').innerHTML=''; return; } var medal=['🥇','🥈','🥉'];
+  $('board').innerHTML='<div class="counter"><div class="goal" style="text-align:left;margin-bottom:6px">🏆 <b>MusikFest Recruiter Cup</b> — top 3 win big</div>'+
+    b.map(function(r,i){ return '<div class="brow'+(r.me?' me':'')+'"><span style="width:26px;text-align:center">'+(i<3?medal[i]:('#'+(i+1)))+'</span><b>'+esc(r.name)+(r.me?' (you)':'')+'</b><span>'+r.signups+'</span></div>'; }).join('')+'</div>'; }
+
+/* ---- friend confirmation (both sides) ---- */
+function loadFriends(){ _SFC.rpc('sf_friend_pending').then(function(r){ renderFriends((r&&r.data&&r.data.pending)||[]); }).catch(function(){}); }
+function renderFriends(p){ if(!p.length){ $('friends').innerHTML=''; return; }
+  $('friends').innerHTML='<div class="counter"><div class="goal" style="text-align:left;margin-bottom:6px">🤝 <b>Confirm friends on DeadDance</b></div>'+
+    p.map(function(f){ var nm=f.handle||(f.i_invited?'A head you brought in':'Your inviter'); return '<div class="brow"><b>'+esc(nm)+'</b><button class="mini-c" data-o="'+esc(String(f.other||''))+'">Add friend</button></div>'; }).join('')+'</div>';
+  $('friends').querySelectorAll('.mini-c').forEach(function(btn){ btn.onclick=function(){ confirmFriend(btn.getAttribute('data-o'), btn); }; }); }
+function confirmFriend(other, btn){ if(!other)return; if(btn){ btn.textContent='…'; btn.disabled=true; }
+  _SFC.rpc('sf_friend_confirm',{p_other:other}).then(function(r){ var d=r&&r.data||{};
+    if(d.ok){ toast(d.friends?'🤝 Friends on DeadDance!':'✓ Sent — waiting on them'); loadFriends(); }
+    else { if(btn){ btn.textContent='Add friend'; btn.disabled=false; } toast('Try again'); } }).catch(function(){ if(btn){ btn.textContent='Add friend'; btn.disabled=false; } }); }
+
+/* ---- recruiter handle ---- */
+function setHandle(){ var h=($('handle').value||'').trim(); _SFC.rpc('sf_street_set_handle',{p_handle:h}).then(function(){ toast('🏷️ Street name saved'); loadBoard(); }).catch(function(){ toast('Try again'); }); }
+
+/* ---- winner pickup card (with scannable code QR) ---- */
+function showPickup(code, status){ var box=$('pickup'); box.style.display='block';
+  if(status==='fulfilled'){ box.innerHTML='✅ <b>Shirt picked up — enjoy!</b><div class="goal">You closed the loop. Keep recruiting for Cookies.</div>'; return; }
+  box.innerHTML='🎽 <b>You earned a shirt!</b><div class="goal" style="margin:4px 0">Find any DeadDance street-team member — they scan this and hand you your shirt.</div>'+
+    '<div id="pickqr" style="width:190px;height:190px;background:#fff;border-radius:12px;margin:10px auto;display:flex;align-items:center;justify-content:center"></div><div class="code">'+esc(code)+'</div>';
+  try{ if(window.DDQR&&DDQR.into) DDQR.into('pickqr','SFSHIRT:'+code,{size:190,css:52,caption:false}); }catch(e){ var q=$('pickqr'); if(q)q.textContent=code; }
+}
+
+/* ---- street-teamer scans a winner's code → hand off the shirt (closes the loop) ---- */
+var _sstream=null,_sscan=false,_sraf=null,_scv=document.createElement('canvas'),_sctx=_scv.getContext('2d'),_scool=0;
+function openScan(){ $('scan').classList.add('on'); $('sres').innerHTML=''; startScan(); }
+function closeScan(){ stopScan(); $('scan').classList.remove('on'); }
+function startScan(){ var v=$('svid'); navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(s){ _sstream=s; v.srcObject=s; v.play(); _sscan=true; sloop(); }).catch(function(){ sres('bad','Allow camera to scan'); }); }
+function stopScan(){ _sscan=false; if(_sraf)cancelAnimationFrame(_sraf); if(_sstream){ _sstream.getTracks().forEach(function(t){t.stop();}); _sstream=null; } }
+function sloop(){ if(!_sscan)return; var v=$('svid'); if(v.readyState===v.HAVE_ENOUGH_DATA){ _scv.width=v.videoWidth; _scv.height=v.videoHeight; _sctx.drawImage(v,0,0,_scv.width,_scv.height);
+  try{ var img=_sctx.getImageData(0,0,_scv.width,_scv.height); var c=jsQR(img.data,img.width,img.height); if(c&&c.data&&Date.now()>_scool){ _scool=Date.now()+2500; onShirtScan(c.data); } }catch(e){} }
+  _sraf=requestAnimationFrame(sloop); }
+function codeFrom(s){ s=String(s||'').trim(); return s.indexOf('SFSHIRT:')===0 ? s.slice(8) : s; }
+function onShirtScan(data){ var code=codeFrom(data); if(!/^MF-[A-Z0-9]{4,10}$/i.test(code)){ sres('bad','Not a shirt code'); return; }
+  _SFC.rpc('sf_shirt_fulfill',{p_code:code}).then(function(r){ var d=r&&r.data||{};
+    if(d.ok){ buzz(); sres('ok','✓ Hand over a '+esc(d.size||'')+' shirt'+(d.name?(' for '+esc(d.name)):'')); }
+    else if(d.error==='already'){ sres('bad','Already picked up'+(d.size?(' · '+esc(d.size)):'')); }
+    else { sres('bad','Invalid code'); } }).catch(function(){ sres('bad','Try again'); }); }
+function sres(kind,msg){ var el=$('sres'); if(!el)return; el.innerHTML=msg; el.style.cssText='margin-top:10px;padding:14px;border-radius:12px;text-align:center;font-weight:800;font-size:16px;'+(kind==='ok'?'background:rgba(57,217,138,.18);color:#5be8a0;border:1px solid #39d98a':'background:rgba(224,54,74,.16);color:#ff8a9a;border:1px solid #e0364a'); }
+$('scan').addEventListener('click',function(e){ if(e.target===$('scan')) closeScan(); });
+function paint(d){
+  var n=d.signups||0, ck=d.cookies||0;
+  var goal=d.free_at||20;
+  if(LASTSIGN!=null && n>LASTSIGN){ buzz(); toast('🎉 New head signed up! '+n+' / '+goal); }
+  LASTSIGN=n;
+  $('signN').innerHTML=n+'<span> / '+goal+'</span>';
+  $('signBar').style.width=Math.min(100,n/goal*100)+'%';
+  var cb=$('claimBtn');
+  if(d.free_claimed){ cb.textContent='🎽 Shirt claimed ✓'; cb.disabled=true; }
+  else if(d.free_ready){ cb.disabled=false; cb.textContent='🎽 Claim free shirt'; }
+  else { cb.disabled=true; cb.textContent='🎽 '+(goal-n)+' more for a free shirt'; }
+  if(d.handle && $('handle') && !$('handle').value) $('handle').value=d.handle;
+  // winner notification — one-time toast when they cross the line
+  if(d.free_ready && !d.free_claimed){ try{ if(localStorage.getItem('dd.sf.earned')!=='1'){ localStorage.setItem('dd.sf.earned','1'); buzz(); toast('🎽 You earned a MusikFest T-shirt! Claim it below.'); } }catch(e){} }
+  // returning winner: re-show their pickup QR (the code lives server-side)
+  if(d.shirt_code){ showPickup(d.shirt_code, d.shirt_status); }
+  $('ckN').textContent=ck;
+  $('ckBar').style.width=Math.min(100,ck/(d.cookie_goal||250)*100)+'%';
+}
+function buzz(){ try{ if(navigator.vibrate) navigator.vibrate([90,40,90,40,140]); }catch(e){} }
+
+/* ---- claim free MusikFest shirt ---- */
+function sizePicker(sel){ return '<label>Size</label><div class="sizes">'+['S','M','L','XL','2XL'].map(function(s){return '<button class="'+(s===sel?'on':'')+'" onclick="SIZE=\''+s+'\';document.querySelectorAll(\'.sizes button\').forEach(function(b){b.classList.toggle(\'on\',b.textContent===\''+s+'\')})">'+s+'</button>';}).join('')+'</div>'; }
+function openClaim(){ SIZE='L';
+  $('sheetc').innerHTML='<button class="x" onclick="closeSheet()">✕</button><h3>🎽 Your free MusikFest shirt</h3><div class="goal" style="text-align:left">Pick it up any day at the DeadDance booth. Just show your code.</div>'
+    +'<label>Your name</label><input id="cn" placeholder="Name for the booth">'+sizePicker('L')
+    +'<button class="cta" style="margin-top:14px" onclick="doClaim()">Get my pickup code</button>'; openSheet(); }
+function doClaim(){ var name=($('cn').value||'').trim(); if(!name){ toast('Add your name'); return; }
+  _SFC.rpc('sf_shirt_claim_free',{p_size:SIZE,p_name:name}).then(function(r){ var d=r&&r.data||{};
+    if(d.ok){ closeSheet(); showPickup(d.code,'pickup_ready'); refresh(); buzz(); }
+    else if(d.error==='need_more'){ toast('Need '+(d.need-d.have)+' more signups'); }
+    else if(d.error==='already_claimed'){ toast('Already claimed ✓'); closeSheet(); }
+    else if(d.error==='shirts_gone'){ toast('First 1,000 shirts are gone — keep earning Cookies!'); closeSheet(); }
+    else if(d.error==='mf_only'){ toast('Free shirts are handed out at MusikFest only'); closeSheet(); }
+    else { toast('Try again'); } }).catch(function(){ toast('Try again'); }); }
+
+/* ---- redeem cookies → shirt shipped by Jay ---- */
+function openRedeem(){ SIZE='L';
+  $('sheetc').innerHTML='<button class="x" onclick="closeSheet()">✕</button><h3>🍪 Redeem 250 Cookies</h3><div class="goal" style="text-align:left">Jay Customz prints it and ships it to your door.</div>'
+    +'<label>Your name</label><input id="rn" placeholder="Full name">'+sizePicker('L')
+    +'<label>Ship to</label><input id="ra" placeholder="Street, city, state, ZIP">'
+    +'<button class="cta" style="margin-top:14px" onclick="doRedeem()">Send my order to Jay</button>'; openSheet(); }
+function doRedeem(){ var name=($('rn').value||'').trim(), addr=($('ra').value||'').trim();
+  if(!name){ toast('Add your name'); return; } if(!addr){ toast('Add a shipping address'); return; }
+  _SFC.rpc('sf_shirt_redeem_cookies',{p_size:SIZE,p_name:name,p_addr:addr}).then(function(r){ var d=r&&r.data||{};
+    if(d.ok){ closeSheet(); toast('🚚 Sent to Jay — on its way!'); refresh(); }
+    else if(d.error==='need_cookies'){ toast('Need '+(d.need-d.have)+' more Cookies'); }
+    else if(d.error==='need_address'){ toast('Add a shipping address'); }
+    else { toast('Try again'); } }).catch(function(){ toast('Try again'); }); }
+
+function openSheet(){ $('sheet').classList.add('on'); }
+function closeSheet(){ $('sheet').classList.remove('on'); }
+$('sheet').addEventListener('click',function(e){ if(e.target===$('sheet')) closeSheet(); });
+boot();
+</script>
+</body>
+</html>
