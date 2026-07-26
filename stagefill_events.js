@@ -26,5 +26,6 @@
     { slug:'san-diego-reggae', name:'San Diego Beach Reggae', city:'San Diego', state:'CA', start:'2026-07-04', time:'15:00', cat:'live_music', venue:'Mission Beach', lat:32.7703, lng:-117.2521 },
     { slug:'minneapolis-improv', name:'Minneapolis Improv Fest', city:'Minneapolis', state:'MN', start:'2026-10-24', end:'2026-10-25', time:'19:00', cat:'comedy', venue:'Brave New Workshop', lat:44.9782, lng:-93.2757 }
   ];
+  EVENTS.forEach(function (e) { e.sample = true; });   // seed = representative sample; real events come from sf_list (_live)
   root.STAGEFILL_EVENTS = EVENTS;
 })(typeof window !== 'undefined' ? window : this);

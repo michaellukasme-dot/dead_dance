@@ -91,6 +91,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
     <label>Or paste a logo link (if you didn't upload)</label><input id="logo" placeholder="Drive / Dropbox / website link">
     <label>Day you play MusikFest (sets your pickup time)</label><input id="playday" type="date" min="2026-07-30" max="2026-08-09">
     <label style="display:flex;align-items:flex-start;gap:9px;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--ink);margin-top:16px;cursor:pointer;font-weight:700"><input type="checkbox" id="artok" style="width:auto;flex:0 0 auto;margin-top:2px"> I've reviewed my logo/artwork above and confirm it's correct and ready to print.</label>
+    <label style="display:flex;align-items:flex-start;gap:9px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink);margin-top:10px;cursor:pointer;font-weight:600"><input type="checkbox" id="tcok" style="width:auto;flex:0 0 auto;margin-top:2px"> I own the rights to this artwork and agree to the <a href="terms.html" target="_blank">Terms</a>, <a href="privacy_policy.html" target="_blank">Privacy</a> &amp; <a href="refunds.html" target="_blank">Refund</a> policy.</label>
     <div class="tot"><div><div style="color:var(--muted);font-size:12px;font-weight:800">TOTAL</div><div class="n" id="total">$0</div></div>
       <div style="text-align:right;color:var(--muted);font-size:12.5px;font-weight:700" id="breakdown">0 shirts</div></div>
     <button class="cta" onclick="place()">Reserve my order →</button>
@@ -162,9 +163,10 @@ function place(){ var band=($('band').value||'').trim(); if(!band){ toast('Add y
   var shirts=total(); if(shirts<1){ toast('Add at least one shirt to the size mix'); return; }
   if(!LOGO && !($('logo').value||'').trim()){ toast('Add your logo — tap the shirt or paste a link'); return; }
   if(!$('artok').checked){ toast('Please confirm your artwork before ordering'); return; }
+  if(!$('tcok').checked){ toast('Please agree to the Terms & rights to order'); return; }
   var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ toast('One sec…'); return; }
   var sizes={}; SIZES.forEach(function(s){ if(CNT[s]>0) sizes[s]=CNT[s]; });
-  cl.rpc('sf_band_merch_create',{p:{tier:SEL,sizes:sizes,band:band,kind:FOR,chapter:($('chapter').value||''),play_day:($('playday').value||''),contact:($('contact').value||'').trim(),logo:(LOGO||($('logo').value||'').trim())}})
+  cl.rpc('sf_band_merch_create',{p:{tier:SEL,sizes:sizes,band:band,kind:FOR,chapter:($('chapter').value||''),play_day:($('playday').value||''),contact:($('contact').value||'').trim(),logo:(LOGO||($('logo').value||'').trim()),terms_version:'1.0'}})
     .then(function(r){ var d=r&&r.data||{}; if(d.ok){ done(d); } else { toast(d.error==='need_band'?'Add your band name':(d.error==='need_sizes'?'Add shirts to the size mix':'Try again')); } })
     .catch(function(){ toast('Try again'); }); }
 function done(d){ var t=tier(), mix=SIZES.filter(function(s){return CNT[s]>0;}).map(function(s){return CNT[s]+' '+s;}).join(', ');
@@ -183,10 +185,11 @@ function saveLast(){ try{ var sizes={}; SIZES.forEach(function(s){ if(CNT[s]>0) 
   localStorage.setItem('dd.merch.last', JSON.stringify({kind:FOR,tier:SEL,sizes:sizes,name:($('band').value||'').trim(),chapter:($('chapter').value||'')})); }catch(e){} }
 function loadReorder(){ try{ var o=JSON.parse(localStorage.getItem('dd.merch.last')||'null'); if(!o||o.kind!==FOR||!o.name)return;
   var mix=Object.keys(o.sizes||{}).map(function(s){return o.sizes[s]+' '+s;}).join(', '); var t=TIERS.filter(function(x){return x.k===o.tier;})[0];
-  $('reorder').classList.add('on'); $('reorder').innerHTML='<div class="rt">🔁 <b>Reorder</b> '+esc(o.name)+' — '+esc((t?t.lvl:'')+' · '+mix)+'<div style="color:var(--muted);font-size:11.5px;margin-top:2px">Charge to your '+FOR+' account (when billing is on).</div></div><button id="reBtn">Reorder</button>';
+  $('reorder').classList.add('on'); $('reorder').innerHTML='<div class="rt">🔁 <b>Reorder</b> '+esc(o.name)+' — '+esc((t?t.lvl:'')+' · '+mix)+'<div style="color:var(--muted);font-size:11.5px;margin-top:2px">We\'ll invoice your '+FOR+' account (billing on file soon).</div></div><button id="reBtn">Reorder</button>';
   $('reBtn').onclick=function(){ SEL=o.tier||SEL; SIZES.forEach(function(s){ CNT[s]=(o.sizes&&o.sizes[s])||0; }); if(o.name)$('band').value=o.name; if(o.chapter){ $('chapter').value=o.chapter; chapterChange(); } renderTiers(); renderSizes(); calc(); toast('Prefilled your last run — review & reserve'); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }; }catch(e){} }
 
 applyMode(); renderChapters(); renderTiers(); renderSizes(); calc(); loadReorder();
 </script>
+<script src="dd_legal_footer.js"></script>
 </body>
 </html>

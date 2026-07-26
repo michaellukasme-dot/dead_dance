@@ -112,6 +112,7 @@ function render(){
       +'<div class="date"><div class="m">'+dp.m+'</div><div class="d">'+dp.d+'</div><div class="y">'+dp.y+'</div></div>'
       +'<div class="info"><div class="n">'+esc(e.name)+(e._mine?' <span style="color:#c08a1a;font-size:11px">· yours</span>':'')+'</div>'
       +'<div class="m">'+esc([e.venue,[e.city,e.state].filter(Boolean).join(', ')].filter(Boolean).join(' · '))+range+'</div></div>'
+      +(e.sample&&!e._live?'<span class="chip" style="background:#fff3d6;color:#8a6d00;margin-right:5px">sample</span>':'')
       +'<span class="chip">'+catIcon(e.cat)+' '+esc(catLabel(e.cat))+'</span></a>';
   });
   if(curG!==null) html+='</div>';
@@ -127,5 +128,6 @@ function sfLive(){ var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return; 
   fillCities($('fState').value); render(); }).catch(function(){}); }
 sfLive();
 </script>
+<script src="dd_legal_footer.js"></script>
 </body>
 </html>

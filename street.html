@@ -62,6 +62,42 @@ input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:
   <h1>Spread the family</h1>
   <div class="sub">Every phone you touch grows the scene — and earns you Cookies.</div>
 
+  <svg viewBox="0 0 360 210" width="100%" style="max-width:360px;display:block;margin:2px auto 6px" xmlns="http://www.w3.org/2000/svg" aria-label="Touch phones to join">
+    <defs>
+      <linearGradient id="ddscr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#4c1d95"/></linearGradient>
+      <radialGradient id="spark" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffe58a" stop-opacity=".95"/><stop offset="1" stop-color="#ffe58a" stop-opacity="0"/></radialGradient>
+    </defs>
+    <!-- left phone: QR -->
+    <g transform="translate(104,116) rotate(-11)">
+      <rect x="-53" y="-93" width="106" height="186" rx="18" fill="#23202a"/>
+      <rect x="-45" y="-84" width="90" height="168" rx="10" fill="#fff"/>
+      <g fill="#1b1226" transform="translate(-27,-58)">
+        <path d="M0 0h16v16H0z M3 3h10v10H3z" fill-rule="evenodd"/><rect x="5" y="5" width="6" height="6"/>
+        <path d="M38 0h16v16H38z M41 3h10v10h-10z" fill-rule="evenodd"/><rect x="43" y="5" width="6" height="6"/>
+        <path d="M0 38h16v16H0z M3 41h10v10H3z" fill-rule="evenodd"/><rect x="5" y="43" width="6" height="6"/>
+        <rect x="22" y="2" width="4" height="4"/><rect x="30" y="8" width="4" height="4"/><rect x="22" y="14" width="4" height="4"/>
+        <rect x="24" y="24" width="4" height="4"/><rect x="34" y="26" width="4" height="4"/><rect x="44" y="24" width="4" height="4"/>
+        <rect x="24" y="40" width="4" height="4"/><rect x="32" y="46" width="4" height="4"/><rect x="42" y="42" width="4" height="4"/><rect x="48" y="48" width="4" height="4"/>
+        <rect x="18" y="30" width="4" height="4"/><rect x="10" y="24" width="4" height="4"/>
+      </g>
+      <text x="0" y="66" text-anchor="middle" font-size="9" font-weight="800" fill="#6d28d9">Scan to join</text>
+    </g>
+    <!-- right phone: DeadDance welcome -->
+    <g transform="translate(256,100) rotate(11)">
+      <rect x="-53" y="-93" width="106" height="186" rx="18" fill="#23202a"/>
+      <rect x="-45" y="-84" width="90" height="168" rx="10" fill="url(#ddscr)"/>
+      <text x="0" y="-28" text-anchor="middle" font-size="30">🌹</text>
+      <text x="0" y="2" text-anchor="middle" font-size="13" font-weight="900" fill="#fff">DeadDance</text>
+      <text x="0" y="20" text-anchor="middle" font-size="8.5" fill="#e9dcff">You're in the family</text>
+      <rect x="-36" y="40" width="72" height="20" rx="10" fill="#e0b94a"/>
+      <text x="0" y="53" text-anchor="middle" font-size="8.5" font-weight="800" fill="#3a2400">Welcome ✓</text>
+    </g>
+    <!-- touch spark -->
+    <circle cx="180" cy="58" r="34" fill="url(#spark)"/>
+    <text x="180" y="65" text-anchor="middle" font-size="20">⚡</text>
+  </svg>
+  <div class="sub" style="margin-top:0"><b>Touch phones.</b> They scan your QR, they're in — and now they have their own.</div>
+
   <div class="qrcard"><div id="qr">…</div><div class="qrcap">📲 Have them scan this</div></div>
   <div class="touch"><b>Touch phones:</b> they point their camera here, tap the link, and they're in — instantly one of the family, with their own code to keep it going.</div>
 
@@ -118,11 +154,21 @@ function start(uid){ ME=uid; if(!ME){ setTimeout(boot,400); return; }
 }
 function refresh(){ if(!ME)return; _SFC.rpc('sf_street_me').then(function(r){ var d=r&&r.data; if(!d||d.error)return; paint(d); }).catch(function(){}); loadBoard(); loadFriends(); }
 
-/* ---- MusikFest Recruiter Cup ---- */
-function loadBoard(){ _SFC.rpc('sf_street_board').then(function(r){ renderBoard((r&&r.data&&r.data.board)||[]); }).catch(function(){}); }
-function renderBoard(b){ if(!b.length){ $('board').innerHTML=''; return; } var medal=['🥇','🥈','🥉'];
-  $('board').innerHTML='<div class="counter"><div class="goal" style="text-align:left;margin-bottom:6px">🏆 <b>MusikFest Recruiter Cup</b> — top 3 win big</div>'+
-    b.map(function(r,i){ return '<div class="brow'+(r.me?' me':'')+'"><span style="width:26px;text-align:center">'+(i<3?medal[i]:('#'+(i+1)))+'</span><b>'+esc(r.name)+(r.me?' (you)':'')+'</b><span>'+r.signups+'</span></div>'; }).join('')+'</div>'; }
+/* ---- MusikFest Recruiter Cup (contest, scored over the full festival) ---- */
+var PRIZES=[
+  {m:'🥇',t:'1st · Golden Bear',d:'$500 cash + a one-of-one tie-dye jacket + 5,000 🍪 + side-stage at a DeadDance show'},
+  {m:'🥈',t:'2nd · Silver Rose',d:'$250 cash + the premium MOST tee + 2,500 🍪'},
+  {m:'🥉',t:'3rd · Bronze Stealie',d:'$100 cash + a tee + 1,000 🍪'}
+];
+function loadBoard(){ _SFC.rpc('sf_street_contest').then(function(r){ var d=r&&r.data||{}; renderBoard(d.board||[], d.ends); }).catch(function(){}); }
+function renderBoard(b, ends){ var medal=['🥇','🥈','🥉'];
+  var cd=''; if(ends){ var days=Math.ceil((new Date(ends+'T23:59:59')-new Date())/864e5); cd = days>1?('· ends in '+days+' days'):(days===1?'· ends tomorrow':(days===0?'· ends today':'· ended')); }
+  var prizes=PRIZES.map(function(p){ return '<div class="brow" style="align-items:flex-start"><span style="width:26px">'+p.m+'</span><div style="flex:1;text-align:left"><b style="font-size:13px">'+p.t+'</b><div style="color:var(--muted);font-size:11.5px;font-weight:600">'+esc(p.d)+'</div></div></div>'; }).join('');
+  var rows = b.length ? b.map(function(r,i){ return '<div class="brow'+(r.me?' me':'')+'"><span style="width:26px;text-align:center">'+(i<3?medal[i]:('#'+(i+1)))+'</span><b>'+esc(r.name)+(r.me?' (you)':'')+'</b><span>'+r.signups+'</span></div>'; }).join('')
+             : '<div class="goal" style="text-align:left;padding:6px 4px">Be first on the board — start touching phones!</div>';
+  $('board').innerHTML='<div class="counter"><div class="goal" style="text-align:left;margin-bottom:4px">🏆 <b>MusikFest Recruiter Cup</b> '+cd+'</div>'+
+    prizes+
+    '<div class="goal" style="text-align:left;margin:10px 0 4px">Standings — most registered over the full festival</div>'+rows+'</div>'; }
 
 /* ---- friend confirmation (both sides) ---- */
 function loadFriends(){ _SFC.rpc('sf_friend_pending').then(function(r){ renderFriends((r&&r.data&&r.data.pending)||[]); }).catch(function(){}); }
@@ -204,9 +250,11 @@ function openRedeem(){ SIZE='L';
   $('sheetc').innerHTML='<button class="x" onclick="closeSheet()">✕</button><h3>🍪 Redeem 250 Cookies</h3><div class="goal" style="text-align:left">Jay Customz prints it and ships it to your door.</div>'
     +'<label>Your name</label><input id="rn" placeholder="Full name">'+sizePicker('L')
     +'<label>Ship to</label><input id="ra" placeholder="Street, city, state, ZIP">'
+    +'<label style="display:flex;gap:8px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--ink);margin-top:10px;cursor:pointer"><input type="checkbox" id="rtc" style="width:auto;flex:0 0 auto;margin-top:2px"> I agree to the <a href="terms.html" target="_blank" style="color:var(--accent)">Terms</a> &amp; <a href="privacy_policy.html" target="_blank" style="color:var(--accent)">Privacy</a>.</label>'
     +'<button class="cta" style="margin-top:14px" onclick="doRedeem()">Send my order to Jay</button>'; openSheet(); }
 function doRedeem(){ var name=($('rn').value||'').trim(), addr=($('ra').value||'').trim();
   if(!name){ toast('Add your name'); return; } if(!addr){ toast('Add a shipping address'); return; }
+  if(!$('rtc').checked){ toast('Please agree to the Terms & Privacy'); return; }
   _SFC.rpc('sf_shirt_redeem_cookies',{p_size:SIZE,p_name:name,p_addr:addr}).then(function(r){ var d=r&&r.data||{};
     if(d.ok){ closeSheet(); toast('🚚 Sent to Jay — on its way!'); refresh(); }
     else if(d.error==='need_cookies'){ toast('Need '+(d.need-d.have)+' more Cookies'); }
@@ -218,5 +266,6 @@ function closeSheet(){ $('sheet').classList.remove('on'); }
 $('sheet').addEventListener('click',function(e){ if(e.target===$('sheet')) closeSheet(); });
 boot();
 </script>
+<script src="dd_legal_footer.js"></script>
 </body>
 </html>

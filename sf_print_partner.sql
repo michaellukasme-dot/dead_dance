@@ -53,6 +53,8 @@ alter table public.sf_band_merch_order add column if not exists partner  text;
 alter table public.sf_band_merch_order add column if not exists size_mix jsonb;    -- {S,M,L,XL,2XL} counts
 alter table public.sf_band_merch_order add column if not exists play_day text;      -- MusikFest set date → pickup timing (spreads Jay's print load)
 alter table public.sf_band_merch_order add column if not exists kind text default 'band';  -- band | venue (same store)
+alter table public.sf_band_merch_order add column if not exists terms_version text;         -- consent: Terms version affirmed
+alter table public.sf_band_merch_order add column if not exists consented_at timestamptz;    -- consent: when artwork-ownership + Terms were affirmed
 
 create or replace function public.sf_band_merch_create(p jsonb)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -72,10 +74,12 @@ begin
   v_chapter := nullif(trim(p->>'chapter'),'');
   select name, city into v_partner, v_pcity from public.sf_print_partner
     where chapter = v_chapter and status = 'active' limit 1;
-  insert into public.sf_band_merch_order(band, contact, tier, dozens, shirts, unit_cents, total_cents, logo, note, chapter, partner, size_mix, play_day, kind)
+  insert into public.sf_band_merch_order(band, contact, tier, dozens, shirts, unit_cents, total_cents, logo, note, chapter, partner, size_mix, play_day, kind, terms_version, consented_at)
     values (nullif(p->>'band',''), nullif(p->>'contact',''), v_tier, v_doz, v_shirts, v_unit, v_unit*v_shirts,
             nullif(p->>'logo',''), nullif(p->>'note',''), v_chapter, v_partner, v_sizes, nullif(p->>'play_day',''),
-            case when p->>'kind' = 'venue' then 'venue' else 'band' end)
+            case when p->>'kind' = 'venue' then 'venue' else 'band' end,
+            nullif(p->>'terms_version',''),
+            case when nullif(p->>'terms_version','') is not null then now() else null end)
     returning id into v_id;
   return jsonb_build_object('ok', true, 'order', v_id, 'tier', v_tier, 'shirts', v_shirts,
     'unit_cents', v_unit, 'total_cents', v_unit*v_shirts, 'chapter', v_chapter,

@@ -48,7 +48,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
     <label>City</label><input id="city" placeholder="City, ST">
     <label>Contact email or phone</label><input id="contact" placeholder="How DeadDance reaches you">
     <button class="cta" onclick="apply()">Apply to be the printer →</button>
-    <div class="foot">We review every application and confirm one partner per chapter. No commitment to apply.</div>
+    <div class="foot">We review every application and confirm one partner per chapter. No commitment to apply. By applying you agree to our <a href="terms.html" style="color:var(--accent)">Terms</a> &amp; <a href="privacy_policy.html" style="color:var(--accent)">Privacy</a>.</div>
   </div>
   <div class="win" id="win"></div>
 </div>
@@ -76,5 +76,6 @@ function apply(){ var ch=$('chapter').value, name=($('name').value||'').trim();
       else { toast(d.error==='need_fields'?'Add chapter + shop name':'Try again'); } })
     .catch(function(){ toast('Try again'); }); }
 </script>
+<script src="dd_legal_footer.js"></script>
 </body>
 </html>

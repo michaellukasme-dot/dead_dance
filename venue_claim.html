@@ -46,7 +46,7 @@ input,select{width:100%;padding:12px 13px;border:1px solid var(--line);border-ra
 <div class="wrap">
   <div class="brand">🎟️ StageFill · <span style="color:var(--muted);font-weight:700">Venue setup</span></div>
   <div class="card" id="card"></div>
-  <div class="mini">Free to set up. You only ever pay if you'd rather we <i>didn't</i> run your ticketing.</div>
+  <div class="mini">Free to set up. You only ever pay if you'd rather we <i>didn't</i> run your ticketing.<br>By claiming you agree to our <a href="terms.html" style="color:var(--accent)">Terms</a> &amp; <a href="privacy_policy.html" style="color:var(--accent)">Privacy</a>.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -140,5 +140,6 @@ function cp2(btn){ var t=$('snip').textContent; try{ navigator.clipboard.writeTe
 function shake(m){ alert(m); }
 render();
 </script>
+<script src="dd_legal_footer.js"></script>
 </body>
 </html>

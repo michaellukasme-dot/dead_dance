@@ -239,6 +239,30 @@ begin
 end $$;
 grant execute on function public.sf_shirt_fulfill(text) to anon, authenticated;
 
+-- ── MusikFest Recruiter Cup — CONTEST scoped to the full festival window (Jul 31 – Aug 9, 2026) ──
+-- Top recruiters by registrations DURING MusikFest. Winners 1/2/3 are decided from this board.
+create or replace function public.sf_street_contest()
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+declare v_me text := nullif(auth.uid()::text,'');
+begin
+  return jsonb_build_object(
+    'starts', '2026-07-31', 'ends', '2026-08-09',
+    'board', coalesce((
+      select jsonb_agg(row_to_json(t)) from (
+        select coalesce(s.handle, 'Head #' || upper(substr(r.referrer, 1, 4))) as name,
+               count(*)::int as signups,
+               (r.referrer = v_me) as me
+          from public.sf_referral r
+          left join public.sf_streeter s on s.member = r.referrer
+         where r.created_at::date between date '2026-07-31' and date '2026-08-09'
+         group by r.referrer, s.handle
+         order by count(*) desc, min(r.created_at) asc
+         limit 10
+      ) t
+    ), '[]'::jsonb));
+end $$;
+grant execute on function public.sf_street_contest() to anon, authenticated;
+
 -- admin/Jay/booth read queue (fail-closed: non-admins get nothing). PII (name/addr) exposed to admins only.
 create or replace function public.sf_shirt_queue()
 returns setof public.sf_shirt_order language plpgsql stable security definer set search_path = public as $$
