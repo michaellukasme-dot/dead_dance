@@ -58,6 +58,10 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
 .gig .v{text-align:right;color:var(--ink)}.gig .v small{display:block;color:var(--muted);font-size:12px}
 .mclose{width:100%;margin-top:12px;border:0;background:#f2ecf9;color:var(--purple2);font-weight:800;border-radius:12px;padding:12px;cursor:pointer;font-size:14px}
 .badge{display:inline-block;font-size:10.5px;font-weight:800;color:#8a6d00;background:#fff3d6;border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.hostbadge{display:inline-block;font-size:11.5px;font-weight:800;color:var(--purple2);background:#f2ecf9;border-radius:8px;padding:6px 11px;margin-bottom:10px}
+.tixbtn{display:block;width:100%;text-align:center;border:0;cursor:pointer;font-weight:800;font-size:15px;padding:13px;border-radius:12px;margin-bottom:8px;background:linear-gradient(180deg,#ffce6b,var(--gold));color:#3a1d00}
+.tixbtn[data-free="1"]{background:#eef6f0;color:#12854f}
+.legal{font-size:11px;color:var(--muted);margin-top:4px}.legal a{color:var(--purple2);font-weight:700}
 </style>
 </head>
 <body>
@@ -81,6 +85,8 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
     <h2>The roster</h2>
     <div class="roster" id="roster"></div>
   </div>
+
+  <div id="tixSlot"></div>
 
   <div class="sec">
     <div class="qrcard">
@@ -113,7 +119,14 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
 
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+/* StageFill ticketing spine — same client + endpoints as event_page.html. A band that lets us
+   sell tickets gets the full treatment: Pre-Event (tickets on sale) → Live (doors) → Historical. */
+var SF_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM",
+    SF_CHECKOUT="https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/sf-checkout";
+(function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co", SF_ANON); window.ddClient=function(){return C;}; }catch(e){} })();
+
 /* ---- band seed (research 2026-07-26; unverified rosters flagged, filled after outreach) ---- */
 var BANDS={
   "rift":{name:"Rift",kind:"Philadelphia Phish Tribute",home:"Philadelphia, PA",
@@ -143,7 +156,18 @@ var BANDS={
     tease:[], recording:null,
     links:{},
     coming:[],
-    conf:"Set: Aug 5. No public roster or links found — awaiting the band."}
+    conf:"Set: Aug 5. No public roster or links found — awaiting the band."},
+  /* SAMPLE of the ticketed treatment — a band that lets us sell tickets for their OWN show.
+     Real checkout activates when the band enables ticketing (or pass ?ev=<slug> for a live event). */
+  "demo-ticketed":{name:"Your Band",kind:"Ticketed headline show · sample",home:"Bethlehem, PA",
+    members:[{n:"— your lineup —",r:"appears here"}],
+    ticketed:true, host:"managed",
+    set:{date:"2026-09-19",time:"8:00 PM",stage:"The Foundry · SteelStacks"},
+    tickets:[{name:"General Admission",price_cents:2500,sample:true},{name:"Free RSVP",price_cents:0,sample:true}],
+    tease:[], recording:null,
+    links:{},
+    coming:[],
+    conf:"Sample of the ticketed treatment. Real Stripe checkout goes live when the band turns on ticketing."}
 };
 
 function P(k){return new URLSearchParams(location.search).get(k);}
@@ -196,7 +220,11 @@ function render(){
   var walk='<a class="pill gold" href="'+esc(walkUrl)+'" target="_blank" rel="noopener">🗺 Walk to the stage</a>';
   var coming=(B.coming&&B.coming.length)?'<button class="pill" onclick="csOpen()">📅 Coming shows</button>':'';
   if(S==='future'){
-    pills.push('<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">🎟 See us live</a>');
+    if(B.ticketed && B.tickets && B.tickets.length){
+      pills.push('<button class="pill gold" onclick="document.getElementById(\'tixSlot\').scrollIntoView({behavior:\'smooth\'})">🎟 Get tickets</button>');
+    } else {
+      pills.push('<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">🎟 See us live</a>');
+    }
     pills.push(walk); pills.push(coming);
   }else if(S==='live'){
     pills.push(walk);
@@ -233,6 +261,16 @@ function render(){
 
   document.getElementById('conf').textContent=B.conf||'';
 
+  /* tickets — StageFill buy spine. Pre-Event + Live (door); Historical shows none. */
+  var tix=document.getElementById('tixSlot'); tix.innerHTML='';
+  if(B.ticketed && (S==='future'||S==='live') && B.tickets && B.tickets.length){
+    var hostBadge=(B.host==='self')?'🎟 Tickets by the band · Pro ($20/mo)':'🎟 Tickets by DeadDance · managed';
+    var rows=B.tickets.map(function(t){ var pr=t.price_cents||0; var lbl=pr>0?('Buy '+esc(t.name)+' — $'+(pr/100).toFixed(0)):('Free — '+esc(t.name));
+      return '<button class="tixbtn sftix" data-tt="'+esc(String(t.id||''))+'" data-free="'+(pr>0?'0':'1')+'" data-sample="'+(t.sample?'1':'0')+'">'+lbl+'</button>'; }).join('');
+    tix.innerHTML='<div class="sec"><h2>Tickets</h2><div class="hostbadge">'+hostBadge+'</div>'+rows
+      +'<div class="legal">By reserving or buying you agree to our <a href="terms.html">Terms</a>, <a href="privacy_policy.html">Privacy</a> &amp; <a href="refunds.html">Refunds</a>.</div></div>';
+  }
+
   /* the QR — UNBRANDED, and ALWAYS a clickable link behind it (dual-door: tap to open · scan to share) */
   try{ if(window.DDQR&&DDQR.into){ DDQR.into('walkQR', walkUrl, {size:360, css:118, caption:false, mark:false, link:true}); }
        else { document.getElementById('walkQR').textContent='QR'; } }catch(e){ document.getElementById('walkQR').textContent='QR'; }
@@ -252,7 +290,27 @@ window.csOpen=function(){ var l=document.getElementById('csList');
   document.getElementById('mbg').classList.add('on'); };
 window.csClose=function(){ document.getElementById('mbg').classList.remove('on'); };
 
+/* ---- StageFill buy spine (same contract as event_page.html) ---- */
+function sfBuy(ttId){ fetch(SF_CHECKOUT,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+SF_ANON},body:JSON.stringify({ticket_type_id:ttId,qty:1,ref:'band'})})
+  .then(function(r){return r.json();}).then(function(d){ if(d&&d.url){ location.href=d.url; } else { alert('Checkout unavailable right now.'); } }).catch(function(){ alert('Checkout unavailable right now.'); }); }
+function sfRSVP(ttId){ var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ alert('Offline — try again.'); return; }
+  cl.rpc('sf_rsvp',{p_tt:ttId}).then(function(r){ var d=r&&r.data||{}; if(d.ok){ location.href='sf_ticket.html?t='+encodeURIComponent(d.token); } else { alert('Could not RSVP — please try again.'); } }).catch(function(){ alert('Could not RSVP right now.'); }); }
+document.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest&&ev.target.closest('.sftix'); if(!b) return;
+  if(b.getAttribute('data-sample')==='1'){ alert('Sample of the ticketed treatment — real Stripe checkout activates when the band turns on ticketing in their console.'); return; }
+  var id=b.getAttribute('data-tt')||''; if(!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)) return;
+  if(b.getAttribute('data-free')==='1'){ sfRSVP(id); } else { sfBuy(id); } });
+
 render();
+
+/* live ticketed event: ?ev=<slug> pulls a real StageFill event and gives it the same treatment */
+(function(){ var ev=P('ev'); if(!ev) return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)) return;
+  cl.rpc('sf_get',{p_slug:ev}).then(function(r){ if(r&&!r.error&&r.data&&r.data.event){ var d=r.data,e=d.event;
+    B={ name:e.name, kind:(e.venue||'Ticketed Show'), home:[e.city,e.state].filter(Boolean).join(', '),
+        members:(B&&B.members)||[], ticketed:true, host:(e.is_owner?'self':'managed'),
+        set:{date:e.date_start,time:e.start_time,stage:e.venue},
+        tickets:(d.ticket_types||[]).map(function(t){return {id:t.id,name:t.name,price_cents:t.price_cents};}),
+        tease:[], recording:null, links:{}, coming:[], conf:'' };
+    render(); } }).catch(function(){}); })();
 </script>
 </body>
 </html>
