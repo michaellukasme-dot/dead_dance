@@ -154,6 +154,7 @@ body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
 var SF_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM",
     SF_CHECKOUT="https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/sf-checkout";
 (function(){ try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co", SF_ANON); window.ddClient=function(){return C;}; }catch(e){} })();
+window.SL_SMS_NUMBER="";  // set to your Twilio number (e.g. "+1 610-555-0100") to show fans the confirm-by-text step
 
 /* ---- band seed: shared dd_mf_bands.js (single source), with the inline copy as a safety fallback ---- */
 var BANDS=window.DD_MF_BANDS||{
@@ -369,16 +370,21 @@ function slFanForm(){
     +'<div class="say">Register as a '+esc(B.name)+' fan to receive the setlist as they play each song — every tune lands on your phone the moment it starts.</div>'
     +'<input class="slphone" id="slPhone" type="tel" inputmode="tel" placeholder="Your mobile number" autocomplete="tel">'
     +'<button class="slbtn" onclick="slRegister()">🎵 Text me the setlist</button>'
-    +'<div class="legal">You’re registering as a '+esc(B.name)+' fan. '+esc(B.name)+' controls whether live texts are sent; message &amp; data rates may apply — opt out anytime.</div>'
+    +'<div class="legal">You’re asking '+esc(B.name)+' to text you their live setlist. You’ll confirm by text from your phone; '+esc(B.name)+' controls whether texts are sent; message &amp; data rates may apply — reply STOP to opt out anytime.</div>'
     +'<div class="slbandlink"><a href="#" onclick="slEditor(slGet());return false;">🎤 In the band? Build your live setlist →</a></div>';
 }
 window.slRegister=function(){
   var el=document.getElementById('slPhone'), digits=((el&&el.value)||'').replace(/[^0-9]/g,'');
   if(digits.length<10){ if(el){ el.style.borderColor='#b8002e'; el.focus(); } return; }
-  try{ var k='dd.setlistfans', o=JSON.parse(localStorage.getItem(k)||'{}'); (o[slug]=o[slug]||[]).push({p:digits,t:Date.now()}); localStorage.setItem(k,JSON.stringify(o)); }catch(e){}
-  try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_fan',{band:slug,phone:digits}); }catch(e){}
-  document.getElementById('slBody').innerHTML='<h3>🌹 You’re on the list!</h3><div class="sub">If '+esc(B.name)+' opts in, you’ll get each song as they play it — live from the stage.</div>';
+  try{ var k='dd.setlistfans', o=JSON.parse(localStorage.getItem(k)||'{}'); (o[slug]=o[slug]||[]).push({t:Date.now()}); localStorage.setItem(k,JSON.stringify(o)); }catch(e){}   // no PII cached
+  try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_setlist_fan_pending',{p_band:slug,p_phone:slE164(digits),p_source:'web'}); }catch(e){}   // PENDING → confirmed only when they text
+  try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_fan',{band:slug}); }catch(e){}   // no phone to analytics
+  var confirmLine = window.SL_SMS_NUMBER
+    ? 'Text <b>START</b> to <b>'+esc(SL_SMS_NUMBER)+'</b> from your phone to confirm'
+    : 'You’ll confirm with a quick text from your phone';
+  document.getElementById('slBody').innerHTML='<h3>🌹 One more step</h3><div class="sub">Almost in — '+confirmLine+'. Then each song lands live as '+esc(B.name)+' plays it. Reply STOP anytime.</div>';
 };
+function slE164(d){ d=String(d||'').replace(/[^0-9]/g,''); if(d.length===10) return '+1'+d; if(d.length===11&&d.charAt(0)==='1') return '+'+d; return '+'+d; }
 
 /* fan: the scheduled setlist (terse rows: time · song), with a register CTA while upcoming/live */
 function slFanList(saved){
@@ -444,6 +450,7 @@ window.slSaveSet=function(){
   var ats=[].slice.call(document.querySelectorAll('#slSched .slAt'));
   var out=songs.map(function(nm,i){ return {n:nm, at:(ats[i]&&ats[i].value)||''}; });
   slPut({win:{s:slVal('slStart'),e:slVal('slEnd')}, songs:out});
+  try{ var cl=window.ddClient&&ddClient(), key=P('key'); if(cl&&cl.rpc&&key) cl.rpc('dd_setlist_upsert_web',{p_band:slug,p_token:key,p_date:(B.set&&B.set.date)||null,p_start:slVal('slStart')||null,p_end:slVal('slEnd')||null,p_songs:out}); }catch(e){}   // → dd_setlists (token-gated; ?key=<band token>)
   try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_set',{band:slug,songs:out.length}); }catch(e){}
   document.getElementById('slBody').innerHTML='<h3>🌹 Set List scheduled!</h3><div class="sub">'+out.length+' song'+(out.length===1?'':'s')+' — fans who opt in get each one texted the moment you play it. Reopen Set List anytime to edit.</div>';
 };
@@ -459,6 +466,12 @@ document.addEventListener('click',function(ev){ var b=ev.target&&ev.target.close
   if(b.getAttribute('data-free')==='1'){ sfRSVP(id); } else { sfBuy(id); } });
 
 render();
+
+/* hydrate the setlist from the backend (dd_setlists) so fans always see the band's latest — the
+   SMS webhook and the app editor both write there. Best-effort; localStorage still wins if newer. */
+try{ var _cl=window.ddClient&&ddClient(); if(_cl&&_cl.rpc){ _cl.rpc('dd_setlist_get',{p_band:slug,p_date:(B.set&&B.set.date)||null}).then(function(r){
+  var d=r&&r.data; if(d&&d.songs&&d.songs.length){ B.setlist={win:{s:(d.win_start||'').slice(0,5),e:(d.win_end||'').slice(0,5)},songs:d.songs}; }
+}).catch(function(){}); } }catch(e){}
 
 /* PRE-SHOW ROUTINE: if this band's set is within the window and no setlist is entered yet, remind
    the band group (all members). On the band's own page (role=band) also show an inline banner. */
