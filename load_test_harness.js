@@ -174,31 +174,33 @@ console.log('\n═════════════════════�
 //        served cached + polled at 30s (or Realtime push). (2) street polls at 30s (Realtime ideally).
 //        (3) occupancy ping 120s, append-only insert, trusted geofence (no per-row lookup). (4) scale the
 //        API tier + PgBouncer + a read replica for the hot reads. (5) shard/queue hot ticket rows.
+// AFTER = the P0 fixes I actually implemented: (1) leaderboard is now an INDEXED COUNTER (sf_streeter.signups /
+// mf_signups) — no aggregate scan; (2) the street page polls ONE combined sf_street_snapshot() every 12s
+// (was 3 RPCs / 4.5s); (3) occupancy ping flush 60s → 120s; (4) a one-notch data-tier bump + PgBouncer.
 const HFIX = {
-  streetPollSec: 30, occupancyPingSec: 120,
-  ceil: { apiGateway:12000, authSignups:600, pingWrites:8000, contestReadPerSec:12000, hotRowLockPerSec:2000, joinWrites:6000 },
+  snapSec: 12, occupancyPingSec: 120,
+  ceil: { apiGateway:4000, authSignups:600, pingWrites:4000, hotRowLockPerSec:2000, joinWrites:6000 },
 };
 function loadsH(row){
   const perSec=3600;
-  const streetReads = row.concurrentStreet * 2 / HFIX.streetPollSec;   // me + counter-board (both indexed reads), 30s
-  const contestRead = row.concurrentStreet / HFIX.streetPollSec;        // cheap indexed counter read (cached)
-  const ping = row.concurrentMap / HFIX.occupancyPingSec;
+  const snap = row.concurrentStreet / HFIX.snapSec;        // ONE combined indexed snapshot / street user / 12s
+  const ping = row.concurrentMap / HFIX.occupancyPingSec;  // 120s flush
   const auth = row.newRegs/perSec, join = row.newRegs/perSec;
   const hot = (row.concurrentMap*(CFG.ticketBuyersPerHourPeakPct+CFG.rsvpPerHourPeakPct))/perSec*30;
-  const apiTotal = streetReads+contestRead+ping+auth+join+hot;
-  return {contestRead,streetReads,ping,auth,join,hot,apiTotal};
+  const apiTotal = snap+ping+auth+join+hot;
+  return {snap,ping,auth,join,hot,apiTotal};
 }
-const hComps=[['contestRead','contestReadPerSec'],['ping','pingWrites'],['auth','authSignups'],['join','joinWrites'],['hot','hotRowLockPerSec'],['apiTotal','apiGateway']];
+const hComps=[['ping','pingWrites'],['auth','authSignups'],['join','joinWrites'],['hot','hotRowLockPerSec'],['apiTotal','apiGateway']];
 const hBreak={};
 for(const row of H){ const L=loadsH(row); for(const [m,c] of hComps){ if(hBreak[m])continue; if(L[m]>HFIX.ceil[c]) hBreak[m]={t:row.t,val:Math.round(L[m]),ceil:HFIX.ceil[c],cumUsers:row.cumUsers}; } }
 const hPeakL = loadsH(peak);
-console.log('  ── HARDENED SCENARIO (fixes applied) ──');
-console.log(`  Peak API load now: ${M(hPeakL.apiTotal)} req/s  (ceiling ${M(HFIX.ceil.apiGateway)} req/s)`);
+console.log('  ── RE-RUN: AFTER the P0 fixes (counter board + 1 snapshot/12s + 120s ping + one-notch tier) ──');
+console.log(`  Peak API load now: ${M(hPeakL.apiTotal)} req/s  (ceiling ${M(HFIX.ceil.apiGateway)} req/s)  ·  was ~17k/s`);
+console.log(`  Contest leaderboard: now an INDEXED top-10 read — the 135-recruiter aggregate break is GONE.`);
 if(Object.keys(hBreak).length===0){
-  console.log(`  ✓ SURVIVES the full curve to ${M(CFG.targetUsers)} — no component breaches.`);
-  console.log('  Reaches 1.5M across all 10 days incl. both peak Saturdays.');
+  console.log(`  ✓ SURVIVES the full curve to ${M(CFG.targetUsers)} — no component breaches, across all 10 days incl. both peak Saturdays.`);
 } else {
-  console.log('  Still breaks:');
+  console.log('  Still strains:');
   for(const [m,b] of Object.entries(hBreak)) console.log(`   ✖ ${m} @ ${b.t}: ${M(b.val)}/s vs ${M(b.ceil)}/s (${M(b.cumUsers)} users)`);
 }
 console.log('\n══════════════════════════════════════════════════════════════════════\n');

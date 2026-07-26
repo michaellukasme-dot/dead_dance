@@ -138,7 +138,7 @@ function sfPingStart(eid, geofences){ if(_pEvt||!eid||!geofences||!geofences.len
     if(best){ if(_pAnchor!==best.id){ _pAnchor=best.id; _pSince=Date.now(); } _pBuf.push({device:sfDev(), geofence_id:best.id, lat:la, lng:ln, dwell_s:Math.round((Date.now()-_pSince)/1000)}); }
     else { _pAnchor=null; }
   }, function(){}, {enableHighAccuracy:true, maximumAge:15000});
-  _pIn=setInterval(sfPingFlush, 60000); window.addEventListener('pagehide', sfPingFlush); }
+  _pIn=setInterval(sfPingFlush, 120000); window.addEventListener('pagehide', sfPingFlush); }   // 120s flush (was 60s) — halves occupancy write load at festival scale
 function sfPingFlush(){ if(!_pEvt||!_pBuf.length) return; var batch=_pBuf.splice(0,300), cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('sf_ping_batch',{p_event:_pEvt, p_pings:batch}).catch(function(){}); }
 function sfOccView(){ if(!E._id) return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ alert('Offline.'); return; } var day=new Date().toISOString().slice(0,10), slug=qs('ev')||'';
   cl.rpc('sf_rollup_mine',{p_slug:slug}).then(function(){ return cl.rpc('sf_occupancy_get',{p_event:E._id, p_day:day}); }).then(function(r){ sfOccRender((r&&r.data)||[]); }).catch(function(){ alert('Could not load occupancy.'); }); }

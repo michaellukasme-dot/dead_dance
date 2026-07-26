@@ -150,9 +150,13 @@ function start(uid){ ME=uid; if(!ME){ setTimeout(boot,400); return; }
   try{ if(window.DDQR&&DDQR.into) DDQR.into('qr',url,{size:250,css:60,caption:false}); }catch(e){ $('qr').textContent='QR'; }
   var ref=qs('st')||'';
   _SFC.rpc('sf_street_join',{p_ref:ref}).then(refresh).catch(refresh);
-  setInterval(refresh, 4500);   // live buzz counter
+  setInterval(refresh, 12000);   // one cheap snapshot every 12s (was 3 RPCs / 4.5s — festival-hardened)
 }
-function refresh(){ if(!ME)return; _SFC.rpc('sf_street_me').then(function(r){ var d=r&&r.data; if(!d||d.error)return; paint(d); }).catch(function(){}); loadBoard(); loadFriends(); }
+function refresh(){ if(!ME)return; _SFC.rpc('sf_street_snapshot').then(function(r){ var d=r&&r.data; if(!d||d.error)return;
+    if(d.me&&!d.me.error) paint(d.me);
+    var c=d.contest||{}; renderBoard(c.board||[], c.ends);
+    renderFriends(d.pending||[]);
+  }).catch(function(){}); }
 
 /* ---- MusikFest Recruiter Cup (contest, scored over the full festival) ---- */
 var PRIZES=[
