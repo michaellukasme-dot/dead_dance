@@ -106,8 +106,9 @@ returns jsonb language plpgsql security definer set search_path = public as $$
 declare v_me text := nullif(auth.uid()::text,''); v_sign int; v_claimed text; v_code text; v_id uuid;
 begin
   if v_me is null then return jsonb_build_object('error','no_session'); end if;
-  -- free shirt is a MusikFest-ONLY perk, picked up from the street team. (Adjust window to exact fest dates.)
-  if current_date not between date '2026-07-28' and date '2026-08-31' then
+  -- free shirt is a MusikFest-ONLY perk, picked up from the street team.
+  -- MusikFest 2026: Preview Night Jul 30 → last day Aug 9 (+1 day pickup grace).
+  if current_date not between date '2026-07-30' and date '2026-08-10' then
     return jsonb_build_object('error','mf_only');
   end if;
   -- HARD BUDGET CAP: only the FIRST 1000 recruiters get a free shirt (1000 × $18.50 = $18,500 max).
