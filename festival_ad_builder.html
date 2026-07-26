@@ -5,80 +5,74 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Buy a Festival Ad · StageFill</title>
 <style>
-/* Hanz & Franz light UI · the ad PREVIEWS render in the buyer's own brand colors (auto-extracted from the logo). */
 :root{--ink:#1b1226;--muted:#6a6280;--line:#e6e0f0;--bg:#f6f4fa;--accent:#6d28d9;--gold:#b07d17;--card:#fff}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
-.wrap{max-width:900px;margin:0 auto;padding:22px 16px 80px}
+.wrap{max-width:820px;margin:0 auto;padding:22px 16px 90px}
 .badge{display:inline-block;background:#f1ecf7;border:1px solid var(--line);color:var(--accent);border-radius:999px;font-weight:800;font-size:12px;padding:5px 13px}
 h1{font-size:26px;margin:12px 0 2px}.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
-.cols{display:grid;grid-template-columns:1fr;gap:18px}@media(min-width:760px){.cols{grid-template-columns:1fr 340px}}
-.tiers{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
-.tier{flex:0 0 150px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:13px;cursor:pointer;text-align:center}
-.tier.sel{border-color:var(--gold);background:#faf6ec}
-.tier .lv{font-weight:900;letter-spacing:.08em;color:var(--gold);font-size:13px}
-.tier .nm{font-weight:800;font-size:13.5px;margin-top:4px}
-.tier .ds{color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.35}
-.tier .pr{font-weight:900;font-size:17px;margin-top:7px}.tier .pr span{font-size:11px;color:var(--muted);font-weight:700}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(90,46,134,.06)}
 label{display:block;font-weight:800;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+label:first-child{margin-top:0}
 input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:15px;font-weight:600}
+.row{display:flex;gap:10px}.row>div{flex:1}
 .logodrop{border:1.5px dashed #c9bde6;border-radius:14px;padding:18px;text-align:center;color:var(--accent);font-weight:800;cursor:pointer;background:#faf7ff}
-.logodrop img{max-height:70px;max-width:100%;border-radius:8px}
+.logodrop img{max-height:64px;max-width:100%;border-radius:8px}
 .pal{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted);font-weight:700}
-.sw{width:26px;height:26px;border-radius:7px;box-shadow:inset 0 0 0 1px #0002}
-.cta{width:100%;margin-top:16px;padding:14px;border:0;border-radius:14px;background:linear-gradient(180deg,#7c3aed,#6d28d9);color:#fff;font-weight:800;font-size:16px;cursor:pointer}
-.preview{position:sticky;top:16px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.stage{perspective:1300px}
-.win{background:#eafaf1;border:1px solid #b7e6cc;color:#12633f;border-radius:12px;padding:12px 14px;font-size:13px;display:none;margin-top:12px}
+.sw{width:24px;height:24px;border-radius:7px;box-shadow:inset 0 0 0 1px #0002}
+/* compare row — 3 ads side by side, like a tee store */
+.pick{margin-top:20px}
+.pickhd{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 2px 10px}
+.compare{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.choice{flex:0 0 214px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px;box-shadow:0 4px 18px rgba(90,46,134,.07);position:relative}
+.choice.best{border:2px solid var(--gold)}
+.choice .ribbon{position:absolute;top:10px;right:-4px;background:#e8663f;color:#fff;font-weight:800;font-size:9.5px;padding:3px 9px;border-radius:5px 0 0 5px}
+.choice .hd{display:flex;justify-content:space-between;align-items:baseline;margin:2px 2px 9px}
+.choice .lv{font-weight:900;color:var(--gold);letter-spacing:.06em;font-size:13px}
+.choice .lv small{display:block;color:var(--ink);font-size:11.5px;font-weight:800;letter-spacing:0}
+.choice .pr{font-weight:900;font-size:17px;text-align:right}.choice .pr span{font-size:10.5px;color:var(--muted);font-weight:700}
+.adwrap{width:192px;height:333px;overflow:hidden;border-radius:16px;margin:0 auto;background:#2a2925}
+.adscale{width:280px;height:486px;transform:scale(.6857);transform-origin:top left}
+.buy{width:100%;margin-top:11px;background:linear-gradient(180deg,#7c3aed,#6d28d9);color:#fff;border:0;border-radius:11px;font-weight:800;font-size:14px;padding:11px;cursor:pointer}
+.buy.gold{background:linear-gradient(180deg,#ecc95c,#c79a3a);color:#3c2f10}
+.hint{color:var(--muted);font-size:13px;text-align:center;padding:26px 0}
+.win{background:#eafaf1;border:1px solid #b7e6cc;color:#12633f;border-radius:12px;padding:13px 15px;font-size:13.5px;display:none;margin-top:16px}
 .win.on{display:block}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#12a150;color:#fff;font-weight:800;padding:11px 18px;border-radius:999px;opacity:0;transition:.2s;z-index:99;pointer-events:none}#toast.on{opacity:1}
-/* ---- shared ad-card shell (renders in buyer brand colors via --b/--t/--bo/--ac) ---- */
-@keyframes adflip{0%,12%{transform:rotateY(0)}18%,42%{transform:rotateY(180deg)}48%,58%{transform:rotateY(360deg)}64%,88%{transform:rotateY(540deg)}94%,100%{transform:rotateY(720deg)}}
+/* ---- ad card shell (buyer brand colors) ---- */
 @keyframes adsweep{0%{left:-60%}60%,100%{left:130%}}
-@keyframes adpulse{0%{opacity:.5}50%{opacity:1}100%{opacity:.5}}
+@keyframes adpulse{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
 @keyframes adglow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.9;transform:scale(1.1)}}
-.adcard{width:280px;height:486px;border-radius:24px;overflow:hidden;position:relative;color:#fff;font-family:inherit;
-  box-shadow:0 22px 54px rgba(20,18,12,.5),inset 0 0 0 1px rgba(255,255,255,.06)}
-.adflip{width:280px;height:486px;transform-style:preserve-3d;animation:adflip 20s ease-in-out infinite;position:relative}
-.adflip.hold{animation:none!important;transform:rotateY(180deg)}
-.adface{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:24px;overflow:hidden}
-.adback{transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
-.adglowb{position:absolute;left:50%;bottom:0;width:260px;height:150px;transform:translateX(-50%);animation:adglow 6s ease-in-out infinite}
-.adlogo{max-width:190px;max-height:120px;display:block;margin:0 auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
-.adsweep{position:absolute;top:0;bottom:0;width:44%;left:-60%;transform:skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);animation:adsweep 6.5s ease-in-out infinite}
-.qp{width:190px;height:190px;background:#fbf7ec;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(0,0,0,.4)}
-.qp #adQR{width:166px;height:166px;display:flex;align-items:center;justify-content:center}
-.holdhint{font-size:10px;font-weight:700;margin-top:9px;opacity:.85}
+.adcard{width:280px;height:486px;border-radius:24px;overflow:hidden;position:relative;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.adcard .glowb{position:absolute;left:50%;bottom:0;width:260px;height:150px;transform:translateX(-50%);animation:adglow 6s ease-in-out infinite}
+.adcard .lg{max-width:190px;max-height:120px;display:block;margin:0 auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))}
+.adcard .sweep{position:absolute;top:0;bottom:0;width:44%;left:-60%;transform:skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);animation:adsweep 6.5s ease-in-out infinite}
+.adcard .eb{position:absolute;top:26px;left:0;right:0;text-align:center;font-size:10px;font-weight:800;letter-spacing:.28em}
+.adcard .foot{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.06em;opacity:.6}
+.adcard .flipbadge{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;background:rgba(255,255,255,.16);padding:6px 13px;border-radius:999px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <span class="badge">📣 StageFill Festival Ads</span>
   <h1>Put your brand on the festival map</h1>
-  <p class="sub">Pick a tier, drop your logo — we build the ad in <b>your</b> brand colors, pulled straight from your logo. Live preview updates as you go.</p>
+  <p class="sub">Drop your logo — we instantly build all three ads in <b>your</b> brand colors (pulled from your logo). Pick one and buy.</p>
 
-  <div class="cols">
-    <div>
-      <div class="tiers" id="tiers"></div>
-      <div class="card" style="margin-top:14px">
-        <label>Your logo (PNG with transparency is best)</label>
-        <label class="logodrop" id="drop"><span id="dropTxt">＋ Upload your logo</span><input type="file" id="logo" accept="image/png,image/jpeg,image/svg+xml" hidden></label>
-        <div class="pal" id="pal" style="display:none">Brand palette (auto): <span class="sw" id="sw1"></span><span class="sw" id="sw2"></span><span id="palnote"></span></div>
-        <label>Business name</label><input id="name" placeholder="Your business">
-        <label>Website (for the scan QR &amp; palette)</label><input id="site" placeholder="https://yourbusiness.com">
-        <label>Tagline / offer (MORE &amp; MOST)</label><input id="tag" placeholder="e.g. 10% off at Booth 42">
-        <label>Booth / location</label><input id="booth" placeholder="Main Street · Booth 42">
-        <button class="cta" onclick="reserve()">Reserve this ad →</button>
-        <div class="win" id="win"></div>
-      </div>
-    </div>
-    <div class="preview">
-      <div class="stage"><div id="previewMount"></div></div>
-      <div style="color:var(--muted);font-size:11.5px;text-align:center" id="tierNote"></div>
-    </div>
+  <div class="card">
+    <label>Your logo (PNG with transparency is best)</label>
+    <label class="logodrop" id="drop"><span id="dropTxt">＋ Upload your logo</span><input type="file" id="logo" accept="image/png,image/jpeg,image/svg+xml" hidden></label>
+    <div class="pal" id="pal" style="display:none">Brand palette (auto): <span class="sw" id="sw1"></span><span class="sw" id="sw2"></span><span>from your logo</span></div>
+    <label>Business name</label><input id="name" placeholder="Your business">
+    <div class="row"><div><label>Website (scan QR)</label><input id="site" placeholder="https://…"></div><div><label>Booth / location</label><input id="booth" placeholder="Booth 42"></div></div>
+    <label>Tagline / offer</label><input id="tag" placeholder="e.g. 10% off at Booth 42">
   </div>
+
+  <div class="pick">
+    <div class="pickhd">Choose your ad</div>
+    <div id="choices"><div class="hint">⬆ Upload your logo to see your three ad options.</div></div>
+  </div>
+  <div class="win" id="win"></div>
 </div>
 <div id="toast"></div>
 <canvas id="cv" width="48" height="48" style="display:none"></canvas>
@@ -94,15 +88,12 @@ function darken(c,a){return hx(c.map(function(x){return x*(1-a);}));}
 function lum(c){return (0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;}
 
 var TIERS=[
- {k:'less',lv:'LESS',nm:'Standard',ds:'Your logo on the festival default card',price:25},
- {k:'more',lv:'MORE',nm:'Splash',ds:'Animated, auto-branded splash ad',price:100},
- {k:'most',lv:'MOST',nm:'Premium',ds:'Premium flip card + scan QR — the ArtsQuest treatment',price:250}
+ {k:'less',lv:'LESS',nm:'Standard',price:25},
+ {k:'more',lv:'MORE',nm:'Splash',price:100,best:0},
+ {k:'most',lv:'MOST',nm:'Premium',price:250,best:1}
 ];
-var SEL='most', BASE=[60,59,52], ACC=[224,185,74], LOGO='';
-function renderTiers(){ $('tiers').innerHTML=TIERS.map(function(t){return '<div class="tier'+(t.k===SEL?' sel':'')+'" onclick="pick(\''+t.k+'\')"><div class="lv">'+t.lv+'</div><div class="nm">'+t.nm+'</div><div class="ds">'+t.ds+'</div><div class="pr">$'+t.price+'<span>/day</span></div></div>';}).join(''); }
-function pick(k){ SEL=k; renderTiers(); draw(); }
+var BASE=[60,59,52], ACC=[224,185,74], LOGO='';
 
-/* ---- logo upload → palette extraction ---- */
 $('drop').addEventListener('click',function(){ $('logo').click(); });
 $('logo').addEventListener('change',function(e){ var f=e.target.files&&e.target.files[0]; if(!f)return;
   var r=new FileReader(); r.onload=function(){ LOGO=r.result; var img=new Image(); img.onload=function(){ extract(img); $('dropTxt').innerHTML='<img src="'+LOGO+'" alt="logo">'; draw(); }; img.src=LOGO; }; r.readAsDataURL(f); });
@@ -113,70 +104,62 @@ function extract(img){ var cv=$('cv'),ctx=cv.getContext('2d'); ctx.clearRect(0,0
     var mx=Math.max(r,g,b),mn=Math.min(r,g,b),sat=mx-mn,l=(mx+mn)/2; if(l>246||l<10)continue;
     var key=(r>>4)+'.'+(g>>4)+'.'+(b>>4); if(!bk[key])bk[key]={r:0,g:0,b:0,n:0,s:0}; var o=bk[key]; o.r+=r;o.g+=g;o.b+=b;o.s+=sat;o.n++; }
   var arr=Object.keys(bk).map(function(k){var o=bk[k];return {c:[o.r/o.n,o.g/o.n,o.b/o.n],n:o.n,s:o.s/o.n};});
-  if(!arr.length){ return; }
-  arr.sort(function(a,b){return b.n-a.n;});
-  BASE=arr[0].c;
-  var acc=arr.slice().sort(function(a,b){return b.s*Math.log(1+b.n)-a.s*Math.log(1+a.n);})[0];
-  ACC=(acc&&acc.s>28)?acc.c:[224,185,74];   // fall back to festival gold if logo has no strong accent
+  if(!arr.length)return; arr.sort(function(a,b){return b.n-a.n;});
+  BASE=arr[0].c; var acc=arr.slice().sort(function(a,b){return b.s*Math.log(1+b.n)-a.s*Math.log(1+a.n);})[0];
+  ACC=(acc&&acc.s>28)?acc.c:[224,185,74];
   $('pal').style.display='flex'; $('sw1').style.background=hx(BASE); $('sw2').style.background=hx(ACC);
-  $('palnote').textContent='from your logo';
 }
 
-/* ---- render the selected tier ad in the buyer's colors ---- */
-function draw(){
-  var name=($('name').value||'Your Brand'), tag=($('tag').value||''), booth=($('booth').value||''), site=($('site').value||'');
+/* build one ad's inner markup (280x486) for a tier, in buyer colors */
+function adHTML(tier){
+  var name=($('name').value||'Your Brand'), tag=($('tag').value||''), booth=($('booth').value||'');
   var base=hx(BASE), top=lighten(BASE,.16), bot=darken(BASE,.34), ac=hx(ACC);
-  var textOnBase = lum(BASE)>.6 ? '#20202a' : '#ffffff';
-  var logoImg = LOGO ? '<img class="adlogo" src="'+LOGO+'">' : '<div style="font-weight:900;font-size:30px;color:'+textOnBase+'">'+esc(name)+'</div>';
-  var mount=$('previewMount'), note=$('tierNote');
+  var ink = lum(BASE)>.6 ? '#20202a' : '#ffffff';
+  var logo = LOGO ? '<img class="lg" src="'+LOGO+'">' : '<div style="font-weight:900;font-size:28px;color:'+ink+'">'+esc(name)+'</div>';
+  if(tier==='less'){
+    return '<div class="adcard" style="background:linear-gradient(180deg,#4a4840,#33322c);color:#f4efe4">'+
+      '<div class="eb" style="color:#cbb06a">◆ FESTIVAL PARTNER ◆</div>'+
+      '<div style="position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);text-align:center;padding:0 20px">'+logo+
+        '<div style="margin-top:14px;font-weight:800;font-size:16px">'+esc(name)+'</div>'+(booth?'<div style="color:#b6ab93;font-size:12px;margin-top:3px">'+esc(booth)+'</div>':'')+'</div>'+
+      '<div class="foot">POWERED BY ✦ STAGEFILL</div></div>';
+  }
+  if(tier==='more'){
+    return '<div class="adcard" style="background:radial-gradient(120% 90% at 50% 0%,'+top+','+base+' 50%,'+bot+');color:'+ink+'">'+
+      '<div class="glowb" style="background:radial-gradient(60% 100% at 50% 100%,'+ac+'66,transparent 70%)"></div>'+
+      '<div class="eb" style="color:'+ac+'">◆ FESTIVAL PARTNER ◆</div>'+
+      '<div style="position:absolute;top:44%;left:0;right:0;transform:translateY(-50%);text-align:center;padding:0 22px;overflow:hidden">'+logo+'<span class="sweep"></span></div>'+
+      '<div style="position:absolute;top:61%;left:0;right:0;text-align:center;padding:0 20px"><div style="font-weight:900;font-size:22px">'+esc(name)+'</div>'+(tag?'<div style="margin-top:6px;font-size:13px;font-weight:700;opacity:.85">'+esc(tag)+'</div>':'')+'</div>'+
+      (booth?'<div style="position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:'+ac+';color:#20202a;font-weight:900;font-size:12.5px;padding:9px 16px;border-radius:999px;animation:adpulse 2.6s ease-in-out infinite">📍 '+esc(booth)+'</div>':'')+
+      '<div class="foot">POWERED BY ✦ STAGEFILL</div></div>';
+  }
+  /* most — show the branded FRONT + a "flips to scan QR" badge (full flip+QR in the live ad) */
+  return '<div class="adcard" style="background:radial-gradient(120% 90% at 50% 0%,'+top+','+base+' 50%,'+bot+');color:'+ink+'">'+
+    '<div class="glowb" style="background:radial-gradient(60% 100% at 50% 100%,'+ac+'66,transparent 70%)"></div>'+
+    '<div class="eb" style="color:'+ac+'">◆ FESTIVAL PARTNER ◆</div>'+
+    '<div style="position:absolute;top:42%;left:0;right:0;transform:translateY(-50%);text-align:center;padding:0 22px;overflow:hidden">'+logo+'<span class="sweep"></span></div>'+
+    '<div style="position:absolute;top:60%;left:0;right:0;text-align:center;padding:0 20px"><div style="font-weight:900;font-size:21px">'+esc(name)+'</div>'+(tag?'<div style="margin-top:5px;font-size:12.5px;font-weight:700;opacity:.85">'+esc(tag)+'</div>':'')+'</div>'+
+    '<div class="flipbadge">↻ flips to a scan QR</div>'+
+    '<div class="foot">POWERED BY ✦ STAGEFILL · 4× rotation</div></div>';
+}
 
-  if(SEL==='less'){ note.textContent='LESS · Standard — your logo on the festival default card.';
-    mount.innerHTML='<div class="adcard" style="background:linear-gradient(180deg,#4a4840,#33322c)">'+
-      '<div style="position:absolute;top:22px;left:0;right:0;text-align:center;font-size:10px;font-weight:800;letter-spacing:.28em;color:#cbb06a">◆ FESTIVAL PARTNER ◆</div>'+
-      '<div style="position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);text-align:center;padding:0 20px">'+logoImg+'<div style="margin-top:14px;font-weight:800;font-size:16px;color:#f4efe4">'+esc(name)+'</div>'+(booth?'<div style="color:#b6ab93;font-size:12px;margin-top:3px">'+esc(booth)+'</div>':'')+'</div>'+
-      '<div style="position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.06em;color:#8f866f">POWERED BY ✦ STAGEFILL</div></div>';
-    return;
-  }
-  if(SEL==='more'){ note.textContent='MORE · Splash — animated, auto-branded from your logo colors.';
-    mount.innerHTML='<div class="adcard" style="background:radial-gradient(120% 90% at 50% 0%,'+top+','+base+' 50%,'+bot+')">'+
-      '<div class="adglowb" style="background:radial-gradient(60% 100% at 50% 100%,'+ac+'66,transparent 70%)"></div>'+
-      '<div style="position:absolute;top:26px;left:0;right:0;text-align:center;font-size:10px;font-weight:800;letter-spacing:.28em;color:'+ac+'">◆ FESTIVAL PARTNER ◆</div>'+
-      '<div style="position:absolute;top:44%;left:0;right:0;transform:translateY(-50%);text-align:center;padding:0 22px;overflow:hidden">'+logoImg+'<span class="adsweep"></span></div>'+
-      '<div style="position:absolute;top:60%;left:0;right:0;text-align:center;padding:0 20px"><div style="font-weight:900;font-size:22px;color:'+textOnBase+'">'+esc(name)+'</div>'+(tag?'<div style="margin-top:6px;font-size:13px;font-weight:700;color:'+textOnBase+';opacity:.85">'+esc(tag)+'</div>':'')+'</div>'+
-      (booth?'<div style="position:absolute;bottom:56px;left:50%;transform:translateX(-50%);background:'+ac+';color:'+(lum(ACC)>.6?'#20202a':'#20202a')+';font-weight:900;font-size:12.5px;padding:9px 16px;border-radius:999px;animation:adpulse 2.6s ease-in-out infinite">📍 '+esc(booth)+'</div>':'')+
-      '<div style="position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.06em;color:'+textOnBase+';opacity:.55">POWERED BY ✦ STAGEFILL</div></div>';
-    return;
-  }
-  /* MOST — premium flip card + QR */
-  note.textContent='MOST · Premium — flip card + scan QR, auto-branded. Tap the QR to hold & scan.';
-  mount.innerHTML='<div class="adflip" id="adflip">'+
-    '<div class="adface" style="background:radial-gradient(120% 90% at 50% 0%,'+top+','+base+' 50%,'+bot+');color:'+textOnBase+'">'+
-      '<div style="position:absolute;top:26px;left:0;right:0;text-align:center;font-size:10px;font-weight:800;letter-spacing:.28em;color:'+ac+'">◆ FESTIVAL PARTNER ◆</div>'+
-      '<div class="adglowb" style="background:radial-gradient(60% 100% at 50% 100%,'+ac+'66,transparent 70%)"></div>'+
-      '<div style="position:absolute;top:42%;left:0;right:0;transform:translateY(-50%);text-align:center;padding:0 22px;overflow:hidden">'+logoImg+'<span class="adsweep"></span></div>'+
-      '<div style="position:absolute;top:60%;left:0;right:0;text-align:center;padding:0 20px"><div style="font-weight:900;font-size:21px">'+esc(name)+'</div>'+(tag?'<div style="margin-top:5px;font-size:12.5px;font-weight:700;opacity:.85">'+esc(tag)+'</div>':'')+'</div>'+
-      '<div style="position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.05em;opacity:.6">POWERED BY ✦ STAGEFILL · flip to scan ⤾</div>'+
-    '</div>'+
-    '<div class="adface adback" style="background:radial-gradient(120% 90% at 50% 0%,'+top+','+base+' 50%,'+bot+');color:'+textOnBase+'">'+
-      '<div style="font-size:10px;font-weight:800;letter-spacing:.26em;color:'+ac+'">◆ SCAN ◆</div>'+
-      '<div style="font-weight:900;font-size:18px;margin:4px 0 14px">'+esc(name)+'</div>'+
-      '<div class="qp"><div id="adQR">▦</div></div>'+
-      '<div style="margin-top:12px;font-size:13px;font-weight:800">'+(site?'Visit us':'Find our booth')+'</div>'+
-      '<div class="holdhint" id="hh">🔒 Tap to hold still, then scan</div>'+
-    '</div></div>';
-  var fl=$('adflip'); $('adflip').querySelector('.adback').addEventListener('click',function(){ var held=fl.classList.toggle('hold'); $('hh').textContent=held?'⏸ Held — scan now (tap to resume)':'🔒 Tap to hold still, then scan'; });
-  try{ if(window.DDQR&&DDQR.into){ DDQR.into('adQR', site||'https://deaddance.app', {size:166,css:36,caption:false}); } else { $('adQR').textContent='QR'; } }catch(e){ $('adQR').textContent='QR'; }
+function draw(){
+  if(!LOGO){ $('choices').innerHTML='<div class="hint">⬆ Upload your logo to see your three ad options.</div>'; return; }
+  $('choices').innerHTML='<div class="compare">'+TIERS.map(function(t){
+    return '<div class="choice'+(t.best?' best':'')+'">'+(t.best?'<div class="ribbon">MOST POPULAR</div>':'')+
+      '<div class="hd"><div class="lv">'+t.lv+'<small>'+t.nm+'</small></div><div class="pr">$'+t.price+'<span>/day</span></div></div>'+
+      '<div class="adwrap"><div class="adscale">'+adHTML(t.k)+'</div></div>'+
+      '<button class="buy'+(t.best?' gold':'')+'" onclick="buy(\''+t.k+'\')">Buy now →</button></div>';
+  }).join('')+'</div>';
 }
 ['name','tag','booth','site'].forEach(function(id){ $(id).addEventListener('input',draw); });
 
-function reserve(){ var name=($('name').value||'').trim(); if(!name){ toast('Add your business name'); return; }
-  var t=TIERS.filter(function(x){return x.k===SEL;})[0];
-  try{ localStorage.setItem('dd.ad.last',JSON.stringify({tier:SEL,name:name,site:$('site').value,booth:$('booth').value,tag:$('tag').value,hasLogo:!!LOGO})); }catch(e){}
+function buy(k){ var name=($('name').value||'').trim(); if(!name){ toast('Add your business name'); return; }
+  var t=TIERS.filter(function(x){return x.k===k;})[0];
+  try{ localStorage.setItem('dd.ad.last',JSON.stringify({tier:k,name:name,site:$('site').value,booth:$('booth').value,tag:$('tag').value,hasLogo:!!LOGO})); }catch(e){}
   $('win').classList.add('on');
-  $('win').innerHTML='✅ <b>'+esc(t.nm)+' ad reserved — $'+t.price+'/day</b><div style="margin-top:5px">We\'ll confirm your proof and dates, then it goes live in the festival\'s rolling-ad rotation'+(SEL==='most'?' at 4× frequency':'')+'. 🌹</div>';
-  toast('📣 Ad reserved!');
+  $('win').innerHTML='✅ <b>'+esc(t.nm)+' ad — $'+t.price+'/day</b><div style="margin-top:5px">Reserved. We\'ll confirm your proof and dates, then it goes live in the festival\'s rolling-ad rotation'+(k==='most'?' at 4× frequency, flipping to your scan QR':'')+'. 🌹</div>';
+  $('win').scrollIntoView({behavior:'smooth'}); toast('📣 '+t.nm+' reserved!');
 }
-renderTiers(); draw();
 </script>
 </body>
 </html>
