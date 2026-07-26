@@ -33,7 +33,9 @@
     if (!root.QRLite) { try { canvas.dataset.qrOk = '0'; } catch (e) {} return Promise.resolve(canvas); }
     try { root.QRLite.drawCanvas(text, canvas, { size: opts.size || 200, dark: opts.dark || '#1a1320', light: '#ffffff', quiet: 4 }); try { canvas.dataset.qrOk = '1'; } catch (e) {} }
     catch (e) { try { console.error('DDQR: QR encode FAILED for payload:', text, e); canvas.dataset.qrOk = '0'; } catch (_) {} return Promise.resolve(canvas); }   // fail LOUD — never a silent blank
-    return drawMark(canvas, opts.mark || 'dd').then(function () { return canvas; });
+    var mk = opts.mark == null ? 'dd' : opts.mark;
+    if (mk === false || mk === 'none' || mk === '') { return Promise.resolve(canvas); }   // unbranded: no center mark (clean festival-map QR)
+    return drawMark(canvas, mk).then(function () { return canvas; });
   }
 
   // render into a container element (creates the canvas)

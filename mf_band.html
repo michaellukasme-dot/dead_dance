@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MusikFest Band — DeadDance</title>
+<meta name="theme-color" content="#2a1b3d">
+<style>
+/* mf_band.html — the Dead & Jam band event page. DeadDance palette (branded, on purpose).
+   Modeled on the DSO · ArtsQuest historical page (mf_cafe) — but the DSO show was HISTORICAL;
+   these are FUTURE, and the page LIVES THROUGH the show:
+       FUTURE  → LIVE (on now) → CLOSEOUT → HISTORICAL (frozen archive).
+   The pills change with the state. ?band=<slug>  (rift | life-after-dead | shakedown-citi | liberty-jams)
+   Test states with ?state=future|live|historical  or  ?now=2026-08-03T21:30  */
+:root{--purple:#2a1b3d;--purple2:#3d2a57;--rose:#b8002e;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2;--bg:#faf8fc;--card:#fff}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:400 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding:0 15px 90px}
+.hero{position:relative;overflow:hidden;background:radial-gradient(130% 90% at 50% 0%,var(--purple2),var(--purple) 62%);color:#fff;border-radius:0 0 22px 22px;padding:26px 20px 22px;text-align:center}
+.hero .rose{font-size:22px}
+.eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.28em;color:#e7c8ff;text-transform:uppercase}
+.bname{font-size:30px;font-weight:900;margin:7px 0 2px;line-height:1.05;letter-spacing:-.3px}
+.kind{font-size:12.5px;font-weight:700;color:#c9b6e8}
+.statebar{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:8px 15px;border-radius:999px;font-weight:800;font-size:13px}
+.st-future{background:#f0a50022;color:#ffd27a;border:1px solid #f0a50055}
+.st-live{background:#b8002e;color:#fff;box-shadow:0 0 0 0 #b8002e;animation:pulse 1.8s infinite}
+.st-hist{background:#ffffff1c;color:#d8cbef;border:1px solid #ffffff33}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #b8002e88}70%{box-shadow:0 0 0 12px #b8002e00}100%{box-shadow:0 0 0 0 #b8002e00}}
+.count{font-variant-numeric:tabular-nums}
+.set{margin-top:12px;font-size:13.5px;color:#e9def7;font-weight:600}
+.set b{color:#fff}
+.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.pill{border:0;cursor:pointer;font-weight:800;font-size:13px;padding:10px 15px;border-radius:999px;background:#ffffff18;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.pill.gold{background:linear-gradient(180deg,#ffce6b,var(--gold));color:#3a1d00}
+.pill.rose{background:var(--rose);color:#fff}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 17px;margin-top:14px}
+.sec h2{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.roster{display:flex;flex-direction:column;gap:2px}
+.mrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #f4f0fa;font-size:14.5px}
+.mrow:last-child{border-bottom:0}.mrow b{font-weight:800}.mrow span{color:var(--muted);font-weight:600;font-size:13px;text-align:right}
+.tease{display:flex;flex-wrap:wrap;gap:7px}
+.song{background:#f5f0fb;color:#4a2f6e;border-radius:9px;padding:6px 11px;font-size:13px;font-weight:700}
+.muted{color:var(--muted);font-size:13.5px}
+.qrcard{display:flex;gap:15px;align-items:center}
+.qrbox{width:118px;height:118px;flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.qrcard .cap b{display:block;font-size:15px;margin-bottom:3px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.links a{font-size:12.5px;font-weight:700;color:var(--purple2);text-decoration:none;background:#f2ecf9;border-radius:8px;padding:6px 10px}
+.foot{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+.foot .rose{color:var(--rose)}
+/* Coming-shows modal — terse */
+.mbg{position:fixed;inset:0;background:#1a132099;display:none;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.mbg.on{display:flex}
+.modal{background:#fff;width:100%;max-width:600px;border-radius:18px 18px 0 0;padding:16px 17px calc(20px + env(safe-area-inset-bottom,0));max-height:80vh;overflow:auto}
+.modal h3{margin:2px 0 3px;font-size:17px}.modal .sub{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+.gig{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #f4f0fa;font-size:14px}
+.gig:last-child{border-bottom:0}.gig .d{font-weight:800;color:var(--purple2);white-space:nowrap}
+.gig .v{text-align:right;color:var(--ink)}.gig .v small{display:block;color:var(--muted);font-size:12px}
+.mclose{width:100%;margin-top:12px;border:0;background:#f2ecf9;color:var(--purple2);font-weight:800;border-radius:12px;padding:12px;cursor:pointer;font-size:14px}
+.badge{display:inline-block;font-size:10.5px;font-weight:800;color:#8a6d00;background:#fff3d6;border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="rose">🌹</div>
+  <div class="eyebrow" id="eyebrow">Musikfest 2026 · Bethlehem</div>
+  <div class="bname" id="bname">—</div>
+  <div class="kind" id="kind"></div>
+  <div id="statebar"></div>
+  <div class="set" id="setline"></div>
+  <div class="pills" id="pills"></div>
+</div>
+
+<div class="wrap">
+  <div class="sec" id="teaseSec" style="display:none">
+    <h2 id="teaseHead">Setlist tease</h2>
+    <div class="tease" id="tease"></div>
+  </div>
+
+  <div class="sec">
+    <h2>The roster</h2>
+    <div class="roster" id="roster"></div>
+  </div>
+
+  <div class="sec">
+    <div class="qrcard">
+      <div class="qrbox"><div id="walkQR">▦</div></div>
+      <div class="cap">
+        <b id="qrTitle">Walk to the stage</b>
+        <div class="muted" id="qrSub">Tap to open · or scan from another phone — turn-by-turn from wherever you are.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Find them</h2>
+    <div class="links" id="links"></div>
+  </div>
+
+  <div class="foot">From Bethlehem · launched in Bethlehem <span class="rose">🌹</span><br>
+    <span class="muted" id="conf"></span></div>
+</div>
+
+<!-- Coming shows — terse modal -->
+<div class="mbg" id="mbg" onclick="if(event.target===this)csClose()">
+  <div class="modal">
+    <h3 id="csTitle">Coming shows</h3>
+    <div class="sub" id="csSub"></div>
+    <div id="csList"></div>
+    <button class="mclose" onclick="csClose()">Close</button>
+  </div>
+</div>
+
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+<script>
+/* ---- band seed (research 2026-07-26; unverified rosters flagged, filled after outreach) ---- */
+var BANDS={
+  "rift":{name:"Rift",kind:"Philadelphia Phish Tribute",home:"Philadelphia, PA",
+    members:[{n:"Sean Coyne",r:"Guitar"},{n:"John Hildenbrand",r:"Keys"},{n:"Matt Agostini",r:"Bass"},{n:"Matt Elberson",r:"Drums"}],
+    set:{date:"2026-08-05",time:"",stage:""}, /* on lineup; day/stage TBD */
+    tease:[], recording:null,
+    links:{Website:"https://riftphilly.com/",Instagram:"https://www.instagram.com/riftphilly/",Facebook:"https://www.facebook.com/riftphilly/",YouTube:"https://www.youtube.com/@RiftPhilly"},
+    coming:[{d:"Aug 15, 2026",v:"Concerts Under the Stars",c:"King of Prussia, PA"}],
+    conf:"Lineup confirmed via riftphilly.com."},
+  "life-after-dead":{name:"Life After Dead",kind:"Grateful Dead Tribute",home:"Bethlehem, PA",
+    members:[{n:"Rich Jeffreys",r:"Lead vocals & guitar"},{n:"Jon Fadem",r:"Lead guitar & vocals"},{n:"Dave Johnsen",r:"Bass & vocals"},{n:"Zach Martin",r:"Drums"}],
+    set:{date:"",time:"",stage:"",note:"Festival set to confirm"}, /* Café date Jun 27 — festival TBD */
+    tease:[], recording:null,
+    links:{Website:"https://www.reverbnation.com/lifeafterdead1",Facebook:"https://www.facebook.com/lifeafterdeadband",Instagram:"https://www.instagram.com/lifeafterdeadband/"},
+    coming:[{d:"Jun 27, 2026",v:"Musikfest Café at SteelStacks",c:"Bethlehem, PA"}],
+    conf:"Lineup confirmed via ArtsQuest. Festival set date to confirm with band."},
+  "shakedown-citi":{name:"Shakedown Citi",kind:"Grateful Dead / Jam",home:"New York, NY",
+    members:[], /* not published — awaiting band */
+    set:{date:"2026-08-03",time:"",stage:""},
+    tease:[], recording:null,
+    links:{Website:"https://www.shakedownciti.com/",Instagram:"https://www.instagram.com/shakedownciti/",Facebook:"https://www.facebook.com/shakedownciti",Spotify:"https://open.spotify.com/artist/642FvT9DfSxEEAORYWqPmq",Bandsintown:"https://www.bandsintown.com/a/15537374-shakedown-citi"},
+    coming:[{d:"Jul 29, 2026",v:"The Warehouse",c:"Amityville, NY"},{d:"Aug 1, 2026",v:"Jerry Jam 20",c:"Middle Island, NY"},{d:"Aug 5, 2026",v:"Westcott Theater",c:"Syracuse, NY"},{d:"Aug 6, 2026",v:"Bearsville Theater",c:"Woodstock, NY"},{d:"Aug 7, 2026",v:"FTC StageOne",c:"Fairfield, CT"}],
+    conf:"Set: Aug 3. Roster not yet published — awaiting the band."},
+  "liberty-jams":{name:"Liberty Jams",kind:"Jam Band",home:"",
+    members:[],
+    set:{date:"2026-08-05",time:"",stage:""},
+    tease:[], recording:null,
+    links:{},
+    coming:[],
+    conf:"Set: Aug 5. No public roster or links found — awaiting the band."}
+};
+
+function P(k){return new URLSearchParams(location.search).get(k);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var slug=(P('band')||'rift').toLowerCase();
+var B=BANDS[slug]||BANDS['rift'];
+var MAP='https://deaddance.app/artsquest_musikfest.html'; /* the live festival map — walking directions */
+var walkUrl=MAP+(B.set&&B.set.stage?('#stage='+encodeURIComponent(B.set.stage)):'');
+
+/* ---- state machine: FUTURE → LIVE → HISTORICAL ---- */
+function setBounds(){
+  if(!B.set||!B.set.date) return null;
+  var t=B.set.time||'8:00 PM';
+  var start=new Date(B.set.date+'T'+to24(t));
+  var end=new Date(start.getTime()+2*60*60*1000); /* ~2h set */
+  return {start:start,end:end};
+}
+function to24(t){ var m=/(\d+):(\d+)\s*(AM|PM)?/i.exec(t||''); if(!m) return '20:00:00';
+  var h=+m[1],mi=m[2],ap=(m[3]||'').toUpperCase(); if(ap==='PM'&&h<12)h+=12; if(ap==='AM'&&h===12)h=0; return (h<10?'0':'')+h+':'+mi+':00'; }
+function now(){ var o=P('now'); return o?new Date(o):new Date(); }
+function state(){
+  var forced=P('state'); if(forced) return forced;
+  var b=setBounds(); if(!b) return 'future';           /* no date yet → treat as upcoming */
+  var n=now(); if(n<b.start) return 'future'; if(n<=b.end) return 'live'; return 'historical';
+}
+
+function render(){
+  document.getElementById('bname').textContent=B.name;
+  document.getElementById('kind').textContent=B.kind+(B.home?(' · '+B.home):'');
+  document.title=B.name+' — MusikFest 2026';
+  var S=state();
+
+  /* state bar + set line */
+  var sb=document.getElementById('statebar'), sl=document.getElementById('setline');
+  var setTxt = B.set&&B.set.date ? fmtDate(B.set.date)+(B.set.time?(' · '+B.set.time):' · time TBD')+(B.set.stage?(' · '+B.set.stage):'') : 'Festival set — date to confirm';
+  if(S==='future'){
+    sb.innerHTML='<span class="statebar st-future">⏳ <span class="count" id="cd">Upcoming</span></span>';
+    sl.innerHTML='<b>'+esc(setTxt)+'</b>';
+    tick();
+  }else if(S==='live'){
+    sb.innerHTML='<span class="statebar st-live">🌹 ON NOW — playing</span>';
+    sl.innerHTML='<b>'+esc(setTxt)+'</b>';
+  }else{
+    sb.innerHTML='<span class="statebar st-hist">✓ Played · '+esc(B.set&&B.set.date?fmtDate(B.set.date):'MusikFest 2026')+'</span>';
+    sl.innerHTML='<span style="color:#d8cbef">This set is now history — the archive below is frozen.</span>';
+  }
+
+  /* pills differ by state */
+  var pills=[];
+  var walk='<a class="pill gold" href="'+esc(walkUrl)+'" target="_blank" rel="noopener">🗺 Walk to the stage</a>';
+  var coming=(B.coming&&B.coming.length)?'<button class="pill" onclick="csOpen()">📅 Coming shows</button>':'';
+  if(S==='future'){
+    pills.push('<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">🎟 See us live</a>');
+    pills.push(walk); pills.push(coming);
+  }else if(S==='live'){
+    pills.push(walk);
+    pills.push('<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">📸 Surround the stage</a>');
+    pills.push(coming);
+  }else{
+    if(B.recording) pills.push('<a class="pill rose" href="'+esc(B.recording)+'" target="_blank" rel="noopener">▶ Recording</a>');
+    if(B.tease&&B.tease.length) pills.push('<button class="pill" onclick="document.getElementById(\'teaseSec\').scrollIntoView({behavior:\'smooth\'})">🎵 Setlist</button>');
+    pills.push(coming);
+  }
+  document.getElementById('pills').innerHTML=pills.filter(Boolean).join('');
+
+  /* setlist tease (or, historical, "the setlist that night") */
+  var ts=document.getElementById('teaseSec'), th=document.getElementById('teaseHead'), tw=document.getElementById('tease');
+  if(B.tease&&B.tease.length){
+    ts.style.display=''; th.textContent=(S==='historical'?'The setlist':'Setlist tease');
+    tw.innerHTML=B.tease.map(function(s){return '<span class="song">'+esc(s)+'</span>';}).join('');
+  } else { ts.style.display='none'; }
+
+  /* roster */
+  var r=document.getElementById('roster');
+  if(B.members&&B.members.length){
+    r.innerHTML=B.members.map(function(m){return '<div class="mrow"><b>'+esc(m.n)+'</b><span>'+esc(m.r)+'</span></div>';}).join('');
+  } else {
+    r.innerHTML='<div class="muted">Roster coming soon — we’ve reached out to the band. <span class="badge">awaiting band</span></div>';
+  }
+
+  /* QR title by state */
+  document.getElementById('qrTitle').textContent = S==='historical' ? 'Relive the map' : 'Walk to the stage';
+
+  /* links */
+  var ls=document.getElementById('links'), keys=Object.keys(B.links||{});
+  ls.innerHTML = keys.length ? keys.map(function(k){return '<a href="'+esc(B.links[k])+'" target="_blank" rel="noopener">'+esc(k)+'</a>';}).join('') : '<span class="muted">Links coming soon.</span>';
+
+  document.getElementById('conf').textContent=B.conf||'';
+
+  /* the QR — UNBRANDED, and ALWAYS a clickable link behind it (dual-door: tap to open · scan to share) */
+  try{ if(window.DDQR&&DDQR.into){ DDQR.into('walkQR', walkUrl, {size:360, css:118, caption:false, mark:false, link:true}); }
+       else { document.getElementById('walkQR').textContent='QR'; } }catch(e){ document.getElementById('walkQR').textContent='QR'; }
+}
+
+function fmtDate(iso){ try{ return new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric'}); }catch(e){ return iso; } }
+function tick(){ var el=document.getElementById('cd'); if(!el) return; var b=setBounds(); if(!b){ el.textContent='Upcoming'; return; }
+  var ms=b.start-now(); if(ms<=0){ el.textContent='Starting…'; return; }
+  var d=Math.floor(ms/864e5), h=Math.floor(ms%864e5/36e5), m=Math.floor(ms%36e5/6e4);
+  el.textContent=(d>0?d+'d ':'')+h+'h '+m+'m to set'; setTimeout(tick,60000); }
+
+/* coming-shows terse modal */
+window.csOpen=function(){ var l=document.getElementById('csList');
+  document.getElementById('csTitle').textContent=B.name+' — coming shows';
+  document.getElementById('csSub').textContent=(B.coming.length)+' upcoming · tap a venue to look it up';
+  l.innerHTML=B.coming.map(function(g){ return '<div class="gig"><span class="d">'+esc(g.d)+'</span><span class="v">'+esc(g.v)+'<small>'+esc(g.c)+'</small></span></div>'; }).join('');
+  document.getElementById('mbg').classList.add('on'); };
+window.csClose=function(){ document.getElementById('mbg').classList.remove('on'); };
+
+render();
+</script>
+</body>
+</html>
