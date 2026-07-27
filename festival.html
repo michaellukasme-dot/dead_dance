@@ -62,9 +62,10 @@ var BUILTIN={
   gate:{lb:'Gates',ic:'🎟',c:'#3a1f57'}, coaster:{lb:'Thrill',ic:'🎢',c:'#e8730c'}, beer:{lb:'Beer',ic:'🍺',c:'#c79a3a'},
   drinks:{lb:'Drinks',ic:'🥤',c:'#e8730c'}, pizza:{lb:'Pizza',ic:'🍕',c:'#b8002e'}, burger:{lb:'Burgers',ic:'🍔',c:'#c79a3a'},
   food:{lb:'Food',ic:'🥗',c:'#12854f'}, hotdog:{lb:'Hot Dogs',ic:'🌭',c:'#e8730c'}, taco:{lb:'Mexican',ic:'🌮',c:'#e8730c'},
-  icecream:{lb:'Ice Cream',ic:'🍦',c:'#2a7de1'}, popcorn:{lb:'Snacks',ic:'🍿',c:'#c79a3a'}
+  icecream:{lb:'Ice Cream',ic:'🍦',c:'#2a7de1'}, popcorn:{lb:'Snacks',ic:'🍿',c:'#c79a3a'},
+  atm:{lb:'ATM',ic:'🏧',c:'#e8730c'}, parking:{lb:'Parking',ic:'🅿️',c:'#1f5fbf'}, shuttle:{lb:'Shuttle',ic:'🚐',c:'#b8002e'}, bus:{lb:'Bus Stop',ic:'🚌',c:'#e8a300'}, recycle:{lb:'Recycling',ic:'♻️',c:'#2a8a4a'}
 };
-var ORDER=['stage','show','rides','coaster','gate','merch','beer','drinks','food','pizza','burger','hotdog','taco','icecream','popcorn','restroom','misting','access','firstaid','police'];
+var ORDER=['stage','show','rides','coaster','gate','merch','beer','drinks','food','pizza','burger','hotdog','taco','icecream','popcorn','restroom','misting','access','firstaid','police','atm','parking','shuttle','bus','recycle'];
 var SB; try{ SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
 function dir(ll){ return 'https://www.google.com/maps/dir/?api=1&destination='+ll[0]+','+ll[1]+'&travelmode=walking'; }
 function centroid(cs){ if(!cs||!cs.length)return null; var la=0,ln=0; cs.forEach(function(p){la+=p[0];ln+=p[1];}); return [la/cs.length,ln/cs.length]; }
@@ -103,10 +104,11 @@ function render(F){
     var st=t.covered?{color:'#e8730c',weight:2,fillColor:'#f59e0b',fillOpacity:.22}:{color:'#e8730c',weight:2,dashArray:'6,5',fillColor:'#f59e0b',fillOpacity:.10};
     try{ L.polygon(t.corners,st).addTo(map).bindTooltip('⛺ '+esc(t.name||'Tent')+(t.covered?' · ☂ rain-or-shine':''),{sticky:true}); }catch(e){}
   });
-  // the festival's OWN designed map — a curtain UNDER the icons. Lukas Apps' geo + data still runs it all;
-  // this just lets a festival recognize their familiar map. Toggle it off to see the live geo map.
-  var mo=doc.mapOverlay, ovLayer=null;
-  if(mo&&mo.img&&mo.bounds){ try{ if(!map.getPane('fqImg')){ map.createPane('fqImg'); map.getPane('fqImg').style.zIndex=350; } ovLayer=L.imageOverlay(mo.img, mo.bounds, {opacity:(mo.opacity!=null?mo.opacity:0.6), pane:'fqImg'}).addTo(map); }catch(e){} }
+  // the festival's OWN designed map sheet(s) — curtains UNDER the icons. Lukas Apps' geo + data still
+  // runs it all; this just lets a festival recognize their familiar map. Toggle off to see the geo map.
+  var mos=(doc.mapOverlays&&doc.mapOverlays.length)?doc.mapOverlays:(doc.mapOverlay?[doc.mapOverlay]:[]), ovLayers=[];
+  if(mos.length){ try{ if(!map.getPane('fqImg')){ map.createPane('fqImg'); map.getPane('fqImg').style.zIndex=350; }
+    mos.forEach(function(o){ if(o&&o.img&&o.bounds){ ovLayers.push(L.imageOverlay(o.img, o.bounds, {opacity:(o.opacity!=null?o.opacity:0.6), pane:'fqImg'}).addTo(map)); } }); }catch(e){} }
   // pins on top
   pins.forEach(function(p){ var t=typeInfo(p.type,customMap);
     L.marker(p.ll,{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:'+t.c+';border:2px solid #fff;box-shadow:0 2px 6px #0005;display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:13px">'+t.ic+'</span></div>'}),title:p.name}).addTo(map)
@@ -120,9 +122,11 @@ function render(F){
   // legend
   document.getElementById('legend').innerHTML=ORDER.concat(Object.keys(customMap)).filter(function(k){return pins.some(function(p){return p.type===k;});})
     .map(function(k){var t=typeInfo(k,customMap);return '<span>'+t.ic+' '+esc(t.lb)+'</span>';}).join('');
-  if(ovLayer){ var lg=document.getElementById('legend');
+  if(ovLayers.length){ var lg=document.getElementById('legend');
     lg.insertAdjacentHTML('afterbegin','<button id="ovToggle" style="border:1px solid #e2c58a;background:#fff8ec;color:#7a4a12;font:800 12px system-ui;border-radius:999px;padding:5px 11px;cursor:pointer;margin-right:6px">🖼 Map guide: on</button>');
-    document.getElementById('ovToggle').onclick=function(){ if(map.hasLayer(ovLayer)){ map.removeLayer(ovLayer); this.textContent='🖼 Map guide: off'; this.style.opacity='.6'; } else { ovLayer.addTo(map); this.textContent='🖼 Map guide: on'; this.style.opacity='1'; } };
+    document.getElementById('ovToggle').onclick=function(){ var on=map.hasLayer(ovLayers[0]);
+      ovLayers.forEach(function(l){ if(on){ map.removeLayer(l); } else { l.addTo(map); } });
+      this.textContent='🖼 Map guide: '+(on?'off':'on'); this.style.opacity=on?'.6':'1'; };
   }
 
   // sections grouped by type

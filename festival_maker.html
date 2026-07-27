@@ -94,14 +94,9 @@ h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spac
 
   <div class="maprow">
     <button class="mbtn" style="background:#fff3e0;color:#e8730c" onclick="fmUploadMap()">🖼 Overlay a festival map</button>
-    <span class="mtip">Upload your printed <b>Map &amp; Guide</b> — drag the <b>SW/NE</b> corners to fit it over the real map. Your icons sit on top.</span>
+    <span class="mtip">Upload your printed <b>Map &amp; Guide</b> — drag the <b>SW/NE</b> corners to fit it over the real map. Add <b>several sheets</b> for a big festival (MusikFest North + South). Your icons sit on top.</span>
   </div>
-  <div id="ovCtl" style="display:none;align-items:center;gap:10px;margin:2px 0 6px;padding:9px 12px;background:#fff8ec;border:1px solid #ffe1bf;border-radius:12px">
-    <span style="font-size:12px;font-weight:800;color:#7a4a12">Curtain opacity</span>
-    <input id="ovRange" type="range" min="10" max="100" value="60" oninput="fmOvOpacity(this.value)" style="flex:1">
-    <span id="ovPct" style="font-size:12px;font-weight:800;color:#7a4a12;width:34px;text-align:right">60%</span>
-    <button class="axx" onclick="fmOvRemove()" title="Remove overlay">✕</button>
-  </div>
+  <div id="ovList"></div>
   <input type="file" id="ovFile" accept="image/*" style="display:none" onchange="fmMapFile(this)">
 
   <div class="hint"><b>Pick an icon</b> → <b>＋ Add</b> → <b>tap the map</b> where it is. The pin drops there and the coordinates fill in. Name every spot — “NorthWest Restrooms”, “Angelo’s Pizza”, “Main Stage”. Only one item type shows at a time — no clutter. (Drag any pin to nudge it; 📍 to re-place.)</div>
@@ -136,13 +131,20 @@ var TYPES=[
   {k:'hotdog',ic:'🌭',lb:'Hot Dogs',one:'hot dog stand',eg:'Hog Diggity Dog',c:'#e8730c'},
   {k:'taco',ic:'🌮',lb:'Mexican',one:'stand',eg:'Taco Truck',c:'#e8730c'},
   {k:'icecream',ic:'🍦',lb:'Ice Cream',one:'stand',eg:'The Cup Guy',c:'#2a7de1'},
-  {k:'popcorn',ic:'🍿',lb:'Snacks',one:'snack stand',eg:'Kettle Corn',c:'#c79a3a'}
+  {k:'popcorn',ic:'🍿',lb:'Snacks',one:'snack stand',eg:'Kettle Corn',c:'#c79a3a'},
+  {k:'atm',ic:'🏧',lb:'ATM',one:'ATM',eg:'ATM — Main St',c:'#e8730c'},
+  {k:'parking',ic:'🅿️',lb:'Parking',one:'parking area',eg:'Accessible Parking — Lehigh St',c:'#1f5fbf'},
+  {k:'shuttle',ic:'🚐',lb:'Shuttle',one:'shuttle stop',eg:'Shuttleplatz North',c:'#b8002e'},
+  {k:'bus',ic:'🚌',lb:'Bus Stop',one:'bus stop',eg:'LANTA Bus Stop',c:'#e8a300'},
+  {k:'recycle',ic:'♻️',lb:'Recycling',one:'recycling station',eg:'Recycling Station',c:'#2a8a4a'}
 ];
 var LS='dd.festivalmaker';
 var state=load(), sel=null, active=null;
 var MAP, FP=[], fpMarks=[], fpPoly=null, itemMarks={}, placing=null; // placing={k,id} while awaiting a map tap
 
-function load(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.items){ s.customTypes=s.customTypes||[]; return s; } }catch(e){} return {name:'',items:{},footprint:null,nextId:1,customTypes:[]}; }
+function load(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.items){ s.customTypes=s.customTypes||[];
+  if(s.mapOverlay && !s.mapOverlays){ s.mapOverlays=[{id:'ov1',name:'Map',img:s.mapOverlay.img,bounds:s.mapOverlay.bounds,opacity:s.mapOverlay.opacity}]; delete s.mapOverlay; }  // migrate single→array
+  s.mapOverlays=s.mapOverlays||[]; return s; } }catch(e){} return {name:'',items:{},footprint:null,nextId:1,customTypes:[],mapOverlays:[]}; }
 function allT(){ return TYPES.concat(state.customTypes||[]); }
 function fmSave(){ state.name=(document.getElementById('fname').value||''); state.footprint=FP.map(function(m){var ll=m.getLatLng();return [ll.lat,ll.lng];}); try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} paintCounts(); paintTotal(); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -172,8 +174,8 @@ function initMap(center){
   if(saved && saved.length>=3){ saved.forEach(function(ll){ addCorner(ll[0],ll[1]); }); }
   else { var d=0.0016; [[1,-1],[1,1],[-1,1],[-1,-1]].forEach(function(o){ addCorner(center[0]+d*o[0], center[1]+d*o[1]); }); }
   fpRedraw();
-  // festival-map curtain (below everything), then Platz/Tent areas, then item markers on top
-  renderOverlay();
+  // festival-map curtains (below everything), then Platz/Tent areas, then item markers on top
+  renderOverlays();
   redrawAllAreas();
   allT().forEach(function(t){ (state.items[t.k]||[]).forEach(function(r){ if(r.lat&&r.lng) makeItemMarker(t.k,r); }); });
   setTimeout(function(){ try{ MAP.invalidateSize(); }catch(e){} },200);
@@ -226,7 +228,7 @@ function renderPalette(){ var p=document.getElementById('palette');
 }
 (function(){ renderPalette();
   document.getElementById('fname').value=state.name||'';
-  renderAreas(); fmOvShowCtl();
+  renderAreas(); renderOvList();
   paintTotal();
   // center the map on the user (setup crews on-site) → fallback Allentown fairgrounds
   if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(p){ initMap([p.coords.latitude,p.coords.longitude]); }, function(){ initMap([40.6013,-75.4979]); }, {timeout:8000}); }
@@ -390,11 +392,13 @@ function tentRow(t){ return '<div class="trow"><span class="tic">⛺</span><inpu
   +(AREA_EDIT===t.id?'<button class="abtn" onclick="fmAreaCorner(\''+t.id+'\')">＋pt</button>':'')
   +'<button class="axx" onclick="fmDelTent(\''+t.id+'\')">✕</button></div>'; }
 
-/* ---------- FESTIVAL MAP OVERLAY (the "curtain") ----------
-   An admin uploads their designed Map & Guide; we lay it as a semi-opaque image OVER the real geo
-   map, in a pane BELOW the icons, and let them drag the SW/NE corners to reposition / resize /
-   stretch it into place. Stored in the doc (downscaled) so it rides the cloud + fan renderer. */
-var OVL=null, ovMarks=[];
+/* ---------- FESTIVAL MAP OVERLAYS (the "curtains") — MULTIPLE sheets ----------
+   Big festivals (MusikFest = North + South Bethlehem) need several designed map sheets, each dropped
+   over its own geographic zone. Each overlay is a semi-opaque image in a pane BELOW the icons; drag
+   its SW/NE corners to place it. Stored (downscaled) in the doc so they ride the cloud + fan view. */
+var ovLayers={}, ovHandles={}, OV_EDIT=null;
+function ensureOv(){ state.mapOverlays=state.mapOverlays||[]; }
+function ovById(id){ ensureOv(); return state.mapOverlays.filter(function(o){return o.id===id;})[0]; }
 function fmDownscale(file, cb){ var img=new Image(); img.onload=function(){ var max=1600, w=img.width, h=img.height, sc=Math.min(1, max/Math.max(w,h));
     var c=document.createElement('canvas'); c.width=Math.round(w*sc); c.height=Math.round(h*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height);
     try{ cb(c.toDataURL('image/jpeg',0.72)); }catch(e){ cb(null); } };
@@ -402,32 +406,46 @@ function fmDownscale(file, cb){ var img=new Image(); img.onload=function(){ var 
 function fmDefaultBounds(){ if(state.footprint&&state.footprint.length>=3){ var la=state.footprint.map(function(p){return p[0];}), ln=state.footprint.map(function(p){return p[1];});
     return [[Math.min.apply(null,la),Math.min.apply(null,ln)],[Math.max.apply(null,la),Math.max.apply(null,ln)]]; }
   var b=MAP.getBounds().pad(-0.15); return [[b.getSouth(),b.getWest()],[b.getNorth(),b.getEast()]]; }
-function clearOverlay(){ if(OVL){ try{MAP.removeLayer(OVL);}catch(e){} OVL=null; } ovMarks.forEach(function(m){ try{MAP.removeLayer(m);}catch(e){} }); ovMarks=[]; }
 function ovHandle(lbl){ return L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:20px;height:20px;border-radius:5px;background:#f0a500;border:2px solid #fff;box-shadow:0 1px 6px #0007;display:flex;align-items:center;justify-content:center;font:900 9px system-ui;color:#3a2a00">'+lbl+'</div>'}); }
-function renderOverlay(){ if(!MAP) return; clearOverlay(); var o=state.mapOverlay; if(!o||!o.img||!o.bounds) return;
+function clearOverlays(){ Object.keys(ovLayers).forEach(function(id){ try{MAP.removeLayer(ovLayers[id]);}catch(e){} }); ovLayers={};
+  Object.keys(ovHandles).forEach(function(id){ (ovHandles[id]||[]).forEach(function(m){ try{MAP.removeLayer(m);}catch(e){} }); }); ovHandles={}; }
+function renderOverlays(){ if(!MAP) return; ensureOv(); clearOverlays();
   if(!MAP.getPane('fmImg')){ MAP.createPane('fmImg'); MAP.getPane('fmImg').style.zIndex=350; MAP.getPane('fmImg').style.pointerEvents='none'; }  // below polygons(400)+markers(600)
-  OVL=L.imageOverlay(o.img, o.bounds, {opacity:(o.opacity!=null?o.opacity:0.6), pane:'fmImg', interactive:false}).addTo(MAP);
-  var mSW=L.marker(o.bounds[0],{draggable:true,icon:ovHandle('SW')}).addTo(MAP);
-  var mNE=L.marker(o.bounds[1],{draggable:true,icon:ovHandle('NE')}).addTo(MAP);
-  function upd(){ var s=mSW.getLatLng(), n=mNE.getLatLng();
-    o.bounds=[[Math.min(s.lat,n.lat),Math.min(s.lng,n.lng)],[Math.max(s.lat,n.lat),Math.max(s.lng,n.lng)]]; if(OVL) OVL.setBounds(o.bounds); }
-  mSW.on('drag',upd); mNE.on('drag',upd); mSW.on('dragend',fmSave); mNE.on('dragend',fmSave);
-  ovMarks=[mSW,mNE];
+  state.mapOverlays.forEach(function(o){ if(!o.img||!o.bounds) return;
+    ovLayers[o.id]=L.imageOverlay(o.img, o.bounds, {opacity:(o.opacity!=null?o.opacity:0.6), pane:'fmImg', interactive:false}).addTo(MAP);
+    if(OV_EDIT===o.id){ var mSW=L.marker(o.bounds[0],{draggable:true,icon:ovHandle('SW')}).addTo(MAP), mNE=L.marker(o.bounds[1],{draggable:true,icon:ovHandle('NE')}).addTo(MAP);
+      (function(ov,layer){ function upd(){ var s=mSW.getLatLng(), n=mNE.getLatLng();
+          ov.bounds=[[Math.min(s.lat,n.lat),Math.min(s.lng,n.lng)],[Math.max(s.lat,n.lat),Math.max(s.lng,n.lng)]]; if(layer) layer.setBounds(ov.bounds); }
+        mSW.on('drag',upd); mNE.on('drag',upd); mSW.on('dragend',fmSave); mNE.on('dragend',fmSave); })(o, ovLayers[o.id]);
+      ovHandles[o.id]=[mSW,mNE];
+    }
+  });
 }
-function fmOvShowCtl(){ var c=document.getElementById('ovCtl'); if(!c||!state.mapOverlay) return; c.style.display='flex';
-  var r=document.getElementById('ovRange'), p=document.getElementById('ovPct'), pct=Math.round((state.mapOverlay.opacity!=null?state.mapOverlay.opacity:0.6)*100);
-  if(r) r.value=pct; if(p) p.textContent=pct+'%'; }
+function renderOvList(){ ensureOv(); var box=document.getElementById('ovList'); if(!box) return;
+  if(!state.mapOverlays.length){ box.innerHTML=''; return; }
+  box.innerHTML=state.mapOverlays.map(function(o){ var pct=Math.round((o.opacity!=null?o.opacity:0.6)*100), ed=(OV_EDIT===o.id);
+    return '<div style="display:flex;align-items:center;gap:7px;margin:6px 0;padding:8px 10px;background:#fff8ec;border:1px solid #ffe1bf;border-radius:11px">'
+      +'<input value="'+esc(o.name||'Map')+'" oninput="fmOvName(\''+o.id+'\',this.value)" style="width:80px;min-width:0;border:1px solid #ecd9bf;border-radius:8px;padding:6px;font:700 12px system-ui;background:#fff">'
+      +'<input type="range" min="10" max="100" value="'+pct+'" oninput="fmOvOpacity(\''+o.id+'\',this.value)" style="flex:1">'
+      +'<span id="ovpct_'+o.id+'" style="font:800 11px system-ui;color:#7a4a12;width:32px;text-align:right">'+pct+'%</span>'
+      +'<button class="abtn" style="background:'+(ed?'#e8730c;color:#fff':'#ffe6c8;color:#b35a00')+'" onclick="fmOvEdit(\''+o.id+'\')">'+(ed?'✓ Placing':'✎ Place')+'</button>'
+      +'<button class="axx" onclick="fmOvRemove(\''+o.id+'\')">✕</button></div>'; }).join('');
+}
 window.fmUploadMap=function(){ var f=document.getElementById('ovFile'); if(f) f.click(); };
-window.fmMapFile=function(input){ var f=input.files&&input.files[0]; if(!f){ return; }
+window.fmMapFile=function(input){ var f=input.files&&input.files[0]; if(!f) return;
   fmDownscale(f,function(url){ if(!url){ alert('Could not read that image — try a JPG or PNG.'); return; }
-    state.mapOverlay={img:url, bounds:fmDefaultBounds(), opacity:0.6}; fmSave(); renderOverlay(); fmOvShowCtl();
+    ensureOv(); var o={id:'ov'+nid(), name:'Map '+(state.mapOverlays.length+1), img:url, bounds:fmDefaultBounds(), opacity:0.6};
+    state.mapOverlays.push(o); OV_EDIT=o.id; fmSave(); renderOverlays(); renderOvList();
     try{ document.getElementById('fmap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
     if(url.length>900000) alert('Heads up — that map image is large. It saves on this device, but a smaller/simpler image publishes to the cloud more reliably.');
   }); input.value=''; };
-window.fmOvOpacity=function(v){ if(!state.mapOverlay) return; state.mapOverlay.opacity=(+v)/100; if(OVL) OVL.setOpacity((+v)/100);
-  var p=document.getElementById('ovPct'); if(p) p.textContent=Math.round(+v)+'%'; fmSave(); };
-window.fmOvRemove=function(){ if(!confirm('Remove the festival map overlay?')) return; state.mapOverlay=null; clearOverlay();
-  var c=document.getElementById('ovCtl'); if(c) c.style.display='none'; fmSave(); };
+window.fmOvName=function(id,v){ var o=ovById(id); if(o){ o.name=v; fmSave(); } };
+window.fmOvOpacity=function(id,v){ var o=ovById(id); if(!o) return; o.opacity=(+v)/100; if(ovLayers[id]) ovLayers[id].setOpacity((+v)/100);
+  var p=document.getElementById('ovpct_'+id); if(p) p.textContent=Math.round(+v)+'%'; fmSave(); };
+window.fmOvEdit=function(id){ OV_EDIT=(OV_EDIT===id?null:id); renderOverlays(); renderOvList();
+  if(OV_EDIT){ try{ document.getElementById('fmap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} } };
+window.fmOvRemove=function(id){ if(!confirm('Remove this map overlay?')) return; ensureOv();
+  state.mapOverlays=state.mapOverlays.filter(function(o){return o.id!==id;}); if(OV_EDIT===id) OV_EDIT=null; fmSave(); renderOverlays(); renderOvList(); };
 
 window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker.html';
   try{ if(navigator.share){ navigator.share({title:(state.name||'Festival')+' — StageFill',url:u}); return; } }catch(e){}
