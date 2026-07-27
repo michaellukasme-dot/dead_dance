@@ -32,34 +32,23 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
   // DDtile(map) → street base + a Google/Apple-style "Map ⇄ Satellite" toggle in the map window.
   // Auto-falls-back to OSM so a map is never blank.
   w.DDtile = function (map) {
-    // one-time CSS — skin the real street tiles in DeadDance purple (our brand on a real walking map)
-    if (!document.getElementById('dd-purple-css')) { var st = document.createElement('style'); st.id = 'dd-purple-css';
-      st.textContent = '.dd-purple-tiles{filter:grayscale(.5) sepia(.5) hue-rotate(210deg) saturate(1.8) brightness(1.03) contrast(.96)}';
-      document.head.appendChild(st); }
+    // The PLAIN, real map — no purple skin, no brand/Map layer toggle. We are the better map; don't tint it.
     var k = w.DD_TILE_KEY, usingKey = !!k;
     var url = usingKey ? mt("streets-v2", "png", k) : CARTO.url;
     var attr = usingKey ? ATTR : CARTO.attribution;
     var mz = usingKey ? 20 : CARTO.maxZoom;
     var subs = usingKey ? 'abc' : CARTO.subdomains;
-    var plain = !!w.DD_MAP_PLAIN;                                                                                       // white-label maps (e.g. ArtsQuest) show plain tiles — no purple skin
-    var base   = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK });          // 🗺 plain geo
-    var purple = plain ? L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK })    // plain (no filter) when DD_MAP_PLAIN
-                       : L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK, className: 'dd-purple-tiles' });  // 🌹 DeadDance brand
-    (plain ? base : purple).addTo(map);   // DeadDance defaults to purple; white-label defaults to plain
-
-    // toggle: brand (purple) ⇄ 🗺 Map (plain geo), top-right — skip on plain white-label maps (both looks are identical there)
-    if (!plain) { try { var _lyr = {}; _lyr[w.DD_MAP_BRAND || "🌹 DeadDance"] = purple; _lyr["🗺 Map"] = base; L.control.layers(_lyr, null, { position: "topright", collapsed: false }).addTo(map); } catch (e) {} }
+    var base = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK }).addTo(map);
 
     var errs = 0, swapped = false;
-    function watch(layer) { layer.on("tileerror", function () {
+    base.on("tileerror", function () {
       try { if (w.DDHealth) DDHealth.tileErr(); } catch (e) {}
       errs++;
       if (usingKey && !swapped && errs >= 6) { swapped = true;                     // keyed provider failing → never leave a blank map
-        try { map.removeLayer(base); map.removeLayer(purple); } catch (e) {}
-        L.tileLayer(CARTO.url, plain ? { attribution: CARTO.attribution, maxZoom: CARTO.maxZoom, subdomains: CARTO.subdomains, errorTileUrl: BLANK } : { attribution: CARTO.attribution, maxZoom: CARTO.maxZoom, subdomains: CARTO.subdomains, errorTileUrl: BLANK, className: 'dd-purple-tiles' }).addTo(map);
+        try { map.removeLayer(base); } catch (e) {}
+        L.tileLayer(CARTO.url, { attribution: CARTO.attribution, maxZoom: CARTO.maxZoom, subdomains: CARTO.subdomains, errorTileUrl: BLANK }).addTo(map);
       }
-    }); }
-    watch(base); watch(purple);
-    return plain ? base : purple;
+    });
+    return base;
   };
 })(window);
