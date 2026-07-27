@@ -87,6 +87,11 @@ h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spac
   <h1>🎪 StageFill Festival Maker</h1>
   <input class="fname" id="fname" placeholder="Festival name — e.g. The Great Allentown Fair" oninput="fmSave()">
 
+  <div class="maprow" style="margin:0 0 8px">
+    <input id="placeQ" placeholder="🔍 Search a place to center the map — e.g. Bethlehem, PA" onkeydown="if(event.key==='Enter')fmSearchPlace(this.value)" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:11px;padding:10px 12px;font:inherit;font-size:14px;background:#fff">
+    <button class="mbtn" onclick="fmSearchPlace(document.getElementById('placeQ').value)">Go</button>
+  </div>
+
   <div id="fmap"></div>
   <div class="maprow">
     <button class="mbtn pur" onclick="fpAddCorner()">＋ Add corner pin</button>
@@ -150,6 +155,18 @@ var soloType=null; // when set, only this type's pins show on the map (the palet
 function applyMapFilter(){ if(!MAP) return; allT().forEach(function(t){ var show=(soloType===null||soloType===t.k);
   (state.items[t.k]||[]).forEach(function(r){ var m=itemMarks[r.id]; if(!m)return; if(show){ if(!MAP.hasLayer(m)) MAP.addLayer(m); } else if(MAP.hasLayer(m)) MAP.removeLayer(m); }); }); }
 window.fmShowAll=function(){ soloType=null; renderPalette(); applyMapFilter(); };
+/* Place search — center the map on any town/address (admin setting up a festival that isn't at their
+   GPS). On a FRESH festival (no pins yet) the grounds box comes along; when editing, only the view moves. */
+window.fmSearchPlace=function(q){ q=(q||'').trim(); if(!q||!MAP) return;
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q),{headers:{'Accept':'application/json'}})
+   .then(function(r){ return r.json(); }).then(function(a){
+     if(!a||!a.length){ alert('Couldn’t find that — try "City, State".'); return; }
+     var lat=+a[0].lat, lon=+a[0].lon; try{ MAP.setView([lat,lon],15); }catch(e){}
+     var hasItems=Object.keys(state.items||{}).some(function(k){ return (state.items[k]||[]).length; });
+     if(!hasItems){ fpMarks.forEach(function(m){ try{MAP.removeLayer(m);}catch(e){} }); fpMarks=[]; FP=[];
+       var d=0.0016; [[1,-1],[1,1],[-1,1],[-1,-1]].forEach(function(o){ addCorner(lat+d*o[0], lon+d*o[1]); }); fpRedraw(); fmSave(); }
+   }).catch(function(){ alert('Search failed — check your connection.'); });
+};
 
 function load(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.items){ s.customTypes=s.customTypes||[];
   if(s.mapOverlay && !s.mapOverlays){ s.mapOverlays=[{id:'ov1',name:'Map',img:s.mapOverlay.img,bounds:s.mapOverlay.bounds,opacity:s.mapOverlay.opacity}]; delete s.mapOverlay; }  // migrate single→array
