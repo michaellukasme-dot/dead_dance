@@ -40,6 +40,9 @@ h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spac
 .pi .cnt.show{display:flex}
 .pi.addother{border:1.5px dashed #f0a500;background:#fff8ec}
 .pi.addother .ic{color:#e8730c}.pi.addother .lb{color:#e8730c}
+.pi.allpill{border-color:#bfe6d2;background:#f0faf4}
+.pi.allpill.on{border-color:#12854f;background:#d7f3e3;box-shadow:0 2px 10px #12a15022}
+.pi.allpill .lb{color:#0e7d4f}.pi.allpill.on .lb{color:#0b6b42}
 .editor{margin-top:14px}
 .ehead{display:flex;align-items:center;gap:9px;margin:4px 0 8px}.ehead .eic{font-size:22px}.ehead b{font-size:17px}
 .entry{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:9px}
@@ -143,6 +146,10 @@ var TYPES=[
 var LS='dd.festivalmaker';
 var state=load(), sel=null, active=null;
 var MAP, FP=[], fpMarks=[], fpPoly=null, itemMarks={}, placing=null; // placing={k,id} while awaiting a map tap
+var soloType=null; // when set, only this type's pins show on the map (the palette acts like the old filter pills)
+function applyMapFilter(){ if(!MAP) return; allT().forEach(function(t){ var show=(soloType===null||soloType===t.k);
+  (state.items[t.k]||[]).forEach(function(r){ var m=itemMarks[r.id]; if(!m)return; if(show){ if(!MAP.hasLayer(m)) MAP.addLayer(m); } else if(MAP.hasLayer(m)) MAP.removeLayer(m); }); }); }
+window.fmShowAll=function(){ soloType=null; renderPalette(); applyMapFilter(); };
 
 function load(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.items){ s.customTypes=s.customTypes||[];
   if(s.mapOverlay && !s.mapOverlays){ s.mapOverlays=[{id:'ov1',name:'Map',img:s.mapOverlay.img,bounds:s.mapOverlay.bounds,opacity:s.mapOverlay.opacity}]; delete s.mapOverlay; }  // migrate single→array
@@ -176,10 +183,12 @@ function initMap(center){
   if(saved && saved.length>=3){ saved.forEach(function(ll){ addCorner(ll[0],ll[1]); }); }
   else { var d=0.0016; [[1,-1],[1,1],[-1,1],[-1,-1]].forEach(function(o){ addCorner(center[0]+d*o[0], center[1]+d*o[1]); }); }
   fpRedraw();
+  if(saved && saved.length>=3){ try{ MAP.fitBounds(saved,{padding:[34,34]}); }catch(e){} }   // editing an existing map → frame the grounds (both zones), not the user
   // festival-map curtains (below everything), then Platz/Tent areas, then item markers on top
   renderOverlays();
   redrawAllAreas();
   allT().forEach(function(t){ (state.items[t.k]||[]).forEach(function(r){ if(r.lat&&r.lng) makeItemMarker(t.k,r); }); });
+  applyMapFilter();
   setTimeout(function(){ try{ MAP.invalidateSize(); }catch(e){} },200);
 }
 function cornerIcon(){ return L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],html:'<div style="width:18px;height:18px;border-radius:50%;background:#7c3aed;border:3px solid #fff;box-shadow:0 1px 5px #0006"></div>'}); }
@@ -224,7 +233,8 @@ function syncCoordText(r){ var el=document.getElementById('co_'+r.id); if(el) el
 
 /* ---------- PALETTE + EDITOR ---------- */
 function renderPalette(){ var p=document.getElementById('palette');
-  p.innerHTML=allT().map(function(t){ return '<div class="pi'+(sel===t.k?' on':'')+'" data-k="'+t.k+'" onclick="fmPick(\''+t.k+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+esc(t.lb)+'</span><span class="cnt" id="cnt_'+t.k+'"></span></div>'; }).join('')
+  p.innerHTML='<div class="pi allpill'+(soloType===null?' on':'')+'" onclick="fmShowAll()"><span class="ic">👁</span><span class="lb">Show all</span></div>'
+    + allT().map(function(t){ return '<div class="pi'+(sel===t.k?' on':'')+'" data-k="'+t.k+'" onclick="fmPick(\''+t.k+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+esc(t.lb)+'</span><span class="cnt" id="cnt_'+t.k+'"></span></div>'; }).join('')
     + '<div class="pi addother" onclick="fmAddCustom()"><span class="ic">➕</span><span class="lb">Add other</span></div>';
   paintCounts();
 }
@@ -232,16 +242,18 @@ function renderPalette(){ var p=document.getElementById('palette');
   document.getElementById('fname').value=state.name||'';
   renderAreas(); renderOvList();
   paintTotal();
-  // center the map on the user (setup crews on-site) → fallback Allentown fairgrounds
-  if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(p){ initMap([p.coords.latitude,p.coords.longitude]); }, function(){ initMap([40.6013,-75.4979]); }, {timeout:8000}); }
+  // Editing an existing map (has a footprint) → open ON the grounds. Otherwise center on the user
+  // (setup crew on-site), fallback Allentown fairgrounds.
+  var _fp=state.footprint;
+  if(_fp && _fp.length>=3){ var la=0,ln=0; _fp.forEach(function(p){la+=p[0];ln+=p[1];}); initMap([la/_fp.length, ln/_fp.length]); }
+  else if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(p){ initMap([p.coords.latitude,p.coords.longitude]); }, function(){ initMap([40.6013,-75.4979]); }, {timeout:8000}); }
   else initMap([40.6013,-75.4979]);
 })();
 function paintCounts(){ allT().forEach(function(t){ var n=(state.items[t.k]||[]).length,b=document.getElementById('cnt_'+t.k); if(b){ b.textContent=n; b.classList.toggle('show',n>0); } }); }
 function paintTotal(){ var total=0,kinds=0; allT().forEach(function(t){ var n=(state.items[t.k]||[]).length; total+=n; if(n)kinds++; });
   document.getElementById('tot').innerHTML= total?('<b>'+total+'</b> spot'+(total===1?'':'s')+' · <b>'+kinds+'</b> type'+(kinds===1?'':'s')):'Nothing added yet.'; }
-window.fmPick=function(k){ sel=k; active=null;
-  document.querySelectorAll('.pi').forEach(function(el){ el.classList.toggle('on',el.getAttribute('data-k')===k); });
-  renderEditor();
+window.fmPick=function(k){ sel=k; active=null; soloType=k;   // picking a type also filters the map to it (like the pills)
+  renderPalette(); applyMapFilter(); renderEditor();
 };
 function setActive(id){ active=id; document.querySelectorAll('.entry').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-id')===id); });
   var m=itemMarks[id]; if(m){ MAP.panTo(m.getLatLng()); m.openTooltip(); } }

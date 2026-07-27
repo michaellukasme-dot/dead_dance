@@ -34,6 +34,7 @@
 
   <div class="sec">The map — everything, where it actually is</div>
   <div id="map"></div>
+  <div id="zoneBar" style="display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 2px"></div>
   <div class="legend" id="legend"></div>
 
   <div id="sections"></div>
@@ -109,10 +110,12 @@ function render(F){
   var mos=(doc.mapOverlays&&doc.mapOverlays.length)?doc.mapOverlays:(doc.mapOverlay?[doc.mapOverlay]:[]), ovLayers=[];
   if(mos.length){ try{ if(!map.getPane('fqImg')){ map.createPane('fqImg'); map.getPane('fqImg').style.zIndex=350; }
     mos.forEach(function(o){ if(o&&o.img&&o.bounds){ ovLayers.push(L.imageOverlay(o.img, o.bounds, {opacity:(o.opacity!=null?o.opacity:0.6), pane:'fqImg'}).addTo(map)); } }); }catch(e){} }
-  // pins on top
+  // pins on top (collected by zone so North/South buttons can filter them)
+  var zoneMarks={};
   pins.forEach(function(p){ var t=typeInfo(p.type,customMap);
-    L.marker(p.ll,{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:'+t.c+';border:2px solid #fff;box-shadow:0 2px 6px #0005;display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:13px">'+t.ic+'</span></div>'}),title:p.name}).addTo(map)
+    var mk=L.marker(p.ll,{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:'+t.c+';border:2px solid #fff;box-shadow:0 2px 6px #0005;display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:13px">'+t.ic+'</span></div>'}),title:p.name}).addTo(map)
      .bindPopup('<b>'+esc(p.name||t.lb)+'</b>'+(p.detail?('<br><span style="font-size:12px;color:#555">'+esc(p.detail)+'</span>'):'')+'<br><a href="'+dir(p.ll)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
+    var z=(p.detail||'').trim(); (zoneMarks[z]=zoneMarks[z]||[]).push(mk);
   });
   var allLL=pins.map(function(p){return p.ll;}).concat(bound&&bound.length>=3?bound:[]);
   if(allLL.length){ try{ map.fitBounds(allLL,{padding:[36,36],maxZoom:18}); }catch(e){ map.setView(F.center||[40.6013,-75.4979],16); } }
@@ -122,6 +125,19 @@ function render(F){
   // legend
   document.getElementById('legend').innerHTML=ORDER.concat(Object.keys(customMap)).filter(function(k){return pins.some(function(p){return p.type===k;});})
     .map(function(k){var t=typeInfo(k,customMap);return '<span>'+t.ic+' '+esc(t.lb)+'</span>';}).join('');
+  // North / South zone buttons — filter the map by side; the active one is shaded
+  (function(){ var zb=document.getElementById('zoneBar'); if(!zb) return;
+    var zones=Object.keys(zoneMarks).filter(function(z){ return z && z!==''; });
+    if(zones.length<2){ zb.style.display='none'; return; }
+    var cur='All', labels={North:'⬆︎ North',South:'⬇︎ South'};
+    function paint(){ zb.querySelectorAll('button').forEach(function(b){ var on=b.getAttribute('data-z')===cur;
+      b.style.background=on?'#5a2e86':'#f3eefb'; b.style.color=on?'#fff':'#5a2e86'; b.style.boxShadow=on?'0 2px 8px rgba(90,46,134,.28)':'none'; }); }
+    function show(z){ cur=z; Object.keys(zoneMarks).forEach(function(k){ zoneMarks[k].forEach(function(m){ var vis=(z==='All'||k===z);
+      if(vis){ if(!map.hasLayer(m)) m.addTo(map); } else if(map.hasLayer(m)) map.removeLayer(m); }); }); paint(); }
+    zb.innerHTML=['All'].concat(zones).map(function(z){ return '<button data-z="'+esc(z)+'" style="border:1px solid #d9cfe9;border-radius:999px;padding:7px 15px;font:800 13px system-ui;cursor:pointer;transition:.12s">'+(labels[z]||esc(z))+'</button>'; }).join('');
+    zb.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ show(b.getAttribute('data-z')); }; });
+    paint();
+  })();
   if(ovLayers.length){ var lg=document.getElementById('legend');
     lg.insertAdjacentHTML('afterbegin','<button id="ovToggle" style="border:1px solid #e2c58a;background:#fff8ec;color:#7a4a12;font:800 12px system-ui;border-radius:999px;padding:5px 11px;cursor:pointer;margin-right:6px">🖼 Map guide: on</button>');
     document.getElementById('ovToggle').onclick=function(){ var on=map.hasLayer(ovLayers[0]);
