@@ -115,6 +115,27 @@
     }).catch(function(){ toast('Claim failed',false); });
   }
 
+  // ---- ONE-CLICK CLOUD PUBLISH (no DevTools, ever) ------------------------
+  // Local draft → creates a cloud festival, saves the doc, reopens as the owner editor.
+  // Already a cloud festival (?festival&key) → just Save.
+  window.ddCloudPublish=function(){
+    if(!C){ toast('Offline — no cloud',false); return; }
+    try{ window.fmSave && window.fmSave(); }catch(e){}
+    if(slug && key){ save(); return; }
+    var s=localState()||{};
+    var nm=(((document.getElementById('fname')||{}).value)||s.name||'').trim();
+    if(!nm){ nm=(prompt('Name your festival to publish it:','')||'').trim(); if(!nm) return; }
+    var fp=s.footprint||null; toast('☁ Publishing…', true);
+    C.rpc('dd_festival_create',{ p_name:nm, p_region:null, p_email:null }).then(function(r){
+      if(r&&r.error){ toast('Create failed: '+(r.error.message||''),false); return; }
+      var d=(r&&r.data)||{}, sg=d.slug, tok=d.owner_token; if(!sg||!tok){ toast('Create failed',false); return; }
+      s.__slug=sg; s.name=nm;
+      C.rpc('dd_festival_save',{ p_slug:sg, p_token:tok, p_doc:s, p_name:nm, p_region:null, p_dates:null, p_center:centroid(fp), p_boundary:fp }).then(function(){
+        location.href = location.pathname+'?festival='+encodeURIComponent(sg)+'&key='+encodeURIComponent(tok);
+      }).catch(function(){ toast('Saved create but doc failed',false); });
+    }).catch(function(){ toast('Publish failed',false); });
+  };
+
   // ---- boot ---------------------------------------------------------------
   function boot(){
     if(!slug) return;                      // pure-local maker → do nothing

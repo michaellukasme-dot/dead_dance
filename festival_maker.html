@@ -107,7 +107,8 @@ h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spac
 
 <div class="savebar">
   <div class="tot" id="tot">Nothing added yet.</div>
-  <button class="go" onclick="fmShare()">🔗 Save &amp; share</button>
+  <button class="go" style="background:linear-gradient(180deg,#12a17a,#0e7d63)" onclick="window.ddCloudPublish?ddCloudPublish():alert('Cloud offline')">☁ Publish</button>
+  <button class="go" onclick="fmShare()">🔗 Share</button>
 </div>
 
 <script>
