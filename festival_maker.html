@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Festival · Event Maker · StageFill</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* StageFill Festival Maker — the MAP is the star. Drag corner pins to frame the grounds ("＋ Add Pin"
+   for any shape, not just 4 corners). Pick ONE item icon → only that type's rows show; each entry gets
+   a NAME and its own draggable pin. "NorthWest Restrooms", "Angelo's Pizza". Saves to localStorage. */
+:root{--blue:#2f6feb;--blue2:#1e50c7;--purple:#7c3aed;--ink:#1b2436;--muted:#7a8397;--line:#e6e9f2;--bg:#f5f7fc;--card:#fff;--ok:#12a150}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:600px;margin:0 auto;padding:14px 14px 96px}
+h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spacing:-.3px}
+.fname{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;background:var(--card);margin:8px 0}
+#fmap{position:relative;height:46vh;min-height:320px;width:100%;border-radius:16px;border:1px solid var(--line);background:#e9edf6;overflow:hidden}
+.coordbox{background:#0b1220cc;color:#fff;font:700 11px/1.2 ui-monospace,Menlo,Consolas,monospace;padding:5px 9px;border-radius:8px;letter-spacing:.02em;box-shadow:0 1px 6px #0005}
+.xhair{position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;z-index:500;pointer-events:none;opacity:.85}
+.xhair:before,.xhair:after{content:'';position:absolute;background:#2f6feb;box-shadow:0 0 0 1px #fff}
+.xhair:before{left:11px;top:0;width:2px;height:24px}.xhair:after{top:11px;left:0;height:2px;width:24px}
+.maprow{display:flex;gap:8px;margin:8px 0 4px;align-items:center}
+.mbtn{border:0;border-radius:11px;padding:10px 13px;font-weight:800;font-size:13px;cursor:pointer;background:#eef3ff;color:var(--blue2)}
+.mbtn.pur{background:#f1eafc;color:var(--purple)}
+.mtip{font-size:11.5px;color:var(--muted);flex:1;line-height:1.3}
+.hint{background:#eef3ff;border:1px solid #d8e4ff;border-radius:12px;padding:10px 13px;font-size:12.5px;color:#3a4b74;margin:8px 0 12px}
+.palgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pi{position:relative;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:10px 3px 7px;text-align:center;cursor:pointer;transition:.12s}
+.pi:active{transform:scale(.96)}
+.pi.on{border-color:var(--blue);background:#eef3ff;box-shadow:0 2px 10px #2f6feb22}
+.pi .ic{font-size:22px;line-height:1}
+.pi .lb{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-top:3px;line-height:1.05}
+.pi.on .lb{color:var(--blue2)}
+.pi .cnt{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--blue);color:#fff;font-size:11px;font-weight:900;display:none;align-items:center;justify-content:center;padding:0 5px}
+.pi .cnt.show{display:flex}
+.pi.addother{border:1.5px dashed #f0a500;background:#fff8ec}
+.pi.addother .ic{color:#e8730c}.pi.addother .lb{color:#e8730c}
+.editor{margin-top:14px}
+.ehead{display:flex;align-items:center;gap:9px;margin:4px 0 8px}.ehead .eic{font-size:22px}.ehead b{font-size:17px}
+.entry{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:9px}
+.entry.active{border-color:var(--blue);box-shadow:0 2px 12px #2f6feb22}
+.entry .top{display:flex;gap:8px;align-items:center}
+.entry .nm{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit;font-size:15px;background:#fff}
+.entry .x{flex:0 0 auto;border:0;background:#f3edf8;color:#b8002e;width:34px;height:34px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer}
+.pinrow{display:flex;gap:8px;align-items:center;margin-top:8px}
+.pinrow .pinbtn{border:0;border-radius:10px;padding:9px 12px;font-weight:800;font-size:13px;cursor:pointer;background:#eef3ff;color:var(--blue2)}
+.pinrow .pinbtn.set{background:#e7f7ef;color:var(--ok)}
+.pinrow .co{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.det{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px;font:inherit;font-size:13px;background:#fff;margin-top:7px}
+.add{width:100%;border:1.5px dashed var(--blue);background:#f5f8ff;color:var(--blue2);border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer}
+.empty{color:var(--muted);font-size:13.5px;text-align:center;padding:16px 0}
+.pinmark{width:30px;height:30px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0005;border:2px solid #fff}
+.pinmark span{transform:rotate(-45deg);font-size:15px}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:#fffffff2;border-top:1px solid var(--line);padding:10px 15px calc(12px + env(safe-area-inset-bottom,0));display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px)}
+.savebar .tot{font-size:12.5px;color:var(--muted);font-weight:700;flex:1}.savebar b{color:var(--ink)}
+.savebar .go{border:0;border-radius:12px;padding:12px 18px;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(180deg,var(--blue),var(--blue2));cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎪 StageFill Festival Maker</h1>
+  <input class="fname" id="fname" placeholder="Festival name — e.g. The Great Allentown Fair" oninput="fmSave()">
+
+  <div id="fmap"></div>
+  <div class="maprow">
+    <button class="mbtn pur" onclick="fpAddCorner()">＋ Add corner pin</button>
+    <span class="mtip"><b>Drag the purple pins</b> to frame your grounds — any shape. Double-tap a pin to remove it.</span>
+  </div>
+
+  <div class="hint"><b>Pick an icon</b> → <b>＋ Add</b> → <b>tap the map</b> where it is. The pin drops there and the coordinates fill in. Name every spot — “NorthWest Restrooms”, “Angelo’s Pizza”, “Main Stage”. Only one item type shows at a time — no clutter. (Drag any pin to nudge it; 📍 to re-place.)</div>
+
+  <div class="palgrid" id="palette"></div>
+  <div class="editor" id="editor"><div class="empty">👆 Pick an item type to start adding.</div></div>
+</div>
+
+<div class="savebar">
+  <div class="tot" id="tot">Nothing added yet.</div>
+  <button class="go" onclick="fmShare()">🔗 Save &amp; share</button>
+</div>
+
+<script>
+var TYPES=[
+  {k:'stage',ic:'🎵',lb:'Stages',one:'stage',eg:'Main Stage',c:'#7c3aed'},
+  {k:'restroom',ic:'🚻',lb:'Restrooms',one:'restroom',eg:'NorthWest Restrooms',c:'#2a7de1'},
+  {k:'access',ic:'♿',lb:'Wheelchair',one:'access point',eg:'ADA Entrance — Gate 6',c:'#12854f'},
+  {k:'misting',ic:'💧',lb:'Misting',one:'misting station',eg:'Misting Station — Main St',c:'#2a7de1'},
+  {k:'firstaid',ic:'✚',lb:'First Aid',one:'first-aid post',eg:'First Aid — Grandstand',c:'#b8002e'},
+  {k:'police',ic:'👮',lb:'Security',one:'security post',eg:'Police / Lost & Found',c:'#2a7de1'},
+  {k:'merch',ic:'🎁',lb:'Merch',one:'merch booth',eg:'Fair Merch Tent',c:'#d63384'},
+  {k:'show',ic:'🎪',lb:'Shows',one:'show',eg:'Robinson’s Racing Pigs',c:'#b8002e'},
+  {k:'rides',ic:'🎡',lb:'Rides',one:'ride area',eg:'Powers & Thomas Midway',c:'#e8730c'},
+  {k:'gate',ic:'🎟',lb:'Gates',one:'gate',eg:'Gate 1 — 17th & Chew',c:'#3a1f57'},
+  {k:'coaster',ic:'🎢',lb:'Thrill',one:'thrill ride',eg:'The Zipper',c:'#e8730c'},
+  {k:'beer',ic:'🍺',lb:'Beer',one:'bar',eg:'Weyerbacher Biergarten',c:'#c79a3a'},
+  {k:'drinks',ic:'🥤',lb:'Drinks',one:'drink stand',eg:'Lemonade — Main St',c:'#e8730c'},
+  {k:'pizza',ic:'🍕',lb:'Pizza',one:'pizza stand',eg:'Angelo’s Pizza',c:'#b8002e'},
+  {k:'burger',ic:'🍔',lb:'Burgers',one:'burger stand',eg:'Char Pit',c:'#c79a3a'},
+  {k:'food',ic:'🥗',lb:'Food',one:'food stand',eg:'Aw Shucks Corn',c:'#12854f'},
+  {k:'hotdog',ic:'🌭',lb:'Hot Dogs',one:'hot dog stand',eg:'Hog Diggity Dog',c:'#e8730c'},
+  {k:'taco',ic:'🌮',lb:'Mexican',one:'stand',eg:'Taco Truck',c:'#e8730c'},
+  {k:'icecream',ic:'🍦',lb:'Ice Cream',one:'stand',eg:'The Cup Guy',c:'#2a7de1'},
+  {k:'popcorn',ic:'🍿',lb:'Snacks',one:'snack stand',eg:'Kettle Corn',c:'#c79a3a'}
+];
+var LS='dd.festivalmaker';
+var state=load(), sel=null, active=null;
+var MAP, FP=[], fpMarks=[], fpPoly=null, itemMarks={}, placing=null; // placing={k,id} while awaiting a map tap
+
+function load(){ try{ var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&s.items){ s.customTypes=s.customTypes||[]; return s; } }catch(e){} return {name:'',items:{},footprint:null,nextId:1,customTypes:[]}; }
+function allT(){ return TYPES.concat(state.customTypes||[]); }
+function fmSave(){ state.name=(document.getElementById('fname').value||''); state.footprint=FP.map(function(m){var ll=m.getLatLng();return [ll.lat,ll.lng];}); try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} paintCounts(); paintTotal(); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function T(k){ return allT().filter(function(t){return t.k===k;})[0]; }
+function listOf(k){ if(!state.items[k]) state.items[k]=[]; return state.items[k]; }
+function nid(){ state.nextId=(state.nextId||1); return 'e'+(state.nextId++); }
+
+/* ---------- MAP + FOOTPRINT PINS ---------- */
+function updCoords(){ var el=document.getElementById('coordbox'); if(!el||!MAP)return; var c=MAP.getCenter(); el.textContent=c.lat.toFixed(6)+', '+c.lng.toFixed(6); }
+function initMap(center){
+  MAP=L.map('fmap',{zoomControl:true,maxZoom:21}).setView(center,17);
+  var street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20});
+  var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Imagery © Esri',maxZoom:21,maxNativeZoom:19});
+  sat.addTo(MAP);   // satellite by default → place pins on the real tents & booths
+  L.control.layers({'🛰 Satellite':sat,'🗺 Street':street},null,{position:'topright',collapsed:false}).addTo(MAP);
+  MAP.on('click', fmMapClick);   // tap-to-place: the whole form works this way
+  // Google-Maps-style precision: live coordinate readout + center crosshair
+  try{ var CC=L.Control.extend({options:{position:'bottomleft'},onAdd:function(){ var d=L.DomUtil.create('div','coordbox'); d.id='coordbox'; d.textContent='—'; return d; }});
+    MAP.addControl(new CC());
+    var xh=document.createElement('div'); xh.className='xhair'; document.getElementById('fmap').appendChild(xh);
+    MAP.on('move',updCoords);
+  }catch(e){}
+  // footprint corners: restore or seed a 4-corner box around center
+  var saved=state.footprint;
+  if(saved && saved.length>=3){ saved.forEach(function(ll){ addCorner(ll[0],ll[1]); }); }
+  else { var d=0.0016; [[1,-1],[1,1],[-1,1],[-1,-1]].forEach(function(o){ addCorner(center[0]+d*o[0], center[1]+d*o[1]); }); }
+  fpRedraw();
+  // restore item markers
+  allT().forEach(function(t){ (state.items[t.k]||[]).forEach(function(r){ if(r.lat&&r.lng) makeItemMarker(t.k,r); }); });
+  setTimeout(function(){ try{ MAP.invalidateSize(); }catch(e){} },200);
+}
+function cornerIcon(){ return L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],html:'<div style="width:18px;height:18px;border-radius:50%;background:#7c3aed;border:3px solid #fff;box-shadow:0 1px 5px #0006"></div>'}); }
+function addCorner(lat,lng){ var m=L.marker([lat,lng],{draggable:true,icon:cornerIcon()}).addTo(MAP);
+  m.on('drag',fpRedraw); m.on('dragend',fmSave);
+  m.on('dblclick',function(){ if(fpMarks.length<=3){ alert('Need at least 3 corners.'); return; } MAP.removeLayer(m); fpMarks=fpMarks.filter(function(x){return x!==m;}); fpRedraw(); fmSave(); });
+  fpMarks.push(m); FP=fpMarks; }
+window.fpAddCorner=function(){ var c=MAP.getCenter(); addCorner(c.lat, c.lng); fpRedraw(); fmSave(); };
+function fpRedraw(){ var pts=fpMarks.map(function(m){var ll=m.getLatLng();return [ll.lat,ll.lng];});
+  if(fpPoly) MAP.removeLayer(fpPoly);
+  if(pts.length>=3) fpPoly=L.polygon(pts,{color:'#7c3aed',weight:2,fillColor:'#7c3aed',fillOpacity:.08}).addTo(MAP); }
+
+/* ---------- ITEM PINS ---------- */
+function itemDivIcon(t){ return L.divIcon({className:'',iconSize:[30,30],iconAnchor:[6,28],html:'<div class="pinmark" style="background:'+t.c+'"><span>'+t.ic+'</span></div>'}); }
+function makeItemMarker(k,r){ if(itemMarks[r.id]) return itemMarks[r.id]; var t=T(k);
+  var m=L.marker([+r.lat,+r.lng],{draggable:true,icon:itemDivIcon(t)}).addTo(MAP);
+  m.bindTooltip(r.n||t.lb,{direction:'top'});
+  m.on('drag',function(){ var ll=m.getLatLng(); r.lat=ll.lat.toFixed(6); r.lng=ll.lng.toFixed(6); if(sel===k) syncCoordText(r); });
+  m.on('dragend',fmSave);
+  m.on('click',function(){ if(sel!==k) fmPick(k); setActive(r.id); });
+  itemMarks[r.id]=m; return m;
+}
+function removeItemMarker(r){ if(itemMarks[r.id]){ MAP.removeLayer(itemMarks[r.id]); delete itemMarks[r.id]; } }
+function itemById(k,id){ var a=state.items[k]||[]; for(var i=0;i<a.length;i++) if(a[i].id===id) return a[i]; return null; }
+
+/* TAP-TO-PLACE: after ＋Add (or 📍), the next tap on the map sets that item's coordinates. */
+function startPlacing(k,id,label){ placing={k:k,id:id}; showPlaceBanner('Tap the map to place '+esc(label));
+  try{ document.getElementById('fmap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
+function fmMapClick(e){ if(!placing) return; var r=itemById(placing.k,placing.id); if(!r){ placing=null; hidePlaceBanner(); return; }
+  r.lat=e.latlng.lat.toFixed(6); r.lng=e.latlng.lng.toFixed(6);
+  if(itemMarks[r.id]) itemMarks[r.id].setLatLng(e.latlng); else makeItemMarker(placing.k,r);
+  fmSave(); if(sel===placing.k){ syncCoordText(r); setActive(r.id); }
+  placing=null; hidePlaceBanner();
+}
+function showPlaceBanner(txt){ var b=document.getElementById('placeBanner');
+  if(!b){ b=document.createElement('div'); b.id='placeBanner'; b.style.cssText='position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:1200;background:#1e50c7;color:#fff;padding:9px 8px 9px 15px;border-radius:999px;font-weight:800;font-size:13px;box-shadow:0 6px 22px #0005;display:flex;gap:10px;align-items:center'; document.body.appendChild(b); }
+  b.innerHTML='<span>👆 '+txt+'</span><button onclick="fmCancelPlace()" style="border:0;background:#ffffff33;color:#fff;border-radius:999px;padding:5px 11px;font-weight:800;cursor:pointer">Cancel</button>'; b.style.display='flex'; }
+function hidePlaceBanner(){ var b=document.getElementById('placeBanner'); if(b) b.style.display='none'; }
+window.fmCancelPlace=function(){ placing=null; hidePlaceBanner(); };
+function syncCoordText(r){ var el=document.getElementById('co_'+r.id); if(el) el.textContent=r.lat&&r.lng?(r.lat+', '+r.lng):'tap the map to place'; var b=document.getElementById('pin_'+r.id); if(b){ b.classList.toggle('set',!!(r.lat&&r.lng)); b.textContent=(r.lat&&r.lng)?'📍 on map':'📍 Tap map'; } }
+
+/* ---------- PALETTE + EDITOR ---------- */
+function renderPalette(){ var p=document.getElementById('palette');
+  p.innerHTML=allT().map(function(t){ return '<div class="pi'+(sel===t.k?' on':'')+'" data-k="'+t.k+'" onclick="fmPick(\''+t.k+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+esc(t.lb)+'</span><span class="cnt" id="cnt_'+t.k+'"></span></div>'; }).join('')
+    + '<div class="pi addother" onclick="fmAddCustom()"><span class="ic">➕</span><span class="lb">Add other</span></div>';
+  paintCounts();
+}
+(function(){ renderPalette();
+  document.getElementById('fname').value=state.name||'';
+  paintTotal();
+  // center the map on the user (setup crews on-site) → fallback Allentown fairgrounds
+  if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(p){ initMap([p.coords.latitude,p.coords.longitude]); }, function(){ initMap([40.6013,-75.4979]); }, {timeout:8000}); }
+  else initMap([40.6013,-75.4979]);
+})();
+function paintCounts(){ allT().forEach(function(t){ var n=(state.items[t.k]||[]).length,b=document.getElementById('cnt_'+t.k); if(b){ b.textContent=n; b.classList.toggle('show',n>0); } }); }
+function paintTotal(){ var total=0,kinds=0; allT().forEach(function(t){ var n=(state.items[t.k]||[]).length; total+=n; if(n)kinds++; });
+  document.getElementById('tot').innerHTML= total?('<b>'+total+'</b> spot'+(total===1?'':'s')+' · <b>'+kinds+'</b> type'+(kinds===1?'':'s')):'Nothing added yet.'; }
+window.fmPick=function(k){ sel=k; active=null;
+  document.querySelectorAll('.pi').forEach(function(el){ el.classList.toggle('on',el.getAttribute('data-k')===k); });
+  renderEditor();
+};
+function setActive(id){ active=id; document.querySelectorAll('.entry').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-id')===id); });
+  var m=itemMarks[id]; if(m){ MAP.panTo(m.getLatLng()); m.openTooltip(); } }
+function renderEditor(){ var t=T(sel), rows=listOf(sel), ed=document.getElementById('editor');
+  var body=rows.length? rows.map(function(r){return entryHTML(r);}).join('') : '<div class="empty">No '+esc(t.lb.toLowerCase())+' yet — add the first one.</div>';
+  ed.innerHTML='<div class="ehead"><span class="eic">'+t.ic+'</span><b>'+esc(t.lb)+'</b></div>'+body
+    +'<button class="add" onclick="fmAdd()">＋ Add '+(rows.length?'another ':'a ')+esc(t.one)+'</button>';
+}
+function entryHTML(r){ var t=T(sel), set=(r.lat&&r.lng);
+  return '<div class="entry'+(active===r.id?' active':'')+'" data-id="'+r.id+'" onclick="setActive(\''+r.id+'\')">'
+    +'<div class="top"><input class="nm" value="'+esc(r.n||'')+'" placeholder="Name — e.g. '+esc(t.eg)+'" oninput="fmField(\''+r.id+'\',\'n\',this.value)"><button class="x" onclick="event.stopPropagation();fmDel(\''+r.id+'\')" title="Remove">✕</button></div>'
+    +'<div class="pinrow"><button class="pinbtn'+(set?' set':'')+'" id="pin_'+r.id+'" onclick="event.stopPropagation();fmPin(\''+r.id+'\')">'+(set?'📍 on map':'📍 Tap map')+'</button><span class="co" id="co_'+r.id+'">'+(set?(r.lat+', '+r.lng):'tap the map to place')+'</span></div>'
+    +'<input class="det" value="'+esc(r.d||'')+'" placeholder="Details (optional) — hours, sponsor, notes" oninput="fmField(\''+r.id+'\',\'d\',this.value)">'
+    +'</div>';
+}
+function findById(id){ var a=listOf(sel); for(var i=0;i<a.length;i++) if(a[i].id===id) return a[i]; return null; }
+window.fmAdd=function(){ if(!sel)return; var r={id:nid(),n:'',lat:'',lng:'',d:''}; listOf(sel).push(r); fmSave(); renderEditor(); setActive(r.id); startPlacing(sel,r.id,'this '+T(sel).one); };
+window.fmDel=function(id){ var r=findById(id); if(r) removeItemMarker(r); state.items[sel]=listOf(sel).filter(function(x){return x.id!==id;}); fmSave(); renderEditor(); };
+window.fmField=function(id,f,v){ var r=findById(id); if(!r)return; r[f]=v; if(f==='n'&&itemMarks[id]) itemMarks[id].setTooltipContent(v||T(sel).lb); fmSave(); };
+window.fmPin=function(id){ var r=findById(id); if(!r)return; if(itemMarks[id]){ setActive(id); } else { startPlacing(sel,id,(r.n||('this '+T(sel).one))); } };
+/* ＋ Add other — a festival admin makes a custom item type (icon + name); it joins the palette
+   and works exactly like the built-ins (tap-to-place, count badge, saved). */
+window.fmAddCustom=function(){ var o=document.createElement('div'); o.id='customModal';
+  o.style.cssText='position:fixed;inset:0;background:#0007;z-index:1300;display:flex;align-items:center;justify-content:center;padding:18px';
+  o.innerHTML='<div style="background:#fff;border-radius:18px;max-width:360px;width:100%;padding:20px;box-shadow:0 20px 60px #0006">'
+    +'<div style="font-weight:900;font-size:18px;color:#1e50c7;margin-bottom:4px">Add a custom item</div>'
+    +'<div style="color:#7a8397;font-size:13px;margin-bottom:14px">Anything the palette misses — petting zoo, photo booth, water station, ATM.</div>'
+    +'<label style="font-size:12px;font-weight:800;color:#7a8397">Icon (emoji)</label>'
+    +'<input id="cIc" maxlength="4" value="📍" style="width:100%;box-sizing:border-box;border:1px solid #e6e9f2;border-radius:10px;padding:11px;font-size:24px;text-align:center;margin:4px 0 10px">'
+    +'<label style="font-size:12px;font-weight:800;color:#7a8397">Name</label>'
+    +'<input id="cLb" placeholder="e.g. Petting Zoo" style="width:100%;box-sizing:border-box;border:1px solid #e6e9f2;border-radius:10px;padding:11px;font-size:15px;margin:4px 0 14px">'
+    +'<div style="display:flex;gap:8px"><button onclick="var m=document.getElementById(\'customModal\');if(m)m.remove();" style="flex:1;border:0;border-radius:11px;padding:12px;font-weight:800;background:#f3edf8;color:#7a8397;cursor:pointer">Cancel</button>'
+    +'<button onclick="fmCustomCreate()" style="flex:1;border:0;border-radius:11px;padding:12px;font-weight:900;background:linear-gradient(180deg,#2f6feb,#1e50c7);color:#fff;cursor:pointer">Create</button></div></div>';
+  o.addEventListener('click',function(e){ if(e.target===o) o.remove(); });
+  document.body.appendChild(o); setTimeout(function(){ var i=document.getElementById('cLb'); if(i)i.focus(); },60);
+};
+window.fmCustomCreate=function(){ var ic=((document.getElementById('cIc')||{}).value||'📍').trim()||'📍';
+  var lb=((document.getElementById('cLb')||{}).value||'').trim(); if(!lb){ var i=document.getElementById('cLb'); if(i){ i.style.borderColor='#b8002e'; i.focus(); } return; }
+  var t={k:'cust_'+nid(), ic:ic, lb:lb, one:lb.toLowerCase(), eg:lb, c:'#7a8397', custom:true};
+  state.customTypes=state.customTypes||[]; state.customTypes.push(t); fmSave();
+  var m=document.getElementById('customModal'); if(m)m.remove();
+  renderPalette(); fmPick(t.k);
+};
+window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker.html';
+  try{ if(navigator.share){ navigator.share({title:(state.name||'Festival')+' — StageFill',url:u}); return; } }catch(e){}
+  try{ navigator.clipboard.writeText(u); alert('Saved 🌹 Draft stored on this device; link copied.'); }catch(e){ alert('Saved 🌹 Draft stored on this device.'); } };
+</script>
+</body>
+</html>
