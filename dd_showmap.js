@@ -498,6 +498,11 @@
             fr   = (isCh ? 0.032 : 0.015) * vbW,   // pulse ring
             halo = (isCh ? 0.034 : 0.017) * vbW,   // white disc behind the emoji
             fe   = (isCh ? 0.050 : 0.028) * vbW;   // emoji size
+        // Keep the beacon clear of the floating overlays: the Local/National/My-Calendar toggle +
+        // region badge (top) and the 🚌/🍀 FABs (bottom-right). When Local mode centers south of a
+        // festival (e.g. Delaware → Allentown), the beacon would otherwise hide under the toggle.
+        var _vy=curVB[1], _vh=curVB[3], _minY=_vy+0.12*_vh+halo, _maxY=_vy+_vh-0.06*_vh-halo;
+        if(fp[1]<_minY) fp[1]=_minY; if(fp[1]>_maxY) fp[1]=_maxY;
         var ttl = (F.emoji + " " + F.name).replace(/'/g, "");
         fhtml += '<g class="smfest" tabindex="0" role="button" aria-label="' + esc(F.name) + ' — open the festival map" style="cursor:pointer"' +
           ' onclick="event.stopPropagation();try{window.ddSheet?ddSheet(\'' + F.href + '\',\'' + ttl + '\'):window.open(\'' + F.href + '\',\'_blank\',\'noopener\')}catch(e){}">' +

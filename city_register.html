@@ -135,7 +135,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function slugify(s){ return String(s||'district').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) + '-' + Math.random().toString(36).slice(2,6); }
 function initMap(){
   LMAP=L.map('zmap',{scrollWheelZoom:true}).setView([40.6175,-75.3755],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP);
   LMAP.on('click',function(e){ setCenter(e.latlng.lat,e.latlng.lng); });
   // try to center on the visitor
   try{ navigator.geolocation && navigator.geolocation.getCurrentPosition(function(p){ if(!CENTER){ LMAP.setView([p.coords.latitude,p.coords.longitude],14); } },function(){},{timeout:6000}); }catch(e){}

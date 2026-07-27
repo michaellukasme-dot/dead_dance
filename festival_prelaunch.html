@@ -81,7 +81,7 @@ function init(){
 function drawMap(){
   var ctr=centroid();
   map=L.map('map',{zoomControl:true,attributionControl:false}).setView(ctr,16);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(map);
+  L.tileLayer('https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(map);
   poly=L.polygon(corners(),{color:'#6d28d9',weight:2,fillColor:'#7c3aed',fillOpacity:.12}).addTo(map);
   (S.acts||[]).forEach(function(a){ if(a.lat==null)return; L.circleMarker([a.lat,a.lng],{radius:6,color:'#b07d17',fillColor:'#e0b94a',fillOpacity:1,weight:2}).addTo(map).bindPopup('🎤 '+esc(a.name||'Stage')); });
   try{ map.fitBounds(poly.getBounds().pad(0.25)); }catch(e){}

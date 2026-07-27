@@ -594,7 +594,7 @@ var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
   LMAP=L.map(el,{zoomControl:true,scrollWheelZoom:true});
   try{ L.Popup.mergeOptions({autoPan:true,keepInView:true,autoPanPadding:[16,18],maxWidth:240}); }catch(e){}   // every pin popup pans itself fully into the map frame
-  if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
+  if(window.DDtile){ DDtile(LMAP); } else { L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(LMAP); }
   try{ L.control.scale({imperial:true,metric:false}).addTo(LMAP); }catch(e){}
   LG_STAGE=L.layerGroup().addTo(LMAP); LG_PATH=L.layerGroup().addTo(LMAP); LG_PHOTO=L.layerGroup().addTo(LMAP); LG_YOU=L.layerGroup().addTo(LMAP); LG_DIR=L.layerGroup().addTo(LMAP); LG_SHOP=L.layerGroup(); LG_FOOD=L.layerGroup(); LG_POTTY=L.layerGroup(); LG_AID=L.layerGroup();
   // Fit the WHOLE footprint but reserve room at the bottom for the Musikfest sheet, so the SOUTH SIDE

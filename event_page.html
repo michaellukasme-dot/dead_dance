@@ -100,7 +100,7 @@ function render(E){
   /* map */
   var corners=E.corners, center=[E.lat||40.6187, E.lng||-75.3803];
   var map=L.map('emMap',{zoomControl:true,attributionControl:false}).setView(center,15);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(map);
+  L.tileLayer('https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(map);
   if(corners&&corners.tl){ var poly=L.polygon([corners.tl,corners.tr,corners.br,corners.bl],{color:'#2f6feb',weight:2,fillColor:'#7aa5f2',fillOpacity:.16}).addTo(map); try{ map.fitBounds(poly.getBounds().pad(0.2)); }catch(e){} }
   acts.forEach(function(a){ if(a.lat==null)return; var ic=L.divIcon({className:'',html:'<div class="actpin"><span>'+((a.catIcon)||'📍')+'</span></div>',iconSize:[24,24],iconAnchor:[12,24]});
     L.marker([a.lat,a.lng],{icon:ic,title:a.name}).addTo(map).bindPopup('<b>'+esc(a.name)+'</b><br>'+esc(a.stage||'')+' '+esc(a.time||'')); });

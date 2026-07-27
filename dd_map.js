@@ -15,11 +15,15 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
   "use strict";
   var ATTR = '© MapTiler © OpenStreetMap contributors';
   function mt(style, ext, k) { return "https://api.maptiler.com/maps/" + style + "/{z}/{x}/{y}." + ext + "?key=" + k; }
-  var OSM = { url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attribution: "© OpenStreetMap", maxZoom: 19 };
+  // Dev default + universal fallback: CARTO. Unlike OSM's servers it does NOT 403 no-referer / file://
+  // loads, so maps render whether opened locally or served. (MapTiler key still upgrades everything.)
+  var CARTO = { url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", subdomains: "abcd", attribution: "© OpenStreetMap © CARTO", maxZoom: 20 };
+  // 1px transparent → any blocked/failed tile renders BLANK, never the ugly "403 / Access blocked" graphic.
+  var BLANK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
   w.DD_TILE = w.DD_TILE_KEY
     ? { url: mt("streets-v2", "png", w.DD_TILE_KEY), attribution: ATTR, maxZoom: 20 }
-    : OSM;
+    : CARTO;
 
   // Esri World Imagery — FREE satellite tiles, no API key required. Gives us the Google-style
   // Map ⇄ Satellite toggle TODAY. (Upgrades to MapTiler hybrid automatically once a key is pasted.)
@@ -33,13 +37,14 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
       st.textContent = '.dd-purple-tiles{filter:grayscale(.5) sepia(.5) hue-rotate(210deg) saturate(1.8) brightness(1.03) contrast(.96)}';
       document.head.appendChild(st); }
     var k = w.DD_TILE_KEY, usingKey = !!k;
-    var url = usingKey ? mt("streets-v2", "png", k) : OSM.url;
-    var attr = usingKey ? ATTR : OSM.attribution;
-    var mz = usingKey ? 20 : OSM.maxZoom;
+    var url = usingKey ? mt("streets-v2", "png", k) : CARTO.url;
+    var attr = usingKey ? ATTR : CARTO.attribution;
+    var mz = usingKey ? 20 : CARTO.maxZoom;
+    var subs = usingKey ? 'abc' : CARTO.subdomains;
     var plain = !!w.DD_MAP_PLAIN;                                                                                       // white-label maps (e.g. ArtsQuest) show plain tiles — no purple skin
-    var base   = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true });                               // 🗺 plain geo
-    var purple = plain ? L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true })                        // plain (no filter) when DD_MAP_PLAIN
-                       : L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, className: 'dd-purple-tiles' });  // 🌹 DeadDance brand
+    var base   = L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK });          // 🗺 plain geo
+    var purple = plain ? L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK })    // plain (no filter) when DD_MAP_PLAIN
+                       : L.tileLayer(url, { attribution: attr, maxZoom: mz, crossOrigin: true, subdomains: subs, errorTileUrl: BLANK, className: 'dd-purple-tiles' });  // 🌹 DeadDance brand
     (plain ? base : purple).addTo(map);   // DeadDance defaults to purple; white-label defaults to plain
 
     // toggle: brand (purple) ⇄ 🗺 Map (plain geo), top-right — skip on plain white-label maps (both looks are identical there)
@@ -51,7 +56,7 @@ window.DD_TILE_KEY = "";   // ←←← PASTE KEY HERE, e.g. "AbCdEf123456"  (le
       errs++;
       if (usingKey && !swapped && errs >= 6) { swapped = true;                     // keyed provider failing → never leave a blank map
         try { map.removeLayer(base); map.removeLayer(purple); } catch (e) {}
-        L.tileLayer(OSM.url, plain ? { attribution: OSM.attribution, maxZoom: OSM.maxZoom } : { attribution: OSM.attribution, maxZoom: OSM.maxZoom, className: 'dd-purple-tiles' }).addTo(map);
+        L.tileLayer(CARTO.url, plain ? { attribution: CARTO.attribution, maxZoom: CARTO.maxZoom, subdomains: CARTO.subdomains, errorTileUrl: BLANK } : { attribution: CARTO.attribution, maxZoom: CARTO.maxZoom, subdomains: CARTO.subdomains, errorTileUrl: BLANK, className: 'dd-purple-tiles' }).addTo(map);
       }
     }); }
     watch(base); watch(purple);

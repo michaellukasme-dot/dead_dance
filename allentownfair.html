@@ -152,7 +152,7 @@ function dirLink(ll){ return 'https://www.google.com/maps/dir/?api=1&destination
   try{
     window.DD_MAP_PLAIN=true;   // plain street tiles — no purple DeadDance skin, no brand/Map toggle
     MAP=L.map('amap',{zoomControl:true,scrollWheelZoom:true});
-    if(window.DDtile){ DDtile(MAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20}).addTo(MAP); }
+    if(window.DDtile){ DDtile(MAP); } else { L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20}).addTo(MAP); }
     L.polygon(BOUND,{color:'#7a3cc0',weight:2,fillColor:'#7a3cc0',fillOpacity:.07}).addTo(MAP);
     var layers={}; GORDER.forEach(function(k){ layers[k]=L.layerGroup().addTo(MAP); });
     PINS.forEach(function(p,i){

@@ -314,7 +314,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 /* ---------- map ---------- */
 function initMap(){
   map=L.map('emMap',{zoomControl:true,attributionControl:false}).setView([40.6187,-75.3803],15); // Bethlehem default
-  var url='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  var url='https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
   tiles=L.tileLayer(url,{maxZoom:19,crossOrigin:true}).addTo(map);   // StageFill-neutral plain street tiles
   map.on('click',function(e){ if(placeMode==='map') dropActAt(e.latlng.lat,e.latlng.lng); });
   makeCorners();

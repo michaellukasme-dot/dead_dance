@@ -67,7 +67,7 @@ var TODAY=new Date().toISOString().slice(0,10);
 function dir(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng; }
 
 var map=L.map('map',{zoomControl:true,scrollWheelZoom:false});
-if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
+if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
 var pts=[];
 SHOWS.forEach(function(s,i){ var past=s.d<TODAY;
   var m=L.circleMarker([s.lat,s.lng],{radius:9,color:'#fff',weight:2,fillColor:past?'#9db3a7':'#1f7a4d',fillOpacity:1}).addTo(map);

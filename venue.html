@@ -83,7 +83,7 @@ function drawMap(v){ var el=$('vmap'); if(v.lat==null||v.lng==null){ el.style.di
   el.style.display='block';
   try{ if(_vmap){ _vmap.remove(); _vmap=null; } }catch(e){}
   _vmap=L.map('vmap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false,dragging:true}).setView([v.lat,v.lng],14);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(_vmap);
+  L.tileLayer('https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true}).addTo(_vmap);
   var ic=L.divIcon({className:'',html:'<div style="background:#6d28d9;color:#fff;border-radius:50% 50% 50% 0;width:28px;height:28px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0006;border:2px solid #fff"><span style="transform:rotate(45deg);font-size:14px">🎟️</span></div>',iconSize:[28,28],iconAnchor:[14,28]});
   L.marker([v.lat,v.lng],{icon:ic,title:v.name}).addTo(_vmap).bindPopup('<b>'+esc(v.name||'')+'</b>');   // ONLY this venue — no other dots
   setTimeout(function(){ _vmap.invalidateSize(); },250);
