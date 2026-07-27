@@ -557,6 +557,33 @@ body{padding-bottom:64px}
 .adroll-slide.ddqr .ddqr-cap{margin-top:15px}
 .adroll-slide.ddqr .ddqr-cap .scan{display:block;font-size:12.5px;font-weight:800;color:#b8002e}
 .adroll-slide.ddqr .ddqr-cap .url{display:block;font-size:11px;font-weight:800;color:#5a2e86;letter-spacing:.04em;margin-top:3px}
+/* festqr — premium WHITE-BOX QR card (Allentown Fair, StageFill…). White-label of the ArtsQuest
+   sponsor look on purpose — reads as a marquee festival card, one scan from the live map. */
+.adroll-slide.festqr{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;padding:20px 16px;background:linear-gradient(180deg,#ffffff 0%,#fbfaff 100%);position:relative}
+.adroll-slide.festqr::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--fq,#7a3cc0);z-index:3}
+.adroll-slide.festqr .fq-top{margin-bottom:12px}
+.adroll-slide.festqr .fq-top .fq-ic{font-size:28px;display:block;line-height:1}
+.adroll-slide.festqr .fq-top b{display:block;font-size:19px;color:#241535;font-weight:900;letter-spacing:-.01em;margin-top:5px;line-height:1.12}
+.adroll-slide.festqr .fq-top .fq-tag{display:block;font-size:11px;color:#6c6478;font-weight:700;margin-top:4px;line-height:1.3;max-width:238px}
+.adroll-slide.festqr .fq-tile{background:#fff;border-radius:18px;padding:13px;box-shadow:0 12px 30px rgba(20,15,30,.16),0 2px 6px rgba(20,15,30,.10);border:1px solid #f0ecf6}
+.adroll-slide.festqr .fq-code{display:flex;align-items:center;justify-content:center}
+.adroll-slide.festqr .fq-code canvas{border-radius:10px;display:block}
+.adroll-slide.festqr .fq-cap{margin-top:12px}
+.adroll-slide.festqr .fq-cap .fq-scan{display:block;font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--fq,#7a3cc0)}
+.adroll-slide.festqr .fq-cap .fq-url{display:block;font-size:10.5px;font-weight:800;color:#8a8296;letter-spacing:.03em;margin-top:3px}
+/* fairneon — neon-carnival card matching the Allentown Fair "Map & Guide" cover (dark, glowing). */
+.adroll-slide.fairneon{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;padding:16px 14px;position:relative;overflow:hidden;background:radial-gradient(130% 92% at 50% 0%,#3a1150 0%,#1a0b2e 55%,#0a0512 100%)}
+.adroll-slide.fairneon::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ff2d95,#ffd23a,#a94dff,#3ad0ff);z-index:3;box-shadow:0 0 12px #ff2d95aa}
+.adroll-slide.fairneon .fn-title{line-height:1;margin-bottom:3px}
+.adroll-slide.fairneon .fn-title .fn-sm{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;color:#fff;text-transform:uppercase;text-shadow:0 0 8px #ff2d95}
+.adroll-slide.fairneon .fn-title .fn-big{display:block;font-size:23px;font-weight:900;letter-spacing:.01em;background:linear-gradient(90deg,#ff2d95,#ffd23a,#a94dff,#3ad0ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-transform:uppercase;filter:drop-shadow(0 0 6px #a94dff88)}
+.adroll-slide.fairneon .fn-sub{font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#3ad0ff;text-shadow:0 0 8px #3ad0ff99;margin-bottom:11px}
+.adroll-slide.fairneon .fn-tile{background:#fff;border-radius:16px;padding:12px;box-shadow:0 0 20px #ff2d9566,0 8px 22px #0009;border:2px solid #ff2d9566}
+.adroll-slide.fairneon .fn-code{display:flex;align-items:center;justify-content:center}
+.adroll-slide.fairneon .fn-code canvas{border-radius:9px;display:block}
+.adroll-slide.fairneon .fn-cap{margin-top:11px}
+.adroll-slide.fairneon .fn-cap .fn-scan{display:block;font-size:11.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#ff2d95;text-shadow:0 0 8px #ff2d9566}
+.adroll-slide.fairneon .fn-cap .fn-url{display:block;font-size:10px;font-weight:800;color:#c9b8e6;letter-spacing:.04em;margin-top:3px}
 /* Ford-Falcon Friends — chrome "Futura" script on a night road (pure CSS, no image needed) */
 .adroll-slide.falcon{height:100%;display:flex;flex-direction:column;cursor:pointer;background:#0b0b0f}
 .adroll-slide.falcon .fc-road{flex:1 1 auto;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(150% 95% at 50% 0%,#3a3a45 0%,#191920 44%,#0a0a0e 100%)}
@@ -1057,6 +1084,9 @@ body.dd-insider .dd-only{display:block}
       var AD_PITCH={ic:'📣', bg:'linear-gradient(135deg,#f0a500,#c79a3a)', biz:'Advertise here', off:'Pitch your festival · fill your room — the whole Dead family sees it', house:true, pitch:true, cta:'Buy a spot · LESS / MORE / MOST ›'};
       var AD_POSTER={poster:'MUSIKFEST_poster.jpg', ic:'🎨', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Musikfest 2026 — “Music Unites”', off:'Official festival poster by artist Doug Boehm · celebrating America 250', cta:'See the 2026 poster ›', url:'https://www.artsquest.org/doug-boehm-returns-as-musikfest-poster-artist-with-2026-design-celebrating-america-250/', beth:true};
       var AD_ACI={logo:'logos/aci_consulting.png', ic:'📊', bg:'linear-gradient(135deg,#1f3f8a,#0f2452)', biz:'Abboud Consulting Inc. (ACI)', off:'Strategy & operations consulting', cta:'Get in touch ›', beth:true};   // 2× roll (added twice to the partner pool)
+      /* Premium white-box QR cards — their OWN rotation slots so they recur more than an average partner. */
+      var AD_ALLENTOWN={fairneon:true, ic:'🎡', biz:'The Great Allentown Fair', off:'Sep 2–7, 2026 · the map · every gate, stage, ATM & restroom', qr:'https://deaddance.app/allentownfair.html', url:'allentownfair.html', cta:'Scan → the fair map', host:'deaddance.app/allentownfair', beth:true};
+      var AD_STAGEFILL={festqr:true, ic:'🎪', accent:'#7a3cc0', biz:'StageFill', off:'The live map behind every great festival — find your stage, beat the rain', qr:'https://deaddance.app/stagefill.html', url:'stagefill.html', cta:'Scan → make your festival map', host:'stagefill · deaddance.app', house:true};
       function adHead(a){ return (a.ic||'🌹') + (a.logo ? '<img class="adlogo" src="'+a.logo+'" alt="" onerror="this.remove()">' : ''); }
       /* Every Musikfest act → a rolling ad inviting them onto StageFill (618 acts, deduped by band).
          Dead/jam acts (sc:dd) roll 4× as often as the rest. This is how we fill the day's inventory. */
@@ -1065,12 +1095,14 @@ body.dd-insider .dd-only{display:block}
         out.push({ logo:'logos/band_'+_slug(r.b)+'.png', ic:(sc==='dd'?'🌹':'🎵'), bg:(sc==='dd'?'linear-gradient(135deg,#b8002e,#5a2e86)':'linear-gradient(135deg,#5a2e86,#7a3cc0)'),
           biz:r.b, off:'Musikfest · '+r.st+' · '+_mfDay(r.d)+' '+r.t, cta:(sc==='dd'?'🌹 Claim your StageFill page ›':'🎪 Claim your StageFill page ›'), stagefill:true }); }); }catch(e){} return out; }
       var POOL_PARTNER=[], POOL_HOUSE=AD_HOUSE, POOL_NAT=AD_NATIONAL, POOL_DD=[], POOL_SF=[];
+      var POOL_FEST=[AD_ALLENTOWN, AD_STAGEFILL, AD_ALLENTOWN];   // Allentown 2:1 in its own pool → extra recurrence
       function buildPools(){ POOL_PARTNER=AD_BETHLEHEM.concat(bethRetail(), [AD_POSTER, AD_ACI, AD_ACI]); POOL_DD=bandAds('dd'); POOL_SF=bandAds('sf'); }
       buildPools();
-      // rotation frame — dd appears 8×, sf 2× (the 4:1 Dead-first pace); partners/house/national/pitch interleaved so the local POC never disappears
-      var FRAME=['partner','dd','sf','dd','dd','house','dd','national','dd','partner','sf','dd','dd','pitch','partner','dd','national','partner'];
-      var POOLS={partner:function(){return POOL_PARTNER;},house:function(){return POOL_HOUSE;},national:function(){return POOL_NAT;},dd:function(){return POOL_DD;},sf:function(){return POOL_SF;}};
-      var CUR={partner:0,house:0,national:0,dd:0,sf:0}, fi=0, curAd=null, at=null, FX=['fade','zoom','up','slideL','flip','down','slideR','blur'], fxi=0;
+      // rotation frame — dd appears 8×, sf 2× (the 4:1 Dead-first pace); 'fest' (Allentown/StageFill premium QR)
+      // gets 3 of its own slots so it recurs well above an average partner; house/national/pitch interleaved.
+      var FRAME=['partner','dd','fest','sf','dd','dd','house','dd','national','fest','dd','partner','sf','dd','dd','pitch','fest','partner','dd','national','partner'];
+      var POOLS={partner:function(){return POOL_PARTNER;},house:function(){return POOL_HOUSE;},national:function(){return POOL_NAT;},dd:function(){return POOL_DD;},sf:function(){return POOL_SF;},fest:function(){return POOL_FEST;}};
+      var CUR={partner:0,house:0,national:0,dd:0,sf:0,fest:0}, fi=0, curAd=null, at=null, FX=['fade','zoom','up','slideL','flip','down','slideR','blur'], fxi=0;
       function nextAd(depth){ depth=depth||0; if(depth>FRAME.length+1) return AD_PITCH;
         var tok=FRAME[fi%FRAME.length]; fi++;
         if(tok==='pitch') return AD_PITCH;
@@ -1104,6 +1136,27 @@ body.dd-insider .dd-only{display:block}
             +'</div>';
           if(window.DDQR){ try{ DDQR.into('adRollQR', a.qr, {css:152,size:300,mark:'dd',link:false}); }catch(e){} }
           var qdt=document.getElementById('adRollDots'); if(qdt) qdt.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
+        if(a.festqr){   // premium white-box QR card — a festival/product map, one scan away (Allentown Fair, StageFill…)
+          v.innerHTML='<div class="adroll-slide festqr adfx-'+fx+'" onclick="adRollTap()" style="--fq:'+(a.accent||'#7a3cc0')+'">'
+            +'<div class="fq-top"><span class="fq-ic">'+(a.ic||'🎪')+'</span><b>'+a.biz+'</b><span class="fq-tag">'+(a.off||'')+'</span></div>'
+            +'<div class="fq-tile"><div class="fq-code" id="adRollQR"></div></div>'
+            +'<div class="fq-cap"><span class="fq-scan">'+(a.cta||'Scan → the map')+'</span><span class="fq-url">'+(a.host||'deaddance.app')+'</span></div>'
+            +'</div>';
+          if(window.DDQR){ try{ DDQR.into('adRollQR', a.qr, {css:148,size:300,mark:(a.mark||'dd'),link:false}); }catch(e){} }
+          var fqd=document.getElementById('adRollDots'); if(fqd) fqd.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
+        if(a.fairneon){   // neon-carnival card — matches the Allentown Fair "Map & Guide" cover
+          v.innerHTML='<div class="adroll-slide fairneon adfx-'+fx+'" onclick="adRollTap()">'
+            +'<div class="fn-title"><span class="fn-sm">The Great</span><span class="fn-big">Allentown Fair</span></div>'
+            +'<div class="fn-sub">Map &amp; Guide</div>'
+            +'<div class="fn-tile"><div class="fn-code" id="adRollQR"></div></div>'
+            +'<div class="fn-cap"><span class="fn-scan">'+(a.cta||'Scan → the fair map')+'</span><span class="fn-url">'+(a.host||'deaddance.app/allentownfair')+'</span></div>'
+            +'</div>';
+          if(window.DDQR){ try{ DDQR.into('adRollQR', a.qr, {css:132,size:300,mark:'dd',link:false}); }catch(e){} }
+          var fnd=document.getElementById('adRollDots'); if(fnd) fnd.innerHTML='<i class="on"></i><i></i><i></i>';
           return;
         }
         if(a.falcon){   // Ford-Falcon Friends — chrome "Futura" script on a night road (pure CSS, garage-glossy)
@@ -1179,7 +1232,7 @@ body.dd-insider .dd-only{display:block}
       function adNext(){ adRender(nextAd()); }
       var _pooledMF=false;
       function adStart(){ if(!_pooledMF && (window.MF_RETAILERS||window.DD_MUSIKFEST)){ buildPools(); _pooledMF=!!(window.DD_MUSIKFEST&&window.DD_MUSIKFEST.length); }
-        var want=null; try{ var q=(new URLSearchParams(location.search).get('ad')||'').toLowerCase(); if(q){ var all=(POOL_PARTNER||[]).concat(POOL_DD||[],POOL_SF||[]); for(var i=0;i<all.length;i++){ if(String(all[i].biz||'').toLowerCase().indexOf(q)>=0){ want=all[i]; break; } } } }catch(e){}   // ?ad=jay → show that partner's ad first (no waiting)
+        var want=null; try{ var q=(new URLSearchParams(location.search).get('ad')||'').toLowerCase(); if(q){ var all=(POOL_PARTNER||[]).concat(POOL_DD||[],POOL_SF||[],POOL_FEST||[]); for(var i=0;i<all.length;i++){ if(String(all[i].biz||'').toLowerCase().indexOf(q)>=0){ want=all[i]; break; } } } }catch(e){}   // ?ad=jay / allentown / stagefill → show that ad first (no waiting)
         adRender(want||nextAd()); if(at)clearInterval(at); at=setInterval(adNext,5200); }
       function adStop(){ if(at){ clearInterval(at); at=null; } }
       function upd(){ try{ var ready=window.DDMe&&DDMe.ready&&DDMe.ready(); var si=ready?(DDMe.signedIn&&DDMe.signedIn()):cachedSignedIn();
