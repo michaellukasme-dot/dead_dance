@@ -133,10 +133,9 @@ body{margin:0;background:var(--cream);color:var(--ink);font:14.5px/1.5 -apple-sy
 .sharebar span{display:block;height:100%;background:#fff;border-radius:999px}
 .top .friendsbtn:hover{transform:scale(1.06)}
 /* layout */
-.wrap{display:grid;grid-template-columns:288px 1fr 210px;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:stretch}   /* stretch: left column matches the map card height → flush static rectangle */
-.wrap.si{grid-template-columns:288px 1fr}   /* signed in: OAuth column collapses, back to 2-col */
-.wrap>#signupCard{align-self:start;margin-bottom:0}   /* OAuth rides the top-right, near the blank menu */
-#signupCard{display:flex;flex-direction:column;gap:12px}   /* desktop: two cards stacked in the top-right column */
+.wrap{display:grid;grid-template-columns:288px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:18px 18px 120px;align-items:stretch}   /* 2-col: left sidebar + wide Map/List. OAuth now lives BELOW the Ad in the left column. */
+.wrap.si{grid-template-columns:288px 1fr}   /* signed in: identical (OAuth hidden) */
+#signupCard{display:flex;flex-direction:column;gap:12px;flex:0 0 auto}   /* OAuth cards stack at the bottom of the left sidebar, under the Ad */
 #signupCard .oauthcard{display:flex;align-items:center;gap:8px;margin-bottom:0}
 #signupCard .oauthcard .orose{font-size:20px;flex:0 0 auto}
 #signupCard .oauthcard button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -160,15 +159,15 @@ body.ddonly{background:transparent}   /* in the Friends sheet: transparent so th
 .hpfab:hover{transform:scale(1.06)}.hpfab:active{transform:scale(.94)}
 /* narrow screens: CALENDAR/MAP first — the fb-enhancement line, then the calendar + QR, then the feed */
 @media(max-width:820px){
-  /* single column; dissolve .left so its cards reorder alongside map + OAuth + ad.
-     Signed-out order Michael asked for: Calendar → FB(OAuth) → Map/List → Advertisement. */
+  /* single column; dissolve .left so its cards reorder alongside map + ad + OAuth.
+     Mobile order Michael asked for: Calendar → Map/List → Advertisement → Google/Facebook (LAST). */
   .wrap{display:flex;flex-direction:column;grid-template-columns:none}
   .wrap>.left{display:contents}
   .wrap>.fb-strip{order:0}
   #calCard{order:1}
-  .wrap>#signupCard{order:2}
   .wrap>.center{order:3}
-  #adRollCard{order:4}   /* nested in .left → plain ID selector so the order actually applies (Ad is LAST when narrow) */
+  #adRollCard{order:4}   /* nested in .left → plain ID selector so the order actually applies */
+  #signupCard{order:9}   /* Google/Facebook LAST on mobile (nested in .left → plain ID) */
   #profCard{order:5}
 }
 /* Facebook-enhancement card (dismissible) */
@@ -987,6 +986,12 @@ body.dd-insider .dd-only{display:block}
     </div>
 
     <div class="card adroll" id="adRollCard" style="display:none"><span class="adroll-tag">AD</span><div class="adroll-view" id="adRollView"></div><div class="adroll-dots" id="adRollDots"></div></div>
+
+    <!-- OAUTH (signed-out only) — sits BELOW the Ad in the left sidebar; last on mobile -->
+    <div id="signupCard" style="display:none">
+      <div class="card oauthcard"><span class="orose">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
+      <div class="card oauthcard"><span class="orose">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
+    </div>
     <script src="dd_mf_retailers.js"></script>
     <script src="dd_musikfest.js"></script>
     <script>(function(){
@@ -1200,12 +1205,6 @@ body.dd-insider .dd-only{display:block}
 
     <!-- ===== US SHOW MAP — upcoming shows plotted by venue (dd_showmap.js) ===== -->
     <div id="showMap"></div>
-  </div>
-
-  <!-- ===================== OAUTH (signed-out only) — rides the TOP-RIGHT column, near the blank menu ===================== -->
-  <div id="signupCard" style="display:none">
-    <div class="card oauthcard"><span class="orose">🌹</span><button onclick="ddOAuth('facebook')" style="flex:1;min-width:0;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;background:#1877f2;cursor:pointer">Continue with Facebook</button></div>
-    <div class="card oauthcard"><span class="orose">🌹</span><button onclick="ddOAuth('google')" style="flex:1;min-width:0;border:1px solid #dadce0;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#3c4043;background:#fff;cursor:pointer">Continue with Google</button></div>
   </div>
 
   <!-- ===================== FRIENDS (social network — curated · synthesized · mirrored) ===================== -->

@@ -712,7 +712,14 @@
       radiusMi = mi;
       var lat = userLoc[0], lng = userLoc[1];
       var latSpan = mi / 69, lngSpan = mi / (69 * Math.max(0.25, Math.cos(lat * Math.PI / 180)));
-      var tvb = boxToVB({ latMin: lat - latSpan, latMax: lat + latSpan, lngMin: lng - lngSpan, lngMax: lng + lngSpan });
+      var b = { latMin: lat - latSpan, latMax: lat + latSpan, lngMin: lng - lngSpan, lngMax: lng + lngSpan };
+      // Widen the frame to include active festivals within ~250 mi, so the whole region (e.g. all of
+      // PA — Musikfest, Allentown) stays in view and the beacons sit in place, never at the top edge.
+      try { SM_FESTS.forEach(function (F) { if (!F.ch || TODAY_ISO > F.end) return;
+        if (haversineMi(lat, lng, F.ch[0], F.ch[1]) > 250) return;
+        b.latMin = Math.min(b.latMin, F.ch[0]); b.latMax = Math.max(b.latMax, F.ch[0]);
+        b.lngMin = Math.min(b.lngMin, F.ch[1]); b.lngMax = Math.max(b.lngMax, F.ch[1]); }); } catch (e) {}
+      var tvb = boxToVB(b);
       level = "radius";
       host.querySelectorAll(".dd-scope button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-scope") === "local"); });
       drawBadges(false); regionRow.hidden = false; backBtn.hidden = false; showRadius(true);
