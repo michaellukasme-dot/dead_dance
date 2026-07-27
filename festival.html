@@ -63,9 +63,9 @@ var BUILTIN={
   drinks:{lb:'Drinks',ic:'🥤',c:'#e8730c'}, pizza:{lb:'Pizza',ic:'🍕',c:'#b8002e'}, burger:{lb:'Burgers',ic:'🍔',c:'#c79a3a'},
   food:{lb:'Food',ic:'🥗',c:'#12854f'}, hotdog:{lb:'Hot Dogs',ic:'🌭',c:'#e8730c'}, taco:{lb:'Mexican',ic:'🌮',c:'#e8730c'},
   icecream:{lb:'Ice Cream',ic:'🍦',c:'#2a7de1'}, popcorn:{lb:'Snacks',ic:'🍿',c:'#c79a3a'},
-  atm:{lb:'ATM',ic:'🏧',c:'#e8730c'}, parking:{lb:'Parking',ic:'🅿️',c:'#1f5fbf'}, shuttle:{lb:'Shuttle',ic:'🚐',c:'#b8002e'}, bus:{lb:'Bus Stop',ic:'🚌',c:'#e8a300'}, recycle:{lb:'Recycling',ic:'♻️',c:'#2a8a4a'}
+  atm:{lb:'ATM',ic:'🏧',c:'#e8730c'}, parking:{lb:'Parking',ic:'🅿️',c:'#1f5fbf'}, shuttle:{lb:'Shuttle',ic:'🚐',c:'#b8002e'}, bus:{lb:'Bus Stop',ic:'🚌',c:'#e8a300'}, recycle:{lb:'Recycling',ic:'♻️',c:'#2a8a4a'}, info:{lb:'Info',ic:'ℹ️',c:'#2a7de1'}
 };
-var ORDER=['stage','show','rides','coaster','gate','merch','beer','drinks','food','pizza','burger','hotdog','taco','icecream','popcorn','restroom','misting','access','firstaid','police','atm','parking','shuttle','bus','recycle'];
+var ORDER=['stage','show','rides','coaster','gate','merch','beer','drinks','food','pizza','burger','hotdog','taco','icecream','popcorn','restroom','misting','access','firstaid','police','atm','parking','shuttle','bus','recycle','info'];
 var SB; try{ SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
 function dir(ll){ return 'https://www.google.com/maps/dir/?api=1&destination='+ll[0]+','+ll[1]+'&travelmode=walking'; }
 function centroid(cs){ if(!cs||!cs.length)return null; var la=0,ln=0; cs.forEach(function(p){la+=p[0];ln+=p[1];}); return [la/cs.length,ln/cs.length]; }
