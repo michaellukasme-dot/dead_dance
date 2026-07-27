@@ -17,7 +17,7 @@
   .afmapwrap{ position:relative; }
   #amap{ height:52vh; width:100%; background:#e9e3f2; }
   .leaflet-attribution-flag{ display:none!important; }
-  .aflegend{ position:absolute; z-index:15; left:0; right:0; bottom:0; display:flex; gap:7px; overflow-x:auto; padding:9px 12px; background:linear-gradient(0deg,#000a,transparent); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .aflegend{ position:absolute; z-index:15; left:0; right:0; top:0; display:flex; gap:7px; overflow-x:auto; padding:10px 12px; background:linear-gradient(180deg,#000b,transparent); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .aflegend::-webkit-scrollbar{ display:none; }
   .afchip{ flex:0 0 auto; border:0; border-radius:999px; padding:7px 13px; font-weight:800; font-size:12.5px; cursor:pointer; background:#ffffffea; color:#3a1f57; box-shadow:0 2px 8px #0004; white-space:nowrap; }
   .afchip.off{ opacity:.4; }
@@ -75,11 +75,13 @@ window.afShare=function(){ var u="https://deaddance.app/allentownfair.html"; try
 /* ── Allentown Fairgrounds — pinpoint seed (official Map & Directory + Google boundary).
    This is the whole festival as data; point the same template at any PA fair by swapping this seed. ── */
 var FAIR={ name:"The Great Allentown Fair", dates:"Sept 2–7, 2026", center:[40.60130,-75.49790] };
+/* boundary = a clean 4-corner rectangle. The old pinch on N Lafayette was a bad interior point;
+   NW is the parallelogram-computed 4th corner from the three trusted corners. */
 var BOUND=[
-  [40.60212281660213,-75.50077132309319],[40.6032907636895,-75.49661492874922],
-  [40.60233057791279,-75.49595670971611],[40.6015332201769,-75.49589754396033],
-  [40.600516856034815,-75.49532067784142],[40.600168705648265,-75.49978029668377],
-  [40.59891085688427,-75.50105975615264],[40.60170729204349,-75.50233181990204]
+  [40.60170729204349,-75.50233181990204], /* NW — Liberty & N Lafayette */
+  [40.6032907636895, -75.49661492874922], /* NE — Liberty & St Cloud   */
+  [40.600516856034815,-75.49532067784142],/* SE — W Chew & St Cloud     */
+  [40.59891085688427,-75.50105975615264]  /* SW — W Chew & N Lafayette  */
 ];
 var PINS=[
   {c:'gate',ic:'🚪',n:'Gate 6 — Lafayette & Liberty',ll:[40.60217681145291,-75.50079921900783]},
@@ -97,8 +99,8 @@ var PINS=[
   {c:'see',L:'H',n:'The Judging Tent',ll:[40.59964389903979,-75.50101000591236]},
   {c:'see',L:'I',n:'The 4-H Livestock Experience · Agri-Land',ll:[40.59983755774478,-75.50056916553433]},
   {c:'see',L:'J',n:'Poultry / Rabbit Building',ll:[40.599510011212054,-75.49987956522867]},
-  {c:'see',L:'K',n:'Service Electric Grandstand — Show Venue',ll:[40.60153893620614,-75.49747433568447]},
-  {c:'see',L:'L',n:'Market Building — indoor shopping · Red Barn Stage',ll:[40.60146742398269,-75.49738328781226]},
+  {c:'stage',L:'K',n:'Service Electric Grandstand — Show Venue',ll:[40.60153893620614,-75.49747433568447]},
+  {c:'stage',L:'L',n:'Market Building — indoor shopping · Red Barn Stage',ll:[40.60146742398269,-75.49738328781226]},
   {c:'see',L:'M',n:'Grandstand Box Office — Tickets / Will Call',ll:[40.601674809219844,-75.49682444225182]},
   {c:'see',L:'N',n:'Allentown Fair Office',ll:[40.60147219146663,-75.49641943619959]},
   {c:'see',L:'O',n:'Ritz Barbecue',ll:[40.60134346928088,-75.49615885091018]},
@@ -108,8 +110,8 @@ var PINS=[
   {c:'see',L:'S',n:'Weyerbacher Biergarten — Hog Diggity Dog · The Cup Guy',ll:[40.60269265617024,-75.49569105322195]},
   {c:'see',L:'T',n:'Main Entrance Plaza — LVHN Wellness Way',ll:[40.60095491747596,-75.4949281348445]},
   {c:'see',L:'U',n:'Emergency / Security — Lost & Found',ll:[40.60067363316496,-75.49533000131493]},
-  {c:'svc',ic:'✚',n:'First Aid',ll:[40.60059496869912,-75.49516988265947]},
-  {c:'svc',ic:'👮',n:'Police',ll:[40.600714157251275,-75.49523895345908]},
+  {c:'firstaid',ic:'✚',n:'First Aid',ll:[40.60059496869912,-75.49516988265947]},
+  {c:'police',ic:'👮',n:'Police',ll:[40.600714157251275,-75.49523895345908]},
   {c:'atm',ic:'🏧',n:'ATM',ll:[40.60197428256774,-75.50083256268407]},
   {c:'atm',ic:'🏧',n:'ATM',ll:[40.603250439262155,-75.49648850701556]},
   {c:'atm',ic:'🏧',n:'ATM',ll:[40.602871433300145,-75.49592338229219]},
@@ -123,8 +125,8 @@ var PINS=[
   {c:'atm',ic:'🏧',n:'ATM',ll:[40.60036913464451,-75.49976224526597]},
   {c:'atm',ic:'🏧',n:'ATM',ll:[40.60100259265745,-75.4945451058819]},
   {c:'see',ic:'🎡',n:'Powers & Thomas Midway',ll:[40.60020443238212,-75.49795119162744]},
-  {c:'svc',ic:'ℹ️',n:'InFAIRmation',ll:[40.60132359293622,-75.49586427404523]},
-  {c:'svc',ic:'ℹ️',n:'InFAIRmation',ll:[40.60020710322986,-75.49989562324446]},
+  {c:'info',ic:'ℹ️',n:'InFAIRmation',ll:[40.60132359293622,-75.49586427404523]},
+  {c:'info',ic:'ℹ️',n:'InFAIRmation',ll:[40.60020710322986,-75.49989562324446]},
   {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.600596990638365,-75.50139279099119]},
   {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.60014887309523,-75.50038912176396]},
   {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.60087294853477,-75.49795163935502]},
@@ -140,14 +142,15 @@ var PINS=[
   {c:'acc',ic:'♿',n:'Accessible entrance',ll:[40.60111118926764,-75.50003951156516]},
   {c:'acc',ic:'♿',n:'Accessible entrance',ll:[40.600714794328155,-75.50063011454755]}
 ];
-var CATS={ gate:{lbl:'🚪 Gates',c:'#7a3cc0'}, see:{lbl:'🎡 Attractions',c:'#b8002e'}, svc:{lbl:'🛟 Services',c:'#2a7de1'}, wc:{lbl:'🚻 Restrooms',c:'#2a7de1'}, bev:{lbl:'🥤 Beverage',c:'#e8730c'}, acc:{lbl:'♿ Accessible',c:'#1f9e6b'}, atm:{lbl:'🏧 ATMs',c:'#1f9e6b'} };
-var GORDER=['gate','see','svc','wc','bev','acc','atm'];
+var CATS={ see:{lbl:'🎡 Attractions',c:'#b8002e'}, stage:{lbl:'🎤 Stage',c:'#7a3cc0'}, gate:{lbl:'🚪 Gates',c:'#3a1f57'}, atm:{lbl:'🏧 ATMs',c:'#1f9e6b'}, wc:{lbl:'🚻 Bathrooms',c:'#2a7de1'}, acc:{lbl:'♿ Wheelchair',c:'#12854f'}, bev:{lbl:'🥤 Beverage',c:'#e8730c'}, firstaid:{lbl:'✚ First Aid',c:'#b8002e'}, police:{lbl:'👮 Police',c:'#2a7de1'}, info:{lbl:'ℹ️ Info',c:'#e8730c'} };
+var GORDER=['see','stage','gate','atm','wc','acc','bev','firstaid','police','info'];
 var MAP, MK=[];
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function dirLink(ll){ return 'https://www.google.com/maps/dir/?api=1&destination='+ll[0]+','+ll[1]+'&travelmode=walking'; }
 
 (function(){
   try{
+    window.DD_MAP_PLAIN=true;   // plain street tiles — no purple DeadDance skin, no brand/Map toggle
     MAP=L.map('amap',{zoomControl:true,scrollWheelZoom:true});
     if(window.DDtile){ DDtile(MAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20}).addTo(MAP); }
     L.polygon(BOUND,{color:'#7a3cc0',weight:2,fillColor:'#7a3cc0',fillOpacity:.07}).addTo(MAP);
