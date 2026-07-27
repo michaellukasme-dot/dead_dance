@@ -364,15 +364,23 @@
     if (w / h > aspect) h = w / aspect; else w = h * aspect;
     return [cx - w / 2, cy - h / 2, w, h];
   }
-  function chapterVB(ch) {
+  function chapterVB(ch, extra) {   // extra = [[lat,lng],…] festival beacons to also keep in frame
+    var b;
     if (ch.shows.length) {
       var lats = ch.shows.map(function (s) { return s._ll[0]; }), lngs = ch.shows.map(function (s) { return s._ll[1]; });
-      var b = { latMin: Math.min.apply(null, lats), latMax: Math.max.apply(null, lats), lngMin: Math.min.apply(null, lngs), lngMax: Math.max.apply(null, lngs) };
+      b = { latMin: Math.min.apply(null, lats), latMax: Math.max.apply(null, lats), lngMin: Math.min.apply(null, lngs), lngMax: Math.max.apply(null, lngs) };
       if (b.latMax - b.latMin < 2.4) { var mLat = (b.latMin + b.latMax) / 2; b.latMin = mLat - 1.6; b.latMax = mLat + 1.6; }
       if (b.lngMax - b.lngMin < 3.2) { var mLng = (b.lngMin + b.lngMax) / 2; b.lngMin = mLng - 2.4; b.lngMax = mLng + 2.4; }
-      return boxToVB(b);
+    } else {
+      b = { latMin: ch.c[0] - 4.2, latMax: ch.c[0] + 4.2, lngMin: ch.c[1] - 6.0, lngMax: ch.c[1] + 6.0 };
     }
-    return boxToVB({ latMin: ch.c[0] - 4.2, latMax: ch.c[0] + 4.2, lngMin: ch.c[1] - 6.0, lngMax: ch.c[1] + 6.0 });
+    // widen so nearby festival beacons (e.g. Musikfest + Allentown → all of PA) stay in frame,
+    // instead of being jammed against the top edge above the shows.
+    if (extra && extra.length) extra.forEach(function (p) {
+      b.latMin = Math.min(b.latMin, p[0]); b.latMax = Math.max(b.latMax, p[0]);
+      b.lngMin = Math.min(b.lngMin, p[1]); b.lngMax = Math.max(b.lngMax, p[1]);
+    });
+    return boxToVB(b);
   }
 
   function fmtDate(iso) { var d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
@@ -698,7 +706,9 @@
       regionRow.hidden = false; backBtn.hidden = false; sel.value = ch.name;
       nearEl.textContent = ch.shows.length ? (ch.shows.length + (ch.shows.length === 1 ? " show" : " shows")) : "waiting — seed it";
       setSum(shortName(ch.name) + ' · ' + ch.shows.length + ' show' + (ch.shows.length !== 1 ? 's' : ''));
-      animateTo(chapterVB(ch), 620, chapterName);
+      // include active festivals within ~250 mi of the chapter so their beacons frame in (shows PA)
+      var _fx = []; try { SM_FESTS.forEach(function (F) { if (F.ch && TODAY_ISO <= F.end && ch.c && haversineMi(ch.c[0], ch.c[1], F.ch[0], F.ch[1]) <= 250) _fx.push(F.ch); }); } catch (e) {}
+      animateTo(chapterVB(ch, _fx), 620, chapterName);
       renderPanel(ch);
       var fests = festsFor(ch);
       if (ch.shows.length) farrah('<b>' + esc(shortName(ch.name)) + '</b> — <b>' + ch.shows.length + ' show' + (ch.shows.length > 1 ? 's' : '') + '</b>' + (fests.length ? (' + <b>' + fests.length + ' festival' + (fests.length > 1 ? 's' : '') + '</b>') : '') + ' on the board. Grab tickets, or add your own date.');
