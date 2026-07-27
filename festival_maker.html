@@ -140,10 +140,12 @@ function nid(){ state.nextId=(state.nextId||1); return 'e'+(state.nextId++); }
 
 /* ---------- MAP + FOOTPRINT PINS ---------- */
 function updCoords(){ var el=document.getElementById('coordbox'); if(!el||!MAP)return; var c=MAP.getCenter(); el.textContent=c.lat.toFixed(6)+', '+c.lng.toFixed(6); }
+var BLANK_TILE='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='; // 1px transparent → blocked tiles show blank, never the "403 / Access blocked" graphic
 function initMap(center){
   MAP=L.map('fmap',{zoomControl:true,maxZoom:21}).setView(center,17);
-  var street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20});
-  var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Imagery © Esri',maxZoom:21,maxNativeZoom:19});
+  // Street tiles from CARTO (works over file:// and https — OSM's server 403s no-referer/local loads).
+  var street=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',attribution:'© OpenStreetMap © CARTO',maxZoom:20,errorTileUrl:BLANK_TILE});
+  var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Imagery © Esri',maxZoom:21,maxNativeZoom:19,errorTileUrl:BLANK_TILE});
   sat.addTo(MAP);   // satellite by default → place pins on the real tents & booths
   L.control.layers({'🛰 Satellite':sat,'🗺 Street':street},null,{position:'topright',collapsed:false}).addTo(MAP);
   MAP.on('click', fmMapClick);   // tap-to-place: the whole form works this way

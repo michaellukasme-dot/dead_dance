@@ -30,6 +30,8 @@
     <p id="fDates"></p>
   </div>
 
+  <div id="rainbox"></div>
+
   <div class="sec">The map — everything, where it actually is</div>
   <div id="map"></div>
   <div class="legend" id="legend"></div>
@@ -48,49 +50,98 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="qr.js"></script><script src="dd_qrmark.js"></script><script src="dd_map.js"></script>
+<script src="dd_rainshine.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function qp(k){ return new URLSearchParams(location.search).get(k)||''; }
-var TYPES={stage:{label:'Stages',emoji:'🎤',color:'#b8002e'},potty:{label:'Restrooms',emoji:'🚻',color:'#1f9e6b'},parking:{label:'Parking',emoji:'🅿️',color:'#2f6fe0'},food:{label:'Food',emoji:'🍔',color:'#e8730c'},merchant:{label:'Shops & bars',emoji:'🛍️',color:'#8a6d3b'}};
-var ORDER=['stage','food','parking','potty','merchant'];
+/* Built-in palette — mirrors the Festival Maker's TYPES. Custom types (cust_*) come from doc.customTypes. */
+var BUILTIN={
+  stage:{lb:'Stages',ic:'🎵',c:'#7c3aed'}, restroom:{lb:'Restrooms',ic:'🚻',c:'#2a7de1'}, access:{lb:'Wheelchair',ic:'♿',c:'#12854f'},
+  misting:{lb:'Misting',ic:'💧',c:'#2a7de1'}, firstaid:{lb:'First Aid',ic:'✚',c:'#b8002e'}, police:{lb:'Security',ic:'👮',c:'#2a7de1'},
+  merch:{lb:'Merch',ic:'🎁',c:'#d63384'}, show:{lb:'Shows',ic:'🎪',c:'#b8002e'}, rides:{lb:'Rides',ic:'🎡',c:'#e8730c'},
+  gate:{lb:'Gates',ic:'🎟',c:'#3a1f57'}, coaster:{lb:'Thrill',ic:'🎢',c:'#e8730c'}, beer:{lb:'Beer',ic:'🍺',c:'#c79a3a'},
+  drinks:{lb:'Drinks',ic:'🥤',c:'#e8730c'}, pizza:{lb:'Pizza',ic:'🍕',c:'#b8002e'}, burger:{lb:'Burgers',ic:'🍔',c:'#c79a3a'},
+  food:{lb:'Food',ic:'🥗',c:'#12854f'}, hotdog:{lb:'Hot Dogs',ic:'🌭',c:'#e8730c'}, taco:{lb:'Mexican',ic:'🌮',c:'#e8730c'},
+  icecream:{lb:'Ice Cream',ic:'🍦',c:'#2a7de1'}, popcorn:{lb:'Snacks',ic:'🍿',c:'#c79a3a'}
+};
+var ORDER=['stage','show','rides','coaster','gate','merch','beer','drinks','food','pizza','burger','hotdog','taco','icecream','popcorn','restroom','misting','access','firstaid','police'];
 var SB; try{ SB=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); }catch(e){}
-function dir(p){ return 'https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng+'&travelmode='+(p.type==='parking'?'driving':'walking'); }
-function fmtRange(a,b){ if(!a)return ''; try{ var o={month:'short',day:'numeric'}; var d1=new Date(a+'T12:00:00').toLocaleDateString(undefined,o); if(!b||b===a)return d1; return d1+' – '+new Date(b+'T12:00:00').toLocaleDateString(undefined,o); }catch(e){ return a+(b?(' – '+b):''); } }
+function dir(ll){ return 'https://www.google.com/maps/dir/?api=1&destination='+ll[0]+','+ll[1]+'&travelmode=walking'; }
+function centroid(cs){ if(!cs||!cs.length)return null; var la=0,ln=0; cs.forEach(function(p){la+=p[0];ln+=p[1];}); return [la/cs.length,ln/cs.length]; }
+function typeInfo(k,customMap){ return BUILTIN[k] || customMap[k] || {lb:'Other',ic:'📍',c:'#7a8397'}; }
 
 function render(F){
+  var doc=F.doc||{};
   document.getElementById('fName').textContent=F.name||'Festival';
-  document.getElementById('fCity').textContent=F.city||'';
-  document.getElementById('fDates').textContent=fmtRange(F.start,F.end);
+  document.getElementById('fCity').textContent=F.region||'';
+  document.getElementById('fDates').textContent=F.dates||'';
   document.title=(F.name||'Festival')+' · StageFill';
-  var pins=(F.pins||[]).filter(function(p){return p.lat!=null;}).slice(0,1000);  // cap render (DoS guard)
-  // map
-  var map=L.map('map',{zoomControl:true}); if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
-  pins.forEach(function(p){ var t=TYPES[p.type]||{color:'#888',emoji:'📍'};
-    L.circleMarker([p.lat,p.lng],{radius:8,color:'#fff',weight:2,fillColor:t.color,fillOpacity:1}).addTo(map)
-     .bindTooltip((t.emoji||'')+' '+esc(p.name||''),{direction:'top'})
-     .bindPopup('<b>'+esc(p.name||'')+'</b>'+(p.detail?('<br><span style="font-size:12px;color:#555">'+esc(p.detail)+'</span>'):'')+'<br><a href="'+dir(p)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">'+(p.type==='parking'?'🚗 Drive here':'🚶 Walk me there')+'</a>'); });
-  if(pins.length){ try{ map.fitBounds(pins.map(function(p){return [p.lat,p.lng];}),{padding:[36,36],maxZoom:16}); }catch(e){} }
-  else map.setView([39.95,-75.16],13);
+
+  // custom types → lookup
+  var customMap={}; (doc.customTypes||[]).forEach(function(t){ customMap[t.k]={lb:t.lb,ic:t.ic,c:t.c}; });
+
+  // FANS SEE VERIFIED PINS ONLY (the place→verify→adjust gate). Flatten the object-of-arrays.
+  var pins=[]; var items=doc.items||{};
+  Object.keys(items).forEach(function(k){ (items[k]||[]).forEach(function(r){
+    if(r.status!=='verified') return; if(r.lat==null||r.lng==null||r.lat===''||r.lng==='') return;
+    pins.push({type:k, name:r.n||'', detail:r.d||'', ll:[+r.lat,+r.lng]});
+  }); });
+  pins=pins.slice(0,1500);   // render cap (DoS guard)
+
+  var platzes=(doc.platzes||[]).slice(0,200), tents=(doc.tents||[]).slice(0,400);   // render caps (DoS guard)
+  var platzName={}; platzes.forEach(function(p){ platzName[p.id]=p.name; });
+
+  // map — CARTO tiles (load over file:// and https; OSM 403s no-referer). errorTileUrl → blank, never a "403" graphic.
+  var BLANK_TILE='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  var map=L.map('map',{zoomControl:true,maxZoom:21});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',attribution:'© OpenStreetMap © CARTO',maxZoom:20,errorTileUrl:BLANK_TILE}).addTo(map);
+  // grounds boundary
+  var bound=F.boundary||doc.footprint; if(bound&&bound.length>=3){ try{ L.polygon(bound,{color:'#5a2e86',weight:2,fillColor:'#5a2e86',fillOpacity:.05}).addTo(map); }catch(e){} }
+  // Platz fills (below), then tents (covered=solid orange, uncovered=dashed)
+  platzes.forEach(function(p){ if(p.corners&&p.corners.length>=3) try{ L.polygon(p.corners,{color:'#0e9488',weight:2,fillColor:'#14b8a6',fillOpacity:.08}).addTo(map).bindTooltip('▦ '+esc(p.name||'Platz'),{sticky:true}); }catch(e){} });
+  tents.forEach(function(t){ if(!(t.corners&&t.corners.length>=3))return;
+    var st=t.covered?{color:'#e8730c',weight:2,fillColor:'#f59e0b',fillOpacity:.22}:{color:'#e8730c',weight:2,dashArray:'6,5',fillColor:'#f59e0b',fillOpacity:.10};
+    try{ L.polygon(t.corners,st).addTo(map).bindTooltip('⛺ '+esc(t.name||'Tent')+(t.covered?' · ☂ rain-or-shine':''),{sticky:true}); }catch(e){}
+  });
+  // pins on top
+  pins.forEach(function(p){ var t=typeInfo(p.type,customMap);
+    L.marker(p.ll,{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);background:'+t.c+';border:2px solid #fff;box-shadow:0 2px 6px #0005;display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:13px">'+t.ic+'</span></div>'}),title:p.name}).addTo(map)
+     .bindPopup('<b>'+esc(p.name||t.lb)+'</b>'+(p.detail?('<br><span style="font-size:12px;color:#555">'+esc(p.detail)+'</span>'):'')+'<br><a href="'+dir(p.ll)+'" target="_blank" rel="noopener" style="font-weight:800;color:#5a2e86">🚶 Walk me there</a>');
+  });
+  var allLL=pins.map(function(p){return p.ll;}).concat(bound&&bound.length>=3?bound:[]);
+  if(allLL.length){ try{ map.fitBounds(allLL,{padding:[36,36],maxZoom:18}); }catch(e){ map.setView(F.center||[40.6013,-75.4979],16); } }
+  else map.setView(F.center||[40.6013,-75.4979],16);
   setTimeout(function(){ try{map.invalidateSize();}catch(e){} },250);
+
   // legend
-  document.getElementById('legend').innerHTML=ORDER.filter(function(k){return pins.some(function(p){return p.type===k;});}).map(function(k){return '<span>'+TYPES[k].emoji+' '+TYPES[k].label+'</span>';}).join('');
+  document.getElementById('legend').innerHTML=ORDER.concat(Object.keys(customMap)).filter(function(k){return pins.some(function(p){return p.type===k;});})
+    .map(function(k){var t=typeInfo(k,customMap);return '<span>'+t.ic+' '+esc(t.lb)+'</span>';}).join('');
+
   // sections grouped by type
   var host=document.getElementById('sections'), html='';
-  ORDER.forEach(function(k){ var group=pins.filter(function(p){return p.type===k;}); if(!group.length)return;
-    html+='<div class="sec">'+TYPES[k].emoji+' '+TYPES[k].label+' ('+group.length+')</div><div class="card">'+
-      group.map(function(p){ return '<div class="row"><div><div class="nm">'+esc(p.name||'')+'</div>'+(p.detail?('<div class="dt">'+esc(p.detail)+'</div>'):'')+'</div><a href="'+dir(p)+'" target="_blank" rel="noopener">'+(k==='parking'?'directions ›':'walk ›')+'</a></div>'; }).join('')+'</div>';
+  ORDER.concat(Object.keys(customMap)).forEach(function(k){ var group=pins.filter(function(p){return p.type===k;}); if(!group.length)return; var t=typeInfo(k,customMap);
+    html+='<div class="sec">'+t.ic+' '+esc(t.lb)+' ('+group.length+')</div><div class="card">'+
+      group.map(function(p){ return '<div class="row"><div><div class="nm">'+esc(p.name||'')+'</div>'+(p.detail?('<div class="dt">'+esc(p.detail)+'</div>'):'')+'</div><a href="'+dir(p.ll)+'" target="_blank" rel="noopener">walk ›</a></div>'; }).join('')+'</div>';
   });
+  if(!pins.length){ html='<div class="card" style="text-align:center;color:#7a7285">This map is being finalized — check back soon. 🌹</div>'; }
   host.innerHTML=html;
+
+  // RAIN OR SHINE — surface covered tents; live weather at the grounds
+  try{ if(window.DDRain){ DDRain.mount({ hostId:'rainbox', map:map, center:F.center||centroid(bound),
+    tents: tents.map(function(t){ return {id:t.id,name:t.name,covered:!!t.covered,platz:platzName[t.platzId]||'',center:centroid(t.corners)}; }) }); } }catch(e){}
+
   // QR to this live page (dual-door: tap or scan)
   try{ if(window.DDQR) DDQR.into('fqr', location.href.split('#')[0], {mark:'dd',size:360,css:180,caption:true}); }catch(e){}
 }
 
-(function(){ var slug=qp('event');
-  if(!slug){ document.getElementById('fName').textContent='No festival'; document.getElementById('fCity').textContent='Add ?event=<name> to the link'; return; }
+(function(){ var slug=qp('event')||qp('festival');
+  if(!slug){ document.getElementById('fName').textContent='No festival'; document.getElementById('fCity').textContent='Add ?event=<slug> to the link'; return; }
   if(!SB){ document.getElementById('fCity').textContent='Offline'; return; }
-  SB.rpc('dd_festival_get',{p_slug:slug}).then(function(r){
+  SB.rpc('dd_festival_get',{p_slug:slug,p_token:null}).then(function(r){
     if(r.error||!r.data){ document.getElementById('fName').textContent='Not found'; document.getElementById('fCity').textContent='This festival isn’t published yet.'; return; }
-    var F=(typeof r.data==='string')?JSON.parse(r.data):r.data; render(F);
+    var F=(typeof r.data==='string')?JSON.parse(r.data):r.data;
+    if(!F.published && !(F.doc&&F.doc.items)){ document.getElementById('fName').textContent=F.name||'Coming soon'; document.getElementById('fCity').textContent='This festival isn’t published yet.'; return; }
+    render(F);
   }).catch(function(){ document.getElementById('fCity').textContent='Could not load.'; });
 })();
 </script>
