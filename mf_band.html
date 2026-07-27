@@ -205,6 +205,17 @@ var slug=(P('band')||'rift').toLowerCase();
 var B=BANDS[slug]||BANDS['rift'];
 var MAP='https://deaddance.app/artsquest_musikfest.html'; /* the live festival map — walking directions */
 var walkUrl=MAP+(B.set&&B.set.stage?('#stage='+encodeURIComponent(B.set.stage)):'');
+/* the free FULL ticket for this show — the collectible stub, appended to the fan's deck (ticket.html).
+   The ticket's SHOW QR points at THIS event page (stateful), so one code carries the holder through
+   pre-show → during (song texts) → after (historical/closed). Same QR, evolving destination. */
+function tixColor(s){ var m={'rift':'#00a3a3','life-after-dead':'#b8002e','shakedown-citi':'#5a2e86','liberty-jams':'#e8730c','demo-ticketed':'#2f7bf6'}; return m[s]||'#5a2e86'; }
+function tixUrl(){ var when=(B.set&&B.set.date)?fmtDate(B.set.date):'';
+  var origin=(location.origin.indexOf('http')===0?location.origin:'https://deaddance.app');
+  var ev=origin+'/mf_band.html?band='+encodeURIComponent(slug);
+  return 'ticket.html?band='+encodeURIComponent(B.name)+'&sub='+encodeURIComponent(B.kind||'Dead & Jam')
+    +'&venue='+encodeURIComponent('MusikFest 2026 · Bethlehem, PA')+'&date='+encodeURIComponent(when)
+    +'&iso='+encodeURIComponent((B.set&&B.set.date)||'')+'&price=Free&gate='+encodeURIComponent((B.set&&B.set.stage)||'MusikFest')
+    +'&ev='+encodeURIComponent(ev)+'&color='+encodeURIComponent(tixColor(slug)); }
 
 /* ---- state machine: FUTURE → LIVE → HISTORICAL ---- */
 function setBounds(){
@@ -266,12 +277,13 @@ function render(){
     if(B.ticketed && B.tickets && B.tickets.length){
       pills.push('<button class="pill gold" onclick="document.getElementById(\'tixSlot\').scrollIntoView({behavior:\'smooth\'})">🎟 Get tickets</button>');
     } else {
-      pills.push('<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">🎟 See us live</a>');
+      pills.push('<a class="pill rose" href="'+esc(tixUrl())+'" target="_blank" rel="noopener">🎟 Get your free ticket</a>');
     }
     pills.push(walk); pills.push(coming);
   }else if(S==='live'){
+    pills.push('<a class="pill rose" href="'+esc(tixUrl())+'" target="_blank" rel="noopener">🎟 Get your free ticket</a>');
     pills.push(walk);
-    pills.push('<a class="pill rose" href="'+esc(MAP)+'" target="_blank" rel="noopener">📸 Surround the stage</a>');
+    pills.push('<a class="pill" href="'+esc(MAP)+'" target="_blank" rel="noopener">📸 Surround the stage</a>');
     pills.push(coming);
   }else{
     if(B.recording) pills.push('<a class="pill rose" href="'+esc(B.recording)+'" target="_blank" rel="noopener">▶ Recording</a>');

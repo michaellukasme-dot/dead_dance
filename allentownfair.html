@@ -12,21 +12,36 @@
   html,body{ margin:0; height:100%; font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#1a1320; background:#0e0a16; }
   .afhead{ position:sticky; top:0; z-index:20; background:linear-gradient(90deg,#241535,#3a1f57); color:#fff; padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px; display:flex; align-items:center; gap:12px; }
   .afhead .back{ color:#e2d3fb; text-decoration:none; font-weight:800; font-size:13px; }
-  .afhead h1{ margin:0; font-size:19px; font-weight:900; letter-spacing:-.01em; }
+  .afhead h1{ margin:0; font-size:18px; font-weight:900; letter-spacing:-.01em; }
   .afhead .x{ margin-left:auto; background:#ffffff22; border:0; color:#fff; width:32px; height:32px; border-radius:50%; font-size:17px; cursor:pointer; }
-  #amap{ height:56vh; width:100%; background:#e9e3f2; }
+  .afmapwrap{ position:relative; }
+  #amap{ height:52vh; width:100%; background:#e9e3f2; }
   .leaflet-attribution-flag{ display:none!important; }
-  .afsheet{ background:#fff; border-radius:20px 20px 0 0; margin-top:-18px; position:relative; z-index:10; padding:18px 18px calc(24px + env(safe-area-inset-bottom,0px)); box-shadow:0 -8px 30px #0006; min-height:44vh; }
-  .afsheet .grab{ width:44px; height:5px; border-radius:3px; background:#e2dcec; margin:0 auto 14px; }
+  .aflegend{ position:absolute; z-index:15; left:0; right:0; bottom:0; display:flex; gap:7px; overflow-x:auto; padding:9px 12px; background:linear-gradient(0deg,#000a,transparent); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .aflegend::-webkit-scrollbar{ display:none; }
+  .afchip{ flex:0 0 auto; border:0; border-radius:999px; padding:7px 13px; font-weight:800; font-size:12.5px; cursor:pointer; background:#ffffffea; color:#3a1f57; box-shadow:0 2px 8px #0004; white-space:nowrap; }
+  .afchip.off{ opacity:.4; }
+  .afsheet{ background:#fff; border-radius:20px 20px 0 0; margin-top:-18px; position:relative; z-index:10; padding:16px 16px calc(28px + env(safe-area-inset-bottom,0px)); box-shadow:0 -8px 30px #0006; }
+  .grab{ width:44px; height:5px; border-radius:3px; background:#e2dcec; margin:0 auto 12px; }
   .afsheet h2{ margin:0 0 3px; font-size:20px; color:#241535; }
-  .afmeta{ color:#7a7285; font-weight:700; font-size:13px; margin-bottom:14px; }
+  .afmeta{ color:#7a7285; font-weight:700; font-size:13px; margin-bottom:12px; }
   .afmeta b{ color:#b8002e; }
-  .afcard{ background:#faf7fd; border:1px solid #ece3f7; border-left:3px solid var(--gold); border-radius:12px; padding:12px 14px; font-size:13.5px; color:#4a4356; line-height:1.5; }
-  .afcard b{ color:#5a2e86; }
-  .afrow{ display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; }
+  .afrow{ display:flex; gap:9px; margin-bottom:12px; flex-wrap:wrap; }
   .afrow a{ text-decoration:none; }
   .afbtn{ background:linear-gradient(135deg,#b8002e,#7a3cc0); color:#fff; border:0; border-radius:12px; font-weight:800; font-size:13.5px; padding:11px 15px; cursor:pointer; }
   .afbtn.ghost{ background:#f1ecf7; color:#5a2e86; }
+  .afsearch{ width:100%; border:1px solid var(--line); border-radius:12px; padding:11px 13px; font:inherit; font-size:14px; margin-bottom:6px; }
+  .afgrp{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a99ec6; margin:16px 0 4px; }
+  .afitem{ display:flex; align-items:center; gap:11px; padding:10px 6px; border-bottom:1px solid #f4f0fa; cursor:pointer; }
+  .afitem:active{ background:#faf7fd; }
+  .afbadge{ width:26px;height:26px;flex:0 0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff; }
+  .afbadge.e{ background:#fff; color:inherit; box-shadow:inset 0 0 0 1px #eadff2; font-size:14px; }
+  .afitem .nm{ flex:1; font-size:14px; font-weight:600; color:#241535; line-height:1.25; }
+  .afitem .walk{ flex:0 0 auto; color:#5a2e86; font-weight:800; font-size:12px; text-decoration:none; background:#f2ecf9; border-radius:8px; padding:5px 9px; }
+  .pinL{ width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;box-shadow:0 1px 5px #0007;border:2px solid #fff; }
+  .pinE{ width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;background:#fff;box-shadow:0 1px 5px #0006; }
+  .lp b{ color:#241535; } .lp .g{ color:#7a7285; font-size:12px; }
+  .lp a{ display:inline-block; margin-top:5px; background:#5a2e86; color:#fff; text-decoration:none; border-radius:8px; padding:5px 10px; font-weight:800; font-size:12px; }
 </style>
 </head>
 <body>
@@ -35,31 +50,184 @@
     <h1>🎡 Great Allentown Fair 2026</h1>
     <button class="x" onclick="afBack(event)" aria-label="Close">×</button>
   </div>
-  <div id="amap"></div>
+  <div class="afmapwrap"><div id="amap"></div><div class="aflegend" id="aflegend"></div></div>
   <div class="afsheet">
     <div class="grab"></div>
     <h2>The Great Allentown Fair</h2>
     <div class="afmeta"><b>Sept 2–7, 2026</b> · Allentown Fairgrounds · 302 N 17th St, Allentown, PA</div>
-    <div class="afcard">🌹 <b>Full festival map coming soon.</b> Stages, vendors, the grandstand, gates, restrooms &amp; first aid will land here the same way Musikfest did — pinpoint, from the source. For now, here's where the Fair lives.</div>
     <div class="afrow">
-      <a href="https://www.google.com/maps/dir/?api=1&destination=40.6047,-75.4785&travelmode=driving" target="_blank" rel="noopener"><button class="afbtn">🚗 Directions</button></a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=40.60130,-75.49790&travelmode=driving" target="_blank" rel="noopener"><button class="afbtn">🚗 Drive here</button></a>
+      <button class="afbtn ghost" onclick="afShare()">🔗 Share map</button>
       <a href="https://www.allentownfair.com/" target="_blank" rel="noopener"><button class="afbtn ghost">Fair site ›</button></a>
     </div>
+    <div class="afgrp" style="margin-top:2px">📅 Daily Schedule</div>
+    <div id="aftabs" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none"></div>
+    <div id="afsched"></div>
+    <input class="afsearch" id="afq" placeholder="🔎 Find a barn, ATM, gate, ride…" oninput="afFilter(this.value)" style="margin-top:14px">
+    <div id="afdir"></div>
   </div>
 
 <script src="dd_map.js"></script>
 <script>
-/* close INSIDE the DeadDance sheet (iframe) → land back on the app; standalone → go home */
 window.afBack=function(e){ try{ if(window.parent && window.parent!==window && window.parent.ddSheetClose){ if(e&&e.preventDefault)e.preventDefault(); window.parent.ddSheetClose(); return false; } }catch(err){} return true; };
+window.afShare=function(){ var u="https://deaddance.app/allentownfair.html"; try{ if(navigator.share){ navigator.share({title:"Great Allentown Fair map",url:u}); return; } }catch(e){} try{ navigator.clipboard.writeText(u); alert("Map link copied 🌹"); }catch(e){ prompt("Copy the map link:", u); } };
+
+/* ── Allentown Fairgrounds — pinpoint seed (official Map & Directory + Google boundary).
+   This is the whole festival as data; point the same template at any PA fair by swapping this seed. ── */
+var FAIR={ name:"The Great Allentown Fair", dates:"Sept 2–7, 2026", center:[40.60130,-75.49790] };
+var BOUND=[
+  [40.60212281660213,-75.50077132309319],[40.6032907636895,-75.49661492874922],
+  [40.60233057791279,-75.49595670971611],[40.6015332201769,-75.49589754396033],
+  [40.600516856034815,-75.49532067784142],[40.600168705648265,-75.49978029668377],
+  [40.59891085688427,-75.50105975615264],[40.60170729204349,-75.50233181990204]
+];
+var PINS=[
+  {c:'gate',ic:'🚪',n:'Gate 6 — Lafayette & Liberty',ll:[40.60217681145291,-75.50079921900783]},
+  {c:'gate',ic:'🚪',n:'Gate 7 — St. George & Liberty (parking tunnel)',ll:[40.60276178338942,-75.4987301684209]},
+  {c:'gate',ic:'🚪',n:'Gate 8 — St. Cloud & Liberty',ll:[40.603431598580414,-75.49602384890912]},
+  {c:'gate',ic:'🚪',n:'Gate 3 — Lafayette & Chew',ll:[40.600189470235755,-75.49976556504465]},
+  {c:'gate',ic:'🚪',n:'Gate 1 — 17th & Chew',ll:[40.60101978807049,-75.49444713311141]},
+  {c:'see',L:'A',n:'Astound Broadband Farmerama Theater · Butterfly Kingdom',ll:[40.601958426424574,-75.5017013368681]},
+  {c:'see',L:'B',n:"Machinery Ave Court — Robinson's Pig Paddling Porkers",ll:[40.6011549002197,-75.50060065413275]},
+  {c:'see',L:'C',n:'Agri-Plex Square · Harvest Patio · Dan, Dan The Farmer Man',ll:[40.6009851533724,-75.50039597824296]},
+  {c:'see',L:'D',n:'Livestock Barns — Cattle, Swine, Sheep & Goats',ll:[40.600946900502194,-75.50189483552829]},
+  {c:'see',L:'E',n:'Agri-Plex — Exhibits & Farm-to-Table Kitchen',ll:[40.60046634695578,-75.50096907073441]},
+  {c:'see',L:'F',n:'Nursing Station (Lehigh Valley Health Network)',ll:[40.600698256312484,-75.50062269615165]},
+  {c:'see',L:'G',n:"Lil' Farm Hands · Antique Engine Tractor & Toy Club",ll:[40.599906892206455,-75.50028261928861]},
+  {c:'see',L:'H',n:'The Judging Tent',ll:[40.59964389903979,-75.50101000591236]},
+  {c:'see',L:'I',n:'The 4-H Livestock Experience · Agri-Land',ll:[40.59983755774478,-75.50056916553433]},
+  {c:'see',L:'J',n:'Poultry / Rabbit Building',ll:[40.599510011212054,-75.49987956522867]},
+  {c:'see',L:'K',n:'Service Electric Grandstand — Show Venue',ll:[40.60153893620614,-75.49747433568447]},
+  {c:'see',L:'L',n:'Market Building — indoor shopping · Red Barn Stage',ll:[40.60146742398269,-75.49738328781226]},
+  {c:'see',L:'M',n:'Grandstand Box Office — Tickets / Will Call',ll:[40.601674809219844,-75.49682444225182]},
+  {c:'see',L:'N',n:'Allentown Fair Office',ll:[40.60147219146663,-75.49641943619959]},
+  {c:'see',L:'O',n:'Ritz Barbecue',ll:[40.60134346928088,-75.49615885091018]},
+  {c:'see',L:'P',n:'Powers & Thomas Midway — West End · Victoria Circus',ll:[40.59995849822209,-75.49948052849142]},
+  {c:'see',L:'Q',n:'Powers & Thomas Midway — East End · Guest Relations',ll:[40.60108125665419,-75.49539907211452]},
+  {c:'see',L:'R',n:'Weyerbacher Biergarten — live music (PA Lottery)',ll:[40.60298823411364,-75.49596105725675]},
+  {c:'see',L:'S',n:'Weyerbacher Biergarten — Hog Diggity Dog · The Cup Guy',ll:[40.60269265617024,-75.49569105322195]},
+  {c:'see',L:'T',n:'Main Entrance Plaza — LVHN Wellness Way',ll:[40.60095491747596,-75.4949281348445]},
+  {c:'see',L:'U',n:'Emergency / Security — Lost & Found',ll:[40.60067363316496,-75.49533000131493]},
+  {c:'svc',ic:'✚',n:'First Aid',ll:[40.60059496869912,-75.49516988265947]},
+  {c:'svc',ic:'👮',n:'Police',ll:[40.600714157251275,-75.49523895345908]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60197428256774,-75.50083256268407]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.603250439262155,-75.49648850701556]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.602871433300145,-75.49592338229219]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60237562352586,-75.49592966148373]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.6015174825368,-75.49733619413021]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60100736017238,-75.5001335615142]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60110032668777,-75.49766898980106]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60137207422427,-75.49553093456716]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.600126087385796,-75.49988228543933]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.601164688058496,-75.49647280910655]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60036913464451,-75.49976224526597]},
+  {c:'atm',ic:'🏧',n:'ATM',ll:[40.60100259265745,-75.4945451058819]},
+  {c:'see',ic:'🎡',n:'Powers & Thomas Midway',ll:[40.60020443238212,-75.49795119162744]},
+  {c:'svc',ic:'ℹ️',n:'InFAIRmation',ll:[40.60132359293622,-75.49586427404523]},
+  {c:'svc',ic:'ℹ️',n:'InFAIRmation',ll:[40.60020710322986,-75.49989562324446]},
+  {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.600596990638365,-75.50139279099119]},
+  {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.60014887309523,-75.50038912176396]},
+  {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.60087294853477,-75.49795163935502]},
+  {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.60142486092056,-75.49653783279574]},
+  {c:'wc',ic:'🚻',n:'Restrooms',ll:[40.603047659441685,-75.49633109694162]},
+  {c:'bev',ic:'🥤',n:'Beverage Tent',ll:[40.60160461120378,-75.50058585426365]},
+  {c:'bev',ic:'🥤',n:'Beverage Tent',ll:[40.60035141248049,-75.4997422385745]},
+  {c:'bev',ic:'🥤',n:'Beverage Tent',ll:[40.6012324847372,-75.49616775258694]},
+  {c:'bev',ic:'🥤',n:'Beverage Tent',ll:[40.60169158648068,-75.49613397190441]},
+  {c:'bev',ic:'🥤',n:'Beverage Tent',ll:[40.60282804771023,-75.49624137967842]},
+  {c:'acc',ic:'♿',n:'Accessible entrance',ll:[40.602788409340185,-75.4967079886645]},
+  {c:'acc',ic:'♿',n:'Accessible entrance',ll:[40.600692497043,-75.49804581862462]},
+  {c:'acc',ic:'♿',n:'Accessible entrance',ll:[40.60111118926764,-75.50003951156516]},
+  {c:'acc',ic:'♿',n:'Accessible entrance',ll:[40.600714794328155,-75.50063011454755]}
+];
+var CATS={ gate:{lbl:'🚪 Gates',c:'#7a3cc0'}, see:{lbl:'🎡 Attractions',c:'#b8002e'}, svc:{lbl:'🛟 Services',c:'#2a7de1'}, wc:{lbl:'🚻 Restrooms',c:'#2a7de1'}, bev:{lbl:'🥤 Beverage',c:'#e8730c'}, acc:{lbl:'♿ Accessible',c:'#1f9e6b'}, atm:{lbl:'🏧 ATMs',c:'#1f9e6b'} };
+var GORDER=['gate','see','svc','wc','bev','acc','atm'];
+var MAP, MK=[];
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function dirLink(ll){ return 'https://www.google.com/maps/dir/?api=1&destination='+ll[0]+','+ll[1]+'&travelmode=walking'; }
+
 (function(){
   try{
-    var FG=[40.6047,-75.4785];   // Allentown Fairgrounds — refine with Google right-click when we build it out
-    var map=L.map('amap',{zoomControl:true,scrollWheelZoom:true}).setView(FG,16);
-    if(window.DDtile){ DDtile(map); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map); }
-    var ic=L.divIcon({className:'affg',iconSize:[40,40],iconAnchor:[20,20],html:'<div style="width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid #7a3cc0;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 8px #0006">🎡</div>'});
-    L.marker(FG,{icon:ic}).addTo(map).bindPopup('<b>🎡 The Great Allentown Fair</b><br><span style="font-size:12px;color:#555">Sept 2–7, 2026 · 302 N 17th St</span>');
-    setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },250);
+    MAP=L.map('amap',{zoomControl:true,scrollWheelZoom:true});
+    if(window.DDtile){ DDtile(MAP); } else { L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:20}).addTo(MAP); }
+    L.polygon(BOUND,{color:'#7a3cc0',weight:2,fillColor:'#7a3cc0',fillOpacity:.07}).addTo(MAP);
+    var layers={}; GORDER.forEach(function(k){ layers[k]=L.layerGroup().addTo(MAP); });
+    PINS.forEach(function(p,i){
+      var col=CATS[p.c].c, html = p.L ? '<div class="pinL" style="background:'+col+'">'+esc(p.L)+'</div>' : '<div class="pinE" style="color:'+col+'">'+p.ic+'</div>';
+      var m=L.marker(p.ll,{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:html}),title:p.n}).addTo(layers[p.c])
+        .bindPopup('<div class="lp"><b>'+(p.L?(esc(p.L)+' · '):'')+esc(p.n)+'</b><div class="g">'+CATS[p.c].lbl.replace(/^..\s/,'')+'</div><a href="'+dirLink(p.ll)+'" target="_blank" rel="noopener">🚶 Walk here</a></div>');
+      MK[i]=m;
+    });
+    MAP.fitBounds(L.latLngBounds(BOUND.concat(PINS.map(function(p){return p.ll;}))).pad(0.06));
+    // filter chips
+    var leg=document.getElementById('aflegend'), on={}; GORDER.forEach(function(k){ on[k]=1;
+      var b=document.createElement('button'); b.className='afchip'; b.textContent=CATS[k].lbl;
+      b.onclick=function(){ on[k]=!on[k]; b.classList.toggle('off',!on[k]); if(on[k])layers[k].addTo(MAP); else MAP.removeLayer(layers[k]); };
+      leg.appendChild(b);
+    });
+    // synced directory list
+    var dir=document.getElementById('afdir'), html='';
+    GORDER.forEach(function(k){
+      var rows=''; PINS.forEach(function(p,i){ if(p.c!==k) return;
+        var badge = p.L ? '<div class="afbadge" style="background:'+CATS[k].c+'">'+esc(p.L)+'</div>' : '<div class="afbadge e" style="color:'+CATS[k].c+'">'+p.ic+'</div>';
+        rows += '<div class="afitem" data-n="'+esc(p.n.toLowerCase())+'" onclick="afGo('+i+')">'+badge+'<div class="nm">'+esc(p.n)+'</div>'
+             +  '<a class="walk" href="'+dirLink(p.ll)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Walk</a></div>';
+      });
+      html += '<div class="afgrp">'+CATS[k].lbl+'</div>'+rows;
+    });
+    dir.innerHTML=html;
+    setTimeout(function(){ try{ MAP.invalidateSize(); }catch(e){} },250);
   }catch(e){}
+})();
+window.afGo=function(i){ try{ MAP.setView(PINS[i].ll, 18, {animate:true}); MK[i].openPopup(); document.querySelector('.afmapwrap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} };
+window.afFilter=function(q){ q=(q||'').toLowerCase().trim();
+  document.querySelectorAll('#afdir .afitem').forEach(function(el){ el.style.display = (!q || el.getAttribute('data-n').indexOf(q)>=0) ? '' : 'none'; });
+  document.querySelectorAll('#afdir .afgrp').forEach(function(g){ var n=g.nextElementSibling, any=false; while(n && n.classList.contains('afitem')){ if(n.style.display!=='none')any=true; n=n.nextElementSibling; } g.style.display=any?'':'none'; });
+};
+
+/* Daily schedule engine — day tabs → confirmed 2026 Grandstand headliner + the every-day favorites
+   that recur across the free stages. Full stage-by-stage grid loads from the schedule CSV when the
+   Fair publishes 2026 programming. (Recurring acts read from the 2025 daily grids.) */
+var DAYS=[
+  {iso:'2026-09-02',dow:'Wed',shows:[{t:'7:30 PM',n:'The Four Tops with the Allentown Symphony Orchestra'}]},
+  {iso:'2026-09-03',dow:'Thu',shows:[{t:'7:00 PM',n:'Stars Stripes Slams Wrestling'}]},
+  {iso:'2026-09-04',dow:'Fri',shows:[{t:'7:00 PM',n:'Warren Zeiders'}]},
+  {iso:'2026-09-05',dow:'Sat',shows:[{t:'7:00 PM',n:'All Time Low'}]},
+  {iso:'2026-09-06',dow:'Sun',shows:[{t:'2:00 PM',n:'Local Legends Live'}]},
+  {iso:'2026-09-07',dow:'Mon',shows:[{t:'5:00 PM',n:'J & J Demolition Derby'}]}
+];
+var RECUR=[
+  {t:'12:00 PM',n:'Butterfly Exhibit (open until 8 PM)',st:'Astound Farmerama Theater'},
+  {t:'1:30 PM',n:'Dan, Dan The Farmer Man',st:'Agri-Plex Square'},
+  {t:'1:30 PM',n:'Hog Diggity Dog',st:'Weyerbacher Courtyard'},
+  {t:'2:00 PM',n:'Mighty Mike',st:'Main Entrance Plaza'},
+  {t:'2:30 PM',n:"Robinson's Pig Paddling Porkers",st:'Machinery Ave Court'},
+  {t:'3:00 PM',n:'Victoria Circus',st:'Red Barn Stage'},
+  {t:'3:00 PM',n:'Steve Goodtime',st:'Main Entrance Plaza'},
+  {t:'3:30 PM',n:'The Cup Guy',st:'Weyerbacher Courtyard'},
+  {t:'4:00 PM',n:'Mighty Mike',st:'Main Entrance Plaza'},
+  {t:'4:30 PM',n:'Dan, Dan The Farmer Man',st:'Agri-Plex Square'},
+  {t:'4:30 PM',n:'Hog Diggity Dog',st:'Weyerbacher Courtyard'},
+  {t:'5:00 PM',n:'Steve Goodtime',st:'Main Entrance Plaza'},
+  {t:'5:30 PM',n:"Robinson's Pig Paddling Porkers",st:'Machinery Ave Court'},
+  {t:'5:30 PM',n:'Victoria Circus',st:'Red Barn Stage'},
+  {t:'7:00 PM',n:'Dan, Dan The Farmer Man',st:'Agri-Plex Square'},
+  {t:'7:30 PM',n:'Victoria Circus',st:'Red Barn Stage'},
+  {t:'8:30 PM',n:'Hog Diggity Dog',st:'Weyerbacher Courtyard'}
+];
+(function(){ var tabs=document.getElementById('aftabs'), body=document.getElementById('afsched'); if(!tabs||!body) return;
+  var gk=-1; PINS.forEach(function(p,i){ if(p.L==='K')gk=i; });
+  function t2m(t){ var m=/(\d+):(\d+)\s*(AM|PM)/i.exec(t)||[]; var h=(+m[1]||0)%12; if(/pm/i.test(m[3]||''))h+=12; return h*60+(+m[2]||0); }
+  function render(i){ var d=DAYS[i];
+    [].forEach.call(tabs.children,function(b,j){ b.classList.toggle('off',j!==i); });
+    var gs=(d.shows||[]).map(function(s){ return '<div class="afitem"'+(gk>=0?' onclick="afGo('+gk+')"':'')+'><div class="afbadge" style="background:#b8002e">★</div><div class="nm">'+esc(s.n)+'<div style="font-size:12px;color:#7a7285;font-weight:600">'+esc(s.t)+' · Grandstand</div></div><a class="walk" href="https://www.allentownfair.com/" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tickets</a></div>'; }).join('');
+    var rec=RECUR.slice().sort(function(a,b){return t2m(a.t)-t2m(b.t);}).map(function(s){ return '<div class="afitem"><div class="afbadge e" style="color:#5a2e86">🎪</div><div class="nm">'+esc(s.n)+'<div style="font-size:12px;color:#7a7285;font-weight:600">'+esc(s.t)+' · '+esc(s.st)+'</div></div></div>'; }).join('');
+    body.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.06em;color:#b8002e;margin:6px 0 2px">🎤 GRANDSTAND HEADLINER</div>'+gs
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:.06em;color:#5a2e86;margin:14px 0 2px">🎪 EVERY-DAY FAVORITES</div>'+rec
+      +'<div style="margin-top:10px;background:#faf7fd;border:1px solid #ece3f7;border-left:3px solid #f0a500;border-radius:12px;padding:10px 12px;font-size:12.5px;color:#4a4356">Full stage-by-stage daily lineup (11 stages) drops here when the Fair publishes 2026 programming.</div>';
+  }
+  DAYS.forEach(function(d,i){ var dt=new Date(d.iso+'T12:00:00'); var b=document.createElement('button'); b.className='afchip off'; b.textContent=d.dow+' '+(dt.getMonth()+1)+'/'+dt.getDate(); b.onclick=function(){ render(i); }; tabs.appendChild(b); });
+  render(0);
 })();
 </script>
 </body>

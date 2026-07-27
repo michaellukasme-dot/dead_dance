@@ -10,7 +10,8 @@
   function save(s) { try { root.localStorage.setItem(SKEY, JSON.stringify(s)); } catch (e) {} }
   var STATE = load();
 
-  function tix() { try { return (root.MYTIX || []).slice(); } catch (e) { return []; } }
+  function tix() { try { if (root.MYTIX && root.MYTIX.length) return root.MYTIX.slice(); var a = JSON.parse(root.localStorage.getItem("dd.mytix") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function isPast(t) { try { var iso = t && (t.iso || t.date); return !!iso && new Date(iso + "T23:59:59") < new Date(); } catch (e) { return false; } }
   function refOf(t, i) { return (t && (t.ref || (t.band + "|" + (t.iso || t.date || "")))) || ("tix" + i); }
   function statusOf(t, i) { var r = refOf(t, i); return (STATE[r] && STATE[r].status) || "held"; }
 
@@ -59,13 +60,14 @@
       var list = tix();
       if (!list.length) { el.innerHTML = '<div style="color:#8a7;font-size:13px">No tickets yet — buy one on any show and it lands here. 🌹</div>'; return; }
       el.innerHTML = list.map(function (t, i) {
-        var st = statusOf(t, i);
-        var badge = st === "held" ? "" : (st === "transferred" ? '<span style="color:#5a2e86;font-weight:800"> · → ' + esc((STATE[refOf(t, i)] || {}).to || "") + "</span>" : '<span style="color:#1f7a4d;font-weight:800"> · 🍀 Miracled</span>');
-        var actions = st === "held"
-          ? '<button onclick="DDTickets.transfer(' + i + ')" style="background:#5a2e86;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;margin-right:6px">↗ Transfer</button>' +
+        var st = statusOf(t, i), past = isPast(t);
+        var badge = past ? '<span style="color:#b8002e;font-weight:800"> · 🎟 Attended</span>'
+          : (st === "held" ? "" : (st === "transferred" ? '<span style="color:#5a2e86;font-weight:800"> · → ' + esc((STATE[refOf(t, i)] || {}).to || "") + "</span>" : '<span style="color:#1f7a4d;font-weight:800"> · 🍀 Miracled</span>'));
+        var actions = (!past && st === "held")
+          ? '<button onclick="DDTickets.transfer(' + i + ')" style="background:#5a2e86;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;margin-right:6px">↗ Share</button>' +
             '<button onclick="DDTickets.float(' + i + ')" style="background:#1f7a4d;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800">🍀 Free to Miracle</button>'
           : '';
-        return '<div style="border:1px solid #e2dac9;border-radius:11px;padding:10px 12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:10px"><div><b>🎟️ ' + esc(t.band || "Ticket") + '</b>' + badge + '<div style="font-size:12px;color:#7a7686">' + esc(t.venue || "") + (t.iso || t.date ? " · " + esc(t.iso || t.date) : "") + '</div></div><div>' + actions + '</div></div>';
+        return '<div style="border:1px solid #e2dac9;border-radius:11px;padding:10px 12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;' + (past ? 'opacity:.72;background:#f6f2ea' : '') + '"><div><b>🎟️ ' + esc(t.band || "Ticket") + '</b>' + badge + '<div style="font-size:12px;color:#7a7686">' + esc(t.venue || "") + (t.iso || t.date ? " · " + esc(t.iso || t.date) : "") + '</div></div><div>' + actions + '</div></div>';
       }).join("");
     } catch (e) {}
   }

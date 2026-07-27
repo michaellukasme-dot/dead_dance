@@ -77,7 +77,10 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 .barfoot .tixq{width:19px;height:19px;border-radius:50%;border:0;background:#2f7bf6;color:#fff;font-size:12px;font-weight:900;cursor:pointer;line-height:19px;padding:0;display:inline-flex;align-items:center;justify-content:center}
 #tixSecModal{display:none;position:fixed;inset:0;z-index:600;background:rgba(14,11,20,.88);align-items:center;justify-content:center;padding:18px}
 #tixSecModal.on{display:flex}
-</style></head>
+</style>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+</head>
 <body onclick="if(event.target===this)ddTixDismiss()">
 
 <div class="ticket">
@@ -114,9 +117,12 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   </div>
 
   <div class="perf"></div>
-  <div class="stub">
-    <span>Ticket ID <b id="tid">d.dance/t/····</b></span>
-    <span class="chip">DEVICE-BOUND</span>
+  <div class="stub" style="flex-direction:column;align-items:stretch;gap:12px;background:#0f0b18;padding:16px 18px 18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;color:#c9bfe0;font-size:11px"><span>Ticket ID <b id="tid" style="color:#fff">d.dance/t/····</b></span><span class="chip" style="background:#ffffff14;color:#7ad7ff;border-color:#7ad7ff55">SHOW PASS</span></div>
+    <div style="display:flex;gap:13px;align-items:center">
+      <div id="showqr" style="width:118px;height:118px;flex:0 0 auto;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden">▦</div>
+      <div style="color:#cfc6e6;font-size:12px;line-height:1.45"><b style="color:#fff">Your show QR.</b> The <b>same code</b> before, during &amp; after — scan at the gate, get each song texted live, then keep it as your night in history. 🌹</div>
+    </div>
   </div>
 </div>
 
@@ -130,7 +136,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   var band=g('band','SHAKEDOWN'), sub=g('sub','Grateful Dead Tribute'),
       venue=g('venue','Wind Creek Steel Stage · Bethlehem, PA'), date=g('date',''),
       price=g('price','$18'), gate=g('gate','Gate A'),
-      sec=g('sec',''), row=g('row',''), seat=g('seat',''), img=g('img',''), url=g('url','');
+      sec=g('sec',''), row=g('row',''), seat=g('seat',''), img=g('img',''), url=g('url',''), iso=g('iso',''), ev=g('ev',''), color=g('color','');
+  if(color){ try{ document.documentElement.style.setProperty('--tm-blue', color); }catch(e){} }   // differentiate each show's ticket
 
   document.getElementById('band').textContent=String(band).toUpperCase();
   document.getElementById('sub').textContent=sub;
@@ -160,6 +167,27 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   } else { document.getElementById('ga').classList.remove('hidden'); }
 
   document.getElementById('tid').textContent='d.dance/t/'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,4).toUpperCase();
+
+  /* ROLLOVER: once the show has passed, the ticket becomes a CLOSED, historical stub — attended,
+     kept in your deck as a collectible. (The whole event page closes to history the same way.) */
+  (function(){ if(!iso) return; try{ if(new Date(iso+'T23:59:59') < new Date()){
+    var card=document.querySelector('.ticket');
+    if(card){ card.style.filter='grayscale(.45)';
+      var st=document.createElement('div'); st.textContent='ATTENDED · a night in history 🌹';
+      st.style.cssText='position:absolute;top:54px;left:0;right:0;text-align:center;font-weight:900;color:#b8002e;font-size:13px;letter-spacing:.03em;transform:rotate(-6deg);z-index:6;pointer-events:none;text-shadow:0 1px 0 #fff';
+      card.appendChild(st); }
+    var bb=document.getElementById('buybar'); if(bb) bb.classList.add('hidden');
+    var iN=document.getElementById('issuedNote'); if(iN){ iN.classList.remove('hidden'); iN.textContent='✓ Attended · closed historical event 🌹'; }
+  } }catch(e){} })();
+
+  /* the SHOW QR — the holder's persistent code for this show. It points at the stateful event page, so
+     ONE scan resolves to countdown/setlist-tease (pre) → live song texts (during) → historical (after).
+     Same QR through the whole process, tied to this ticket holder (&t=<id>). */
+  (function(){ var el=document.getElementById('showqr'); if(!el) return;
+    var tid=(document.getElementById('tid').textContent||'').replace('d.dance/t/','');
+    var qurl = ev ? (ev + (ev.indexOf('?')>=0?'&':'?') + 't=' + encodeURIComponent(tid)) : 'https://deaddance.app';
+    try{ if(window.DDQR&&DDQR.into){ DDQR.into('showqr', qurl, {size:320, css:118, caption:false, mark:false, link:true}); } else { el.textContent='QR'; } }catch(e){ el.textContent='QR'; }
+  })();
 
   // faux PDF417 that "rotates" like a live SafeTix code — draws immediately (it's the marketing piece)
   function drawBars(){
@@ -200,6 +228,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       bb.classList.add('hidden');
       document.getElementById('issuedNote').classList.remove('hidden');
       armReminder();
+      /* append to the fan's DECK (persists; DDTickets reads this) — flip through & share them */
+      try{ var mk='dd.mytix', arr=JSON.parse(window.localStorage.getItem(mk)||'[]'); arr.push({ref:'t'+Date.now(), band:band, venue:venue, date:date, iso:iso||date, price:price, at:Date.now()}); window.localStorage.setItem(mk, JSON.stringify(arr)); }catch(e){}
       try{ if(window.parent&&window.parent.toast) window.parent.toast('🎟️ Ticket issued — it lives on your phone now. 🌹'); }catch(e){}
     }, 750);
   };

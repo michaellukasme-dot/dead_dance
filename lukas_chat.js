@@ -112,9 +112,10 @@
     try {
       var p = client().auth.signInWithOAuth({ provider: "facebook", options: { redirectTo: location.origin + location.pathname } });
       if (p && p.then) p.then(function(r){
-        if (r && r.error) fail(/provider|enable|config/i.test(r.error.message||"") ? "Facebook sign-in is still being switched on — use email for now." : ("Facebook sign-in: " + (r.error.message||"try again")));
+        if (r && r.error) { try{ console.warn("[DeadDance] Facebook OAuth error:", r.error.message || r.error); }catch(_e){}
+          fail(/provider|enable|config/i.test(r.error.message||"") ? "Facebook sign-in is still being switched on — use email for now." : ("Facebook sign-in: " + (r.error.message||"try again"))); }
         // success → the browser redirects to Facebook; we come back signed in
-      }, function(){ fail(); });
+      }, function(e){ try{ console.warn("[DeadDance] Facebook OAuth threw:", e); }catch(_e){} fail(); });
     } catch(e){ fail(); }
   }
   function signInGoogle(){
@@ -124,8 +125,9 @@
     try {
       var p = client().auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
       if (p && p.then) p.then(function(r){
-        if (r && r.error) fail(/provider|enable|config/i.test(r.error.message||"") ? "Google sign-in is still being switched on — use email for now." : ("Google sign-in: " + (r.error.message||"try again")));
-      }, function(){ fail(); });
+        if (r && r.error) { try{ console.warn("[DeadDance] Google OAuth error:", r.error.message || r.error); }catch(_e){}
+          fail(/provider|enable|config/i.test(r.error.message||"") ? "Google sign-in is still being switched on — use email for now." : ("Google sign-in: " + (r.error.message||"try again"))); }
+      }, function(e){ try{ console.warn("[DeadDance] Google OAuth threw:", e); }catch(_e){} fail(); });
     } catch(e){ fail(); }
   }
   function finishIdentity(){
