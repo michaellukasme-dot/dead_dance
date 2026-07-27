@@ -56,6 +56,24 @@ h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spac
 .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:16px 0}
 .pinmark{width:30px;height:30px;border-radius:50% 50% 50% 2px;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0005;border:2px solid #fff}
 .pinmark span{transform:rotate(-45deg);font-size:15px}
+.pinmark.draft{opacity:.5;border-style:dashed}
+.vchk{position:absolute;left:19px;top:-5px;width:16px;height:16px;border-radius:50%;background:var(--ok);color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;box-shadow:0 1px 3px #0006}
+.pinrow .vbtn{border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer;background:#fff;color:var(--muted)}
+.pinrow .vbtn.ok{background:#e7f7ef;color:var(--ok);border-color:#bce9d3}
+.home{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;font:inherit;font-size:13px;background:#fbfcff;margin-top:7px;color:var(--ink)}
+/* Areas — Platz & Tents */
+.areas{margin:4px 0 8px}
+.arow{display:flex;gap:7px;align-items:center;margin-bottom:6px}
+.acard{border:1px solid #cfe9e5;background:#f2fbf9;border-radius:13px;padding:9px 10px;margin-bottom:8px}
+.ahint{background:#fff6ec;border:1px solid #ffe1bf;border-radius:11px;padding:9px 12px;font-size:12px;color:#7a4a12;margin-bottom:8px}
+.anm{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:8px 9px;font:inherit;font-size:14px;font-weight:700;background:#fff}
+.abtn{border:0;border-radius:9px;padding:8px 10px;font-weight:800;font-size:12px;cursor:pointer;background:#e4f4f1;color:#0e7d72;white-space:nowrap}
+.abtn.on{background:#0e9488;color:#fff}
+.axx{border:0;background:#f7ecec;color:#b8002e;width:30px;height:30px;border-radius:8px;font-weight:800;cursor:pointer;flex:0 0 auto}
+.trow{display:flex;gap:6px;align-items:center;margin:7px 0 0;padding-left:6px}
+.trow .tic{font-size:15px}
+.cov{display:flex;align-items:center;gap:2px;font-size:15px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:5px 7px;cursor:pointer}
+.atent{width:100%;border:1.5px dashed #0e9488;background:#eafaf7;color:#0e7d72;border-radius:10px;padding:9px;font-weight:800;font-size:12.5px;cursor:pointer;margin-top:8px}
 .savebar{position:fixed;left:0;right:0;bottom:0;background:#fffffff2;border-top:1px solid var(--line);padding:10px 15px calc(12px + env(safe-area-inset-bottom,0));display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px)}
 .savebar .tot{font-size:12.5px;color:var(--muted);font-weight:700;flex:1}.savebar b{color:var(--ink)}
 .savebar .go{border:0;border-radius:12px;padding:12px 18px;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(180deg,var(--blue),var(--blue2));cursor:pointer}
@@ -71,6 +89,8 @@ h1{font-size:21px;font-weight:900;color:var(--blue);margin:4px 0 2px;letter-spac
     <button class="mbtn pur" onclick="fpAddCorner()">＋ Add corner pin</button>
     <span class="mtip"><b>Drag the purple pins</b> to frame your grounds — any shape. Double-tap a pin to remove it.</span>
   </div>
+
+  <div class="areas" id="areasBox"></div>
 
   <div class="hint"><b>Pick an icon</b> → <b>＋ Add</b> → <b>tap the map</b> where it is. The pin drops there and the coordinates fill in. Name every spot — “NorthWest Restrooms”, “Angelo’s Pizza”, “Main Stage”. Only one item type shows at a time — no clutter. (Drag any pin to nudge it; 📍 to re-place.)</div>
 
@@ -138,7 +158,8 @@ function initMap(center){
   if(saved && saved.length>=3){ saved.forEach(function(ll){ addCorner(ll[0],ll[1]); }); }
   else { var d=0.0016; [[1,-1],[1,1],[-1,1],[-1,-1]].forEach(function(o){ addCorner(center[0]+d*o[0], center[1]+d*o[1]); }); }
   fpRedraw();
-  // restore item markers
+  // restore Platz/Tent areas (below the pins), then item markers on top
+  redrawAllAreas();
   allT().forEach(function(t){ (state.items[t.k]||[]).forEach(function(r){ if(r.lat&&r.lng) makeItemMarker(t.k,r); }); });
   setTimeout(function(){ try{ MAP.invalidateSize(); }catch(e){} },200);
 }
@@ -153,9 +174,10 @@ function fpRedraw(){ var pts=fpMarks.map(function(m){var ll=m.getLatLng();return
   if(pts.length>=3) fpPoly=L.polygon(pts,{color:'#7c3aed',weight:2,fillColor:'#7c3aed',fillOpacity:.08}).addTo(MAP); }
 
 /* ---------- ITEM PINS ---------- */
-function itemDivIcon(t){ return L.divIcon({className:'',iconSize:[30,30],iconAnchor:[6,28],html:'<div class="pinmark" style="background:'+t.c+'"><span>'+t.ic+'</span></div>'}); }
+function itemDivIcon(t,verified){ return L.divIcon({className:'',iconSize:[30,30],iconAnchor:[6,28],
+  html:'<div class="pinmark'+(verified?'':' draft')+'" style="background:'+t.c+'"><span>'+t.ic+'</span></div>'+(verified?'<div class="vchk">✓</div>':'')}); }
 function makeItemMarker(k,r){ if(itemMarks[r.id]) return itemMarks[r.id]; var t=T(k);
-  var m=L.marker([+r.lat,+r.lng],{draggable:true,icon:itemDivIcon(t)}).addTo(MAP);
+  var m=L.marker([+r.lat,+r.lng],{draggable:true,icon:itemDivIcon(t,r.status==='verified')}).addTo(MAP);
   m.bindTooltip(r.n||t.lb,{direction:'top'});
   m.on('drag',function(){ var ll=m.getLatLng(); r.lat=ll.lat.toFixed(6); r.lng=ll.lng.toFixed(6); if(sel===k) syncCoordText(r); });
   m.on('dragend',fmSave);
@@ -189,6 +211,7 @@ function renderPalette(){ var p=document.getElementById('palette');
 }
 (function(){ renderPalette();
   document.getElementById('fname').value=state.name||'';
+  renderAreas();
   paintTotal();
   // center the map on the user (setup crews on-site) → fallback Allentown fairgrounds
   if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(p){ initMap([p.coords.latitude,p.coords.longitude]); }, function(){ initMap([40.6013,-75.4979]); }, {timeout:8000}); }
@@ -208,15 +231,28 @@ function renderEditor(){ var t=T(sel), rows=listOf(sel), ed=document.getElementB
   ed.innerHTML='<div class="ehead"><span class="eic">'+t.ic+'</span><b>'+esc(t.lb)+'</b></div>'+body
     +'<button class="add" onclick="fmAdd()">＋ Add '+(rows.length?'another ':'a ')+esc(t.one)+'</button>';
 }
-function entryHTML(r){ var t=T(sel), set=(r.lat&&r.lng);
+function entryHTML(r){ var t=T(sel), set=(r.lat&&r.lng), ver=(r.status==='verified');
   return '<div class="entry'+(active===r.id?' active':'')+'" data-id="'+r.id+'" onclick="setActive(\''+r.id+'\')">'
     +'<div class="top"><input class="nm" value="'+esc(r.n||'')+'" placeholder="Name — e.g. '+esc(t.eg)+'" oninput="fmField(\''+r.id+'\',\'n\',this.value)"><button class="x" onclick="event.stopPropagation();fmDel(\''+r.id+'\')" title="Remove">✕</button></div>'
-    +'<div class="pinrow"><button class="pinbtn'+(set?' set':'')+'" id="pin_'+r.id+'" onclick="event.stopPropagation();fmPin(\''+r.id+'\')">'+(set?'📍 on map':'📍 Tap map')+'</button><span class="co" id="co_'+r.id+'">'+(set?(r.lat+', '+r.lng):'tap the map to place')+'</span></div>'
+    +'<div class="pinrow"><button class="pinbtn'+(set?' set':'')+'" id="pin_'+r.id+'" onclick="event.stopPropagation();fmPin(\''+r.id+'\')">'+(set?'📍 on map':'📍 Tap map')+'</button>'
+      +'<button class="vbtn'+(ver?' ok':'')+'" onclick="event.stopPropagation();fmVerify(\''+r.id+'\')" title="Verified pins are the ones fans see">'+(ver?'✓ Verified':'Verify')+'</button>'
+      +'<span class="co" id="co_'+r.id+'">'+(set?(r.lat+', '+r.lng):'tap the map to place')+'</span></div>'
+    +((state.platzes&&state.platzes.length)?'<select class="home" onclick="event.stopPropagation()" onchange="fmHome(\''+r.id+'\',this.value)">'+homeOptions(r)+'</select>':'')
     +'<input class="det" value="'+esc(r.d||'')+'" placeholder="Details (optional) — hours, sponsor, notes" oninput="fmField(\''+r.id+'\',\'d\',this.value)">'
     +'</div>';
 }
+function homeOptions(r){
+  var opts='<option value="open"'+(!r.platzId&&!r.tentId?' selected':'')+'>📍 Open grounds</option>';
+  (state.platzes||[]).forEach(function(p){
+    opts+='<option value="adj:'+p.id+'"'+((r.platzId===p.id&&!r.tentId)?' selected':'')+'>▦ Adjacent — '+esc(p.name)+'</option>';
+    (state.tents||[]).filter(function(tt){return tt.platzId===p.id;}).forEach(function(tt){
+      opts+='<option value="tent:'+tt.id+'"'+((r.tentId===tt.id)?' selected':'')+'>⛺ Under — '+esc(tt.name)+(tt.covered?' ☂':'')+'</option>';
+    });
+  });
+  return opts;
+}
 function findById(id){ var a=listOf(sel); for(var i=0;i<a.length;i++) if(a[i].id===id) return a[i]; return null; }
-window.fmAdd=function(){ if(!sel)return; var r={id:nid(),n:'',lat:'',lng:'',d:''}; listOf(sel).push(r); fmSave(); renderEditor(); setActive(r.id); startPlacing(sel,r.id,'this '+T(sel).one); };
+window.fmAdd=function(){ if(!sel)return; var r={id:nid(),n:'',lat:'',lng:'',d:'',status:'draft',platzId:null,tentId:null,under:false}; listOf(sel).push(r); fmSave(); renderEditor(); setActive(r.id); startPlacing(sel,r.id,'this '+T(sel).one); };
 window.fmDel=function(id){ var r=findById(id); if(r) removeItemMarker(r); state.items[sel]=listOf(sel).filter(function(x){return x.id!==id;}); fmSave(); renderEditor(); };
 window.fmField=function(id,f,v){ var r=findById(id); if(!r)return; r[f]=v; if(f==='n'&&itemMarks[id]) itemMarks[id].setTooltipContent(v||T(sel).lb); fmSave(); };
 window.fmPin=function(id){ var r=findById(id); if(!r)return; if(itemMarks[id]){ setActive(id); } else { startPlacing(sel,id,(r.n||('this '+T(sel).one))); } };
@@ -243,6 +279,102 @@ window.fmCustomCreate=function(){ var ic=((document.getElementById('cIc')||{}).v
   var m=document.getElementById('customModal'); if(m)m.remove();
   renderPalette(); fmPick(t.k);
 };
+/* ---------- VERIFY (place → verify → adjust) ----------
+   Draft pins render dashed/translucent (admin-only); Verified pins render solid with a ✓ — those are
+   the only ones fans see on the live map. When editing a cloud map (?festival&key), the toggle also
+   pushes to the spine via dd_poi_verify. */
+window.fmVerify=function(id){ var r=findById(id); if(!r)return;
+  if(!(r.lat&&r.lng)){ alert('Place this pin on the map first, then verify it.'); return; }
+  r.status = (r.status==='verified')?'draft':'verified'; fmSave();
+  var t=T(sel), m=itemMarks[id]; if(m) m.setIcon(itemDivIcon(t, r.status==='verified'));
+  try{ var F=window.DD_FEST; if(F&&F.owner&&F.key){ var cl=window.ddClient&&ddClient();
+    if(cl&&cl.rpc) cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:id,p_status:r.status,p_by:'admin'}); } }catch(e){}
+  renderEditor(); setActive(id);
+};
+window.fmHome=function(id,val){ var r=findById(id); if(!r)return;
+  if(val==='open'){ r.platzId=null; r.tentId=null; r.under=false; }
+  else if(val.indexOf('adj:')===0){ r.platzId=val.slice(4); r.tentId=null; r.under=false; }
+  else if(val.indexOf('tent:')===0){ var t=tentById(val.slice(5)); r.tentId=val.slice(5); r.platzId=t?t.platzId:null; r.under=true; }
+  fmSave();
+};
+
+/* ---------- PLATZ & TENTS (layered areas) ----------
+   A Platz is a named container drawn with corner pins (same mechanic as the grounds). Inside it sit
+   tents; a tent flagged "covered" (☂) is a RAIN-OR-SHINE venue. Items pick a home: Open grounds,
+   Adjacent (in a Platz), or Under a specific Tent — stored on each pin (platzId/tentId/under). */
+var AREA_EDIT=null, areaMarks={}, areaPolys={};
+function ensureAreas(){ state.platzes=state.platzes||[]; state.tents=state.tents||[]; }
+function areaById(id){ return (state.platzes||[]).concat(state.tents||[]).filter(function(a){return a.id===id;})[0]; }
+function tentById(id){ return (state.tents||[]).filter(function(t){return t.id===id;})[0]; }
+function eachItem(fn){ Object.keys(state.items||{}).forEach(function(k){ (state.items[k]||[]).forEach(fn); }); }
+function areaSeed(c,scale){ var d=0.0008*(scale||1); return [[c[0]+d,c[1]-d],[c[0]+d,c[1]+d],[c[0]-d,c[1]+d],[c[0]-d,c[1]-d]]; }
+function areaCornerIcon(color){ return L.divIcon({className:'',iconSize:[18,18],iconAnchor:[9,9],html:'<div style="width:14px;height:14px;border-radius:50%;background:'+color+';border:3px solid #fff;box-shadow:0 1px 4px #0006"></div>'}); }
+function areaStyle(kind,covered){ if(kind==='platz') return {color:'#0e9488',weight:2,fillColor:'#14b8a6',fillOpacity:.10};
+  return covered? {color:'#e8730c',weight:2,fillColor:'#f59e0b',fillOpacity:.24} : {color:'#e8730c',weight:2,dashArray:'6,5',fillColor:'#f59e0b',fillOpacity:.10}; }
+function clearAreaLayers(){ Object.keys(areaPolys).forEach(function(id){ try{MAP.removeLayer(areaPolys[id]);}catch(e){} }); areaPolys={};
+  Object.keys(areaMarks).forEach(function(id){ (areaMarks[id]||[]).forEach(function(m){ try{MAP.removeLayer(m);}catch(e){} }); }); areaMarks={}; }
+function redrawAllAreas(){ if(!MAP) return; ensureAreas(); clearAreaLayers();
+  (state.platzes||[]).forEach(function(p){ drawOneArea(p,'platz'); });
+  (state.tents||[]).forEach(function(t){ drawOneArea(t,'tent'); }); }
+function drawOneArea(a,kind){ var editing=(AREA_EDIT===a.id);
+  if(a.corners && a.corners.length>=3){
+    var poly=L.polygon(a.corners, areaStyle(kind,a.covered)).addTo(MAP);
+    var lbl=(kind==='tent'?(a.covered?'⛺ ':'▢ '):'▦ ')+esc(a.name||(kind==='platz'?'Platz':'Tent'))+((kind==='tent'&&a.covered)?' · ☂ rain-or-shine':'');
+    poly.bindTooltip(lbl,{sticky:true,direction:'top'}); areaPolys[a.id]=poly;
+  }
+  if(editing){ var color=(kind==='platz')?'#0e9488':'#e8730c', marks=[];
+    a.corners.forEach(function(ll,idx){ var m=L.marker(ll,{draggable:true,icon:areaCornerIcon(color)}).addTo(MAP);
+      m.on('drag',function(){ var p=m.getLatLng(); a.corners[idx]=[p.lat,p.lng]; if(areaPolys[a.id]) areaPolys[a.id].setLatLngs(a.corners); });
+      m.on('dragend',fmSave);
+      m.on('dblclick',function(){ if(a.corners.length<=3){ alert('Need at least 3 corners.'); return; } a.corners.splice(idx,1); fmSave(); redrawAllAreas(); });
+      marks.push(m); });
+    areaMarks[a.id]=marks;
+  }
+}
+window.fmAddPlatz=function(){ ensureAreas(); var name=prompt('Name this Platz (e.g. Liederplatz):',''); if(name===null)return;
+  var c=MAP?MAP.getCenter():{lat:40.6013,lng:-75.4979}; var p={id:'pz'+nid(),name:(name||'Platz'),corners:areaSeed([c.lat,c.lng],1.7)};
+  state.platzes.push(p); AREA_EDIT=p.id; fmSave(); redrawAllAreas(); renderAreas(); if(sel)renderEditor();
+  try{ document.getElementById('fmap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} };
+window.fmAddTent=function(platzId){ ensureAreas(); var name=prompt('Name this Tent (e.g. North Tent):',''); if(name===null)return;
+  var c=MAP?MAP.getCenter():{lat:40.6013,lng:-75.4979}; var t={id:'tn'+nid(),platzId:platzId,name:(name||'Tent'),covered:true,corners:areaSeed([c.lat,c.lng],1)};
+  state.tents.push(t); AREA_EDIT=t.id; fmSave(); redrawAllAreas(); renderAreas(); if(sel)renderEditor();
+  try{ document.getElementById('fmap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} };
+window.fmEditArea=function(id){ AREA_EDIT=(AREA_EDIT===id?null:id); redrawAllAreas(); renderAreas();
+  if(AREA_EDIT){ try{ document.getElementById('fmap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} } };
+window.fmAreaCorner=function(id){ var a=areaById(id); if(!a||!MAP)return; var c=MAP.getCenter(); a.corners.push([c.lat,c.lng]); fmSave(); redrawAllAreas(); };
+window.fmAreaName=function(id,val){ var a=areaById(id); if(a){ a.name=val; fmSave(); if(areaPolys[id]){ var kind=(state.tents||[]).indexOf(a)>=0?'tent':'platz'; areaPolys[id].setTooltipContent((kind==='tent'?(a.covered?'⛺ ':'▢ '):'▦ ')+esc(val)+((kind==='tent'&&a.covered)?' · ☂ rain-or-shine':'')); } } };
+window.fmTentCovered=function(id,val){ var t=tentById(id); if(!t)return; t.covered=!!val; fmSave(); redrawAllAreas(); renderAreas(); };
+window.fmDelPlatz=function(id){ if(!confirm('Delete this Platz? Its tents remain but lose the Platz link.'))return;
+  state.platzes=(state.platzes||[]).filter(function(p){return p.id!==id;});
+  (state.tents||[]).forEach(function(t){ if(t.platzId===id) t.platzId=null; });
+  eachItem(function(r){ if(r.platzId===id){ r.platzId=null; r.tentId=null; r.under=false; } });
+  if(AREA_EDIT===id)AREA_EDIT=null; fmSave(); redrawAllAreas(); renderAreas(); if(sel)renderEditor(); };
+window.fmDelTent=function(id){ if(!confirm('Delete this Tent?'))return;
+  state.tents=(state.tents||[]).filter(function(t){return t.id!==id;});
+  eachItem(function(r){ if(r.tentId===id){ r.tentId=null; r.under=false; } });
+  if(AREA_EDIT===id)AREA_EDIT=null; fmSave(); redrawAllAreas(); renderAreas(); if(sel)renderEditor(); };
+function renderAreas(){ ensureAreas(); var box=document.getElementById('areasBox'); if(!box)return;
+  var pz=state.platzes, tn=state.tents;
+  var html='<div class="arow"><b>⛺ Platz &amp; Tents</b><button class="mbtn" style="margin-left:auto" onclick="fmAddPlatz()">＋ Add Platz</button></div>';
+  if(!pz.length){ html+='<div class="ahint">Optional. A <b>Platz</b> holds big <b>tents</b>. Flag a tent <b>☂ covered</b> and it becomes a <b>rain-or-shine</b> venue — fans get routed there when it rains. Items can sit <b>under</b> a tent or <b>adjacent</b> in the Platz.</div>'; }
+  pz.forEach(function(p){
+    html+='<div class="acard"><div class="arow"><input class="anm" value="'+esc(p.name)+'" oninput="fmAreaName(\''+p.id+'\',this.value)">'
+      +'<button class="abtn'+(AREA_EDIT===p.id?' on':'')+'" onclick="fmEditArea(\''+p.id+'\')">'+(AREA_EDIT===p.id?'✓ Done':'✎ Shape')+'</button>'
+      +(AREA_EDIT===p.id?'<button class="abtn" onclick="fmAreaCorner(\''+p.id+'\')">＋ pt</button>':'')
+      +'<button class="axx" onclick="fmDelPlatz(\''+p.id+'\')">✕</button></div>';
+    tn.filter(function(t){return t.platzId===p.id;}).forEach(function(t){ html+=tentRow(t); });
+    html+='<button class="atent" onclick="fmAddTent(\''+p.id+'\')">＋ Add Tent in '+esc(p.name)+'</button></div>';
+  });
+  var orph=tn.filter(function(t){return !t.platzId;});
+  if(orph.length){ html+='<div class="acard"><div class="arow"><b style="font-size:13px;color:#7a4a12">Tents without a Platz</b></div>'; orph.forEach(function(t){ html+=tentRow(t); }); html+='</div>'; }
+  box.innerHTML=html;
+}
+function tentRow(t){ return '<div class="trow"><span class="tic">⛺</span><input class="anm" value="'+esc(t.name)+'" oninput="fmAreaName(\''+t.id+'\',this.value)">'
+  +'<label class="cov" title="Covered = rain-or-shine venue"><input type="checkbox" '+(t.covered?'checked':'')+' onchange="fmTentCovered(\''+t.id+'\',this.checked)">☂</label>'
+  +'<button class="abtn'+(AREA_EDIT===t.id?' on':'')+'" onclick="fmEditArea(\''+t.id+'\')">'+(AREA_EDIT===t.id?'✓':'✎')+'</button>'
+  +(AREA_EDIT===t.id?'<button class="abtn" onclick="fmAreaCorner(\''+t.id+'\')">＋pt</button>':'')
+  +'<button class="axx" onclick="fmDelTent(\''+t.id+'\')">✕</button></div>'; }
+
 window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker.html';
   try{ if(navigator.share){ navigator.share({title:(state.name||'Festival')+' — StageFill',url:u}); return; } }catch(e){}
   try{ navigator.clipboard.writeText(u); alert('Saved 🌹 Draft stored on this device; link copied.'); }catch(e){ alert('Saved 🌹 Draft stored on this device.'); } };
