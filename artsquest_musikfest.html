@@ -298,6 +298,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div class="silverfloat" id="silverFloat"></div>
   <div id="mfAsk" aria-live="polite"></div>   <!-- one crowdsource ask at a time, floats over the map, expires if ignored -->
   <input type="file" id="photoIn" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
+  <input type="file" id="shotIn" accept="image/*" capture="environment" style="display:none" onchange="addPhotos(this)"><!-- "Add my shot"/Surround → camera (rear) on mobile -->
   <div id="photoStrip" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:6px"></div>
 
   <!-- map + filter chips + distance pill relocated to the fixed top zone (.mf-map) in app mode -->
@@ -1120,7 +1121,7 @@ function mfAskRender(a, data){
   clearTimeout(_askTimer); _askTimer=setTimeout(function(){ mfAskClose(false); }, ASK_EXPIRE);
 }
 window.mfAskClose=function(kept){ var h=document.getElementById('mfAsk'); if(h) h.classList.remove('on'); clearTimeout(_askTimer); _askBusy=false; };
-window.mfAskDo=function(act){ if(act==='photo'){ var p=document.getElementById('photoIn'); if(p)p.click(); } else if(act==='checkin'){ try{ mfCheckIn(); }catch(e){} } window.mfAskClose(true); };
+window.mfAskDo=function(act){ if(act==='photo'){ var p=document.getElementById('shotIn')||document.getElementById('photoIn'); if(p)p.click(); setTimeout(function(){ try{ mfAskClose(true); }catch(e){} },700); return; } if(act==='checkin'){ try{ mfCheckIn(); }catch(e){} } window.mfAskClose(true); };  // click camera FIRST, close AFTER
 function mfAskTick(){
   if(_askBusy) return;                                   // one at a time — never stack
   if(Date.now()-_askLastAt < ASK_MINGAP) return;         // protect the show — long gaps between asks
@@ -1173,8 +1174,8 @@ function cookieCelebrate(cap){ var el=document.getElementById('ckPop'); if(!el){
   el.innerHTML='<img src="cookie-mark.svg" alt="" style="width:34px;height:34px;flex:none"><div><div style="font-weight:900;font-size:13px">🍪 Posted to the family!</div>'+(cap?'<div style="font-size:12px;opacity:.9">“'+String(cap).replace(/</g,'&lt;')+'”</div>':'')+'</div>';
   el.style.display='flex'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.display='none'; },4500);
 }
-window.askCapture=function(cap){ window._askCap=cap||''; var inp=document.getElementById('photoIn'); if(inp)inp.click(); };   // tapping the ask opens the camera; the shot itself is the send
-window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; var inp=document.getElementById('photoIn'); if(inp)inp.click(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
+window.askCapture=function(cap){ window._askCap=cap||''; var inp=document.getElementById('shotIn')||document.getElementById('photoIn'); if(inp)inp.click(); };   // tapping the ask opens the camera; the shot itself is the send
+window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; var inp=document.getElementById('shotIn')||document.getElementById('photoIn'); if(inp)inp.click(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
 
 if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; try{ fillPlanDate(); refresh(); }catch(e){ try{console.error('mf init refresh failed (non-fatal):',e);}catch(_){}}} else { try{ drawMap(); }catch(e){} }
 

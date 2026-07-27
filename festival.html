@@ -139,10 +139,11 @@ function render(F){
     paint();
   })();
   if(ovLayers.length){ var lg=document.getElementById('legend');
-    lg.insertAdjacentHTML('afterbegin','<button id="ovToggle" style="border:1px solid #e2c58a;background:#fff8ec;color:#7a4a12;font:800 12px system-ui;border-radius:999px;padding:5px 11px;cursor:pointer;margin-right:6px">🖼 Map guide: on</button>');
-    document.getElementById('ovToggle').onclick=function(){ var on=map.hasLayer(ovLayers[0]);
-      ovLayers.forEach(function(l){ if(on){ map.removeLayer(l); } else { l.addTo(map); } });
-      this.textContent='🖼 Map guide: '+(on?'off':'on'); this.style.opacity=on?'.6':'1'; };
+    lg.insertAdjacentHTML('afterbegin','<span id="mapMode" style="display:inline-flex;border:1px solid #d9cfe9;border-radius:999px;overflow:hidden;margin-right:8px"><button data-m="drawn" style="border:0;padding:6px 13px;font:800 12.5px system-ui;cursor:pointer">🖼 Drawn Map</button><button data-m="live" style="border:0;border-left:1px solid #d9cfe9;padding:6px 13px;font:800 12.5px system-ui;cursor:pointer">🗺 Live Map</button></span>');
+    function setMapMode(m){ ovLayers.forEach(function(l){ if(m==='drawn'){ l.setOpacity(1); if(!map.hasLayer(l)) l.addTo(map); } else if(map.hasLayer(l)) map.removeLayer(l); });
+      document.querySelectorAll('#mapMode button').forEach(function(b){ var on=b.getAttribute('data-m')===m; b.style.background=on?'#5a2e86':'#f3eefb'; b.style.color=on?'#fff':'#5a2e86'; }); }
+    document.querySelectorAll('#mapMode button').forEach(function(b){ b.onclick=function(){ setMapMode(b.getAttribute('data-m')); }; });
+    setMapMode('drawn');   // show the festival's own art first; the label always matches what's shown
   }
 
   // sections grouped by type
