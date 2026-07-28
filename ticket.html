@@ -80,6 +80,35 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 </style>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
+<script src="dd_roster.js"></script><script src="dd_setlist.js"></script><script src="dd_media.js"></script>
+<style>
+.pillrow{display:flex;gap:8px;margin-top:9px}
+.tpill{flex:1;border:1px solid var(--line,#e6e0ef);background:#fff;border-radius:12px;padding:10px 6px;font:800 12.5px system-ui;color:#5a2e86;cursor:pointer}
+.tpill:active{transform:scale(.97)}
+#curtain{display:none;position:fixed;inset:0;z-index:60;background:rgba(14,11,20,.62);align-items:flex-end;justify-content:center}
+#curtain.on{display:flex}
+.curtcard{background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:18px 18px 26px;max-height:82vh;overflow:auto;position:relative;box-shadow:0 -12px 40px #0006;animation:curtup .22s ease}
+@keyframes curtup{from{transform:translateY(24px);opacity:.6}to{transform:translateY(0);opacity:1}}
+.curtx{position:absolute;top:12px;right:12px;width:30px;height:30px;border:0;border-radius:50%;background:#f1ecf7;color:#5a2e86;font-size:17px;cursor:pointer}
+.curth{font:900 18px system-ui;color:#1a1320;letter-spacing:-.2px}
+.curtsub{font:700 12.5px system-ui;color:#8a8296;margin:3px 0 12px}
+.rrow,.srow{display:flex;align-items:center;gap:8px;padding:9px 2px;border-bottom:1px solid #f4f0fa}
+.rrow b{flex:0 0 auto;font-size:14px;color:#1a1320}.rrow span{margin-left:auto;text-align:right;font-size:12.5px;color:#5a2e86;font-weight:700}
+.srow .snum{width:20px;color:#b9a7d6;font-weight:900;font-size:12px}.srow b{font-size:14px;color:#1a1320}
+.srow .sat{margin-left:auto;font-size:11.5px;color:#8a8296;font-variant-numeric:tabular-nums}
+.srow .splay{margin-left:8px;border:0;background:#b8002e;color:#fff;width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer}
+.chanh{font:900 11px system-ui;letter-spacing:.06em;color:#7a3cc0;margin:14px 0 4px}
+.chanl{font-size:13px;color:#4a4356;line-height:1.5}
+.curtempty{text-align:center;color:#8a8296;font-size:14px;padding:22px 6px;line-height:1.5}
+.cookie{display:block;margin-top:10px;background:#fff8ec;border:1px solid #ffe1bf;border-radius:12px;padding:10px 12px;font:700 12.5px system-ui;color:#7a4a12}
+.slbl{display:block;font:800 11px system-ui;color:#8a8296;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.slin{width:100%;box-sizing:border-box;border:1px solid #e6e0ef;border-radius:10px;padding:10px;font:inherit;font-size:14px}
+.slta{width:100%;box-sizing:border-box;border:1px solid #e6e0ef;border-radius:10px;padding:10px;font:inherit;font-size:14px;min-height:120px;resize:vertical}
+.redit{display:flex;gap:6px;align-items:center;margin:6px 0}
+.redit input{flex:1;min-width:0;border:1px solid #e6e0ef;border-radius:9px;padding:8px;font:inherit;font-size:13px}
+.redit .rn{flex:1.2}.redit .rx{border:0;background:#f7ecec;color:#b8002e;width:30px;height:30px;border-radius:8px;cursor:pointer;flex:0 0 auto;font-weight:800}
+.raddbtn{width:100%;border:1.5px dashed #12854f;background:#f0faf4;color:#0e7d4f;border-radius:10px;padding:9px;font:800 13px system-ui;cursor:pointer;margin-top:6px}
+</style>
 </head>
 <body onclick="if(event.target===this)ddTixDismiss()">
 
@@ -114,6 +143,11 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     <div class="foot"><span class="rose">🌹</span> Your ticket. Your friends. No toll booth.</div>
     <button class="tmb" onclick="ddCheckInHere()" style="border-color:#b8002e;color:#b8002e">📍 Check in — in your voice</button>
     <button class="tmb" onclick="bandPerm(1)">🎤 That's my band — sell my tickets</button>
+    <div class="pillrow" id="pillrow">
+      <button class="tpill" onclick="ticketCurtain('setlist')">🎼 Setlist</button>
+      <button class="tpill" onclick="ticketCurtain('roster')">🎸 Roster</button>
+      <button class="tpill" onclick="ticketShare()">↗ Share</button>
+    </div>
   </div>
 
   <div class="perf"></div>
@@ -127,6 +161,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 </div>
 
 <div id="bandPerm"><div class="bpcard" id="bpcard"></div></div>
+<div id="curtain" onclick="if(event.target===this)curtainClose()"><div class="curtcard" id="curtcard"></div></div>
 <div class="cap">the blue sweep is the tell — recognized by millions</div>
 
 <script>
@@ -138,6 +173,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       price=g('price','$18'), gate=g('gate','Gate A'),
       sec=g('sec',''), row=g('row',''), seat=g('seat',''), img=g('img',''), url=g('url',''), iso=g('iso',''), ev=g('ev',''), color=g('color','');
   if(color){ try{ document.documentElement.style.setProperty('--tm-blue', color); }catch(e){} }   // differentiate each show's ticket
+  var role=g('role','fan');   // fan (default) · band/member (edits the setlist) · venue/owner (sales + close)
 
   document.getElementById('band').textContent=String(band).toUpperCase();
   document.getElementById('sub').textContent=sub;
@@ -266,6 +302,106 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     try{ if(window.parent&&window.parent!==window&&typeof window.parent.ddTixClose==='function'){ window.parent.ddTixClose(); return; } }catch(e){}
     try{ window.parent.postMessage({dd:'ddTixClose'},'*'); }catch(e){}
   };
+
+  /* ---------- THE BACK OF THE TICKET — Setlist · Roster · Share (curtains) ----------
+     Keep the front clean; the extras live on a flip. Same principle a venue gets: their floor plan
+     lives in their console, not on every fan's ticket. */
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function fmtD(d){ try{ if(!d) return ''; return new Date((d.length<=10?d+'T12:00:00':d)).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return d||''; } }
+  var venueShort=String(venue||'').split('·')[0].trim();
+  function channeled(){ return /dead|dark star|shakedown|jerry|garcia|jgb|terrapin|china cat/i.test(band+' '+sub)
+    ? '<div class="chanh">The lineage they channel</div><div class="chanl">Jerry Garcia · Bob Weir · Phil Lesh · Bill Kreutzmann · Mickey Hart · Keith &amp; Donna Jean Godchaux</div>' : ''; }
+  var isBand=(role==='band'||role==='member');   // a band member edits tonight's record (venue/owner → sales view)
+  function slug(x){ try{ return (window.DDSetlist&&DDSetlist.slugify)?DDSetlist.slugify(x):String(x).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }catch(e){ return String(x); } }
+  function rKey(){ return 'dd.roster.'+slug(band)+'.'+(date||'na'); }        // per-SHOW roster (subs + sit-ins), keyed band+date
+  function sKey(){ return 'dd.setlist.'+slug(band)+'.'+(date||'na'); }       // per-SHOW setlist (the band's record)
+  function getRoster(){ try{ var v=JSON.parse(localStorage.getItem(rKey())||'null'); if(v&&v.length) return v; }catch(e){} try{ if(window.DDRoster&&DDRoster.forBand) return DDRoster.forBand(band)||[]; }catch(e){} return []; }
+  function getSongs(){ try{ var v=JSON.parse(localStorage.getItem(sKey())||'null'); if(v&&v.songs) return v; }catch(e){} try{ if(window.DDSetlist){ var sl=(DDSetlist.get&&DDSetlist.get(band,date))||(DDSetlist.now&&DDSetlist.now(band)); if(sl) return {start:sl.start||'',songs:sl.songs||sl||[]}; } }catch(e){} return {start:'',songs:[]}; }
+  var chead=function(icon,title){ return '<button class="curtx" onclick="curtainClose()" aria-label="Close">×</button><div class="curth">'+icon+' '+title+'</div><div class="curtsub">'+esc(band)+' · '+esc(venueShort)+(date?(' · '+esc(fmtD(date))):'')+'</div>'; };
+
+  // ----- ROSTER -----
+  function rosterHTML(){ if(isBand) return rosterEditHTML();
+    var members=getRoster(), head=chead('🎸','The Roster — that night');
+    if(!members.length) return head+'<div class="curtempty">The band hasn’t posted who played yet.<span class="cookie">🍪 Owsley: ask '+esc(band)+' to add tonight’s lineup — it lives on the ticket forever.</span></div>';
+    var rows=members.map(function(m){ return '<div class="rrow"><b>'+esc(m.name||m.n||'')+'</b><span>'+esc(m.role||m.r||'')+'</span></div>'; }).join('');
+    return head+'<div>'+rows+'</div>'+channeled();
+  }
+  function rrowEdit(n,r){ return '<div class="redit"><input class="rn" placeholder="Name" value="'+esc(n)+'"><input class="rr" placeholder="Role · e.g. Bass, Sax" value="'+esc(r)+'"><button class="rx" onclick="this.parentNode.remove()" title="Remove">×</button></div>'; }
+  function rosterEditHTML(){ var members=getRoster();
+    return chead('🎸','Tonight’s lineup')+'<div class="curtsub" style="margin-top:-8px">subs &amp; sit-ins welcome — this is who <i>actually</i> played</div>'
+      +'<div id="rEdit">'+(members.length?members:[{name:'',role:''}]).map(function(m){ return rrowEdit(m.name||m.n||'', m.role||m.r||''); }).join('')+'</div>'
+      +'<button class="raddbtn" onclick="rAddRow()">＋ Add a sit-in / guest (e.g. Sax — “Bill Clinton”)</button>'
+      +'<button class="tmb" style="width:100%;margin-top:10px;border-color:#12854f;color:#0e7d4f" onclick="saveRoster()">💾 Save tonight’s roster</button>'
+      +'<div class="cookie">🌹 The stand-in who covered the sick bassist, the guest who sat in — recorded on this ticket forever, appended to '+esc(band)+'’s deck.</div>';
+  }
+  window.rAddRow=function(){ var h=document.getElementById('rEdit'); if(h) h.insertAdjacentHTML('beforeend', rrowEdit('','')); };
+  window.saveRoster=function(){ var out=[]; document.querySelectorAll('#rEdit .redit').forEach(function(d){ var n=(d.querySelector('.rn')||{}).value||'', r=(d.querySelector('.rr')||{}).value||''; n=n.trim(); if(n) out.push({name:n,role:r.trim()}); });
+    try{ localStorage.setItem(rKey(), JSON.stringify(out)); }catch(e){}
+    curtainClose(); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Tonight’s roster saved 🌹'); }catch(e){} };
+
+  // ----- SETLIST -----
+  function setlistHTML(){ if(isBand) return setlistEditHTML();
+    var d=getSongs(), songs=d.songs||[], head=chead('🎼','The Setlist — that night');
+    if(!songs.length) return head+'<div class="curtempty">No setlist yet.<span class="cookie">🍪 In the van up 476? The band texts it in — every song lands here live, then keeps as history.</span></div>';
+    var hasAudio=false;
+    var rows=songs.map(function(s,i){ var nm=(s&&(s.n||s.name))||s; var au=null; try{ au=window.__songAudio&&__songAudio(band,date,nm); }catch(e){}
+      if(au) hasAudio=true;
+      return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b>'+(s&&s.at?('<span class="sat">'+esc(s.at)+'</span>'):'')+(au?('<button class="splay" title="Play" onclick="ticketPlay(\''+encodeURIComponent(au)+'\')">▶</button>'):'')+'</div>'; }).join('');
+    return head+'<div>'+rows+'</div>'+(hasAudio?'':'<div class="cookie">🍪 Owsley to '+esc(band)+': upload this show’s audio → every song gets a ▶ right here.</div>');
+  }
+  function setlistEditHTML(){ var d=getSongs();
+    var text=(d.songs||[]).map(function(s){ return (s.n||s.name||s)+(s.at?(' '+s.at):''); }).join('\n');
+    return chead('🎼','Set the list &amp; tease time')
+      +'<label class="slbl">Tease / set-start time</label><input id="slStart" class="slin" placeholder="9:00" value="'+esc(d.start||'')+'">'
+      +'<label class="slbl">Songs — one per line (add a time if you have it)</label>'
+      +'<textarea id="slSongs" class="slta" placeholder="Suzy Greenberg 2:30\nWolfmans Brother 4:55\nTweezer">'+esc(text)+'</textarea>'
+      +'<button class="tmb" style="width:100%;margin-top:10px;border-color:#12854f;color:#0e7d4f" onclick="saveSetlist()">💾 Save the setlist</button>'
+      +'<div class="cookie">🌹 Fans on this show see each song appear here — texted live if they opted in. Your record, on your band’s ticket. No pressure, just a nudge. 🍪</div>';
+  }
+  window.saveSetlist=function(){ var start=((document.getElementById('slStart')||{}).value||'').trim();
+    var raw=((document.getElementById('slSongs')||{}).value||'');
+    var songs=raw.split(/\n/).map(function(l){ l=l.trim(); if(!l) return null; var m=l.match(/(\d{1,2}:\d{2})\s*$/); return m?{n:l.slice(0,m.index).trim(),at:m[1]}:{n:l}; }).filter(Boolean);
+    try{ localStorage.setItem(sKey(), JSON.stringify({start:start,songs:songs})); }catch(e){}
+    try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band,{date:date,start:start,songs:songs}); }catch(e){}
+    try{ var key=g('key',''), cl=window.ddClient&&ddClient(); if(key&&cl&&cl.rpc) cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:start||null,p_end:null,p_songs:songs}); }catch(e){}   // cloud sync if a band key is present
+    curtainClose(); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Setlist saved 🌹'); }catch(e){} };
+  /* ---------- VENUE VIEW — same ticket, operator's pills. Their event, their numbers, close it out.
+     A venue flips through the tickets for their OWN events (a deck of nights). Role via ?role=venue.
+     Full sales/floor/stage console = roadmap (ROADMAP_ticket_sales_admin_console.md). ---------- */
+  function money(n){ return '$'+Math.round(n||0).toLocaleString(); }
+  function venueHTML(){
+    var cap=+g('cap',0)||0, sold=+g('sold',0)||0, priceN=parseFloat(String(price).replace(/[^0-9.]/g,''))||0;
+    var rev=sold*priceN, net=rev*0.99, spend=priceN?Math.max(12,Math.round(priceN*0.9)):18, bar=sold*spend;
+    var head='<button class="curtx" onclick="curtainClose()" aria-label="Close">×</button><div class="curth">📊 Your event — '+esc(band)+'</div><div class="curtsub">'+esc(venueShort)+(date?(' · '+esc(fmtD(date))):'')+'</div>';
+    var rows='<div class="rrow"><b>🎟 Tickets sold</b><span>'+sold+(cap?(' / '+cap):'')+'</span></div>'
+      +'<div class="rrow"><b>💵 Ticket revenue</b><span>'+money(rev)+'</span></div>'
+      +'<div class="rrow"><b>Your net · after 1%</b><span>'+money(net)+'</span></div>'
+      +'<div class="rrow"><b>🍺 Est. bar lift</b><span>'+money(bar)+'</span></div>';
+    return head+'<div>'+rows+'</div>'
+      +'<div class="cookie">🍺 Bar lift is an <b>estimate</b> — crowd × typical per-head spend. We infer it from attendance; you never hand us your POS.</div>'
+      +'<button class="tmb" style="border-color:#b8002e;color:#b8002e;margin-top:12px;width:100%" onclick="venueClose()">🔒 Close this event → move to history</button>';
+  }
+  window.venueClose=function(){ if(!confirm('Close “'+band+'” — settle and move it to your history?')) return; curtainClose();
+    try{ var n=document.getElementById('issuedNote'); if(n){ n.classList.remove('hidden'); n.textContent='✓ Event closed · settled 🌹'; } }catch(e){}
+    try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Event closed 🌹 — it lives in your venue history now.'); }catch(e){} };
+  window.ticketCurtain=function(which){ var el=document.getElementById('curtcard'); if(!el)return;
+    el.innerHTML = which==='roster' ? rosterHTML() : which==='venue' ? venueHTML() : setlistHTML();
+    document.getElementById('curtain').classList.add('on'); };
+  // role-aware pills — the same ticket, filed into each QR: fan (default) · band (edit) · venue (sales)
+  (function(){ var pr=document.getElementById('pillrow'); if(!pr) return;
+    if(role==='venue'||role==='owner'){ pr.innerHTML='<button class="tpill" onclick="ticketCurtain(\'venue\')">📊 Sales</button>'
+        +'<button class="tpill" onclick="ticketCurtain(\'venue\')">💵 Revenue</button>'
+        +'<button class="tpill" style="border-color:#b8002e;color:#b8002e" onclick="venueClose()">🔒 Close</button>'; }
+    else if(isBand){ pr.innerHTML='<button class="tpill" onclick="ticketCurtain(\'setlist\')">🎼 Edit setlist</button>'
+        +'<button class="tpill" onclick="ticketCurtain(\'roster\')">🎸 Edit roster</button>'
+        +'<button class="tpill" onclick="ticketShare()">↗ Share</button>'; }
+  })();
+  window.curtainClose=function(){ var c=document.getElementById('curtain'); if(c)c.classList.remove('on'); };
+  window.ticketPlay=function(u){ try{ u=decodeURIComponent(u); var a=new Audio(u); a.play(); }catch(e){ try{ window.open(decodeURIComponent(u),'_blank','noopener'); }catch(x){} } };
+  window.ticketShare=function(){ var link=url||('https://deaddance.app/event.html'+(ev?('?ev='+encodeURIComponent(ev)):''));
+    var txt='🌹 '+band+' — '+venueShort+(date?(' · '+fmtD(date)):'')+' · my ticket on DeadDance';
+    try{ if(navigator.share){ navigator.share({title:String(band), text:txt, url:link}); return; } }catch(e){}
+    try{ navigator.clipboard.writeText(link); (window.parent&&window.parent.toast?window.parent.toast:alert)('Link copied — share it 🌹'); }catch(e){ alert(link); } };
 })();
 </script>
 <div id="tixSecModal" onclick="if(event.target===this)closeTixSec()"><div style="max-width:360px;max-height:88vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:20px 20px 22px;box-shadow:0 24px 60px #000c;position:relative"><button onclick="closeTixSec()" aria-label="Close" style="position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:34px;height:34px;border-radius:17px;font-size:18px;cursor:pointer">×</button><div style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:16.5px;padding-right:30px"><span style="font-size:21px">🌹</span> The most secure ticket on the market</div><p style="font-size:14px;line-height:1.6;color:#d7d2e2;margin:12px 0 0">From the smallest bar room or restaurant to the largest stadium, DeadDance secures both the <b>ticket</b> and the <b>sale</b> — engineered to thwart the scalper hacks that still work on other ticket vendors.</p><div style="margin-top:14px;display:flex;flex-direction:column;gap:11px"><div style="display:flex;gap:10px"><span style="font-size:17px">🔒</span><div style="font-size:13.5px;line-height:1.55"><b>Can’t be cloned.</b> The barcode rotates like the one you already trust — but the signing key never leaves your phone. A screenshot is dead on arrival, and it can’t be copied onto another device the way the big vendors’ can.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🪑</span><div style="font-size:13.5px;line-height:1.55"><b>Seat-true.</b> Your section, row, and seat are signed into the ticket — nobody edits a screenshot into a better seat.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🎟️</span><div style="font-size:13.5px;line-height:1.55"><b>Distribution locked end to end.</b> Every sale and transfer is signed, so tickets can’t be siphoned into scalper inventory or resold through a back door.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">📶</span><div style="font-size:13.5px;line-height:1.55"><b>Works offline at the gate.</b> No signal in a packed room? It still verifies — no network required.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🌹</span><div style="font-size:13.5px;line-height:1.55"><b>Still yours.</b> Free transfers to friends, no resale toll booth — Ticketmaster-grade security, Grateful-Dead ethics.</div></div></div></div></div><script>window.openTixSec=function(){var m=document.getElementById("tixSecModal");if(m)m.classList.add("on");};window.closeTixSec=function(){var m=document.getElementById("tixSecModal");if(m)m.classList.remove("on");};</script>
