@@ -261,7 +261,7 @@ body.ddonly{background:transparent}   /* in the Friends sheet: transparent so th
 .evt .go{display:flex;gap:8px;margin-top:9px}
 /* bottom footer nav — the family's tabs (guitar-character icons) */
 body{padding-bottom:64px}
-.footnav{position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;justify-content:space-around;align-items:flex-end;background:#241634f2;backdrop-filter:blur(8px);border-top:1px solid #ffffff20;padding:7px 2px;box-shadow:0 -6px 20px #0004}
+.footnav{position:fixed;left:0;right:0;bottom:0;z-index:140;display:flex;justify-content:space-around;align-items:flex-end;background:#241634f2;backdrop-filter:blur(8px);border-top:1px solid #ffffff20;padding:7px 2px;box-shadow:0 -6px 20px #0004}
 .footnav .fn{flex:1;background:none;border:0;color:#e9def7;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 1px;cursor:pointer;font-family:inherit}
 .footnav .fn .ic{font-size:22px;line-height:1}
 .footnav .fn .lb{font-size:9.5px;font-weight:800;letter-spacing:.01em;color:#b6a9c9}
@@ -1369,17 +1369,30 @@ body.dd-insider .dd-only{display:block}
 
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
-  <button class="fn" onclick="closeFriends();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
+  <button class="fn" onclick="ddCloseOverlays();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
   <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
-  <button class="fn" onclick="requireSignin(function(){openReader('groups')})" title="The Dealer — Groups, Bands, Shop, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
-  <button class="fn" onclick="requireSignin(function(){ if(window.ddSheet){ ddSheet('games.html','🍪 Games',true); } else { openGame(); } })"><span class="ic">🎮</span><span class="lb">Games</span></button>
+  <button class="fn" onclick="requireSignin(function(){ddCloseOverlays();openReader('groups')})" title="The Dealer — Groups, Bands, Shop, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
+  <button class="fn" onclick="requireSignin(function(){ ddCloseOverlays(); if(window.ddSheet){ ddSheet('games.html','🍪 Games',true); } else { openGame(); } })"><span class="ic">🎮</span><span class="lb">Games</span></button>
   <button class="fn" style="display:none" onclick="requireSignin(function(){ddSheet('record_store.html','💿 DeadDance Records')})"><!-- hidden for launch — no records yet --><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" aria-label="Records" style="display:block"><circle cx="12" cy="12" r="11" fill="#181026"/><circle cx="12" cy="12" r="11" fill="none" stroke="#3a2a55" stroke-width="1"/><circle cx="12" cy="12" r="8" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".7"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#4a3a6a" stroke-width=".6" opacity=".5"/><circle cx="12" cy="12" r="3.6" fill="#ffd76a"/><circle cx="12" cy="12" r="1" fill="#181026"/></svg></span><span class="lb">Records</span></button>
-  <button class="fn" onclick="requireSignin(function(){openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
-  <button class="fn" onclick="requireSignin(function(){profile('me')})"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
+  <button class="fn" onclick="requireSignin(function(){ddCloseOverlays();openNotifs()})" title="Notifications"><span class="ic" style="position:relative">🔔<span id="notifBadge" style="position:absolute;top:-5px;right:-9px;background:var(--rose);color:#fff;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:7px;display:grid;place-items:center;padding:0 3px">3</span></span><span class="lb">Alerts</span></button>
+  <button class="fn" onclick="requireSignin(function(){ddCloseOverlays();profile('me')})"><span class="ic"><svg id="navqr" width="22" height="22" viewBox="0 0 100 100" aria-label="Your QR"></svg></span><span class="lb">You</span></button>
 </nav>
 <button id="createfab" onclick="requireSignin(function(){openCreate()})" aria-label="Create" title="Create" style="position:fixed;right:16px;bottom:210px;z-index:58;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;font-size:30px;line-height:1;font-weight:800;box-shadow:0 8px 22px #0007;cursor:pointer">＋</button>
 <div class="nowplay" id="nowplay">🎵 <span><b>Now playing:</b> <span id="npTrack"></span></span><button onclick="stopPlay()">stop</button></div>
 <script>window.openFriends=function(){var v=document.getElementById('socialView');if(v){v.classList.add('on');v.scrollTop=0;}try{document.querySelectorAll('.footnav .fn').forEach(function(b){b.classList.remove('fnon');});}catch(e){}};window.closeFriends=function(){var v=document.getElementById('socialView');if(v)v.classList.remove('on');};
+/* ONE reset for the whole bottom nav: before any nav action, cleanly tear down every open
+   overlay (Dealer/reader, Games/records sheet, Profile, Notifications, Menu, Friends) and
+   release the scroll lock. Fixes the recurring "modal open → tap a nav item → modal closes,
+   nothing opens, whole bottom bar goes dead" bug: the nav now always lands on a clean slate. */
+window.ddCloseOverlays=function(){
+  try{ if(window.closeReader) closeReader(); }catch(e){}
+  try{ if(window.ddSheetClose) ddSheetClose(); }catch(e){}
+  try{ if(window.closeProfile) closeProfile(); }catch(e){}
+  try{ if(window.coClose){ coClose('notifov'); coClose('appsov'); } }catch(e){}
+  try{ if(window.closeFriends) closeFriends(); }catch(e){}
+  try{ if(window.ddSearchClose) ddSearchClose(); }catch(e){}
+  try{ document.body.style.overflow=''; }catch(e){}   /* never leave the page scroll-locked */
+};
 /* bottom-nav intents arriving from the Friends page (dd_home_mockup.html) — #go=dealer|games|records|alerts|you */
 (function(){ try{ var m=(location.hash||'').match(/go=(\w+)/); if(!m) return; var go=m[1];
   var inFrame=false; try{ inFrame=(window.self!==window.top); }catch(e){ inFrame=true; }

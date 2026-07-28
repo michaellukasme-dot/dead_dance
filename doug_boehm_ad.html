@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doug Boehm — Art Store (Premium Rolling Ad)</title>
+<style>
+/* Doug Boehm premium rolling ad · his woodcut palette (mustard / forest / oxblood / black).
+   SUPER-SPECIAL weight: shows at 5× frequency — rotation engine reads data-ad-weight="5".
+   FLIP card: front = the artist ad, back = QR + link that RESOLVES to his art store.
+   The flip plays twice per appearance (QR shown twice), then rests on the front. */
+html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#12100b}
+@keyframes dbf_flip{0%,15%{transform:rotateY(0)}23%,39%{transform:rotateY(180deg)}47%,63%{transform:rotateY(360deg)}71%,86%{transform:rotateY(540deg)}94%,100%{transform:rotateY(720deg)}}
+@keyframes dbf_aur{0%{transform:translate(-6%,-4%) scale(1.1);opacity:.75}50%{transform:translate(6%,4%) scale(1.28);opacity:1}100%{transform:translate(-6%,-4%) scale(1.1);opacity:.75}}
+@keyframes dbf_aur2{0%{transform:translate(5%,3%) scale(1.2);opacity:.55}50%{transform:translate(-5%,-3%) scale(1.05);opacity:.9}100%{transform:translate(5%,3%) scale(1.2);opacity:.55}}
+@keyframes dbf_tw{0%,100%{opacity:.15}50%{opacity:1}}
+@keyframes dbf_sweep{0%{left:-60%}60%,100%{left:130%}}
+@keyframes dbf_glow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.9;transform:scale(1.08)}}
+@keyframes dbf_pulse{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+@keyframes dbf_ken{0%{transform:scale(1.04)}50%{transform:scale(1.14)}100%{transform:scale(1.04)}}
+.dbf-stage{perspective:1300px}
+.dbf-flip{position:relative;width:300px;height:520px;transform-style:preserve-3d;animation:dbf_flip 15s ease-in-out infinite}
+.dbf-face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:26px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(12,10,6,.6),inset 0 0 0 1px rgba(255,240,190,.06);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.dbf-front{background:radial-gradient(120% 90% at 50% 0%,#2a2712 0%,#1c1a10 48%,#0f0d08 100%);color:#f6efdc;text-decoration:none;display:block}
+.dbf-back{transform:rotateY(180deg);background:radial-gradient(120% 90% at 50% 0%,#2a2712 0%,#1c1a10 48%,#0f0d08 100%);color:#f6efdc;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px;text-align:center;text-decoration:none}
+.dbf-aur{position:absolute;border-radius:50%;filter:blur(38px);pointer-events:none}
+.dbf-a1{width:280px;height:280px;top:-60px;left:-50px;background:radial-gradient(circle,#e0b94a99,transparent 64%);animation:dbf_aur 15s ease-in-out infinite}
+.dbf-a2{width:250px;height:250px;top:60px;right:-70px;background:radial-gradient(circle,#5f7a2e99,transparent 62%);animation:dbf_aur2 18s ease-in-out infinite}
+.dbf-a3{width:220px;height:220px;bottom:-40px;left:20px;background:radial-gradient(circle,#b8322a80,transparent 66%);animation:dbf_aur 20s ease-in-out infinite}
+.dbf-star{position:absolute;width:2px;height:2px;border-radius:50%;background:#f7ecc9;animation:dbf_tw 3.6s ease-in-out infinite}
+.dbf-eyebrow{position:absolute;top:24px;left:0;right:0;text-align:center;font-size:10px;font-weight:800;letter-spacing:.26em;color:#e6c877;z-index:3}
+.dbf-brand{position:absolute;top:50px;left:0;right:0;text-align:center;z-index:3}
+.dbf-mark{display:inline-block;position:relative;font-family:"Brush Script MT","Segoe Script",cursive;font-weight:400;font-size:40px;color:#fbf3df;line-height:1;text-shadow:0 2px 20px rgba(224,185,74,.4)}
+.dbf-sweep{position:absolute;top:0;bottom:0;width:44%;left:-60%;transform:skewX(-18deg);background:linear-gradient(90deg,transparent,rgba(255,244,205,.42),transparent);animation:dbf_sweep 6.5s ease-in-out infinite;pointer-events:none}
+.dbf-hero{position:absolute;top:120px;left:26px;right:26px;height:250px;border-radius:16px;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,240,190,.12);background:linear-gradient(150deg,#7a6b12,#7d1533)}
+.dbf-hero img{width:100%;height:100%;object-fit:contain;background:#0f0d08}
+.dbf-herofade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(15,13,8,.75) 100%)}
+.dbf-kicker{position:absolute;top:384px;left:0;right:0;text-align:center;font-size:11px;font-weight:800;letter-spacing:.14em;color:#e9dcbb;z-index:3}
+.dbf-sub{position:absolute;top:406px;left:0;right:0;text-align:center;font-size:10.5px;font-weight:600;letter-spacing:.03em;color:#b7ab8c;z-index:3}
+.dbf-cta{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#ecc95c,#e0b94a);color:#2f2410;font-weight:900;font-size:13px;padding:11px 22px;border-radius:999px;white-space:nowrap;animation:dbf_pulse 2.8s ease-in-out infinite;z-index:3}
+.dbf-foot{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.06em;color:#8a805f;z-index:3}
+.dbf-back .bk{font-size:10px;font-weight:800;letter-spacing:.24em;color:#e6c877}
+.dbf-back .bmark{font-family:"Brush Script MT","Segoe Script",cursive;font-size:30px;color:#fbf3df;margin-top:2px}
+.dbf-qp{width:210px;height:210px;background:#fbf7ec;border-radius:18px;margin:18px 0 14px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(0,0,0,.42);overflow:hidden}
+.dbf-qp #dbQR{width:182px;height:182px;display:flex;align-items:center;justify-content:center}
+.dbf-back h3{margin:0;font-size:17px;font-weight:900;color:#fbf3df}
+.dbf-back p{margin:5px 14px 0;font-size:11.5px;color:#c7bd9f;font-weight:600;line-height:1.4}
+.dbf-back .cta2{margin-top:16px;background:linear-gradient(180deg,#ecc95c,#e0b94a);color:#2f2410;font-weight:900;font-size:12.5px;padding:9px 18px;border-radius:999px}
+</style>
+</head>
+<body>
+<div class="dbf-stage">
+<div class="dbf-flip" data-ad-weight="5" data-ad="dougboehm-art">
+
+  <!-- FRONT — the artist ad (whole card resolves to the store) -->
+  <a class="dbf-face dbf-front" href="doug_boehm_art.html" role="img"
+     aria-label="Doug Boehm — Musikfest 2026 poster artist. Original art, prints, posters and hand-painted guitars. Flip for the store QR.">
+    <span class="dbf-aur dbf-a1"></span><span class="dbf-aur dbf-a2"></span><span class="dbf-aur dbf-a3"></span>
+    <span class="dbf-star" style="top:38px;left:44px"></span><span class="dbf-star" style="top:66px;left:236px;animation-delay:1.1s"></span>
+    <span class="dbf-star" style="top:104px;left:60px;animation-delay:2s;width:3px;height:3px"></span><span class="dbf-star" style="top:96px;left:250px;animation-delay:.7s"></span>
+    <div class="dbf-eyebrow">◆ MUSIKFEST 2026 · POSTER ARTIST ◆</div>
+    <div class="dbf-brand"><span class="dbf-mark">Doug Boehm<span class="dbf-sweep"></span></span></div>
+    <div class="dbf-hero">
+      <img src="MUSIKFEST_poster.jpg" alt="Musikfest 2026 official poster — art by Doug Boehm"
+           onerror="this.style.display='none'">
+      <span class="dbf-herofade"></span>
+    </div>
+    <div class="dbf-kicker">ORIGINALS · PRINTS · POSTERS · PAINTED GUITARS</div>
+    <div class="dbf-sub">straight from the studio · one-tap buy</div>
+    <span class="dbf-cta">🖼️ Own a piece →</span>
+    <div class="dbf-foot">POWERED BY ✦ DEADDANCE · flip for the store ⤾</div>
+  </a>
+
+  <!-- BACK — QR + link that RESOLVES to the store -->
+  <a class="dbf-face dbf-back" href="doug_boehm_art.html">
+    <div class="bk">◆ THE ART STORE ◆</div>
+    <div class="bmark">Doug Boehm</div>
+    <div class="dbf-qp"><div id="dbQR">▦</div></div>
+    <h3>Scan for the store</h3>
+    <p>Originals, prints, posters &amp; hand-painted guitars — one tap</p>
+    <div class="cta2">deaddance.app/dougboehm</div>
+  </a>
+
+</div>
+</div>
+<script src="qr.js"></script>
+<script src="dd_qrmark.js"></script>
+<script>
+(function(){
+  var base=(location.origin&&location.origin.indexOf('http')===0?location.origin:'https://deaddance.app');
+  var url=base+'/doug_boehm_art.html';
+  function paint(){
+    try{
+      if(window.DDQR&&DDQR.into){ DDQR.into('dbQR', url, {mark:'dd', size:182, css:170, caption:false}); return true; }
+    }catch(e){}
+    return false;
+  }
+  if(!paint()){ // libs may still be parsing — retry briefly, then fall back
+    var n=0, t=setInterval(function(){ if(paint()||++n>20){ clearInterval(t); if(n>20){var el=document.getElementById('dbQR');if(el)el.textContent='QR';} } }, 100);
+  }
+})();
+</script>
+</body>
+</html>
