@@ -605,8 +605,25 @@ function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById(
   try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{paddingTopLeft:[24,48], paddingBottomRight:[24,200]}); }catch(e){ LMAP.setView([40.6172,-75.3762],15); }
   setTimeout(function(){ try{ LMAP.invalidateSize(); }catch(e){} },250);
 }
-function updateYou(){ if(!LG_YOU)return; LG_YOU.clearLayers(); if(window.YOU){
-  L.circleMarker(window.YOU,{radius:9,color:'#fff',weight:3,fillColor:'#1f9e6b',fillOpacity:1}).bindTooltip('YOU',{permanent:true,direction:'right',opacity:1}).addTo(LG_YOU); } }
+function updateYou(){ if(!LG_YOU)return; LG_YOU.clearLayers(); if(!window.YOU) return;
+  if(!document.getElementById('mfyoucss')){ var st=document.createElement('style'); st.id='mfyoucss';
+    st.textContent='.mfyou{width:46px;height:46px;border-radius:50%;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center}'
+      +'.mfyou img{width:46px;height:46px;object-fit:cover;border-radius:50%;border:3px solid #1f9e6b;box-shadow:0 1px 6px #0007;display:block}'
+      +'.mfyou.dot{background:#1f9e6b;border:3px solid #fff;box-shadow:0 1px 6px #0007;font-size:20px}'
+      +'.mfyou .ring{position:absolute;inset:-5px;border-radius:50%;border:2px solid #1f9e6b;animation:mfyoupulse 2s ease-out infinite;pointer-events:none}'
+      +'@keyframes mfyoupulse{0%{transform:scale(.85);opacity:.6}100%{transform:scale(1.6);opacity:0}}'
+      +'.mfyou::after{content:"📸";position:absolute;right:-5px;bottom:-5px;font-size:12px;background:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px #0006;pointer-events:none}';
+    document.head.appendChild(st); }
+  var av=''; try{ av=localStorage.getItem('dd.me.img')||localStorage.getItem('dd.profile.img')||''; }catch(e){}
+  var html = av ? '<div class="mfyou"><img src="'+av+'" alt="you"><span class="ring"></span></div>'
+                : '<div class="mfyou dot">🌹<span class="ring"></span></div>';
+  var ic=L.divIcon({className:'',iconSize:[46,46],iconAnchor:[23,23],html:html});
+  var m=L.marker(window.YOU,{icon:ic,title:'You — tap to snap from where you stand'}).addTo(LG_YOU);
+  m.on('click',function(){ try{ mfSelfShot(); }catch(e){} });
+  m.bindTooltip('YOU · tap to snap 📸',{direction:'right',opacity:.95}); }
+/* tap your OWN avatar → camera → straight into the stream. No waiting for Owsley's crowd prompt. */
+window.mfSelfShot=function(){ window._askCap='📸 From where I stand at Musikfest 🌹';
+  var inp=document.getElementById('shotIn')||document.getElementById('photoIn'); if(inp) inp.click(); };
 function updatePath(){ if(!LG_PATH)return; LG_PATH.clearLayers(); if(typeof WALK!=='undefined' && WALK.path && WALK.path.length>1){ L.polyline(WALK.path,{color:'#b8002e',weight:5,opacity:.85,lineJoin:'round'}).addTo(LG_PATH); } }
 function updatePhotos(){ if(!LG_PHOTO)return; LG_PHOTO.clearLayers(); (window.PHOTOS||[]).forEach(function(ph){ if(ph.lat==null)return;
   var ic=L.divIcon({className:'mfphoto',iconSize:[46,46],iconAnchor:[23,23],html:'<img src="'+ph.url+'" style="width:46px;height:46px;object-fit:cover;border-radius:50%;border:3px solid #b8002e;box-shadow:0 1px 5px #0006">'});

@@ -105,13 +105,6 @@ body.mfdrag .sheet{transition:none}
 .ckmon button{border:0;border-radius:10px;padding:8px 11px;font-weight:800;font-size:12px;cursor:pointer;background:#463a63;color:#fff}
 
 .calsum{font-size:12.5px;color:var(--ink);font-weight:700;margin:12px 0 2px;text-align:center}
-/* category pills — left→right, filter the list AND toggle that category on/off on the map (same as the fan map) */
-.catpills{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 10px;margin:0 -2px;scrollbar-width:none}
-.catpills::-webkit-scrollbar{display:none}
-.catpill{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:800 12.5px inherit;color:var(--ink);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
-.catpill .cc{background:var(--muted);color:#fff;border-radius:999px;font-size:10px;font-weight:900;padding:0 6px;min-width:16px;text-align:center}
-.catpill.off{opacity:.42;background:#f1f3f7}
-.catpill.all{border-color:#2f6feb;color:#2f6feb}.catpill.all.on{background:#e9f0ff}
 </style>
 </head>
 <body>
@@ -203,7 +196,6 @@ body.mfdrag .sheet{transition:none}
 
   <div class="cur" id="cur_acts">
     <div class="sec">Acts &amp; stages</div>
-    <div class="catpills" id="catPills"></div>
     <div class="actlist" id="actList"></div>
     <div class="hint" id="actEmpty">No acts yet — tap the blue ➕ up top to add one.</div>
   </div>
@@ -374,31 +366,15 @@ function dropActOnFloor(xpct,ypct){ if(!placingAct)return;
 function addActMarker(a){ if(a.lat==null)return;
   var icon=L.divIcon({className:'',html:'<div class="actpin"><span>'+((a.catIcon)||'📍')+'</span></div>',iconSize:[24,24],iconAnchor:[12,24]});
   var m=L.marker([a.lat,a.lng],{icon:icon,title:a.name}).addTo(map); m.bindPopup('<b>'+esc(a.name)+'</b><br>'+esc(a.stage||'')+' · '+esc(a.time||''));
-  m._cat=a.cat||'other';   // so a category pill can toggle this marker on/off the map
   actMarkers.push(m); }
-/* ---- category pills: left→right, filter the list AND toggle each category on/off the map ---- */
-var catOff={};
-function actCats(){ var seen={},out=[]; state.acts.forEach(function(a){ var k=a.cat||'other'; if(!seen[k]){ seen[k]=1; out.push({key:k,icon:a.catIcon||'📍',label:a.catLabel||'Other'}); } }); return out; }
-function renderCatPills(){ var host=el('catPills'); if(!host)return; var cats=actCats();
-  if(!cats.length){ host.innerHTML=''; return; }
-  var anyOff=Object.keys(catOff).some(function(k){return catOff[k];});
-  host.innerHTML='<button class="catpill all'+(anyOff?'':' on')+'" onclick="catAllOn()">👁 All</button>'
-    +cats.map(function(c){ var n=state.acts.filter(function(a){return (a.cat||'other')===c.key;}).length;
-      return '<button class="catpill'+(catOff[c.key]?' off':'')+'" onclick="catToggle(\''+c.key+'\')">'+c.icon+' '+esc(c.label)+' <span class="cc">'+n+'</span></button>'; }).join(''); }
-function applyActFilter(){ actMarkers.forEach(function(m){ var off=!!catOff[m._cat||'other']; try{ if(off){ if(map.hasLayer(m)) map.removeLayer(m); } else if(!map.hasLayer(m)) m.addTo(map); }catch(e){} }); }
-window.catToggle=function(k){ catOff[k]=!catOff[k]; renderActs(); };
-window.catAllOn=function(){ catOff={}; renderActs(); };
-function renderActs(){ var host=el('actList');
-  var acts=state.acts.filter(function(a){ return !catOff[a.cat||'other']; });   // list keeps to the ON categories
-  host.innerHTML=acts.map(function(a){
+function renderActs(){ var host=el('actList'); host.innerHTML=state.acts.map(function(a){
     var loc=a.lat!=null?'map':(a.xpct!=null?'floor':'');
     var meta=[(a.catLabel?((a.catIcon||'')+' '+a.catLabel):''),(a.stage||''),loc].filter(Boolean).join(' · ');
     return '<div class="actrow"><span class="t">'+esc((a.time||'').replace(':00',''))+'</span>'
       +'<span class="n">'+esc(a.name)+'<span class="g"> · '+esc(meta)+'</span></span>'
       +'<button class="x" onclick="emDelAct('+a.id+')">✕</button></div>'; }).join('');
   el('actEmpty').style.display=state.acts.length?'none':'block';
-  el('emRose').textContent=state.acts.length; el('emStat').textContent='🥾 0.00 mi · '+state.acts.length+' act'+(state.acts.length===1?'':'s');
-  renderCatPills(); applyActFilter(); }
+  el('emRose').textContent=state.acts.length; el('emStat').textContent='🥾 0.00 mi · '+state.acts.length+' act'+(state.acts.length===1?'':'s'); }
 function emDelAct(id){ state.acts=state.acts.filter(function(a){return a.id!==id;});
   actMarkers.forEach(function(m){map.removeLayer(m);}); actMarkers=[]; state.acts.forEach(addActMarker);
   renderActs(); paintFloorPins(); emSave(); }
