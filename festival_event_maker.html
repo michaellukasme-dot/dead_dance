@@ -216,7 +216,7 @@ body.mfdrag .sheet{transition:none}
       <button class="btn p" onclick="emSearchPlace(document.getElementById('placeQ').value)">Go</button>
     </div>
     <div class="sec">Sections <span style="font-weight:700;color:var(--muted);font-size:12px">· <span id="secCount">1</span></span></div>
-    <div class="hint">Each section is one rectangular map you zoom to. MusikFest has two — <b>North</b> &amp; <b>South</b>; Bacon Fest a Centre Square plus a spoke down each street. Tap a section to switch · drag its 4 corner pins to frame it. Add one with <b>➕ → 🗺️ New section</b> or the button below.</div>
+    <div class="hint">Each section is one map you zoom to. MusikFest = <b>North</b> &amp; <b>South</b>; Bacon Fest = Centre Square + a spoke per street. Tap a section to switch · drag its pins to frame it (<b>4 by default</b>). For an awkward-shaped or <b>curved</b> park, tap <b>📍 ＋ Corner</b> to add pins and trace the outline · tap a pin to remove it. Add a whole section with <b>➕ → 🗺️ New section</b>.</div>
     <div class="secbar" id="secBar"></div>
     <div class="sectools">
       <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin:12px 0 4px">Active section name</label>
@@ -415,6 +415,7 @@ function initMap(){
   tiles=L.tileLayer(url,{maxZoom:19,crossOrigin:true,errorTileUrl:BLANK_TILE}).addTo(map);   // StageFill-neutral plain street tiles
   var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Imagery © Esri',maxZoom:21,maxNativeZoom:19,errorTileUrl:BLANK_TILE});
   L.control.layers({'🗺 Street':tiles,'🛰 Satellite':sat},null,{position:'topright',collapsed:false}).addTo(map);
+  try{ map.zoomControl.setPosition('topright'); }catch(e){}   // move +/- to the right so the section pills (top-left) don't cover it
   var showCoord=function(){ try{ var c=map.getCenter(), n=el('emCoord'); if(n) n.textContent=c.lat.toFixed(6)+', '+c.lng.toFixed(6); }catch(e){} };
   map.on('move',showCoord); showCoord();   // Google-Maps-style live coordinate readout under the crosshair
   map.on('click',function(e){ if(placeMode==='map') dropActAt(e.latlng.lat,e.latlng.lng); });
@@ -429,66 +430,81 @@ window.emSearchPlace=function(q){ q=(q||'').trim(); if(!q||!map)return; toast('�
 function defaultCorners(){ var b=map.getBounds(), n=b.getNorth(),s=b.getSouth(),w=b.getWest(),e=b.getEast();
   var dy=(n-s)*.18, dx=(e-w)*.18;
   return {tl:[n-dy,w+dx],tr:[n-dy,e-dx],bl:[s+dy,w+dx],br:[s+dy,e-dx]}; }
-/* ===== SECTIONS — a festival is a list of rectangular map-frames you flip between.
-   Each section = {id, name, corners:{tl,tr,bl,br}}. Buttons switch sections; ⤢ Fit frames the active one.
-   MusikFest = North + South. Bacon Fest = Centre Square + a spoke per street.
+/* ===== SECTIONS — a festival is a list of map-frames you flip between. section = {id, name, pts:[[lat,lng]…]}.
+   4 pins by DEFAULT (a rectangle); tap ＋ Corner to add pins for awkward-shaped parks/events — any section
+   (incl. Main). Buttons switch sections; ⤢ Fit frames the active one.
    state.corners is kept as the DERIVED bbox of ALL sections so center/payload/geofences still work. ===== */
-var cornerMk={}, sectionPolys=[];
+var cornerMk=[], sectionPolys=[];
+function defaultRing(){ var c=defaultCorners(); return [c.tl,c.tr,c.br,c.bl]; }   // clockwise 4-pin ring
+function _ring(c){ return [c.tl,c.tr,c.br,c.bl]; }
 function ensureSections(){
   if(!Array.isArray(state.sections)||!state.sections.length){
     var c=(state.corners&&state.corners.tl)?state.corners:defaultCorners();
-    state.sections=[{id:Date.now(),name:'Main',corners:c}]; state.activeSection=0; }
+    state.sections=[{id:Date.now(),name:'Main',pts:_ring(c)}]; state.activeSection=0; }
+  state.sections.forEach(function(s){ if(!Array.isArray(s.pts)||s.pts.length<3){ s.pts=(s.corners&&s.corners.tl)?_ring(s.corners):defaultRing(); if(s.corners)delete s.corners; } });  // migrate old {corners} → pts ring
   if(typeof state.activeSection!=='number'||state.activeSection<0||state.activeSection>=state.sections.length) state.activeSection=0; }
 function activeSec(){ ensureSections(); return state.sections[state.activeSection]; }
-function _secPts(c){ return [c.tl,c.tr,c.br,c.bl]; }
 function syncCorners(){ ensureSections();
   var mnLa=90,mxLa=-90,mnLn=180,mxLn=-180;
-  state.sections.forEach(function(s){ [s.corners.tl,s.corners.tr,s.corners.bl,s.corners.br].forEach(function(p){ if(p[0]<mnLa)mnLa=p[0]; if(p[0]>mxLa)mxLa=p[0]; if(p[1]<mnLn)mnLn=p[1]; if(p[1]>mxLn)mxLn=p[1]; }); });
+  state.sections.forEach(function(s){ s.pts.forEach(function(p){ if(p[0]<mnLa)mnLa=p[0]; if(p[0]>mxLa)mxLa=p[0]; if(p[1]<mnLn)mnLn=p[1]; if(p[1]>mxLn)mxLn=p[1]; }); });
   state.corners={tl:[mxLa,mnLn],tr:[mxLa,mxLn],bl:[mnLa,mnLn],br:[mnLa,mxLn]}; }
 function makeCorners(){ ensureSections(); rebuildSections(); }   // called by initMap
 function rebuildSections(){ ensureSections();
   sectionPolys.forEach(function(p){ try{ map.removeLayer(p); }catch(e){} }); sectionPolys=[];
   state.sections.forEach(function(s,i){ var active=(i===state.activeSection);
-    var poly=L.polygon(_secPts(s.corners),{color:active?'#7a3cc0':'#9a8fb5',weight:active?2:1.5,dashArray:active?null:'5,6',fillColor:'#a071ff',fillOpacity:active?.16:.05}).addTo(map);
+    var poly=L.polygon(s.pts,{color:active?'#7a3cc0':'#9a8fb5',weight:active?2:1.5,dashArray:active?null:'5,6',fillColor:'#a071ff',fillOpacity:active?.16:.05}).addTo(map);
     poly.on('click',function(){ if(i!==state.activeSection) emSwitchSection(i); });
     sectionPolys.push(poly); });
-  ['tl','tr','bl','br'].forEach(function(k){ if(cornerMk[k]){ try{ map.removeLayer(cornerMk[k]); }catch(e){} delete cornerMk[k]; } });
-  var c=activeSec().corners;
-  ['tl','tr','bl','br'].forEach(function(k){
-    var m=L.marker(c[k],{draggable:true,title:k.toUpperCase()+' corner · '+activeSec().name}).addTo(map);
-    m.on('drag',function(){ var ll=m.getLatLng(); activeSec().corners[k]=[ll.lat,ll.lng]; drawFootprint(); syncCorners(); });
+  cornerMk.forEach(function(m){ try{ map.removeLayer(m); }catch(e){} }); cornerMk=[];
+  var sec=activeSec();
+  sec.pts.forEach(function(pt,idx){
+    var m=L.marker(pt,{draggable:true,title:'Corner '+(idx+1)+' · '+sec.name+' — drag to move · tap to remove'}).addTo(map);
+    m.on('drag',function(){ var ll=m.getLatLng(); sec.pts[idx]=[ll.lat,ll.lng]; drawFootprint(); syncCorners(); });
     m.on('dragend',function(){ renderCornerInputs(); emSave(); });
-    cornerMk[k]=m; });
+    m.on('click',function(){ removeCorner(idx); });
+    cornerMk.push(m); });
   drawFootprint(); syncCorners(); renderSectionBar(); renderCornerInputs(); }
-function drawFootprint(){ ensureSections(); state.sections.forEach(function(s,i){ if(sectionPolys[i]) sectionPolys[i].setLatLngs(_secPts(s.corners)); }); }
+function drawFootprint(){ ensureSections(); state.sections.forEach(function(s,i){ if(sectionPolys[i]) sectionPolys[i].setLatLngs(s.pts); }); }
 function frameSection(i){ try{ var s=state.sections[i]||activeSec(); if(!s||!map)return;
-  map.fitBounds(L.latLngBounds(_secPts(s.corners)),{paddingTopLeft:[60,124], paddingBottomRight:[60,130], maxZoom:17, animate:true});
+  map.fitBounds(L.latLngBounds(s.pts),{paddingTopLeft:[60,124], paddingBottomRight:[60,130], maxZoom:17, animate:true});
 }catch(e){} }
 function frameGrounds(){ frameSection(state.activeSection); }
-function frameAll(){ try{ syncCorners(); map.fitBounds(L.latLngBounds(_secPts(state.corners)),{paddingTopLeft:[60,124], paddingBottomRight:[60,130], maxZoom:16, animate:true}); }catch(e){} }
+function frameAll(){ try{ syncCorners(); var c=state.corners; map.fitBounds(L.latLngBounds([c.tl,c.tr,c.br,c.bl]),{paddingTopLeft:[60,124], paddingBottomRight:[60,130], maxZoom:16, animate:true}); }catch(e){} }
 function emSwitchSection(i){ ensureSections(); if(i<0||i>=state.sections.length)return; state.activeSection=i; rebuildSections(); frameSection(i); emSave(); }
 function emAddSection(){ ensureSections(); emCloseType(); emTab('cur_map');
   var nm=prompt('Name this section (e.g. North Side, Ferry St Spoke):','Section '+(state.sections.length+1)); if(nm===null)return;
-  state.sections.push({id:Date.now(),name:(nm.trim()||('Section '+(state.sections.length+1))),corners:defaultCorners()});
+  state.sections.push({id:Date.now(),name:(nm.trim()||('Section '+(state.sections.length+1))),pts:defaultRing()});
   state.activeSection=state.sections.length-1; rebuildSections(); frameSection(state.activeSection); emSave();
-  toast('“'+activeSec().name+'” added — drag its 4 corner pins to frame it.'); }
+  toast('“'+activeSec().name+'” added — drag its corner pins to frame it.'); }
 function emDelSection(){ ensureSections(); if(state.sections.length<=1){ toast('A festival needs at least one section.'); return; }
   if(!confirm('Delete section “'+activeSec().name+'”?'))return;
   state.sections.splice(state.activeSection,1); state.activeSection=Math.max(0,state.activeSection-1); rebuildSections(); frameSection(state.activeSection); emSave(); }
+/* ＋ Corner / remove — shape the ACTIVE section beyond its 4 defaults (awkward parks). 3 pins minimum. */
+function _nearestEdgeIdx(pts,lat,lng){ var n=pts.length,best=0,bd=Infinity;
+  for(var i=0;i<n;i++){ var a=pts[i],c=pts[(i+1)%n],mx=(a[0]+c[0])/2,my=(a[1]+c[1])/2,d=(mx-lat)*(mx-lat)+(my-lng)*(my-lng); if(d<bd){bd=d;best=i;} }
+  return best+1; }
+function emAddCorner(){ ensureSections(); var sec=activeSec(), ctr=map.getCenter();
+  sec.pts.splice(_nearestEdgeIdx(sec.pts,ctr.lat,ctr.lng),0,[ctr.lat,ctr.lng]);
+  rebuildSections(); emSave(); toast('＋ Corner added to “'+sec.name+'” — drag it into place.'); }
+function removeCorner(idx){ var sec=activeSec(); if(sec.pts.length<=3){ toast('A section needs at least 3 corners.'); return; }
+  sec.pts.splice(idx,1); rebuildSections(); emSave(); }
 function renderSectionBar(){ ensureSections();
   var html=state.sections.map(function(s,i){ return '<button class="secpill'+(i===state.activeSection?' on':'')+'" onclick="emSwitchSection('+i+')">'+esc(s.name)+'</button>'; }).join('')
-    +'<button class="secpill add" onclick="emAddSection()">＋ Section</button>';
+    +'<button class="secpill add" onclick="emAddSection()">＋ Section</button>'
+    +'<button class="secpill add" onclick="emAddCorner()">📍 ＋ Corner</button>';
   var bar=el('secBarMap'); if(bar) bar.innerHTML=html;
   var pbar=el('secBar'); if(pbar) pbar.innerHTML=html;
   var cnt=el('secCount'); if(cnt) cnt.textContent=state.sections.length; }
-function renderCornerInputs(){ var host=el('cornerInputs'); if(!host)return; var c=activeSec().corners;
-  var nm=el('secName'); if(nm) nm.value=activeSec().name;
-  host.innerHTML=['tl','tr','bl','br'].map(function(k){ var lab={tl:'Top-left',tr:'Top-right',bl:'Bottom-left',br:'Bottom-right'}[k];
-    return '<div class="crow"><span class="ck">'+lab+'</span>'
-      +'<input value="'+c[k][0].toFixed(5)+'" onchange="cornerEdit(\''+k+'\',0,this.value)" aria-label="'+lab+' latitude">'
-      +'<input value="'+c[k][1].toFixed(5)+'" onchange="cornerEdit(\''+k+'\',1,this.value)" aria-label="'+lab+' longitude"></div>'; }).join(''); }
-function cornerEdit(k,which,val){ var v=parseFloat(val); if(isNaN(v))return; activeSec().corners[k][which]=v;
-  if(cornerMk[k]) cornerMk[k].setLatLng(activeSec().corners[k]); drawFootprint(); syncCorners(); emSave(); }
+function renderCornerInputs(){ var host=el('cornerInputs'); if(!host)return; var sec=activeSec();
+  var nm=el('secName'); if(nm) nm.value=sec.name;
+  host.innerHTML=sec.pts.map(function(p,i){
+    return '<div class="crow"><span class="ck">Corner '+(i+1)+'</span>'
+      +'<input value="'+p[0].toFixed(5)+'" onchange="cornerEdit('+i+',0,this.value)" aria-label="Corner '+(i+1)+' latitude">'
+      +'<input value="'+p[1].toFixed(5)+'" onchange="cornerEdit('+i+',1,this.value)" aria-label="Corner '+(i+1)+' longitude">'
+      +(sec.pts.length>3?'<button class="axx" onclick="removeCorner('+i+')" title="Remove this corner">✕</button>':'')
+      +'</div>'; }).join(''); }
+function cornerEdit(i,which,val){ var v=parseFloat(val); if(isNaN(v))return; var sec=activeSec(); if(!sec.pts[i])return; sec.pts[i][which]=v;
+  if(cornerMk[i]) cornerMk[i].setLatLng(sec.pts[i]); drawFootprint(); syncCorners(); emSave(); }
 function secNameEdit(v){ activeSec().name=(v||'').trim()||activeSec().name; renderSectionBar(); emSave(); }
 /* ===== PLATZ & TENTS — a Platz holds tents; a ☂ covered tent = rain-or-shine venue. ===== */
 var AREA_EDIT=null, areaMarks={}, areaPolys={};
@@ -863,7 +879,7 @@ function svCapture(preType){ if(!navigator.geolocation){ toast('This device has 
   navigator.geolocation.getCurrentPosition(function(pos){
     var la=pos.coords.latitude, ln=pos.coords.longitude, ac=Math.round(pos.coords.accuracy||0);
     state.survey=state.survey||[]; var p={type:type,label:label,lat:la,lng:ln,acc:ac,ts:Date.now(),id:Date.now()}; state.survey.push(p);
-    if(type.indexOf('geo_')===0){ var mm={geo_nw:'tl',geo_ne:'tr',geo_sw:'bl',geo_se:'br'}[type]; if(mm){ activeSec().corners[mm]=[la,ln]; rebuildSections(); } }   /* set that corner of the ACTIVE section */
+    if(type.indexOf('geo_')===0){ var mm={geo_nw:0,geo_ne:1,geo_se:2,geo_sw:3}[type]; if(mm!=null){ var _sc=activeSec(); if(_sc.pts[mm]) _sc.pts[mm]=[la,ln]; rebuildSections(); } }   /* set that corner (0=NW,1=NE,2=SE,3=SW) of the ACTIVE section */
     svPin(p); svRender(); emSave(); if(el('svLabel'))el('svLabel').value='';
     toast('📍 Captured '+svLabelFor(type)+(label?' · '+label:'')+' (±'+ac+'m)');
   }, function(err){ toast('📍 Turn on Location to capture. '+(err&&err.message?('('+err.message+')'):'')); }, {enableHighAccuracy:true,timeout:12000,maximumAge:0}); }
