@@ -471,13 +471,6 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return C;}; }catch(e){}
 window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!v){ v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('dev-'+Date.now()); localStorage.setItem(k,v);} return {id:v}; }catch(e){ return {id:'anon'}; } };
 </script>
-<div id="mfTixModal" onclick="if(event.target===this)mfCloseTicket()" style="display:none;position:fixed;inset:0;z-index:410;background:rgba(20,12,34,.9);align-items:center;justify-content:center;padding:14px">
-  <div style="position:relative;width:min(400px,100%);height:min(88vh,760px);background:#0f0b18;border-radius:20px;overflow:hidden;box-shadow:0 24px 70px #000b">
-    <button onclick="mfCloseTicket()" aria-label="Close ticket" style="position:absolute;top:10px;right:12px;z-index:2;border:0;background:#ffffff26;color:#fff;width:38px;height:38px;border-radius:19px;font-size:20px;cursor:pointer">×</button>
-    <iframe id="mfTixFrame" src="about:blank" title="Ticket" style="border:0;width:100%;height:100%"></iframe>
-  </div>
-</div>
-<style>.mftix{margin-left:8px;flex:0 0 auto;border:0;background:linear-gradient(180deg,#2f6feb,#1e50c7);color:#fff;font-weight:800;font-size:11px;border-radius:8px;padding:5px 10px;cursor:pointer;white-space:nowrap;align-self:center}.mftix.paid{background:linear-gradient(180deg,#f0a500,#d98e00);color:#3a2a00}</style>
 <script src="dd_feed.js"></script>
 <script src="dd_spread.js"></script>
 <script src="dd_hyperpost.js"></script>
@@ -486,7 +479,6 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
-<script src="dd_bandgroups.js"></script><script src="dd_flywheel.js"></script><!-- Band→Fan flywheel: free ticket → fan → band group -->
 <script src="dd_musikfest.js"></script>
 <script src="dd_mf_vendors.js"></script>
 <script src="dd_contest.js"></script>
@@ -1023,7 +1015,7 @@ window.refresh=function(){ if(!MF.length)return;
  document.getElementById('fullSched').innerHTML = shown.length ? shown.map(function(r){
    var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!(window.BAND_INFO&&BAND_INFO[r.b]);
    var bspan='<span class="b'+(bio?' hasbio':'')+'"'+(bio?' data-b="'+esc(r.b)+'" onclick="bandInfo(this.getAttribute(\'data-b\'))" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px"':'')+'>'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+(bio?' ⓘ':'')+'</span>';
-   return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span>'+mfTixBtn(r)+'</div>';
+   return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span></div>';
  }).join('') : '<div class="srow"><span class="g">Nothing '+(PILL==='dead'?'Dead/jam ':'')+'left today — tap › for the next day.</span></div>';
  document.getElementById('schMore').innerHTML = (rows.length>SCH_MAX) ? ('<button class="lmore" onclick="schToggle()">'+(schExpand?'Show less ↑':('Show '+(rows.length-SCH_MAX)+' more ↓'))+'</button>') : '';
  try{ if(typeof syncCurtainDayLabels==='function') syncCurtainDayLabels(); }catch(e){}   // keep the curtain day arrows' label in sync
@@ -1559,23 +1551,9 @@ renderPark();
    🌹 dead highlight — exactly like refresh(). */
 var MF_CUR='cur_plan';
 function mfActiveDay(){ var s=document.getElementById('planDate'); return (s&&s.value)?s.value:(DAYS[curDayIdx]||DAYS[0]); }
-/* Band→Fan flywheel: every act carries a FREE ticket (only Wind Creek is paid). Tapping it grabs the
-   ticket → the tapper becomes a fan of that band + joins its group → opens the ticket in a modal. */
-function mfTixBtn(r){ var st=r.st||'', b=r.b||'', d=r.d||''; var paid=(window.DDFlywheel&&DDFlywheel.isPaidStage)?DDFlywheel.isPaidStage(st):/(wind\s*creek|steel\s*stage)/i.test(st);
-  return '<button class="mftix'+(paid?' paid':'')+'" data-b="'+esc(b)+'" data-st="'+esc(st)+'" data-d="'+esc(d)+'" onclick="event.stopPropagation();mfOpenTicket(this)">'+(paid?'🎟 Buy':'🎟 Free')+'</button>'; }
-var MF_BUY_URL='https://www.musikfest.org/';   // ArtsQuest/MusikFest tickets for the paid Steel Stage — set to the exact deep link when known
-window.mfOpenTicket=function(el){ var b=el.getAttribute('data-b')||'', st=el.getAttribute('data-st')||'', d=el.getAttribute('data-d')||'';
-  var paid=(window.DDFlywheel&&DDFlywheel.isPaidStage)?DDFlywheel.isPaidStage(st):/(wind\s*creek|steel\s*stage)/i.test(st);
-  if(!paid){ try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(b,{stage:st,date:d}); }catch(e){} }   // free → grab: fan of this band + joins its group
-  var base='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(st)+'&date='+encodeURIComponent(d);
-  var url= paid ? (base+'&buy='+encodeURIComponent(MF_BUY_URL)) : (base+'&price=FREE');   // paid still SHOWS the ticket; its Buy links to ArtsQuest
-  var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(f)f.src=url; if(m)m.style.display='flex';
-  try{ if(!paid && window.mfToast) mfToast('🎟 Free ticket — now a '+b+' fan 🌹'); }catch(e){} };
-window.mfCloseTicket=function(){ var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(m)m.style.display='none'; if(f)f.src='about:blank'; };
-window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='ddTixClose') mfCloseTicket(); }catch(x){} });   // the ticket's own × (inside the iframe) closes the modal
 function schRowHTML(r,cs){ var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!(window.BAND_INFO&&BAND_INFO[r.b]);
   var bspan='<span class="b'+(bio?' hasbio':'')+'"'+(bio?' data-b="'+esc(r.b)+'" onclick="bandInfo(this.getAttribute(\'data-b\'))" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px"':'')+'>'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+(bio?' ⓘ':'')+'</span>';
-  return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span>'+mfTixBtn(r)+'</div>'; }
+  return '<div class="srow"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><input type="checkbox" class="catch" '+on+' title="Catch this act" data-ck="'+esc(ck)+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))"><span class="d" style="width:60px">'+esc(String(r.t).replace(':00',''))+'</span>'+bspan+'<span class="g">'+esc(r.st)+'</span></div>'; }
 function ensureStagePick(){ var sp=document.getElementById('stagePick2'); if(sp&&!sp.options.length&&MF.length){ var st=Array.from(new Set(MF.map(function(r){return r.st;}))).sort(); sp.innerHTML=st.map(function(s){return '<option>'+esc(s)+'</option>';}).join(''); } }
 window.renderSchedInto=function(mode,containerId){ var host=document.getElementById(containerId); if(!host)return;
   if(!MF.length){ host.innerHTML=''; return; }

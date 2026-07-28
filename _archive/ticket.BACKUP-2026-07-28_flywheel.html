@@ -183,13 +183,10 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 
   // price / buy label
   var numeric=/\$|\d/.test(price);
-  var buyUrl=g('buy','');   // paid events (e.g. the Steel Stage) still SHOW the ticket, but Buy links out to the seller (ArtsQuest)
   document.getElementById('price').textContent = price;
-  var buyLbl = buyUrl ? '🎟️ Buy at ArtsQuest ↗' : (numeric ? '🎟️ Buy now · one tap' : (/free/i.test(price)?'🎟️ Get ticket · one tap':'🔔 Notify me'));
+  var buyLbl = numeric ? '🎟️ Buy now · one tap' : (/free/i.test(price)?'🎟️ Get ticket · one tap':'🔔 Notify me');
   document.getElementById('bbBuy').textContent = buyLbl;
-  if(buyUrl){ var bbb=document.getElementById('bbBuy'); if(bbb) bbb.onclick=function(){ try{ window.open(buyUrl,'_blank','noopener'); }catch(e){} };
-    var fe=document.getElementById('fees'); if(fe) fe.textContent='Tickets sold by ArtsQuest 🌹'; }
-  else if(!numeric && !/free/i.test(price)) document.getElementById('fees').textContent='we\'ll ping you the second it\'s live 🌹';
+  if(!numeric && !/free/i.test(price)) document.getElementById('fees').textContent='we\'ll ping you the second it\'s live 🌹';
 
   // %BAND% image as the event art
   var art=document.getElementById('art');
@@ -342,57 +339,32 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     try{ localStorage.setItem(rKey(), JSON.stringify(out)); }catch(e){}
     curtainClose(); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Tonight’s roster saved 🌹'); }catch(e){} };
 
-  // ----- SETLIST — fans see an EMPTY list until the band TEASES each song, which fills it in LIVE.
-  //        The band edits (list · tease times · reveal) until the show is ARCHIVED, then it locks to history. -----
-  var _slPoll=null;
-  function isArchived(){ try{ var d=getSongs(); if(d&&d.archived) return true; }catch(e){}
-    try{ if(date){ var dd=new Date(date+'T23:59:59'); if(!isNaN(dd.getTime()) && dd.getTime() < Date.now()-2*864e5) return true; } }catch(e){}   // auto-locks >2 days after the show
-    return false; }
-  function songRevealed(s){ return !!(s&&(s.teased||s.revealed)); }
+  // ----- SETLIST -----
   function setlistHTML(){ if(isBand) return setlistEditHTML();
-    var d=getSongs(), all=d.songs||[], arch=isArchived();
-    var teasedOnly = all.filter(songRevealed);
-    // fans see only teased songs (the reveal IS the show). Archived: show what was actually PLAYED (teased);
-    // if nothing was teased (band logged the set post-show), the whole list is the record.
-    var songs = arch ? (teasedOnly.length ? teasedOnly : all) : teasedOnly;
-    var head=chead('🎼', arch?'The Setlist — that night':'The Setlist — live');
-    if(!songs.length) return head+'<div class="curtempty">'+(all.length?('The set’s about to start — songs appear here the moment '+esc(band)+' teases each one. 🌹'):'No setlist yet.')+'<span class="cookie">🍪 In the van up 476? The band texts it in — every song lands here live, then keeps as history.</span></div>';
+    var d=getSongs(), songs=d.songs||[], head=chead('🎼','The Setlist — that night');
+    if(!songs.length) return head+'<div class="curtempty">No setlist yet.<span class="cookie">🍪 In the van up 476? The band texts it in — every song lands here live, then keeps as history.</span></div>';
     var hasAudio=false;
     var rows=songs.map(function(s,i){ var nm=(s&&(s.n||s.name))||s; var au=null; try{ au=window.__songAudio&&__songAudio(band,date,nm); }catch(e){}
       if(au) hasAudio=true;
       return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b>'+(s&&s.at?('<span class="sat">'+esc(s.at)+'</span>'):'')+(au?('<button class="splay" title="Play" onclick="ticketPlay(\''+encodeURIComponent(au)+'\')">▶</button>'):'')+'</div>'; }).join('');
-    return head+'<div>'+rows+'</div>'+(arch?'':'<div class="cookie">🌹 Live — more songs fill in as '+esc(band)+' teases them.</div>')+((!arch)?'':(hasAudio?'':'<div class="cookie">🍪 Owsley to '+esc(band)+': upload this show’s audio → every song gets a ▶ right here.</div>'));
+    return head+'<div>'+rows+'</div>'+(hasAudio?'':'<div class="cookie">🍪 Owsley to '+esc(band)+': upload this show’s audio → every song gets a ▶ right here.</div>');
   }
   function setlistEditHTML(){ var d=getSongs();
-    if(isArchived()){ var lst=(d.songs||[]).map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b></div>'; }).join('');
-      return chead('🎼','Setlist — archived')+'<div class="curtempty">This show is <b>archived</b> 🌹 — locked as history.</div>'+(lst?('<div>'+lst+'</div>'):''); }
     var text=(d.songs||[]).map(function(s){ return (s.n||s.name||s)+(s.at?(' '+s.at):''); }).join('\n');
-    var teaseList=(d.songs||[]).length ? ('<label class="slbl" style="margin-top:14px">Go live — tease each song to your fans</label><div id="teaseList">'
-        +(d.songs||[]).map(function(s,i){ var t=songRevealed(s); return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b><button class="tmb" style="margin-left:auto;padding:4px 11px;'+(t?'border-color:#12854f;color:#0e7d4f':'border-color:#b8002e;color:#b8002e')+'" onclick="teaseSong('+i+')">'+(t?'✓ Teased':'▶ Tease')+'</button></div>'; }).join('')+'</div>') : '';
     return chead('🎼','Set the list &amp; tease time')
       +'<label class="slbl">Tease / set-start time</label><input id="slStart" class="slin" placeholder="9:00" value="'+esc(d.start||'')+'">'
       +'<label class="slbl">Songs — one per line (add a time if you have it)</label>'
       +'<textarea id="slSongs" class="slta" placeholder="Suzy Greenberg 2:30\nWolfmans Brother 4:55\nTweezer">'+esc(text)+'</textarea>'
       +'<button class="tmb" style="width:100%;margin-top:10px;border-color:#12854f;color:#0e7d4f" onclick="saveSetlist()">💾 Save the setlist</button>'
-      + teaseList
-      +'<button class="tmb" style="width:100%;margin-top:14px;border-color:#b8002e;color:#b8002e" onclick="archiveShow()">🔒 Archive this show → lock to history</button>'
-      +'<div class="cookie">🌹 Fans see an <b>empty</b> setlist until you <b>tease</b> — each song you tease fills into their ticket live. Edit freely until you archive. 🍪</div>';
+      +'<div class="cookie">🌹 Fans on this show see each song appear here — texted live if they opted in. Your record, on your band’s ticket. No pressure, just a nudge. 🍪</div>';
   }
-  function _persistSongs(rec){ try{ localStorage.setItem(sKey(), JSON.stringify(rec)); }catch(e){}
-    try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band,{date:date,start:rec.start,songs:rec.songs}); }catch(e){}
-    try{ var key=g('key',''), cl=window.ddClient&&ddClient(); if(key&&cl&&cl.rpc) cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:rec.start||null,p_end:null,p_songs:rec.songs}); }catch(e){} }
   window.saveSetlist=function(){ var start=((document.getElementById('slStart')||{}).value||'').trim();
-    var raw=((document.getElementById('slSongs')||{}).value||''); var prev=getSongs(); var prevMap={};
-    (prev.songs||[]).forEach(function(s){ if(s&&(s.n||s.name)) prevMap[(s.n||s.name)]=s; });   // keep tease flags across edits
-    var songs=raw.split(/\n/).map(function(l){ l=l.trim(); if(!l) return null; var m=l.match(/(\d{1,2}:\d{2})\s*$/); var nm=m?l.slice(0,m.index).trim():l, o={n:nm}; if(m)o.at=m[1]; if(prevMap[nm]&&songRevealed(prevMap[nm]))o.teased=true; return o; }).filter(Boolean);
-    var rec={start:start,songs:songs}; if(prev.archived)rec.archived=true; _persistSongs(rec);
-    ticketCurtain('setlist'); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Setlist saved 🌹'); }catch(e){} };
-  window.teaseSong=function(i){ var d=getSongs(), songs=d.songs||[]; if(!songs[i]||isArchived())return; songs[i].teased=!songs[i].teased;
-    var rec={start:d.start||'',songs:songs}; if(d.archived)rec.archived=true; _persistSongs(rec); ticketCurtain('setlist');
-    try{ (window.parent&&window.parent.toast?window.parent.toast:alert)(songs[i].teased?('🌹 Teased “'+(songs[i].n||'')+'” — it just filled into every fan’s ticket'):'Un-teased'); }catch(e){} };
-  window.archiveShow=function(){ if(!confirm('Archive “'+band+'” — lock the setlist & roster as history? You won’t be able to edit after.'))return;
-    var d=getSongs(); _persistSongs({start:d.start||'',songs:d.songs||[],archived:true});
-    ticketCurtain('setlist'); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Archived 🌹 — locked to history.'); }catch(e){} };
+    var raw=((document.getElementById('slSongs')||{}).value||'');
+    var songs=raw.split(/\n/).map(function(l){ l=l.trim(); if(!l) return null; var m=l.match(/(\d{1,2}:\d{2})\s*$/); return m?{n:l.slice(0,m.index).trim(),at:m[1]}:{n:l}; }).filter(Boolean);
+    try{ localStorage.setItem(sKey(), JSON.stringify({start:start,songs:songs})); }catch(e){}
+    try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band,{date:date,start:start,songs:songs}); }catch(e){}
+    try{ var key=g('key',''), cl=window.ddClient&&ddClient(); if(key&&cl&&cl.rpc) cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:start||null,p_end:null,p_songs:songs}); }catch(e){}   // cloud sync if a band key is present
+    curtainClose(); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Setlist saved 🌹'); }catch(e){} };
   /* ---------- VENUE VIEW — same ticket, operator's pills. Their event, their numbers, close it out.
      A venue flips through the tickets for their OWN events (a deck of nights). Role via ?role=venue.
      Full sales/floor/stage console = roadmap (ROADMAP_ticket_sales_admin_console.md). ---------- */
@@ -410,15 +382,11 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       +'<button class="tmb" style="border-color:#b8002e;color:#b8002e;margin-top:12px;width:100%" onclick="venueClose()">🔒 Close this event → move to history</button>';
   }
   window.venueClose=function(){ if(!confirm('Close “'+band+'” — settle and move it to your history?')) return; curtainClose();
-    try{ var d=getSongs(); localStorage.setItem(sKey(), JSON.stringify({start:d.start||'',songs:d.songs||[],archived:true})); }catch(e){}   // closing the event archives the setlist → locks it to history
     try{ var n=document.getElementById('issuedNote'); if(n){ n.classList.remove('hidden'); n.textContent='✓ Event closed · settled 🌹'; } }catch(e){}
     try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Event closed 🌹 — it lives in your venue history now.'); }catch(e){} };
   window.ticketCurtain=function(which){ var el=document.getElementById('curtcard'); if(!el)return;
     el.innerHTML = which==='roster' ? rosterHTML() : which==='venue' ? venueHTML() : setlistHTML();
-    document.getElementById('curtain').classList.add('on');
-    try{ if(_slPoll){ clearInterval(_slPoll); _slPoll=null; } }catch(e){}
-    // FAN live-fill: while the setlist curtain is open, re-read every 15s so newly-teased songs appear on their own
-    if(which==='setlist' && !isBand && !isArchived()){ _slPoll=setInterval(function(){ try{ var c=document.getElementById('curtain'); if(!c||!c.classList.contains('on')){ clearInterval(_slPoll); _slPoll=null; return; } var el2=document.getElementById('curtcard'); if(el2) el2.innerHTML=setlistHTML(); }catch(e){} }, 15000); } };
+    document.getElementById('curtain').classList.add('on'); };
   // role-aware pills — the same ticket, filed into each QR: fan (default) · band (edit) · venue (sales)
   (function(){ var pr=document.getElementById('pillrow'); if(!pr) return;
     if(role==='venue'||role==='owner'){ pr.innerHTML='<button class="tpill" onclick="ticketCurtain(\'venue\')">📊 Sales</button>'

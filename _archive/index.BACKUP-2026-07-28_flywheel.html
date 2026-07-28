@@ -3086,7 +3086,7 @@ function viewGroup(i){toast('Opens '+GROUPS[i].n+' on Facebook ↗');}
    each carries a QR the band puts on their own Facebook to bring fans in. ===== */
 function bandGroupsHTML(){
  if(!window.DDBandGroups) return '';
- var gs=DDBandGroups.list().concat((window.DDDeadTributes&&DDDeadTributes.claimable)?DDDeadTributes.claimable():[]);   // + the top Dead tribute in each state (claimable like the marquee acts)
+ var gs=DDBandGroups.list();
  return '<p class="rsub"><span class="ff free">FREE</span> 🎸 <b>Band Groups</b> — a home for every act on the calendar. Once the band claims it, their logo goes up (they can change it), and they drop their QR on Facebook to bring the fans in.</p>'+
   '<div class="glist">'+gs.map(function(g){
    var badge=g.accepted?'<span style="font-size:10px;font-weight:800;color:#1f9e6b;background:#e7f7ef;border-radius:999px;padding:2px 7px;margin-left:6px">✓ Official</span>':'<span style="font-size:10px;font-weight:800;color:#9a7; background:#f3f0e6;border-radius:999px;padding:2px 7px;margin-left:6px">unclaimed</span>';
@@ -3102,7 +3102,7 @@ function bandGroupsHTML(){
   }).join('')+'</div>';
 }
 function bandGroupsQRs(){ if(!window.DDBandGroups||!window.DDQR)return;
- DDBandGroups.list().concat((window.DDDeadTributes&&DDDeadTributes.claimable)?DDDeadTributes.claimable():[]).forEach(function(g){ var el=document.getElementById('bgqr-'+g.slug); if(el){ try{ DDQR.into('bgqr-'+g.slug, g.qr, {mark:'dd', size:200, css:96}); }catch(e){} } }); }
+ DDBandGroups.list().forEach(function(g){ var el=document.getElementById('bgqr-'+g.slug); if(el){ try{ DDQR.into('bgqr-'+g.slug, g.qr, {mark:'dd', size:200, css:96}); }catch(e){} } }); }
 function bgTune(slug,on){ try{ DDBandGroups.setTuned(slug,on); }catch(e){} readerTab('groups'); if(typeof toast==='function')toast(on?'📡 Tuned in — this band\'s posts flow into your feed.':'Tuned out.'); }
 function bgShare(slug){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('https://deaddance.app/'+slug),'_blank','noopener'); }
 function bgSaveQR(slug){ try{ DDQR.save('https://deaddance.app/'+slug, {mark:'dd'}, slug+'-group-QR.png'); }catch(e){} }
@@ -4531,8 +4531,7 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
 <script src="dd_logoguess_vip.js" defer></script>
 <script src="dd_bandgroups.js" defer></script>
 <script src="dd_flywheel.js" defer></script><!-- Band→Fan flywheel: ticket-holders show as fans in the group -->
-<script src="dd_dead_tributes.js" defer></script><!-- top Dead tribute per state → claimable groups + chapter calendar (est.) -->
-<script>window.ddGroupFans=function(g){try{if(window.DDFlywheel&&DDFlywheel.group){var f=DDFlywheel.group(g.name);var n=f.members||g.members||0;return n.toLocaleString()+' fans'+(f.youIn?' · <b style="color:#1f9e6b">you are in ✓</b>':'');}}catch(e){}return (g.members||0).toLocaleString()+' fans';};</script>
+<script>window.ddGroupFans=function(g){try{if(window.DDFlywheel&&DDFlywheel.group){var f=DDFlywheel.group(g.name);return f.members.toLocaleString()+' fans'+(f.youIn?' · <b style="color:#1f9e6b">you are in ✓</b>':'');}}catch(e){}return (g.members||0).toLocaleString()+' fans';};</script>
 <script src="dd_watchdog.js" defer></script>
 <script src="dd_bench.js" defer></script>
 <script src="dd_learn.js" defer></script>
@@ -4581,5 +4580,4 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
     if(p.get('order')||p.get('sub')) history.replaceState({},'',location.pathname);
   }catch(e){} })();
 </script>
-<!-- AA_VER: live build badge (AA_DEPLOY) --><script>(function(){try{if(!window.caches||!caches.keys)return;caches.keys().then(function(ks){var b=null;(ks||[]).forEach(function(k){var m=/-v(\d+)/.exec(k);if(m){var n=+m[1];if(!b||n>b.n)b={n:n,s:'v'+m[1]};}});if(!b)return;if(document.getElementById('ddVer')||document.getElementById('fffVer')||document.getElementById('appVer'))return;var d=document.createElement('div');d.id='appVer';d.textContent=b.s;d.style.cssText='position:fixed;right:8px;bottom:8px;z-index:99999;font:600 11px/1 -apple-system,system-ui,sans-serif;color:#7a7a7a;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:4px 7px;opacity:.8;pointer-events:none';document.body.appendChild(d);});}catch(e){}})();</script>
 </body></html>
