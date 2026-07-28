@@ -57,8 +57,10 @@
     held().forEach(function (h) { if (!out.some(function (o) { return o.slug === h.slug; })) out.push(group(h.name)); });   // long-tail acts too
     return out; }
 
-  // guarded spine sync — no-op until a Supabase client + table exist (no liability)
-  function syncSpine(k, band, show) { try { var cl = (root.ddClient && root.ddClient()); if (cl && cl.rpc) cl.rpc("dd_fan_join", { p_band: k, p_name: band, p_show: JSON.stringify(show || {}) }); } catch (e) {} }
+  // stable anonymous fan id (device-local) so the spine can de-dup + count fans per band
+  function fanId() { try { var id = root.localStorage.getItem("dd.fanid"); if (!id) { id = "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); root.localStorage.setItem("dd.fanid", id); } return id; } catch (e) { return "anon"; } }
+  // guarded spine sync — persists the fan server-side via dd_fan_join; no-op until Supabase + the table exist
+  function syncSpine(k, band, show) { try { var cl = (root.ddClient && root.ddClient()); if (cl && cl.rpc) cl.rpc("dd_fan_join", { p_band: k, p_name: band, p_show: (show || {}), p_fan: fanId() }); } catch (e) {} }
 
   root.DDFlywheel = { grab: grab, release: release, isHeld: isHeld, held: held, group: group, groups: groups,
     links: links, fanTicket: fanTicket, bandTicket: bandTicket, isPaidStage: isPaidStage, slug: slug };
