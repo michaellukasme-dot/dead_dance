@@ -80,7 +80,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 </style>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
-<script src="dd_roster.js"></script><script src="dd_setlist.js"></script><script src="dd_setlist_crowd.js"></script><script src="dd_media.js"></script>
+<script src="dd_roster.js"></script><script src="dd_setlist.js"></script><script src="dd_media.js"></script>
 <style>
 .pillrow{display:flex;gap:8px;margin-top:9px}
 .tpill{flex:1;border:1px solid var(--line,#e6e0ef);background:#fff;border-radius:12px;padding:10px 6px;font:800 12.5px system-ui;color:#5a2e86;cursor:pointer}
@@ -351,7 +351,6 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   function songRevealed(s){ return !!(s&&(s.teased||s.revealed)); }
   function setlistHTML(){ if(isBand) return setlistEditHTML();
     var d=getSongs(), all=d.songs||[], arch=isArchived();
-    if(!all.length && window.DDSetlistCrowd) return crowdSetlistHTML(arch);   // band left it blank → fans crowdsource it (Cookie asks + rewards). Band setlist present = LOCKED, no Cookie.
     var teasedOnly = all.filter(songRevealed);
     // fans see only teased songs (the reveal IS the show). Archived: show what was actually PLAYED (teased);
     // if nothing was teased (band logged the set post-show), the whole list is the record.
@@ -364,24 +363,6 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b>'+(s&&s.at?('<span class="sat">'+esc(s.at)+'</span>'):'')+(au?('<button class="splay" title="Play" onclick="ticketPlay(\''+encodeURIComponent(au)+'\')">▶</button>'):'')+'</div>'; }).join('');
     return head+'<div>'+rows+'</div>'+(arch?'':'<div class="cookie">🌹 Live — more songs fill in as '+esc(band)+' teases them.</div>')+((!arch)?'':(hasAudio?'':'<div class="cookie">🍪 Owsley to '+esc(band)+': upload this show’s audio → every song gets a ▶ right here.</div>'));
   }
-  // ----- CROWDSOURCE — the band posted NO setlist, so any fan writes it. Cookie asks, and rewards each add.
-  //        Band-first: the moment the band posts a setlist, all.length>0 → this branch never runs (locked). -----
-  function crowdSetlistHTML(arch){
-    try{ if(window.DDSetlistCrowd&&DDSetlistCrowd.pull) DDSetlistCrowd.pull(band,date); }catch(e){}   // merge other fans' adds (guarded, async)
-    var list=[]; try{ list=DDSetlistCrowd.get(band,date)||[]; }catch(e){}
-    var head=chead('🍪', arch?'The Setlist — by the crowd':'Cookie asks: what did they play?');
-    var rows=list.map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n)+'</b>'+(s.fans>1?('<span class="sat" style="margin-left:auto">🌹 '+s.fans+' heard it</span>'):(s.byMe?'<span class="sat" style="margin-left:auto">you</span>':''))+'</div>'; }).join('');
-    var addUI = arch ? '' : ('<div style="display:flex;gap:8px;margin-top:12px"><input id="crowdSong" class="slin" style="flex:1;margin:0" placeholder="A song they played…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();crowdAdd();}"><button class="tmb" style="margin:0;border-color:#12854f;color:#0e7d4f;white-space:nowrap" onclick="crowdAdd()">🍪 Add</button></div>');
-    var note = arch
-      ? '<div class="cookie">🌹 '+esc(band)+' didn’t log this one — the crowd did. Every song was added by a fan who was there.</div>'
-      : '<div class="cookie">🍪 '+esc(band)+' hasn’t posted a setlist — so you write it. Add a song you heard: you earn a Cookie 🍪 and it fills every fan’s ticket. When enough of you agree, it sticks. 🌹</div>';
-    return head + (rows?('<div>'+rows+'</div>'):'<div class="curtempty">Be the first — add the song playing right now. 🍪</div>') + addUI + note;
-  }
-  window.crowdAdd=function(){ var el=document.getElementById('crowdSong'); var t=el?(el.value||''):''; if(!t.trim())return;
-    var d=getSongs(), res={}; try{ res=DDSetlistCrowd.add(band,date,t,{songs:d.songs||[],archived:d.archived})||{}; }catch(e){}
-    if(el){ el.value=''; try{el.focus();}catch(_){} }
-    ticketCurtain('setlist');
-    try{ var msg=res.locked?(band+' already posted the setlist.'):res.already?('Already on the list 🌹'):('🍪 Added “'+t.trim()+'” — thanks for feeding Cookie 🌹'); (window.parent&&window.parent.toast?window.parent.toast:alert)(msg); }catch(e){} };
   function setlistEditHTML(){ var d=getSongs();
     if(isArchived()){ var lst=(d.songs||[]).map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b></div>'; }).join('');
       return chead('🎼','Setlist — archived')+'<div class="curtempty">This show is <b>archived</b> 🌹 — locked as history.</div>'+(lst?('<div>'+lst+'</div>'):''); }
@@ -437,7 +418,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     document.getElementById('curtain').classList.add('on');
     try{ if(_slPoll){ clearInterval(_slPoll); _slPoll=null; } }catch(e){}
     // FAN live-fill: while the setlist curtain is open, re-read every 15s so newly-teased songs appear on their own
-    if(which==='setlist' && !isBand && !isArchived()){ _slPoll=setInterval(function(){ try{ var c=document.getElementById('curtain'); if(!c||!c.classList.contains('on')){ clearInterval(_slPoll); _slPoll=null; return; } if(document.activeElement&&document.activeElement.id==='crowdSong')return; var el2=document.getElementById('curtcard'); if(el2) el2.innerHTML=setlistHTML(); }catch(e){} }, 15000); } };
+    if(which==='setlist' && !isBand && !isArchived()){ _slPoll=setInterval(function(){ try{ var c=document.getElementById('curtain'); if(!c||!c.classList.contains('on')){ clearInterval(_slPoll); _slPoll=null; return; } var el2=document.getElementById('curtcard'); if(el2) el2.innerHTML=setlistHTML(); }catch(e){} }, 15000); } };
   // role-aware pills — the same ticket, filed into each QR: fan (default) · band (edit) · venue (sales)
   (function(){ var pr=document.getElementById('pillrow'); if(!pr) return;
     if(role==='venue'||role==='owner'){ pr.innerHTML='<button class="tpill" onclick="ticketCurtain(\'venue\')">📊 Sales</button>'
