@@ -42,14 +42,20 @@
   function add(band, date, title, bandRec, fan){
     fan = fan || fanId();
     if (locked(bandRec)) return { locked: true };
-    var rec = _read(band, date), r = merge(rec.songs, title, fan);
+    var rec = _read(band, date), r = merge(rec.songs, title, fan), rewarded = false;
     if (r.added) {
+      // COOKIE ON CONSENSUS, not on unverified submission (Claudine anti-farm): the reward fires only when a
+      // song reaches 2+ distinct fans. Junk a lone actor types never gets confirmed → never mints value.
+      // Deduped per song (no fan in key) → exactly one Cookie per confirmed song, ever.
+      if ((r.song.fans || []).length >= 2 && !r.song._rw) {
+        r.song._rw = true; rewarded = true;
+        try { if (root.DDCoins && DDCoins.feed) DDCoins.feed('setlist', 'setlist|' + slug(band) + '|' + r.song.norm); } catch (e) {}
+        try { if (root.DDCoins && DDCoins.pop) DDCoins.pop(1); } catch (e) {}
+      }
       _write(band, date, rec);
-      try { if (root.DDCoins && DDCoins.feed) DDCoins.feed('setlist', 'setlist|' + slug(band) + '|' + r.song.norm + '|' + fan); } catch (e) {}
-      try { if (root.DDCoins && DDCoins.pop) DDCoins.pop(1); } catch (e) {}
       try { var c = C(); if (c && c.rpc) c.rpc('dd_setlist_fan_add', { p_band: slug(band), p_show: date || '', p_song: r.song.n, p_fan: fan }); } catch (e) {}
     }
-    return { locked: false, added: !!r.added, already: !!r.already, list: view(rec.songs, fan) };
+    return { locked: false, added: !!r.added, already: !!r.already, rewarded: rewarded, list: view(rec.songs, fan) };
   }
   // the crowd list, sorted by consensus (fan count) then time; annotated byMe + fans count
   function view(list, fan){

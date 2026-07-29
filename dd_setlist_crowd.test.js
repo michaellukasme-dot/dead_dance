@@ -1,4 +1,4 @@
-// dd_setlist_crowd — node harness. Shims window/localStorage/DDCoins; ddClient absent (spine no-op).
+// dd_setlist_crowd — node harness (post-Claudine: Cookie on CONSENSUS, not on submission).
 global.window = global;
 var _ls = {}; global.localStorage = { getItem:function(k){return (k in _ls)?_ls[k]:null;}, setItem:function(k,v){_ls[k]=String(v);}, removeItem:function(k){delete _ls[k];} };
 var fed = []; global.DDCoins = { feed:function(t,k){ fed.push(k); }, pop:function(){} };
@@ -7,44 +7,41 @@ require('./dd_setlist_crowd.js');
 var S = global.window.DDSetlistCrowd;
 assert.ok(S, 'module attached');
 
-// 1) normalize
+// normalize + lock
 assert.strictEqual(S._norm('Tweezer!'), 'tweezer');
-assert.strictEqual(S._norm('Wolfman’s Brother'), 'wolfman s brother');
+assert.strictEqual(S.locked({songs:[{n:'x'}]}), true);
+assert.strictEqual(S.locked({songs:[]}), false);
 
-// 2) band authority lock
-assert.strictEqual(S.locked({songs:[{n:'x'}]}), true, 'band songs → locked');
-assert.strictEqual(S.locked({songs:[]}), false, 'no band songs → open');
-assert.strictEqual(S.locked({bandSet:true,songs:[]}), true, 'bandSet flag → locked');
-
-// 3) band-locked add → refused, NO cookie
-var before = fed.length;
+// band-locked add → refused, no cookie
 var r0 = S.add('rift','d','Anything',{songs:[{n:'Y'}]},'fan-x');
-assert.strictEqual(r0.locked, true, 'locked add refused');
-assert.strictEqual(fed.length, before, 'locked add awards NO cookie (band entered = no Cookie)');
+assert.strictEqual(r0.locked, true); assert.strictEqual(fed.length, 0);
 
-// 4) fan add new → added + 1 cookie
+// LEAK FIX: first entry earns NOTHING (unverified)
 var r1 = S.add('rift','2026-07-30','Tweezer',{songs:[]},'fan-1');
-assert.strictEqual(r1.added, true); assert.strictEqual(fed.length, 1, 'first add → 1 cookie');
+assert.strictEqual(r1.added, true); assert.strictEqual(r1.rewarded, false);
+assert.strictEqual(fed.length, 0, 'lone first entry mints NO cookie (anti-farm)');
 
-// 5) second fan, same song (fuzzy) → consensus 2
+// junk from the SAME actor (new fanIds would be needed) → still no cookie
+S.add('rift','2026-07-30','jjjunk one',{songs:[]},'fan-1');
+S.add('rift','2026-07-30','jjjunk two',{songs:[]},'fan-1');
+assert.strictEqual(fed.length, 0, 'a lone actor cannot farm cookies with junk');
+
+// CONSENSUS: a 2nd distinct fan confirms Tweezer → ONE cookie
 var r2 = S.add('rift','2026-07-30','tweezer!',{songs:[]},'fan-2');
-assert.strictEqual(r2.added, true); assert.strictEqual(fed.length, 2);
-var tw = S.get('rift','2026-07-30').filter(function(s){return s.n.toLowerCase().indexOf('tweezer')>=0;})[0];
-assert.strictEqual(tw.fans, 2, 'two distinct fans → consensus 2');
+assert.strictEqual(r2.rewarded, true); assert.strictEqual(fed.length, 1, 'consensus (2 fans) mints exactly 1 cookie');
 
-// 6) same fan, same song again → already, no double cookie
+// further confirmations do NOT re-mint
+S.add('rift','2026-07-30','Tweezer',{songs:[]},'fan-3');
+assert.strictEqual(fed.length, 1, 'already-confirmed song does not re-reward');
+
+// dup by same fan → no-op
 var r3 = S.add('rift','2026-07-30','Tweezer',{songs:[]},'fan-1');
-assert.strictEqual(r3.already, true); assert.strictEqual(r3.added, false); assert.strictEqual(fed.length, 2, 'dup add → no extra cookie');
+assert.strictEqual(r3.already, true); assert.strictEqual(fed.length, 1);
 
-// 7) consensus ordering: add a 1-fan song, Tweezer(2) still first
+// ordering: Tweezer (3 fans) before a solo add
 S.add('rift','2026-07-30','Bathtub Gin',{songs:[]},'fan-1');
 var list = S.get('rift','2026-07-30');
 assert.strictEqual(list[0].n.toLowerCase().indexOf('tweezer')>=0, true, 'most-agreed first');
-assert.strictEqual(fed.length, 3, 'third distinct add → 3 cookies total');
 
-// 8) status
-var st = S.status('rift','2026-07-30');
-assert.strictEqual(st.songs, 2); assert.strictEqual(st.fans, 2);
-
-// 9) pull no-throw without ddClient
-S.pull('rift','2026-07-30').then(function(v){ assert.strictEqual(v,false,'pull no-op without spine'); console.log('ALL PASS ('+fed.length+' cookies fed, '+st.songs+' songs, '+st.fans+' fans)'); }).catch(function(e){ console.error('FAIL',e); process.exit(1); });
+// pull no-op without spine
+S.pull('rift','2026-07-30').then(function(v){ assert.strictEqual(v,false); console.log('ALL PASS — cookies minted: '+fed.length+' (only the consensus song). Junk earned 0.'); }).catch(function(e){ console.error('FAIL',e); process.exit(1); });

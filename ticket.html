@@ -374,7 +374,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     var addUI = arch ? '' : ('<div style="display:flex;gap:8px;margin-top:12px"><input id="crowdSong" class="slin" style="flex:1;margin:0" placeholder="A song they played…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();crowdAdd();}"><button class="tmb" style="margin:0;border-color:#12854f;color:#0e7d4f;white-space:nowrap" onclick="crowdAdd()">🍪 Add</button></div>');
     var note = arch
       ? '<div class="cookie">🌹 '+esc(band)+' didn’t log this one — the crowd did. Every song was added by a fan who was there.</div>'
-      : '<div class="cookie">🍪 '+esc(band)+' hasn’t posted a setlist — so you write it. Add a song you heard: you earn a Cookie 🍪 and it fills every fan’s ticket. When enough of you agree, it sticks. 🌹</div>';
+      : '<div class="cookie">🍪 '+esc(band)+' hasn’t posted a setlist — so you write it. Add a song you heard; it fills every fan’s ticket, and when the crowd agrees on it you earn a Cookie 🍪. 🌹</div>';
     return head + (rows?('<div>'+rows+'</div>'):'<div class="curtempty">Be the first — add the song playing right now. 🍪</div>') + addUI + note;
   }
   window.crowdAdd=function(){ var el=document.getElementById('crowdSong'); var t=el?(el.value||''):''; if(!t.trim())return;
