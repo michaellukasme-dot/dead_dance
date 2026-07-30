@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Ticket · DeadDance / StageFill</title>
+<title>Ticket · StageFill</title>
 <style>
 :root{--tm-blue:#2f7bf6;--gold:#c79a3a;--rose:#b8002e;--purple:#5a2e86;--ink:#23202a;--muted:#7a7686;--line:#e7ddf5;--secure:#1877f2;--green:#1a8f4f}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -19,7 +19,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 
 .brandbar{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;padding-right:34px}
 .brandbar .rose{font-size:15px}
-.brandbar .sf{color:var(--purple);font-weight:700}
+.brandbar .sf{color:#2f6feb;font-weight:700}
 .brandbar .lock{margin-left:auto;display:flex;align-items:center;gap:5px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.03em}
 
 .gate{margin-top:14px}
@@ -117,7 +117,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   <div class="photo">
     <div class="art" id="art"></div>
     <div class="brandbar">
-      <span class="rose">🌹</span><span>DeadDance</span><span class="sf">· StageFill</span>
+      <span id="brandBand" style="font-weight:900">Ticket</span> <span class="sf">· StageFill</span>
       <span class="lock">🔒 SECURE</span>
     </div>
 
@@ -126,7 +126,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     <div class="venue" id="venue">—</div>
     <a class="veloc" id="veloc" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:12px;font-weight:800;color:#2f7bf6;text-decoration:none">📍 Directions &amp; parking ›</a>
     <div class="srs" id="srs"></div>
-    <div class="ga hidden" id="ga">🌹 GENERAL ADMISSION</div>
+    <div class="ga hidden" id="ga">GENERAL ADMISSION</div>
 
     <div class="barwrap">
       <canvas id="bars" width="600" height="132"></canvas>
@@ -135,12 +135,12 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     </div>
 
     <div class="buybar" id="buybar">
-      <div class="bbprice"><b id="price">$18</b><span id="fees">no service fees 🌹</span></div>
+      <div class="bbprice"><b id="price">$18</b><span id="fees">no service fees</span></div>
       <button class="bbbuy" id="bbBuy" onclick="startCheckout('card')">🎟️ Buy now · one tap</button>
     </div>
     <div class="issuedNote hidden" id="issuedNote">✓ In your wallet · device-bound · works offline at the gate</div>
 
-    <div class="foot"><span class="rose">🌹</span> Your ticket. Your friends. No toll booth.</div>
+    <div class="foot">Your ticket. Your friends. No toll booth.</div>
     <button class="tmb" onclick="ddCheckInHere()" style="border-color:#b8002e;color:#b8002e">📍 Check in — in your voice</button>
     <button class="tmb" onclick="bandPerm(1)">🎤 That's my band — sell my tickets</button>
     <div class="pillrow" id="pillrow">
@@ -176,6 +176,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   var role=g('role','fan');   // fan (default) · band/member (edits the setlist) · venue/owner (sales + close)
 
   document.getElementById('band').textContent=String(band).toUpperCase();
+  try{ var _bb=document.getElementById('brandBand'); if(_bb) _bb.textContent=String(band); }catch(e){}   // BAND branding + StageFill (neutral; no DeadDance, no rose)
   document.getElementById('sub').textContent=sub;
   document.getElementById('venue').textContent=venue+(date?(' · '+date):'');
   document.getElementById('gate').textContent=gate;

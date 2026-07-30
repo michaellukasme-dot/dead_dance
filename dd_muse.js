@@ -10,6 +10,10 @@
     try { var v = JSON.parse(localStorage.getItem("dd.voice") || '{"samples":[]}'); return (v.samples || []).slice(0, 12); }
     catch (e) { return []; }
   }
+  // ---- LEARN the user's voice: keep what they actually write (local only, never sent) ----
+  function learn(text) { text = String(text || "").trim(); if (text.length < 12) return;
+    try { var v = JSON.parse(localStorage.getItem("dd.voice") || '{"samples":[]}'); v.samples = v.samples || [];
+      if (v.samples.indexOf(text) < 0) { v.samples.unshift(text); v.samples = v.samples.slice(0, 24); localStorage.setItem("dd.voice", JSON.stringify(v)); } } catch (e) {} }
   function nowSong() {
     try { var t = document.getElementById("npT"); var s = t ? t.textContent.replace(/^🎵\s*/, "").trim() : ""; return s && !/Tap|ambient/i.test(s) ? s : ""; }
     catch (e) { return ""; }
@@ -17,6 +21,7 @@
 
   // ---- which boxes get the mark, and the context we hand the writer ----
   function kindOf(box) {
+    if (box.getAttribute && box.getAttribute("data-muse") === "off") return "";   // explicit opt-out wins
     var id = box.id || "";
     if (id === "composeText") return "post";
     if (id === "groupComposeInput") return "group";
@@ -25,6 +30,8 @@
     if (id === "shSay" || id === "shNote" || id === "crqText" || id === "rdMsg" || id === "pt") return "post";
     if (id === "npReply") return "comment";
     if (box.classList && box.classList.contains("cinput")) return "comment";
+    if (box.getAttribute && box.getAttribute("data-muse")) return box.getAttribute("data-muse-kind") || "write"; // explicit opt-in
+    if (box.tagName === "TEXTAREA") return "write";   // EVERY textarea is a writing surface → gets the Claude mark
     return "";
   }
   function ctxOf(box) {
@@ -39,15 +46,19 @@
   }
 
   // ---- the write call: Sonnet in your voice, with an honest heuristic fallback ----
-  function fallback() { try { if (w.DDHyper && DDHyper.draft) return DDHyper.draft(); } catch (e) {} return "The bus is rolling and the family’s all here. 🌹 Who else is on this one?"; }
-  function compose(box) {
+  var FB = ["The bus is rolling and the family’s all here. 🌹 Who else is on this one?",
+            "Rolled in and dialed in — this one’s got legs. See you down front. 🌹",
+            "New night, same family. Come find us up front. 🌹"];
+  function fallback(avoid) { try { if (w.DDHyper && DDHyper.draft) { var d = DDHyper.draft(); if (d && d !== avoid) return d; } } catch (e) {}
+    for (var i = 0; i < FB.length; i++) { if (FB[i] !== avoid) return FB[i]; } return FB[0]; }
+  function compose(box, opts) { opts = opts || {};
     var meta = ctxOf(box), c = (w.ddClient && ddClient());
     if (c && c.functions && c.functions.invoke) {
-      return c.functions.invoke("dd-compose", { body: { kind: meta.kind, context: meta.context, samples: getSamples() } })
+      return c.functions.invoke("dd-compose", { body: { kind: meta.kind, context: meta.context, samples: getSamples(), avoid: opts.avoid || "" } })
         .then(function (r) { if (r && r.error) throw r.error; var d = r && r.data; var t = (d && (d.text || d.body)) || ""; if (!t) throw "empty"; return t; })
-        .catch(function () { return fallback(); });
+        .catch(function () { return fallback(opts.avoid); });
     }
-    return Promise.resolve(fallback());
+    return Promise.resolve(fallback(opts.avoid));
   }
 
   // ---- the "flow": type the draft in, character by character ----
@@ -66,11 +77,15 @@
     mark.classList.add("busy");
     var prev = box.value, prevPh = box.placeholder || "";
     box.value = ""; box.placeholder = "letting the words flow…";
-    function done() { box.__flowing = false; mark.classList.remove("busy"); box.placeholder = prevPh; }
-    compose(box).then(function (text) {
+    function done() { box.__flowing = false; mark.classList.remove("busy"); box.placeholder = prevPh;
+      try { mark.title = "Tap again for a different take"; } catch (e) {} }
+    box.__n = (box.__n || 0) + 1;
+    // FIRST tap with a Claude shadow suggestion → pour that exact text; each later tap → a DIFFERENTIATED rewrite
+    if (box.__n === 1 && box.__shadow) { box.__last = box.__shadow; typewriter(box, box.__shadow, done); return; }
+    compose(box, { avoid: box.__last || "" }).then(function (text) {
       text = String(text || "").trim();
       if (!text) { box.value = prev; done(); return; }
-      typewriter(box, text, done);
+      box.__last = text; typewriter(box, text, done);
     }).catch(function () { box.value = prev; done(); });
   }
 
@@ -103,8 +118,12 @@
     var holder = document.createElement("span"); holder.className = "muse-wrap" + (isTA ? " ta" : "");
     var p = box.parentNode; if (!p) return; p.insertBefore(holder, box); holder.appendChild(box);
     box.classList.add("muse-pad");
+    // Claude-written SHADOW text (ghost suggestion), differentiated per box via data-muse-shadow
+    var shadow = (box.getAttribute && box.getAttribute("data-muse-shadow")) || "";
+    if (shadow) { box.__shadow = shadow; if (!box.value) box.placeholder = shadow; }
+    try { box.addEventListener("blur", function () { learn(box.value); }); } catch (e) {}   // learn what they keep
     var b = document.createElement("button"); b.type = "button"; b.className = "muse-mark";
-    b.title = "Claude — write it in your voice"; b.setAttribute("aria-label", "Write with Claude");
+    b.title = "Click Me — Claude writes it in your voice 🌹"; b.setAttribute("aria-label", "Write with Claude");
     b.innerHTML = '<img src="claude-mark.svg" alt="Claude">';
     b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); flow(box, b); });
     holder.appendChild(b);
@@ -114,9 +133,11 @@
     ["#composeText", "#groupComposeInput", "#ddm-input", "#lc-input", "#npReply",
      "#shSay", "#shNote", "#crqText", "#rdMsg", "#pt"].forEach(function (sel) { var el = document.querySelector(sel); if (el) wrap(el); });
     try { document.querySelectorAll(".cinput").forEach(wrap); } catch (e) {}
+    // EVERYWHERE a user writes: every textarea + any [data-muse] opt-in across the app (kindOf still gates + de-dupes)
+    try { document.querySelectorAll("textarea, [data-muse]").forEach(wrap); } catch (e) {}
   }
 
-  w.DDMuse = { compose: compose, flow: flow, scan: scan };
+  w.DDMuse = { compose: compose, flow: flow, scan: scan, learn: learn };
 
   if (document.readyState !== "loading") scan(); else document.addEventListener("DOMContentLoaded", scan);
   try { new MutationObserver(scan).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
