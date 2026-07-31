@@ -167,6 +167,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <!-- EVENT QR — in front of the title. This IS the event: scan/tap it and you land right on this map.
          StageFill standard: every event's QR sits in front of its %TITLE%. -->
     <div id="mfqr" onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="This event’s map QR — scan me, or tap to share" style="width:56px;height:56px;background:#fff;border-radius:10px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;overflow:hidden"></div>
+    <button onclick="mfExplainTicket()" title="Download all tickets — a free ticket to every show" aria-label="Download a free ticket to every show" style="border:0;background:#fff;border-radius:10px;width:40px;height:40px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;display:flex;align-items:center;justify-content:center;color:#2f6feb;padding:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4 6.3 11.7l1.4-1.4L11 13.6V3h1zM5 19h14v2H5z"/></svg></button>
     <button onclick="try{mfShareMap&&mfShareMap()}catch(e){}" title="Share this map + QR with other heads" aria-label="Share the map with other heads" style="border:0;background:#fff;border-radius:10px;width:40px;height:40px;flex:0 0 auto;cursor:pointer;box-shadow:0 1px 6px #0003;display:flex;align-items:center;justify-content:center;color:#5a2e86;padding:0"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>
     <h1 style="margin:0">Musikfest</h1>
     <!-- Title bar decluttered for mobile: rose count + poster thumb removed.
@@ -1015,22 +1016,24 @@ window.mfToggleSide=function(){ var b=document.getElementById('sideToggle'); if(
    Drop cutesy_map.png into the folder and it rides on the white curtain; until then it's plain white. */
 try{ window._cutesyPos = localStorage.getItem('dd_cutesy') || 'up'; }catch(e){ window._cutesyPos='up'; }
 function cutesyEnsure(){
-  if(!window.LMAP || window._cutesyLayer) return;
+  if(!window.LMAP || window._cutesyLayer || !window.L) return;
   try{
-    LMAP.createPane('cutesy'); var p=LMAP.getPane('cutesy'); p.style.zIndex=250; p.style.pointerEvents='none';   // above the geo tiles, below overlays + markers
-    var d=document.createElement('div'); d.id='cutesyCurtain';
-    d.style.cssText='position:absolute;inset:0;background:#fdfdff;background-size:cover;background-position:center;transition:-webkit-clip-path .45s ease,clip-path .45s ease';
-    var im=new Image(); im.onload=function(){ d.style.backgroundImage='url("cutesy_map.png")'; }; im.src='cutesy_map.png';   // white until the illustration exists
-    p.appendChild(d); window._cutesyLayer=d; cutesyApply();
+    if(!LMAP.getPane('cutesy')){ LMAP.createPane('cutesy'); var p=LMAP.getPane('cutesy'); p.style.zIndex=250; p.style.pointerEvents='none'; }   // ABOVE the geo tiles, BELOW overlays + markers; the map buttons live above the map entirely
+    var white='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#fdfdff"/></svg>');
+    var lyr=L.imageOverlay(white, LMAP.getBounds(), {pane:'cutesy', interactive:false}); lyr.addTo(LMAP); window._cutesyLayer=lyr;   // an imageOverlay is properly sized by Leaflet (a bare div in a pane collapses to 0)
+    LMAP.on('moveend zoomend resize', function(){ try{ lyr.setBounds(LMAP.getBounds()); }catch(e){} });   // keep the white curtain filling the map viewport
+    setTimeout(function(){ try{ lyr.setBounds(LMAP.getBounds()); }catch(e){} }, 500);   // re-fit once the map has settled its initial view
+    var im=new Image(); im.onload=function(){ try{ lyr.setUrl('cutesy_map.png'); }catch(e){} }; im.src='cutesy_map.png';   // white until the illustration exists
+    cutesyApply();
   }catch(e){}
 }
-function cutesyApply(){ var d=window._cutesyLayer;
-  var clip = window._cutesyPos==='down' ? 'inset(0 0 0 0)' : (window._cutesyPos==='mid' ? 'inset(0 0 50% 0)' : 'inset(0 0 100% 0)');   // curtain hangs from the top: up=hidden, mid=half, down=full
-  if(d){ d.style.clipPath=clip; d.style.webkitClipPath=clip; }
-  var b=document.getElementById('cutesyToggle'); if(b) b.textContent='🎨 Cutesy: '+window._cutesyPos;
+function cutesyApply(){ var lyr=window._cutesyLayer, el=lyr&&lyr.getElement&&lyr.getElement();
+  var clip = window._cutesyPos==='down' ? 'inset(0 0 0 0)' : (window._cutesyPos==='mid' ? 'inset(0 0 50% 0)' : 'inset(0 0 100% 0)');   // drops from the TOP of the map portion: up=hidden, mid=half, down=full
+  if(el){ el.style.transition='clip-path .45s ease, -webkit-clip-path .45s ease'; el.style.clipPath=clip; el.style.webkitClipPath=clip; el.style.filter=(window._cutesyPos==='up'?'none':'drop-shadow(0 3px 6px rgba(0,0,0,.30))'); }   // a shadow on the hem so the drop is unmistakable
+  var b=document.getElementById('cutesyToggle'); if(b){ b.textContent='🎨 Cutesy: '+window._cutesyPos; b.classList.toggle('on', window._cutesyPos!=='up'); }   // shaded (selected) whenever the curtain is showing (mid/down); unshaded when up/hidden
 }
 window.mfCutesyToggle=function(){ cutesyEnsure();
-  window._cutesyPos = window._cutesyPos==='up' ? 'mid' : (window._cutesyPos==='mid' ? 'down' : 'up');   // UP → MID → DOWN → UP; persists
+  window._cutesyPos = window._cutesyPos==='up' ? 'mid' : (window._cutesyPos==='mid' ? 'down' : 'up');   // UP → MID → DOWN → UP; the MAIN sheet never moves when the Cutsey toggles
   cutesyApply(); try{ localStorage.setItem('dd_cutesy', window._cutesyPos); }catch(e){}
 };
 (function armCutesy(){ if(window.LMAP){ cutesyEnsure(); } else setTimeout(armCutesy, 600); })();   // apply the saved position once the map exists
@@ -1533,6 +1536,34 @@ function renderMySets(){ var host=document.getElementById('mySets'); if(!host)re
 // PILL — one tap grabs a free ticket for EVERY act in the plan (fills the wallet)
 window.mfPlanDownloadAll=function(){ var s=catchStore(), n=0; Object.keys(s).forEach(function(k){ var r=s[k]; if(!r)return; try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(r.b,{stage:r.st,date:r.d}); }catch(e){} n++; });
   try{ if(window.mfToast) mfToast(n?('🎫 '+n+' ticket'+(n>1?'s':'')+' in your wallet — one per act you planned. 🌹'):'Plan a few acts first, then grab them all here.'); }catch(e){} };
+// MENU-BAR DOWNLOAD — click OPENS the explainer modal; the fan downloads FROM there (flywheel extension → fan of every band)
+window.mfExplainTicket=function(){
+  var ex=document.getElementById('mfTixExplain'); if(ex) ex.remove();
+  var wrap=document.createElement('div'); wrap.id='mfTixExplain';
+  wrap.style.cssText='position:fixed;inset:0;z-index:620;background:rgba(20,12,34,.6);display:flex;align-items:center;justify-content:center;padding:20px';
+  wrap.addEventListener('click',function(e){ if(e.target===wrap) wrap.remove(); });
+  var card=document.createElement('div');
+  card.style.cssText='background:#fff;border-radius:18px;max-width:340px;width:100%;padding:18px 18px 16px;box-shadow:0 20px 50px #0006;position:relative';
+  card.innerHTML='<button aria-label="Close" onclick="var w=document.getElementById(\'mfTixExplain\');if(w)w.remove()" style="position:absolute;top:12px;right:14px;border:0;background:#eef1f6;color:#2b3242;width:30px;height:30px;border-radius:15px;font-size:16px;cursor:pointer">×</button>'
+   +'<div style="font-weight:900;font-size:16px;margin:0 30px 3px 0">🎫 A free ticket to every show</div>'
+   +'<div style="font-size:12.5px;color:#6b6675;line-height:1.5;margin-bottom:4px">Download them all in one tap — and every ticket does three things:</div>'
+   +'<div style="display:flex;gap:11px;margin-top:11px"><span style="font-size:18px">📲</span><div style="font-size:13px;line-height:1.5"><b>Touch phones to share.</b> Hand a ticket to a friend, phone to phone.</div></div>'
+   +'<div style="display:flex;gap:11px;margin-top:11px"><span style="font-size:18px">📍</span><div style="font-size:13px;line-height:1.5"><b>Directions.</b> Each one walks you right to the stage.</div></div>'
+   +'<div style="display:flex;gap:11px;margin-top:11px"><span style="font-size:18px">🎼</span><div style="font-size:13px;line-height:1.5"><b>Setlist.</b> Follow the songs live — fans fill it in if the band doesn\'t.</div></div>'
+   +'<button onclick="mfDoDownloadAll()" style="width:100%;margin-top:15px;border:0;border-radius:12px;padding:12px;font-weight:900;font-size:14px;background:#2f6feb;color:#fff;cursor:pointer">⬇️ Download all my tickets</button>';
+  wrap.appendChild(card); document.body.appendChild(wrap);
+};
+// the actual grab — a free ticket to EVERY act (deduped by band; Wind Creek paid stage excluded), into the wallet
+window.mfDoDownloadAll=function(){ var seen={}, s=catchStore(), n=0, arr=(typeof MF!=='undefined'&&MF)?MF:[];
+  arr.forEach(function(r){ if(!r||!r.b)return;
+    var paid=(window.DDFlywheel&&DDFlywheel.isPaidStage)?DDFlywheel.isPaidStage(r.st):/(wind\s*creek|steel\s*stage)/i.test(r.st||'');
+    if(paid)return; if(seen[r.b])return; seen[r.b]=1;
+    try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(r.b,{stage:r.st,date:r.d}); }catch(e){}
+    var ck=catchKey(r); if(!s[ck]) s[ck]=r; n++; });
+  try{ localStorage.setItem('dd.mf.catch',JSON.stringify(s)); }catch(e){}
+  try{ renderMySets(); }catch(e){}
+  var w=document.getElementById('mfTixExplain'); if(w) w.remove();
+  try{ if(window.mfToast) mfToast('🎫 '+n+' free tickets in your wallet — open 📝 My Plan. 🌹'); }catch(e){} };
 var NOTIFIED={};
 function catchNotifyCheck(){ if(!('Notification' in window)||Notification.permission!=='granted')return; var s=catchStore(), now=Date.now();
   Object.keys(s).forEach(function(k){ var r=s[k]; var mn=(new Date(r.d+'T'+to24(r.t)).getTime()-now)/60000;
