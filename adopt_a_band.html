@@ -104,17 +104,18 @@
   function render(){
     var all=window._LU||(window._LU=lineup()), c=claims(), host=document.getElementById('list'); if(!host)return;
     if(!all.length){ host.innerHTML='<div class="card"><b>The lineup is loading…</b></div>'; document.getElementById('pnum').textContent=''; return; }
-    var done=all.filter(function(b){return c[b.slug];}).length;
-    document.getElementById('bar').style.width=Math.round(done/all.length*100)+'%';
-    document.getElementById('pnum').textContent=done+' of '+all.length+' acts adopted — '+(all.length-done)+' still need a friend 🌹';
+    var done=all.filter(function(b){return c[b.slug];}).length, total=all.length, left=total-done;
+    document.getElementById('bar').style.width=Math.round(done/total*100)+'%';
+    document.getElementById('pnum').textContent=done+' of '+total+' acts adopted — '+left+' to go 🌹';
+    if(left===0){ host.innerHTML='<div class="card" style="text-align:center;padding:22px"><div style="font-size:34px">🎉</div><b style="font-size:16px">Every act is adopted!</b><div class="note">All '+total+' covered — you did it. Thank you. 🌹</div></div>'; return; }
     var today=todayISO(), groups={}, order=[];
-    all.forEach(function(b){ var g=b.next||'played'; if(!groups[g]){ groups[g]=[]; order.push(g); } groups[g].push(b); });
+    all.forEach(function(b){ if(c[b.slug]) return;   // adopted bands DROP OFF the list — you only ever see what's left
+      var g=b.next||'played'; if(!groups[g]){ groups[g]=[]; order.push(g); } groups[g].push(b); });
     var html=order.map(function(g){ var isToday=(g===today), label=(g==='played')?'Already played · still make a fan':dayLabel(g);
       var tag=(g==='played')?'ENCORE':(isToday?'Today':'Upcoming');
-      var left=groups[g].filter(function(b){return !c[b.slug];}).length;
       return '<div class="dayhdr'+(isToday?' today':'')+'"><span class="tag">'+tag+'</span> '+esc(label)
-        +'<span class="daycount">'+left+' left</span></div>'
-        + groups[g].map(function(b){ return cardHTML(b, !!c[b.slug]); }).join('');
+        +'<span class="daycount">'+groups[g].length+' left</span></div>'
+        + groups[g].map(function(b){ return cardHTML(b, false); }).join('');
     }).join('');
     host.innerHTML=html;
   }
