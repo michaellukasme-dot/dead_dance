@@ -37,6 +37,13 @@
     <p>So do your favorite bands' fans. <b class="hl">Pick ONE or TWO bands</b> you love, post it from <b class="hl">your</b> Facebook, and scratch them off. Then send this page to a few friends — they each take one or two, and their friends after them. <b style="color:#fff">We go down the list until every act is covered.</b> Today's acts are up top — grab those first.</p>
   </div>
   <div class="prog"><div class="bar"><i id="bar"></i></div><div class="pnum" id="pnum">Loading the lineup…</div></div>
+  <div class="steps" style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px;font-size:13px;line-height:1.65;box-shadow:0 5px 14px rgba(42,27,61,.05)">
+    <b style="font-size:13.5px">How it works — 2 minutes, no typing:</b>
+    <div style="margin-top:5px"><b>1.</b> <b style="color:var(--acc)">📋 Copy · their page</b> → paste on <b>the band's Facebook</b> → Post</div>
+    <div><b>2.</b> <b style="color:var(--acc)">📋 Copy · your page</b> → paste on <b>your Facebook</b> → Post</div>
+    <div><b>3.</b> Tap <b style="color:var(--rose)">🌹 Done</b></div>
+    <div><b>4.</b> Send this page to <b>2 friends</b> 🌹</div>
+  </div>
   <div id="list"></div>
   <div class="pass">Took one or two? 🌹 <b>Now send this page to 2–3 friends</b> — that's how we get to zero.<br><a href="#" onclick="ADOPT.share();return false;">📲 Share this page ↗</a></div>
   <div class="foot">🌹 DeadDance.app · From Bethlehem · one friend, one or two bands</div>
@@ -57,9 +64,13 @@
     try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:who()}); }catch(e){} }
   var TICKET='https://deaddance.app/ticket.html?price=FREE&band=';
   function tixUrl(name){ return TICKET+encodeURIComponent(name); }
-  function msg(name){ return 'Do you miss paper tickets? So do all of '+name+"'s fans. 🌹\n\n"
-    +"Here's "+name+"'s FREE ticket to their MusikFest set — free for the band and every fan. It walks you to their stage, texts you the setlist as they play it, and keeps the whole show in your wallet forever.\n\n"
-    +'Grab it here: '+tixUrl(name)+"\n\nFree from DeadDance — made in Bethlehem 🌹"; }
+  function cp(t){ try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} } }
+  function find(slug){ return (window._LU||[]).filter(function(x){return x.slug===slug;})[0]; }
+  function msgBand(name){ return 'Do you miss paper tickets? So do all of '+name+"'s fans. 🌹\n\n"
+    +"Here's "+name+"'s FREE ticket to their MusikFest set — free for the band and every fan. It walks you to their stage, texts you the setlist as they play it, and it's yours to keep forever.\n\n"
+    +'Grab it: '+tixUrl(name)+"\n\n"
+    +name+" — it's yours: share it with all your fans, and every fan who grabs it becomes one you keep. 🌹\n— DeadDance, from Bethlehem"; }
+  function msgOwn(name){ return 'MusikFest people 🌹 — a FREE ticket to every act this year, made right here in Bethlehem. It walks you to the stage and texts you the setlist as the band plays. I grabbed '+name+" — grab yours:\n\nhttps://deaddance.app/musikfest.html"; }
 
   // ---- build the full lineup from the SCHEDULE, phased by day ----
   function curated(){ var B=window.DD_MF_BANDS||{}, m={}; for(var s in B){ if(!Object.prototype.hasOwnProperty.call(B,s))continue; var e=B[s]||{};
@@ -82,10 +93,10 @@
       +(b.kind?('<div class="bk">'+esc(b.kind)+'</div>'):'')
       +(claimed?'<div class="badge">✓ Adopted — thank you 🌹</div>'
         :'<div class="row">'
-           +'<button class="btn p" onclick="ADOPT.copy(\''+esc(b.slug)+'\')">📋 Copy the post</button>'
-           +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Their Facebook ↗</a>'
-           +'<a class="btn g" href="'+tixUrl(b.name)+'" target="_blank" rel="noopener">See the ticket</a>'
-           +'<button class="btn rose" onclick="ADOPT.claim(\''+esc(b.slug)+'\')">🌹 I posted it</button>'
+           +'<button class="btn p" onclick="ADOPT.copyBand(\''+esc(b.slug)+'\')">1️⃣ 📋 Copy · their page</button>'
+           +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Their FB ↗</a>'
+           +'<button class="btn p" onclick="ADOPT.copyOwn(\''+esc(b.slug)+'\')">2️⃣ 📋 Copy · your page</button>'
+           +'<button class="btn rose" onclick="ADOPT.claim(\''+esc(b.slug)+'\')">🌹 Done</button>'
          +'</div>')
       +'</div>';
   }
@@ -108,10 +119,9 @@
     host.innerHTML=html;
   }
   window.ADOPT={
-    copy:function(slug){ var b=(window._LU||[]).filter(function(x){return x.slug===slug;})[0]; if(!b)return;
-      var t=msg(b.name); try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} }
-      try{ alert('📋 Post copied. Open Facebook, paste it, then tap “I posted it.”'); }catch(e){} },
-    claim:function(slug){ saveClaim(slug); render(); var b=(window._LU||[]).filter(function(x){return x.slug===slug;})[0];
+    copyBand:function(slug){ var b=find(slug); if(!b)return; cp(msgBand(b.name)); try{ alert('📋 Copied. Open '+b.name+'’s Facebook → paste → Post.\nThen tap 📋 Copy · your page.'); }catch(e){} },
+    copyOwn:function(slug){ var b=find(slug); if(!b)return; cp(msgOwn(b.name)); try{ alert('📋 Copied. Open YOUR Facebook → paste → Post.\nThen tap 🌹 Done. 🌹'); }catch(e){} },
+    claim:function(slug){ saveClaim(slug); render(); var b=find(slug);
       try{ alert('🌹 Thank you! '+((b&&b.name)||'That act')+' is covered. Grab one more, then send this page to a friend.'); }catch(e){} },
     share:function(){ var u='https://deaddance.app/adopt_a_band.html', t='Help cover every MusikFest act — pick one or two bands and post their free ticket. 🌹';
       if(navigator.share){ navigator.share({title:'Adopt a Band · MusikFest',text:t,url:u}).catch(function(){}); }

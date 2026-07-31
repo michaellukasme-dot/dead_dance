@@ -157,6 +157,15 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       <div id="showqr" onclick="ticketPrint()" title="Click Me — print at home or order the paper 🌹" style="width:118px;height:118px;flex:0 0 auto;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer">▦</div>
       <div style="color:#cfc6e6;font-size:12px;line-height:1.45"><b style="color:#fff">Your show QR.</b> The <b>same code</b> before, during &amp; after — scan at the gate, get each song texted live, then keep it as your night in history. 🌹<br><b style="color:#ffd76a">🖨️ Tap the code</b> — print at home free, or order the paper.</div>
     </div>
+    <div onclick="ticketPrint()" title="Click Me — get the paper ticket 🌹" style="cursor:pointer;display:flex;align-items:center;gap:9px;background:#fff;border-radius:11px;padding:8px 10px;margin-top:11px">
+      <div style="flex:1;display:flex;border:1px solid #ddd;border-radius:6px;overflow:hidden;height:46px;font-family:ui-monospace,'Courier New',monospace">
+        <div style="width:40px;background:#dadada;display:flex;flex-direction:column;justify-content:center;padding:0 5px"><span style="font-size:6px;color:#555;font-weight:700">TICKET&nbsp;#</span><span style="font-size:11px;font-weight:800;color:#222">GA</span></div>
+        <div style="flex:1;display:flex;align-items:center;padding:0 9px;font-size:9.5px;font-weight:800;color:#222;border-left:4px solid var(--tm-blue,#2f7bf6)">🎨 Your paper ticket — same #</div>
+        <div style="width:22px;background:repeating-linear-gradient(0deg,#111 0 2px,#fff 2px 3px,#111 3px 5px)"></div>
+        <div style="width:17px;background:#111;color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800">StageFill</div>
+      </div>
+      <span style="color:#ffd76a;font-size:11px;font-weight:800;white-space:nowrap">🖨️ Tap</span>
+    </div>
   </div>
 </div>
 
@@ -492,14 +501,14 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     ov.onclick=function(e){ if(e.target===ov) ov.style.display='none'; };
     ov.innerHTML='<div class="pm-card" style="background:#fff;border-radius:16px;max-width:640px;width:100%;padding:16px 16px 15px;box-shadow:0 20px 50px #0008;position:relative">'
       +'<button class="pm-close" onclick="document.getElementById(\'printOverlay\').style.display=\'none\'" style="position:absolute;top:10px;right:12px;border:0;background:#eef1f6;color:#2b3242;width:30px;height:30px;border-radius:15px;font-size:16px;cursor:pointer">×</button>'
-      +'<div style="font-weight:900;font-size:16px;margin:0 30px 3px 0">Do you miss paper tickets? 🌹</div>'
-      +'<div style="font-size:12.5px;color:#6b6675;line-height:1.5;margin-bottom:11px">Ours are better — but you can still hold the paper. <b>Print it at home free</b>, or order a <b>card-stock keepsake</b> mailed to you, with art made for <b>this show</b>.</div>'
-      +'<div id="printStub">'+stub+'</div>'
-      +'<div class="pm-actions" style="display:flex;gap:9px;margin-top:13px"><button onclick="window.print()" style="flex:1;border:1.5px solid '+acc+';border-radius:11px;padding:11px;font-weight:800;background:#fff;color:'+acc+';cursor:pointer">🖨️ Print at home · free</button><button onclick="ticketPrintMail()" style="flex:1;border:0;border-radius:11px;padding:11px;font-weight:800;background:'+acc+';color:#fff;cursor:pointer">📮 Card stock · mailed</button></div>'
+      +'<div id="printStub" style="margin:4px 0 0">'+stub+'</div>'
+      +'<div style="font-weight:900;font-size:16px;margin:13px 30px 3px 0">Do you miss paper tickets? 🌹</div>'
+      +'<div style="font-size:12.5px;color:#6b6675;line-height:1.5;margin-bottom:2px">Ours are better — and you can still hold the paper. <b>Print it free</b>, or order the <b>card-stock ticket</b> — plus, after the show, your <b>setlist &amp; the crowd\'s photos</b> as one keepsake collage. 🌹</div>'
+      +'<div class="pm-actions" style="display:flex;gap:9px;margin-top:13px"><button onclick="window.print()" style="flex:1;border:1.5px solid '+acc+';border-radius:11px;padding:11px;font-weight:800;background:#fff;color:'+acc+';cursor:pointer">🖨️ Print at home · free</button><button onclick="ticketPrintMail()" style="flex:1;border:0;border-radius:11px;padding:11px;font-weight:800;background:'+acc+';color:#fff;cursor:pointer">📮 Order keepsakes · mailed</button></div>'
     +'</div>';
     document.body.appendChild(ov);
   };
-  window.ticketPrintMail=function(){ try{ alert('📮 A card-stock keepsake — printed on real ticket stock with this show’s Claude Gaude art and mailed to you (PostNet, Bethlehem). A StageFill premium; checkout happens on StageFill.'); }catch(e){} };
+  window.ticketPrintMail=function(){ try{ alert('📮 Card stock, mailed: your ticket in this show’s Claude Gaude art — and after the show, your setlist + the crowd’s photos as one keepsake collage. Printed by PostNet, Bethlehem. A StageFill premium.'); }catch(e){} };
   window.ticketShare=function(){ var link=url||('https://deaddance.app/event.html'+(ev?('?ev='+encodeURIComponent(ev)):''));
     var txt='🌹 '+band+' — '+venueShort+(date?(' · '+fmtD(date)):'')+' · my ticket on DeadDance';
     try{ if(navigator.share){ navigator.share({title:String(band), text:txt, url:link}); return; } }catch(e){}
