@@ -86,7 +86,7 @@ function render(){
 function setState(st){ SHOW.status=st; if(st==='played'&&!SHOW.recording) SHOW.recording={tracks:SHOW.setlist.filter(function(x){return !/^__/.test(x);}).length,ticketFree:true}; render(); }
 function toast(m){ /* simple */ alert(m); }
 function hp(){ toast('📡 Setlist teaser drafted in your voice — one tap sends it back to Facebook and every network. (Demo)'); }
-function tix(){ toast('🎟️ Tickets — secure checkout. (Demo)'); }
+function tix(){ try{ var b=(window.SHOW&&(SHOW.band||SHOW.act))||'', v=(window.SHOW&&SHOW.venue)||''; location.href='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(v)+'&price=FREE'; }catch(e){ location.href='ticket.html'; } }
 function cal(){ toast('📅 Added to your calendar. (Demo)'); }
 function dl(free){ toast(free?'⬇️ Verifying your ticket QR for this show, then your download starts. (Demo)':'💳 Purchase the download · secure checkout. (Demo)'); }
 function tip(){ toast('▶ Listen in-app, or order the pressed LP via Print the Vinyl. (Demo)'); }

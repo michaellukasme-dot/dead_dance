@@ -3774,7 +3774,7 @@ function closeShake(){document.getElementById('shake2').classList.remove('on');}
 var CURBUY=null;
 function buy(type,idx){
  var item;
- if(type==='ticket'){ if(CURBUY&&typeof openTicket==='function'){ openTicket(CURBUY); return; } item = CURBUY ? {kind:'🎟️ Ticket',title:CURBUY.band,sub:CURBUY.venue,price:CURBUY.price,qty:true} : {kind:'🎟️ Ticket',title:'The China Cats',sub:'Felton Music Hall · 8:30 PM',price:'$28',qty:true};
+ if(type==='ticket'){ if(typeof openTicket==='function'){ openTicket(CURBUY||{}); return; } item = {kind:'🎟️ Ticket',title:(CURBUY&&CURBUY.band)||'',sub:(CURBUY&&CURBUY.venue)||'',price:(CURBUY&&CURBUY.price)||'',qty:true};
    CO={kind:'ticket',ref:(CURBUY&&CURBUY.showId)||null,amountCents:priceCents(item.price),meta:{band:item.title,venue:item.sub}}; }
  else if(type==='market'){ var m=MARKET[idx]; item={kind:'🛍️ Shop',title:m.n,sub:"Kara's Prints · the lot",price:m.p,qty:true};
    CO={kind:'shakedown',ref:null,amountCents:priceCents(m.p),meta:{title:m.n}}; }
