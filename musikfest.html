@@ -316,10 +316,10 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
 
   <!-- ===== BAR 2 · CURTAIN TABS — one full-page panel below the two bars at a time ===== -->
   <div class="curtainbar" id="mfCurtainBar">
-    <button class="mftab" onclick="openPoster()" title="Doug Boehm — this year's Musikfest poster artist. Tap to raise the curtain on the official poster." aria-label="Show the official Musikfest 2026 poster full-screen" style="background:linear-gradient(135deg,#f0a500,#e0577a);color:#fff;border-color:transparent;font-weight:900;box-shadow:0 2px 8px #e0577a55">🖼️ Doug Boehm</button>
+    <button class="mftab" onclick="try{window._sheetPrevTop=(window.mfSheetTop?mfSheetTop():null)}catch(e){}; try{if(window.mfSheetSnap)mfSheetSnap('full')}catch(e){}; openPoster()" title="Doug Boehm — this year's Musikfest poster artist. Tap to raise the curtain ALL the way up and see the full poster." aria-label="Show the official Musikfest 2026 poster full-screen" style="background:linear-gradient(135deg,#f0a500,#e0577a);color:#fff;border-color:transparent;font-weight:900;box-shadow:0 2px 8px #e0577a55">🖼️ Doug Boehm</button>
     <button class="mftab" data-cur="cur_windcreek" onclick="mfCurtain('cur_windcreek')">🎟 Wind Creek Steel Stage</button>
     <button class="mftab on" data-cur="cur_plan" onclick="mfCurtain('cur_plan')">📋 Plan Your Day</button>
-    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">📝 My Plan</button>
+    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')" title="My Ticket Wallet — a free ticket to every show you plan to attend">📝 My Plan</button>
     <button class="mftab" data-cur="cur_dead" onclick="mfCurtain('cur_dead')">🌹 Dead &amp; Jam Band</button>
     <button class="mftab" data-cur="cur_stage" onclick="mfCurtain('cur_stage')">🎪 Browse stage</button>
     <button class="mftab" data-cur="cur_earlier" onclick="mfCurtain('cur_earlier')">⏱ Earlier</button>
@@ -1037,7 +1037,8 @@ window.mfCutesyToggle=function(){ cutesyEnsure();
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
-window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none'; };
+window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none';
+  try{ if(window._sheetPrevTop!=null && window.mfSheetToPx){ mfSheetToPx(window._sheetPrevTop); window._sheetPrevTop=null; } }catch(e){} };   // × on Doug Boehm → curtain returns to its previous height
 
 // ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----
 var MF=window.DD_MUSIKFEST||[];
@@ -1519,16 +1520,19 @@ window.nearestBathroom=function(){ if(!window.YOU){ startWatch(); alert('Getting
 function catchStore(){ try{ return JSON.parse(localStorage.getItem('dd.mf.catch')||'{}'); }catch(e){ return {}; } }
 function catchKey(r){ return r.d+'|'+r.t+'|'+r.b; }
 window.catchToggle=function(key){ var s=catchStore(); if(s[key]) delete s[key];
-  else { var hit=MF.filter(function(r){return catchKey(r)===key;})[0]; if(hit){ s[key]=hit; try{ selfieNudge(hit.b); }catch(e){} }
+  else { var hit=MF.filter(function(r){return catchKey(r)===key;})[0]; if(hit){ s[key]=hit; try{ selfieNudge(hit.b); }catch(e){} try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(hit.b,{stage:hit.st,date:hit.d}); }catch(e){} }   // plan a show → auto-include its FREE ticket in the wallet
     if('Notification' in window && Notification.permission==='default'){ try{Notification.requestPermission();}catch(e){} } }
   try{ localStorage.setItem('dd.mf.catch',JSON.stringify(s)); }catch(e){} renderMySets(); refresh(); };
 function to24(t){ var m=String(t).match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return '20:00:00'; var h=(+m[1])%12+(/pm/i.test(m[3])?12:0); return (h<10?'0':'')+h+':'+m[2]+':00'; }
 function renderMySets(){ var host=document.getElementById('mySets'); if(!host)return; var s=catchStore();
   var arr=Object.keys(s).map(function(k){return s[k];}).sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:mins(a.t)-mins(b.t); });
-  host.innerHTML = arr.length ? arr.map(function(r){ var st=STAGE_BY_KEY[r.st];
+  host.innerHTML = arr.length ? ('<div style="margin:2px 0 9px"><button class="mflay" onclick="mfPlanDownloadAll()" style="background:#241535;color:#fff;border:0" title="Grab a free ticket for every act in your plan">⬇️ Download my tickets — every act</button></div>' + arr.map(function(r){ var st=STAGE_BY_KEY[r.st];
     var dir=st?('<a class="dir" href="https://www.google.com/maps/dir/?api=1&destination='+st.lat+','+st.lng+'&travelmode=walking" target="_blank" rel="noopener">🚶 Walk me there</a>'):'';
-    return '<div class="card"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><div class="nm">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</div><div class="where">'+dayLabel(r.d)+' · '+esc(String(r.t).replace(':00',''))+' · '+esc(r.st)+'</div>'+dir+' <button class="dir" style="margin-left:6px;background:#f6eef1;color:#b8002e" data-ck="'+esc(catchKey(r))+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))">✕ drop</button></div>';
-  }).join('') : '<div class="srow"><span class="g">Check off acts in the schedule and they land here — each with a walk-me-there. We\'ll nudge you ~15 min before.</span></div>'; }
+    return '<div class="card"'+(r.sc==='dd'?' style="background:#fdeaef"':'')+'><div class="nm">'+(r.sc==='dd'?'🌹 ':'')+esc(r.b)+'</div><div class="where">'+dayLabel(r.d)+' · '+esc(String(r.t).replace(':00',''))+' · '+esc(r.st)+'</div>'+dir+' <button class="mftix" data-b="'+esc(r.b)+'" data-st="'+esc(r.st)+'" data-d="'+esc(r.d)+'" onclick="mfOpenTicket(this)" style="margin-left:6px">🎫 Ticket</button> <button class="dir" style="margin-left:6px;background:#f6eef1;color:#b8002e" data-ck="'+esc(catchKey(r))+'" onclick="catchToggle(this.getAttribute(\'data-ck\'))">✕ drop</button></div>';
+  }).join('')) : '<div class="srow"><span class="g">Check off acts in the schedule and they land here — each becomes a free ticket in your wallet, with a walk-me-there. We\'ll nudge you ~15 min before.</span></div>'; }
+// PILL — one tap grabs a free ticket for EVERY act in the plan (fills the wallet)
+window.mfPlanDownloadAll=function(){ var s=catchStore(), n=0; Object.keys(s).forEach(function(k){ var r=s[k]; if(!r)return; try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(r.b,{stage:r.st,date:r.d}); }catch(e){} n++; });
+  try{ if(window.mfToast) mfToast(n?('🎫 '+n+' ticket'+(n>1?'s':'')+' in your wallet — one per act you planned. 🌹'):'Plan a few acts first, then grab them all here.'); }catch(e){} };
 var NOTIFIED={};
 function catchNotifyCheck(){ if(!('Notification' in window)||Notification.permission!=='granted')return; var s=catchStore(), now=Date.now();
   Object.keys(s).forEach(function(k){ var r=s[k]; var mn=(new Date(r.d+'T'+to24(r.t)).getTime()-now)/60000;
@@ -1673,7 +1677,7 @@ window.mfCurtain=function(id){ var el=document.getElementById(id); if(!el)return
   document.querySelectorAll('.mfcurtain').forEach(function(c){ c.classList.remove('on'); });
   el.classList.add('on'); MF_CUR=id;
   document.querySelectorAll('#mfCurtainBar .mftab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-cur')===id); });
-  try{ mfRenderCurtain(id); }catch(e){} };
+  try{ mfRenderCurtain(id); }catch(e){} try{ if(window.mfSheetSnap) mfSheetSnap('mid'); }catch(e){} };   // a curtain tab opens the sheet only to curtain height (Doug Boehm goes full — see its button)
 window.mfDayArrow=function(n){ var s=document.getElementById('planDate'); if(!s||!s.options.length)return;   // step the shared day, re-render the active schedule curtain
   s.selectedIndex=Math.max(0,Math.min(s.options.length-1,s.selectedIndex+n));
   var i=DAYS.indexOf(s.value); if(i>=0) curDayIdx=i;
@@ -1738,6 +1742,9 @@ window.mfRefineX=function(){ var el=document.getElementById('mfRefine'); if(el) 
   function invalidate(){ setTimeout(function(){ try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} },330); }
   function isDown(){ return curTop >= 68*vh(); }                    // sheet sitting low = map big
   function goTo(px){ curTop=px; setTop(px); invalidate(); }
+  window.mfSheetSnap=function(w){ if(!sheet)sheet=document.querySelector('.wrap'); if(!sheet)return; var s=SNAPS(); goTo(w==='full'?s[0]:(w==='peek'?s[2]:s[1])); };   // full · mid(curtain height) · peek — driven by the curtain tabs
+  window.mfSheetTop=function(){ return curTop; };                                          // remember where the curtain is
+  window.mfSheetToPx=function(px){ if(!sheet)sheet=document.querySelector('.wrap'); if(sheet && px!=null) goTo(px); };   // restore it exactly
   var _startY=0,_startT=0,_moved=false,_taps=0,_tapTimer=null;
   function tapSnap(n){ if(isDown()) goTo(n>=2 ? 10*vh() : 52*vh()); else goTo(78*vh()); }   // down: 1 tap→½up, 2 taps→all up · ½/full: 1 tap→all down
   window.mfDragStart=function(e){ if(!isApp())return; sheet=document.querySelector('.wrap'); if(!sheet)return;
