@@ -10,7 +10,7 @@
 .wrap{max-width:760px;margin:0 auto;padding:16px 14px 70px}
 .hero{background:#fbf6e3;color:#1a1414;border:1px solid #ece0bd;border-radius:20px;padding:20px 20px 17px}
 .hero .k{color:#7a6a2e;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
-.hero h1{font-size:44px;line-height:.9;margin:0;font-weight:900;letter-spacing:-1.5px;text-transform:uppercase;color:#161616}
+.hero h1{font-size:clamp(22px,6.3vw,38px);line-height:.9;margin:0;font-weight:900;letter-spacing:-1px;text-transform:uppercase;color:#161616;white-space:nowrap;min-width:0;overflow:hidden}
 .hero p{margin:9px 0 0;color:#514a38;font-size:13.5px;line-height:1.45}
 .joinbar{display:flex;gap:10px;align-items:center;margin-top:14px}
 .joinbtn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;font-size:14.5px;cursor:pointer;background:var(--gold);color:#3a1d00}
@@ -955,9 +955,34 @@ crewRefresh(); renderJoin();
 // street-team QR — no app, just scan → this map
 try{ if(window.DDQR) DDQR.into('mfqr','https://deaddance.app/musikfest',{mark:'dd',size:380,css:56,caption:false}); }catch(e){}
 window.saveMFQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd'},'musikfest-map-QR.png'); }catch(e){} };
-window.mfShareMap=function(){ var url='https://deaddance.app/musikfest';
-  if(navigator.share){ navigator.share({title:'Musikfest 2026 — the DeadDance map',url:url}).catch(function(){}); }
-  else { try{ navigator.clipboard.writeText(url); mfToast('🔗 Map link copied — paste it anywhere.'); }catch(e){ mfToast(url); } } };
+window.mfShareMap=function(){
+  var ex=document.getElementById('mfShareSheet'); if(ex){ ex.remove(); return; }   // toggle off if already open
+  var url='https://deaddance.app/musikfest';
+  var text='Musikfest 2026 — every stage, every Dead & jam band, on the DeadDance map';
+  var U=encodeURIComponent(url), T=encodeURIComponent(text);
+  var items=[
+    {bg:'#1877f2', ic:'f', label:'Share on Facebook', href:'https://www.facebook.com/sharer/sharer.php?u='+U},
+    {bg:'#000000', ic:'X', label:'Share on X',        href:'https://twitter.com/intent/tweet?url='+U+'&text='+T},
+    {bg:'#e60023', ic:'P', label:'Pin it',            href:'https://www.pinterest.com/pin/create/button/?url='+U+'&description='+T}
+  ];
+  var wrap=document.createElement('div'); wrap.id='mfShareSheet';
+  wrap.style.cssText='position:fixed;inset:0;z-index:600;background:rgba(20,12,34,.5);display:flex;align-items:center;justify-content:center;padding:24px';
+  var card=document.createElement('div');
+  card.style.cssText='background:#fff;border-radius:16px;max-width:320px;width:100%;padding:8px;box-shadow:0 20px 50px #0006';
+  function row(bg,ic,label,onclick,href){
+    var a=document.createElement('a'); a.href=href||'#'; if(href){ a.target='_blank'; a.rel='noopener'; }
+    a.style.cssText='display:flex;align-items:center;gap:14px;padding:14px 16px;text-decoration:none;color:#161616;font-weight:700;font-size:16px;border-radius:10px';
+    a.innerHTML='<span style="width:30px;height:30px;border-radius:50%;background:'+bg+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex:none">'+ic+'</span>'+label;
+    a.addEventListener('click', function(e){ if(onclick) onclick(e,a); setTimeout(function(){ wrap.remove(); }, href?150:0); });
+    return a;
+  }
+  items.forEach(function(it){ card.appendChild(row(it.bg,it.ic,it.label,null,it.href)); });
+  card.appendChild(row('#2f8f4e','🔗','Copy link', function(e,a){ e.preventDefault(); try{ navigator.clipboard.writeText(url); }catch(z){} a.childNodes[1].textContent=' Link copied ✓'; }, null));
+  if(navigator.share){ card.appendChild(row('#5a2e86','⇪','More…', function(e){ e.preventDefault(); navigator.share({title:'Musikfest 2026 — the DeadDance map',url:url}).catch(function(){}); }, null)); }
+  wrap.appendChild(card);
+  wrap.addEventListener('click', function(e){ if(e.target===wrap) wrap.remove(); });
+  document.body.appendChild(wrap);
+};
 window._mfLocked=false;
 function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{ LMAP.setMaxBounds(L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]])); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the fest footprint; zoom stays free
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
