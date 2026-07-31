@@ -920,7 +920,7 @@ body.dd-insider .dd-only{display:block}
  .top{gap:7px;padding:10px 12px}
  .top .search{min-width:0;flex:1}
  .top .logo{font-size:22px;gap:0} .top .logo .bname{display:none}
- .top .logo::before{content:"🌹";font-size:22px}
+ .top .logo::before{content:""}
  .top .hpbtn{font-size:0;padding:9px 12px}
  .top .hpbtn::after{content:"📡";font-size:16px}
 }
@@ -928,13 +928,13 @@ body.dd-insider .dd-only{display:block}
 <body>
 
 <div class="top">
-  <div class="logo">🌹&nbsp;&nbsp;&nbsp;&nbsp;<span class="bname">DeadDance</span></div>
+  <div class="logo"><svg class="wtix" viewBox="0 0 26 24" width="1.05em" height="1.05em" fill="none" style="vertical-align:-3px" aria-hidden="true"><rect x="7" y="2.6" width="9.5" height="6" rx="1.4" transform="rotate(-12 11.7 5.6)" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9.2" y="2.4" width="9.5" height="6" rx="1.4" transform="rotate(11 14 5.6)" fill="#2f6feb" stroke="currentColor" stroke-width="1.4"/><path d="M3.2 8.4 h18.6 a2 2 0 0 1 2 2 v8 a2 2 0 0 1 -2 2 H3.2 a2 2 0 0 1 -2 -2 V10.4 a2 2 0 0 1 2 -2 Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="18.6" cy="14.4" r="1.5" fill="#f0a500"/></svg>&nbsp;&nbsp;<span class="bname">StageFill</span></div>
   <input class="search" id="ddSearch" autocomplete="off" placeholder="Search heads, shows, tapes, art…" oninput="ddSearchInput(this.value)" onkeydown="if(event.key==='Escape'){this.blur();ddSearchClose();}">
   <div id="ddSearchRes" class="ddsr"></div>
   <button class="cbtn authbtn" onclick="requireSignin(function(){openApps()})" title="Menu" aria-label="Menu">▦</button>
   <button class="cbtn authbtn" onclick="requireSignin(function(){if(window.LukasChat&&LukasChat.open)LukasChat.open();else alert('Chat is loading…')})" title="Family chat" aria-label="Family chat">💬</button>
   <button class="cbtn authbtn" onclick="requireSignin(function(){openNotifs()})" title="Notifications" aria-label="Notifications"><span style="position:relative">🔔<span id="topNotifBadge" style="position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;background:#e11;color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:16px">0</span></span></button>
-  <button class="cbtn avat authbtn" onclick="requireSignin(function(){openProfMenu()})" title="You" aria-label="You">🌹</button>
+  <button class="cbtn avat authbtn" onclick="requireSignin(function(){openProfMenu()})" title="You" aria-label="You"><svg class="wtix" viewBox="0 0 26 24" width="1em" height="1em" fill="none" style="vertical-align:-2px" aria-hidden="true"><rect x="7" y="2.6" width="9.5" height="6" rx="1.4" transform="rotate(-12 11.7 5.6)" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9.2" y="2.4" width="9.5" height="6" rx="1.4" transform="rotate(11 14 5.6)" fill="#2f6feb" stroke="currentColor" stroke-width="1.4"/><path d="M3.2 8.4 h18.6 a2 2 0 0 1 2 2 v8 a2 2 0 0 1 -2 2 H3.2 a2 2 0 0 1 -2 -2 V10.4 a2 2 0 0 1 2 -2 Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="18.6" cy="14.4" r="1.5" fill="#f0a500"/></svg></button>
 </div>
 
 <div class="wrap">
@@ -1369,7 +1369,7 @@ body.dd-insider .dd-only{display:block}
 
 <!-- ===================== BOTTOM FOOTER NAV (guitar-character icons) ===================== -->
 <nav class="footnav" id="footnav" aria-label="dead.dance navigation">
-  <button class="fn" onclick="ddCloseOverlays();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic">🌹</span><span class="lb">Home</span></button>
+  <button class="fn" onclick="ddCloseOverlays();window.scrollTo({top:0,behavior:'smooth'})"><span class="ic"><svg class="wtix" viewBox="0 0 26 24" width="1em" height="1em" fill="none" style="vertical-align:-2px" aria-hidden="true"><rect x="7" y="2.6" width="9.5" height="6" rx="1.4" transform="rotate(-12 11.7 5.6)" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9.2" y="2.4" width="9.5" height="6" rx="1.4" transform="rotate(11 14 5.6)" fill="#2f6feb" stroke="currentColor" stroke-width="1.4"/><path d="M3.2 8.4 h18.6 a2 2 0 0 1 2 2 v8 a2 2 0 0 1 -2 2 H3.2 a2 2 0 0 1 -2 -2 V10.4 a2 2 0 0 1 2 -2 Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="18.6" cy="14.4" r="1.5" fill="#f0a500"/></svg></span><span class="lb">Home</span></button>
   <button class="fn" onclick="requireSignin(function(){location.href='dd_home_mockup.html'})" title="Friends — with who, following what, shared everywhere"><span class="ic">👥</span><span class="lb">Friends</span></button>
   <button class="fn" onclick="requireSignin(function(){ddCloseOverlays();openReader('groups')})" title="The Dealer — Groups, Bands, Shop, Art"><span class="ic">💎</span><span class="lb">Dealer</span></button>
   <button class="fn" onclick="requireSignin(function(){ ddCloseOverlays(); if(window.ddSheet){ ddSheet('games.html','🍪 Games',true); } else { openGame(); } })"><span class="ic">🎮</span><span class="lb">Games</span></button>
