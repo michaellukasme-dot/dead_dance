@@ -191,8 +191,8 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div id="adFeatured"></div>
   <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">
     <button onclick="closePoster()" aria-label="Close poster" style="position:absolute;top:14px;right:16px;border:0;background:#ffffff26;color:#fff;width:42px;height:42px;border-radius:21px;font-size:23px;cursor:pointer;z-index:2">×</button>
-    <img id="posterImg" src="MUSIKFEST_poster.jpg" alt="Musikfest 2026 official poster" onerror="this.style.display='none';var d=document.getElementById('posterMiss');if(d)d.style.display='block'" style="max-width:100%;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px #000a">
-    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>MUSIKFEST_poster.jpg</b> and it shows here.</div>
+    <img id="posterImg" alt="Musikfest 2026 official poster" onerror="this.style.display='none';var d=document.getElementById('posterMiss');if(d)d.style.display='block'" style="max-width:100%;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px #000a"><!-- src set lazily by openPoster() — no 655KB preload on map open -->
+    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>musikfest_poster.jpg</b> and it shows here.</div>
   </div>
 
   <div class="admodal" id="adModal">
@@ -1000,7 +1000,7 @@ window.mfCenterSide=function(side){ try{ if(typeof ensureMap==='function') ensur
   LMAP.fitBounds(pts,{paddingTopLeft:[30,52], paddingBottomRight:[30,205], maxZoom:17, animate:true});
 }catch(e){} };
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
-  if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
+  if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
 window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none'; };
 
