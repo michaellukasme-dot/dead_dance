@@ -178,7 +178,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div class="mflayers">
     <span class="mfll">🗺 Show on map</span>
     <button class="mflay" id="sideToggle" onclick="mfToggleSide()" title="Toggle the map between the South Side (SteelStacks) and North Side (Main St)">⬇ Southside</button>
-    <button class="mflay" id="cutesyToggle" onclick="mfCutesyToggle()" title="Cutesy Map — an illustrated white curtain between the map and its markers; tap to raise/lower (up · mid · down). It stays where you leave it.">🎨 Cutesy: up</button>
+    <button class="mflay" id="cutesyToggle" onclick="mfCutesyToggle()" title="Cutesy Map">🎨 Cutesy</button>
     <button class="mflay on" data-f="stage" onclick="mfChip(this)">🌹 Stages</button>
     <button class="mflay" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
@@ -1007,6 +1007,7 @@ window._mfSide=null;
 window.mfToggleSide=function(){ var b=document.getElementById('sideToggle'); if(!b)return;
   var go=(window._mfSide==='S')?'N':'S'; window._mfSide=go;
   try{ mfCenterSide(go); }catch(e){}
+  try{ if(window.mfCutesySide) mfCutesySide(); }catch(e){}   // side change → swap the cutesy art (north/south)
   b.textContent=(go==='S'?'⬆ Northside':'⬇ Southside');   // now viewing `go` → offer the opposite next
   b.classList.remove('on'); };
 
@@ -1014,7 +1015,7 @@ window.mfToggleSide=function(){ var b=document.getElementById('sideToggle'); if(
    ALL the markers (markers always ride on top). One toggle raises/lowers it UP → MID → DOWN and it
    STAYS fixed wherever you leave it (persisted). The white bottom sheet never moves.
    Drop cutesy_map.png into the folder and it rides on the white curtain; until then it's plain white. */
-try{ window._cutesyPos = localStorage.getItem('dd_cutesy') || 'up'; }catch(e){ window._cutesyPos='up'; }
+try{ window._cutesyPos = localStorage.getItem('dd_cutesy') || 'up'; }catch(e){ window._cutesyPos='up'; } if(window._cutesyPos==='mid') window._cutesyPos='down';   // 2 positions now: up / down
 function cutesyEnsure(){
   if(!window.LMAP || window._cutesyLayer || !window.L) return;
   try{
@@ -1023,19 +1024,21 @@ function cutesyEnsure(){
     var lyr=L.imageOverlay(white, LMAP.getBounds(), {pane:'cutesy', interactive:false}); lyr.addTo(LMAP); window._cutesyLayer=lyr;   // an imageOverlay is properly sized by Leaflet (a bare div in a pane collapses to 0)
     LMAP.on('moveend zoomend resize', function(){ try{ lyr.setBounds(LMAP.getBounds()); }catch(e){} });   // keep the white curtain filling the map viewport
     setTimeout(function(){ try{ lyr.setBounds(LMAP.getBounds()); }catch(e){} }, 500);   // re-fit once the map has settled its initial view
-    var im=new Image(); im.onload=function(){ try{ lyr.setUrl('cutesy_map.png'); }catch(e){} }; im.src='cutesy_map.png';   // white until the illustration exists
+    var _cu=(window._mfSide==='S')?'cutesy_bethlehem_south.png':'cutesy_bethlehem.png'; var im=new Image(); im.onload=function(){ try{ lyr.setUrl(_cu); }catch(e){} }; im.src=_cu;   // Bethlehem cutesy map: North (default) / South — drop the files in; white until then
     cutesyApply();
   }catch(e){}
 }
 function cutesyApply(){ var lyr=window._cutesyLayer, el=lyr&&lyr.getElement&&lyr.getElement();
-  var clip = window._cutesyPos==='down' ? 'inset(0 0 0 0)' : (window._cutesyPos==='mid' ? 'inset(0 0 50% 0)' : 'inset(0 0 100% 0)');   // drops from the TOP of the map portion: up=hidden, mid=half, down=full
-  if(el){ el.style.transition='clip-path .45s ease, -webkit-clip-path .45s ease'; el.style.clipPath=clip; el.style.webkitClipPath=clip; el.style.filter=(window._cutesyPos==='up'?'none':'drop-shadow(0 3px 6px rgba(0,0,0,.30))'); }   // a shadow on the hem so the drop is unmistakable
-  var b=document.getElementById('cutesyToggle'); if(b){ b.textContent='🎨 Cutesy: '+window._cutesyPos; b.classList.toggle('on', window._cutesyPos!=='up'); }   // shaded (selected) whenever the curtain is showing (mid/down); unshaded when up/hidden
+  var down = window._cutesyPos==='down';
+  var clip = down ? 'inset(0 0 0 0)' : 'inset(0 0 100% 0)';   // 2 positions: DOWN = covers the whole map portion (no gap) · UP = fully hidden
+  if(el){ el.style.transition='clip-path .45s ease, -webkit-clip-path .45s ease'; el.style.clipPath=clip; el.style.webkitClipPath=clip; el.style.filter=(down?'drop-shadow(0 3px 6px rgba(0,0,0,.30))':'none'); }
+  var b=document.getElementById('cutesyToggle'); if(b){ b.textContent='🎨 Cutesy'; b.classList.toggle('on', down); }   // text is just "Cutesy"; the SHADE tells the state — unshaded = up, shaded = down
 }
 window.mfCutesyToggle=function(){ cutesyEnsure();
-  window._cutesyPos = window._cutesyPos==='up' ? 'mid' : (window._cutesyPos==='mid' ? 'down' : 'up');   // UP → MID → DOWN → UP; the MAIN sheet never moves when the Cutsey toggles
+  window._cutesyPos = (window._cutesyPos==='down') ? 'up' : 'down';   // 2 positions: UP ⇄ DOWN; the MAIN sheet never moves when the Cutsey toggles
   cutesyApply(); try{ localStorage.setItem('dd_cutesy', window._cutesyPos); }catch(e){}
 };
+window.mfCutesySide=function(){ if(!window._cutesyLayer)return; var u=(window._mfSide==='S')?'cutesy_bethlehem_south.png':'cutesy_bethlehem.png'; var im=new Image(); im.onload=function(){ try{ window._cutesyLayer.setUrl(u); }catch(e){} }; im.src=u; };   // swap the cutesy art to match the North/South side toggle
 (function armCutesy(){ if(window.LMAP){ cutesyEnsure(); } else setTimeout(armCutesy, 600); })();   // apply the saved position once the map exists
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
