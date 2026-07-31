@@ -114,11 +114,13 @@ body.mfapp{overflow:hidden;position:fixed;inset:0;width:100%;height:100%;backgro
 body.mfapp .mf-map{display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1;background:#dfe6ea}
 body.mfapp #lmap{position:absolute!important;inset:0!important;z-index:0!important;height:100%!important;width:100%!important;border-radius:0!important;background:#dfe6ea}
 body.mfapp .mf-back{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:7;background:#fff;color:var(--purple);padding:8px 13px;border-radius:999px;box-shadow:0 2px 8px #0003;font-size:13px;font-weight:800;text-decoration:none}
-body.mfapp .mf-chips{position:absolute;top:calc(11px + env(safe-area-inset-top,0px));left:0;right:0;z-index:6;display:flex;gap:8px;overflow-x:auto;padding:2px 14px 6px 150px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+body.mfapp .mf-chips{position:absolute;top:calc(11px + env(safe-area-inset-top,0px));left:0;right:0;z-index:6;display:flex;gap:8px;overflow-x:auto;padding:2px 14px 6px 200px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 body.mfapp .mf-chips::-webkit-scrollbar{display:none}
 .mfchip{flex:0 0 auto;border:0;background:#fff;color:#241535;border-radius:999px;padding:9px 15px;font-weight:800;font-size:14px;box-shadow:0 2px 8px #0003;cursor:pointer;white-space:nowrap}
 .mfchip.on{background:#241535;color:#fff}
-.mflayers{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.mflayers{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.mflayers::-webkit-scrollbar{display:none}
+.mf-tracknote{position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:7;background:#ffffffd9;color:#161616;border:0;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;box-shadow:0 1px 6px #0003;cursor:pointer;white-space:nowrap;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 .mflayers .mfll{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-right:2px}
 .mflay{border:0;background:#f1eef7;color:var(--purple);border-radius:999px;padding:8px 13px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
 .mflay.on{background:#241535;color:#fff}
@@ -156,6 +158,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   </div>
   <div id="lmap" aria-label="Musikfest stage map"></div>
   <span id="trackStat" class="mf-statpill"></span>
+  <button id="trackBtn" class="mf-tracknote" onclick="toggleTrack()" title="Auto-tracking — tap to pause/resume">⏸ Auto-Tracking</button>
 </div>
 <div class="wrap">
   <div class="mf-grab" id="mfGrab" onpointerdown="mfDragStart(event)"><span></span></div>
@@ -172,16 +175,13 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <span id="roseTotalN" style="display:none">0</span>
   </div>
   <div class="mflayers">
-    <button class="mflay" onclick="mfCheckIn()" title="Check in where you are — post it in your own voice" style="background:linear-gradient(135deg,#7a3cc0,#b8002e);color:#fff;border-color:transparent;font-weight:800">📍 Check In</button>
     <span class="mfll">🗺 Show on map</span>
-    <button class="mflay" onclick="mfCenterSide('S')" title="Center on the South Side (SteelStacks)">⬇ Southside</button>
-    <button class="mflay" onclick="mfCenterSide('N')" title="Center on the North Side (Main St)">⬆ Northside</button>
+    <button class="mflay" id="sideToggle" onclick="mfToggleSide()" title="Toggle the map between the South Side (SteelStacks) and North Side (Main St)">⬇ Southside</button>
     <button class="mflay on" data-f="stage" onclick="mfChip(this)">🌹 Stages</button>
     <button class="mflay" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
     <button class="mflay" data-f="aid" onclick="mfChip(this)">⛑️ First Aid</button>
     <span style="width:1px;height:20px;background:var(--line);margin:0 3px"></span>
-    <button id="trackBtn" class="mflay" onclick="toggleTrack()">⏸ Auto-Tracking</button>
     <button class="mflay" onclick="document.getElementById('photoIn').click()" title="Add my photos" aria-label="Add my photos">📷</button>
     <button class="mflay" onclick="postWalk()" title="Share / post my walk" aria-label="Share my walk"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" style="vertical-align:-3px"><path d="M13 3l8 7-8 7v-4.2C7.2 12.8 4 15 2 19c.6-7 4.6-10.4 11-10.9V3z"/></svg></button>
     <button id="parkBtn" class="mflay" onclick="parkTap()" title="Remember where I parked · walk me back to my car" aria-label="Parking">🅿️</button>
@@ -999,6 +999,13 @@ window.mfCenterSide=function(side){ try{ if(typeof ensureMap==='function') ensur
   if(!pts.length)return;
   LMAP.fitBounds(pts,{paddingTopLeft:[30,52], paddingBottomRight:[30,205], maxZoom:17, animate:true});
 }catch(e){} };
+// ONE toggle (not two buttons): flips the map South⇄North and shades to show the active side
+window._mfSide=null;
+window.mfToggleSide=function(){ var b=document.getElementById('sideToggle'); if(!b)return;
+  var next=(window._mfSide==='S')?'N':'S'; window._mfSide=next;
+  try{ mfCenterSide(next); }catch(e){}
+  b.textContent=(next==='S'?'⬇ Southside':'⬆ Northside');
+  b.classList.add('on'); };
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
@@ -1460,10 +1467,10 @@ function startWatch(){ if(WALK.gps||!navigator.geolocation)return;
   else { WALK.gps={stop:function(){}}; navigator.geolocation.watchPosition(function(p){ onFix({lat:p.coords.latitude,lng:p.coords.longitude,rawAcc:p.coords.accuracy,alt:p.coords.altitude}); },onGeoErr,{enableHighAccuracy:true,maximumAge:8000,timeout:30000}); }
 }
 window.toggleTrack=function(){ WALK.on=!WALK.on; var b=document.getElementById('trackBtn');
-  if(WALK.on){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); b.style.background='#1f7a4d'; b.style.color='#fff'; WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
+  if(WALK.on){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); WALK.last=null; WALK.lastAlt=null; window._walkGotFix=false;
     walkStatus('🛰️ Finding you… <b>allow location if your phone asks.</b>',true);   // instant feedback — never "nothing"
     startWatch(); try{ if(window.DDSteps) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} fmtStat(); }
-  else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); b.style.background=''; b.style.color=''; try{ if(window.DDSteps) DDSteps.stop(); }catch(e){} var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
+  else { b.textContent='▶ Auto-Tracking'; b.classList.remove('on'); try{ if(window.DDSteps) DDSteps.stop(); }catch(e){} var s=document.getElementById('ddWalkStat'); if(s)s.style.display='none'; } };
 /* arm the pedometer on the first user tap — tracking auto-starts at load, but iOS motion needs a gesture */
 (function(){ function arm(){ try{ if(WALK.on && window.DDSteps && !DDSteps.active()) DDSteps.start(function(){ try{ fmtStat(); }catch(e){} }); }catch(e){} }
   try{ document.addEventListener('pointerdown', arm, { once:true }); }catch(e){} })();
