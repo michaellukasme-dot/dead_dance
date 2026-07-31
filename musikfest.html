@@ -177,6 +177,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div class="mflayers">
     <span class="mfll">🗺 Show on map</span>
     <button class="mflay" id="sideToggle" onclick="mfToggleSide()" title="Toggle the map between the South Side (SteelStacks) and North Side (Main St)">⬇ Southside</button>
+    <button class="mflay" id="cutesyToggle" onclick="mfCutesyToggle()" title="Cutesy Map — an illustrated white curtain between the map and its markers; tap to raise/lower (up · mid · down). It stays where you leave it.">🎨 Cutesy: up</button>
     <button class="mflay on" data-f="stage" onclick="mfChip(this)">🌹 Stages</button>
     <button class="mflay" data-f="shop" onclick="mfChip(this)">🛍️ Shops</button>
     <button class="mflay" data-f="potty" onclick="mfChip(this)">🚻 Potty</button>
@@ -318,11 +319,11 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <button class="mftab" onclick="openPoster()" title="Doug Boehm — this year's Musikfest poster artist. Tap to raise the curtain on the official poster." aria-label="Show the official Musikfest 2026 poster full-screen" style="background:linear-gradient(135deg,#f0a500,#e0577a);color:#fff;border-color:transparent;font-weight:900;box-shadow:0 2px 8px #e0577a55">🖼️ Doug Boehm</button>
     <button class="mftab" data-cur="cur_windcreek" onclick="mfCurtain('cur_windcreek')">🎟 Wind Creek Steel Stage</button>
     <button class="mftab on" data-cur="cur_plan" onclick="mfCurtain('cur_plan')">📋 Plan Your Day</button>
+    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">📝 My Plan</button>
     <button class="mftab" data-cur="cur_dead" onclick="mfCurtain('cur_dead')">🌹 Dead &amp; Jam Band</button>
     <button class="mftab" data-cur="cur_stage" onclick="mfCurtain('cur_stage')">🎪 Browse stage</button>
     <button class="mftab" data-cur="cur_earlier" onclick="mfCurtain('cur_earlier')">⏱ Earlier</button>
     <button class="mftab" data-cur="cur_lineup" onclick="mfCurtain('cur_lineup')">🎫 Browse the Whole Lineup</button>
-    <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')">My Sets 🌹</button>
     <button class="mftab" data-cur="cur_locals" onclick="mfCurtain('cur_locals')">💡 Locals</button>
     <button class="mftab" id="mfConsoleTab" data-cur="cur_console" onclick="mfCurtain('cur_console')" style="display:none">🔒 Console</button>
   </div>
@@ -1007,6 +1008,32 @@ window.mfToggleSide=function(){ var b=document.getElementById('sideToggle'); if(
   try{ mfCenterSide(go); }catch(e){}
   b.textContent=(go==='S'?'⬆ Northside':'⬇ Southside');   // now viewing `go` → offer the opposite next
   b.classList.remove('on'); };
+
+/* ===== CUTESY MAP — a WHITE curtain (the illustrated map layer) that hangs BETWEEN the geo tiles and
+   ALL the markers (markers always ride on top). One toggle raises/lowers it UP → MID → DOWN and it
+   STAYS fixed wherever you leave it (persisted). The white bottom sheet never moves.
+   Drop cutesy_map.png into the folder and it rides on the white curtain; until then it's plain white. */
+try{ window._cutesyPos = localStorage.getItem('dd_cutesy') || 'up'; }catch(e){ window._cutesyPos='up'; }
+function cutesyEnsure(){
+  if(!window.LMAP || window._cutesyLayer) return;
+  try{
+    LMAP.createPane('cutesy'); var p=LMAP.getPane('cutesy'); p.style.zIndex=250; p.style.pointerEvents='none';   // above the geo tiles, below overlays + markers
+    var d=document.createElement('div'); d.id='cutesyCurtain';
+    d.style.cssText='position:absolute;inset:0;background:#fdfdff;background-size:cover;background-position:center;transition:-webkit-clip-path .45s ease,clip-path .45s ease';
+    var im=new Image(); im.onload=function(){ d.style.backgroundImage='url("cutesy_map.png")'; }; im.src='cutesy_map.png';   // white until the illustration exists
+    p.appendChild(d); window._cutesyLayer=d; cutesyApply();
+  }catch(e){}
+}
+function cutesyApply(){ var d=window._cutesyLayer;
+  var clip = window._cutesyPos==='down' ? 'inset(0 0 0 0)' : (window._cutesyPos==='mid' ? 'inset(0 0 50% 0)' : 'inset(0 0 100% 0)');   // curtain hangs from the top: up=hidden, mid=half, down=full
+  if(d){ d.style.clipPath=clip; d.style.webkitClipPath=clip; }
+  var b=document.getElementById('cutesyToggle'); if(b) b.textContent='🎨 Cutesy: '+window._cutesyPos;
+}
+window.mfCutesyToggle=function(){ cutesyEnsure();
+  window._cutesyPos = window._cutesyPos==='up' ? 'mid' : (window._cutesyPos==='mid' ? 'down' : 'up');   // UP → MID → DOWN → UP; persists
+  cutesyApply(); try{ localStorage.setItem('dd_cutesy', window._cutesyPos); }catch(e){}
+};
+(function armCutesy(){ if(window.LMAP){ cutesyEnsure(); } else setTimeout(armCutesy, 600); })();   // apply the saved position once the map exists
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
   if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
