@@ -154,8 +154,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   <div class="stub" style="flex-direction:column;align-items:stretch;gap:12px;background:#0f0b18;padding:16px 18px 18px">
     <div style="display:flex;justify-content:space-between;align-items:center;color:#c9bfe0;font-size:11px"><span>Ticket ID <b id="tid" style="color:#fff">d.dance/t/····</b></span><span class="chip" style="background:#ffffff14;color:#7ad7ff;border-color:#7ad7ff55">SHOW PASS</span></div>
     <div style="display:flex;gap:13px;align-items:center">
-      <div id="showqr" style="width:118px;height:118px;flex:0 0 auto;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden">▦</div>
-      <div style="color:#cfc6e6;font-size:12px;line-height:1.45"><b style="color:#fff">Your show QR.</b> The <b>same code</b> before, during &amp; after — scan at the gate, get each song texted live, then keep it as your night in history. 🌹</div>
+      <div id="showqr" onclick="ticketPrint()" title="Click Me — print at home or order the paper 🌹" style="width:118px;height:118px;flex:0 0 auto;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer">▦</div>
+      <div style="color:#cfc6e6;font-size:12px;line-height:1.45"><b style="color:#fff">Your show QR.</b> The <b>same code</b> before, during &amp; after — scan at the gate, get each song texted live, then keep it as your night in history. 🌹<br><b style="color:#ffd76a">🖨️ Tap the code</b> — print at home free, or order the paper.</div>
     </div>
   </div>
 </div>
@@ -470,6 +470,36 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   })();
   window.curtainClose=function(){ var c=document.getElementById('curtain'); if(c)c.classList.remove('on'); };
   window.ticketPlay=function(u){ try{ u=decodeURIComponent(u); var a=new Audio(u); a.play(); }catch(e){ try{ window.open(decodeURIComponent(u),'_blank','noopener'); }catch(x){} } };
+  /* 🖨️ PRINT — tap the show QR → "do you miss paper tickets?" → the printable stub (per-event Claude Gaude art), print at home free or order card stock mailed */
+  window.ticketPrint=function(){
+    function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+    if(!document.getElementById('printCSS')){ var st=document.createElement('style'); st.id='printCSS';
+      st.textContent='@media print{body>*{visibility:hidden!important}#printOverlay,#printOverlay *{visibility:visible!important}#printOverlay{position:absolute!important;inset:0!important;background:#fff!important;display:block!important;padding:0!important;overflow:visible!important}#printOverlay .pm-card{box-shadow:none!important;max-width:100%!important;padding:0!important}#printOverlay .pm-actions,#printOverlay .pm-close{display:none!important}}';
+      document.head.appendChild(st); }
+    var ex=document.getElementById('printOverlay'); if(ex){ ex.style.display='flex'; return; }
+    var acc=((document.documentElement.style.getPropertyValue('--tm-blue')||'').trim())||'#2f7bf6';
+    var band=((document.getElementById('band')||{}).textContent||'YOUR SHOW');
+    var venue=((document.getElementById('venue')||{}).textContent||'');
+    var sub=((document.getElementById('sub')||{}).textContent||'');
+    var tid=(((document.getElementById('tid')||{}).textContent||'').replace('d.dance/t/','')||'—');
+    var stub='<div style="display:flex;background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden;font-family:ui-monospace,\'Courier New\',monospace;color:#1a1a1a;min-height:158px">'
+      +'<div style="width:104px;flex:none;background:#dadada;padding:9px 8px"><div style="font-size:7px;font-weight:700;color:#555">TICKET #</div><div style="font-size:12px;font-weight:800;word-break:break-all">'+esc(tid)+'</div><div style="font-size:7px;font-weight:700;color:#555;margin-top:7px">ADMISSION</div><div style="font-size:13px;font-weight:800">GA</div><div style="font-size:9px;font-weight:800;color:#333;margin-top:12px">StageFill<span style="font-size:6px;vertical-align:super">™</span></div></div>'
+      +'<div style="flex:1;padding:10px 12px;border-left:6px solid '+acc+'"><div style="font-size:9px;font-weight:800;letter-spacing:.06em;color:'+acc+'">STAGEFILL'+(sub?(' · '+esc(sub).toUpperCase()):'')+'</div><div style="font-size:9px;letter-spacing:.1em;color:#555;margin-top:7px">YOU ARE GOING TO SEE</div><div style="font-size:21px;font-weight:800;line-height:1;margin-top:2px">'+esc(band).toUpperCase()+'</div><div style="font-size:12px;font-weight:700;margin-top:7px">'+esc(venue)+'</div><div style="font-size:8.5px;color:#777;margin-top:8px">🎨 art for this show by Claude Gaude · <b>same #'+esc(tid)+'</b> as your digital ticket</div><div style="font-size:8px;color:#8a8a8a;margin-top:5px">setlist texted live · directions to your stage · yours to keep forever 🌹</div></div>'
+      +'<div style="width:132px;flex:none;display:flex"><div style="flex:1;background:repeating-linear-gradient(0deg,#111 0 2px,#fff 2px 3px,#111 3px 6px,#fff 6px 7px,#111 7px 9px,#fff 9px 12px)"></div><div style="width:32px;background:#111;color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">StageFill™</div></div>'
+    +'</div>';
+    var ov=document.createElement('div'); ov.id='printOverlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:800;background:rgba(10,8,20,.72);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto';
+    ov.onclick=function(e){ if(e.target===ov) ov.style.display='none'; };
+    ov.innerHTML='<div class="pm-card" style="background:#fff;border-radius:16px;max-width:640px;width:100%;padding:16px 16px 15px;box-shadow:0 20px 50px #0008;position:relative">'
+      +'<button class="pm-close" onclick="document.getElementById(\'printOverlay\').style.display=\'none\'" style="position:absolute;top:10px;right:12px;border:0;background:#eef1f6;color:#2b3242;width:30px;height:30px;border-radius:15px;font-size:16px;cursor:pointer">×</button>'
+      +'<div style="font-weight:900;font-size:16px;margin:0 30px 3px 0">Do you miss paper tickets? 🌹</div>'
+      +'<div style="font-size:12.5px;color:#6b6675;line-height:1.5;margin-bottom:11px">Ours are better — but you can still hold the paper. <b>Print it at home free</b>, or order a <b>card-stock keepsake</b> mailed to you, with art made for <b>this show</b>.</div>'
+      +'<div id="printStub">'+stub+'</div>'
+      +'<div class="pm-actions" style="display:flex;gap:9px;margin-top:13px"><button onclick="window.print()" style="flex:1;border:1.5px solid '+acc+';border-radius:11px;padding:11px;font-weight:800;background:#fff;color:'+acc+';cursor:pointer">🖨️ Print at home · free</button><button onclick="ticketPrintMail()" style="flex:1;border:0;border-radius:11px;padding:11px;font-weight:800;background:'+acc+';color:#fff;cursor:pointer">📮 Card stock · mailed</button></div>'
+    +'</div>';
+    document.body.appendChild(ov);
+  };
+  window.ticketPrintMail=function(){ try{ alert('📮 A card-stock keepsake — printed on real ticket stock with this show’s Claude Gaude art and mailed to you (PostNet, Bethlehem). A StageFill premium; checkout happens on StageFill.'); }catch(e){} };
   window.ticketShare=function(){ var link=url||('https://deaddance.app/event.html'+(ev?('?ev='+encodeURIComponent(ev)):''));
     var txt='🌹 '+band+' — '+venueShort+(date?(' · '+fmtD(date)):'')+' · my ticket on DeadDance';
     try{ if(navigator.share){ navigator.share({title:String(band), text:txt, url:link}); return; } }catch(e){}

@@ -1,82 +1,123 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Adopt a Band · DeadDance</title>
-<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="rose.svg">
+<title>Adopt a Band · DeadDance · MusikFest</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
 <style>
 :root{--rose:#b8002e;--purple:#2a1b3d;--acc:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
 *{box-sizing:border-box}body{margin:0;background:#faf8fd;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:640px;margin:0 auto;padding:16px 14px 60px}
 .hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:22px;padding:22px 20px}
 .hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
-.hero h1{font-size:24px;margin:4px 0 8px;font-weight:900}
+.hero h1{font-size:23px;margin:4px 0 8px;font-weight:900}
 .hero p{margin:0;color:#cdbfe0;font-size:14px;line-height:1.5}
+.hero b.hl{color:#ffd76a}
 .prog{margin:16px 2px 4px}.bar{height:12px;background:#eee7f6;border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#b8002e,#f0a500);width:0%;transition:width .4s}
 .pnum{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:6px;text-align:center}
-.card{border:1px solid var(--line);border-radius:16px;padding:14px 15px;background:#fff;margin-top:12px;box-shadow:0 6px 18px rgba(42,27,61,.05)}
-.card.claimed{opacity:.6;background:#f7f4fb}
-.bn{font-weight:900;font-size:18px}.bn s{color:var(--muted)}
-.bk{color:var(--muted);font-size:12.5px;margin-top:2px}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
-.btn{border:0;border-radius:11px;padding:9px 13px;font-weight:800;font-size:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.dayhdr{font-weight:900;font-size:14px;margin:22px 2px 4px;display:flex;align-items:center;gap:8px}
+.dayhdr .tag{font-size:10.5px;font-weight:800;color:#fff;background:var(--rose);border-radius:999px;padding:3px 9px;text-transform:uppercase;letter-spacing:.04em}
+.dayhdr.today .tag{background:#12854f}
+.daycount{font-size:11.5px;color:var(--muted);font-weight:700;margin-left:auto}
+.card{border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff;margin-top:10px;box-shadow:0 5px 14px rgba(42,27,61,.05)}
+.card.claimed{opacity:.55;background:#f7f4fb}
+.bn{font-weight:900;font-size:16.5px}.bn s{color:var(--muted)}
+.bk{color:var(--muted);font-size:12px;margin-top:1px}
+.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.btn{border:0;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12.5px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .btn.p{background:var(--acc);color:#fff}.btn.g{background:#f1eef7;color:var(--acc)}.btn.rose{background:var(--rose);color:#fff}
 .badge{display:inline-block;background:#eef7f2;color:#12854f;font-weight:800;font-size:11px;padding:4px 10px;border-radius:999px;margin-top:9px}
-.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
-.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:26px}
+.pass{text-align:center;background:#fff;border:1px dashed var(--line);border-radius:14px;padding:14px;margin-top:22px}
+.pass a{color:var(--acc);font-weight:800;text-decoration:none}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
 </style></head>
 <body>
 <div class="wrap">
   <div class="hero">
-    <div class="k">DeadDance · MusikFest</div>
+    <div class="k">DeadDance · MusikFest street team</div>
     <h1>Do you miss paper tickets? 🌹</h1>
-    <p>So do your favorite bands' fans. <b style="color:#fff">Pick one band you love</b> — we already wrote the post. Share it to their Facebook, then scratch them off the list. <b style="color:#ffd76a">One friend, one band.</b> Let's cover them all.</p>
+    <p>So do your favorite bands' fans. <b class="hl">Pick ONE or TWO bands</b> you love, post it from <b class="hl">your</b> Facebook, and scratch them off. Then send this page to a few friends — they each take one or two, and their friends after them. <b style="color:#fff">We go down the list until every act is covered.</b> Today's acts are up top — grab those first.</p>
   </div>
   <div class="prog"><div class="bar"><i id="bar"></i></div><div class="pnum" id="pnum">Loading the lineup…</div></div>
   <div id="list"></div>
-  <div class="foot">🌹 DeadDance.app · From Bethlehem</div>
+  <div class="pass">Took one or two? 🌹 <b>Now send this page to 2–3 friends</b> — that's how we get to zero.<br><a href="#" onclick="ADOPT.share();return false;">📲 Share this page ↗</a></div>
+  <div class="foot">🌹 DeadDance.app · From Bethlehem · one friend, one or two bands</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>try{ var _C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _C;}; }catch(e){}</script>
 <script src="dd_mf_bands.js"></script>
+<script src="dd_musikfest.js"></script>
 <script>
 (function(){
-  var TICKET='https://deaddance.app/mf_band.html?band=';
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function todayISO(){ try{ return new Date().toISOString().slice(0,10); }catch(e){ return '2026-07-31'; } }
+  function slugify(n){ return String(n).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  function dayLabel(d){ try{ return new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return d; } }
   function who(){ try{ var k='dd.adopter',v=localStorage.getItem(k); if(!v){v='fan-'+Math.random().toString(36).slice(2,8);localStorage.setItem(k,v);} return v; }catch(e){return 'anon';} }
   function claims(){ try{ return JSON.parse(localStorage.getItem('dd.adopt')||'{}'); }catch(e){ return {}; } }
   function saveClaim(slug){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.adopt',JSON.stringify(c));}catch(e){}
     try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:who()}); }catch(e){} }
-  function msg(name,slug){ return 'Do you miss paper tickets? So do all of '+name+"'s fans. 🌹\n\n"
-    +"Here's "+name+"'s FREE ticket to their MusikFest set — free for the band and every fan. It walks you to their stage, remembers where you parked, texts you their setlist as they play, and keeps the whole show in your wallet forever.\n\n"
-    +'Grab it here: '+TICKET+slug+"\n\nFree from DeadDance — made in Bethlehem."; }
-  function bands(){ var out=[]; try{ var B=window.DD_MF_BANDS||{}; for(var s in B){ if(!Object.prototype.hasOwnProperty.call(B,s))continue; var b=B[s]||{}; out.push({slug:s,name:b.name||s,kind:b.kind||'',home:b.home||'',fb:(b.links&&b.links.Facebook)||''}); } }catch(e){} return out.sort(function(a,b){return a.name.localeCompare(b.name);}); }
-  function fbLink(b){ return b.fb || ('https://www.facebook.com/search/top?q='+encodeURIComponent(b.name)); }
-  function copy(t){ try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} } }
-  function toast(m){ try{ alert(m); }catch(e){} }
+  var TICKET='https://deaddance.app/ticket.html?price=FREE&band=';
+  function tixUrl(name){ return TICKET+encodeURIComponent(name); }
+  function msg(name){ return 'Do you miss paper tickets? So do all of '+name+"'s fans. 🌹\n\n"
+    +"Here's "+name+"'s FREE ticket to their MusikFest set — free for the band and every fan. It walks you to their stage, texts you the setlist as they play it, and keeps the whole show in your wallet forever.\n\n"
+    +'Grab it here: '+tixUrl(name)+"\n\nFree from DeadDance — made in Bethlehem 🌹"; }
+
+  // ---- build the full lineup from the SCHEDULE, phased by day ----
+  function curated(){ var B=window.DD_MF_BANDS||{}, m={}; for(var s in B){ if(!Object.prototype.hasOwnProperty.call(B,s))continue; var e=B[s]||{};
+    m[(e.name||s).toLowerCase()]={slug:s, kind:e.kind||'', fb:e.Facebook||(e.links&&e.links.Facebook)||''}; } return m; }
+  function lineup(){ var S=window.DD_MUSIKFEST||[], cur=curated(), map={};
+    S.forEach(function(r){ if(!r||!r.b)return; var key=String(r.b).toLowerCase();
+      if(!map[key]) map[key]={name:r.b, days:{}, meta:cur[key]||null}; if(r.d) map[key].days[r.d]=true; });
+    var today=todayISO();
+    return Object.keys(map).map(function(k){ var m=map[k], ds=Object.keys(m.days).sort();
+      var next=ds.filter(function(d){return d>=today;})[0]||null;
+      return { name:m.name, slug:(m.meta&&m.meta.slug)||slugify(m.name), kind:(m.meta&&m.meta.kind)||'',
+        fb:(m.meta&&m.meta.fb)||'', next:next, first:ds[0]||'', bucket: next || 'zzz' }; })
+      .sort(function(a,b){ if(a.bucket!==b.bucket) return a.bucket<b.bucket?-1:1; return a.name.localeCompare(b.name); });
+  }
+  function fbLink(b){ return b.fb || ('https://www.facebook.com/search/top?q='+encodeURIComponent(b.name+' band')); }
+
+  function cardHTML(b, claimed){
+    return '<div class="card'+(claimed?' claimed':'')+'" id="c_'+esc(b.slug)+'">'
+      +'<div class="bn">'+(claimed?'<s>'+esc(b.name)+'</s>':esc(b.name))+'</div>'
+      +(b.kind?('<div class="bk">'+esc(b.kind)+'</div>'):'')
+      +(claimed?'<div class="badge">✓ Adopted — thank you 🌹</div>'
+        :'<div class="row">'
+           +'<button class="btn p" onclick="ADOPT.copy(\''+esc(b.slug)+'\')">📋 Copy the post</button>'
+           +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Their Facebook ↗</a>'
+           +'<a class="btn g" href="'+tixUrl(b.name)+'" target="_blank" rel="noopener">See the ticket</a>'
+           +'<button class="btn rose" onclick="ADOPT.claim(\''+esc(b.slug)+'\')">🌹 I posted it</button>'
+         +'</div>')
+      +'</div>';
+  }
+  window._LU=null;
   function render(){
-    var all=bands(), c=claims(), host=document.getElementById('list'); if(!host)return;
-    if(!all.length){ host.innerHTML='<div class="card"><b>The lineup is loading…</b><div class="note">If this stays empty, the band list didn’t load — refresh the page.</div></div>'; document.getElementById('pnum').textContent=''; return; }
+    var all=window._LU||(window._LU=lineup()), c=claims(), host=document.getElementById('list'); if(!host)return;
+    if(!all.length){ host.innerHTML='<div class="card"><b>The lineup is loading…</b></div>'; document.getElementById('pnum').textContent=''; return; }
     var done=all.filter(function(b){return c[b.slug];}).length;
     document.getElementById('bar').style.width=Math.round(done/all.length*100)+'%';
-    document.getElementById('pnum').textContent=done+' of '+all.length+' bands adopted — '+(all.length-done)+' still need a friend 🌹';
-    host.innerHTML=all.map(function(b){ var claimed=!!c[b.slug];
-      return '<div class="card'+(claimed?' claimed':'')+'">'
-        +'<div class="bn">'+(claimed?'<s>'+esc(b.name)+'</s>':esc(b.name))+'</div>'
-        +((b.kind||b.home)?('<div class="bk">'+esc([b.kind,b.home].filter(Boolean).join(' · '))+'</div>'):'')
-        +(claimed?'<div class="badge">✓ Adopted — thank you 🌹</div>'
-          :'<div class="row">'
-             +'<button class="btn p" onclick="ADOPT.copy(\''+b.slug+'\')">📋 Copy the post</button>'
-             +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Their Facebook ↗</a>'
-             +'<a class="btn g" href="'+TICKET+b.slug+'" target="_blank" rel="noopener">See the ticket</a>'
-             +'<button class="btn rose" onclick="ADOPT.claim(\''+b.slug+'\')">🌹 I posted it</button>'
-           +'</div>')
-        +'</div>';
+    document.getElementById('pnum').textContent=done+' of '+all.length+' acts adopted — '+(all.length-done)+' still need a friend 🌹';
+    var today=todayISO(), groups={}, order=[];
+    all.forEach(function(b){ var g=b.next||'played'; if(!groups[g]){ groups[g]=[]; order.push(g); } groups[g].push(b); });
+    var html=order.map(function(g){ var isToday=(g===today), label=(g==='played')?'Already played · still make a fan':dayLabel(g);
+      var tag=(g==='played')?'ENCORE':(isToday?'Today':'Upcoming');
+      var left=groups[g].filter(function(b){return !c[b.slug];}).length;
+      return '<div class="dayhdr'+(isToday?' today':'')+'"><span class="tag">'+tag+'</span> '+esc(label)
+        +'<span class="daycount">'+left+' left</span></div>'
+        + groups[g].map(function(b){ return cardHTML(b, !!c[b.slug]); }).join('');
     }).join('');
+    host.innerHTML=html;
   }
   window.ADOPT={
-    copy:function(slug){ var B=window.DD_MF_BANDS||{}, b=B[slug]||{}; copy(msg(b.name||slug,slug)); toast('📋 Post copied. Open their Facebook, paste it, then tap “I posted it.”'); },
-    claim:function(slug){ saveClaim(slug); render(); toast('🌹 Thank you! '+(((window.DD_MF_BANDS||{})[slug]||{}).name||'That band')+' is covered.'); }
+    copy:function(slug){ var b=(window._LU||[]).filter(function(x){return x.slug===slug;})[0]; if(!b)return;
+      var t=msg(b.name); try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} }
+      try{ alert('📋 Post copied. Open Facebook, paste it, then tap “I posted it.”'); }catch(e){} },
+    claim:function(slug){ saveClaim(slug); render(); var b=(window._LU||[]).filter(function(x){return x.slug===slug;})[0];
+      try{ alert('🌹 Thank you! '+((b&&b.name)||'That act')+' is covered. Grab one more, then send this page to a friend.'); }catch(e){} },
+    share:function(){ var u='https://deaddance.app/adopt_a_band.html', t='Help cover every MusikFest act — pick one or two bands and post their free ticket. 🌹';
+      if(navigator.share){ navigator.share({title:'Adopt a Band · MusikFest',text:t,url:u}).catch(function(){}); }
+      else { try{ navigator.clipboard.writeText(t+' '+u); alert('🔗 Link copied — paste it to a few friends.'); }catch(e){ alert(u); } } }
   };
-  // pull shared claims so two friends don't adopt the same band (guarded; local-first without the spine)
+  // pull shared claims so two friends don't adopt the same act (guarded; local-first without the spine)
   try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc){ cl.rpc('dd_bandadopt_list',{}).then(function(r){ try{ var rows=(r&&r.data)||[]; var c=claims(); rows.forEach(function(x){ if(x&&x.slug&&!c[x.slug]) c[x.slug]={by:x.by||'someone',ts:Date.now()}; }); localStorage.setItem('dd.adopt',JSON.stringify(c)); render(); }catch(e){} }).catch(function(){}); } }catch(e){}
   render();
 })();
