@@ -191,7 +191,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   <div id="posterModal" onclick="if(event.target===this)closePoster()" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,12,34,.92);align-items:center;justify-content:center;padding:18px">
     <button onclick="closePoster()" aria-label="Close poster" style="position:absolute;top:14px;right:16px;border:0;background:#ffffff26;color:#fff;width:42px;height:42px;border-radius:21px;font-size:23px;cursor:pointer;z-index:2">×</button>
     <img id="posterImg" alt="Musikfest 2026 official poster" onerror="this.style.display='none';var d=document.getElementById('posterMiss');if(d)d.style.display='block'" style="max-width:100%;max-height:92vh;border-radius:10px;box-shadow:0 20px 60px #000a"><!-- src set lazily by openPoster() — no 655KB preload on map open -->
-    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>musikfest_poster.jpg</b> and it shows here.</div>
+    <div id="posterMiss" style="display:none;color:#fff;text-align:center;max-width:340px;font-weight:700;line-height:1.5">🖼️ Add the poster to the app folder as <b>MUSIKFEST_poster.jpg</b> and it shows here.</div>
   </div>
 
   <div class="admodal" id="adModal">
@@ -481,6 +481,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_spread.js"></script>
 <script src="dd_hyperpost.js"></script>
 <script src="dd_checkin.js"></script>
+<script src="dd_presence.js"></script><!-- presence → ticket: persist at a stage while an act plays → the event ticket -->>
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
@@ -998,15 +999,16 @@ window.mfCenterSide=function(side){ try{ if(typeof ensureMap==='function') ensur
   if(!pts.length)return;
   LMAP.fitBounds(pts,{paddingTopLeft:[30,52], paddingBottomRight:[30,205], maxZoom:17, animate:true});
 }catch(e){} };
-// ONE toggle (not two buttons): flips the map South⇄North and shades to show the active side
+// ONE toggle (not two buttons): tap flips the map South⇄North. The button always shows the OTHER
+// side — the destination the next tap takes you to — and stays UNSELECTED (it's a "go there" control).
 window._mfSide=null;
 window.mfToggleSide=function(){ var b=document.getElementById('sideToggle'); if(!b)return;
-  var next=(window._mfSide==='S')?'N':'S'; window._mfSide=next;
-  try{ mfCenterSide(next); }catch(e){}
-  b.textContent=(next==='S'?'⬇ Southside':'⬆ Northside');
-  b.classList.add('on'); };
+  var go=(window._mfSide==='S')?'N':'S'; window._mfSide=go;
+  try{ mfCenterSide(go); }catch(e){}
+  b.textContent=(go==='S'?'⬆ Northside':'⬇ Southside');   // now viewing `go` → offer the opposite next
+  b.classList.remove('on'); };
 window.openPoster=function(src){ var m=document.getElementById('posterModal'), img=document.getElementById('posterImg'), miss=document.getElementById('posterMiss');
-  if(img){ img.style.display=''; img.src=src||'musikfest_poster.jpg'; } if(miss) miss.style.display='none';
+  if(img){ img.style.display=''; img.src=src||'MUSIKFEST_poster.jpg'; } if(miss) miss.style.display='none';
   if(m) m.style.display='flex'; };
 window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none'; };
 
@@ -1447,7 +1449,8 @@ function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus(
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); mfSilverTick(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
+  if(window.ddPresence && !window.mfPresenceTick){ window.mfPresenceTick=function(la,lo){ if(!window._presReady){ try{ ddPresence.configure({ nowActAt:function(st){ try{ var nm=(typeof actAtStage==='function')?actAtStage(st.name):''; if(!nm)return null; return {event:'MF|'+st.id+'|'+((typeof todayISO==='function')?todayISO():'')+'|'+nm, name:nm}; }catch(e){ return null; } }, onGrant:function(t){ try{ if(typeof walkStatus==='function') walkStatus('🎟️ You were here for <b>'+(t.act||'the set')+'</b> — the ticket to this show is yours. 🌹', true); else if(typeof mfToast==='function') mfToast('🎟️ Your ticket to '+(t.act||'this show')+' is in your wallet.'); try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab({event:t.event,act:t.act,stage:t.stage,source:'presence'}); }catch(_){ } }catch(e){} } }); }catch(e){} window._presReady=true; } var sl=(typeof STAGES!=='undefined'&&STAGES)?STAGES.map(function(s){return {id:s.n,name:s.n,lat:s.lat,lng:s.lng};}):[]; var nw=Date.now(), dt=window._presLast?(nw-window._presLast):0; window._presLast=nw; try{ ddPresence.tick({lat:la,lng:lo}, sl, dt); }catch(e){} }; }
+  try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(window.mfPresenceTick) window.mfPresenceTick(la,lo); }catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); mfSilverTick(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
 function updateYou(){}  // dd_gps.js owns the YOU dot (blue + honest accuracy ring) — no duplicate green dot
@@ -1598,8 +1601,10 @@ var MF_BUY_URL='https://www.musikfest.org/';   // ArtsQuest/MusikFest tickets fo
 window.mfOpenTicket=function(el){ var b=el.getAttribute('data-b')||'', st=el.getAttribute('data-st')||'', d=el.getAttribute('data-d')||'';
   var paid=(window.DDFlywheel&&DDFlywheel.isPaidStage)?DDFlywheel.isPaidStage(st):/(wind\s*creek|steel\s*stage)/i.test(st);
   if(!paid){ try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(b,{stage:st,date:d}); }catch(e){} }   // free → grab: fan of this band + joins its group
-  var base='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(st)+'&date='+encodeURIComponent(d);
-  var url= paid ? (base+'&buy='+encodeURIComponent(MF_BUY_URL)) : (base+'&price=FREE');   // paid still SHOWS the ticket; its Buy links to ArtsQuest
+  var sub=''; try{ if(window.BAND_INFO&&BAND_INFO[b]&&BAND_INFO[b].kind) sub=BAND_INFO[b].kind;
+    else if(window.DD_MUSIKFEST){ var _r=DD_MUSIKFEST.filter(function(x){return x.b===b;})[0]; if(_r&&_r.kind) sub=_r.kind; } }catch(e){}   // REAL per-act genre → no wrong label
+  var base='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(st)+'&date='+encodeURIComponent(d)+(sub?('&sub='+encodeURIComponent(sub)):'');
+  var url= paid ? (base+'&price=FREE&record=1&buy='+encodeURIComponent(MF_BUY_URL)) : (base+'&price=FREE');   // Wind Creek = FREE record/keepsake (not entry); Buy links to ArtsQuest for real entry
   var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(f)f.src=url; if(m)m.style.display='flex';
   try{ if(!paid && window.mfToast) mfToast('🎟 Free ticket — now a '+b+' fan 🌹'); }catch(e){} };
 window.mfCloseTicket=function(){ var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(m)m.style.display='none'; if(f)f.src='about:blank'; };

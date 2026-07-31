@@ -168,16 +168,16 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 (function(){
   var Q=new URLSearchParams(location.search);
   function g(k,d){ var v=Q.get(k); return (v==null||v==='')?d:v; }
-  var band=g('band','SHAKEDOWN'), sub=g('sub','Grateful Dead Tribute'),
+  var band=g('band','SHAKEDOWN'), sub=g('sub',''),   /* neutral default — no act inherits a wrong genre; launchers pass the real one */
       venue=g('venue','Wind Creek Steel Stage · Bethlehem, PA'), date=g('date',''),
       price=g('price','$18'), gate=g('gate','Gate A'),
-      sec=g('sec',''), row=g('row',''), seat=g('seat',''), img=g('img',''), url=g('url',''), iso=g('iso',''), ev=g('ev',''), color=g('color','');
+      sec=g('sec',''), row=g('row',''), seat=g('seat',''), img=g('img',''), url=g('url',''), iso=g('iso',''), ev=g('ev',''), color=g('color',''), record=g('record','');
   if(color){ try{ document.documentElement.style.setProperty('--tm-blue', color); }catch(e){} }   // differentiate each show's ticket
   var role=g('role','fan');   // fan (default) · band/member (edits the setlist) · venue/owner (sales + close)
 
   document.getElementById('band').textContent=String(band).toUpperCase();
   try{ var _bb=document.getElementById('brandBand'); if(_bb) _bb.textContent=String(band); }catch(e){}   // BAND branding + StageFill (neutral; no DeadDance, no rose)
-  document.getElementById('sub').textContent=sub;
+  (function(){ var se=document.getElementById('sub'); se.textContent=sub; se.style.display=sub?'':'none'; })();   /* hide the subtitle when there's no real genre */
   document.getElementById('venue').textContent=venue+(date?(' · '+date):'');
   document.getElementById('gate').textContent=gate;
   var vl=document.getElementById('veloc'); if(vl) vl.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(String(venue||'')+(date?'':''));
@@ -191,6 +191,16 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   if(buyUrl){ var bbb=document.getElementById('bbBuy'); if(bbb) bbb.onclick=function(){ try{ window.open(buyUrl,'_blank','noopener'); }catch(e){} };
     var fe=document.getElementById('fees'); if(fe) fe.textContent='Tickets sold by ArtsQuest 🌹'; }
   else if(!numeric && !/free/i.test(price)) document.getElementById('fees').textContent='we\'ll ping you the second it\'s live 🌹';
+
+  // WIND CREEK headliners (the one paid stage): a FREE RECORD of the show — a keepsake, NOT entry. Clearly disclaimed.
+  if(record){
+    var rn=document.createElement('div'); rn.id='recordNote';
+    rn.style.cssText='margin:10px 0 0;background:#fff4d6;border:1px solid #e6c257;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.5;color:#5a4a12;font-weight:600';
+    rn.innerHTML='🎟️ <b>Free keepsake — not your entry.</b> Wind Creek Steel Stage shows are ticketed: you’ll need a Wind Creek ticket to get in. This one’s a free <b>record of the night</b> — the setlist fills in live as it’s played (fans keep it if the band doesn’t), and it’s yours to keep. 🌹';
+    var bar=document.getElementById('buybar'); if(bar&&bar.parentNode) bar.parentNode.insertBefore(rn, bar); else { var c=document.querySelector('.ticket'); if(c) c.appendChild(rn); }
+    var pe=document.getElementById('price'); if(pe) pe.textContent='FREE · keepsake';
+    var bb=document.getElementById('bbBuy'); if(bb) bb.textContent='🎟️ Real ticket at ArtsQuest ↗';
+  }
 
   // %BAND% image as the event art
   var art=document.getElementById('art');
@@ -206,7 +216,17 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       '<div><small>SEAT</small><b>'+(seat||'—')+'</b></div>';
   } else { document.getElementById('ga').classList.remove('hidden'); }
 
-  document.getElementById('tid').textContent='d.dance/t/'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,4).toUpperCase();
+  // STABLE unique ticket ID — persisted per device+event, so reopening the SAME show yields the SAME id
+  var tid;
+  (function(){ var seed=[band,venue,date,ev].join('|');
+    try{ var kk='ddtid|'+seed; tid=localStorage.getItem(kk);
+      if(!tid){ var r=(Math.random().toString(36).slice(2)+seed).replace(/[^a-z0-9]/gi,'');
+        var h=5381; for(var i=0;i<r.length;i++) h=((h<<5)+h+r.charCodeAt(i))>>>0;
+        var s=('000000'+h.toString(36).toUpperCase()).slice(-6);
+        tid='d.dance/t/'+s.slice(0,4)+'-'+s.slice(4,6); localStorage.setItem(kk,tid); }
+    }catch(e){ tid='d.dance/t/'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,4).toUpperCase(); }
+  })();
+  document.getElementById('tid').textContent=tid;
 
   /* ROLLOVER: once the show has passed, the ticket becomes a CLOSED, historical stub — attended,
      kept in your deck as a collectible. (The whole event page closes to history the same way.) */
