@@ -102,7 +102,7 @@ var fest   = P('fest')   || (draft&&draft.name) || 'MusikFest 2026';
 var dates  = P('dates')  || (draft ? fmtDates(draft.dateStart, draft.dateEnd) : 'July 31 – August 9');
 var loc    = P('loc')    || (draft ? [draft.city,draft.state].filter(Boolean).join(', ') : 'Bethlehem, PA · SteelStacks');
 var tag    = P('tagline')|| (host==='ArtsQuest'?'imagine that ™':'');
-var mapurl = P('map')    || (draft&&draft.slug ? (location.origin+'/event_page.html?ev='+encodeURIComponent(draft.slug)) : (location.origin.indexOf('http')===0?location.origin:'https://deaddance.app')+'/artsquest_musikfest.html');
+var mapurl = P('map')    || (draft&&draft.slug ? (location.origin+'/event_page.html?ev='+encodeURIComponent(draft.slug)) : (location.origin.indexOf('http')===0?location.origin:'https://deaddance.app')+'/musikfest.html');
 var skyline= P('skyline')|| (host==='ArtsQuest'?'steelstacks':'festival');
 
 /* brand color → gradient */

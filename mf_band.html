@@ -203,7 +203,7 @@ function P(k){return new URLSearchParams(location.search).get(k);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 var slug=(P('band')||'rift').toLowerCase();
 var B=BANDS[slug]||BANDS['rift'];
-var MAP='https://deaddance.app/artsquest_musikfest.html'; /* the live festival map — walking directions */
+var MAP='https://deaddance.app/musikfest.html'; /* the live festival map — walking directions */
 var walkUrl=MAP+(B.set&&B.set.stage?('#stage='+encodeURIComponent(B.set.stage)):'');
 /* the free FULL ticket for this show — the collectible stub, appended to the fan's deck (ticket.html).
    The ticket's SHOW QR points at THIS event page (stateful), so one code carries the holder through
