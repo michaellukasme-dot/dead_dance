@@ -12,7 +12,10 @@
   function load() { try { return JSON.parse(root.localStorage.getItem(LS) || "{}") || {}; } catch (e) { return {}; } }
   function save(o) { try { root.localStorage.setItem(LS, JSON.stringify(o)); } catch (e) {} }
   function bandsMap() { var s = load(); return s.bands || {}; }
-  function isPaidStage(stage) { return /(wind\s*creek|steel\s*stage)/i.test(String(stage || "")); }   // the ONE paid stage (feed labels it "Steel Stage"); everything else free
+  function isPaidStage(stage) { var s = String(stage || ""); var n = s.toLowerCase().replace(/\s+/g,' ').trim();
+    try { var L = (typeof window !== 'undefined' && window.DD_PAID_STAGES) || [];   // per-festival ticketed stages (e.g. Allentown Fair's Grandstand), set by the host on switch
+      for (var i=0;i<L.length;i++){ if (String(L[i]).toLowerCase().replace(/\s+/g,' ').trim() === n) return true; } } catch(e){}
+    return /(wind\s*creek|steel\s*stage)/i.test(s); }   // MusikFest's paid Steel Stage (feed labels it "Steel Stage"); everything else free
 
   // ---- ticket links for a show (line up 1:1 with the email merge fields) ----
   function q(o) { return Object.keys(o).map(function (k) { return k + "=" + encodeURIComponent(o[k] == null ? "" : o[k]); }).join("&"); }

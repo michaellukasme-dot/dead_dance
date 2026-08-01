@@ -1111,7 +1111,8 @@ try{ if(window.ddFestivals){
   if(window.DD_ALLENTOWNFAIR) ddFestivals.register('allentownfair', window.DD_ALLENTOWNFAIR);   // Allentown — OWN footprint
   var _fk=ddFestivals.pick(location.search); ddFestivals.setActive(_fk); window._FEST=_fk;
   if(_fk!=='musikfest'){ var _f=ddFestivals.resolve(_fk);
-    if(_f && _f.lineup && _f.lineup.length){ MF=_f.lineup; window.MF=MF; STAGES=ddFestivals.stagesFor(STAGES,_fk); window.STAGES=STAGES; window._FEST_NAME=_f.name; window._FEST_DATES=_f.dates; window._FEST_CENTER=ddFestivals.center(_fk); } }
+    if(_f && _f.lineup && _f.lineup.length){ MF=_f.lineup; window.MF=MF; STAGES=ddFestivals.stagesFor(STAGES,_fk); window.STAGES=STAGES; window._FEST_NAME=_f.name; window._FEST_DATES=_f.dates; window._FEST_CENTER=ddFestivals.center(_fk);
+      window.DD_PAID_STAGES=(STAGES||[]).filter(function(s){return s&&(s.ticket||s.free===0);}).map(function(s){return String(s.n);}); } }
 }}catch(e){ try{ console.error('festival switch (non-fatal):',e); }catch(_){} }
 MF_STAGES=Array.from(new Set(MF.map(function(r){return r.st;})));
 var DAYS=Array.from(new Set(MF.map(function(r){return r.d;}))).sort();
