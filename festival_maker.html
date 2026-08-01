@@ -10,6 +10,8 @@
 <script src="dd_festival.js"></script><!-- cloud spine: activates only with ?festival=<slug> -->
 <script src="acts_seed.js"></script><!-- the bookable act pool (DDActs) for the Stage-Manager Agent -->
 <script src="dd_stageboss.js"></script><!-- the Autonomous Festival Stage-Manager Agent (proforma + budget + confirm) -->
+<script src="dd_cornerverify.js"></script><!-- 4-corner GPS verification routine (crew sets corners → exact center) -->
+<script src="qr.js"></script><!-- QR for the crew verify link -->
 
 <style>
 /* StageFill Festival Maker — the MAP is the star. Drag corner pins to frame the grounds ("＋ Add Pin"
@@ -333,7 +335,8 @@ window.fmCustomCreate=function(){ var ic=((document.getElementById('cIc')||{}).v
    Draft pins render dashed/translucent (admin-only); Verified pins render solid with a ✓ — those are
    the only ones fans see on the live map. When editing a cloud map (?festival&key), the toggle also
    pushes to the spine via dd_poi_verify. */
-window.fmVerify=function(id){ var r=findById(id); if(!r)return;
+window.fmVerify=function(id){ if(window.fmVerifyOpen){ return window.fmVerifyOpen(id); }   // 4-Corner Verify routine (standard for all pins)
+  var r=findById(id); if(!r)return;
   if(!(r.lat&&r.lng)){ alert('Place this pin on the map first, then verify it.'); return; }
   r.status = (r.status==='verified')?'draft':'verified'; fmSave();
   var t=T(sel), m=itemMarks[id]; if(m) m.setIcon(itemDivIcon(t, r.status==='verified'));
@@ -615,6 +618,94 @@ window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker
     b.innerHTML='🎤 Auto-book the lineup <span class="pill">✦ PREMIUM</span>';
     b.onclick=window.fmAutoBook; document.body.appendChild(b); }
   if(document.readyState!=='loading') mount(); else document.addEventListener('DOMContentLoaded', mount);
+})();
+</script>
+<!-- ============ 4-Corner GPS Verification (standard for all pins) ============ -->
+<script>
+(function(){
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function vcss(){ if(document.getElementById('vfCSS'))return; var s=document.createElement('style'); s.id='vfCSS'; s.textContent=
+    '.vf-modal{position:fixed;inset:0;background:#0009;z-index:8300;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}'+
+    '.vf-card{background:#fff;color:#1a1320;max-width:520px;width:100%;border-radius:18px;padding:20px;box-shadow:0 24px 70px #0007;max-height:92vh;overflow:auto;position:relative}'+
+    '.vf-x{position:absolute;top:12px;right:14px;background:0;border:0;font-size:20px;color:#9aa2b4;cursor:pointer}'+
+    '.vf-h{font-size:17px;font-weight:900;margin:0 30px 4px 0}.vf-sub{color:#6a6280;font-size:12.5px;margin-bottom:12px;line-height:1.5}'+
+    '.vf-corner{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid #eee}'+
+    '.vf-corner b{width:32px;font-size:13px}.vf-corner input{flex:1;min-width:0;padding:8px;border:1px solid #e4e0ee;border-radius:9px;font:inherit;font-size:12px}'+
+    '.vf-gps{background:#7c3aed;color:#fff;border:0;border-radius:9px;padding:8px 10px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap}'+
+    '.vf-stat{background:#f6f3fe;border:1px solid #e7ddfb;border-radius:12px;padding:10px 12px;margin:12px 0;font-size:12.5px;font-weight:700;color:#4c1d95;line-height:1.5}'+
+    '.vf-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}'+
+    '.vf-btn{border:0;border-radius:10px;padding:10px 12px;font-weight:800;font-size:12.5px;cursor:pointer}'+
+    '.vf-share{background:#eef2fb;color:#2f6feb}.vf-pull{background:#eef7f2;color:#12854f}'+
+    '.vf-fin{width:100%;background:#12854f;color:#fff;border:0;border-radius:12px;padding:13px;font-weight:900;font-size:15px;cursor:pointer;margin-top:10px}'+
+    '.vf-disc{margin-top:10px;font-size:11px;color:#9aa2b4;line-height:1.5}';
+    document.head.appendChild(s); }
+  function modal(html){ vcss(); var b=document.createElement('div'); b.className='vf-modal'; b.innerHTML='<div class="vf-card">'+html+'</div>';
+    document.body.appendChild(b); b.addEventListener('click',function(e){ if(e.target===b) b.remove(); }); var x=b.querySelector('.vf-x'); if(x)x.onclick=function(){b.remove();}; return b; }
+  var CORNERS=['NW','NE','SW','SE'];
+  function pinKeyFor(id){ try{ return ((window.state&&state.name)||'fest')+'|'+(window.sel||'pin')+'|'+id; }catch(e){ return 'pin|'+id; } }
+  function refreshStat(pin){ var el=window._vfStatEl; if(!el||!window.ddCornerVerify)return; var st=window.ddCornerVerify.status(pin);
+    var c=st.centroid?((+st.centroid.lat).toFixed(6)+', '+(+st.centroid.lng).toFixed(6)):'—';
+    el.innerHTML='<b>'+st.corners+' of 4</b> corners in · center '+c+(st.spreadM!=null?(' · spread <b>'+st.spreadM+'m</b> · '+st.quality):'')+(st.corners>=st.need?' · ✅ ready to finalize':' · need '+st.need)+(st.outlierDropped?'<br>⚠️ one wild reading dropped':''); return st; }
+
+  function applyVerified(id, res){ try{ var r=findById(id); if(!r)return;
+    r.lat=(+res.centroid.lat).toFixed(6); r.lng=(+res.centroid.lng).toFixed(6); r.status='verified'; fmSave();
+    var t=T(sel), m=itemMarks[id]; if(m){ m.setLatLng([+r.lat,+r.lng]); m.setIcon(itemDivIcon(t,true)); } else if(typeof makeItemMarker==='function'){ makeItemMarker(sel,r); }
+    try{ var F=window.DD_FEST; if(F&&F.owner&&F.key){ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:id,p_status:'verified',p_by:'admin'}); } }catch(e){}
+    if(typeof renderEditor==='function') renderEditor(); if(typeof setActive==='function') setActive(id);
+  }catch(e){} }
+
+  window.fmVerifyOpen=function(id){
+    if(!window.ddCornerVerify){ alert('Verify routine still loading — one sec.'); return; }
+    var r=findById(id); if(!r) return; var pin=pinKeyFor(id), name=(r.n||'this pin');
+    window._vfName=name;
+    window.ddCornerVerify.reset(pin);
+    window.ddCornerVerify.configure({ onComplete:function(res){ applyVerified(id,res);
+      modal('<button class="vf-x">✕</button><div class="vf-h">✅ Verification complete</div><div class="vf-sub"><b>'+esc(name)+'</b> is set to its exact center — <b>±'+res.spreadM+'m</b> ('+res.quality+'). The pin is now <b>Verified</b> and live for fans. 🌹</div>'); }});
+    var rows=CORNERS.map(function(cn){ return '<div class="vf-corner"><b>'+cn+'</b><input id="vf_'+cn+'" placeholder="lat, lng — or tap Capture →"><button class="vf-gps" onclick="fmVfGps(\''+pin+'\',\''+cn+'\')">📍 Capture</button></div>'; }).join('');
+    var m=modal(
+      '<button class="vf-x">✕</button>'+
+      '<div class="vf-h">📍 4-Corner Verify — '+esc(name)+'</div>'+
+      '<div class="vf-sub">Put a phone on each of the 4 corners for ~10 minutes. On each corner tap <b>Capture</b> (uses that phone&rsquo;s GPS) or paste a coordinate. The routine averages them into the exact center and rejects a bad reading.</div>'+
+      rows+
+      '<div class="vf-stat" id="vfStat">0 of 4 corners in · need 3</div>'+
+      '<div class="vf-row"><button class="vf-btn vf-share" onclick="fmVfShare(\''+pin+'\')">🔗 Share to crew</button>'+
+        '<button class="vf-btn vf-pull" onclick="fmVfPull(\''+pin+'\')">🔄 Pull crew corners</button></div>'+
+      '<button class="vf-fin" onclick="fmVfFinalize(\''+pin+'\')">✓ Finalize verification</button>'+
+      '<div class="vf-disc">4 corners ideal, 3 accepted. Hold each ~10 min for a settled fix. Nothing is verified until you finalize.</div>'
+    );
+    window._vfStatEl=m.querySelector('#vfStat');
+    CORNERS.forEach(function(cn){ var inp=m.querySelector('#vf_'+cn); inp.onchange=function(){ var p=(inp.value||'').split(/[, ]+/).map(parseFloat).filter(function(x){return isFinite(x);}); if(p.length>=2){ window.ddCornerVerify.submit(pin,cn,p[0],p[1],0,'organizer'); refreshStat(pin); } }; });
+  };
+  window.fmVfGps=function(pin,corner){ if(!navigator.geolocation){ alert('No GPS here — paste the coordinate instead.'); return; }
+    navigator.geolocation.getCurrentPosition(function(pos){ window.ddCornerVerify.submit(pin,corner,pos.coords.latitude,pos.coords.longitude,0,'organizer');
+      var inp=document.getElementById('vf_'+corner); if(inp) inp.value=pos.coords.latitude.toFixed(6)+', '+pos.coords.longitude.toFixed(6); refreshStat(pin);
+    }, function(err){ alert('Could not get GPS: '+err.message+'. Paste the coordinate instead.'); }, {enableHighAccuracy:true,timeout:10000,maximumAge:0}); };
+  window.fmVfShare=function(pin){ var u=location.origin+location.pathname+'?verify='+encodeURIComponent(pin)+'&name='+encodeURIComponent(window._vfName||'the stage');
+    try{ navigator.clipboard.writeText(u); }catch(e){}
+    if(navigator.share){ navigator.share({title:'Set a corner',text:'Stand on your corner ~10 min, then tap Capture.',url:u}).catch(function(){}); }
+    else alert('🔗 Crew link copied — send it to your 4 corner phones:\n\n'+u); };
+  window.fmVfPull=function(pin){ try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc){ cl.rpc('sf_verify_corners',{p_pin:pin}).then(function(r){ var rows=(r&&r.data)||[]; rows.forEach(function(x){ window.ddCornerVerify.submit(pin,x.corner,x.lat,x.lng,x.dwell_ms||0,x.by||'crew'); }); refreshStat(pin); if(!rows.length) alert('No crew corners in yet — have them open the link and Capture.'); }).catch(function(){ alert('Could not reach the backend to pull crew corners.'); }); } else { alert('Backend not connected — capture the 4 corners here instead.'); } }catch(e){} };
+  window.fmVfFinalize=function(pin){ var f=window.ddCornerVerify.finalize(pin); if(!f.ok){ alert('Need at least 3 corners first ('+window.ddCornerVerify.status(pin).corners+' in). Capture or pull more.'); return; }
+    var d=document.querySelector('.vf-modal'); if(d) d.remove(); };
+
+  // ---- CREW MODE: a corner phone opens ?verify=<pin> ----
+  function crewMode(){ var mv=(location.search.match(/[?&]verify=([^&]+)/)||[])[1]; if(!mv)return; mv=decodeURIComponent(mv);
+    var nm=decodeURIComponent((location.search.match(/[?&]name=([^&]+)/)||[])[1]||'the stage'); var start=Date.now();
+    var m=modal('<div class="vf-h">📍 Set a corner — '+esc(nm)+'</div>'+
+      '<div class="vf-sub">Stand on <b>your</b> corner and keep the phone still. Pick your corner, then Capture. Best after ~10 minutes on the spot.</div>'+
+      '<div class="vf-row">'+CORNERS.map(function(c){return '<button class="vf-btn vf-share" onclick="window._vfCorner=\''+c+'\';var e=document.getElementById(\'vfPick\');if(e)e.innerHTML=\'Your corner: <b>'+c+'</b>\'">'+c+'</button>';}).join('')+'</div>'+
+      '<div class="vf-stat" id="vfPick">Your corner: (pick one)</div>'+
+      '<button class="vf-fin" id="vfCap">📍 Capture my corner</button>'+
+      '<div class="vf-disc" id="vfMsg">Your reading is sent to the organizer, who computes the exact center from all 4.</div>');
+    var xx=m.querySelector('.vf-x'); if(xx) xx.style.display='none';
+    document.getElementById('vfCap').onclick=function(){ var corner=window._vfCorner; if(!corner){ alert('Pick your corner first.'); return; }
+      if(!navigator.geolocation){ alert('No GPS on this phone.'); return; }
+      navigator.geolocation.getCurrentPosition(function(pos){ var dwell=Date.now()-start;
+        try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('sf_verify_submit',{p_pin:mv,p_corner:corner,p_lat:pos.coords.latitude,p_lng:pos.coords.longitude,p_dwell:dwell,p_by:'crew'}); }catch(e){}
+        var msg=document.getElementById('vfMsg'); if(msg) msg.innerHTML='✅ Corner <b>'+corner+'</b> sent ('+Math.round(dwell/60000)+' min on spot). Thank you! Keep standing here and Capture again for a sharper fix.';
+      }, function(err){ alert('GPS error: '+err.message); }, {enableHighAccuracy:true,timeout:15000,maximumAge:0}); };
+  }
+  if(document.readyState!=='loading') crewMode(); else document.addEventListener('DOMContentLoaded', crewMode);
 })();
 </script>
 </body>
