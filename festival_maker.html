@@ -708,5 +708,53 @@ window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker
   if(document.readyState!=='loading') crewMode(); else document.addEventListener('DOMContentLoaded', crewMode);
 })();
 </script>
+<!-- ===== One-tap: load all MusikFest stages as pins to GPS-tune with the 4-Corner Verify ===== -->
+<script>
+window.fmLoadMusikfest = function(){
+  var STG = [
+    {n:"IBEW Local 375 Liederplatz",lat:40.62165516199015,lng:-75.38135321209411},
+    {n:"Main Street Stage",lat:40.62173297570262,lng:-75.38190270860275},
+    {n:"Vesper Concert Series",lat:40.619137994459265,lng:-75.38183762664599},
+    {n:"Hotel Bethlehem Platz",lat:40.620275,lng:-75.382429},
+    {n:"PNC Stadtplatz",lat:40.61792884070416,lng:-75.37860132628923},
+    {n:"Handwerkplatz",lat:40.62026781243216,lng:-75.38398048560234},
+    {n:"Familienplatz",lat:40.6195989965615,lng:-75.38322523283168},
+    {n:"Service Electric Festplatz",lat:40.61885373668897,lng:-75.38378915490927},
+    {n:"Yuengling Lagerplatz",lat:40.61818490664305,lng:-75.38380425996199},
+    {n:"Plaza Tropical",lat:40.61733643831984,lng:-75.38394020547393},
+    {n:"Guardian Life Zinzenplatz",lat:40.616610263199064,lng:-75.38446384739493},
+    {n:"Sand Island — The Ice House",lat:40.61619363146837,lng:-75.3817289055007},
+    {n:"ComedyPlatz (Stand-Up Comedy)",lat:40.616144373842666,lng:-75.38193356035647},
+    {n:"Wind Creek Steel Stage at PNC Plaza",lat:40.61450899708398,lng:-75.37147088973724},
+    {n:"Air Products Americaplatz at Levitt Pavilion",lat:40.61479448696134,lng:-75.36829888824602},
+    {n:"Highmark Blue Shield Community Stage",lat:40.61431741767585,lng:-75.36787331553037},
+    {n:"Frank Banko Alehouse Cinemas",lat:40.61415213303438,lng:-75.36758130979148},
+    {n:"Lutron Jazz Cabaret",lat:40.61415213303438,lng:-75.36778097306541},
+    {n:"Lyrikplatz at Frank Banko Alehouse Cinemas",lat:40.61414455470893,lng:-75.36763621719182},
+    {n:"Musikfest Café",lat:40.61417486800559,lng:-75.36751641922744},
+    {n:"Matchplatz at The Wooden Match",lat:40.61661178522842,lng:-75.38226257840737}
+  ];
+  try{
+    var arr = listOf('stage'); var have = {}; arr.forEach(function(r){ have[String(r.n).toLowerCase()] = 1; });
+    var added = 0;
+    STG.forEach(function(s){ if(have[s.n.toLowerCase()]) return;
+      var r = { id:nid(), n:s.n, lat:(+s.lat).toFixed(6), lng:(+s.lng).toFixed(6), d:'', status:'draft', platzId:null, tentId:null, under:false };
+      arr.push(r); try{ makeItemMarker('stage', r); }catch(e){} added++;
+    });
+    window.sel = 'stage'; fmSave();
+    try{ renderPalette(); }catch(e){} try{ renderEditor(); }catch(e){} paintCounts(); paintTotal();
+    try{ if(MAP && added) MAP.fitBounds(STG.map(function(s){ return [s.lat, s.lng]; }), {padding:[40,40]}); }catch(e){}
+    alert(added ? (added + ' MusikFest stages loaded 🌹\nTap Verify on each → 🔗 Share to crew → they set the 4 corners.') : 'MusikFest stages are already loaded.');
+  }catch(e){ alert('Could not load stages: ' + e.message); }
+};
+document.addEventListener('DOMContentLoaded', function(){
+  var f = document.getElementById('fname'); if(!f || document.getElementById('fmLoadMF')) return;
+  var b = document.createElement('button'); b.id = 'fmLoadMF'; b.type = 'button';
+  b.textContent = '🎵 Load MusikFest stages → tune GPS';
+  b.style.cssText = 'display:block;width:100%;margin:2px 0 10px;padding:11px;border:0;border-radius:12px;background:#241535;color:#fff;font-weight:800;font-size:14px;cursor:pointer';
+  b.onclick = window.fmLoadMusikfest;
+  f.parentNode.insertBefore(b, f.nextSibling);
+});
+</script>
 </body>
 </html>
