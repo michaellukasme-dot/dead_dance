@@ -1,0 +1,148 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stage Crew · DeadDance · MusikFest</title>
+<meta name="theme-color" content="#2a1b3d"><link rel="icon" href="dd-512.png">
+<style>
+:root{--rose:#b8002e;--purple:#2a1b3d;--acc:#5a2e86;--gold:#f0a500;--ink:#1a1320;--muted:#7a7285;--line:#ece7f2}
+*{box-sizing:border-box}body{margin:0;background:#faf8fd;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 60px}
+.hero{background:linear-gradient(150deg,#3a2456,#241535);color:#fff;border-radius:22px;padding:22px 20px}
+.hero .k{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.hero h1{font-size:23px;margin:4px 0 8px;font-weight:900}
+.hero p{margin:0;color:#cdbfe0;font-size:14px;line-height:1.5}
+.hero b.hl{color:#ffd76a}
+.prog{margin:16px 2px 4px}.bar{height:12px;background:#eee7f6;border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#b8002e,#f0a500);width:0%;transition:width .4s}
+.pnum{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:6px;text-align:center}
+.steps{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px;font-size:13px;line-height:1.65;box-shadow:0 5px 14px rgba(42,27,61,.05)}
+.dayhdr{font-weight:900;font-size:14px;margin:22px 2px 4px;display:flex;align-items:center;gap:8px}
+.dayhdr .tag{font-size:10.5px;font-weight:800;color:#fff;background:var(--acc);border-radius:999px;padding:3px 9px;text-transform:uppercase;letter-spacing:.04em}
+.dayhdr.south .tag{background:#0a6ea3}
+.daycount{font-size:11.5px;color:var(--muted);font-weight:700;margin-left:auto}
+.card{border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff;margin-top:10px;box-shadow:0 5px 14px rgba(42,27,61,.05)}
+.card.paid{border-color:#f0a500;background:#fffdf6}
+.bn{font-weight:900;font-size:16.5px}
+.bk{color:var(--muted);font-size:12px;margin-top:2px;line-height:1.4}
+.paidflag{display:inline-block;background:#fdeec9;color:#8a5a00;font-weight:800;font-size:11px;padding:4px 10px;border-radius:999px;margin-top:8px}
+.corners{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.corner{font-size:11px;font-weight:800;color:var(--acc);background:#f1eef7;border-radius:8px;padding:5px 9px}
+.timer{font-weight:900;font-size:15px;color:var(--rose);margin-top:9px;display:none}
+.timer.on{display:block}
+.timer.done{color:#12854f}
+.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.btn{border:0;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12.5px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.btn.p{background:var(--acc);color:#fff}.btn.g{background:#f1eef7;color:var(--acc)}.btn.rose{background:var(--rose);color:#fff}.btn.time{background:#241535;color:#fff}
+.pass{text-align:center;background:#fff;border:1px dashed var(--line);border-radius:14px;padding:14px;margin-top:22px}
+.pass a{color:var(--acc);font-weight:800;text-decoration:none}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="k">DeadDance · MusikFest Stage Crew</div>
+    <h1>Surround every stage 🌹</h1>
+    <p><b class="hl">Two teams of 4.</b> At each stage, take the <b class="hl">4 corners</b>, stand <b class="hl">8 minutes</b>, open the map so it finds you, and snap your angle. That's the whole job. <b style="color:#fff">Northside first, then across the river to Southside.</b> 20 stages ≈ 2 hours.</p>
+  </div>
+  <div class="prog"><div class="bar"><i id="bar"></i></div><div class="pnum" id="pnum">Loading the stages…</div></div>
+  <div class="steps">
+    <b style="font-size:13.5px">How it works — 8 minutes a stage:</b>
+    <div style="margin-top:5px"><b>1.</b> <b style="color:var(--acc)">🧭 Walk here</b> → get to the next stage on the list.</div>
+    <div><b>2.</b> Spread out — <b>one person per corner</b> (North · South · Stage-left · Stage-right).</div>
+    <div><b>3.</b> Tap <b style="color:var(--ink)">⏱️ Start 8-min</b> → then <b style="color:var(--acc)">📍 Open map &amp; snap</b>: let it find you, take one photo of the stage.</div>
+    <div><b>4.</b> Timer done? Tap <b style="color:var(--rose)">✓ Covered</b> — it drops off. On to the next.</div>
+    <div><b>5.</b> Send this page to your team. 🌹</div>
+  </div>
+  <div id="list"></div>
+  <div class="pass">Crew of 8? 🌹 <b>Split it — one team Northside, one team Southside</b> and you're done in about an hour.<br><a href="#" onclick="CREW.share();return false;">📲 Share this page ↗</a></div>
+  <div class="foot">🌹 DeadDance.app · From Bethlehem · 4 corners · 8 minutes · every stage</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _C;}; }catch(e){}</script>
+<script>
+(function(){
+  // Stage list mirrors musikfest.html STAGES (coords provided by Michael 2026-07-23). Northside free, Southside SteelStacks.
+  var STAGES=[
+   {n:"IBEW Local 375 Liederplatz",side:"N",lat:40.62165516199015,lng:-75.38135321209411,where:"Courtyard behind the Sun Inn (556 Main St) — walk through."},
+   {n:"Main Street Stage",side:"N",lat:40.62173297570262,lng:-75.38190270860275,where:"On Main St, ~500 block near Market St."},
+   {n:"Vesper Concert Series",side:"N",lat:40.619137994459265,lng:-75.38183762664599,where:"By Central Moravian Church, 73 W Church St."},
+   {n:"Hotel Bethlehem Platz",side:"N",lat:40.620275,lng:-75.382429,where:"At the Historic Hotel Bethlehem, 437 Main St."},
+   {n:"PNC Stadtplatz",side:"N",lat:40.61792884070416,lng:-75.37860132628923,where:"Payrow Plaza by City Hall, 10 E Church St."},
+   {n:"Handwerkplatz",side:"N",lat:40.62026781243216,lng:-75.38398048560234,where:"The Luckenbach Mill, 459 Old York Rd — artisans."},
+   {n:"Familienplatz",side:"N",lat:40.6195989965615,lng:-75.38322523283168,where:"Kids' & family area, Colonial Industrial Quarter, near Spring St."},
+   {n:"Service Electric Festplatz",side:"N",lat:40.61885373668897,lng:-75.38378915490927,where:"Polka/German tent, Spring St side of the CIQ."},
+   {n:"Yuengling Lagerplatz",side:"N",lat:40.61818490664305,lng:-75.38380425996199,where:"Edge of the Colonial Industrial Quarter — beer + a stage."},
+   {n:"Plaza Tropical",side:"N",lat:40.61733643831984,lng:-75.38394020547393,where:"Latin stage in the CIQ, near Spring St."},
+   {n:"Guardian Life Zinzenplatz",side:"N",lat:40.616610263199064,lng:-75.38446384739493,where:"Lower CIQ, along the Monocacy Creek toward the Lehigh."},
+   {n:"Sand Island — The Ice House",side:"N",lat:40.61619363146837,lng:-75.3817289055007,where:"Charles A. Brown Ice House, 56 River St on Sand Island."},
+   {n:"ComedyPlatz (Stand-Up)",side:"N",lat:40.616144373842666,lng:-75.38193356035647,where:"Stand-up at the Ice House on Sand Island."},
+   {n:"Matchplatz — The Wooden Match",side:"N",lat:40.61661178522842,lng:-75.38226257840737,where:"The Wooden Match parking lot, 61 W Lehigh St — independent stage, all-ages/free. Stand-correct these coords with the crew today."},
+   {n:"Wind Creek Steel Stage at PNC Plaza",side:"S",paid:1,lat:40.61450899708398,lng:-75.37147088973724,where:"The ticketed amphitheater on the SteelStacks campus."},
+   {n:"Air Products Americaplatz at Levitt Pavilion",side:"S",lat:40.61479448696134,lng:-75.36829888824602,where:"The FREE Levitt lawn stage under the blast furnaces."},
+   {n:"Highmark Blue Shield Community Stage",side:"S",lat:40.61431741767585,lng:-75.36787331553037,where:"Air Products Town Square, between Visitor Center & ArtsQuest."},
+   {n:"Frank Banko Alehouse Cinemas",side:"S",lat:40.61415213303438,lng:-75.36758130979148,where:"Indoor cinema stage inside the ArtsQuest Center (A/C)."},
+   {n:"Lutron Jazz Cabaret",side:"S",lat:40.61415213303438,lng:-75.36778097306541,where:"Jazz cabaret inside the ArtsQuest Center."},
+   {n:"Lyrikplatz",side:"S",lat:40.61414455470893,lng:-75.36763621719182,where:"Singer-songwriter stage inside the ArtsQuest Center."},
+   {n:"Musikfest Café",side:"S",lat:40.61417486800559,lng:-75.36751641922744,where:"Inside the ArtsQuest Center, 101 Founders Way — indoor, A/C."}
+  ];
+  var CORNERS=["North side","South side","Stage left","Stage right"];
+  var DWELL_MIN=8;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function slugify(n){ return String(n).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  function who(){ try{ var k='dd.crew',v=localStorage.getItem(k); if(!v){v='crew-'+Math.random().toString(36).slice(2,8);localStorage.setItem(k,v);} return v; }catch(e){return 'anon';} }
+  function claims(){ try{ return JSON.parse(localStorage.getItem('dd.stagecrew')||'{}'); }catch(e){ return {}; } }
+  function saveClaim(slug){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.stagecrew',JSON.stringify(c));}catch(e){}
+    try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_stagecrew_claim',{p_slug:slug,p_by:who()}); }catch(e){} }
+  function walkUrl(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng+'&travelmode=walking'; }
+  function find(slug){ return STAGES.filter(function(x){return slugify(x.n)===slug;})[0]; }
+
+  function cardHTML(s){ var slug=slugify(s.n);
+    return '<div class="card'+(s.paid?' paid':'')+'" id="c_'+esc(slug)+'">'
+      +'<div class="bn">'+esc(s.n)+'</div>'
+      +'<div class="bk">'+s.where+'</div>'
+      +(s.paid?'<div class="paidflag">🎟️ Paid stage — go early and ask the setup / maintenance crew for 8 minutes at the 4 corners. Yes → run it like any other stage. No → surround from the fence and snap from there.</div>':'')
+      +'<div class="corners">'+CORNERS.map(function(c){return '<span class="corner">📍 '+c+'</span>';}).join('')+'</div>'
+      +'<div class="timer" id="t_'+esc(slug)+'"></div>'
+      +'<div class="row">'
+        +'<a class="btn g" href="'+walkUrl(s)+'" target="_blank" rel="noopener">🧭 Walk here</a>'
+        +'<button class="btn time" onclick="CREW.timer(\''+esc(slug)+'\')">⏱️ Start 8-min</button>'
+        +'<a class="btn p" href="musikfest.html" target="_blank" rel="noopener">📍 Open map &amp; snap</a>'
+        +'<button class="btn rose" onclick="CREW.claim(\''+esc(slug)+'\')">✓ Covered</button>'
+      +'</div>'
+    +'</div>';
+  }
+  function render(){
+    var c=claims(), host=document.getElementById('list'); if(!host)return;
+    var total=STAGES.length, done=STAGES.filter(function(s){return c[slugify(s.n)];}).length, left=total-done;
+    document.getElementById('bar').style.width=Math.round(done/total*100)+'%';
+    document.getElementById('pnum').textContent=done+' of '+total+' stages covered — '+left+' to go · ~'+(left*DWELL_MIN)+' min left 🌹';
+    if(left===0){ host.innerHTML='<div class="card" style="text-align:center;padding:22px"><div style="font-size:34px">🎉</div><b style="font-size:16px">Every stage surrounded!</b><div class="bk" style="margin-top:6px">All '+total+' covered — the map is alive. Thank you, crew. 🌹</div></div>'; return; }
+    var groups={N:[],S:[]};
+    STAGES.forEach(function(s){ if(c[slugify(s.n)]) return; groups[s.side].push(s); });   // covered stages DROP OFF
+    var html='';
+    [['N','Northside · Main St',' Do these first'],['S','Southside · SteelStacks','Ride the free LANTA Gold Line across the river']].forEach(function(g){
+      var arr=groups[g[0]]; if(!arr.length) return;
+      html+='<div class="dayhdr'+(g[0]==='S'?' south':'')+'"><span class="tag">'+(g[0]==='N'?'Northside':'Southside')+'</span> '+esc(g[2])+'<span class="daycount">'+arr.length+' left</span></div>';
+      html+=arr.map(cardHTML).join('');
+    });
+    host.innerHTML=html;
+  }
+  var _timers={};
+  window.CREW={
+    timer:function(slug){ var el=document.getElementById('t_'+slug); if(!el)return;
+      if(_timers[slug]){ return; }   // already running — one per stage
+      var end=Date.now()+DWELL_MIN*60*1000; el.className='timer on';
+      function tick(){ var ms=end-Date.now(); if(ms<=0){ el.className='timer on done'; el.textContent='✅ 8 minutes done — you’ve dwelled. Snap done? Tap ✓ Covered.'; clearInterval(_timers[slug]); delete _timers[slug]; return; }
+        var m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); el.textContent='⏱️ '+m+':'+(s<10?'0':'')+s+' — hold your corner, open the map, snap your angle.'; }
+      tick(); _timers[slug]=setInterval(tick,1000);
+    },
+    claim:function(slug){ saveClaim(slug); if(_timers[slug]){ clearInterval(_timers[slug]); delete _timers[slug]; } render(); var s=find(slug);
+      try{ alert('🌹 '+((s&&s.n)||'That stage')+' — covered! On to the next. Send this page to your team.'); }catch(e){} },
+    share:function(){ var u='https://deaddance.app/stage_crew.html', t='MusikFest Stage Crew 🌹 — take a corner, 8 minutes, snap your angle. Northside first, then Southside.';
+      if(navigator.share){ navigator.share({title:'Stage Crew · MusikFest',text:t,url:u}).catch(function(){}); }
+      else { try{ navigator.clipboard.writeText(t+' '+u); alert('🔗 Link copied — paste it to your team.'); }catch(e){ alert(u); } } }
+  };
+  // pull shared claims so two teams don't both do the same stage (guarded; local-first without the spine)
+  try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc){ cl.rpc('dd_stagecrew_list',{}).then(function(r){ try{ var rows=(r&&r.data)||[]; var c=claims(); rows.forEach(function(x){ if(x&&x.slug&&!c[x.slug]) c[x.slug]={by:x.by||'crew',ts:Date.now()}; }); localStorage.setItem('dd.stagecrew',JSON.stringify(c)); render(); }catch(e){} }).catch(function(){}); } }catch(e){}
+  render();
+})();
+</script>
+</body></html>

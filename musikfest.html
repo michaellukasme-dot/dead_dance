@@ -517,7 +517,9 @@ var STAGES=[
  {n:"Frank Banko Alehouse Cinemas",side:"S",free:1,lat:40.61415213303438,lng:-75.36758130979148,where:"Indoor cinema stage inside the <b>ArtsQuest Center</b>, 101 Founders Way (A/C)."},
  {n:"Lutron Jazz Cabaret",side:"S",free:1,lat:40.61415213303438,lng:-75.36778097306541,where:"The jazz cabaret at Frank Banko Alehouse Cinemas, inside the ArtsQuest Center."},
  {n:"Lyrikplatz at Frank Banko Alehouse Cinemas",side:"S",free:1,lat:40.61414455470893,lng:-75.36763621719182,where:"Singer-songwriter stage inside the ArtsQuest Center (Frank Banko Alehouse Cinemas)."},
- {n:"Musikfest Café",side:"S",free:1,lat:40.61417486800559,lng:-75.36751641922744,where:"Inside the <b>ArtsQuest Center</b>, 101 Founders Way — indoor, A/C (PNC series)."}
+ {n:"Musikfest Café",side:"S",free:1,lat:40.61417486800559,lng:-75.36751641922744,where:"Inside the <b>ArtsQuest Center</b>, 101 Founders Way — indoor, A/C (PNC series)."},
+ // INDEPENDENT stage inside the fest footprint — The Wooden Match's Matchplatz (does NOT pay ArtsQuest). Coords = centroid of Michael's 4-corner guesstimate 2026-07-31; field-verified on-site 2026-08-01.
+ {n:"Matchplatz at The Wooden Match",side:"N",free:1,indie:1,lat:40.61661178522842,lng:-75.38226257840737,where:"The Wooden Match parking lot, <b>61 W Lehigh St</b> — an <b>independent</b> stage inside the festival (all-ages, free). Not an ArtsQuest platz."}
 ];
 var SCHED=[
  ["Jul 30","Grupo Niche","salsa · Preview Night"],["Jul 31","Russell Dickerson","country"],
@@ -928,6 +930,7 @@ renderAds();
 window.adWindowQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.app/musikfest',{mark:'dd',size:2000},'musikfest-window-QR-24in.png'); }catch(e){}
   mfToastHTML('🖨️ <b>Your 2′×2′ Musikfest QR</b><br><span style="font-size:12px;color:#e7ddf3">Downloading — print it big for your window. Every scan opens the whole festival map.</span>'); };
 // deep link from a retailer's FB post: deaddance.app/musikfest?ad=<slug> → open the CART, preselect their shop, pre-fill their ad
+(function(){ try{ var _s=(location.search.match(/[?&]src=([^&]+)/)||[])[1]; if(_s){ _s=decodeURIComponent(_s); try{ localStorage.setItem('dd.mf.src',_s); }catch(e){} try{ if(window.DDTele&&DDTele.event) DDTele.event('scan.src',{src:_s}); }catch(e){} } }catch(e){} })();  /* QR/sign attribution — e.g. ?src=matchplatz. ids-only, no PII. */
 (function(){ try{ var m=(location.search.match(/[?&]ad=([^&]+)/)||[])[1]; if(!m)return; m=decodeURIComponent(m);
   setTimeout(function(){ adOpen(); var sel=document.getElementById('adBiz'); if(sel){ for(var i=0;i<sel.options.length;i++){ if(adSlug(sel.options[i].value)===adSlug(m)){ sel.value=sel.options[i].value; adBizChange(); break; } } } }, 450); }catch(e){} })();
 

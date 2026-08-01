@@ -8,14 +8,17 @@
 create table if not exists public.dd_membership (
   fan_id text not null, group_key text not null, group_type text not null default 'genre',
   joined_at timestamptz not null default now(), primary key (fan_id, group_key));
-create table if not exists public.dd_profile (
+-- NOTE: this is the ANALYTICS profile (demographics, keyed by fan_id). It is deliberately NOT named
+-- dd_profile — that name belongs to dd_me.js (user accounts, keyed by uid/email/name). Kept separate to
+-- avoid clobbering user accounts. RPC names (dd_set_profile, etc.) are unchanged and remain the public API.
+create table if not exists public.dd_fan_profile (
   fan_id text primary key, birth_year int, region text, consented boolean not null default false,
   updated_at timestamptz not null default now());
 create table if not exists public.dd_attend (
   fan_id text not null, event_key text not null, group_key text, attended_at timestamptz not null default now(),
   primary key (fan_id, event_key));
 alter table public.dd_membership enable row level security;
-alter table public.dd_profile   enable row level security;
+alter table public.dd_fan_profile   enable row level security;
 alter table public.dd_attend    enable row level security;
 create table if not exists public.dd_purchase (
   id bigint generated always as identity primary key,
@@ -30,7 +33,7 @@ create or replace function public.dd_join_group(p_fan text, p_group text, p_type
  on conflict (fan_id,group_key) do nothing; $$;
 create or replace function public.dd_set_profile(p_fan text, p_birth_year int, p_region text, p_consent boolean) returns void
  language sql security definer set search_path=public as $$
- insert into dd_profile(fan_id,birth_year,region,consented,updated_at) values (p_fan,p_birth_year,p_region,coalesce(p_consent,false),now())
+ insert into dd_fan_profile(fan_id,birth_year,region,consented,updated_at) values (p_fan,p_birth_year,p_region,coalesce(p_consent,false),now())
  on conflict (fan_id) do update set birth_year=excluded.birth_year, region=excluded.region, consented=excluded.consented, updated_at=now(); $$;
 create or replace function public.dd_log_attend(p_fan text, p_event text, p_group text) returns void
  language sql security definer set search_path=public as $$
@@ -55,14 +58,14 @@ create or replace function public.dd_x_membership(p_a text, p_b text) returns bi
 -- "How many %GROUP% fans were born after %YEAR%?" (e.g., deaddance, 1995 — after Jerry)
 create or replace function public.dd_cohort_born_after(p_group text, p_year int) returns bigint
  language sql security definer set search_path=public as $$
- select public._agg(count(*)) from dd_membership m join dd_profile p on p.fan_id=m.fan_id
+ select public._agg(count(*)) from dd_membership m join dd_fan_profile p on p.fan_id=m.fan_id
  where m.group_key=lower(btrim(p_group)) and p.consented and p.birth_year > p_year; $$;
 
 -- "Of that cohort, their TOP N other events?"
 create or replace function public.dd_cohort_top_events(p_group text, p_year int, p_limit int default 10)
  returns table(event_key text, fans bigint) language sql security definer set search_path=public as $$
  with cohort as (
-   select m.fan_id from dd_membership m join dd_profile p on p.fan_id=m.fan_id
+   select m.fan_id from dd_membership m join dd_fan_profile p on p.fan_id=m.fan_id
    where m.group_key=lower(btrim(p_group)) and p.consented and p.birth_year > p_year)
  select a.event_key, count(distinct a.fan_id) as fans
  from dd_attend a join cohort c on c.fan_id=a.fan_id
@@ -73,7 +76,7 @@ create or replace function public.dd_cohort_top_events(p_group text, p_year int,
 create or replace function public.dd_cohort_purchases(p_group text, p_year int, p_category text)
  returns table(units bigint, revenue_cents bigint, buyers bigint) language sql security definer set search_path=public as $$
  with cohort as (
-   select m.fan_id from dd_membership m join dd_profile p on p.fan_id=m.fan_id
+   select m.fan_id from dd_membership m join dd_fan_profile p on p.fan_id=m.fan_id
    where m.group_key=lower(btrim(p_group)) and p.consented and (p_year is null or p.birth_year > p_year))
  select sum(pu.qty)::bigint, sum(pu.amount_cents)::bigint, count(distinct pu.fan_id)::bigint
  from dd_purchase pu join cohort c on c.fan_id=pu.fan_id
