@@ -636,8 +636,7 @@ function updateYou(){ if(!LG_YOU)return; LG_YOU.clearLayers(); if(!window.YOU) r
   m.on('click',function(){ try{ mfSelfShot(); }catch(e){} });
   m.bindTooltip('YOU · tap to snap 📸',{direction:'right',opacity:.95}); }
 /* tap your OWN avatar → camera → straight into the stream. No waiting for Owsley's crowd prompt. */
-window.mfSelfShot=function(){ window._askCap='📸 From where I stand at Musikfest 🌹';
-  var inp=document.getElementById('shotIn')||document.getElementById('photoIn'); if(inp) inp.click(); };
+window.mfSelfShot=function(){ window._askCap='📸 From where I stand at Musikfest 🌹'; mfCapture(); };
 function updatePath(){ if(!LG_PATH)return; LG_PATH.clearLayers(); if(typeof WALK!=='undefined' && WALK.path && WALK.path.length>1){ L.polyline(WALK.path,{color:'#b8002e',weight:5,opacity:.85,lineJoin:'round'}).addTo(LG_PATH); } }
 function updatePhotos(){ if(!LG_PHOTO)return; LG_PHOTO.clearLayers(); (window.PHOTOS||[]).forEach(function(ph){ if(ph.lat==null)return;
   var ic=L.divIcon({className:'mfphoto',iconSize:[46,46],iconAnchor:[23,23],html:'<img src="'+ph.url+'" style="width:46px;height:46px;object-fit:cover;border-radius:50%;border:3px solid #b8002e;box-shadow:0 1px 5px #0006">'});
@@ -1261,7 +1260,7 @@ function mfAskRender(a, data){
   clearTimeout(_askTimer); _askTimer=setTimeout(function(){ mfAskClose(false); }, ASK_EXPIRE);
 }
 window.mfAskClose=function(kept){ var h=document.getElementById('mfAsk'); if(h) h.classList.remove('on'); clearTimeout(_askTimer); _askBusy=false; };
-window.mfAskDo=function(act){ if(act==='photo'){ var p=document.getElementById('shotIn')||document.getElementById('photoIn'); if(p)p.click(); setTimeout(function(){ try{ mfAskClose(true); }catch(e){} },700); return; } if(act==='checkin'){ try{ mfCheckIn(); }catch(e){} } window.mfAskClose(true); };  // click the camera FIRST, close the bubble AFTER (a synchronous close cancels the picker)
+window.mfAskDo=function(act){ if(act==='photo'){ mfCapture(); setTimeout(function(){ try{ mfAskClose(true); }catch(e){} },700); return; } if(act==='checkin'){ try{ mfCheckIn(); }catch(e){} } window.mfAskClose(true); };  // open camera FIRST (rear on phone, front on desktop), close the bubble AFTER
 function mfAskTick(){
   if(_askBusy) return;                                   // one at a time — never stack
   if(Date.now()-_askLastAt < ASK_MINGAP) return;         // protect the show — long gaps between asks
@@ -1314,8 +1313,8 @@ function cookieCelebrate(cap){ var el=document.getElementById('ckPop'); if(!el){
   el.innerHTML='<img src="cookie-mark.svg" alt="" style="width:34px;height:34px;flex:none"><div><div style="font-weight:900;font-size:13px">🍪 Posted to the family!</div>'+(cap?'<div style="font-size:12px;opacity:.9">“'+String(cap).replace(/</g,'&lt;')+'”</div>':'')+'</div>';
   el.style.display='flex'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.display='none'; },4500);
 }
-window.askCapture=function(cap){ window._askCap=cap||''; var inp=document.getElementById('shotIn')||document.getElementById('photoIn'); if(inp)inp.click(); };   // tapping the ask opens the camera; the shot itself is the send
-window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; var inp=document.getElementById('shotIn')||document.getElementById('photoIn'); if(inp)inp.click(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
+window.askCapture=function(cap){ window._askCap=cap||''; mfCapture(); };   // tapping the ask opens the camera (rear on phone, front on desktop); the shot itself is the send
+window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; mfCapture(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
 
 if(MF.length){ var ti=DAYS.indexOf(todayISO()); curDayIdx=ti>=0?ti:0; try{ fillPlanDate(); refresh(); }catch(e){ try{console.error('mf init refresh failed (non-fatal):',e);}catch(_){}}} else { try{ drawMap(); }catch(e){} }
 
@@ -1526,7 +1525,7 @@ function onFix(f){ if(!window._walkGotFix){ window._walkGotFix=true; walkStatus(
     if(alt!=null){ if(WALK.lastAlt!=null){ var dz=(alt-WALK.lastAlt)*3.28084; if(dz>1) WALK.gain+=dz; } WALK.lastAlt=alt; }
     fmtStat();
   }
-  if(window.ddPresence && !window.mfPresenceTick){ window.mfPresenceTick=function(la,lo){ if(!window._presReady){ try{ ddPresence.configure({ nowActAt:function(st){ try{ var nm=(typeof actAtStage==='function')?actAtStage(st.name):''; if(!nm)return null; return {event:'MF|'+st.id+'|'+((typeof todayISO==='function')?todayISO():'')+'|'+nm, name:nm}; }catch(e){ return null; } }, onGrant:function(t){ try{ if(typeof walkStatus==='function') walkStatus('🎟️ You were here for <b>'+(t.act||'the set')+'</b> — the ticket to this show is yours. 🌹', true); else if(typeof mfToast==='function') mfToast('🎟️ Your ticket to '+(t.act||'this show')+' is in your wallet.'); try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab({event:t.event,act:t.act,stage:t.stage,source:'presence'}); }catch(_){ } }catch(e){} } }); }catch(e){} window._presReady=true; } var sl=(typeof STAGES!=='undefined'&&STAGES)?STAGES.map(function(s){return {id:s.n,name:s.n,lat:s.lat,lng:s.lng};}):[]; var nw=Date.now(), dt=window._presLast?(nw-window._presLast):0; window._presLast=nw; try{ ddPresence.tick({lat:la,lng:lo}, sl, dt); }catch(e){} }; }
+  if(window.ddPresence && !window.mfPresenceTick){ window.mfPresenceTick=function(la,lo){ if(!window._presReady){ try{ ddPresence.configure({ nowActAt:function(st){ try{ var nm=(typeof mfActNowToday==='function')?mfActNowToday(st.name):((typeof actAtStage==='function')?actAtStage(st.name):''); if(!nm)return null; return {event:'MF|'+st.id+'|'+((typeof todayISO==='function')?todayISO():'')+'|'+nm, name:nm}; }catch(e){ return null; } }, onGrant:function(t){ try{ var _act=t.act||'this act', _d=(typeof todayISO==='function')?todayISO():''; window._presTix={b:t.act||'',st:t.stage||'',d:_d}; try{ if(window.DDFlywheel&&DDFlywheel.grab && t.act) DDFlywheel.grab(t.act,{stage:t.stage,date:_d,source:'presence'}); }catch(_){ } try{ mfPresenceTicketDrop(_act); }catch(e){ try{ if(typeof mfToast==='function') mfToast('🎟️ Here is your ticket for '+_act+' — the act you are attending. 🌹',false); }catch(_){} } }catch(e){} } }); }catch(e){} window._presReady=true; } var sl=(typeof STAGES!=='undefined'&&STAGES)?STAGES.map(function(s){return {id:s.n,name:s.n,lat:s.lat,lng:s.lng};}):[]; var nw=Date.now(), dt=window._presLast?(nw-window._presLast):0; window._presLast=nw; try{ ddPresence.tick({lat:la,lng:lo}, sl, dt); }catch(e){} }; }
   try{pottyCheck(prev,[la,lo]);}catch(e){} try{stageCheck([la,lo]);}catch(e){} try{walkByCheck([la,lo]);}catch(e){} try{gatewayCheck([la,lo]);}catch(e){} try{mfVisitTick([la,lo]);}catch(e){} try{ if(window.mfPresenceTick) window.mfPresenceTick(la,lo); }catch(e){} try{ if(!WALK.last)WALK.last=[la,lo]; mfCheckinNudge(); mfSilverTick(); }catch(e){}   // each geofence isolated — one throw can't kill the GPS pipeline
   try{ updatePath(); }catch(e){}  carBadge(); catchNotifyCheck();   // dd_gps draws the YOU dot + accuracy ring itself
 }
@@ -1640,6 +1639,46 @@ window.addPhotos=function(input){ var files=input.files; if(!files||!files.lengt
     if(window.exifr&&exifr.gps){ exifr.gps(f).then(function(gp){ if(gp&&gp.latitude!=null){ save(gp.latitude,gp.longitude,true); mfToast('📷 Saved & pinned right where you shot it!'); } else save(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }).catch(function(){ save(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false); }); }
     else save(window.YOU?window.YOU[0]:null,window.YOU?window.YOU[1]:null,false);
   }); input.value=''; };
+// ===== Capture router: rear camera on phones, FRONT (FaceTime) camera on desktop, graceful fallback =====
+// Phones fire the native rear-camera file input (fastest, most reliable). Desktops have no rear camera, so
+// the old capture-input click did NOTHING — now we open the front camera live via getUserMedia; if it's
+// blocked or absent we fall back to a plain photo-upload picker + a toast, so a click is NEVER dead.
+function mfIsMobile(){ try{ return (window.matchMedia&&matchMedia('(pointer:coarse)').matches) && (('ontouchstart' in window)||navigator.maxTouchPoints>0); }catch(e){ return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent); } }
+function mfShotFallback(){ var p=document.getElementById('photoIn')||document.getElementById('shotIn'); if(p) p.click(); }
+window.mfCapture=function(){
+  if(mfIsMobile()){ var s=document.getElementById('shotIn')||document.getElementById('photoIn'); if(s) s.click(); return; }   // phone → rear camera, unchanged
+  if(window._mfCamBusy || document.getElementById('mfCamOv')) return;   // one live camera session at a time — no stacked modals/streams
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){ mfShotFallback(); try{ mfToast('📷 Pick a photo to upload — live camera capture opens on your phone. 🌹'); }catch(e){} return; }
+  window._mfCamBusy=true;
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})
+    .then(function(stream){ mfCamModal(stream); })
+    .catch(function(err){ window._mfCamBusy=false; mfShotFallback(); try{ mfToast((err&&err.name==='NotAllowedError') ? '📷 Camera blocked — allow it in your browser bar, or pick a photo to upload. 🌹' : '📷 No camera here — pick a photo to upload. Live capture opens on your phone. 🌹'); }catch(e){} });
+};
+function mfCamModal(stream){
+  var cap=window._askCap||'';                                   // preserve the ask caption through the snap
+  var ov=document.createElement('div'); ov.id='mfCamOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(20,10,30,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML='<div style="color:#fff;font-weight:900;font-size:15px;margin-bottom:10px">📸 Grab your angle</div>'
+    +'<video id="mfCamVid" autoplay playsinline muted style="max-width:92vw;max-height:62vh;border-radius:14px;box-shadow:0 8px 30px #0009;transform:scaleX(-1)"></video>'
+    +'<div style="display:flex;gap:12px;margin-top:16px">'
+    +'<button id="mfCamSnap" style="background:#f0a500;color:#241535;border:0;border-radius:999px;padding:13px 26px;font-weight:900;font-size:15px;cursor:pointer">📸 Snap</button>'
+    +'<button id="mfCamX" style="background:#3a2650;color:#fff;border:0;border-radius:999px;padding:13px 22px;font-weight:800;font-size:15px;cursor:pointer">Cancel</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  var vid=document.getElementById('mfCamVid'); try{ vid.srcObject=stream; }catch(e){ try{ vid.src=URL.createObjectURL(stream); }catch(_){}}
+  function stop(){ try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} window._mfCamBusy=false; var o=document.getElementById('mfCamOv'); if(o) o.remove(); }
+  document.getElementById('mfCamX').onclick=stop;
+  document.getElementById('mfCamSnap').onclick=function(){
+    try{
+      var w=vid.videoWidth||1280, h=vid.videoHeight||720;
+      var cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(vid,0,0,w,h);   // preview is mirrored for natural framing; saved frame is true
+      cv.toBlob(function(blob){
+        if(blob){ var file=new File([blob],'shot_'+Date.now()+'.jpg',{type:'image/jpeg'}); window._askCap=cap; try{ window.addPhotos({files:[file]}); }catch(e){} }
+        stop();
+      }, 'image/jpeg', 0.9);
+    }catch(e){ stop(); }
+  };
+}
 // rebuild the strip from durable storage on every open — photos NEVER disappear across close/update
 function restorePhotos(){ if(!(window.DDPhotos&&DDPhotos.all))return; DDPhotos.all().then(function(list){
     (list||[]).forEach(function(rec){ if((PHOTOS||[]).some(function(p){return p.id===rec.id;}))return;
@@ -1715,6 +1754,25 @@ window.mfOpenTicket=function(el){ var b=el.getAttribute('data-b')||'', st=el.get
   var url= paid ? (base+'&price=FREE&record=1&buy='+encodeURIComponent(MF_BUY_URL)) : (base+'&price=FREE');   // Wind Creek = FREE record/keepsake (not entry); Buy links to ArtsQuest for real entry
   var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(f)f.src=url; if(m)m.style.display='flex';
   try{ if(!paid && window.mfToast) mfToast('🎟 Free ticket — now a '+b+' fan 🌹'); }catch(e){} };
+// presence-granted ticket → open the REAL ticket modal for the act you were standing at (reuses mfOpenTicket)
+window.mfPresenceOpenTix=function(){ var p=window._presTix; if(!p||!p.b)return; var el=document.createElement('button'); el.setAttribute('data-b',p.b); el.setAttribute('data-st',p.st||''); el.setAttribute('data-d',p.d||''); try{ mfOpenTicket(el); }catch(e){} };
+// which act is on RIGHT NOW at a stage — locked to TODAY (never the Plan dropdown's day) and robust to
+// sponsor-prefixed stage names (bidirectional substring). Purpose-built for presence so neither actAtStage
+// (planDate-bound) nor mfActOnNow (first-token key) can hand a fan the wrong day's / wrong stage's ticket.
+window.mfActNowToday=function(name){ try{ if(typeof MF==='undefined'||!MF.length) return '';
+  var day=(typeof todayISO==='function')?todayISO():''; if(typeof DAYS!=='undefined'&&DAYS.indexOf(day)<0) day=(typeof DAYS!=='undefined'&&DAYS[curDayIdx])||day;
+  var now=(typeof nowMins==='function')?nowMins():0, ln=String(name||'').toLowerCase(), best=null;
+  MF.forEach(function(r){ if(r.d!==day) return; var rs=String(r.st||'').toLowerCase(); if(!rs||(ln.indexOf(rs)<0 && rs.indexOf(ln)<0)) return; var mm=mins(r.t); if(mm<=now+5 && mm>=now-95){ if(!best||mm>mins(best.t)) best=r; } });
+  return best?best.b:''; }catch(e){ return ''; } };
+// the "here is your ticket" moment — a PERSISTENT, tappable, dismissible banner (a fading toast is too weak
+// for a once-per-act grant). Gold ticket styling; tap opens the real ticket; ✕ dismisses.
+window.mfPresenceTicketDrop=function(act){ var el=document.getElementById('mfPresTix');
+  if(!el){ el=document.createElement('div'); el.id='mfPresTix'; el.style.cssText='position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:270;background:#241535;color:#fff;border:2px solid #f0a500;border-radius:16px;box-shadow:0 12px 34px #0008;max-width:90%;width:340px;padding:14px 16px;text-align:center'; document.body.appendChild(el); }
+  var a=(typeof esc==='function')?esc(act||'this act'):(act||'this act');
+  el.innerHTML='<button aria-label="Dismiss" onclick="this.parentNode.remove()" style="position:absolute;top:5px;right:8px;background:none;border:0;color:#fff;opacity:.7;font-size:15px;line-height:1;cursor:pointer;padding:2px">✕</button>'
+    +'<div style="font-weight:900;font-size:14.5px;margin:0 14px 9px">🎟️ Here is your ticket for <b style="color:#f0a500">'+a+'</b><div style="font-weight:700;font-size:12.5px;opacity:.88;margin-top:3px">the act you are attending 🌹</div></div>'
+    +'<button onclick="mfPresenceOpenTix()" style="background:#f0a500;color:#241535;border:0;border-radius:999px;padding:10px 24px;font-weight:900;font-size:14px;cursor:pointer">Open my ticket →</button>';
+};
 window.mfCloseTicket=function(){ var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(m)m.style.display='none'; if(f)f.src='about:blank'; };
 window.addEventListener('message',function(e){ try{ if(e&&e.data&&e.data.dd==='ddTixClose') mfCloseTicket(); }catch(x){} });   // the ticket's own × (inside the iframe) closes the modal
 function schRowHTML(r,cs){ var ck=catchKey(r), on=cs[ck]?'checked':'', bio=!!(window.BAND_INFO&&BAND_INFO[r.b]);
