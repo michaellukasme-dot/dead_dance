@@ -68,5 +68,23 @@ ok('register(empty key) ignored', F.register('', {}) === null);
 ok('resolve(unknown) → null', F.resolve('ghost') === null);
 ok('count = 2 festivals', F.count() === 2);
 
+// ---- OWN-footprint festival (BaconFest / Allentown Fair) brings its OWN stages+coords+center ----
+(function(){
+  F.register('baconfest', { name:'PA Bacon Fest', ownStages:true, center:{lat:40.6917,lng:-75.2199},
+    stages:[{n:'IBEW Local 102 Stage',lat:40.6896,lng:-75.2201,corner:'S 3rd & Ferry St'},
+            {n:"Tito's Vodka Stage",lat:40.6918,lng:-75.2179,where:'Northampton & Larry Holmes'}],
+    lineup:[{d:'2026-11-07',t:'10:00 AM',st:'IBEW Local 102 Stage',b:'X',sc:'sf'}] });
+  var s = F.stagesFor(ALLSTAGES, 'baconfest');
+  ok('own-festival → its OWN stages, not the host', s.length === 2 && /IBEW/.test(s[0].n));
+  ok('own stages carry coords', isFinite(s[0].lat) && isFinite(s[0].lng));
+  ok('own stage where ← corner fallback', /ferry/i.test(s[0].where));
+  ok('center() returns festival center', F.center('baconfest') && Math.abs(F.center('baconfest').lat-40.6917)<1e-6);
+  ok('own-fest does NOT leak host stages', !s.some(function(x){return /musikfest café|wind creek/i.test(x.n);}));
+  // regressions after adding an own-fest:
+  ok('stagesFor(musikfest) STILL all host', F.stagesFor(ALLSTAGES,'musikfest').length === ALLSTAGES.length);
+  ok('stagesFor(countryfest) STILL subset(2)', F.stagesFor(ALLSTAGES,'countryfest').length === 2);
+  ok('musikfest center() is null (uses host default)', F.center('musikfest') === null);
+})();
+
 console.log('\n dd_festivals harness: '+pass+' passed, '+fail+' failed');
 if(fail){ console.log(' ❌ FAILURES'); process.exit(1); } else { console.log(' ✅ all green'); }

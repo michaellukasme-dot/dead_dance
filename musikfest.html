@@ -491,7 +491,9 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_bandgroups.js"></script><script src="dd_flywheel.js"></script><!-- Band→Fan flywheel: free ticket → fan → band group -->
 <script src="dd_musikfest.js"></script>
 <script src="dd_festivals.js"></script><!-- multi-festival registry (Option B): one map engine, many SteelStacks festivals -->
-<script src="dd_countryfest.js"></script><!-- CountryFest seed (reuses the Southside stages; BaconFest is Easton = its OWN map, not here) -->
+<script src="dd_countryfest.js"></script><!-- CountryFest — reuses the Southside stages -->
+<script src="dd_baconfest.js"></script><!-- PA Bacon Fest — own footprint (Easton) -->
+<script src="dd_allentownfair.js"></script><!-- The Great Allentown Fair — own footprint (Allentown) -->
 <script src="dd_cutesy.js"></script><!-- cutesy-map georeference: per festival+side corner store + align UI -->>
 <script src="dd_mf_vendors.js"></script>
 <script src="dd_contest.js"></script>
@@ -991,7 +993,13 @@ window.mfShareMap=function(){
   document.body.appendChild(wrap);
 };
 window._mfLocked=false;
-function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{ LMAP.setMaxBounds(L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]])); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the fest footprint; zoom stays free
+function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{
+  var bb=null; try{ if(window.STAGES&&STAGES.length){ var la=STAGES.map(function(s){return +s.lat;}), ln=STAGES.map(function(s){return +s.lng;});
+    var laN=Math.min.apply(0,la),laX=Math.max.apply(0,la),lnN=Math.min.apply(0,ln),lnX=Math.max.apply(0,ln);
+    var mLa=Math.max(0.004,(laX-laN)*0.4), mLn=Math.max(0.004,(lnX-lnN)*0.4);
+    if(isFinite(laN)&&isFinite(lnN)) bb=L.latLngBounds([[laN-mLa,lnN-mLn],[laX+mLa,lnX+mLn]]); } }catch(e){}
+  if(!bb) bb=L.latLngBounds([[40.6100,-75.3895],[40.6260,-75.3640]]);   // fallback: Bethlehem footprint
+  LMAP.setMaxBounds(bb); LMAP.options.maxBoundsViscosity=1.0; window._mfLocked=true; }catch(e){} }   // once walking: pan locked to the ACTIVE festival's footprint (any city); zoom stays free
 window.mapTo=function(lat,lng,z){ try{ if(typeof ensureMap==='function') ensureMap(); if(window.LMAP) LMAP.setView([lat,lng], z||16, {animate:true}); }catch(e){} };   // North/South legend → recenter the map
 // Southside / Northside action-bar buttons → recenter on that side's stages, reserving room for the
 // bottom sheet (paddingBottomRight) so the side you pick is never hidden behind it.
@@ -1098,10 +1106,12 @@ var MF=window.DD_MUSIKFEST||[];
 /* ── Multi-festival (Option B): register + pick from ?fest. No param → MusikFest, byte-unchanged. ── */
 try{ if(window.ddFestivals){
   ddFestivals.register('musikfest',{ name:'MusikFest', lineup:(window.DD_MUSIKFEST||[]), stages:[] });   // [] stages = use ALL host stages
-  if(window.DD_COUNTRYFEST) ddFestivals.register('countryfest', window.DD_COUNTRYFEST);   // SteelStacks footprint only (BaconFest=Easton→own map)
+  if(window.DD_COUNTRYFEST)   ddFestivals.register('countryfest',   window.DD_COUNTRYFEST);    // SteelStacks — subset of MusikFest stages
+  if(window.DD_BACONFEST)     ddFestivals.register('baconfest',     window.DD_BACONFEST);       // Easton — OWN footprint
+  if(window.DD_ALLENTOWNFAIR) ddFestivals.register('allentownfair', window.DD_ALLENTOWNFAIR);   // Allentown — OWN footprint
   var _fk=ddFestivals.pick(location.search); ddFestivals.setActive(_fk); window._FEST=_fk;
   if(_fk!=='musikfest'){ var _f=ddFestivals.resolve(_fk);
-    if(_f && _f.lineup && _f.lineup.length){ MF=_f.lineup; window.MF=MF; STAGES=ddFestivals.stageFilter(STAGES,_fk); window.STAGES=STAGES; window._FEST_NAME=_f.name; window._FEST_DATES=_f.dates; } }
+    if(_f && _f.lineup && _f.lineup.length){ MF=_f.lineup; window.MF=MF; STAGES=ddFestivals.stagesFor(STAGES,_fk); window.STAGES=STAGES; window._FEST_NAME=_f.name; window._FEST_DATES=_f.dates; window._FEST_CENTER=ddFestivals.center(_fk); } }
 }}catch(e){ try{ console.error('festival switch (non-fatal):',e); }catch(_){} }
 MF_STAGES=Array.from(new Set(MF.map(function(r){return r.st;})));
 var DAYS=Array.from(new Set(MF.map(function(r){return r.d;}))).sort();

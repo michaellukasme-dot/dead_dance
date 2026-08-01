@@ -60,7 +60,7 @@
   ];
   root.DD_BACONFEST = {
     name:"PA Bacon Fest", org:"Greater Easton Development Partnership", city:"Easton", state:"PA",
-    dates:[D1,D2], free:true, center:{lat:40.69168,lng:-75.21990},  // Centre Square
+    dates:[D1,D2], free:true, ownStages:true, center:{lat:40.69168,lng:-75.21990},  // Centre Square — own footprint (Easton)
     contact:{ ed:"Jared Mast", site:"pabaconfest.com", org_site:"eastonpartnership.org" },
     stages:STAGES, lineup:LINEUP,
     note:"Stage coords APPROX — verify on-site with the 4-Corner routine. Lineup = last published (2025) until 2026 grid announced."

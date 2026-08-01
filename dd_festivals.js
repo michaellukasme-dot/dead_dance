@@ -25,17 +25,33 @@
   function register(key, spec){
     key = slug(key); if(!key) return null; spec = spec || {};
     var lineup = Array.isArray(spec.lineup) ? spec.lineup : [];
-    var stageNames = (spec.stages || []).map(function(s){ return typeof s === 'string' ? s : (s && s.n); }).filter(Boolean);
+    var raw = spec.stages || [];
+    var own = !!spec.ownStages;                 // own-footprint festival (its own city + coords), not a subset of the host map
+    var ownStages = own ? raw.map(function(s){ return { n:(s&&s.n)||'', lat:Number(s&&s.lat), lng:Number(s&&s.lng),
+          side:(s&&s.side)||'N', where:(s&&(s.where||s.corner))||'', approx:!!(s&&s.approx) }; })
+        .filter(function(s){ return s.n && isFinite(s.lat) && isFinite(s.lng); }) : [];
+    var stageNames = own ? [] : raw.map(function(s){ return typeof s === 'string' ? s : (s && s.n); }).filter(Boolean);
     var dates = (spec.dates && spec.dates.length) ? spec.dates.slice()
               : Array.from(new Set(lineup.map(function(r){ return r && r.d; }).filter(Boolean))).sort();
     REG[key] = {
       key: key, name: spec.name || key, title: spec.title || spec.name || key,
-      lineup: lineup, stageNames: stageNames, dates: dates,
-      cover: (spec.cover != null ? spec.cover : null),
-      all: !stageNames.length         // no stage list = use ALL the host's stages (that's MusikFest)
+      lineup: lineup, own: own, ownStages: ownStages, stageNames: stageNames, dates: dates,
+      center: spec.center || null, cover: (spec.cover != null ? spec.cover : null),
+      all: (!own && !stageNames.length)         // no stages + not own = use ALL host stages (that's MusikFest)
     };
     return REG[key];
   }
+
+  // the stages the host should render for a festival:
+  //   own-footprint (BaconFest, Allentown Fair) → its OWN stages (with coords, different city)
+  //   subset (CountryFest) → filtered host stages · musikfest → ALL host stages unchanged
+  function stagesFor(hostStages, key){
+    var f = get(key || ACTIVE); if (!f) return (hostStages || []).slice();
+    if (f.own) return f.ownStages.slice();
+    if (f.all) return (hostStages || []).slice();
+    return stageFilter(hostStages, key);
+  }
+  function center(key){ var f = get(key || ACTIVE); return (f && f.center) ? f.center : null; }
 
   function has(key){ return !!REG[slug(key)]; }
   function get(key){ return REG[slug(key)] || null; }
@@ -70,7 +86,8 @@
       if (typeof root.ddEvent === 'function'){ root.ddEvent('festivals.'+evt, p); } }catch(e){} }
 
   var api = { register:register, has:has, get:get, keys:keys, count:count, list:list,
-              pick:pick, setActive:setActive, active:active, resolve:resolve, stageFilter:stageFilter,
+              pick:pick, setActive:setActive, active:active, resolve:resolve,
+              stageFilter:stageFilter, stagesFor:stagesFor, center:center,
               slug:slug, DEFAULT_KEY:DEFAULT_KEY, _reg:REG,
               _reset:function(){ REG={}; ACTIVE=DEFAULT_KEY; } };
   root.ddFestivals = api;
