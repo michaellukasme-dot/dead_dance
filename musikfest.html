@@ -490,6 +490,8 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
 <script src="dd_bandgroups.js"></script><script src="dd_flywheel.js"></script><!-- Band→Fan flywheel: free ticket → fan → band group -->
 <script src="dd_musikfest.js"></script>
+<script src="dd_festivals.js"></script><!-- multi-festival registry (Option B): one map engine, many SteelStacks festivals -->
+<script src="dd_countryfest.js"></script><!-- CountryFest seed (reuses the Southside stages; BaconFest is Easton = its OWN map, not here) -->
 <script src="dd_cutesy.js"></script><!-- cutesy-map georeference: per festival+side corner store + align UI -->>
 <script src="dd_mf_vendors.js"></script>
 <script src="dd_contest.js"></script>
@@ -607,7 +609,7 @@ function stageKey(s){ var n=s.n.toLowerCase();
  if(n.indexOf('americaplatz')>=0||n.indexOf('levitt')>=0)return 'Americaplatz'; if(n.indexOf('stadt')>=0)return 'Stadtplatz';
  return null; }
 function deadStageSet(){ var day=(typeof DAYS!=='undefined'&&typeof curDayIdx!=='undefined')?DAYS[curDayIdx]:null, set={};
- (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.sc==='dd' && (!day||r.d===day)) set[r.st]=true; }); return set; }
+ ((window.MF||window.DD_MUSIKFEST)||[]).forEach(function(r){ if(r.sc==='dd' && (!day||r.d===day)) set[r.st]=true; }); return set; }
 /* Real map — Leaflet + OpenStreetMap (the hardened TCTP map engine). Clean streets, real geography. */
 var LMAP=null, LG_STAGE=null, LG_PATH=null, LG_PHOTO=null, LG_YOU=null, LG_SHOP=null, LG_FOOD=null, LG_POTTY=null, LG_AID=null, LG_DIR=null, MF_MAPON={stage:true,shop:false,food:false,potty:false,aid:false};
 function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById('lmap'); if(!el)return;
@@ -1093,6 +1095,14 @@ window.closePoster=function(){ var m=document.getElementById('posterModal'); if(
 
 // ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----
 var MF=window.DD_MUSIKFEST||[];
+/* ── Multi-festival (Option B): register + pick from ?fest. No param → MusikFest, byte-unchanged. ── */
+try{ if(window.ddFestivals){
+  ddFestivals.register('musikfest',{ name:'MusikFest', lineup:(window.DD_MUSIKFEST||[]), stages:[] });   // [] stages = use ALL host stages
+  if(window.DD_COUNTRYFEST) ddFestivals.register('countryfest', window.DD_COUNTRYFEST);   // SteelStacks footprint only (BaconFest=Easton→own map)
+  var _fk=ddFestivals.pick(location.search); ddFestivals.setActive(_fk); window._FEST=_fk;
+  if(_fk!=='musikfest'){ var _f=ddFestivals.resolve(_fk);
+    if(_f && _f.lineup && _f.lineup.length){ MF=_f.lineup; window.MF=MF; STAGES=ddFestivals.stageFilter(STAGES,_fk); window.STAGES=STAGES; window._FEST_NAME=_f.name; window._FEST_DATES=_f.dates; } }
+}}catch(e){ try{ console.error('festival switch (non-fatal):',e); }catch(_){} }
 MF_STAGES=Array.from(new Set(MF.map(function(r){return r.st;})));
 var DAYS=Array.from(new Set(MF.map(function(r){return r.d;}))).sort();
 function dayLabel(d){ try{ return new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return d; } }
@@ -1423,7 +1433,7 @@ function showCtx(best,set){ var i=BAND_INFO[set.b]||{}, cs=curSong(set);
     song:cs.song||'', songIdx:cs.songIdx||0, songTotal:cs.songTotal||0, stageLatLng:[best.lat,best.lng] }; }
 // who's on a given stage RIGHT NOW today (the set that started most recently, within ~95 min)
 function nowSetAtStage(stKey){ if(!stKey)return null; var day=todayISO(), nm=nowMins(), best=null;
-  (window.DD_MUSIKFEST||[]).forEach(function(r){ if(r.d!==day || r.st!==stKey) return; var t=mins(r.t);
+  ((window.MF||window.DD_MUSIKFEST)||[]).forEach(function(r){ if(r.d!==day || r.st!==stKey) return; var t=mins(r.t);
     if(t<=nm+5 && t>=nm-95){ if(!best || t>mins(best.t)) best=r; } });
   return best; }
 // walk-by: within ~180 ft of a stage → toast who's on + their bio (deduped 4 min per stage)
@@ -1752,7 +1762,7 @@ window.mfOpenTicket=function(el){ var b=el.getAttribute('data-b')||'', st=el.get
   var paid=(window.DDFlywheel&&DDFlywheel.isPaidStage)?DDFlywheel.isPaidStage(st):/(wind\s*creek|steel\s*stage)/i.test(st);
   if(!paid){ try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(b,{stage:st,date:d}); }catch(e){} }   // free → grab: fan of this band + joins its group
   var sub=''; try{ if(window.BAND_INFO&&BAND_INFO[b]&&BAND_INFO[b].kind) sub=BAND_INFO[b].kind;
-    else if(window.DD_MUSIKFEST){ var _r=DD_MUSIKFEST.filter(function(x){return x.b===b;})[0]; if(_r&&_r.kind) sub=_r.kind; } }catch(e){}   // REAL per-act genre → no wrong label
+    else if(window.MF||window.DD_MUSIKFEST){ var _r=(window.MF||window.DD_MUSIKFEST).filter(function(x){return x.b===b;})[0]; if(_r&&_r.kind) sub=_r.kind; } }catch(e){}   // REAL per-act genre → no wrong label
   var base='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(st)+'&date='+encodeURIComponent(d)+(sub?('&sub='+encodeURIComponent(sub)):'');
   var url= paid ? (base+'&price=FREE&record=1&buy='+encodeURIComponent(MF_BUY_URL)) : (base+'&price=FREE');   // Wind Creek = FREE record/keepsake (not entry); Buy links to ArtsQuest for real entry
   var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(f)f.src=url; if(m)m.style.display='flex';
@@ -1905,4 +1915,26 @@ window.mfRefineX=function(){ var el=document.getElementById('mfRefine'); if(el) 
 })();
 </script>
 <script src="sf_invite_toast.js"></script>
+<!-- ===== Multi-festival: title + switcher (only visible when NOT MusikFest — live map stays pristine) ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    if(!window.ddFestivals) return;
+    var active = window._FEST || 'musikfest';
+    if(active === 'musikfest') return;                       // default view: change nothing at all
+    // retitle to the active festival
+    var h = document.querySelector('.hero h1'); if(h && window._FEST_NAME) h.textContent = window._FEST_NAME;
+    try{ document.title = (window._FEST_NAME||'Festival') + ' · DeadDance'; }catch(e){}
+    // a small switcher (native select) so you can hop festivals / return to MusikFest
+    if(ddFestivals.count() > 1){
+      var row = document.querySelector('.mflayers'); if(!row) return;
+      var sel = document.createElement('select'); sel.id = 'festSel'; sel.title = 'Switch festival';
+      sel.style.cssText = 'font:inherit;font-size:12px;font-weight:800;border:1px solid #ece7f2;border-radius:999px;padding:5px 9px;background:#fff;color:#5a2e86;cursor:pointer;margin-left:4px;flex:0 0 auto';
+      ddFestivals.list().forEach(function(f){ var o=document.createElement('option'); o.value=f.key; o.textContent=f.name; if(f.key===active)o.selected=true; sel.appendChild(o); });
+      sel.onchange = function(){ var k=sel.value; location.href = location.pathname + (k==='musikfest' ? '' : ('?fest='+encodeURIComponent(k))); };
+      row.appendChild(sel);
+    }
+  }catch(e){}
+});
+</script>
 </body></html>
