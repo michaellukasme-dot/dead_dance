@@ -703,20 +703,54 @@ window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker
 
   // ---- CREW MODE: a corner phone opens ?verify=<pin> ----
   function crewMode(){ var mv=(location.search.match(/[?&]verify=([^&]+)/)||[])[1]; if(!mv)return; mv=decodeURIComponent(mv);
-    var nm=decodeURIComponent((location.search.match(/[?&]name=([^&]+)/)||[])[1]||'the stage'); var start=Date.now();
-    var m=modal('<div class="vf-h">📍 Set a corner — '+esc(nm)+'</div>'+
-      '<div class="vf-sub">Stand on <b>your</b> corner and keep the phone still. Pick your corner, then Capture. Best after ~10 minutes on the spot.</div>'+
-      '<div class="vf-row">'+CORNERS.map(function(c){return '<button class="vf-btn vf-share" onclick="window._vfCorner=\''+c+'\';var e=document.getElementById(\'vfPick\');if(e)e.innerHTML=\'Your corner: <b>'+c+'</b>\'">'+c+'</button>';}).join('')+'</div>'+
-      '<div class="vf-stat" id="vfPick">Your corner: (pick one)</div>'+
-      '<button class="vf-fin" id="vfCap">📍 Capture my corner</button>'+
-      '<div class="vf-disc" id="vfMsg">Your reading is sent to the organizer, who computes the exact center from all 4.</div>');
+    var nm=decodeURIComponent((location.search.match(/[?&]name=([^&]+)/)||[])[1]||'the stage');
+    var DUR=10*60*1000;   // 10 minutes hands-off
+    var big='font-size:26px;font-weight:900;padding:30px 10px;border-radius:18px;width:100%;margin:9px 0;border:0;color:#fff;cursor:pointer;letter-spacing:.02em;';
+    var m=modal(
+      '<div class="vf-h" style="font-size:21px">📍 '+esc(nm)+'</div>'+
+      '<div class="vf-sub" id="cmSub" style="font-size:17px">Which corner are you on? <b>Tap it.</b> <span style="color:#b8002e">Keep your screen on.</span></div>'+
+      '<div id="cmPick">'+
+        '<button class="cmB" data-c="NW" style="'+big+'background:#7c3aed">↖  NW corner</button>'+
+        '<button class="cmB" data-c="NE" style="'+big+'background:#2f7bf6">↗  NE corner</button>'+
+        '<button class="cmB" data-c="SW" style="'+big+'background:#e8730c">↙  SW corner</button>'+
+        '<button class="cmB" data-c="SE" style="'+big+'background:#12854f">↘  SE corner</button>'+
+      '</div>'+
+      '<div id="cmRun" style="display:none;text-align:center">'+
+        '<div id="cmClock" style="font-size:58px;font-weight:900;color:#241535;margin:4px 0">10:00</div>'+
+        '<div style="height:18px;background:#eee7f6;border-radius:10px;overflow:hidden;margin:8px 0"><i id="cmBar" style="display:block;height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#12854f);transition:width .5s"></i></div>'+
+        '<div id="cmMsg" style="font-size:20px;font-weight:800;line-height:1.35;color:#241535"></div>'+
+      '</div>');
     var xx=m.querySelector('.vf-x'); if(xx) xx.style.display='none';
-    document.getElementById('vfCap').onclick=function(){ var corner=window._vfCorner; if(!corner){ alert('Pick your corner first.'); return; }
-      if(!navigator.geolocation){ alert('No GPS on this phone.'); return; }
-      navigator.geolocation.getCurrentPosition(function(pos){ var dwell=Date.now()-start;
-        try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('sf_verify_submit',{p_pin:mv,p_corner:corner,p_lat:pos.coords.latitude,p_lng:pos.coords.longitude,p_dwell:dwell,p_by:'crew'}); }catch(e){}
-        var msg=document.getElementById('vfMsg'); if(msg) msg.innerHTML='✅ Corner <b>'+corner+'</b> sent ('+Math.round(dwell/60000)+' min on spot). Thank you! Keep standing here and Capture again for a sharper fix.';
-      }, function(err){ alert('GPS error: '+err.message); }, {enableHighAccuracy:true,timeout:15000,maximumAge:0}); };
+    var start=0, corner=null, wl=null, watch=null, iv=null, sum={la:0,ln:0,n:0}, best=null, sent=0;
+    function avg(){ if(sum.n) return {lat:sum.la/sum.n, lng:sum.ln/sum.n}; return best?{lat:best.lat,lng:best.lng}:null; }
+    function push(){ var a=avg(); if(!a) return; var dwell=Date.now()-start;
+      try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('sf_verify_submit',{p_pin:mv,p_corner:corner,p_lat:a.lat,p_lng:a.lng,p_dwell:dwell,p_by:'crew'}); }catch(e){} sent++; }
+    function fmt(ms){ ms=Math.max(0,ms); var mm=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); return mm+':'+(s<10?'0':'')+s; }
+    function keepAwake(){ try{ if(navigator.wakeLock&&navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function(s){ wl=s; }).catch(function(){}); }catch(e){} }
+    document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') keepAwake(); });
+    Array.prototype.forEach.call(m.querySelectorAll('.cmB'), function(b){ b.onclick=function(){
+      corner=b.getAttribute('data-c');
+      if(!navigator.geolocation){ alert('Turn ON Location, then reopen this link.'); return; }
+      document.getElementById('cmPick').style.display='none';
+      document.getElementById('cmRun').style.display='block';
+      document.getElementById('cmSub').innerHTML='Corner <b>'+corner+'</b> — lay the phone down right here and walk away. Grab it when it says <b style="color:#12854f">DONE</b>.';
+      start=Date.now(); keepAwake();
+      watch=navigator.geolocation.watchPosition(function(pos){ var ac=pos.coords.accuracy||99;
+        if(ac<=30){ sum.la+=pos.coords.latitude; sum.ln+=pos.coords.longitude; sum.n++; }
+        if(!best||ac<best.ac){ best={lat:pos.coords.latitude,lng:pos.coords.longitude,ac:ac}; }
+      }, function(){}, {enableHighAccuracy:true, maximumAge:0, timeout:20000});
+      iv=setInterval(function(){ var el=Date.now()-start, rem=DUR-el;
+        var ck=document.getElementById('cmClock'), bar=document.getElementById('cmBar'), msg=document.getElementById('cmMsg');
+        ck.textContent=fmt(rem); bar.style.width=Math.min(100,Math.round(el/DUR*100))+'%';
+        if(el>15000 && sent*20000 < el) push();                 // auto-send ~every 20s
+        if(rem<=0){ clearInterval(iv); if(watch!=null){ try{ navigator.geolocation.clearWatch(watch); }catch(e){} } push();
+          ck.textContent='✅'; ck.style.color='#12854f';
+          msg.innerHTML='DONE — grab your phone. 🌹<br><span style="font-size:14px;color:#7a7285;font-weight:600">Corner '+corner+' locked'+(sum.n?'':' — move to open sky if it looks off')+'.</span>';
+          try{ if(wl&&wl.release) wl.release(); }catch(e){}
+        } else if(el>60000 && sum.n===0){ msg.innerHTML='📶 Weak GPS — slide the phone to open sky, off the ground.'; }
+        else { msg.innerHTML='🟢 Recording… leave it on the spot.'; }
+      },1000);
+    }; });
   }
   if(document.readyState!=='loading') crewMode(); else document.addEventListener('DOMContentLoaded', crewMode);
 })();
