@@ -32,13 +32,13 @@
     'Classical':0.85,'Piano / Standards':0.85
   };
   var PART_ENERGY = { afternoon:'Chill', mid:'Mid', evening:'High', night:'High' };  // what each slot wants
-  var DEFAULTS = { perStageDay:150, gateSharePct:0, cover:15, barPerHead:11, housePerStageDay:350, fillFloor:0.35, fillSpan:0.40, maxPerAct:1, karaoke:true, karaokeFee:0 };
+  var DEFAULTS = { perStageDay:150, gateSharePct:0, cover:15, barPerHead:11, housePerStageDay:350, fillFloor:0.35, fillSpan:0.40, maxPerAct:1, karaoke:true, karaokeFee:150 };
 
   // The HOUSE BUDGET-ACT: Karaoke. The crowd IS the act — ~$0 to book, runs in parallel on
   // every stage, and mops up any slot the paid booker left dark. "That's my band" — CLAIMED by
   // the house, so its singers/ticketholders roll into the DeadDance flywheel like any act.
   var KARAOKE = { name:'DeadDance Karaoke', genre:'Karaoke', size:'Solo', energy:'Mid',
-                  fee:0, karaoke:true, claimedBy:'Michael Lukas', host:'DeadDance' };
+                  fee:150, karaoke:true, claimedBy:'Michael Lukas', host:'DeadDance' };  // inexpensive act, not free — cheapest dwell-per-dollar, plays every stage at once
 
   function clamp(x,a,b){ return x<a?a:(x>b?b:x); }
   function num(x,d){ x=Number(x); return isFinite(x)?x:(d||0); }

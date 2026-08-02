@@ -106,12 +106,13 @@ ok('net after StageFill == houseNet - fee', R.netAfterStageFill === (R.pnl.netTo
   ok('empty pool → 0 filled, still returns P&L', e.slotsFilled===0 && e.pnl && e.pnl.netToHouse!=null);
 })();
 
-// ---- KARAOKE — the house budget-act that fills every open slot ----
+// ---- KARAOKE — the inexpensive house act ($150/night, not free) that fills open slots ----
 (function(){
-  // default ON: an empty pool still yields a FULL festival of karaoke, at $0 spend
+  ok('KARAOKE default fee is $150 (inexpensive, not free)', SB.KARAOKE.fee===150 && SB._defaults.karaokeFee===150);
+  // SPEC budget 5000 comfortably covers karaoke fill; each slot is billed at $150
   var k=SB.plan(SPEC, []);
-  ok('KARAOKE default ON → fills all open slots on empty pool', k.slotsFilled===k.slotsTotal);
-  ok('KARAOKE is free → actSpend stays 0', k.actSpend===0);
+  ok('KARAOKE default ON → fills all open slots (within budget)', k.slotsFilled===k.slotsTotal);
+  ok('KARAOKE billed at $150/slot (not free)', k.actSpend === k.slotsFilled*150);
   var allKar=true, claimed=true, filler=true;
   k.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(!sl.act){allKar=false;return;}
     if(!sl.act.karaoke) allKar=false; if(sl.act.claimedBy!=='Michael Lukas') claimed=false; if(!sl.filler) filler=false; }); });
@@ -120,13 +121,13 @@ ok('net after StageFill == houseNet - fee', R.netAfterStageFill === (R.pnl.netTo
   // karaoke:false → open slots stay dark (pure paid booker)
   var off=SB.plan(SPEC, [], {karaoke:false});
   ok('karaoke:false → open slots stay empty', off.slotsFilled===0);
-  // real acts get first pick; karaoke only mops up the leftovers
-  var mix=SB.plan(SPEC, POOL);
+  // real acts get first pick; karaoke (fee 0 here to isolate) only mops up leftovers
+  var mix=SB.plan(SPEC, POOL, {karaokeFee:0});
   var real=0, kar=0; mix.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(sl.act){ sl.filler?kar++:real++; } }); });
   ok('KARAOKE fills only leftover slots (real acts first)', real>0 && (real+kar)===mix.slotsTotal);
-  // a host-fee karaoke still honors the HARD budget cap
-  var hf=SB.plan(Object.assign({},SPEC,{budget:200}), [], {karaokeFee:150});
-  ok('host-fee karaoke never overspends budget', hf.actSpend<=200);
+  // a low budget caps how many $150 karaoke slots can be afforded
+  var hf=SB.plan(Object.assign({},SPEC,{budget:200}), []);
+  ok('$150 karaoke honors the HARD budget cap', hf.actSpend<=200 && hf.actSpend%150===0);
 })();
 
 // gate-share pricing variant
@@ -168,9 +169,9 @@ ok('net after StageFill == houseNet - fee', R.netAfterStageFill === (R.pnl.netTo
 (function(){
   var kp=SB.plan({ name:'Platz Fest', budget:0, days:['2026-08-06','2026-08-07','2026-08-08'],
     stages:[ { id:'kplatz', name:'Karaokeplatz', cap:400, cover:0, karaokeplatz:true,
-               genres:['dead','country','hiphop'], slotsPerDay:1 } ] }, []);
+               genres:['dead','country','hiphop'], slotsPerDay:1 } ] }, [], {karaokeFee:0});   // fee 0 here to isolate the rotation
   var st=kp.stages[0];
-  ok('Karaokeplatz fills every night at $0', st.slotsFilled===st.slotsTotal && kp.actSpend===0);
+  ok('Karaokeplatz fills every night (rotation isolated at $0)', st.slotsFilled===st.slotsTotal && kp.actSpend===0);
   var names=st.slots.map(function(s){ return s.act && s.act.name; });
   ok('night 1 = Dead Karaoke',    names[0]==='Dead Karaoke');
   ok('night 2 = Country Karaoke', names[1]==='Country Karaoke');
@@ -181,9 +182,13 @@ ok('net after StageFill == houseNet - fee', R.netAfterStageFill === (R.pnl.netTo
   // explicit per-night override via nights{}
   var ov=SB.plan({ name:'Ov', budget:0, days:['2026-08-06','2026-08-07'],
     stages:[ { id:'k', name:'Karaokeplatz', cap:300, cover:0, karaokeplatz:true,
-               nights:{'2026-08-06':'latin','2026-08-07':'rock'}, slotsPerDay:1 } ] }, []);
+               nights:{'2026-08-06':'latin','2026-08-07':'rock'}, slotsPerDay:1 } ] }, [], {karaokeFee:0});
   var on=ov.stages[0].slots.map(function(s){ return s.act.name; });
   ok('nights{} override respected', on[0]==='Latin Karaoke' && on[1]==='Rock Karaoke');
+  // Karaokeplatz at the honest $150/night default, within budget → 3 nights = $450
+  var kpp=SB.plan({ name:'Priced', budget:1000, days:['2026-08-06','2026-08-07','2026-08-08'],
+    stages:[ { id:'k', name:'Karaokeplatz', cap:300, cover:0, karaokeplatz:true, genres:['dead','country','hiphop'], slotsPerDay:1 } ] }, []);
+  ok('Karaokeplatz default $150/night within budget (3 nights = $450)', kpp.actSpend===450 && kpp.stages[0].slotsFilled===3);
   // a host-fee Karaokeplatz still honors the hard budget cap
   var hf=SB.plan({ name:'HF', budget:100, days:['2026-08-06','2026-08-07'],
     stages:[ { id:'k', name:'Karaokeplatz', cap:300, cover:0, karaokeplatz:true, genres:['dead'], slotsPerDay:1 } ] },
