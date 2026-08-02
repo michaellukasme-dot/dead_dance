@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Street Team Academy · DeadDance</title>
+<meta name="theme-color" content="#241535">
+<link rel="icon" href="rose-32.png">
+<style>
+  :root{ --purple:#241535; --acc:#7c3aed; --rose:#b8002e; --gold:#f0a500; --green:#12854f; --blue:#2f7bf6;
+         --ink:#1b1430; --muted:#6f6a88; --line:#ece7f5; --bg:#f7f5fc; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:680px; margin:0 auto; padding:0 15px 70px; }
+  /* hero */
+  .hero{ background:linear-gradient(155deg,#3a2456,#180f28); color:#fff; border-radius:0 0 26px 26px; padding:30px 22px 26px; text-align:center; }
+  .hero .k{ color:var(--gold); font-weight:900; font-size:12px; letter-spacing:.18em; text-transform:uppercase; }
+  .hero h1{ font-size:30px; margin:8px 0 6px; line-height:1.06; font-weight:900; }
+  .hero p{ margin:0 auto; max-width:460px; color:#d6cbe8; font-size:15px; line-height:1.5; }
+  .deal{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .chip{ background:#ffffff18; border:1px solid #ffffff33; border-radius:999px; padding:7px 13px; font-size:12.5px; font-weight:800; }
+  .chip b{ color:var(--gold); }
+  /* section */
+  h2{ font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--acc); font-weight:900; margin:34px 4px 4px; }
+  h2 .n{ background:var(--acc); color:#fff; border-radius:8px; padding:2px 9px; margin-right:8px; }
+  .lead{ margin:2px 4px 14px; color:var(--muted); font-size:14.5px; }
+  /* step cards */
+  .step{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:16px 16px 16px 66px; position:relative; margin:12px 0; box-shadow:0 8px 22px rgba(36,21,53,.05); }
+  .step .num{ position:absolute; left:14px; top:16px; width:38px; height:38px; border-radius:11px; background:var(--acc); color:#fff; font-weight:900; font-size:18px; display:flex; align-items:center; justify-content:center; }
+  .step h3{ margin:0 0 3px; font-size:17px; }
+  .step p{ margin:0; color:var(--muted); font-size:14px; line-height:1.5; }
+  .step .em{ position:absolute; right:16px; top:14px; font-size:26px; }
+  /* demo stage */
+  .demo{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:18px; margin:12px 0; box-shadow:0 8px 22px rgba(36,21,53,.05); }
+  .demo .title{ font-weight:900; font-size:15px; margin-bottom:4px; }
+  .demo .sub{ color:var(--muted); font-size:13px; margin-bottom:12px; }
+  .btn{ border:0; border-radius:12px; padding:12px 16px; font-weight:900; font-size:14px; color:#fff; background:var(--acc); cursor:pointer; }
+  .btn.ghost{ background:#f1eef9; color:var(--acc); }
+  /* phone-touch stage */
+  .stage{ position:relative; height:230px; overflow:hidden; border-radius:16px; background:linear-gradient(180deg,#faf7ff,#f0ebfa); }
+  .phone{ position:absolute; bottom:18px; width:96px; height:180px; border-radius:18px; background:#241535; border:3px solid #3a2a55; box-shadow:0 10px 24px rgba(36,21,53,.25); transition:transform 1s cubic-bezier(.7,0,.3,1); }
+  .phone .scr{ position:absolute; inset:8px; border-radius:11px; background:#fff; overflow:hidden; }
+  .phone .brand{ font-size:8px; font-weight:900; color:var(--acc); padding:6px 6px 2px; }
+  .phone .tk{ margin:4px 6px; height:26px; border-radius:5px; background:repeating-linear-gradient(90deg,#241535 0 2px,#fff 2px 3px); }
+  .phone .lab{ font-size:8px; font-weight:800; color:var(--muted); padding:2px 6px; }
+  #pA{ left:14px; transform:translateX(0); }
+  #pB{ right:14px; transform:translateX(0); }
+  .stage.go #pA{ transform:translateX(46px); }
+  .stage.go #pB{ transform:translateX(-46px); }
+  .flytk{ position:absolute; top:64px; left:50%; margin-left:-34px; width:68px; height:34px; border-radius:6px; background:linear-gradient(135deg,#7c3aed,#241535); box-shadow:0 6px 16px rgba(124,58,237,.5); display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px; opacity:0; transform:scale(.4); }
+  .stage.go .flytk{ animation:hop 1.6s .7s ease forwards; }
+  @keyframes hop{ 0%{opacity:0;transform:scale(.4) translateY(0)} 25%{opacity:1;transform:scale(1) translateY(-26px)} 70%{opacity:1;transform:scale(1) translateY(-26px)} 100%{opacity:0;transform:scale(.5) translateY(-60px)} }
+  .pop{ position:absolute; top:26px; left:50%; margin-left:-30px; background:var(--green); color:#fff; font-weight:900; font-size:13px; padding:5px 11px; border-radius:999px; opacity:0; }
+  .stage.go .pop{ animation:pop 1.1s 2.1s ease forwards; }
+  @keyframes pop{ 0%{opacity:0;transform:translateY(6px) scale(.6)} 40%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:1;transform:translateY(-4px) scale(1)} }
+  .zap{ position:absolute; top:96px; left:50%; margin-left:-14px; font-size:28px; opacity:0; }
+  .stage.go .zap{ animation:zap .5s .5s ease forwards; }
+  @keyframes zap{ 0%{opacity:0;transform:scale(.4)} 50%{opacity:1;transform:scale(1.2)} 100%{opacity:.9;transform:scale(1)} }
+  /* spread tree */
+  .spread{ display:flex; flex-direction:column; align-items:center; gap:12px; padding:8px 0 2px; }
+  .spread .rowd{ display:flex; gap:10px; }
+  .spread .dot{ width:26px; height:26px; border-radius:50%; background:#e3d9f5; display:flex; align-items:center; justify-content:center; font-size:13px; transform:scale(0); }
+  .spread.go .dot{ animation:grow .4s forwards; }
+  .spread.go .r1 .dot{ animation-delay:.1s; background:var(--acc); }
+  .spread.go .r2 .dot{ animation-delay:.5s; background:#9a6cf0; }
+  .spread.go .r3 .dot{ animation-delay:.9s; background:#c3a6f6; }
+  @keyframes grow{ to{ transform:scale(1); } }
+  .count{ text-align:center; font-weight:900; font-size:15px; color:var(--acc); margin-top:8px; }
+  /* corner phone */
+  .cphone{ width:150px; margin:6px auto 0; border-radius:22px; background:#241535; border:4px solid #3a2a55; padding:14px 12px 18px; text-align:center; }
+  .cphone .clab{ color:#c9bfe0; font-size:11px; font-weight:800; }
+  .cphone .clock{ color:#fff; font-size:40px; font-weight:900; margin:6px 0; }
+  .cphone .cbar{ height:12px; background:#3a2a55; border-radius:7px; overflow:hidden; }
+  .cphone .cbar i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,#7c3aed,#12854f); }
+  .cphone .cmsg{ color:#8ff0c9; font-size:12px; font-weight:800; margin-top:8px; min-height:16px; }
+  .corners4{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .cbtn{ border:0; border-radius:12px; padding:14px; font-weight:900; font-size:14px; color:#fff; }
+  .say{ background:#fff8ec; border:1px solid #ffe1bf; border-radius:12px; padding:11px 13px; font-size:13.5px; color:#7a4a12; font-weight:700; margin:10px 0; line-height:1.5; }
+  .say b{ color:#5a3400; }
+  .foot{ text-align:center; color:var(--muted); font-size:12px; margin-top:34px; line-height:1.6; }
+  .tag{ display:inline-block; background:#eafaf3; color:var(--green); font-weight:800; font-size:11px; padding:3px 9px; border-radius:999px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="k">🌹 DeadDance · Street Team Academy</div>
+  <h1>20 minutes an act.<br>Here's the whole job.</h1>
+  <p>Seed the band, spread the free ticket, and let the crowd carry it. Do it right and every set you work grows the map. This page shows you exactly how.</p>
+  <div class="deal">
+    <span class="chip">💵 <b>~$20–30</b>/hr</span>
+    <span class="chip">👕 <b>Shirts</b></span>
+    <span class="chip">📈 <b>Equity</b> in the company</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 1. INFORM -->
+  <h2><span class="n">1</span>The Job</h2>
+  <div class="lead">Four moves at every act. That's it. Illustrative — the real thing is even faster.</div>
+
+  <div class="step"><div class="num">1</div><span class="em">🕐</span>
+    <h3>Arrive early</h3>
+    <p>Get to the stage before the set so you're set up before the crowd builds.</p></div>
+  <div class="step"><div class="num">2</div><span class="em">👕</span>
+    <h3>Seed the band</h3>
+    <p>Hand the band their ticket and <b>3 shirts</b> — theirs to keep or throw to the crowd.</p></div>
+  <div class="step"><div class="num">3</div><span class="em">📲</span>
+    <h3>Share the ticket with fans</h3>
+    <p>Pass the free ticket to fans and show them how to <b>touch phones</b> to receive it.</p></div>
+  <div class="step"><div class="num">4</div><span class="em">🔁</span>
+    <h3>Tell them to turn and share</h3>
+    <p>Each fan passes it to the next. The turn-and-share is the whole point — you start the chain.</p></div>
+
+  <!-- 2. TEACH -->
+  <h2><span class="n">2</span>How to do it</h2>
+  <div class="lead">The two things that trip people up: the phone-touch, and what to say. Here's both.</div>
+
+  <div class="demo">
+    <div class="title">📲 The phone-touch</div>
+    <div class="sub">Hold the two phones back-to-back / top-to-top. The ticket jumps across. Tap ▶ to see it.</div>
+    <div class="stage" id="stage1">
+      <div class="phone" id="pA"><div class="scr"><div class="brand">🌹 DEADDANCE</div><div class="tk"></div><div class="lab">Your ticket</div></div></div>
+      <div class="phone" id="pB"><div class="scr"><div class="brand">🌹 DEADDANCE</div><div class="lab" style="padding-top:26px">Tap to receive…</div></div></div>
+      <div class="zap">✨</div>
+      <div class="flytk">🎟️</div>
+      <div class="pop">＋1 fan 🌹</div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" onclick="playTouch()">▶ See the touch</button></div>
+  </div>
+
+  <div class="demo">
+    <div class="title">🔁 Turn &amp; share — the chain</div>
+    <div class="sub">One fan you seed becomes two, then four. That's the multiplier. Tap ▶.</div>
+    <div class="spread" id="spread">
+      <div class="rowd r1"><div class="dot">🙂</div></div>
+      <div class="rowd r2"><div class="dot">🙂</div><div class="dot">🙂</div></div>
+      <div class="rowd r3"><div class="dot">🙂</div><div class="dot">🙂</div><div class="dot">🙂</div><div class="dot">🙂</div></div>
+    </div>
+    <div class="count" id="spreadCount">Tap to spread</div>
+    <div style="margin-top:12px"><button class="btn ghost" onclick="playSpread()">▶ Watch it spread</button></div>
+  </div>
+
+  <div class="say">🗣️ <b>What to say — keep it this simple:</b><br>“Free ticket to this set — touch your phone to mine. Now turn to your left and share it. That's it. 🌹”</div>
+
+  <!-- 3. SHOW -->
+  <h2><span class="n">3</span>Watch it done</h2>
+  <div class="lead">A good 20 minutes, start to finish. This is the whole loop.</div>
+  <div class="demo">
+    <div class="title">🎬 The full run</div>
+    <div class="sub">Arrive → hand the band their shirts → seed 3 fans → they turn &amp; share → the section lights up.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px" id="film">
+      <div class="filmrow" data-t="Arrive early — beat the crowd 🕐"></div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" onclick="playFilm()">▶ Play the run</button></div>
+    <div id="filmOut" style="margin-top:12px;font-weight:900;color:var(--green);min-height:22px"></div>
+  </div>
+
+  <!-- BONUS: GPS stage tuning -->
+  <h2><span class="n">＋</span>Bonus job: tune a stage</h2>
+  <div class="lead">Some crews also GPS-tune the stages. Four phones, four corners, 10 minutes, hands-off. <span class="tag">optional</span></div>
+  <div class="say" style="background:#fdecec;border-color:#f6c9c9;color:#8a1220">⚠️ <b>Step 0 — do this first:</b> set each phone's <b>Auto-Lock to NEVER</b> (iPhone: Settings → Display &amp; Brightness → Auto-Lock → Never). A locked phone stops the GPS mid-count.</div>
+  <div class="demo">
+    <div class="title">📍 The corner session</div>
+    <div class="sub">Open the crew link → tap your corner → set the phone down → grab it at ✅. Tap ▶ to watch (sped up).</div>
+    <div class="cphone">
+      <div class="clab" id="ccLab">Which corner are you on?</div>
+      <div class="corners4" id="ccPick">
+        <button class="cbtn" style="background:#7c3aed" onclick="playCorner('NW')">↖ NW</button>
+        <button class="cbtn" style="background:#2f7bf6" onclick="playCorner('NE')">↗ NE</button>
+        <button class="cbtn" style="background:#e8730c" onclick="playCorner('SW')">↙ SW</button>
+        <button class="cbtn" style="background:#12854f" onclick="playCorner('SE')">↘ SE</button>
+      </div>
+      <div id="ccRun" style="display:none">
+        <div class="clock" id="ccClock">0:10</div>
+        <div class="cbar"><i id="ccBar"></i></div>
+        <div class="cmsg" id="ccMsg">🟢 Recording… leave it on the spot.</div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px">Real timer is 10 minutes. Everyone grabs their phone when it turns green.</div>
+  </div>
+
+  <div class="foot">
+    🌹 <b>DeadDance · StageFill</b> — from Bethlehem.<br>
+    Illustrative training. Your crew lead sends you the live links on the day.
+  </div>
+</div>
+
+<script>
+  function playTouch(){ var s=document.getElementById('stage1'); s.classList.remove('go'); void s.offsetWidth; s.classList.add('go'); }
+  function playSpread(){ var s=document.getElementById('spread'); s.classList.remove('go'); void s.offsetWidth; s.classList.add('go');
+    var c=document.getElementById('spreadCount'); var n=[1,3,7]; var i=0; c.textContent='1 fan…';
+    var iv=setInterval(function(){ i++; if(i>=n.length){ clearInterval(iv); c.textContent='7 fans from 1 — and it keeps going 🌹'; return; } c.textContent=(n[i]+1)+' fans…'; }, 500); }
+  var FILM=['Arrive early — beat the crowd 🕐','Hand the band 3 shirts 👕 — one flies to the crowd','Seed 3 fans — phone-touch 📲','“Turn and share” 🔁','Section lights up — the map grows 🌹✅'];
+  function playFilm(){ var box=document.getElementById('film'); var out=document.getElementById('filmOut'); box.innerHTML=''; out.textContent='';
+    FILM.forEach(function(t,i){ setTimeout(function(){ var d=document.createElement('div'); d.className='step'; d.style.padding='12px 14px 12px 52px'; d.style.margin='6px 0';
+      d.innerHTML='<div class="num" style="width:30px;height:30px;font-size:14px;left:12px;top:12px">'+(i+1)+'</div><p style="color:var(--ink);font-weight:700">'+t+'</p>'; box.appendChild(d);
+      if(i===FILM.length-1) out.textContent='That is a perfect 20 minutes. 🌹'; }, i*700); }); }
+  function playCorner(c){ document.getElementById('ccPick').style.display='none'; document.getElementById('ccRun').style.display='block';
+    document.getElementById('ccLab').innerHTML='Corner <b style="color:#ffd76a">'+c+'</b> — set it down and walk away.';
+    var total=10, left=total, bar=document.getElementById('ccBar'), clock=document.getElementById('ccClock'), msg=document.getElementById('ccMsg');
+    var iv=setInterval(function(){ left--; clock.textContent='0:'+(left<10?'0':'')+left; bar.style.width=Math.round((total-left)/total*100)+'%';
+      if(left<=0){ clearInterval(iv); clock.textContent='✅'; clock.style.color='#8ff0c9'; msg.innerHTML='DONE — grab your phone 🌹'; } }, 300); }
+</script>
+</body>
+</html>
