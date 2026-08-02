@@ -72,11 +72,26 @@
   function tixUrl(name){ return TICKET+encodeURIComponent(name); }
   function cp(t){ try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} } }
   function find(slug){ return (window._LU||[]).filter(function(x){return x.slug===slug;})[0]; }
-  function msgBand(name){ return 'Do you miss paper tickets? So do all of '+name+"'s fans. 🌹\n\n"
-    +"Here's "+name+"'s FREE ticket to their MusikFest set — free for the band and every fan. It walks you to their stage, texts you the setlist as they play it, and it's yours to keep forever.\n\n"
-    +'Grab it: '+tixUrl(name)+"\n\n"
-    +name+" — it's yours: share it with all your fans, and every fan who grabs it becomes one you keep. 🌹\n— DeadDance, from Bethlehem"; }
-  function msgOwn(name){ return 'MusikFest people 🌹 — a FREE ticket to every act this year, made right here in Bethlehem. It walks you to the stage and texts you the setlist as the band plays. I grabbed '+name+" — grab yours:\n\nhttps://deaddance.app/musikfest.html"; }
+  // pick a variant deterministically from the slug so each band's post says the same thing, differently
+  function _pick(seed, arr){ var h=0,s=String(seed); for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return arr[h%arr.length]; }
+  function bandDate(b){ return (b&&b.next)? (' ('+dayLabel(b.next)+')') : ''; }
+  // THE GOAL: the post to the BAND. Differentiated per band + carries that band's UNIQUE ticket link.
+  var BAND_MSGS=[
+    function(n,d,u){ return 'Hey '+n+' 🌹 — this is YOUR free MusikFest ticket'+d+'. Fans keep it forever: it walks them to your stage, texts them your setlist as you play it, and every fan who grabs it becomes one on your list. Share it with the crowd by touching phones.\n\nYour ticket: '+u; },
+    function(n,d,u){ return n+', we built you a ticket 🌹 — free for you and every fan'+d+'. A living memento that collects your fans at the show and grows your list. Post it, share it, pass it phone-to-phone.\n\n'+u; },
+    function(n,d,u){ return 'Fans miss paper tickets, '+n+' 🌹 — the setlist on the back, the memento of the night. This one does that AND collects your fans for you'+d+'. Free to you and everyone:\n\n'+u; },
+    function(n,d,u){ return n+' fans 🌹 — here is the band\'s free MusikFest ticket'+d+'. It guides you to the stage and texts you the setlist as they play it. Grab it, keep it forever, pass it on:\n\n'+u; },
+    function(n,d,u){ return 'This is '+n+'\'s ticket 🌹 — free for the band and every fan'+d+'. Setlist texted live, audio you can add later, every attendee on your list. Touch phones to share it with the crowd:\n\n'+u; },
+    function(n,d,u){ return n+' 🌹 your MusikFest ticket is ready'+d+' — a keepsake for fans and a fan-list for you. Free, forever, and it spreads by touching phones. Here it is:\n\n'+u; }
+  ];
+  function msgBand(b){ var n=(b&&b.name)||'this act'; return _pick((b&&b.slug)||n, BAND_MSGS)(n, bandDate(b), tixUrl(n)); }
+  // BONUS: the post to YOUR wall. Also carries the band's ticket link.
+  var OWN_MSGS=[
+    function(n,u){ return 'MusikFest people 🌹 I adopted '+n+' — grab their FREE ticket. It walks you to the stage and texts you the setlist as they play. Keep it forever:\n\n'+u; },
+    function(n,u){ return 'Grabbed '+n+'\'s free MusikFest ticket 🌹 — setlist texted live, yours to keep. Get yours:\n\n'+u; },
+    function(n,u){ return 'At MusikFest? 🌹 Get '+n+'\'s free ticket — it guides you to the stage and texts the setlist as it happens:\n\n'+u; }
+  ];
+  function msgOwn(b){ var n=(b&&b.name)||'this act'; return _pick(((b&&b.slug)||n)+'own', OWN_MSGS)(n, tixUrl(n)); }
 
   // ---- build the full lineup from the SCHEDULE, phased by day ----
   function curated(){ var B=window.DD_MF_BANDS||{}, m={}; for(var s in B){ if(!Object.prototype.hasOwnProperty.call(B,s))continue; var e=B[s]||{};
@@ -98,11 +113,23 @@
       +'<div class="bn">'+(claimed?'<s>'+esc(b.name)+'</s>':esc(b.name))+'</div>'
       +(b.kind?('<div class="bk">'+esc(b.kind)+'</div>'):'')
       +(claimed?'<div class="badge">✓ Adopted — thank you 🌹</div>'
-        :'<div class="row">'
-           +'<button class="btn p" onclick="ADOPT.copyBand(\''+esc(b.slug)+'\')">1️⃣ 📋 Copy the post for the band</button>'
-           +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Open the band\'s Facebook ↗</a>'
-           +'<button class="btn p" onclick="ADOPT.copyOwn(\''+esc(b.slug)+'\')">2️⃣ 📋 Copy the post for your wall</button>'
-           +'<button class="btn rose" onclick="ADOPT.claim(\''+esc(b.slug)+'\')">🌹 Done</button>'
+        :'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+           +'<div style="flex:1 1 240px;border:1.5px solid var(--acc);border-radius:12px;padding:10px">'
+             +'<div style="font-size:11px;font-weight:800;color:var(--acc);letter-spacing:.4px">① POST TO THE BAND · THE GOAL 🌹</div>'
+             +'<div style="font-size:12px;color:#555;margin:6px 0 8px">A ready-made message + '+esc(b.name)+'\'s ticket link. Paste it on the band\'s Facebook.</div>'
+             +'<div class="row">'
+               +'<button class="btn p" onclick="ADOPT.copyBand(\''+esc(b.slug)+'\')">📋 Copy this</button>'
+               +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Open band\'s FB ↗</a>'
+             +'</div>'
+           +'</div>'
+           +'<div style="flex:1 1 240px;border:1px solid #ddd;border-radius:12px;padding:10px">'
+             +'<div style="font-size:11px;font-weight:800;color:#888;letter-spacing:.4px">② POST TO YOUR WALL · BONUS</div>'
+             +'<a href="'+tixUrl(b.name)+'" target="_blank" rel="noopener" style="display:block;font-size:12px;margin:6px 0 8px;color:var(--acc)">🎟️ See '+esc(b.name)+'\'s ticket — front &amp; back ↗</a>'
+             +'<div class="row">'
+               +'<button class="btn p" onclick="ADOPT.copyOwn(\''+esc(b.slug)+'\')">📋 Copy this</button>'
+               +'<button class="btn rose" onclick="ADOPT.claim(\''+esc(b.slug)+'\')">🌹 Done</button>'
+             +'</div>'
+           +'</div>'
          +'</div>')
       +'</div>';
   }
@@ -126,8 +153,8 @@
     host.innerHTML=html;
   }
   window.ADOPT={
-    copyBand:function(slug){ var b=find(slug); if(!b)return; cp(msgBand(b.name)); try{ alert('📋 Copied. Open '+b.name+'’s Facebook → paste → Post.\nThen tap 📋 Copy the post for your wall.'); }catch(e){} },
-    copyOwn:function(slug){ var b=find(slug); if(!b)return; cp(msgOwn(b.name)); try{ alert('📋 Copied. Open YOUR Facebook → paste → Post.\nThen tap 🌹 Done. 🌹'); }catch(e){} },
+    copyBand:function(slug){ var b=find(slug); if(!b)return; cp(msgBand(b)); try{ alert('📋 Copied '+b.name+'’s post + ticket link.\nOpen the band’s Facebook → paste → Post. That’s the goal. 🌹'); }catch(e){} },
+    copyOwn:function(slug){ var b=find(slug); if(!b)return; cp(msgOwn(b)); try{ alert('📋 Copied (bonus). Open YOUR Facebook → paste → Post.\nThen tap 🌹 Done.'); }catch(e){} },
     claim:function(slug){ var b=find(slug), nm=((b&&b.name)||'That act');
       saveClaim(slug, function(status, err){ render();
         try{

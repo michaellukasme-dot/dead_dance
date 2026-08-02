@@ -20,7 +20,7 @@
 
 
 -- =============================================================================
--- 1) dd_setlists — a band's web-scheduled setlist (one row per band + show date).
+-- 1) dd_ts_setlist — a band's web-scheduled setlist (one row per band + show date).
 --    The song list drives the ticket's live "texted as played" experience and is the
 --    server copy that syncs across the band's devices and feeds the SMS dispatcher.
 --    Params come straight from the client:  { p_band, p_token, p_date, p_start, p_end, p_songs }.
@@ -31,7 +31,7 @@
 --    token; every later write must present the same token. This stops a stranger from
 --    overwriting a band's setlist while staying self-contained (no external auth table needed).
 -- =============================================================================
-create table if not exists public.dd_setlists (
+create table if not exists public.dd_ts_setlist (
   band_slug   text not null,
   show_date   text not null default '',            -- 'YYYY-MM-DD' or '' if the band didn't set one
   band_token  text,                                -- per-band write key (?key=); set on first write, required after
@@ -41,8 +41,9 @@ create table if not exists public.dd_setlists (
   updated_at  timestamptz not null default now(),
   primary key (band_slug, show_date)
 );
-alter table public.dd_setlists enable row level security;   -- no direct table access; only the RPC below
+alter table public.dd_ts_setlist enable row level security;   -- no direct table access; only the RPC below
 
+drop function if exists public.dd_setlist_upsert_web(text, text, text, text, text, jsonb);
 create or replace function public.dd_setlist_upsert_web(
   p_band text, p_token text, p_date text, p_start text, p_end text, p_songs jsonb)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -54,19 +55,19 @@ begin
 
   -- per-band write token (TOFU): if this band already registered a token anywhere, it must match.
   select band_token into v_existing
-    from public.dd_setlists
+    from public.dd_ts_setlist
    where band_slug = v_band and band_token is not null
    limit 1;
   if v_existing is not null and (p_token is null or p_token <> v_existing) then
     return jsonb_build_object('ok', false, 'err', 'setlist write token required — this band is already claimed');
   end if;
 
-  insert into public.dd_setlists(band_slug, show_date, band_token, set_start, set_end, songs, updated_at)
+  insert into public.dd_ts_setlist(band_slug, show_date, band_token, set_start, set_end, songs, updated_at)
     values (v_band, v_date, nullif(btrim(coalesce(p_token,'')),''),
             nullif(btrim(coalesce(p_start,'')),''), nullif(btrim(coalesce(p_end,'')),''),
             coalesce(p_songs, '[]'::jsonb), now())
     on conflict (band_slug, show_date) do update
-      set band_token = coalesce(dd_setlists.band_token, excluded.band_token),  -- keep the first token
+      set band_token = coalesce(dd_ts_setlist.band_token, excluded.band_token),  -- keep the first token
           set_start = excluded.set_start, set_end = excluded.set_end,
           songs = excluded.songs, updated_at = now();
 
@@ -76,13 +77,13 @@ end $$;
 
 
 -- =============================================================================
--- 2) dd_setlist_fans — a fan's PENDING subscription to a band's live setlist texts.
+-- 2) dd_ts_setlist_fan — a fan's PENDING subscription to a band's live setlist texts.
 --    Params from the client:  { p_band, p_phone (E.164), p_source }.
 --    status='pending' until the fan confirms by SMS (the inbound webhook flips it to
 --    'confirmed'); we NEVER text a pending number. Idempotent per (band, phone): re-submitting
 --    the same number is a no-op, not a duplicate. Phone is PII — stored, never logged.
 -- =============================================================================
-create table if not exists public.dd_setlist_fans (
+create table if not exists public.dd_ts_setlist_fan (
   band_slug   text not null,
   phone       text not null,                       -- E.164, e.g. +14845551212
   status      text not null default 'pending',     -- pending | confirmed | stopped
@@ -91,9 +92,10 @@ create table if not exists public.dd_setlist_fans (
   confirmed_at timestamptz,
   primary key (band_slug, phone)
 );
-alter table public.dd_setlist_fans enable row level security;   -- no direct table access; only the RPC below
-create index if not exists dd_setlist_fans_band on public.dd_setlist_fans(band_slug, status);
+alter table public.dd_ts_setlist_fan enable row level security;   -- no direct table access; only the RPC below
+create index if not exists dd_ts_setlist_fan_band on public.dd_ts_setlist_fan(band_slug, status);
 
+drop function if exists public.dd_setlist_fan_pending(text, text, text);
 create or replace function public.dd_setlist_fan_pending(p_band text, p_phone text, p_source text)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare v_band text; v_phone text;
@@ -106,16 +108,16 @@ begin
     return jsonb_build_object('ok', false, 'err', 'valid phone required');
   end if;
 
-  insert into public.dd_setlist_fans(band_slug, phone, status, source)
+  insert into public.dd_ts_setlist_fan(band_slug, phone, status, source)
     values (v_band, v_phone, 'pending', nullif(btrim(coalesce(p_source,'')),''))
     on conflict (band_slug, phone) do update
-      set source = coalesce(excluded.source, dd_setlist_fans.source);  -- idempotent; don't downgrade a confirmed fan
+      set source = coalesce(excluded.source, dd_ts_setlist_fan.source);  -- idempotent; don't downgrade a confirmed fan
   return jsonb_build_object('ok', true, 'band', v_band, 'status', 'pending');
 end $$;
 
 
 -- =============================================================================
--- 3) dd_festival_poi_verify — an admin flips a POI pin's verified/draft status.
+-- 3) dd_ts_poi_verify — an admin flips a POI pin's verified/draft status.
 --    Params from the client:  { p_slug, p_token, p_item_key, p_status, p_by }.
 --    Only VERIFIED pins are shown to fans, so this write is OWNER-TOKEN GATED.
 --
@@ -125,7 +127,7 @@ end $$;
 --    back to trust-on-first-use on this table (first admin to verify records the token; later writes
 --    must match) — self-contained and idempotent either way.
 -- =============================================================================
-create table if not exists public.dd_festival_poi (
+create table if not exists public.dd_ts_poi (
   festival_slug text not null,
   item_key      text not null,                     -- the pin id from the maker
   status        text not null default 'draft',     -- draft | verified
@@ -134,9 +136,10 @@ create table if not exists public.dd_festival_poi (
   updated_at    timestamptz not null default now(),
   primary key (festival_slug, item_key)
 );
-alter table public.dd_festival_poi enable row level security;   -- no direct table access; only the RPCs below
-create index if not exists dd_festival_poi_slug on public.dd_festival_poi(festival_slug, status);
+alter table public.dd_ts_poi enable row level security;   -- no direct table access; only the RPCs below
+create index if not exists dd_ts_poi_slug on public.dd_ts_poi(festival_slug, status);
 
+drop function if exists public.dd_poi_verify(text, text, text, text, text);
 create or replace function public.dd_poi_verify(
   p_slug text, p_token text, p_item_key text, p_status text, p_by text)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -159,7 +162,7 @@ begin
   -- 2) TOFU fallback: an owner token already recorded for this festival's pins
   if v_owner is null then
     select owner_token into v_owner
-      from public.dd_festival_poi
+      from public.dd_ts_poi
      where festival_slug = v_slug and owner_token is not null
      limit 1;
   end if;
@@ -168,20 +171,21 @@ begin
     return jsonb_build_object('ok', false, 'err', 'owner token mismatch — not authorized to verify this festival');
   end if;
 
-  insert into public.dd_festival_poi(festival_slug, item_key, status, owner_token, verified_by, updated_at)
+  insert into public.dd_ts_poi(festival_slug, item_key, status, owner_token, verified_by, updated_at)
     values (v_slug, v_key, v_status, p_token, nullif(btrim(coalesce(p_by,'')),''), now())
     on conflict (festival_slug, item_key) do update
       set status = excluded.status,
-          owner_token = coalesce(dd_festival_poi.owner_token, excluded.owner_token),  -- keep first token
+          owner_token = coalesce(dd_ts_poi.owner_token, excluded.owner_token),  -- keep first token
           verified_by = excluded.verified_by, updated_at = now();
 
   return jsonb_build_object('ok', true, 'festival', v_slug, 'item', v_key, 'status', v_status);
 end $$;
 
 -- Public read of the verified pins for a festival (fans need this to know which pins are live).
+drop function if exists public.dd_poi_verified_get(text);
 create or replace function public.dd_poi_verified_get(p_slug text)
 returns table(item_key text, status text) language sql stable security definer set search_path = public as $$
-  select item_key, status from public.dd_festival_poi
+  select item_key, status from public.dd_ts_poi
    where festival_slug = lower(btrim(p_slug)) and status = 'verified'
    order by updated_at;
 $$;
