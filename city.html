@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Downtown Walking Map · StageFill</title>
+<meta name="theme-color" content="#241535">
+<link rel="icon" href="rose-32.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _c;}; }catch(e){}</script>
+<script src="dd_telemetry.js"></script>
+<script src="dd_citymap.js"></script>
+<style>
+  :root{ --purple:#241535; --acc:#7c3aed; --gold:#f0a500; --green:#12854f; --rose:#b8002e; --ink:#1b1430; --mut:#6f6a88; --line:#ece7f5; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:#f7f5fc; }
+  .bar{ background:linear-gradient(120deg,#3a2456,#180f28); color:#fff; padding:14px 16px; display:flex; align-items:center; gap:10px; }
+  .bar .t{ font-weight:900; font-size:17px; } .bar .s{ color:#cbbfe0; font-size:12px; }
+  .badge{ margin-left:auto; font-weight:900; font-size:12px; padding:6px 12px; border-radius:999px; }
+  .badge.open{ background:#12854f; color:#fff; } .badge.closed{ background:#3a2a45; color:#e8c9c9; }
+  #map{ height:62vh; width:100%; }
+  .strip{ padding:12px 14px 60px; max-width:720px; margin:0 auto; }
+  .strip h3{ font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); margin:6px 2px 8px; }
+  .ad{ display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:8px; box-shadow:0 6px 16px rgba(36,21,53,.05); }
+  .ad .dot{ width:34px; height:34px; border-radius:10px; background:#f1eef9; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .ad .m{ font-weight:800; } .ad .h{ color:var(--mut); font-size:12.5px; }
+  .empty{ text-align:center; color:var(--mut); padding:30px 10px; }
+  .foot{ text-align:center; color:var(--mut); font-size:12px; margin-top:16px; }
+  .cta{ display:block; text-align:center; background:var(--acc); color:#fff; font-weight:800; text-decoration:none; border-radius:12px; padding:12px; margin-top:14px; }
+</style>
+</head>
+<body>
+<div class="bar">
+  <div><div class="t" id="cName">Downtown</div><div class="s" id="cHours">walking map</div></div>
+  <div class="badge closed" id="badge">· · ·</div>
+</div>
+<div id="map"></div>
+<div class="strip">
+  <h3>On the corridor</h3>
+  <div id="ads"><div class="empty">Loading the district…</div></div>
+  <a class="cta" id="claimCta" href="claim_city.html">Not your city yet? Claim it →</a>
+  <div class="foot">🌹 DeadDance · StageFill — your downtown, live. Year-round.</div>
+</div>
+
+<script>
+(function(){
+  var CM=window.DDCityMap, $=function(i){return document.getElementById(i);};
+  function q(k){ try{ return new URLSearchParams(location.search).get(k); }catch(e){ return null; } }
+  var slug=(q('city')||'').toLowerCase();
+  var map=L.map('map',{zoomControl:true}).setView([40.5806,-75.3405],15);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+
+  function paint(city){
+    var c=CM.norm(city);
+    document.title=(c.name||'Downtown')+' Walking Map';
+    $('cName').textContent=c.name||'Downtown';
+    $('cHours').textContent='Open '+c.hours.openLabel+'–'+c.hours.closeLabel;
+    var st=CM.isActive(c);
+    var b=$('badge'); b.className='badge '+(st.active?'open':'closed');
+    b.textContent=st.active?'● OPEN NOW':'○ '+ (st.reason==='closed today'?'Closed today':'After hours');
+    if(c.corridor && c.corridor.length){
+      var pl=L.polyline(c.corridor,{color:'#7c3aed',weight:7,opacity:.85}).addTo(map);
+      try{ map.fitBounds(pl.getBounds(),{padding:[40,40]}); }catch(e){ if(c.center) map.setView(c.center,15); }
+    } else if(c.center){ map.setView(c.center,15); }
+  }
+  function paintAds(rows){ var host=$('ads');
+    if(!rows || !rows.length){ host.innerHTML='<div class="empty">No merchants on the map yet — be the first. 🌹</div>'; return; }
+    host.innerHTML=rows.map(function(a){ return '<div class="ad"><div class="dot">🏪</div><div><div class="m">'+esc(a.merchant||'Merchant')+'</div><div class="h">'+esc(a.headline||'On the corridor')+'</div></div></div>'; }).join('');
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  if(!slug){ paint({name:'Your Downtown'}); paintAds([]); return; }
+  var cl=window.ddClient&&ddClient();
+  if(cl&&cl.rpc){
+    cl.rpc('sf_city_get',{p_slug:slug}).then(function(r){ var d=(r&&r.data)||{};
+      if(d && !d.err){ paint({ name:d.name, state:d.state, corridor:d.corridor, hours:{ open:CM.minToHhmm(d.open_min), close:CM.minToHhmm(d.close_min), days:d.active_days } }); }
+      else { paint({ name:slug.replace(/-/g,' ') }); }
+    }).catch(function(){ paint({ name:slug.replace(/-/g,' ') }); });
+    paintAds([]);   // live merchant ads render here once the ad-network reader is wired (RLS-safe follow-up)
+  } else { paint({ name:slug.replace(/-/g,' ') }); paintAds([]); }
+})();
+</script>
+</body>
+</html>

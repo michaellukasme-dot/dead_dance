@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claim my City — StageFill Walking Map</title>
+<meta name="theme-color" content="#241535">
+<link rel="icon" href="rose-32.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _c;}; }catch(e){}</script>
+<script src="dd_telemetry.js"></script>
+<script src="dd_citymap.js"></script>
+<script src="qr.js"></script>
+<style>
+  :root{ --purple:#241535; --acc:#7c3aed; --gold:#f0a500; --green:#12854f; --ink:#1b1430; --mut:#6f6a88; --line:#ece7f5; --bg:#f7f5fc; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  .wrap{ max-width:640px; margin:0 auto; padding:0 15px 70px; }
+  .hero{ background:linear-gradient(155deg,#3a2456,#180f28); color:#fff; border-radius:0 0 24px 24px; padding:28px 20px 22px; text-align:center; }
+  .hero .k{ color:var(--gold); font-weight:900; font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; }
+  .hero h1{ font-size:27px; margin:8px 0 6px; }
+  .hero p{ color:#d6cbe8; font-size:14.5px; margin:0 auto; max-width:460px; line-height:1.5; }
+  .step{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:16px 16px; margin-top:14px; box-shadow:0 8px 22px rgba(36,21,53,.05); }
+  .step h2{ font-size:15px; margin:0 0 4px; } .step h2 .n{ background:var(--acc); color:#fff; border-radius:8px; padding:2px 9px; margin-right:8px; font-size:13px; }
+  .step .sub{ color:var(--mut); font-size:13px; margin:0 0 10px; }
+  label.f{ display:block; font-size:12px; font-weight:800; color:var(--mut); margin:8px 0 3px; text-transform:uppercase; letter-spacing:.04em; }
+  input[type=text], input[type=email], input[type=time]{ width:100%; padding:12px; border:1px solid var(--line); border-radius:11px; font-size:15px; background:#fbfaff; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #map{ height:280px; border-radius:14px; overflow:hidden; border:1px solid var(--line); margin-top:8px; }
+  .mtools{ display:flex; gap:7px; margin-top:8px; flex-wrap:wrap; }
+  .btn{ border:0; border-radius:10px; padding:9px 13px; font-weight:800; font-size:13px; cursor:pointer; }
+  .btn.p{ background:var(--acc); color:#fff; } .btn.g{ background:#f1eef9; color:var(--acc); }
+  .days{ display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .day{ border:1.5px solid var(--line); border-radius:9px; padding:8px 0; width:40px; text-align:center; font-weight:800; font-size:12.5px; cursor:pointer; color:var(--mut); }
+  .day.on{ background:var(--acc); color:#fff; border-color:var(--acc); }
+  .len{ font-size:12.5px; color:var(--mut); font-weight:700; margin-top:6px; }
+  .go{ display:block; width:100%; border:0; border-radius:13px; padding:15px; font-weight:900; font-size:16px; color:#fff; background:linear-gradient(180deg,#7c3aed,#4c1d95); cursor:pointer; margin-top:16px; }
+  /* result */
+  #result{ display:none; }
+  .qwrap{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  #qr{ width:150px; height:150px; background:#fff; border-radius:14px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .link{ flex:1; min-width:200px; }
+  .copy{ display:flex; gap:6px; margin-top:6px; }
+  .copy input{ font-size:12.5px; } .copy button{ white-space:nowrap; }
+  .snip{ background:#0f0b18; color:#cdd6ef; border-radius:12px; padding:12px; font:600 11.5px ui-monospace,Menlo,monospace; overflow-x:auto; margin-top:8px; word-break:break-all; }
+  .foot{ text-align:center; color:var(--mut); font-size:12px; margin-top:26px; line-height:1.6; }
+  .pill{ display:inline-block; background:#eafaf3; color:var(--green); font-weight:800; font-size:11px; padding:3px 9px; border-radius:999px; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="k">🌹 StageFill · City Walking Map</div>
+  <h1>Claim your City.</h1>
+  <p>Put your downtown on one live map — every restaurant, shop and event on your ~1-mile corridor. Post the QR on your site and street signs. Year-round, and the corridor ads can pay for it.</p>
+</div>
+
+<div class="wrap">
+  <div id="setup">
+    <div class="step">
+      <h2><span class="n">1</span>Your city</h2>
+      <div class="row2">
+        <div><label class="f">City / downtown name</label><input id="cname" type="text" placeholder="Bethlehem"></div>
+        <div><label class="f">State</label><input id="cstate" type="text" placeholder="PA" maxlength="2"></div>
+      </div>
+      <label class="f" style="margin-top:10px">Your email (we send your owner key)</label>
+      <input id="cemail" type="email" placeholder="you@city.gov">
+    </div>
+
+    <div class="step">
+      <h2><span class="n">2</span>Draw your corridor</h2>
+      <div class="sub">Tap along Main Street to trace the walkable strip. A few points is plenty.</div>
+      <div id="map"></div>
+      <div class="mtools">
+        <button class="btn g" onclick="CITY.undo()">↩︎ Undo point</button>
+        <button class="btn g" onclick="CITY.clear()">✕ Clear</button>
+        <button class="btn g" onclick="CITY.locate()">📍 Find me</button>
+      </div>
+      <div class="len" id="len">No corridor yet — tap the map to start.</div>
+    </div>
+
+    <div class="step">
+      <h2><span class="n">3</span>Active hours</h2>
+      <div class="sub">Ads only run while you're open — you set the window. 9am–11pm is typical.</div>
+      <div class="row2">
+        <div><label class="f">Opens</label><input id="open" type="time" value="09:00"></div>
+        <div><label class="f">Closes</label><input id="close" type="time" value="23:00"></div>
+      </div>
+      <label class="f" style="margin-top:10px">Days</label>
+      <div class="days" id="days"></div>
+    </div>
+
+    <button class="go" onclick="CITY.generate()">🗺️ Get my QR &amp; map link →</button>
+  </div>
+
+  <div id="result">
+    <div class="step">
+      <h2><span class="n">✓</span><span id="rName">Your</span> Walking Map is ready 🌹</h2>
+      <div class="sub"><span class="pill">Live</span> Post this QR on your website and street signs. Anyone who scans it gets your downtown, live.</div>
+      <div class="qwrap">
+        <div id="qr">▦</div>
+        <div class="link">
+          <label class="f">Your permanent link</label>
+          <div class="copy"><input id="mapLink" type="text" readonly><button class="btn p" onclick="CITY.copy('mapLink')">Copy</button></div>
+          <label class="f" style="margin-top:12px">Paste on your website</label>
+          <div class="snip" id="snip"></div>
+          <button class="btn g" style="margin-top:8px" onclick="CITY.copy('snipRaw')">Copy the code</button>
+          <input id="snipRaw" type="text" style="position:absolute;left:-9999px" readonly>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <h2>What happens next</h2>
+      <div class="sub" style="margin:0">Merchants on your corridor buy proximity ad slots — that revenue funds your subscription. We email your owner key so only you can edit the map. Add your festivals and farmers markets anytime; they live under the same city.</div>
+    </div>
+    <button class="go" onclick="location.reload()">＋ Claim another city</button>
+  </div>
+
+  <div class="foot">🌹 DeadDance · StageFill — from Bethlehem. One city, one QR, on the map year-round.</div>
+</div>
+
+<script>
+(function(){
+  var CM=window.DDCityMap, $=function(i){return document.getElementById(i);};
+  var pts=[], map, line, dayset={0:1,1:1,2:1,3:1,4:1,5:1,6:1};
+  var DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  // days
+  $('days').innerHTML=DOW.map(function(d,i){return '<div class="day on" data-d="'+i+'" onclick="CITY.day('+i+')">'+d+'</div>';}).join('');
+
+  // map
+  map=L.map('map',{zoomControl:true}).setView([40.6259,-75.3705],15);   // default: Bethlehem
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+  line=L.polyline([],{color:'#7c3aed',weight:6,opacity:.85}).addTo(map);
+  map.on('click',function(e){ pts.push([e.latlng.lat,e.latlng.lng]); redraw(); });
+  function redraw(){ line.setLatLngs(pts);
+    var m=(CM&&CM.lengthMeters)?CM.lengthMeters(pts):0; var mi=(m/1609.34).toFixed(2);
+    $('len').textContent = pts.length<2 ? (pts.length+' point — tap to add more.') : ('Corridor: '+pts.length+' points · ~'+mi+' mi');
+  }
+
+  window.CITY={
+    day:function(i){ dayset[i]=!dayset[i]; var el=document.querySelector('.day[data-d="'+i+'"]'); if(el) el.classList.toggle('on', !!dayset[i]); },
+    undo:function(){ pts.pop(); redraw(); },
+    clear:function(){ pts=[]; redraw(); },
+    locate:function(){ if(!navigator.geolocation) return; navigator.geolocation.getCurrentPosition(function(p){ map.setView([p.coords.latitude,p.coords.longitude],16); }); },
+    copy:function(id){ var el=$(id); if(!el) return; el.select&&el.select(); try{ navigator.clipboard.writeText(el.value); alert('Copied 🌹'); }catch(e){ try{ document.execCommand('copy'); alert('Copied 🌹'); }catch(x){} } },
+    generate:function(){
+      var name=($('cname').value||'').trim(); if(!name){ alert('Name your city / downtown first.'); return; }
+      var days=Object.keys(dayset).filter(function(k){return dayset[k];}).map(Number);
+      var spec={ name:name, state:($('cstate').value||'').trim().toUpperCase()||null, corridor:pts,
+                 hours:{ open:$('open').value||'09:00', close:$('close').value||'23:00', days:days.length?days:[0,1,2,3,4,5,6] } };
+      var c=CM.norm(spec);
+      // best-effort persist (guarded — no-op offline). CLAIM FIRST → get the owner token → save WITH it.
+      var email=($('cemail').value||'').trim();
+      try{ var p=CM.claim(c.slug, null, email);
+        if(p&&p.then){ p.then(function(res){ var tok=res&&res.owner_token; try{ CM.save(spec, tok); }catch(e){} }); }
+      }catch(e){}
+      // the QR + link + embed are client-side — they work regardless of backend
+      var url=CM.mapUrl(c.slug);
+      $('rName').textContent=name;
+      $('mapLink').value=url;
+      var snip=CM.embedSnippet(c.slug, name);
+      $('snip').textContent=snip; $('snipRaw').value=snip;
+      $('setup').style.display='none'; $('result').style.display='block';
+      try{ if(window.DDQR&&DDQR.into){ $('qr').innerHTML=''; DDQR.into('qr', url, {size:150, css:0, caption:false}); } }catch(e){}
+      window.scrollTo(0,0);
+    }
+  };
+})();
+</script>
+</body>
+</html>
