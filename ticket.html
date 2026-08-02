@@ -446,8 +446,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
         +(d.songs||[]).map(function(s,i){ var t=songRevealed(s); return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b>'+audioBtn((s.n||s.name||s),i)+'<button class="tmb" style="margin-left:auto;padding:4px 11px;'+(t?'border-color:#12854f;color:#0e7d4f':'border-color:#b8002e;color:#b8002e')+'" onclick="teaseSong('+i+')">'+(t?'✓ Teased':'▶ Tease')+'</button></div>'; }).join('')+'</div>') : '';
     return chead('🎼','Set the list &amp; tease time')
       +'<label class="slbl">Tease / set-start time</label><input id="slStart" class="slin" placeholder="9:00" value="'+esc(d.start||'')+'">'
-      +'<label class="slbl">Songs — one per line (add a time if you have it)</label>'
-      +'<textarea id="slSongs" class="slta" placeholder="Suzy Greenberg 2:30\nWolfmans Brother 4:55\nTweezer">'+esc(text)+'</textarea>'
+      +'<label class="slbl" title="Enter your setlist and a time for each song — we text each one to your fans when you tease it">Songs — one per line (add a time if you have it)</label>'
+      +'<textarea id="slSongs" class="slta" onfocus="slHint()" onmouseenter="slHint()" title="Enter your setlist and a time for each song — we text each one to your fans when you tease it" placeholder="Suzy Greenberg 2:30\nWolfmans Brother 4:55\nTweezer">'+esc(text)+'</textarea>'
       +'<button class="tmb" style="width:100%;margin-top:10px;border-color:#12854f;color:#0e7d4f" onclick="saveSetlist()">💾 Save the setlist</button>'
       + teaseList
       +'<button class="tmb" style="width:100%;margin-top:14px;border-color:#b8002e;color:#b8002e" onclick="archiveShow()">🔒 Archive this show → lock to history</button>'
@@ -462,6 +462,10 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       if(key&&cl&&cl.rpc){ cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:rec.start||null,p_end:null,p_songs:rec.songs})
         .then(function(r){ if(r&&r.error){ var t=(window.parent&&window.parent.toast); if(t) t('Saved on this device, but it didn’t reach the server 🌹 — reopen with your key or screenshot to Michael'); } })
         .catch(function(){ var t=(window.parent&&window.parent.toast); if(t) t('Saved on this device — offline, hasn’t synced to the server yet 🌹'); }); } }catch(e){} }
+  // idiot-proof hint on the blank setlist — fires once when the band hovers/taps the songs box.
+  var _slHinted=false;
+  window.slHint=function(){ if(_slHinted)return; _slHinted=true;
+    try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('🎼 Enter your setlist and a time for each song — tap Tease and we text that song to your fans, live. 🌹'); }catch(e){} };
   window.saveSetlist=function(){ var start=((document.getElementById('slStart')||{}).value||'').trim();
     var raw=((document.getElementById('slSongs')||{}).value||''); var prev=getSongs(); var prevMap={};
     (prev.songs||[]).forEach(function(s){ if(s&&(s.n||s.name)) prevMap[(s.n||s.name)]=s; });   // keep tease flags across edits
