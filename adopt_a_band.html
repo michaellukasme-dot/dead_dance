@@ -60,8 +60,14 @@
   function dayLabel(d){ try{ return new Date(d+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return d; } }
   function who(){ try{ var k='dd.adopter',v=localStorage.getItem(k); if(!v){v='fan-'+Math.random().toString(36).slice(2,8);localStorage.setItem(k,v);} return v; }catch(e){return 'anon';} }
   function claims(){ try{ return JSON.parse(localStorage.getItem('dd.adopt')||'{}'); }catch(e){ return {}; } }
-  function saveClaim(slug){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.adopt',JSON.stringify(c));}catch(e){}
-    try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:who()}).then(function(){}).catch(function(){}); }catch(e){} }
+  function saveClaim(slug, cb){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.adopt',JSON.stringify(c));}catch(e){}
+    // Report the REAL server result back via cb(status, err): true=saved to server, false=server rejected, null=no server reachable.
+    try{ var cl=window.ddClient&&ddClient();
+      if(cl&&cl.rpc){ cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:who()})
+        .then(function(r){ if(cb) cb(r&&r.error?false:true, r&&r.error); })
+        .catch(function(e){ if(cb) cb(false, e); });
+        return; } }catch(e){}
+    if(cb) cb(null); }
   var TICKET='https://deaddance.app/ticket.html?price=FREE&band=';
   function tixUrl(name){ return TICKET+encodeURIComponent(name); }
   function cp(t){ try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} } }
@@ -122,8 +128,16 @@
   window.ADOPT={
     copyBand:function(slug){ var b=find(slug); if(!b)return; cp(msgBand(b.name)); try{ alert('📋 Copied. Open '+b.name+'’s Facebook → paste → Post.\nThen tap 📋 Copy · your page.'); }catch(e){} },
     copyOwn:function(slug){ var b=find(slug); if(!b)return; cp(msgOwn(b.name)); try{ alert('📋 Copied. Open YOUR Facebook → paste → Post.\nThen tap 🌹 Done. 🌹'); }catch(e){} },
-    claim:function(slug){ saveClaim(slug); render(); var b=find(slug);
-      try{ alert('🌹 Thank you! '+((b&&b.name)||'That act')+' is covered. Grab one more, then send this page to a friend.'); }catch(e){} },
+    claim:function(slug){ var b=find(slug), nm=((b&&b.name)||'That act');
+      saveClaim(slug, function(status, err){ render();
+        try{
+          if(status===true){ alert('✅ '+nm+' is covered — saved to the server. Grab one more, then send this page to a friend. 🌹'); }
+          else if(status===false){ var msg=(err&&(err.message||err.hint||err.code))||'unknown error';
+            alert('⚠️ '+nm+' saved on THIS phone but did NOT reach the server.\n\nPlease screenshot this and send it to Michael:\n'+msg); }
+          else { alert('📴 '+nm+' saved on this phone (no server connection right now). It will not sync to the shared count.'); }
+        }catch(e){}
+      });
+      render(); },
     share:function(){ var u='https://deaddance.app/adopt_a_band.html', t='Help cover every MusikFest act — pick one or two bands and post their free ticket. 🌹';
       if(navigator.share){ navigator.share({title:'Adopt a Band · MusikFest',text:t,url:u}).catch(function(){}); }
       else { try{ navigator.clipboard.writeText(t+' '+u); alert('🔗 Link copied — paste it to a few friends.'); }catch(e){ alert(u); } } }
