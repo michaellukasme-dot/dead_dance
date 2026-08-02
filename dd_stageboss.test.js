@@ -46,22 +46,23 @@ ok('plan returns stages', R && R.stages && R.stages.length===2);
 ok('BUDGET HARD CAP — never overspends', R.actSpend <= SPEC.budget);
 ok('budgetLeft == budget - spend', R.budgetLeft === (R.budget - R.actSpend));
 
-// no double-booking across overlapping (same day+start) slots
+// no double-booking across overlapping (same day+start) slots — REAL acts only
+// (Karaoke is a parallel house format, legitimately running on many stages at once)
 (function(){
   var seen={}, dbl=false;
-  R.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(!sl.act) return;
+  R.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(!sl.act || sl.filler) return;
     var key = sl.act.name+'|'+sl.day+'|'+sl.start; if(seen[key]) dbl=true; seen[key]=1; }); });
   ok('NO DOUBLE-BOOK at the same time', !dbl);
 })();
 
-// VARIETY: no act booked more than maxPerAct (default 1) times across the festival
+// VARIETY: no REAL act booked more than maxPerAct (default 1) times (Karaoke is exempt — it's the filler)
 (function(){
-  var cnt={}, over=false; R.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(sl.act){ cnt[sl.act.name]=(cnt[sl.act.name]||0)+1; if(cnt[sl.act.name]>1) over=true; } }); });
+  var cnt={}, over=false; R.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(sl.act && !sl.filler){ cnt[sl.act.name]=(cnt[sl.act.name]||0)+1; if(cnt[sl.act.name]>1) over=true; } }); });
   ok('VARIETY — no act booked more than once by default', !over);
 })();
 (function(){
   var t=SB.plan(SPEC, POOL, {maxPerAct:2}); var cnt={}, mx=0;
-  t.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(sl.act){ cnt[sl.act.name]=(cnt[sl.act.name]||0)+1; if(cnt[sl.act.name]>mx)mx=cnt[sl.act.name]; } }); });
+  t.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(sl.act && !sl.filler){ cnt[sl.act.name]=(cnt[sl.act.name]||0)+1; if(cnt[sl.act.name]>mx)mx=cnt[sl.act.name]; } }); });
   ok('maxPerAct:2 respected (allows up to twice)', mx<=2);
 })();
 
@@ -92,16 +93,39 @@ ok('net after StageFill == houseNet - fee', R.netAfterStageFill === (R.pnl.netTo
   ok('deterministic — same inputs, same plan', A===B);
 })();
 
-// budget=0 → nothing booked, no crash
+// budget=0 → no PAID act booked, no crash (karaoke off = pure paid booker)
 (function(){
-  var z=SB.plan(Object.assign({},SPEC,{budget:0}), POOL);
+  var z=SB.plan(Object.assign({},SPEC,{budget:0}), POOL, {karaoke:false});
   ok('zero budget → zero spend, zero booked', z.actSpend===0 && z.slotsFilled===0);
 })();
 
-// empty pool → no crash, no bookings
+// empty pool → no PAID bookings, still returns P&L (karaoke off)
 (function(){
-  var e=SB.plan(SPEC, []);
+  var e=SB.plan(SPEC, [], {karaoke:false});
   ok('empty pool → 0 filled, still returns P&L', e.slotsFilled===0 && e.pnl && e.pnl.netToHouse!=null);
+})();
+
+// ---- KARAOKE — the house budget-act that fills every open slot ----
+(function(){
+  // default ON: an empty pool still yields a FULL festival of karaoke, at $0 spend
+  var k=SB.plan(SPEC, []);
+  ok('KARAOKE default ON → fills all open slots on empty pool', k.slotsFilled===k.slotsTotal);
+  ok('KARAOKE is free → actSpend stays 0', k.actSpend===0);
+  var allKar=true, claimed=true, filler=true;
+  k.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(!sl.act){allKar=false;return;}
+    if(!sl.act.karaoke) allKar=false; if(sl.act.claimedBy!=='Michael Lukas') claimed=false; if(!sl.filler) filler=false; }); });
+  ok('KARAOKE slots flagged karaoke + filler', allKar && filler);
+  ok('KARAOKE claimed by the house (Michael)', claimed);
+  // karaoke:false → open slots stay dark (pure paid booker)
+  var off=SB.plan(SPEC, [], {karaoke:false});
+  ok('karaoke:false → open slots stay empty', off.slotsFilled===0);
+  // real acts get first pick; karaoke only mops up the leftovers
+  var mix=SB.plan(SPEC, POOL);
+  var real=0, kar=0; mix.stages.forEach(function(s){ s.slots.forEach(function(sl){ if(sl.act){ sl.filler?kar++:real++; } }); });
+  ok('KARAOKE fills only leftover slots (real acts first)', real>0 && (real+kar)===mix.slotsTotal);
+  // a host-fee karaoke still honors the HARD budget cap
+  var hf=SB.plan(Object.assign({},SPEC,{budget:200}), [], {karaokeFee:150});
+  ok('host-fee karaoke never overspends budget', hf.actSpend<=200);
 })();
 
 // gate-share pricing variant

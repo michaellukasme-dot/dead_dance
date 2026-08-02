@@ -32,7 +32,13 @@
     'Classical':0.85,'Piano / Standards':0.85
   };
   var PART_ENERGY = { afternoon:'Chill', mid:'Mid', evening:'High', night:'High' };  // what each slot wants
-  var DEFAULTS = { perStageDay:150, gateSharePct:0, cover:15, barPerHead:11, housePerStageDay:350, fillFloor:0.35, fillSpan:0.40, maxPerAct:1 };
+  var DEFAULTS = { perStageDay:150, gateSharePct:0, cover:15, barPerHead:11, housePerStageDay:350, fillFloor:0.35, fillSpan:0.40, maxPerAct:1, karaoke:true, karaokeFee:0 };
+
+  // The HOUSE BUDGET-ACT: Karaoke. The crowd IS the act — ~$0 to book, runs in parallel on
+  // every stage, and mops up any slot the paid booker left dark. "That's my band" — CLAIMED by
+  // the house, so its singers/ticketholders roll into the DeadDance flywheel like any act.
+  var KARAOKE = { name:'DeadDance Karaoke', genre:'Karaoke', size:'Solo', energy:'Mid',
+                  fee:0, karaoke:true, claimedBy:'Michael Lukas', host:'DeadDance' };
 
   function clamp(x,a,b){ return x<a?a:(x>b?b:x); }
   function num(x,d){ x=Number(x); return isFinite(x)?x:(d||0); }
@@ -157,6 +163,25 @@
       spend += c.fee;
     });
 
+    // ---- BUDGET FILLER: Karaoke fills any slot the paid booker left open --------
+    // The crowd is the act — ~$0, runs in parallel on every stage, no variety cap.
+    // Still honors the HARD budget cap (a host-fee karaoke can't overspend either).
+    var karOn = opts.karaoke !== false;
+    var karAct = opts.karaokeAct || KARAOKE;
+    var karFee = num(opts.karaokeFee, num(karAct.fee, DEFAULTS.karaokeFee));
+    if(karOn){
+      stages.forEach(function(st, si){
+        st.slots.forEach(function(sl, li){
+          if(slotFilled[si][li]) return;                     // paid act already there
+          if(spend + karFee > budget) return;                // 0 by default → always fits
+          var kdraw = drawIndex(karAct, region), kfit = fitScore(karAct, st, sl);
+          slotFilled[si][li] = { si:si, li:li, act:karAct, fee:karFee, draw:kdraw, fit:kfit,
+                                 value:kdraw*kfit, filler:true };
+          spend += karFee;
+        });
+      });
+    }
+
     // build per-stage proformas + P&L
     var perStageDay = num(opts.perStageDay, DEFAULTS.perStageDay);
     var cover = num(spec.cover!=null?spec.cover:opts.cover, DEFAULTS.cover);
@@ -172,10 +197,12 @@
         var a=c.act, f=expFill(c.draw, opts), slotAtt=Math.round(st.cap*f);
         var g=slotAtt*stCover, b=slotAtt*num(opts.barPerHead,DEFAULTS.barPerHead);
         actCost+=c.fee; gate+=g; bar+=b; att+=slotAtt;
-        return { day:sl.day, start:sl.start, label:sl.label, part:sl.part,
-                 act:{ name:a.name, genre:a.genre, size:a.size, energy:a.energy, city:a.city, state:a.state },
+        return { day:sl.day, start:sl.start, label:sl.label, part:sl.part, filler:!!c.filler,
+                 act:{ name:a.name, genre:a.genre, size:a.size, energy:a.energy, city:a.city, state:a.state,
+                       karaoke:!!a.karaoke, claimedBy:a.claimedBy||null },
                  fee:c.fee, draw:c.draw, fit:Math.round(c.fit*100)/100, expAtt:slotAtt,
-                 why: whyLine(a, st, sl, region) };
+                 why: a.karaoke ? ('House karaoke — crowd-as-act, fills '+st.name+' '+sl.part+' at ~$'+c.fee)
+                                : whyLine(a, st, sl, region) };
       });
       var ndays=Object.keys(dayset).length; stageDays+=ndays;
       var house=num(opts.housePerStageDay,DEFAULTS.housePerStageDay)*ndays;
@@ -230,7 +257,7 @@
   var api = {
     plan: plan, confirm: confirm,
     drawIndex: drawIndex, fitScore: fitScore, expFill: expFill,
-    _defaults: DEFAULTS
+    KARAOKE: KARAOKE, _defaults: DEFAULTS
   };
   root.ddStageBoss = api;
   if (typeof module!=='undefined' && module.exports) module.exports = api;
