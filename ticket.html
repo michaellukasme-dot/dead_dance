@@ -15,7 +15,12 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 .tx-close{position:absolute;top:10px;right:12px;z-index:6;border:0;background:#f1ecf9;color:var(--ink);width:32px;height:32px;border-radius:16px;font-size:19px;line-height:1;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tx-close:active{transform:scale(.94)}
 .photo{position:relative;padding:15px 18px 18px;display:flex;flex-direction:column;background:#fff}
-.art{display:none}
+.art{position:absolute;top:0;left:0;right:0;height:34%;background-size:cover;background-position:center;background-repeat:no-repeat;display:none;z-index:0;border-radius:18px 18px 0 0}
+.art.on{display:block}
+.art.on::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.42),rgba(255,255,255,.5) 40%,rgba(255,255,255,.8) 74%,#fff)}
+.photo>*:not(.art):not(.artup){position:relative;z-index:1}
+.artup{position:absolute;top:11px;right:46px;z-index:4;border:0;background:#ffffffd9;border-radius:9px;padding:4px 8px;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 1px 5px #0003;display:none}
+.artup.on{display:inline-block}
 
 .brandbar{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;padding-right:34px}
 .brandbar .rose{font-size:15px}
@@ -118,6 +123,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   <button class="tx-close" onclick="ddTixDismiss()" aria-label="Close">×</button>
   <div class="photo">
     <div class="art" id="art"></div>
+    <button class="artup" id="artUp" title="Upload cover image" aria-label="Upload cover image">🖼️⬆</button>
     <div class="brandbar">
       <span id="brandBand" style="font-weight:900">Ticket</span> <span class="sf">· StageFill</span>
       <span class="lock">🔒 SECURE</span>
@@ -213,11 +219,24 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     var bb=document.getElementById('bbBuy'); if(bb) bb.textContent='🎟️ Real ticket at ArtsQuest ↗';
   }
 
-  // %BAND% image as the event art
+  // %BAND% image = the TOP THIRD of the ticket FRONT, behind the text. The act uploads it to
+  // differentiate their ticket; everything else stays identical (the brand standard).
   var art=document.getElementById('art');
-  if(img){ var im=new Image(); im.onload=function(){ art.style.backgroundImage='url("'+img+'")'; };
-    im.onerror=function(){ art.className='art artfallback'; }; im.src=img; art.style.backgroundImage='url("'+img+'")'; }
-  else { art.className='art artfallback'; }
+  function artKey(){ try{ return 'dd.tixart|'+slug(band)+'|'+(ev||date||'na'); }catch(e){ return 'dd.tixart|x'; } }
+  function setArt(src){ if(!src){ art.classList.remove('on'); return; } art.style.backgroundImage='url("'+src+'")'; art.classList.add('on'); }
+  var storedArt=null; try{ storedArt=localStorage.getItem(artKey()); }catch(e){}
+  var initialArt = img || storedArt;
+  if(initialArt){ var im=new Image(); im.onload=function(){ setArt(initialArt); }; im.onerror=function(){ art.classList.remove('on'); }; im.src=initialArt; setArt(initialArt); }
+  // the act (band role) gets an upload button → picks an image → it becomes the top-third cover, saved per show
+  (function(){ var up=document.getElementById('artUp'); if(!up) return;
+    if(!isBand){ up.classList.remove('on'); return; } up.classList.add('on');
+    up.onclick=function(){ var inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.style.display='none';
+      inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f) return;
+        var rd=new FileReader(); rd.onload=function(){ var data=rd.result; setArt(data);
+          try{ localStorage.setItem(artKey(), data); }catch(e){ try{ setArt(URL.createObjectURL(f)); }catch(_){} }   // dataURL persists; fall to object URL if too big
+          try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('🖼️ Cover set — it’s behind every fan’s ticket for this show 🌹'); }catch(e){}
+        }; rd.readAsDataURL(f); };
+      document.body.appendChild(inp); inp.click(); setTimeout(function(){ try{document.body.removeChild(inp);}catch(e){} },600); }; })();
 
   // seat block vs GA
   if(sec||row||seat){

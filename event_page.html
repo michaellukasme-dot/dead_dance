@@ -118,7 +118,7 @@ function render(E){
     try{ if(e.is_owner && window.SFFill){ SFFill.mount({slug:ev, side:(qs('ref')==='band'?'band':'venue'), isOwner:true}); } }catch(_e){} } }).catch(function(){}); })();
 function sfRSVP(ttId){ var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ alert('Offline — try again.'); return; }
   cl.rpc('sf_rsvp',{p_tt:ttId}).then(function(r){ var d=r&&r.data||{};
-    if(d.ok){ location.href='sf_ticket.html?t='+encodeURIComponent(d.token); }
+    if(d.ok){ location.href='ticket.html?band='+encodeURIComponent((E&&E.name)||'')+'&venue='+encodeURIComponent((E&&E.venue)||'')+'&date='+encodeURIComponent((E&&E.start)||'')+'&price=FREE&ev='+encodeURIComponent(location.href)+'&t='+encodeURIComponent(d.token); }
     else if(d.error==='full'){ alert('Sorry — the free allocation is full.'); }
     else if(d.error==='not_free'){ alert('That ticket needs checkout.'); }
     else if(d.error==='ticket_unavailable'){ alert('That ticket is no longer available.'); }

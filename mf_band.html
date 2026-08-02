@@ -471,7 +471,7 @@ window.slSaveSet=function(){
 function sfBuy(ttId){ fetch(SF_CHECKOUT,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+SF_ANON},body:JSON.stringify({ticket_type_id:ttId,qty:1,ref:'band'})})
   .then(function(r){return r.json();}).then(function(d){ if(d&&d.url){ location.href=d.url; } else { alert('Checkout unavailable right now.'); } }).catch(function(){ alert('Checkout unavailable right now.'); }); }
 function sfRSVP(ttId){ var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc)){ alert('Offline — try again.'); return; }
-  cl.rpc('sf_rsvp',{p_tt:ttId}).then(function(r){ var d=r&&r.data||{}; if(d.ok){ location.href='sf_ticket.html?t='+encodeURIComponent(d.token); } else { alert('Could not RSVP — please try again.'); } }).catch(function(){ alert('Could not RSVP right now.'); }); }
+  cl.rpc('sf_rsvp',{p_tt:ttId}).then(function(r){ var d=r&&r.data||{}; if(d.ok){ location.href=tixUrl()+'&t='+encodeURIComponent(d.token); } else { alert('Could not RSVP — please try again.'); } }).catch(function(){ alert('Could not RSVP right now.'); }); }
 document.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest&&ev.target.closest('.sftix'); if(!b) return;
   if(b.getAttribute('data-sample')==='1'){ alert('Sample of the ticketed treatment — real Stripe checkout activates when the band turns on ticketing in their console.'); return; }
   var id=b.getAttribute('data-tt')||''; if(!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)) return;
