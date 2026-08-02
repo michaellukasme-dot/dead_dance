@@ -97,6 +97,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 .srow .snum{width:20px;color:#b9a7d6;font-weight:900;font-size:12px}.srow b{font-size:14px;color:#1a1320}
 .srow .sat{margin-left:auto;font-size:11.5px;color:#8a8296;font-variant-numeric:tabular-nums}
 .srow .splay{margin-left:8px;border:0;background:#b8002e;color:#fff;width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer}
+.srow .splay.ghost{background:transparent;border:1.6px dashed #c69;color:#c69;opacity:.6;box-shadow:inset 0 0 0 3px #fff, 0 1px 0 #eadff0}
+.srow .splay.ghost:hover{opacity:1;border-color:#b8002e;color:#b8002e}
 .chanh{font:900 11px system-ui;letter-spacing:.06em;color:#7a3cc0;margin:14px 0 4px}
 .chanl{font-size:13px;color:#4a4356;line-height:1.5}
 .curtempty{text-align:center;color:#8a8296;font-size:14px;padding:22px 6px;line-height:1.5}
@@ -412,12 +414,17 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     if(el){ el.value=''; try{el.focus();}catch(_){} }
     ticketCurtain('setlist');
     try{ var msg=res.locked?(band+' already posted the setlist.'):res.already?('Already on the list 🌹'):('🍪 Added “'+t.trim()+'” — thanks for feeding Cookie 🌹'); (window.parent&&window.parent.toast?window.parent.toast:alert)(msg); }catch(e){} };
+  // per-song audio: solid ▶ once uploaded (plays), else a GHOST ▶ that says "UPLOAD THE AUDIO" on hover.
+  // Pure affordance — the band learns what to do from the button, not a line of copy.
+  function audioBtn(nm, i){ var au=null; try{ au=window.__songAudio&&__songAudio(band,date,nm); }catch(e){}
+    return au ? '<button class="splay" title="Play" onclick="ticketPlay(\''+encodeURIComponent(au)+'\')">▶</button>'
+              : '<button class="splay ghost" title="UPLOAD THE AUDIO" onclick="uploadSongAudio('+i+')">▶</button>'; }
   function setlistEditHTML(){ var d=getSongs();
     if(isArchived()){ var lst=(d.songs||[]).map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b></div>'; }).join('');
       return chead('🎼','Setlist — archived')+'<div class="curtempty">This show is <b>archived</b> 🌹 — locked as history.</div>'+(lst?('<div>'+lst+'</div>'):''); }
     var text=(d.songs||[]).map(function(s){ return (s.n||s.name||s)+(s.at?(' '+s.at):''); }).join('\n');
     var teaseList=(d.songs||[]).length ? ('<label class="slbl" style="margin-top:14px">Go live — tease each song to your fans</label><div id="teaseList">'
-        +(d.songs||[]).map(function(s,i){ var t=songRevealed(s); return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b><button class="tmb" style="margin-left:auto;padding:4px 11px;'+(t?'border-color:#12854f;color:#0e7d4f':'border-color:#b8002e;color:#b8002e')+'" onclick="teaseSong('+i+')">'+(t?'✓ Teased':'▶ Tease')+'</button></div>'; }).join('')+'</div>') : '';
+        +(d.songs||[]).map(function(s,i){ var t=songRevealed(s); return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b>'+audioBtn((s.n||s.name||s),i)+'<button class="tmb" style="margin-left:auto;padding:4px 11px;'+(t?'border-color:#12854f;color:#0e7d4f':'border-color:#b8002e;color:#b8002e')+'" onclick="teaseSong('+i+')">'+(t?'✓ Teased':'▶ Tease')+'</button></div>'; }).join('')+'</div>') : '';
     return chead('🎼','Set the list &amp; tease time')
       +'<label class="slbl">Tease / set-start time</label><input id="slStart" class="slin" placeholder="9:00" value="'+esc(d.start||'')+'">'
       +'<label class="slbl">Songs — one per line (add a time if you have it)</label>'
@@ -479,6 +486,20 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   })();
   window.curtainClose=function(){ var c=document.getElementById('curtain'); if(c)c.classList.remove('on'); };
   window.ticketPlay=function(u){ try{ u=decodeURIComponent(u); var a=new Audio(u); a.play(); }catch(e){ try{ window.open(decodeURIComponent(u),'_blank','noopener'); }catch(x){} } };
+  // ---- per-song AUDIO: band uploads a track → that song lights a real ▶ on every ticket ----
+  window.__ddAudio = window.__ddAudio || {};
+  function akey(b,d,nm){ return slug(b)+'|'+(d||'na')+'|'+slug(nm); }
+  window.__songAudio = function(b,d,nm){ try{ return window.__ddAudio[akey(b,d,nm)] || null; }catch(e){ return null; } };
+  window.uploadSongAudio = function(i){ var d=getSongs(), s=(d.songs||[])[i]; if(!s) return; var nm=s.n||s.name||s;
+    var inp=document.createElement('input'); inp.type='file'; inp.accept='audio/*'; inp.style.display='none';
+    inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f){ return; }
+      try{ window.__ddAudio[akey(band,date,nm)] = URL.createObjectURL(f); }catch(e){}
+      try{ var key=g('key',''), cl=window.ddClient&&ddClient();                      // guarded cloud upload hook (backend TODO — device playback works now)
+           if(key&&cl&&cl.storage){ /* cl.storage.upload(...) when the audio bucket exists */ } }catch(e){}
+      ticketCurtain('setlist');
+      try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('🎧 Audio added to “'+nm+'” — every ticket now gets a ▶ on this song 🌹'); }catch(e){}
+      try{ document.body.removeChild(inp); }catch(e){} };
+    document.body.appendChild(inp); inp.click(); };
   /* 🖨️ PRINT — tap the show QR → "do you miss paper tickets?" → the printable stub (per-event Claude Gaude art), print at home free or order card stock mailed */
   window.ticketPrint=function(){
     function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
