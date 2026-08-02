@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MusikFest 2026 — The Data · StageFill</title>
+<meta name="theme-color" content="#0c1020">
+<link rel="icon" href="rose-32.png">
+<script src="dd_telemetry.js"></script>
+<script>try{ var _C=window.supabase&&window.supabase.createClient; }catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _c;}; }catch(e){}</script>
+<script src="dd_datamodule.js"></script>
+<style>
+  :root{ --bg:#0c1020; --card:#141a2e; --line:#26304a; --ink:#eaf0ff; --mut:#8b96b4; --acc:#7c3aed; --gold:#f0a500; --green:#2fd08a; --blue:#38bdf8; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 15px 70px; }
+  .hero{ text-align:center; padding:32px 16px 8px; }
+  .kick{ color:var(--gold); font-weight:900; font-size:12px; letter-spacing:.18em; text-transform:uppercase; }
+  h1{ font-size:30px; margin:8px 0 4px; line-height:1.08; }
+  .hero p{ color:var(--mut); font-size:15px; margin:0 auto; max-width:520px; }
+  /* free top-line */
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:20px 0 6px; }
+  .stat{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 12px; text-align:center; }
+  .stat .v{ font-size:26px; font-weight:900; color:#fff; } .stat .l{ color:var(--mut); font-size:11.5px; font-weight:700; margin-top:3px; }
+  .free-tag{ display:inline-block; background:#12854f22; color:var(--green); border:1px solid #2fd08a55; font-weight:800; font-size:11px; padding:4px 10px; border-radius:999px; }
+  h2{ font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--mut); margin:30px 4px 10px; }
+  /* locked teasers */
+  .locks{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .lock{ position:relative; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; overflow:hidden; min-height:118px; }
+  .lock .fake{ filter:blur(7px); opacity:.5; pointer-events:none; }
+  .lock .bars{ display:flex; align-items:flex-end; gap:5px; height:44px; margin-top:8px; }
+  .lock .bars i{ flex:1; background:linear-gradient(180deg,#7c3aed,#38bdf8); border-radius:3px; }
+  .lock .over{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-align:center; padding:10px; }
+  .lock .over .t{ font-weight:800; font-size:13.5px; } .lock .over .h{ color:var(--mut); font-size:11px; }
+  .lock .over .k{ font-size:20px; }
+  /* tiers */
+  .tiers{ display:flex; flex-direction:column; gap:12px; }
+  .tier{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; }
+  .tier.hot{ border-color:var(--acc); box-shadow:0 0 0 1px var(--acc), 0 14px 34px #7c3aed33; }
+  .tier .top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .tier .name{ font-size:18px; font-weight:900; } .tier .price{ font-size:16px; font-weight:900; color:var(--gold); white-space:nowrap; }
+  .tier .price small{ color:var(--mut); font-weight:700; font-size:11px; }
+  .tier .tl{ color:var(--mut); font-size:13.5px; margin:4px 0 10px; }
+  .tier ul{ margin:0 0 12px; padding-left:18px; color:#cdd6ef; font-size:13.5px; line-height:1.7; }
+  .tier .cta{ display:block; width:100%; border:0; border-radius:12px; padding:13px; font-weight:900; font-size:15px; cursor:pointer; color:#fff; background:var(--acc); }
+  .tier .cta.ghost{ background:#1c2440; color:var(--blue); border:1px solid var(--line); }
+  .tier .cta.have{ background:#12321f; color:var(--green); cursor:default; }
+  .umbrella{ background:linear-gradient(160deg,#1a1330,#0e1630); border-color:#5b3fb0; }
+  .umbrella .badge{ display:inline-block; background:var(--gold); color:#241535; font-weight:900; font-size:10.5px; padding:3px 9px; border-radius:999px; letter-spacing:.04em; }
+  .note{ color:var(--mut); font-size:12px; text-align:center; margin-top:18px; line-height:1.6; }
+  /* modal */
+  .mv{ position:fixed; inset:0; background:#05060ccc; display:none; align-items:center; justify-content:center; padding:18px; z-index:60; }
+  .mv.on{ display:flex; } .mc{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; max-width:400px; width:100%; }
+  .mc h3{ margin:0 0 6px; } .mc p{ color:var(--mut); font-size:13.5px; margin:0 0 12px; }
+  .mc input{ width:100%; padding:12px; border-radius:11px; border:1px solid var(--line); background:#0e1428; color:#fff; font-size:15px; margin-bottom:10px; }
+  .mc .go{ width:100%; border:0; border-radius:11px; padding:13px; font-weight:900; font-size:15px; color:#fff; background:var(--acc); cursor:pointer; }
+  .mc .x{ float:right; background:none; border:0; color:var(--mut); font-size:20px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="kick">🌹 StageFill · The Data Module</div>
+    <h1>MusikFest 2026 — the numbers.</h1>
+    <p>This free page is the top of the report. The full breakdown lives one click below. <span class="free-tag">Free · you're reading it</span></p>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="note" style="margin-top:8px">Illustrative figures — the live report reads from verified GPS dwell, not estimates.</div>
+
+  <h2>🔒 Behind the wall</h2>
+  <div class="locks" id="locks"></div>
+
+  <h2>Get more — or get most</h2>
+  <div class="tiers" id="tiers"></div>
+
+  <div class="note">
+    Checkout opens shortly (payment processing pending) — for now we capture your request and send an invoice.<br>
+    🌹 DeadDance · StageFill — verified festival data, from Bethlehem.
+  </div>
+</div>
+
+<div class="mv" id="mv"><div class="mc">
+  <button class="x" onclick="closeM()">×</button>
+  <h3 id="mvTitle">Unlock</h3>
+  <p id="mvSub"></p>
+  <input id="mvEmail" type="email" placeholder="Work email" autocomplete="email">
+  <button class="go" id="mvGo">Send my request →</button>
+</div></div>
+
+<script>
+(function(){
+  var DM=window.DDDataModule, $=function(i){return document.getElementById(i);};
+  if(!DM){ $('tiers').textContent='Module unavailable.'; return; }
+  var FEST='MusikFest 2026';
+
+  // free top-line (illustrative)
+  var STATS=[['1.1M','Total visits, 10 days'],['Sat Aug 8','Busiest day'],['Wind Creek','Top-draw stage']];
+  $('stats').innerHTML=STATS.map(function(s){return '<div class="stat"><div class="v">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>';}).join('');
+
+  // locked teasers (blurred fake charts + overlay)
+  function fakeBars(n){ var h=''; for(var i=0;i<(n||9);i++){ h+='<i style="height:'+(25+Math.round(Math.random()*70))+'%"></i>'; } return h; }
+  $('locks').innerHTML=DM.locked().map(function(p){
+    return '<div class="lock"><div class="fake"><div style="font-weight:800;font-size:12px">'+p.title+'</div><div class="bars">'+fakeBars(9)+'</div></div>'+
+      '<div class="over"><div class="k">🔒</div><div class="t">'+p.title+'</div><div class="h">'+p.hint+'</div></div></div>';
+  }).join('');
+
+  // tiers
+  function tierCard(t){ var hot=(t.key==='more'), umb=(t.key==='city');
+    var cta = t.key==='less'
+      ? '<button class="cta have">✓ You have this</button>'
+      : '<button class="cta'+(umb?'':' ghost')+'" onclick="openM(\''+t.key+'\')">'+(umb?'License the City →':(t.key==='most'?'Talk about MOST →':'Unlock MORE →'))+'</button>';
+    return '<div class="tier'+(hot?' hot':'')+(umb?' umbrella':'')+'">'+
+      (umb?'<span class="badge">BEST VALUE · DISTRICT</span>':'')+
+      '<div class="top"><span class="name">'+t.label+'</span><span class="price">'+(t.price===0?'Free':DM.money(t.price))+' <small>'+(t.price===0?'':t.unit)+'</small></span></div>'+
+      '<div class="tl">'+t.tagline+'</div>'+
+      '<ul>'+t.includes.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+cta+'</div>';
+  }
+  $('tiers').innerHTML=DM.tiers().map(tierCard).join('');
+
+  // unlock modal → capture intent (guarded; Stripe parked)
+  var curTier=null;
+  window.openM=function(k){ curTier=k; var t=DM.tier(k); $('mvTitle').textContent=t.label;
+    $('mvSub').textContent=(k==='city'?'One subscription for every festival and farmers market your city runs.':'We\'ll send your invoice for '+DM.priceLabel(k)+'.');
+    $('mv').classList.add('on'); setTimeout(function(){ try{$('mvEmail').focus();}catch(e){} },100); };
+  window.closeM=function(){ $('mv').classList.remove('on'); };
+  $('mv').addEventListener('click',function(e){ if(e.target===$('mv')) closeM(); });
+  $('mvGo').onclick=function(){ var email=($('mvEmail').value||'').trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ alert('Enter your email so we can send it. 🌹'); try{$('mvEmail').focus();}catch(e){} return; }
+    var r=DM.requestUnlock({tier:curTier, festival:FEST, email:email});
+    closeM(); alert(r.message||'Request received 🌹'); };
+})();
+</script>
+</body>
+</html>
