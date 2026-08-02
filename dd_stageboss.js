@@ -95,7 +95,8 @@
 
   // ---- default slot generation (3 parts/day) --------------------------------
   function defaultSlots(days, per){
-    var parts = per===2 ? [['15:00','Afternoon','mid'],['19:30','Night','night']]
+    var parts = per===1 ? [['20:00','Night','night']]
+              : per===2 ? [['15:00','Afternoon','mid'],['19:30','Night','night']]
               : per===4 ? [['12:00','Midday','afternoon'],['15:00','Afternoon','mid'],['18:00','Evening','evening'],['21:00','Headliner','night']]
               :           [['13:00','Afternoon','afternoon'],['16:30','Evening','mid'],['20:00','Night','night']];
     var out=[]; (days||[]).forEach(function(d){ parts.forEach(function(p){ out.push({day:d,start:p[0],label:p[1],part:p[2]}); }); });
@@ -108,7 +109,8 @@
     var slots = (s.slots&&s.slots.length) ? s.slots.slice() : defaultSlots(days, s.slotsPerDay||3);
     return { id:String(s.id||s.name||'stage'), name:s.name||s.id||'Stage', cap:num(s.cap,300),
              cover:(s.cover!=null? num(s.cover): null),   // per-stage ticket price; null = use festival default; 0 = FREE stage
-             lean:s.lean||[], vibe:s.vibe||'any', days:days, slots:slots };
+             lean:s.lean||[], vibe:s.vibe||'any', days:days, slots:slots,
+             karaokeplatz:!!s.karaokeplatz, genres:(s.genres||[]).slice(), nights:(s.nights||null) };  // Karaokeplatz: every night a genre
   }
 
   // ---- THE PLAN: fill every stage×slot to max draw within the acts budget ----
@@ -169,13 +171,25 @@
     var karOn = opts.karaoke !== false;
     var karAct = opts.karaokeAct || KARAOKE;
     var karFee = num(opts.karaokeFee, num(karAct.fee, DEFAULTS.karaokeFee));
+    function capw(g){ g=String(g||''); return g.charAt(0).toUpperCase()+g.slice(1); }
+    function genreLabel(g){ try{ if(root.DDGenrePack && root.DDGenrePack.theme){ var t=root.DDGenrePack.theme(g); if(t && t.key && t.label) return t.label; } }catch(e){} return capw(g); }
     if(karOn){
       stages.forEach(function(st, si){
+        var days=[]; st.slots.forEach(function(sl){ if(days.indexOf(sl.day)<0) days.push(sl.day); });  // night order
         st.slots.forEach(function(sl, li){
           if(slotFilled[si][li]) return;                     // paid act already there
           if(spend + karFee > budget) return;                // 0 by default → always fits
-          var kdraw = drawIndex(karAct, region), kfit = fitScore(karAct, st, sl);
-          slotFilled[si][li] = { si:si, li:li, act:karAct, fee:karFee, draw:kdraw, fit:kfit,
+          var act = karAct;
+          if(st.karaokeplatz){                               // KARAOKEPLATZ — every night a different genre
+            var g = (st.nights && st.nights[sl.day]) ? st.nights[sl.day]
+                  : (st.genres && st.genres.length ? st.genres[days.indexOf(sl.day) % st.genres.length] : null);
+            var lbl = g ? genreLabel(g) : 'Open Mic';
+            act = { name: lbl+' Karaoke', genre: lbl+' Night', size:'Solo', energy:'High',
+                    fee:karFee, karaoke:true, karaokeplatz:true, genreKey:(g||null),
+                    claimedBy:'Michael Lukas', host:'DeadDance' };
+          }
+          var kdraw = drawIndex(act, region), kfit = fitScore(act, st, sl);
+          slotFilled[si][li] = { si:si, li:li, act:act, fee:karFee, draw:kdraw, fit:kfit,
                                  value:kdraw*kfit, filler:true };
           spend += karFee;
         });
@@ -199,10 +213,11 @@
         actCost+=c.fee; gate+=g; bar+=b; att+=slotAtt;
         return { day:sl.day, start:sl.start, label:sl.label, part:sl.part, filler:!!c.filler,
                  act:{ name:a.name, genre:a.genre, size:a.size, energy:a.energy, city:a.city, state:a.state,
-                       karaoke:!!a.karaoke, claimedBy:a.claimedBy||null },
+                       karaoke:!!a.karaoke, karaokeplatz:!!a.karaokeplatz, genreKey:a.genreKey||null, claimedBy:a.claimedBy||null },
                  fee:c.fee, draw:c.draw, fit:Math.round(c.fit*100)/100, expAtt:slotAtt,
-                 why: a.karaoke ? ('House karaoke — crowd-as-act, fills '+st.name+' '+sl.part+' at ~$'+c.fee)
-                                : whyLine(a, st, sl, region) };
+                 why: a.karaokeplatz ? ('Karaokeplatz — '+String(a.genre)+', crowd-as-act at ~$'+c.fee)
+                    : a.karaoke      ? ('House karaoke — crowd-as-act, fills '+st.name+' '+sl.part+' at ~$'+c.fee)
+                    :                  whyLine(a, st, sl, region) };
       });
       var ndays=Object.keys(dayset).length; stageDays+=ndays;
       var house=num(opts.housePerStageDay,DEFAULTS.housePerStageDay)*ndays;

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Karaokeplatz — every night a different genre</title>
+<link rel="icon" href="rose-32.png">
+<script src="dd_telemetry.js"></script><!-- optional; guarded -->
+<script src="dd_genrepack.js"></script><!-- the genre content-pack layer (songbook + trivia + theme) -->
+<style>
+  :root{ --accent:#8b5cf6; --ink:#1c1730; --muted:#6b6684; --line:#e7e3f2; --bg:#faf8ff; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  .wrap{ max-width:560px; margin:0 auto; padding:0 16px 60px; }
+  header.hero{ background:linear-gradient(160deg,var(--accent),#241535); color:#fff; padding:26px 18px 22px; border-radius:0 0 22px 22px; box-shadow:0 10px 30px #24153533; }
+  .kick{ font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:.85; font-weight:800; }
+  .hero h1{ margin:6px 0 2px; font-size:27px; line-height:1.1; }
+  .hero .sub{ opacity:.9; font-size:14px; }
+  .pills{ display:flex; gap:8px; overflow-x:auto; padding:14px 2px 4px; margin:0 -2px; }
+  .pill{ flex:0 0 auto; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:8px 14px; font-weight:800; font-size:13px; cursor:pointer; }
+  .pill.on{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  h2{ font-size:16px; margin:22px 2px 8px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+  .song{ display:flex; align-items:center; justify-content:space-between; padding:10px 2px; border-bottom:1px dashed var(--line); }
+  .song:last-child{ border-bottom:0; }
+  .song .t{ font-weight:700; } .song .a{ color:var(--muted); font-size:12.5px; }
+  .q-btn{ border:0; background:var(--accent); color:#fff; font-weight:800; border-radius:10px; padding:8px 12px; font-size:13px; cursor:pointer; }
+  .choice{ display:block; width:100%; text-align:left; margin:8px 0; padding:13px 14px; border:1.5px solid var(--line); background:#fff; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; }
+  .choice.right{ border-color:#12a17a; background:#e9f9f2; } .choice.wrong{ border-color:#d64545; background:#fdecec; }
+  .prog{ color:var(--muted); font-size:13px; font-weight:700; }
+  .big{ font-size:19px; font-weight:800; margin:6px 0 10px; }
+  .sched{ display:flex; gap:8px; overflow-x:auto; padding:8px 2px; }
+  .night{ flex:0 0 auto; border:1px solid var(--line); border-radius:12px; padding:8px 12px; background:#fff; text-align:center; min-width:96px; }
+  .night .d{ font-size:11px; color:var(--muted); font-weight:700; } .night .g{ font-weight:800; font-size:13px; }
+  .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:#241535; color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:50; }
+  .toast.show{ opacity:1; }
+  .foot{ color:var(--muted); font-size:12px; text-align:center; margin-top:26px; line-height:1.5; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap" style="padding:0">
+    <div class="kick">🎪 Karaokeplatz</div>
+    <h1 id="title">Tonight — Open Mic</h1>
+    <div class="sub" id="subtitle">Same tent. Every night a different genre. The crowd is the act.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="pills" id="pills"></div>
+
+  <h2>🎤 Tonight’s songbook</h2>
+  <div class="card" id="songbook"></div>
+
+  <h2>🧠 Trivia — <span id="trivGenre">tonight</span> <span class="prog" id="trivProg"></span></h2>
+  <div class="card" id="trivia"></div>
+
+  <h2>🗓️ This week at the Karaokeplatz</h2>
+  <div class="sched" id="sched"></div>
+
+  <div class="foot">
+    One tent, one set of games — only the <b>content pack</b> changes. Same karaoke, same trivia, new genre every night.<br>
+    🌹 DeadDance · StageFill — the low-budget stage that’s packed every night.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var GP = window.DDGenrePack;
+  var $ = function(id){ return document.getElementById(id); };
+  function q(k){ try{ return new URLSearchParams(location.search).get(k); }catch(e){ return null; } }
+  function nrm(s){ return String(s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+  function fanId(){ try{ var id=localStorage.getItem('dd.fanid'); if(!id){ id='f'+Date.now().toString(36); localStorage.setItem('dd.fanid',id);} return id; }catch(e){ return null; } }
+  function toast(t){ var el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(function(){ el.classList.remove('show'); },1600); }
+
+  if(!GP){ $('title').textContent='Karaokeplatz'; $('songbook').textContent='Content pack unavailable.'; return; }
+
+  // genres to rotate: ?genres=dead,country,... else every seeded genre
+  var genres = (q('genres') ? q('genres').split(',') : GP.keys()).map(nrm).filter(function(g){ return GP.has(g); });
+  if(!genres.length) genres = GP.keys();
+  var startISO = q('start') || new Date().toISOString().slice(0,10);
+  var schedule = GP.rotate(genres, startISO, Math.max(7, genres.length));
+
+  // tonight: explicit ?genre wins; else the scheduled night for today; else rotation by day
+  var todayISO = new Date().toISOString().slice(0,10);
+  var current = (q('genre') && GP.has(q('genre'))) ? nrm(q('genre'))
+              : (GP.nightGenre(schedule, todayISO) || genres[ (new Date().getUTCDate()) % genres.length ]);
+
+  function skin(g){ var t=GP.theme(g); document.documentElement.style.setProperty('--accent', t.color);
+    $('title').textContent = t.icon+' '+t.label+' Night';
+    $('subtitle').textContent = 'Karaokeplatz · '+t.label+' songbook + '+t.label+' trivia — same games, new deck.';
+    $('trivGenre').textContent = t.label; }
+
+  function renderPills(){ var box=$('pills'); box.innerHTML='';
+    genres.forEach(function(g){ var t=GP.theme(g); var b=document.createElement('button');
+      b.className='pill'+(g===current?' on':''); b.textContent=t.icon+' '+t.label;
+      b.onclick=function(){ current=g; go(); }; box.appendChild(b); }); }
+
+  function renderSongbook(){ var box=$('songbook'); box.innerHTML='';
+    GP.karaoke(current).forEach(function(s){ var row=document.createElement('div'); row.className='song';
+      row.innerHTML='<span><span class="t">'+s.title+'</span><br><span class="a">'+s.artist+'</span></span>';
+      var b=document.createElement('button'); b.className='q-btn'; b.textContent='🎤 Queue';
+      b.onclick=function(){ toast('Queued — '+s.title+' 🎤'); try{ GP.logPlay(fanId(), current, 'karaoke'); }catch(e){} };
+      row.appendChild(b); box.appendChild(row); }); }
+
+  // ---- TRIVIA — the SAME game, genre deck ----
+  var deck=[], qi=0, score=0;
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function renderTrivia(){ var box=$('trivia'); deck=shuffle(GP.trivia(current).slice()); qi=0; score=0;  // fresh order each play
+    if(!deck.length){ box.textContent='No trivia deck for this genre yet.'; $('trivProg').textContent=''; return; }
+    step(); }
+  function step(){ var box=$('trivia'); var t=deck[qi]; $('trivProg').textContent='('+(qi+1)+'/'+deck.length+')';
+    var h='<div class="big">'+t.q+'</div>';
+    box.innerHTML=h; t.choices.forEach(function(c,ix){ var b=document.createElement('button'); b.className='choice'; b.textContent=c;
+      b.onclick=function(){ pick(ix, b); }; box.appendChild(b); }); }
+  function pick(ix, btn){ var t=deck[qi];
+    if(qi===0){ try{ GP.logPlay(fanId(), current, 'trivia'); }catch(e){} }   // log a real play only when they actually answer
+    var btns=$('trivia').querySelectorAll('.choice');
+    btns.forEach(function(b,i){ b.disabled=true; if(i===t.a) b.classList.add('right'); });
+    if(ix===t.a){ score++; } else { btn.classList.add('wrong'); }
+    setTimeout(function(){ qi++; if(qi<deck.length) step(); else done(); }, 900); }
+  function done(){ var t=GP.theme(current); $('trivProg').textContent='';
+    $('trivia').innerHTML='<div class="big">You scored '+score+' / '+deck.length+' on '+t.label+' Night 🎤</div>'+
+      '<button class="q-btn" id="again">Play again</button>';
+    $('again').onclick=renderTrivia; }
+
+  function renderSched(){ var box=$('sched'); box.innerHTML='';
+    schedule.slice(0,7).forEach(function(n){ var t=GP.theme(n.genre); var el=document.createElement('div'); el.className='night';
+      var d=new Date(n.date+'T00:00:00'); var dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+      el.innerHTML='<div class="d">'+dow+' '+(d.getMonth()+1)+'/'+d.getDate()+'</div><div class="g" style="color:'+t.color+'">'+t.icon+' '+t.label+'</div>';
+      el.onclick=function(){ current=n.genre; go(); }; box.appendChild(el); }); }
+
+  function go(){ skin(current); renderPills(); renderSongbook(); renderTrivia(); }
+  skin(current); renderPills(); renderSongbook(); renderTrivia(); renderSched();
+})();
+</script>
+</body>
+</html>

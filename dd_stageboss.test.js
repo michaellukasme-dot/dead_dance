@@ -5,6 +5,7 @@
 var assert = require('assert');
 global.window = {};
 require('./acts_seed.js');
+require('./dd_genrepack.js');            // genre labels (pretty "HipHop" etc.) for Karaokeplatz
 var POOL = global.window.DDActs;
 var SB = require('./dd_stageboss.js');
 
@@ -161,6 +162,33 @@ ok('net after StageFill == houseNet - fee', R.netAfterStageFill === (R.pnl.netTo
   ok('free platz → gate $0, not ticketed', platz.gate===0 && platz.ticketed===false);
   ok('paid Wind Creek → gate > 0, ticketed', steel.gate>0 && steel.ticketed===true && steel.cover===59);
   ok('festival mixes free + paid in one plan', mf.pnl.gate === (platz.gate+steel.gate));
+})();
+
+// ---- KARAOKEPLATZ — one tent, every night a different genre ----
+(function(){
+  var kp=SB.plan({ name:'Platz Fest', budget:0, days:['2026-08-06','2026-08-07','2026-08-08'],
+    stages:[ { id:'kplatz', name:'Karaokeplatz', cap:400, cover:0, karaokeplatz:true,
+               genres:['dead','country','hiphop'], slotsPerDay:1 } ] }, []);
+  var st=kp.stages[0];
+  ok('Karaokeplatz fills every night at $0', st.slotsFilled===st.slotsTotal && kp.actSpend===0);
+  var names=st.slots.map(function(s){ return s.act && s.act.name; });
+  ok('night 1 = Dead Karaoke',    names[0]==='Dead Karaoke');
+  ok('night 2 = Country Karaoke', names[1]==='Country Karaoke');
+  ok('night 3 = HipHop Karaoke',  names[2]==='HipHop Karaoke');
+  ok('each night carries a genreKey + karaokeplatz flag',
+     st.slots.every(function(s){ return s.act && s.act.karaokeplatz && s.act.genreKey; }));
+  ok('Karaokeplatz claimed by the house', st.slots.every(function(s){ return s.act.claimedBy==='Michael Lukas'; }));
+  // explicit per-night override via nights{}
+  var ov=SB.plan({ name:'Ov', budget:0, days:['2026-08-06','2026-08-07'],
+    stages:[ { id:'k', name:'Karaokeplatz', cap:300, cover:0, karaokeplatz:true,
+               nights:{'2026-08-06':'latin','2026-08-07':'rock'}, slotsPerDay:1 } ] }, []);
+  var on=ov.stages[0].slots.map(function(s){ return s.act.name; });
+  ok('nights{} override respected', on[0]==='Latin Karaoke' && on[1]==='Rock Karaoke');
+  // a host-fee Karaokeplatz still honors the hard budget cap
+  var hf=SB.plan({ name:'HF', budget:100, days:['2026-08-06','2026-08-07'],
+    stages:[ { id:'k', name:'Karaokeplatz', cap:300, cover:0, karaokeplatz:true, genres:['dead'], slotsPerDay:1 } ] },
+    [], {karaokeFee:80});
+  ok('host-fee Karaokeplatz never overspends', hf.actSpend<=100);
 })();
 
 console.log('\n dd_stageboss harness: '+pass+' passed, '+fail+' failed');
