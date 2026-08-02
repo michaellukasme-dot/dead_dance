@@ -1,0 +1,4 @@
+# NEVER commit real secrets. The key lives in Supabase secrets / 1Password, not here.
+.env
+.env.*
+!.env.example

@@ -71,6 +71,12 @@ returns jsonb language sql security definer set search_path=public as $$
     'official', (select count(*) from public.dd_gd_video where official));
 $$;
 
-grant execute on function public.sf_gd_video_set(text,text,date,text,text,text,boolean,boolean,text,text) to anon, authenticated, service_role;
-grant execute on function public.sf_gd_video_get(text)      to anon, authenticated, service_role;
-grant execute on function public.sf_gd_video_coverage()     to anon, authenticated, service_role;
+-- PRIVATE by default. This is an UNRESOLVED-LEGAL dataset: keep it admin-only (service_role) until
+-- the how/if decision is made with counsel. The edge function (yt-match) uses the service role, so it
+-- still writes. When you decide to surface it publicly, add a dedicated public read RPC then — not before.
+revoke execute on function public.sf_gd_video_set(text,text,date,text,text,text,boolean,boolean,text,text) from public;
+revoke execute on function public.sf_gd_video_get(text)  from public;
+revoke execute on function public.sf_gd_video_coverage() from public;
+grant  execute on function public.sf_gd_video_set(text,text,date,text,text,text,boolean,boolean,text,text) to service_role;
+grant  execute on function public.sf_gd_video_get(text)  to service_role;
+grant  execute on function public.sf_gd_video_coverage() to service_role;

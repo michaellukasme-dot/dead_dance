@@ -61,7 +61,7 @@
   function who(){ try{ var k='dd.adopter',v=localStorage.getItem(k); if(!v){v='fan-'+Math.random().toString(36).slice(2,8);localStorage.setItem(k,v);} return v; }catch(e){return 'anon';} }
   function claims(){ try{ return JSON.parse(localStorage.getItem('dd.adopt')||'{}'); }catch(e){ return {}; } }
   function saveClaim(slug){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.adopt',JSON.stringify(c));}catch(e){}
-    try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:who()}); }catch(e){} }
+    try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:who()}).then(function(){}).catch(function(){}); }catch(e){} }
   var TICKET='https://deaddance.app/ticket.html?price=FREE&band=';
   function tixUrl(name){ return TICKET+encodeURIComponent(name); }
   function cp(t){ try{ navigator.clipboard.writeText(t); }catch(e){ try{ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove(); }catch(_){} } }
