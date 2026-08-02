@@ -38,9 +38,9 @@
   </div>
   <div class="prog"><div class="bar"><i id="bar"></i></div><div class="pnum" id="pnum">Loading the lineup…</div></div>
   <div class="steps" style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px;font-size:13px;line-height:1.65;box-shadow:0 5px 14px rgba(42,27,61,.05)">
-    <b style="font-size:13.5px">How it works — 2 minutes, no typing:</b>
-    <div style="margin-top:5px"><b>1.</b> <b style="color:var(--acc)">📋 Copy · their page</b> → paste on <b>the band's Facebook</b> → Post</div>
-    <div><b>2.</b> <b style="color:var(--acc)">📋 Copy · your page</b> → paste on <b>your Facebook</b> → Post</div>
+    <b style="font-size:13.5px">How it works — 2 minutes, no typing. The buttons copy a ready-made message; you just paste it into Facebook:</b>
+    <div style="margin-top:5px"><b>1.</b> Tap <b style="color:var(--acc)">📋 Copy the post for the band</b> → open the band's Facebook → <b>paste</b> → Post</div>
+    <div><b>2.</b> Tap <b style="color:var(--acc)">📋 Copy the post for your wall</b> → open <b>your</b> Facebook → <b>paste</b> → Post</div>
     <div><b>3.</b> Tap <b style="color:var(--rose)">🌹 Done</b></div>
     <div><b>4.</b> Send this page to <b>2 friends</b> 🌹</div>
   </div>
@@ -99,9 +99,9 @@
       +(b.kind?('<div class="bk">'+esc(b.kind)+'</div>'):'')
       +(claimed?'<div class="badge">✓ Adopted — thank you 🌹</div>'
         :'<div class="row">'
-           +'<button class="btn p" onclick="ADOPT.copyBand(\''+esc(b.slug)+'\')">1️⃣ 📋 Copy · their page</button>'
-           +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Their FB ↗</a>'
-           +'<button class="btn p" onclick="ADOPT.copyOwn(\''+esc(b.slug)+'\')">2️⃣ 📋 Copy · your page</button>'
+           +'<button class="btn p" onclick="ADOPT.copyBand(\''+esc(b.slug)+'\')">1️⃣ 📋 Copy the post for the band</button>'
+           +'<a class="btn g" href="'+fbLink(b)+'" target="_blank" rel="noopener">Open the band\'s Facebook ↗</a>'
+           +'<button class="btn p" onclick="ADOPT.copyOwn(\''+esc(b.slug)+'\')">2️⃣ 📋 Copy the post for your wall</button>'
            +'<button class="btn rose" onclick="ADOPT.claim(\''+esc(b.slug)+'\')">🌹 Done</button>'
          +'</div>')
       +'</div>';
@@ -126,7 +126,7 @@
     host.innerHTML=html;
   }
   window.ADOPT={
-    copyBand:function(slug){ var b=find(slug); if(!b)return; cp(msgBand(b.name)); try{ alert('📋 Copied. Open '+b.name+'’s Facebook → paste → Post.\nThen tap 📋 Copy · your page.'); }catch(e){} },
+    copyBand:function(slug){ var b=find(slug); if(!b)return; cp(msgBand(b.name)); try{ alert('📋 Copied. Open '+b.name+'’s Facebook → paste → Post.\nThen tap 📋 Copy the post for your wall.'); }catch(e){} },
     copyOwn:function(slug){ var b=find(slug); if(!b)return; cp(msgOwn(b.name)); try{ alert('📋 Copied. Open YOUR Facebook → paste → Post.\nThen tap 🌹 Done. 🌹'); }catch(e){} },
     claim:function(slug){ var b=find(slug), nm=((b&&b.name)||'That act');
       saveClaim(slug, function(status, err){ render();
@@ -142,8 +142,16 @@
       if(navigator.share){ navigator.share({title:'Adopt a Band · MusikFest',text:t,url:u}).catch(function(){}); }
       else { try{ navigator.clipboard.writeText(t+' '+u); alert('🔗 Link copied — paste it to a few friends.'); }catch(e){ alert(u); } } }
   };
-  // pull shared claims so two friends don't adopt the same act (guarded; local-first without the spine)
-  try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc){ cl.rpc('dd_bandadopt_list',{}).then(function(r){ try{ var rows=(r&&r.data)||[]; var c=claims(); rows.forEach(function(x){ if(x&&x.slug&&!c[x.slug]) c[x.slug]={by:x.by||'someone',ts:Date.now()}; }); localStorage.setItem('dd.adopt',JSON.stringify(c)); render(); }catch(e){} }).catch(function(){}); } }catch(e){}
+  // On load: (1) RETROACTIVELY push any of THIS person's own past taps up to the server — recovers
+  //   claims made before the write was fixed, with ZERO action from the user (just re-open the page);
+  //   then (2) pull the shared list so friends don't double-adopt. Both idempotent + guarded.
+  function flushMine(cl){ try{ var c=claims(), me=who(); Object.keys(c).forEach(function(slug){ var e=c[slug];
+    if(e && e.by===me){ try{ cl.rpc('dd_bandadopt_claim',{p_slug:slug,p_by:me}).then(function(){}).catch(function(){}); }catch(_){} } }); }catch(e){} }
+  try{ var cl=window.ddClient&&ddClient();
+    if(cl&&cl.rpc){
+      flushMine(cl);
+      cl.rpc('dd_bandadopt_list',{}).then(function(r){ try{ var rows=(r&&r.data)||[]; var c=claims(); rows.forEach(function(x){ if(x&&x.slug&&!c[x.slug]) c[x.slug]={by:x.by||'someone',ts:Date.now()}; }); localStorage.setItem('dd.adopt',JSON.stringify(c)); render(); }catch(e){} }).catch(function(){});
+    } }catch(e){}
   render();
 })();
 </script>

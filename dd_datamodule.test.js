@@ -27,18 +27,38 @@ ok('single event dashboard → MORE (per event)', DM.quote({events:1}).tier==='m
 ok('recurring event → MORE (annual)', DM.quote({events:1,recurring:true}).price===6000);
 ok('nothing → LESS (free hook)', DM.quote({}).tier==='less' && DM.quote({}).price===0);
 
-// guarded lead capture (no client → captured:false, but ok + message)
+// TRUTHFUL lead capture (post silent-drop fix).
+// The synchronous return is only a RECEIPT — captured:false = NOT yet confirmed. With NO client the RPC cannot
+// reach the server, so the message must be HONEST (no false invoice promise) and cb must fire with null (offline).
 (function(){
-  var r=DM.requestUnlock({tier:'more', email:'jared@example.org', festival:'PA Bacon Fest'});
-  ok('requestUnlock ok, not sent without a client', r.ok===true && r.captured===false);
-  ok('paid tier → invoice message (EIN pending)', /invoice|checkout/i.test(r.message));
+  var cbStatus='__none__', cbExtra=null;
+  var r=DM.requestUnlock({tier:'more', email:'jared@example.org', festival:'PA Bacon Fest'},
+    function(status, err, extra){ cbStatus=status; cbExtra=extra; });
+  ok('requestUnlock ok, NOT captured without a client', r.ok===true && r.captured===false);
+  ok('no client → HONEST offline message (no false invoice/"noted" promise)',
+     /(reach|retry|email)/i.test(r.message) && !/invoice/i.test(r.message));
+  ok('no client → cb reports null (offline), never a fake success', cbStatus===null);
   var f=DM.requestUnlock({tier:'less'});
-  ok('free tier → "you already have this" message', /free report/i.test(f.message));
+  ok('free tier → "you already have this" message, captured:false', /free report/i.test(f.message) && f.captured===false);
   ok('unknown tier → error', DM.requestUnlock({tier:'nope'}).ok===false);
 })();
 
 // determinism
 ok('deterministic quote', JSON.stringify(DM.quote({city:true}))===JSON.stringify(DM.quote({city:true})));
 
-console.log('\n dd_datamodule harness: '+pass+' passed, '+fail+' failed');
-if(fail){ console.log(' ❌ FAILURES ABOVE'); process.exit(1); } else { console.log(' ✅ all green'); }
+// SUCCESS/REJECT PATHS via a fake client — the invoice line appears ONLY on a real server-confirmed capture.
+function fakeClient(result){ return { rpc:function(){ return Promise.resolve(result); } }; }
+function fakeThrow(){ return { rpc:function(){ return Promise.reject(new Error('network')); } }; }
+function run(client){ return new Promise(function(res){ global.window.ddClient=function(){ return client; };
+  DM.requestUnlock({tier:'more', email:'x@y.z'}, function(status, err, extra){ res({status:status, extra:extra}); }); }); }
+
+Promise.resolve()
+ .then(function(){ return run(fakeClient({ error:null, data:{ ok:true, id:1 } })); })
+ .then(function(o){ ok('server SUCCESS → cb(true) AND invoice line delivered', o.status===true && o.extra && /invoice/i.test(o.extra.message)); })
+ .then(function(){ return run(fakeClient({ error:{ message:'denied' } })); })
+ .then(function(o){ ok('server REJECT → cb(false), no invoice claim', o.status===false && !(o.extra&&/invoice/i.test(o.extra.message||''))); })
+ .then(function(){ return run(fakeThrow()); })
+ .then(function(o){ ok('network throw → cb(null) offline, no invoice claim', o.status===null && !(o.extra&&/invoice/i.test(o.extra.message||''))); })
+ .then(function(){ global.window.ddClient=undefined;
+   console.log('\n dd_datamodule harness: '+pass+' passed, '+fail+' failed');
+   if(fail){ console.log(' ❌ FAILURES ABOVE'); process.exit(1); } else { console.log(' ✅ all green'); } });

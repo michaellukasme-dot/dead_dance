@@ -60,13 +60,36 @@
   // ---- guarded lead capture (Stripe parked → capture INTENT, invoice later) ----
   function C(){ try{ return root.ddClient && root.ddClient(); }catch(e){ return null; } }
   function emit(evt,p){ try{ if(root.DDTele&&root.DDTele.event) root.DDTele.event('datamodule.'+evt,p||{}); }catch(e){} }
-  function requestUnlock(opts){ opts=opts||{}; var t=tier(opts.tier); if(!t) return { ok:false, err:'unknown tier' };
+  // TRUTHFUL LEAD CAPTURE. The old version set captured:true and promised an invoice the INSTANT it dispatched —
+  // but supabase-js v2 never sent the fire-and-forget RPC, so the lead was lost while the buyer was told "invoiced".
+  // Now: the synchronous return is only a RECEIPT (captured:false = not yet confirmed). The write is actually SENT,
+  // and the REAL outcome is delivered via cb(status, err):  true = server captured the lead (show the invoice line),
+  // false = server rejected,  null = could not reach the server (honest offline — retry / email Michael).
+  // Free tier captures nothing (they already have it). No client → returns captured:false + an HONEST offline message
+  // (never a false invoice promise) and cb(null); keeps the guarded-no-op contract.
+  function requestUnlock(opts, cb){ opts=opts||{}; var t=tier(opts.tier);
+    if(!t){ if(cb) cb(false, 'unknown tier'); return { ok:false, err:'unknown tier' }; }
+    if(t.price===0){ if(cb) cb(true, null, {free:true});
+      return { ok:true, tier:t.key, captured:false, price:0, message:'You already have this — it’s the free report.' }; }
     var c=C(); var lead={ tier:t.key, festival:opts.festival||null, email:opts.email||null, note:opts.note||null };
-    var sent=false; if(c&&c.rpc){ try{ c.rpc('sf_data_lead_capture',{ p_tier:lead.tier, p_festival:lead.festival, p_email:lead.email, p_note:lead.note }); sent=true; }catch(e){} }
-    emit('unlock', { tier:t.key, sent:sent });
-    return { ok:true, tier:t.key, captured:sent, price:t.price,
-             message: t.price===0 ? 'You already have this — it’s the free report.'
-                    : 'Got it. Checkout opens shortly (EIN pending) — we’ll send your invoice for '+priceLabel(t.key)+'. 🌹' };
+    var invoiceLine='Got it — request received. We’ll send your invoice for '+priceLabel(t.key)+' when checkout opens (EIN pending). 🌹';
+    if(c&&c.rpc){
+      try{ c.rpc('sf_data_lead_capture',{ p_tier:lead.tier, p_festival:lead.festival, p_email:lead.email, p_note:lead.note })
+        .then(function(r){ var okv=!(r&&r.error); emit('unlock',{ tier:t.key, saved:okv });
+          if(cb) cb(okv, r&&r.error, { message: okv ? invoiceLine
+            : 'We couldn’t log your request just now — please retry, or email michaellukas.me@gmail.com and we’ll set it up.' }); })
+        .catch(function(e){ emit('unlock',{ tier:t.key, saved:false });
+          if(cb) cb(null, e, { message:'We couldn’t reach StageFill to log your request — please retry, or email michaellukas.me@gmail.com.' }); });
+      }catch(e){ if(cb) cb(null, e); }
+      // receipt only — NOT a confirmation. The truthful message arrives via cb once the server answers.
+      return { ok:true, tier:t.key, captured:false, pending:true, price:t.price,
+               message:'Sending your request to StageFill…' };
+    }
+    // no client — honest: nothing reached the server.
+    emit('unlock',{ tier:t.key, saved:false });
+    if(cb) cb(null, { offline:true });
+    return { ok:true, tier:t.key, captured:false, offline:true, price:t.price,
+             message:'We couldn’t reach StageFill to log your request right now — please retry in a moment, or email michaellukas.me@gmail.com.' };
   }
 
   var api = { TIERS:TIERS, ORDER:ORDER, tier:tier, tiers:tiers, locked:locked, priceLabel:priceLabel, quote:quote, requestUnlock:requestUnlock, money:money };

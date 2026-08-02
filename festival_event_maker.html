@@ -652,7 +652,11 @@ function addActMarker(a){ if(a.lat==null)return;
 window.emVerify=function(id){ var a=(state.acts||[]).filter(function(x){return x.id===id;})[0]; if(!a)return;
   a.verified=!a.verified; emSave();
   actMarkers.forEach(function(m){ try{map.removeLayer(m);}catch(e){} }); actMarkers=[]; state.acts.forEach(addActMarker); applyActFilter(); renderActs();
-  try{ var F=window.DD_FEST, cl=(window.ddClient&&window.ddClient()); if(F&&F.slug&&F.key&&cl&&cl.rpc){ cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:String(id),p_status:(a.verified?'verified':'draft'),p_by:'admin'}); } }catch(e){}
+  // TRUTHFUL SYNC: chain .then/.catch so the verify actually SENDS (v2 fires only on then/catch). The ✓ flip above
+  // is the REAL local state; if the SERVER sync fails we warn honestly so fans aren't shown an unsynced ✓.
+  try{ var F=window.DD_FEST, cl=(window.ddClient&&window.ddClient()); if(F&&F.slug&&F.key&&cl&&cl.rpc){ cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:String(id),p_status:(a.verified?'verified':'draft'),p_by:'admin'})
+    .then(function(rr){ if(rr&&rr.error){ try{ if(typeof toast==='function') toast('Verify didn’t sync to the server — fans may not see it. Retry.'); else console.warn('dd_poi_verify:', rr.error); }catch(_){} } })
+    .catch(function(e){ try{ if(typeof toast==='function') toast('Offline — verify saved locally, not synced to fans yet.'); else console.warn('dd_poi_verify offline', e); }catch(_){} }); } }catch(e){}
 };
 /* ---- category pills: left→right, filter the list AND toggle each category on/off the map ---- */
 var catOff={};

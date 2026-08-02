@@ -107,8 +107,15 @@
   function slugify(n){ return String(n).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
   function who(){ try{ var k='dd.crew',v=localStorage.getItem(k); if(!v){v='crew-'+Math.random().toString(36).slice(2,8);localStorage.setItem(k,v);} return v; }catch(e){return 'anon';} }
   function claims(){ try{ return JSON.parse(localStorage.getItem('dd.stagecrew')||'{}'); }catch(e){ return {}; } }
-  function saveClaim(slug){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.stagecrew',JSON.stringify(c));}catch(e){}
-    try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_stagecrew_claim',{p_slug:slug,p_by:who()}); }catch(e){} }
+  // Report the REAL server result via cb(status, err): true=saved to the shared checklist, false=server rejected,
+  // null=no server reachable. (supabase-js v2 only SENDS on .then/.catch — the old fire-and-forget never posted.)
+  function saveClaim(slug, cb){ var c=claims(); c[slug]={by:who(),ts:Date.now()}; try{localStorage.setItem('dd.stagecrew',JSON.stringify(c));}catch(e){}
+    try{ var cl=window.ddClient&&ddClient();
+      if(cl&&cl.rpc){ cl.rpc('dd_stagecrew_claim',{p_slug:slug,p_by:who()})
+        .then(function(r){ if(cb) cb(r&&r.error?false:true, r&&r.error); })
+        .catch(function(e){ if(cb) cb(false, e); });
+        return; } }catch(e){}
+    if(cb) cb(null); }
   function walkUrl(s){ return 'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng+'&travelmode=walking'; }
   function find(slug){ return STAGES.filter(function(x){return slugify(x.n)===slug;})[0]; }
 
@@ -152,8 +159,16 @@
         var m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); el.textContent='⏱️ '+m+':'+(s<10?'0':'')+s+' — hold your corner, open the map, snap your angle.'; }
       tick(); _timers[slug]=setInterval(tick,1000);
     },
-    claim:function(slug){ saveClaim(slug); if(_timers[slug]){ clearInterval(_timers[slug]); delete _timers[slug]; } render(); var s=find(slug);
-      try{ alert('🌹 '+((s&&s.n)||'That stage')+' — covered! On to the next. Send this page to your team.'); }catch(e){} },
+    claim:function(slug){ var s=find(slug), nm=((s&&s.n)||'That stage');
+      saveClaim(slug, function(status, err){ render();
+        try{
+          if(status===true){ alert('🌹 '+nm+' — covered and saved to the shared checklist. On to the next; send this page to your team.'); }
+          else if(status===false){ var msg=(err&&(err.message||err.hint||err.code))||'unknown error';
+            alert('⚠️ '+nm+' is marked covered on THIS phone but it did NOT reach the server — another team may not see it.\n\nScreenshot this and send it to Michael:\n'+msg); }
+          else { alert('📴 '+nm+' marked covered on this phone (no server connection). It won’t sync to the shared checklist — tell your team directly so nobody doubles up.'); }
+        }catch(e){}
+      });
+      if(_timers[slug]){ clearInterval(_timers[slug]); delete _timers[slug]; } render(); },
     share:function(){ var u='https://deaddance.app/stage_crew.html', t='MusikFest Stage Crew 🌹 — take a corner, 8 minutes, snap your angle. Northside first, then Southside.';
       if(navigator.share){ navigator.share({title:'Stage Crew · MusikFest',text:t,url:u}).catch(function(){}); }
       else { try{ navigator.clipboard.writeText(t+' '+u); alert('🔗 Link copied — paste it to your team.'); }catch(e){ alert(u); } } }

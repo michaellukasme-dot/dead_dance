@@ -70,10 +70,17 @@
 
   // guarded spine (no-op until a backend + table exist)
   function C(){ try{ return root.ddClient && root.ddClient(); }catch(e){ return null; } }
-  function save(series){ var c=C(); if(!c||!c.rpc) return false; try{ var s=norm(series);
-    c.rpc('sf_recurring_set',{ p_id:s.id, p_title:s.title, p_venue:s.venue, p_city:s.city||null,
-      p_cadence:s.cadence, p_weekday:s.weekday, p_anchor:s.anchor, p_day_of_month:s.dayOfMonth,
-      p_time:s.time, p_kind:s.kind, p_genre:s.genre, p_cover:s.cover, p_days:s.days }); return true; }catch(e){ return false; } }
+  // TRUTHFUL WRITE: no client → return false (guarded no-op, unchanged contract). With a client, the RPC
+  // is actually SENT (supabase-js v2 only fires on .then/.catch) and we return a Promise that resolves to
+  // the REAL server result (true=saved, false=rejected/offline). Never return true before the write resolves.
+  function save(series, cb){ var c=C(); if(!c||!c.rpc){ if(cb) cb(false, {offline:true}); return false; }
+    try{ var s=norm(series);
+      return c.rpc('sf_recurring_set',{ p_id:s.id, p_title:s.title, p_venue:s.venue, p_city:s.city||null,
+        p_cadence:s.cadence, p_weekday:s.weekday, p_anchor:s.anchor, p_day_of_month:s.dayOfMonth,
+        p_time:s.time, p_kind:s.kind, p_genre:s.genre, p_cover:s.cover, p_days:s.days })
+        .then(function(r){ var okv=!(r&&r.error); if(cb) cb(okv, r&&r.error); return okv; })
+        .catch(function(e){ if(cb) cb(false, e); return false; });
+    }catch(e){ if(cb) cb(false, e); return false; } }
 
   var api = { norm:norm, occurrences:occurrences, instances:occurrences, upcoming:upcoming, next:next,
               ticketUrl:ticketUrl, save:save, slug:slug, DOW:DOW, CADENCES:CADENCES };

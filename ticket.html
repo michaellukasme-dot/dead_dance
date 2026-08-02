@@ -455,7 +455,13 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   }
   function _persistSongs(rec){ try{ localStorage.setItem(sKey(), JSON.stringify(rec)); }catch(e){}
     try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band,{date:date,start:rec.start,songs:rec.songs}); }catch(e){}
-    try{ var key=g('key',''), cl=window.ddClient&&ddClient(); if(key&&cl&&cl.rpc) cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:rec.start||null,p_end:null,p_songs:rec.songs}); }catch(e){} }
+    // TRUTHFUL SERVER SYNC: chain .then/.catch so the upsert actually SENDS (supabase-js v2 fires only on then/catch).
+    // The "Setlist saved / Archived" toast reflects the REAL local save (always works); if the SERVER sync fails we add
+    // an honest heads-up so the band knows other devices / fan texts may not have it yet. Token-gated (?key).
+    try{ var key=g('key',''), cl=window.ddClient&&ddClient();
+      if(key&&cl&&cl.rpc){ cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:rec.start||null,p_end:null,p_songs:rec.songs})
+        .then(function(r){ if(r&&r.error){ var t=(window.parent&&window.parent.toast); if(t) t('Saved on this device, but it didn’t reach the server 🌹 — reopen with your key or screenshot to Michael'); } })
+        .catch(function(){ var t=(window.parent&&window.parent.toast); if(t) t('Saved on this device — offline, hasn’t synced to the server yet 🌹'); }); } }catch(e){} }
   window.saveSetlist=function(){ var start=((document.getElementById('slStart')||{}).value||'').trim();
     var raw=((document.getElementById('slSongs')||{}).value||''); var prev=getSongs(); var prevMap={};
     (prev.songs||[]).forEach(function(s){ if(s&&(s.n||s.name)) prevMap[(s.n||s.name)]=s; });   // keep tease flags across edits

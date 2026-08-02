@@ -341,8 +341,12 @@ window.fmVerify=function(id){ if(window.fmVerifyOpen){ return window.fmVerifyOpe
   if(!(r.lat&&r.lng)){ alert('Place this pin on the map first, then verify it.'); return; }
   r.status = (r.status==='verified')?'draft':'verified'; fmSave();
   var t=T(sel), m=itemMarks[id]; if(m) m.setIcon(itemDivIcon(t, r.status==='verified'));
+  // TRUTHFUL SYNC: chain .then/.catch so the verify actually SENDS (v2 fires only on then/catch). The ✓/draft flip
+  // above is the REAL local state; if the SERVER sync fails we warn honestly so fans aren't shown an unsynced ✓.
   try{ var F=window.DD_FEST; if(F&&F.owner&&F.key){ var cl=window.ddClient&&ddClient();
-    if(cl&&cl.rpc) cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:id,p_status:r.status,p_by:'admin'}); } }catch(e){}
+    if(cl&&cl.rpc) cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:id,p_status:r.status,p_by:'admin'})
+      .then(function(rr){ if(rr&&rr.error){ try{ if(typeof toast==='function') toast('Verify didn’t sync to the server — fans may not see it. Retry.', false); else console.warn('dd_poi_verify:', rr.error); }catch(_){} } })
+      .catch(function(e){ try{ if(typeof toast==='function') toast('Offline — verify saved locally, not synced to fans yet.', false); else console.warn('dd_poi_verify offline', e); }catch(_){} }); } }catch(e){}
   renderEditor(); setActive(id);
 };
 window.fmHome=function(id,val){ var r=findById(id); if(!r)return;
@@ -621,8 +625,20 @@ window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker
       '<button class="sb-confirm" id="sbTalk">Talk to StageFill about managing this →</button>'+
       '<div class="sb-disc">Preview mode shows the full draft free. Confirming/booking is Premium. (Demo: add <b>?premium=1</b> to the URL to unlock confirm.)</div>'
     );
-    m.querySelector('#sbTalk').onclick=function(){ try{ if(window.ddClient&&ddClient().rpc) ddClient().rpc('sf_stageboss_save',{p_plan_id:'lead:'+Date.now(),p_org:festName(),p_festival:festName(),p_budget:plan.budget,p_spend:plan.actSpend,p_stages:(plan.stages||[]).length,p_json:null}); }catch(e){}
-      m.remove(); modal('<button class="sb-x">✕</button><div class="sb-h">🌹 Thanks</div><div class="sb-sub">We\'ve noted your interest in StageFill managing '+esc(festName())+'. Someone from Bethlehem will reach out.</div>'); };
+    m.querySelector('#sbTalk').onclick=function(){
+      // TRUTHFUL LEAD CAPTURE: the RPC is actually SENT (v2 fires only on .then/.catch). "We've noted your interest…
+      // someone will reach out" shows ONLY on real server success. On reject/offline we tell them honestly to email Michael.
+      function done(status, err){ m.remove();
+        if(status===true){ modal('<button class="sb-x">✕</button><div class="sb-h">🌹 Thanks</div><div class="sb-sub">We\'ve noted your interest in StageFill managing '+esc(festName())+'. Someone from Bethlehem will reach out.</div>'); }
+        else if(status===false){ var msg=(err&&(err.message||err.hint||err.code))||'unknown error'; modal('<button class="sb-x">✕</button><div class="sb-h">⚠️ It didn\'t reach us</div><div class="sb-sub">Your interest did NOT reach StageFill (server said: '+esc(msg)+'). Please screenshot this and email <b>michaellukas.me@gmail.com</b> so we don\'t miss you.</div>'); }
+        else { modal('<button class="sb-x">✕</button><div class="sb-h">📴 Couldn\'t reach us</div><div class="sb-sub">We couldn\'t reach StageFill just now. Please retry in a moment, or email <b>michaellukas.me@gmail.com</b> and we\'ll set up managing '+esc(festName())+'.</div>'); }
+      }
+      try{ var cl=window.ddClient&&ddClient();
+        if(cl&&cl.rpc){ cl.rpc('sf_stageboss_save',{p_plan_id:'lead:'+Date.now(),p_org:festName(),p_festival:festName(),p_budget:plan.budget,p_spend:plan.actSpend,p_stages:(plan.stages||[]).length,p_json:null})
+          .then(function(r){ done(r&&r.error?false:true, r&&r.error); })
+          .catch(function(e){ done(false, e); });
+          return; } }catch(e){}
+      done(null); };
   }
 
   // ---- mount the FAB once the maker is up ----
@@ -663,7 +679,10 @@ window.fmShare=function(){ fmSave(); var u='https://deaddance.app/festival_maker
   function applyVerified(id, res){ try{ var r=findById(id); if(!r)return;
     r.lat=(+res.centroid.lat).toFixed(6); r.lng=(+res.centroid.lng).toFixed(6); r.status='verified'; fmSave();
     var t=T(sel), m=itemMarks[id]; if(m){ m.setLatLng([+r.lat,+r.lng]); m.setIcon(itemDivIcon(t,true)); } else if(typeof makeItemMarker==='function'){ makeItemMarker(sel,r); }
-    try{ var F=window.DD_FEST; if(F&&F.owner&&F.key){ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:id,p_status:'verified',p_by:'admin'}); } }catch(e){}
+    // TRUTHFUL SYNC: chain .then/.catch so the verify actually SENDS; warn honestly if the server sync fails.
+    try{ var F=window.DD_FEST; if(F&&F.owner&&F.key){ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_poi_verify',{p_slug:F.slug,p_token:F.key,p_item_key:id,p_status:'verified',p_by:'admin'})
+      .then(function(rr){ if(rr&&rr.error){ try{ if(typeof toast==='function') toast('Verify didn’t sync to the server — fans may not see it. Retry.', false); else console.warn('dd_poi_verify:', rr.error); }catch(_){} } })
+      .catch(function(e){ try{ if(typeof toast==='function') toast('Offline — verify saved locally, not synced to fans yet.', false); else console.warn('dd_poi_verify offline', e); }catch(_){} }); } }catch(e){}
     if(typeof renderEditor==='function') renderEditor(); if(typeof setActive==='function') setActive(id);
   }catch(e){} }
 

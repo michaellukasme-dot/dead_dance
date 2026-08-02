@@ -71,12 +71,16 @@
       p_channel_type: cand.channelType||'unknown', p_official: cand.channelType==='official',
       p_verified: false, p_note: 'auto-match score '+cand.score, p_added_by: 'yt-match' }; }
 
-  // guarded ingest — upsert top candidates as UNVERIFIED (no-op without a backend)
+  // ingest — rank the top candidates for a show. HONEST ABOUT PERSISTENCE: the write target
+  // `sf_gd_video_set` is service_role-only (see 16_gd_video.sql), and the REAL persistence path is the
+  // server edge function `yt-match` (holds the service key, writes directly). An in-browser anon client
+  // would 403 here, so this brain does NOT attempt/claim a client-side write — that was a silent-drop that
+  // pretended to save. It returns the ranked correlation FACTS only; each row is flagged persisted:false so
+  // no caller can mistake ranking for saving. To persist, POST the show to the yt-match edge function.
   function ingest(show, videos, opts){ opts=opts||{}; var top=Math.max(1, opts.top||3), min=opts.minScore!=null?opts.minScore:0.4;
-    var ranked=rankCandidates(videos, show).filter(function(r){ return r.score>=min; }).slice(0, top);
-    var c=null; try{ if(root.ddClient) c=root.ddClient(); }catch(e){}
-    ranked.forEach(function(r){ var row=toRow(r, show); try{ if(c&&c.rpc) c.rpc('sf_gd_video_set', row); }catch(e){} });
-    try{ if(root.DDTele&&root.DDTele.event) root.DDTele.event('ytmatch.ingest',{count:ranked.length}); }catch(e){}
+    var ranked=rankCandidates(videos, show).filter(function(r){ return r.score>=min; }).slice(0, top)
+      .map(function(r){ r.persisted=false; return r; });   // client-side: correlation only, never persisted here
+    try{ if(root.DDTele&&root.DDTele.event) root.DDTele.event('ytmatch.rank',{count:ranked.length, persisted:false}); }catch(e){}
     return ranked; }
 
   var api = { parseYouTubeId:parseYouTubeId, watchUrl:watchUrl, searchQuery:searchQuery, dateVariants:dateVariants,

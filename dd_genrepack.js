@@ -136,12 +136,23 @@
   // ---- guarded spine + telemetry (ids/counts only; no PII) -------------------
   function C(){ try{ return root.ddClient && root.ddClient(); }catch(e){ return null; } }
   function emit(evt, payload){ try{ if(root.DDTele && root.DDTele.event) root.DDTele.event('genrepack.'+evt, payload||{}); }catch(e){} }
+  // TRUTHFUL WRITE: no client → false (guarded no-op). With a client, every night's RPC is actually SENT
+  // (v2 fires only on .then/.catch) and we return a Promise that resolves to the REAL result — true only when
+  // EVERY night saved server-side, false if any rejected/offline. Never return true before the writes resolve.
   function saveSchedule(festival, stage, schedule){ var c=C(); if(!c||!c.rpc) return false;
-    try{ (schedule||[]).forEach(function(n){ c.rpc('sf_genre_schedule_set',{ p_festival:festival||null, p_stage:stage||null, p_date:n.date, p_genre:n.genre }); }); emit('schedule', {nights:(schedule||[]).length}); return true; }catch(e){ return false; } }
+    try{ var nights=(schedule||[]);
+      var ps=nights.map(function(n){ return c.rpc('sf_genre_schedule_set',{ p_festival:festival||null, p_stage:stage||null, p_date:n.date, p_genre:n.genre })
+        .then(function(r){ return !(r&&r.error); }).catch(function(){ return false; }); });
+      return Promise.all(ps).then(function(res){ var okv=res.every(function(x){return x;}); emit('schedule', {nights:nights.length, saved:okv}); return okv; });
+    }catch(e){ return false; } }
   function getSchedule(festival, stage){ var c=C(); if(!c||!c.rpc) return Promise.resolve([]);
     try{ return c.rpc('sf_genre_schedule_get',{ p_festival:festival||null, p_stage:stage||null }).then(function(r){ return (r&&r.data)||[]; }).catch(function(){ return []; }); }catch(e){ return Promise.resolve([]); } }
+  // TRUTHFUL WRITE: no client → false (guarded no-op). With a client the RPC is actually SENT and we return a
+  // Promise that resolves to the REAL result. Callers (karaokeplatz) ignore the return; the fix is that it fires.
   function logPlay(fanId, genre, game){ var c=C(); if(!c||!c.rpc) return false;
-    try{ c.rpc('sf_genre_play_log',{ p_fan:fanId||null, p_genre:nrm(genre)||null, p_game:game||null }); emit('play',{game:game}); return true; }catch(e){ return false; } }
+    try{ return c.rpc('sf_genre_play_log',{ p_fan:fanId||null, p_genre:nrm(genre)||null, p_game:game||null })
+      .then(function(r){ var okv=!(r&&r.error); emit('play',{game:game, saved:okv}); return okv; })
+      .catch(function(){ return false; }); }catch(e){ return false; } }
 
   var api = { register:register, has:has, get:get, keys:keys, count:count,
     theme:theme, karaoke:karaoke, trivia:trivia, pack:pack,

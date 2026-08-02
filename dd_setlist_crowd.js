@@ -53,7 +53,10 @@
         try { if (root.DDCoins && DDCoins.pop) DDCoins.pop(1); } catch (e) {}
       }
       _write(band, date, rec);
-      try { var c = C(); if (c && c.rpc) c.rpc('dd_setlist_fan_add', { p_band: slug(band), p_show: date || '', p_song: r.song.n, p_fan: fan }); } catch (e) {}
+      // TRUTHFUL PUSH: chain .then/.catch so the write actually SENDS (supabase-js v2 only fires on then/catch) →
+      // crowd consensus now syncs cross-device instead of silently dropping. Best-effort/background: the local
+      // add + Cookie already reflect the real local state, so failure here is logged, never falsely reported.
+      try { var c = C(); if (c && c.rpc) c.rpc('dd_setlist_fan_add', { p_band: slug(band), p_show: date || '', p_song: r.song.n, p_fan: fan }).then(function(){}).catch(function(){}); } catch (e) {}
     }
     return { locked: false, added: !!r.added, already: !!r.already, rewarded: rewarded, list: view(rec.songs, fan) };
   }

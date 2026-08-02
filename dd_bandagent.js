@@ -12,7 +12,10 @@
     selfProvides: { setlist: false, audio: false }, roles: { taper: null, photographers: [] }, roster: [], asks: [] }; }
   function get(s, name){ try { var v = JSON.parse(localStorage.getItem(_key(s)) || 'null'); if (v && v.slug) { if (name && !v.name) v.name = name; return v; } } catch (e) {} return _blank(s, name); }
   function _save(st){ try { localStorage.setItem(_key(st.slug), JSON.stringify(st)); } catch (e) {}
-    try { var c = C(); if (c && c.rpc) c.rpc('dd_bandagent_save', { p_band: st.slug, p_state: st }); } catch (e) {} return st; }
+    // TRUTHFUL PUSH: chain .then/.catch so consent/roster/roles actually SEND server-side (supabase-js v2 only
+    // fires on then/catch) instead of silently dropping. Background/best-effort — the returned state is the real
+    // local state; a failed sync is swallowed, never reported as saved. _save still returns the local state st.
+    try { var c = C(); if (c && c.rpc) c.rpc('dd_bandagent_save', { p_band: st.slug, p_state: st }).then(function(){}).catch(function(){}); } catch (e) {} return st; }
 
   // ---- consent (band-first gate) ----
   function setConsent(s, kind, val){ var st = get(s); if (kind in st.consent) st.consent[kind] = !!val; return _save(st); }

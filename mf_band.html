@@ -389,12 +389,23 @@ window.slRegister=function(){
   var el=document.getElementById('slPhone'), digits=((el&&el.value)||'').replace(/[^0-9]/g,'');
   if(digits.length<10){ if(el){ el.style.borderColor='#b8002e'; el.focus(); } return; }
   try{ var k='dd.setlistfans', o=JSON.parse(localStorage.getItem(k)||'{}'); (o[slug]=o[slug]||[]).push({t:Date.now()}); localStorage.setItem(k,JSON.stringify(o)); }catch(e){}   // no PII cached
-  try{ var cl=window.ddClient&&ddClient(); if(cl&&cl.rpc) cl.rpc('dd_setlist_fan_pending',{p_band:slug,p_phone:slE164(digits),p_source:'web'}); }catch(e){}   // PENDING → confirmed only when they text
   try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_fan',{band:slug}); }catch(e){}   // no phone to analytics
-  var confirmLine = window.SL_SMS_NUMBER
-    ? 'Text <b>START</b> to <b>'+esc(SL_SMS_NUMBER)+'</b> from your phone to confirm'
-    : 'You’ll confirm with a quick text from your phone';
-  document.getElementById('slBody').innerHTML='<h3>🌹 One more step</h3><div class="sub">Almost in — '+confirmLine+'. Then each song lands live as '+esc(B.name)+' plays it. Reply STOP anytime.</div>';
+  var body=document.getElementById('slBody');
+  // TRUTHFUL: "🌹 One more step" shows ONLY when the pending row actually reaches the server (v2 sends only on
+  // .then/.catch). On reject/offline we do NOT claim they're subscribed — we tell them honestly how to still get in.
+  function step(){ var confirmLine = window.SL_SMS_NUMBER
+      ? 'Text <b>START</b> to <b>'+esc(SL_SMS_NUMBER)+'</b> from your phone to confirm'
+      : 'You’ll confirm with a quick text from your phone';
+    if(body) body.innerHTML='<h3>🌹 One more step</h3><div class="sub">Almost in — '+confirmLine+'. Then each song lands live as '+esc(B.name)+' plays it. Reply STOP anytime.</div>'; }
+  function fail(status, err){ var msg=(status===false&&err&&(err.message||err.hint||err.code))||'';
+    var alt = window.SL_SMS_NUMBER ? ' — or just text <b>START</b> to <b>'+esc(SL_SMS_NUMBER)+'</b> from your phone to get in directly' : '';
+    if(body) body.innerHTML='<h3>⚠️ We couldn’t register you</h3><div class="sub">Your number did NOT reach us'+(msg?(' (server said: '+esc(msg)+')'):' just now')+'. Please try again in a moment'+alt+'.</div>'; }
+  try{ var cl=window.ddClient&&ddClient();
+    if(cl&&cl.rpc){ cl.rpc('dd_setlist_fan_pending',{p_band:slug,p_phone:slE164(digits),p_source:'web'})   // PENDING → confirmed only when they text
+      .then(function(r){ if(r&&r.error) fail(false, r.error); else step(); })
+      .catch(function(e){ fail(null, e); });
+      return; } }catch(e){}
+  fail(null);   // no server reachable — do NOT claim they're subscribed
 };
 function slE164(d){ d=String(d||'').replace(/[^0-9]/g,''); if(d.length===10) return '+1'+d; if(d.length===11&&d.charAt(0)==='1') return '+'+d; return '+'+d; }
 
@@ -461,10 +472,19 @@ window.slSaveSet=function(){
   var songs=slSongsNow(); if(!songs.length) return;
   var ats=[].slice.call(document.querySelectorAll('#slSched .slAt'));
   var out=songs.map(function(nm,i){ return {n:nm, at:(ats[i]&&ats[i].value)||''}; });
-  slPut({win:{s:slVal('slStart'),e:slVal('slEnd')}, songs:out});
-  try{ var cl=window.ddClient&&ddClient(), key=P('key'); if(cl&&cl.rpc&&key) cl.rpc('dd_setlist_upsert_web',{p_band:slug,p_token:key,p_date:(B.set&&B.set.date)||null,p_start:slVal('slStart')||null,p_end:slVal('slEnd')||null,p_songs:out}); }catch(e){}   // → dd_setlists (token-gated; ?key=<band token>)
+  slPut({win:{s:slVal('slStart'),e:slVal('slEnd')}, songs:out});   // local save — drives THIS ticket immediately
   try{ if(window.DDJoin&&DDJoin.track) DDJoin.track('setlist_set',{band:slug,songs:out.length}); }catch(e){}
-  document.getElementById('slBody').innerHTML='<h3>🌹 Set List scheduled!</h3><div class="sub">'+out.length+' song'+(out.length===1?'':'s')+' — fans who opt in get each one texted the moment you play it. Reopen Set List anytime to edit.</div>';
+  var body=document.getElementById('slBody'), n=out.length;
+  // TRUTHFUL: "scheduled — fans get each texted" implies a SERVER schedule, so it shows ONLY on a confirmed
+  // server upsert (token-gated; needs ?key=<band token>). Otherwise we say honestly it's saved on THIS device.
+  function scheduled(){ if(body) body.innerHTML='<h3>🌹 Set List scheduled!</h3><div class="sub">'+n+' song'+(n===1?'':'s')+' — fans who opt in get each one texted the moment you play it. Reopen Set List anytime to edit.</div>'; }
+  function localOnly(reason){ if(body) body.innerHTML='<h3>💾 Saved on this device</h3><div class="sub">'+n+' song'+(n===1?'':'s')+' saved here — it shows on your ticket now. To have us text it to fans live, '+(P('key')?('retry in a moment'+(reason?(' ('+esc(reason)+')'):'')+', or screenshot this to Michael'):'reopen this page from your band link (the one with your <b>key</b>)')+'.</div>'; }
+  try{ var cl=window.ddClient&&ddClient(), key=P('key');
+    if(cl&&cl.rpc&&key){ cl.rpc('dd_setlist_upsert_web',{p_band:slug,p_token:key,p_date:(B.set&&B.set.date)||null,p_start:slVal('slStart')||null,p_end:slVal('slEnd')||null,p_songs:out})   // → dd_setlists (token-gated)
+      .then(function(r){ if(r&&r.error) localOnly((r.error&&(r.error.message||r.error.hint))||'server error'); else scheduled(); })
+      .catch(function(){ localOnly('couldn’t reach the server'); });
+      return; } }catch(e){}
+  localOnly(P('key')?'couldn’t reach the server':'');
 };
 
 /* ---- StageFill buy spine (same contract as event_page.html) ---- */

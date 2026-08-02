@@ -129,8 +129,15 @@
   $('mv').addEventListener('click',function(e){ if(e.target===$('mv')) closeM(); });
   $('mvGo').onclick=function(){ var email=($('mvEmail').value||'').trim();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ alert('Enter your email so we can send it. 🌹'); try{$('mvEmail').focus();}catch(e){} return; }
-    var r=DM.requestUnlock({tier:curTier, festival:FEST, email:email});
-    closeM(); alert(r.message||'Request received 🌹'); };
+    // TRUTHFUL: the success/invoice line shows ONLY when the server confirms the lead was captured.
+    // On reject/offline we tell the buyer honestly to retry or email Michael — never a false "invoiced".
+    var r=DM.requestUnlock({tier:curTier, festival:FEST, email:email}, function(status, err, extra){
+      var msg=(extra&&extra.message)
+        || (status===true ? 'Request received 🌹'
+           : status===false ? 'We couldn’t log your request just now — please retry, or email michaellukas.me@gmail.com.'
+           : 'We couldn’t reach StageFill to log your request — please retry, or email michaellukas.me@gmail.com.');
+      try{ alert(msg); }catch(e){} });
+    closeM(); if(r&&r.tier&&DM.tier(r.tier)&&DM.tier(r.tier).price===0){ alert(r.message); } };
 })();
 </script>
 </body>
