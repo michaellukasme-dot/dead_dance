@@ -282,8 +282,8 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
   @keyframes svpop{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
   /* ===== Crowdsource ASK toast — ONE at a time, context+location aware, floats OVER THE MAP, expires if ignored ===== */
   #mfAsk{position:fixed;left:50%;top:88px;transform:translateX(-50%) translateY(-10px);z-index:270;width:min(440px,92vw);opacity:0;pointer-events:none;transition:opacity .32s ease,transform .32s cubic-bezier(.2,.9,.3,1.1)}
-  #mfAsk.on{opacity:1;transform:translateX(-50%) translateY(0)}
-  #mfAsk .ask-card{position:relative;pointer-events:none;overflow:hidden;background:rgba(26,17,38,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;border:1px solid #ffffff2b;border-radius:16px;box-shadow:0 16px 44px #000a;padding:13px 14px 15px}   /* card is click-through so the curtain drags cleanly beneath it — only the buttons below stay live */
+  #mfAsk.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  #mfAsk .ask-card{position:relative;pointer-events:auto;overflow:hidden;background:rgba(26,17,38,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;border:1px solid #ffffff2b;border-radius:16px;box-shadow:0 16px 44px #000a;padding:13px 14px 15px}   /* card is click-through so the curtain drags cleanly beneath it — only the buttons below stay live */
   #mfAsk .ask-hd{display:flex;align-items:center;gap:8px;margin-right:26px}
   #mfAsk .ask-hd img{width:19px;height:19px;flex:none}
   #mfAsk .ask-hd .who{font-size:10.5px;font-weight:800;color:#e2d3fb;line-height:1.25}
