@@ -83,13 +83,55 @@
       if (typeof root.ddEvent==='function'){ root.ddEvent('presence.'+evt, payload); return; }
     }catch(e){}
   }
+  // Truly FIRES the write. supabase-js v2 is LAZY — a bare c.rpc(...) with no
+  // .then/.catch/await NEVER SENDS, so the grant would be a lie. We chain .then/.catch
+  // (guarded, no-throw) so it actually goes to the server, tap telemetry on the result,
+  // and RETURN the promise so callers can reflect the REAL outcome (synced vs not).
   function guardSpine(rpc, args){
-    try{ if (typeof root.ddClient==='function'){ var c=root.ddClient(); if (c && c.rpc){ c.rpc(rpc, args); return true; } } }catch(e){}
-    return false;   // no backend → local-first no-op
+    try{
+      if (typeof root.ddClient==='function'){
+        var c=root.ddClient();
+        if (c && c.rpc){
+          var p = c.rpc(rpc, args);
+          if (p && typeof p.then==='function'){
+            try{ p.then(function(){ emit('spine_ok', { rpc:rpc }); },
+                        function(){ emit('spine_err', { rpc:rpc }); }); }catch(e){}  // telemetry tap (also marks p handled → no unhandledRejection)
+            return p;                                     // hand the REAL promise back to the caller
+          }
+          return true;                                    // non-thenable client (test double) — treat as fired
+        }
+      }
+    }catch(e){}
+    return false;   // no backend reachable → local-first no-op
   }
 
+  // Explicit FAN action — proximity ACCEPT of a FREE ticket, or any host-driven grant.
+  // Idempotent (shares state.granted → one per event). Returns a PROMISE resolving to
+  // the REAL result: {synced:true} only on server confirm; {offline:true} when there is
+  // no backend; {error} when the write could not reach the server. Never a blanket "saved".
+  function accept(event, stage){
+    var ev = String(event);
+    var already = !!state.granted[ev];
+    state.granted[ev] = true;                                   // idempotent local mark
+    var sid = (stage && stage.id!=null) ? stage.id : (stage||null);
+    emit('presence_accept', { event:ev, stage:sid });           // telemetry — ids ONLY, no PII
+    var res = { ok:true, already:already, event:ev, synced:false, offline:false };
+    var p; try{ p = guardSpine('sf_presence_grant', { event:ev, stage:sid }); }catch(e){ p=false; }
+    if (p && typeof p.then==='function'){
+      return p.then(function(r){
+        if (r && r.error){ res.error = String((r.error && r.error.message) || r.error); return res; }  // server reachable but refused
+        res.synced = true; res.server = (r && ('data' in r)) ? r.data : (r||null); return res;          // real confirmation
+      }, function(e){ res.error = String((e && e.message) || e || 'unreachable'); return res; });        // could not reach server
+    }
+    if (p === true){ res.synced = true; return _resolved(res); }  // non-thenable fired client
+    res.offline = true;                                           // no backend → local-first, honest
+    return _resolved(res);
+  }
+  function _resolved(v){ return (typeof Promise!=='undefined') ? Promise.resolve(v)
+                          : { then:function(cb){ try{ cb(v); }catch(e){} return this; }, catch:function(){ return this; } }; }
+
   var api = {
-    configure: configure, tick: tick, distM: distM,
+    configure: configure, tick: tick, distM: distM, grant: grant, accept: accept,
     granted: function(ev){ return !!state.granted[String(ev)]; },
     dwellMs: function(stageId){ return state.dwell[String(stageId)]||0; },
     _reset: function(){ state={dwell:{},granted:{}}; cfg={dwellMs:DEFAULTS.dwellMs,nearM:DEFAULTS.nearM,maxTickMs:DEFAULTS.maxTickMs,onGrant:null,nowActAt:null}; }

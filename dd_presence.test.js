@@ -92,6 +92,56 @@ P.tick(AT_A, STAGES, 60000);
 P.tick(AT_A, STAGES, 60000);                         // back → crosses threshold
 ok('dwell survived the jitter → ticket still granted', grants.length===1);
 
+// 11. guardSpine TRULY FIRES — the fix. supabase-js v2 is lazy: a bare c.rpc() never
+//     sends. Prove the grant path now actually invokes rpc AND chains .then (async result).
+//     We install a fake ddClient whose rpc() returns a real thenable, and confirm it fires.
+(function(){
+  var done=false;
+  var calls=[];
+  global.ddClient=function(){ return { rpc:function(name,args){ calls.push({name:name,args:args});
+    return Promise.resolve({ data:[{event_id:args.event, already:false}], error:null }); } }; };
+  P._reset(); P.configure({ dwellMs:1, nearM:75, onGrant:function(){}, nowActAt:nowActA });
+  P.tick(AT_A, STAGES, 10);   // trips grant() → guardSpine('sf_presence_grant',...)
+  ok('grant() actually calls rpc (no fire-and-forget void)', calls.length===1 && calls[0].name==='sf_presence_grant');
+  ok('rpc args carry the event id', calls[0].args && typeof calls[0].args.event==='string' && calls[0].args.event.length>0);
+  delete global.ddClient;
+})();
+
+// 12. accept() — the proximity-accept round trip. Returns a PROMISE reflecting the REAL
+//     server result: synced ONLY on confirm; offline when no backend; error on failure.
+(function(){
+  var results=[];
+  function run(label){
+    // 12a — server confirms → synced:true
+    global.ddClient=function(){ return { rpc:function(){ return Promise.resolve({ data:[{}], error:null }); } }; };
+    P._reset(); P.configure({ dwellMs:1, nowActAt:nowActA });
+    P.accept('EV-1', {id:'americaplatz'}).then(function(r){
+      ok('accept: server confirm → synced:true', r.ok===true && r.synced===true && !r.offline && !r.error);
+      // 12b — idempotent: same event again is flagged already
+      P.accept('EV-1', {id:'americaplatz'}).then(function(r2){
+        ok('accept: idempotent → already:true (one per event)', r2.already===true);
+        delete global.ddClient;
+        // 12c — no backend → honest offline (local-first), NOT a fake "synced"
+        P._reset(); P.configure({ dwellMs:1, nowActAt:nowActA });
+        P.accept('EV-2', {id:'americaplatz'}).then(function(r3){
+          ok('accept: no backend → offline:true, synced:false (honest, not faked)', r3.offline===true && r3.synced===false);
+          // 12d — server refuses (error object) → NOT synced, error surfaced
+          global.ddClient=function(){ return { rpc:function(){ return Promise.resolve({ data:null, error:{message:'denied'} }); } }; };
+          P._reset(); P.configure({ dwellMs:1, nowActAt:nowActA });
+          P.accept('EV-3', {id:'americaplatz'}).then(function(r4){
+            ok('accept: server error → synced:false + error (truthful didn\'t-verify)', r4.synced===false && !!r4.error);
+            delete global.ddClient;
+            finishReport();
+          });
+        });
+      });
+    });
+  }
+  run();
+})();
+
+function finishReport(){
 console.log('\n dd_presence harness: '+pass+' passed, '+fail+' failed');
 if(fail){ console.log(' FAILURES:\n  - '+fails.join('\n  - ')); process.exit(1); }
 console.log(' ✅ all green');
+}

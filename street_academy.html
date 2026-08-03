@@ -6,6 +6,9 @@
 <title>Street Team Academy · DeadDance</title>
 <meta name="theme-color" content="#241535">
 <link rel="icon" href="rose-32.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _C;}; }catch(e){}</script>
+<script src="dd_streetteam.js"></script>
 <style>
   :root{ --purple:#241535; --acc:#7c3aed; --rose:#b8002e; --gold:#f0a500; --green:#12854f; --blue:#2f7bf6;
          --ink:#1b1430; --muted:#6f6a88; --line:#ece7f5; --bg:#f7f5fc; }
@@ -88,7 +91,18 @@
   <p>Seed the band, spread the free ticket, and let the crowd carry it. Do it right and every set you work grows the map. This page shows you exactly how.</p>
   <div class="deal">
     <span class="chip">💵 <b>~$20–30</b>/hr</span>
-    <span class="chip">👕 <b>Shirts</b></span>
+    <span class="chip">🍪 <b>Daily Cookie Contest</b></span>
+  </div>
+  <button id="joinBtn" onclick="stJoin()" style="margin-top:16px;border:0;border-radius:14px;padding:14px 22px;font-weight:900;font-size:16px;color:#241535;background:var(--gold);cursor:pointer;box-shadow:0 8px 22px rgba(240,165,0,.35)">🌹 Join the Street Team</button>
+  <div id="joinState" style="margin-top:10px;font-size:13px;font-weight:800;color:#d6cbe8;min-height:16px"></div>
+  <div id="stStats" style="display:none;margin-top:14px;background:#ffffff12;border:1px solid #ffffff26;border-radius:16px;padding:14px 12px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
+      <div><div id="stCookies" style="font-size:22px;font-weight:900;color:var(--gold)">–</div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#c8bce2">🍪 Cookies</div></div>
+      <div><div id="stStages" style="font-size:22px;font-weight:900;color:#fff">–</div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#c8bce2">Stages</div></div>
+      <div><div id="stPhones" style="font-size:22px;font-weight:900;color:#fff">–</div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#c8bce2">Phones</div></div>
+      <div><div id="stRank" style="font-size:22px;font-weight:900;color:#fff">–</div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#c8bce2">Rank today</div></div>
+    </div>
+    <div id="stBoard" style="margin-top:10px;font-size:12px;color:#c8bce2;line-height:1.5"></div>
   </div>
 </div>
 
@@ -200,6 +214,49 @@
     var total=10, left=total, bar=document.getElementById('ccBar'), clock=document.getElementById('ccClock'), msg=document.getElementById('ccMsg');
     var iv=setInterval(function(){ left--; clock.textContent='0:'+(left<10?'0':'')+left; bar.style.width=Math.round((total-left)/total*100)+'%';
       if(left<=0){ clearInterval(iv); clock.textContent='✅'; clock.style.color='#8ff0c9'; msg.innerHTML='DONE — grab your phone 🌹'; } }, 300); }
+</script>
+<script>
+/* Street-Team join + live stats — REAL: DDStreetTeam.join fires sf_st_join and reports the true
+   server result. Honest states: joined+synced (server confirmed) vs joined-locally-offline (no reach). */
+(function(){
+  function qp(n){ try{ return new URLSearchParams(location.search).get(n); }catch(e){ return null; } }
+  var FEST = (qp('festival')||'musikfest-2026').toLowerCase();
+  var ST = window.DDStreetTeam;
+  var btn=document.getElementById('joinBtn'), st=document.getElementById('joinState'), panel=document.getElementById('stStats');
+
+  function setBtnJoined(){ if(btn){ btn.textContent="🌹 You're on the Street Team"; btn.disabled=true; btn.style.opacity='.75'; btn.style.cursor='default'; } }
+
+  function renderStats(){
+    if(!ST) return;
+    Promise.resolve(ST.stats(FEST)).then(function(me){
+      if(!me) return;   // no server reach → leave dashes; membership state already stated honestly
+      panel.style.display='block';
+      document.getElementById('stCookies').textContent = (me.cookies!=null?me.cookies:0);
+      document.getElementById('stStages').textContent  = (me.stages!=null?me.stages:0);
+      document.getElementById('stPhones').textContent  = (me.phones_shared!=null?me.phones_shared:0);
+      document.getElementById('stRank').textContent    = (me.rank!=null?('#'+me.rank):'–');
+    }).catch(function(){});
+    Promise.resolve(ST.leaderboard(FEST)).then(function(rows){
+      var el=document.getElementById('stBoard'); if(!el||!rows||!rows.length) return;
+      var medals=['🥇','🥈','🥉'];
+      el.innerHTML="<b style=\"color:#fff\">Today's top 3</b><br>"+rows.map(function(r,i){ return (medals[i]||'')+' '+r.member+' — '+r.cookies+' 🍪'; }).join('<br>');
+      panel.style.display='block';
+    }).catch(function(){});
+  }
+
+  window.stJoin=function(){
+    if(!ST){ st.textContent='Street Team module not loaded — refresh and try again.'; return; }
+    st.textContent='Joining…';
+    Promise.resolve(ST.join(FEST)).then(function(okv){
+      setBtnJoined();
+      if(okv){ st.textContent='✅ Joined & synced — welcome to the crew 🌹'; renderStats(); }
+      else { st.textContent="🌹 Joined on this phone — couldn't reach the server (offline). Your stats will sync when you're back online."; }
+    }).catch(function(){ setBtnJoined(); st.textContent="🌹 Joined on this phone — couldn't reach the server right now."; });
+  };
+
+  // reflect existing membership on load (honest: local flag says joined; stats only if server answers)
+  try{ if(ST && ST.isMember(FEST)){ setBtnJoined(); st.textContent="🌹 You're on the Street Team."; renderStats(); } }catch(e){}
+})();
 </script>
 </body>
 </html>

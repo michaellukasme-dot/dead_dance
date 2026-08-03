@@ -322,6 +322,7 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <button class="mftab" data-cur="cur_windcreek" onclick="mfCurtain('cur_windcreek')">🎟 Wind Creek Steel Stage</button>
     <button class="mftab on" data-cur="cur_plan" onclick="mfCurtain('cur_plan')">📋 Plan Your Day</button>
     <button class="mftab" data-cur="cur_mysets" onclick="mfCurtain('cur_mysets')" title="My Ticket Wallet — a free ticket to every show you plan to attend">📝 My Plan</button>
+    <button class="mftab" data-cur="cur_street" onclick="mfCurtain('cur_street')" title="Street Team — four touch-phone tools: share this stage's ticket, share the map, search→ticket, hand out free tickets">🤝 Street Team</button>
     <button class="mftab" data-cur="cur_dead" onclick="mfCurtain('cur_dead')">🌹 Dead &amp; Jam Band</button>
     <button class="mftab" data-cur="cur_stage" onclick="mfCurtain('cur_stage')">🎪 Browse stage</button>
     <button class="mftab" data-cur="cur_earlier" onclick="mfCurtain('cur_earlier')">⏱ Earlier</button>
@@ -442,6 +443,12 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
     <div id="mySets"></div>
   </div>
 
+  <!-- 8b · 🤝 Street Team — four touch-phone utilities (self-contained renderer: mfRenderStreetTeam) -->
+  <div class="mfcurtain" id="cur_street">
+    <div class="curtitle">🤝 Street Team</div>
+    <div id="stCurtainBody"><div style="color:var(--muted);font-size:13px;padding:8px 0">Loading Street Team tools…</div></div>
+  </div>
+
   <!-- 8 · Locals -->
   <div class="mfcurtain" id="cur_locals">
     <div class="curtitle">What the locals know (and you don't yet)</div>
@@ -490,6 +497,9 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
 <script src="dd_bandgroups.js"></script><script src="dd_flywheel.js"></script><!-- Band→Fan flywheel: free ticket → fan → band group -->
+<script src="dd_streetteam.js"></script><!-- Street Team: opted-in members' activity → cookies (guarded, never blocks GPS) -->
+<script src="dd_mf_bands.js"></script><!-- Dead & Jam roster + member names → the Street Team search index -->
+<script src="dd_stcurtain.js"></script><!-- Street Team CURTAIN brain: search/resolve/ticketUrl/venue-coords/paid-gate (pure, tested) -->
 <script src="dd_musikfest.js"></script>
 <script src="dd_festivals.js"></script><!-- multi-festival registry (Option B): one map engine, many SteelStacks festivals -->
 <script src="dd_countryfest.js"></script><!-- CountryFest — reuses the Southside stages -->
@@ -996,6 +1006,7 @@ window.mfShareMap=function(){
 // PHONE-TO-PHONE — the reliable, honest mechanism: a big QR the other phone's CAMERA scans
 // (works on any two phones, no NFC, no app to install, never leaves your app), plus AirDrop/Messages.
 window.mfPhoneToPhone=function(){
+  try{ if(window.mfStLog) mfStLog('phoneshare',{ref:'p2p'}); }catch(e){}   // Street-Team: member opened the phone-to-phone share
   var ex=document.getElementById('mfP2P'); if(ex){ ex.remove(); return; }   // toggle
   var url='https://deaddance.app/musikfest';
   var wrap=document.createElement('div'); wrap.id='mfP2P';
@@ -1018,6 +1029,181 @@ window.mfPhoneToPhone=function(){
           else { sb.textContent='📋 Copy the link'; sb.onclick=function(){ try{ navigator.clipboard.writeText(url); sb.textContent='Link copied ✓'; }catch(e){} }; } }
   var cb=document.getElementById('mfP2Pcopy'); if(cb){ cb.onclick=function(){ try{ navigator.clipboard.writeText(url); cb.textContent='Link copied ✓'; }catch(e){} }; }
   var xb=document.getElementById('mfP2Pclose'); if(xb){ xb.onclick=function(){ wrap.remove(); }; }
+};
+
+/* ===================================================================================
+ * 🤝 STREET TEAM CURTAIN — self-contained renderer + generic phone-to-phone share.
+ * Reuses: DDStCurtain (brain), DDStreetTeam (log/join), DDQR, mfPhoneToPhone,
+ * mfNearestStage/mfActOnNow, STAGES, MF/DD_MUSIKFEST. Drop mfRenderStreetTeam() into
+ * any %venue% page — pass a different venue key to reuse the same four utilities.
+ * ================================================================================= */
+var ST_FEST='musikfest-2026', ST_BASE='https://deaddance.app/';
+function stVenue(){ try{ return (window.DDStCurtain && DDStCurtain.venue(ST_FEST)) || null; }catch(e){ return null; } }
+// generic phone-to-phone share modal (a real scannable QR + Web Share + copy — no fake NFC)
+window.stShare=function(opts){ opts=opts||{}; var url=opts.url; if(!url) return;
+  var ex=document.getElementById('stShareM'); if(ex) ex.remove();
+  var wrap=document.createElement('div'); wrap.id='stShareM';
+  wrap.style.cssText='position:fixed;inset:0;z-index:660;background:rgba(20,12,34,.72);display:flex;align-items:center;justify-content:center;padding:24px';
+  var card=document.createElement('div');
+  card.style.cssText='background:#fff;border-radius:18px;max-width:340px;width:100%;padding:20px;text-align:center;box-shadow:0 20px 50px #0007';
+  card.innerHTML='<div style="font-weight:800;font-size:17px;color:#2a1147;margin-bottom:4px">'+esc(opts.title||'📲 Phone-to-Phone')+'</div>'
+    +'<div style="font-size:13px;color:#6b6580;margin-bottom:14px">'+(opts.sub||'Point the other phone’s <b>camera</b> at this code. Nothing to install.')+'</div>'
+    +'<div id="stShareQR" style="width:240px;height:240px;margin:0 auto 14px;background:#fff;border-radius:12px;overflow:hidden"></div>'
+    +'<button id="stShareBtn" style="width:100%;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:15px;background:#5a2e86;color:#fff;cursor:pointer;margin-bottom:8px">Send via AirDrop / Messages</button>'
+    +'<button id="stShareCopy" style="width:100%;border:1.5px solid #ddd;border-radius:12px;padding:12px;font-weight:800;font-size:14px;background:#fff;color:#333;cursor:pointer;margin-bottom:8px">📋 Copy the link</button>'
+    +'<button id="stShareClose" style="border:0;background:none;color:#8a86a3;font-size:13px;cursor:pointer">Close</button>';
+  wrap.appendChild(card);
+  wrap.addEventListener('click', function(e){ if(e.target===wrap) wrap.remove(); });
+  document.body.appendChild(wrap);
+  try{ if(window.DDQR) DDQR.into('stShareQR', url, {mark:'dd', size:520, css:240, caption:false});
+       else { document.getElementById('stShareQR').innerHTML='<div style="padding:24px;font-size:12px;color:#b8002e">QR unavailable — use Copy link below.</div>'; } }catch(e){}
+  var sb=document.getElementById('stShareBtn');
+  if(sb){ if(navigator.share){ sb.onclick=function(){ navigator.share({title:opts.title||'DeadDance', url:url}).catch(function(){}); }; }
+          else { sb.textContent='📋 Copy the link'; sb.onclick=function(){ try{ navigator.clipboard.writeText(url); sb.textContent='Link copied ✓'; }catch(e){} }; } }
+  var cb=document.getElementById('stShareCopy'); if(cb){ cb.onclick=function(){ try{ navigator.clipboard.writeText(url); cb.textContent='Link copied ✓'; }catch(e){} }; }
+  var xb=document.getElementById('stShareClose'); if(xb){ xb.onclick=function(){ wrap.remove(); }; }
+  if(opts.logKind){ try{ mfStLog(opts.logKind, {ref: (opts.logRef!=null?opts.logRef:'')}); }catch(e){} }   // Street-Team: real share logged (member-gated)
+};
+// share a specific act's FREE ticket (utility 1 & 3)
+window.stShareTicket=function(act){ if(!act) return; var url=DDStCurtain.ticketUrl(act, ST_BASE);
+  stShare({ url:url, title:'🎟 '+act+' — free ticket', sub:'Point the other phone’s <b>camera</b> here — it grabs <b>'+esc(act)+'</b>’s free ticket. Nothing to install.', logKind:'phoneshare', logRef:act }); };
+
+// UTILITY 1 — resolve THIS stage's act (nearest via GPS, else picker) then share its ticket
+window.stU1=function(){ var host=document.getElementById('stU1Body'); if(!host) return;
+  var ns=null; try{ if(typeof mfNearestStage==='function') ns=mfNearestStage(); }catch(e){}
+  if(ns && ns.stage){ var stName=ns.stage.n, act=''; try{ act=mfActOnNow(stName)||''; }catch(e){}
+    if(act){ host.innerHTML='<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">Nearest stage: <b>'+esc((typeof mfCleanStage==="function"?mfCleanStage(stName):stName))+'</b> — on now: <b>🌹 '+esc(act)+'</b></div>'
+        +'<button class="stbtn" onclick="stShareTicket('+JSON.stringify(act).replace(/"/g,'&quot;')+')">📲 Share '+esc(act)+'’s free ticket</button>'; return; }
+    host.innerHTML='<div style="font-size:12.5px;color:#4a4356;margin-bottom:6px">Nearest stage: <b>'+esc((typeof mfCleanStage==="function"?mfCleanStage(stName):stName))+'</b> — nobody on right now. Pick a stage:</div>'+stStagePicker(); return; }
+  host.innerHTML='<div style="font-size:12.5px;color:#4a4356;margin-bottom:6px">GPS is off, so we can’t find your nearest stage. Pick one:</div>'+stStagePicker();
+};
+function stStagePicker(){ var stages=(window.MF_STAGES&&MF_STAGES.length)?MF_STAGES.slice():Array.from(new Set((window.MF||window.DD_MUSIKFEST||[]).map(function(r){return r.st;})));
+  stages.sort(); var opts=stages.map(function(s){ return '<option value="'+esc(s)+'">'+esc((typeof mfCleanStage==="function"?mfCleanStage(s):s))+'</option>'; }).join('');
+  return '<select id="stStageSel" onchange="stStagePicked()" style="width:100%;font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;color:var(--ink);margin-bottom:8px"><option value="">— choose a stage —</option>'+opts+'</select><div id="stStagePicked"></div>'; }
+window.stStagePicked=function(){ var sel=document.getElementById('stStageSel'), out=document.getElementById('stStagePicked'); if(!sel||!out)return;
+  var st=sel.value; if(!st){ out.innerHTML=''; return; } var act=''; try{ act=mfActOnNow(st)||''; }catch(e){}
+  if(act){ out.innerHTML='<button class="stbtn" onclick="stShareTicket('+JSON.stringify(act).replace(/"/g,'&quot;')+')">📲 Share '+esc(act)+'’s free ticket</button>'; }
+  else { out.innerHTML='<div style="font-size:12px;color:#8a7bbf;font-weight:700">No act on this stage right now — try another, or use Search below to find any act’s ticket.</div>'; } };
+
+// UTILITY 3 — search acts / stages / member names → resolve → share the ticket
+window.stSearch=function(){ var q=(document.getElementById('stQ')||{}).value||''; var out=document.getElementById('stResults'); if(!out)return;
+  if(!window._ST_IDX){ try{ _ST_IDX=DDStCurtain.buildIndex(window.DD_MF_BANDS||null, (window.MF||window.DD_MUSIKFEST||[])); }catch(e){ _ST_IDX=[]; } }
+  var hits=DDStCurtain.search(q, _ST_IDX, 12);
+  if(!q.trim()){ out.innerHTML=''; return; }
+  if(!hits.length){ out.innerHTML='<div style="font-size:12.5px;color:#8a7bbf;font-weight:700;padding:6px 2px">No act, stage, or member matches “'+esc(q)+'”.</div>'; return; }
+  out.innerHTML=hits.map(function(h){
+    var act = h.act || (function(){ try{ return mfActOnNow(h.stage)||''; }catch(e){ return ''; } })();   // stage hit → the act on that stage now
+    var badge = h.type==='member' ? ('👤 '+esc(h.label)+' · <b>'+esc(h.act)+'</b>') : (h.type==='stage' ? ('🎪 '+esc((typeof mfCleanStage==="function"?mfCleanStage(h.label):h.label))+(act?' · on now: <b>'+esc(act)+'</b>':' · <i>nobody on now</i>')) : ('🎟 <b>'+esc(h.label)+'</b>'));
+    var btn = act ? '<button class="stbtn2" onclick="stShareTicket('+JSON.stringify(act).replace(/"/g,'&quot;')+')">Share ticket ›</button>' : '<span style="font-size:11px;color:#b7aecb">no ticket now</span>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid #f4f1f9"><div style="flex:1;min-width:0;font-size:13px;color:#241535">'+badge+'</div>'+btn+'</div>';
+  }).join(''); };
+
+// UTILITY 4 — door. Gated on the venue's paid-sales approval (honest). MusikFest is
+// FREE → hand out the event's FREE ticket; no fake verify.
+function stU4(){ var v=stVenue();
+  if(window.DDStCurtain && DDStCurtain.approvedForPaid(v)){ var du=DDStCurtain.doorUrl(v, ST_BASE);
+    return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">This venue is <b>approved for ticket sales</b> — verify &amp; sell at the door.</div>'
+      +'<a class="stbtn" href="'+esc(du)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">🚪 Open Door Mode — verify &amp; sell ›</a>'; }
+  var freeUrl=DDStCurtain.ticketUrl((v&&v.freeTicketBand)||'MusikFest 2026', ST_BASE);
+  return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">MusikFest is <b>free</b> — so there’s nothing to verify. Instead, <b>hand out free tickets</b>: let people at the door/inside scan this to grab their own.</div>'
+    +'<button class="stbtn" onclick="stShare({url:'+JSON.stringify(freeUrl)+',title:\'🎟 MusikFest — free ticket\',sub:\'Point your camera here to grab your <b>free</b> MusikFest ticket.\',logKind:\'phoneshare\',logRef:\'freeticket\'})">📲 Hand out a free ticket ›</button>'
+    +'<button class="stbtn2" style="margin-top:8px" onclick="mfPhoneToPhone()">🤝 Show a nearby fan how to share ›</button>'
+    +'<div style="font-size:11.5px;color:#8a7bbf;font-weight:700;margin-top:8px">Paid door-verify opens when this venue is approved for ticket sales. It isn’t faked here.</div>'; }
+
+// UTILITY 5 — proximity-accept: a fan physically AT a FREE stage/venue may ACCEPT their
+// free ticket. GPS-gated (never faked), FAN taps CONFIRM, verified-at-show recorded via
+// ddPresence.accept → sf_presence_grant (now truly wired). FREE events only.
+function stU5(){ var v=stVenue();
+  if(window.DDStCurtain && DDStCurtain.approvedForPaid(v)){
+    return '<div style="font-size:12.5px;color:#4a4356">This venue is <b>approved for paid ticket sales</b> \u2014 free proximity-accept isn\u2019t offered here. Paid tickets verify in <b>Door Mode</b> (utility 4).</div>'; }
+  var stName=''; try{ var saved=localStorage.getItem('dd.st.post.'+ST_FEST)||''; if(saved) stName=saved; }catch(e){}
+  if(!stName){ try{ var ns=mfNearestStage(); if(ns&&ns.stage) stName=ns.stage.n; }catch(e){} }
+  var here=(window.WALK&&WALK.last)?WALK.last:null;
+  if(!here){   // honest: no GPS fix \u2192 we do NOT fake proximity
+    return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">We can\u2019t confirm you\u2019re here \u2014 <b>GPS is off</b>. Turn on Auto-Tracking so we can check you\u2019re at the stage. We don\u2019t fake proximity.</div>'
+      +'<button class="stbtn" onclick="try{if(!(window.WALK&&WALK.on))toggleTrack();}catch(e){} setTimeout(mfRenderStreetTeam,700);">\u25b6 Turn on Auto-Tracking</button>'; }
+  if(!stName){ return '<div style="font-size:12.5px;color:#4a4356">Pick your stage in <b>Your post</b> above (or get near a stage) so we know which free ticket to accept.</div>'; }
+  var stObj=(window.STAGES||[]).filter(function(s){return s&&s.n===stName;})[0];
+  var clean=esc((typeof mfCleanStage==='function')?mfCleanStage(stName):stName);
+  if(stObj && stObj.free===0){   // the one PAID stage \u2192 door verify, not free accept
+    return '<div style="font-size:12.5px;color:#4a4356">You\u2019re at <b>'+clean+'</b> \u2014 a <b>paid</b> stage. Free proximity-accept isn\u2019t offered here; paid tickets verify in Door Mode.</div>'; }
+  var coords=null; try{ coords=DDStCurtain.stageCoords(stName, window.STAGES||[]); }catch(e){}
+  if(!coords){ return '<div style="font-size:12.5px;color:#4a4356">No coordinates for that stage.</div>'; }
+  var act=''; try{ act=mfActOnNow(stName)||''; }catch(e){}
+  var band=act || ((v&&v.freeTicketBand)||'MusikFest 2026');
+  var today=(typeof todayISO==='function')?todayISO():'';
+  var ev='MF|'+stName+'|'+today+'|'+(act||'venue');
+  var granted=false; try{ granted=!!(window.ddPresence&&ddPresence.granted(ev)); }catch(e){}
+  var pr=DDStCurtain.proximity(here, coords, {radiusM:100, granted:granted});
+  if(pr.already || granted){
+    return '<div style="font-size:12.5px;color:#1f7a4d;font-weight:700">\u2713 You\u2019ve already accepted your free ticket for this event.</div>'; }
+  if(pr.eligible){
+    window._stU5ctx={st:stName,act:act,ev:ev,band:band};
+    return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">You\u2019re here at <b>'+clean+'</b> (~'+pr.distanceM+' m).'+(act?' On now: <b>\ud83c\udf39 '+esc(act)+'</b>.':'')+' Tap to accept your free ticket.</div>'
+      +'<button class="stbtn" onclick="stU5Accept()">\u2713 I\u2019m here \u2014 accept my free ticket'+(act?(' for '+esc(act)):(' for '+esc(band)))+'</button>'; }
+  return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">You\u2019re ~<b>'+pr.distanceM+' m</b> away \u2014 get closer to <b>'+clean+'</b> to accept your free ticket.</div>'
+    +'<button class="stbtn2" onclick="mfRenderStreetTeam()">\u21bb Re-check my distance</button>';
+}
+// FAN CONFIRM \u2192 grant the free ticket + record verified-at-show. Reflect the REAL result.
+window.stU5Accept=function(){ var ctx=window._stU5ctx||null; var host=document.getElementById('stU5Body'); if(!ctx||!host) return;
+  var band=ctx.band, act=ctx.act, stName=ctx.st, ev=ctx.ev, url=DDStCurtain.ticketUrl(band, ST_BASE);
+  host.innerHTML='<div style="font-size:12.5px;color:#4a4356">Accepting your free ticket\u2026</div>';
+  try{ mfStLog('task', {ref:'proximity-accept:'+(act||band)}); }catch(e){}
+  try{ if(window.DDFlywheel&&DDFlywheel.grab&&act) DDFlywheel.grab(act,{stage:stName,date:(typeof todayISO==='function'?todayISO():''),source:'proximity'}); }catch(e){}
+  var done=function(res){ var synced=res&&res.synced, offline=res&&res.offline;
+    var status = synced
+      ? '<div style="font-size:12px;color:#1f7a4d;font-weight:700;margin-top:8px">\u2705 Verified at the show \u2014 synced to your account.</div>'
+      : offline
+      ? '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\ud83d\udcf4 Granted on your phone (offline) \u2014 it\u2019ll sync when you\u2019re back online.</div>'
+      : '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\u26a0\ufe0f Ticket granted on your phone, but we couldn\u2019t reach the server to verify-at-show. It\u2019s still yours.</div>';
+    host.innerHTML='<div style="font-size:12.5px;color:#241535;font-weight:800;margin-bottom:8px">\ud83c\udf9f Your free ticket for <b>'+esc(band)+'</b> is ready.</div>'
+      +'<a class="stbtn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">Open my free ticket \u203a</a>'+status;
+    try{ window.open(url,'_blank','noopener'); }catch(e){} };
+  try{ var p=(window.ddPresence&&ddPresence.accept)?ddPresence.accept(ev,{id:stName,name:stName}):null;
+    if(p&&p.then){ p.then(done,function(){ done({ok:true,synced:false}); }); } else { done({ok:true,synced:false,offline:true}); }
+  }catch(e){ done({ok:true,synced:false}); }
+};
+
+// membership header + %VENUE% direction (Your post: stage — coords → tap to center)
+function stHeader(){ var v=stVenue(); var member=false; try{ member=!!(window.DDStreetTeam && DDStreetTeam.isMember(ST_FEST)); }catch(e){}
+  if(!member){ return '<div style="background:linear-gradient(100deg,#f3eeff,#fff);border:1px solid #d9c9f0;border-left:5px solid #5a2e86;border-radius:14px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-weight:900;font-size:14px;color:#241535">Join the Street Team</div>'
+      +'<div style="font-size:12px;color:#5a2e86;margin:2px 0 9px">Work the crowd, earn cookies, get your post. These four tools work either way — joining logs your shares.</div>'
+      +'<button class="stbtn" onclick="stJoin()">🤝 Join the '+esc((v&&v.name)||'MusikFest')+' Street Team</button></div>'; }
+  return '<div id="stPostBox" style="background:linear-gradient(100deg,#fff8ec,#fff);border:1px solid #f0d9a6;border-left:5px solid #f0a500;border-radius:14px;padding:12px 13px;margin-bottom:12px">'
+    +'<div style="font-weight:900;font-size:14px;color:#241535">You’re on the Street Team 🌹</div>'
+    +'<div style="font-size:12px;color:#7a6a2e;margin:2px 0 8px">Your post — pick your stage; tap to center the map on it.</div>'
+    +stStagePickPost()+'</div>'; }
+function stStagePickPost(){ var stages=(window.STAGES||[]).filter(function(s){return s&&s.lat!=null;});
+  var saved=''; try{ saved=localStorage.getItem('dd.st.post.'+ST_FEST)||''; }catch(e){}
+  var opts=stages.map(function(s){ return '<option value="'+esc(s.n)+'"'+(s.n===saved?' selected':'')+'>'+esc((typeof mfCleanStage==="function"?mfCleanStage(s.n):s.n))+'</option>'; }).join('');
+  return '<select id="stPostSel" onchange="stPostPick()" style="width:100%;font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;color:var(--ink)"><option value="">— choose your post —</option>'+opts+'</select><div id="stPostCoords" style="margin-top:8px"></div>'; }
+window.stPostPick=function(){ var sel=document.getElementById('stPostSel'), out=document.getElementById('stPostCoords'); if(!sel||!out)return;
+  var name=sel.value; try{ localStorage.setItem('dd.st.post.'+ST_FEST, name); }catch(e){}
+  if(!name){ out.innerHTML=''; return; }
+  var c=null; try{ c=DDStCurtain.stageCoords(name, window.STAGES||[]); }catch(e){}
+  if(!c){ out.innerHTML='<span style="font-size:12px;color:#b7aecb">No coordinates for that post.</span>'; return; }
+  out.innerHTML='<div style="font-size:12.5px;color:#241535;font-weight:700">Your post: <b>'+esc((typeof mfCleanStage==="function"?mfCleanStage(c.name):c.name))+'</b> — '+c.lat.toFixed(5)+', '+c.lng.toFixed(5)+'</div>'
+    +'<button class="stbtn2" style="margin-top:6px" onclick="try{mapTo('+c.lat+','+c.lng+',17)}catch(e){}">🗺 Center the map on my post ›</button>'; };
+window.stJoin=function(){ try{ var p=(window.DDStreetTeam&&DDStreetTeam.join(ST_FEST)); if(p&&p.then){ p.then(function(){ mfRenderStreetTeam(); }, function(){ mfRenderStreetTeam(); }); } else mfRenderStreetTeam(); }catch(e){ mfRenderStreetTeam(); } };
+
+window.mfRenderStreetTeam=function(){ var host=document.getElementById('stCurtainBody'); if(!host) return;
+  if(!window.DDStCurtain){ host.innerHTML='<div style="color:#b8002e;font-size:13px">Street Team brain not loaded (dd_stcurtain.js). Tools unavailable.</div>'; return; }
+  var v=stVenue();
+  host.innerHTML=''
+    +'<style>.stbtn{width:100%;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;background:#5a2e86;color:#fff;cursor:pointer}'
+      +'.stbtn2{border:1.5px solid #d9c9f0;border-radius:10px;padding:8px 11px;font-weight:800;font-size:12.5px;background:#fff;color:#5a2e86;cursor:pointer}'
+      +'.stcard{border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:11px;background:#fff}'
+      +'.stnum{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#5a2e86;color:#fff;font-weight:900;font-size:12px;margin-right:7px}'
+      +'.sth{font-weight:900;font-size:14px;color:#241535;margin-bottom:8px;display:flex;align-items:center}</style>'
+    + stHeader()
+    +'<div class="stcard"><div class="sth"><span class="stnum">1</span>Share this stage’s act ticket</div><div id="stU1Body"><button class="stbtn" onclick="stU1()">📍 Find my stage’s act ›</button></div></div>'
+    +'<div class="stcard"><div class="sth"><span class="stnum">2</span>Share the MusikFest map</div><button class="stbtn" onclick="mfPhoneToPhone()">🗺 Phone-to-phone the map ›</button></div>'
+    +'<div class="stcard"><div class="sth"><span class="stnum">3</span>Search → ticket</div>'
+      +'<input id="stQ" oninput="stSearch()" placeholder="Act, stage, or band-member name…" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink);margin-bottom:6px">'
+      +'<div id="stResults"></div></div>'
+    +'<div class="stcard"><div class="sth"><span class="stnum">4</span>'+(v&&DDStCurtain.approvedForPaid(v)?'Accept / verify a ticket at the door':'Hand out free tickets at the door')+'</div>'+stU4()+'</div>'
+    +'<div class="stcard"><div class="sth"><span class="stnum">5</span>\u2713 Accept your FREE ticket (you\u2019re here)</div><div id="stU5Body">'+stU5()+'</div></div>';
 };
 window._mfLocked=false;
 function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{
@@ -1363,7 +1549,10 @@ window.renderAsks=function(a){ var host=document.getElementById('silverFloat'); 
 function cookieCelebrate(cap){ var el=document.getElementById('ckPop'); if(!el){ el=document.createElement('div'); el.id='ckPop'; el.style.cssText='position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:260;background:#241535;color:#fff;border-radius:16px;box-shadow:0 10px 30px #0007;max-width:90%;padding:12px 15px;display:flex;align-items:center;gap:11px'; document.body.appendChild(el); }
   el.innerHTML='<img src="cookie-mark.svg" alt="" style="width:34px;height:34px;flex:none"><div><div style="font-weight:900;font-size:13px">🍪 Posted to the family!</div>'+(cap?'<div style="font-size:12px;opacity:.9">“'+String(cap).replace(/</g,'&lt;')+'”</div>':'')+'</div>';
   el.style.display='flex'; clearTimeout(el._h); el._h=setTimeout(function(){ el.style.display='none'; },4500);
+  try{ mfStLog('cookie',{ref:'celebrate',secs:1}); }catch(e){}   // Street-Team: a cookie was earned/celebrated → contest credit
 }
+// Street-Team activity logging — ONLY for opted-in members; fully guarded + .then-safe; never throws, never blocks the GPS pipeline.
+function mfStLog(kind, data){ try{ if(window.DDStreetTeam && DDStreetTeam.isMember('musikfest-2026')){ var p=DDStreetTeam.log('musikfest-2026', kind, data||{}); if(p&&p.then) p.then(function(){},function(){}); } }catch(e){} }
 window.askCapture=function(cap){ window._askCap=cap||''; mfCapture(); };   // tapping the ask opens the camera (rear on phone, front on desktop); the shot itself is the send
 window.surroundSend=function(){ var A=['the north side','the south side','stage left','stage right']; var ang=A[Math.floor(Math.random()*A.length)]; window._askCap='Surround the Stage 🎡 — my angle from '+ang+' 🌹'; mfCapture(); };   // group Surround: everyone gets a different side; the four angles stitch into one shot
 
@@ -1479,6 +1668,7 @@ function stageCheck(here){ if(!here)return; var best=null,bd=1e9; STAGES.forEach
   var accM=(window.YOU_ACC||999), accOk = best && accM < Math.max(55, stageFootFt(best)*0.3048*1.4);  // don't announce a stage on a loose fix
   if(best && bd<0.035 && accOk){ var now=Date.now();
     if(WALK._st!==best.n || now-(WALK._stT||0)>240000){ WALK._st=best.n; WALK._stT=now;
+      try{ mfStLog('stage',{ref:best.n, lat:best.lat, lng:best.lng}); }catch(e){}   // Street-Team: member worked this stage
       var set=nowSetAtStage(stageKey(best));
       if(set){ mfToastHTML(bandCard(set.b, set.st, set.t));
         // Surround the Stage — offer the crowd collage for EVERY stage, EVERY set (once per stage+set).
@@ -1556,7 +1746,8 @@ function mfVisitFlush(now){ var cell=_mfCell.cur; now=now||Date.now();
   if(!cell){ _mfCell.since=now; _mfCell.lastFlush=now; return; }
   var sec=Math.round((now-_mfCell.since)/1000); _mfCell.since=now; _mfCell.lastFlush=now;
   if(sec<=0||sec>3600)return; var sb=(window.ddClient&&ddClient());
-  if(sb&&sb.rpc){ try{ sb.rpc('dd_mf_visit_bump',{p_token:mfToken(),p_cell:cell,p_dwell_sec:sec}).then(function(){},function(){}); }catch(e){} } }
+  if(sb&&sb.rpc){ try{ sb.rpc('dd_mf_visit_bump',{p_token:mfToken(),p_cell:cell,p_dwell_sec:sec}).then(function(){},function(){}); }catch(e){} }
+  try{ mfStLog('dwell',{ref:cell, secs:sec}); }catch(e){} }   // Street-Team: bank the member's dwell for their stats
 function mfVisitTick(here){ if(!here)return; var now=Date.now(), cell=currentCell(here);
   if(cell!==_mfCell.cur){ mfVisitFlush(now); _mfCell.cur=cell; _mfCell.since=now; }               // moved rings → bank the dwell
   else if(cell && now-_mfCell.lastFlush>90000){ mfVisitFlush(now); } }                             // still here → flush every ~90s
@@ -1777,6 +1968,8 @@ window.postWalk=function(){
 // DEFAULT GPS ON — start tracking the moment they land; user need not do a thing. The reveal comes at day's end.
 renderMySets(); renderPhotoStrip();
 WALK.on=true; (function(){ var b=document.getElementById('trackBtn'); if(b){ b.textContent='⏸ Auto-Tracking'; b.classList.add('on'); } })(); fmtStat(); startWatch();
+// Street-Team: while Auto-Tracking is on, accrue HOURS with a 60s heartbeat (guarded, member-only, never blocks GPS).
+try{ setInterval(function(){ try{ if(window.WALK && WALK.on) mfStLog('hours',{secs:60}); }catch(e){} }, 60000); }catch(e){}
 
 // parking lots + the "where did I park" button
 try{ document.getElementById('lotList').innerHTML = LOTS.map(function(o){
@@ -1857,6 +2050,7 @@ function mfRenderCurtain(id){ PILL=(id==='cur_dead')?'dead':'all';              
   else if(id==='cur_earlier'){ renderSchedInto('earlier','earlierSched'); }
   else if(id==='cur_lineup'){ renderBrowse(); }
   else if(id==='cur_mysets'){ renderMySets(); }
+  else if(id==='cur_street'){ try{ mfRenderStreetTeam(); }catch(e){} }
   else if(id==='cur_console'){ mfConsoleView(_CV); }
   syncCurtainDayLabels(); }
 window.mfCurtain=function(id){ var el=document.getElementById(id); if(!el)return;

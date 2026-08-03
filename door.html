@@ -22,6 +22,9 @@ video{width:100%;border-radius:14px;background:#000;aspect-ratio:3/4;object-fit:
 .res{margin-top:12px;border-radius:14px;padding:16px;text-align:center;font-weight:800;font-size:18px;display:none}
 .res.ok{display:block;background:rgba(18,161,80,.15);border:1px solid var(--ok);color:#5be89a}
 .res.bad{display:block;background:rgba(224,54,74,.15);border:1px solid var(--bad);color:#ff8a9a}
+.res.warn{display:block;background:rgba(202,162,58,.15);border:1px solid var(--gold);color:#e8cf86}
+.provbtn{width:100%;margin-top:8px;padding:9px;border-radius:10px;border:1px solid var(--line);background:#232836;color:#cfd5e2;font-weight:800;font-size:12.5px;cursor:pointer;display:none}
+.provbox{margin-top:8px;font-size:11.5px;line-height:1.55;color:#aeb6c6;background:#12151c;border:1px solid var(--line);border-radius:10px;padding:9px 11px;display:none;white-space:pre-wrap;word-break:break-word}
 .res small{display:block;font-weight:600;font-size:13px;color:var(--muted);margin-top:4px}
 .tt{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:9px;color:#eef1f6;font-weight:800;font-size:15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .tt .p{color:var(--gold)}
@@ -52,6 +55,7 @@ video{width:100%;border-radius:14px;background:#000;aspect-ratio:3/4;object-fit:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
 <script src="qr.js"></script>
+<script src="dd_ticketsec.js"></script><!-- ticket-security brain: parse/redeem/verify/prov (guarded, .then-chained) -->
 <script>
 var SF_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM", SF_CHECKOUT="https://vmbqfzxhrqxpwgidogfm.supabase.co/functions/v1/sf-checkout";
 function $(id){return document.getElementById(id);}
@@ -76,7 +80,9 @@ function ui(){
      +'<video id="vid" playsinline muted></video>'
      +'<button class="scanbtn" id="scanBtn" onclick="toggleScan()">Start scanning</button>'
      +'<div class="res" id="res"></div>'
-     +'<p class="hint">Point at a fan\'s ticket QR. A green ✓ admits them; a used or invalid ticket shows red.</p>'
+     +'<button class="provbtn" id="provBtn" onclick="provPeek()">🔎 See this ticket\'s provenance (audit)</button>'
+     +'<div class="provbox" id="provBox"></div>'
+     +'<p class="hint">Point at a fan\'s ticket QR. A green ✓ admits them; amber = already used; RED = forged, do not admit. Secure tickets (TIX:…) verify their signature on the server.</p>'
    +'</div>'
    +'<div class="panel" id="pSell">'
      +'<p class="hint">Pick a ticket, then take payment. Card = fan scans &amp; pays on their own phone (Apple/Google Pay or card). Cash = you take the money, we issue the ticket.</p>'
@@ -100,14 +106,49 @@ function loop(){ if(!scanning)return; var v=$('vid');
     try{ var img=ctx.getImageData(0,0,cv.width,cv.height); var code=jsQR(img.data,img.width,img.height); if(code&&code.data&&Date.now()>_cool){ _cool=Date.now()+2500; onScan(code.data); } }catch(e){} }
   raf=requestAnimationFrame(loop); }
 function tokenFrom(s){ try{ if(s.indexOf('http')===0){ var u=new URL(s); return u.searchParams.get('t')||''; } }catch(e){} return String(s||'').trim(); }
-function onScan(data){ var tok=tokenFrom(data); if(!tok){ banner('bad','Not a ticket',''); return; }
+var _lastSecureTok=null;   // last scanned TIX token (for the provenance peek)
+function onScan(data){
+  // SECURE (HMAC-signed) ticket?  Route through the ticket-security spine (sf_ticket_redeem).
+  var sec=null; try{ sec=(window.DDTicketSec&&DDTicketSec.parseToken(data))||null; }catch(e){}
+  if(sec){ redeemSecure(String(data)); return; }
+  _lastSecureTok=null; hideProv();
+  var tok=tokenFrom(data); if(!tok){ banner('bad','Not a ticket',''); return; }
   var cl=ddClient(); cl.rpc('sf_checkin',{p_token:tok}).then(function(r){ var d=r&&r.data||{};
     if(d.status==='ok'){ beep(); banner('ok','✓ Admit — '+(d.qty>1?d.qty+'× ':'')+esc(d.name||'Ticket'), esc(d.event||'')); }
-    else if(d.status==='used'){ banner('bad','Already used', 'Checked in '+fmtAt(d.at)); }
+    else if(d.status==='used'){ banner('warn','Already used', 'Checked in '+fmtAt(d.at)); }
     else if(d.status==='unpaid'){ banner('bad','Not paid',''); }
     else if(d.status==='not_staff'){ banner('bad','Wrong event','This ticket isn\'t for your event.'); }
     else { banner('bad','Invalid ticket',''); }
   }).catch(function(){ banner('bad','Check-in failed','Try again.'); }); }
+
+// staff token for THIS event — held by the door owner (never embedded in a ticket). Prompt once,
+// claim it on the server (TOFU), reuse it for every paid redemption. Free tickets never need it.
+function doorStaff(){ var k='dd.door.staff.'+SLUG, t=''; try{ t=localStorage.getItem(k)||''; }catch(e){}
+  if(!t){ try{ t=(prompt('Set this event\'s STAFF TOKEN (a shared secret only door staff know — needed to admit PAID tickets):')||'').trim(); }catch(e){ t=''; }
+    if(t){ try{ localStorage.setItem(k,t); }catch(e){}
+      try{ if(window.DDTicketSec) DDTicketSec.staffClaim(SLUG,t,(EV&&EV.id)||'door'); }catch(e){} } }
+  return t||null; }
+// redeem a secure ticket. HMAC + single-use verified SERVER-SIDE; banner reflects the REAL result only.
+function redeemSecure(rawTok){ _lastSecureTok=rawTok; hideProv();
+  if(!window.DDTicketSec){ banner('bad','Security brain not loaded',''); return; }
+  banner('warn','Checking…','Verifying signature on the server.');
+  var by=(EV&&EV.id)||'door';
+  var go=function(here){
+    DDTicketSec.redeem(rawTok,{staffToken:doorStaff(),lat:here&&here[0],lng:here&&here[1],by:by}).then(function(res){
+      var h=DDTicketSec.humanStatus(res); banner(h.tone, h.label, h.sub);
+      if(h.tone==='ok') beep();
+      var pb=$('provBtn'); if(pb) pb.style.display='block';   // audit is available for any scanned ticket
+    }); };
+  // one best-effort geo fix (never blocks the admit)
+  try{ if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(
+        function(p){ go([p.coords.latitude,p.coords.longitude]); },
+        function(){ go(null); }, {enableHighAccuracy:true,timeout:3000,maximumAge:60000}); }
+      else go(null); }catch(e){ go(null); } }
+function provPeek(){ if(!_lastSecureTok||!window.DDTicketSec){ return; }
+  var box=$('provBox'); if(!box) return; box.style.display='block'; box.textContent='Loading audit…';
+  DDTicketSec.prov(_lastSecureTok).then(function(rows){
+    var lines=DDTicketSec.formatProv(rows); box.textContent = lines.length? lines.join('\n') : 'No provenance recorded yet.'; }); }
+function hideProv(){ var pb=$('provBtn'), box=$('provBox'); if(pb)pb.style.display='none'; if(box){box.style.display='none';box.textContent='';} }
 function banner(kind,msg,sub){ var el=$('res'); el.className='res '+kind; el.innerHTML=esc(msg)+(sub?'<small>'+sub+'</small>':''); }
 function fmtAt(s){ try{ return new Date(s).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
 function beep(){ try{ var a=new (window.AudioContext||window.webkitAudioContext)(); var o=a.createOscillator(); o.frequency.value=880; o.connect(a.destination); o.start(); setTimeout(function(){o.stop();a.close();},120); }catch(e){} }
