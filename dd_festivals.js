@@ -37,6 +37,11 @@
       key: key, name: spec.name || key, title: spec.title || spec.name || key,
       lineup: lineup, own: own, ownStages: ownStages, stageNames: stageNames, dates: dates,
       center: spec.center || null, cover: (spec.cover != null ? spec.cover : null),
+      // passthrough meta (optional) — lets the host surface real venue/host/FREE facts under the switched title.
+      free: (spec.free == null ? null : !!spec.free),
+      org: spec.org || spec.presentedBy || spec.host || '',
+      host: spec.host || '', venue: spec.venue || '', address: spec.address || '',
+      city: spec.city || '', state: spec.state || '', time: spec.time || '',
       all: (!own && !stageNames.length)         // no stages + not own = use ALL host stages (that's MusikFest)
     };
     return REG[key];

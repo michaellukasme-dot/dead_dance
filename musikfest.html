@@ -507,6 +507,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_countryfest.js"></script><!-- CountryFest — reuses the Southside stages -->
 <script src="dd_baconfest.js"></script><!-- PA Bacon Fest — own footprint (Easton) -->
 <script src="dd_allentownfair.js"></script><!-- The Great Allentown Fair — own footprint (Allentown) -->
+<script src="dd_grooveatthegrove.js"></script><!-- Groove at the Grove 2026 — own footprint (Haddon Heights, NJ) -->
 <script src="dd_cutesy.js"></script><!-- cutesy-map georeference: per festival+side corner store + align UI -->>
 <script src="dd_mf_vendors.js"></script>
 <script src="dd_contest.js"></script>
@@ -1422,6 +1423,7 @@ try{ if(window.ddFestivals){
   if(window.DD_COUNTRYFEST)   ddFestivals.register('countryfest',   window.DD_COUNTRYFEST);    // SteelStacks — subset of MusikFest stages
   if(window.DD_BACONFEST)     ddFestivals.register('baconfest',     window.DD_BACONFEST);       // Easton — OWN footprint
   if(window.DD_ALLENTOWNFAIR) ddFestivals.register('allentownfair', window.DD_ALLENTOWNFAIR);   // Allentown — OWN footprint
+  if(window.DD_GROOVEATTHEGROVE) ddFestivals.register('groove-at-the-grove-2026', window.DD_GROOVEATTHEGROVE);   // Haddon Heights NJ — OWN footprint (approx)
   var _fk=ddFestivals.pick(location.search); ddFestivals.setActive(_fk); window._FEST=_fk;
   if(_fk!=='musikfest'){ var _f=ddFestivals.resolve(_fk);
     if(_f && _f.lineup && _f.lineup.length){ MF=_f.lineup; window.MF=MF; STAGES=ddFestivals.stagesFor(STAGES,_fk); window.STAGES=STAGES; window._FEST_NAME=_f.name; window._FEST_DATES=_f.dates; window._FEST_CENTER=ddFestivals.center(_fk);
@@ -2257,6 +2259,22 @@ document.addEventListener('DOMContentLoaded', function(){
     // retitle to the active festival
     var h = document.querySelector('.hero h1'); if(h && window._FEST_NAME) h.textContent = window._FEST_NAME;
     try{ document.title = (window._FEST_NAME||'Festival') + ' · DeadDance'; }catch(e){}
+    // honest subtitle under the switched title: real date · time · venue · FREE · presenter (reads the seed; no fabrication)
+    try{ var f=ddFestivals.resolve(active);
+      if(f && !document.getElementById('festSub')){
+        var bits=[]; var d0=f.dates&&f.dates[0];
+        if(d0){ var dl=d0; try{ dl=new Date(d0+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'}); }catch(e){} bits.push(dl); }
+        if(f.time) bits.push(f.time);
+        if(f.venue) bits.push(f.venue);
+        if(f.free===true) bits.push('FREE admission');
+        if(f.org) bits.push('Presented by '+f.org);
+        if(bits.length){ var sub=document.createElement('div'); sub.id='festSub';
+          sub.style.cssText='font-size:12.5px;font-weight:700;color:#5a2e86;margin:6px 0 2px;line-height:1.45';
+          sub.textContent=bits.join(' · ');
+          var hero=document.querySelector('.hero'); if(hero&&hero.parentNode) hero.parentNode.insertBefore(sub, hero.nextSibling);
+        }
+      }
+    }catch(e){}
     // a small switcher (native select) so you can hop festivals / return to MusikFest
     if(ddFestivals.count() > 1){
       var row = document.querySelector('.mflayers'); if(!row) return;
