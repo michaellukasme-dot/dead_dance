@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Festival Report · StageFill</title>
+<meta name="theme-color" content="#0c1020">
+<link rel="icon" href="rose-32.png">
+<script>try{ window.supabase; }catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _c;}; }catch(e){}</script>
+<script src="dd_report.js"></script>
+<style>
+  :root{ --bg:#0c1020; --card:#141a2e; --line:#26304a; --ink:#eaf0ff; --mut:#8b96b4; --acc:#7c3aed; --gold:#f0a500; --green:#2fd08a; --blue:#38bdf8; --amber:#f0a500; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 15px 70px; }
+  .hero{ text-align:center; padding:30px 12px 6px; }
+  .kick{ color:var(--gold); font-weight:900; font-size:12px; letter-spacing:.18em; text-transform:uppercase; }
+  h1{ font-size:27px; margin:8px 0 6px; line-height:1.1; }
+  .hero .sub{ color:var(--mut); font-size:14px; margin:0 auto; max-width:520px; }
+  .free-tag{ display:inline-block; background:#12854f22; color:var(--green); border:1px solid #2fd08a55; font-weight:800; font-size:11px; padding:4px 10px; border-radius:999px; margin-top:10px; }
+  .banner{ background:#1b1330; border:1px solid #5b3fb0; border-radius:14px; padding:12px 14px; margin:16px 0 4px; font-size:12.5px; color:#cdd6ef; line-height:1.5; }
+  .banner b{ color:#fff; }
+  .sec{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-top:14px; position:relative; }
+  .sec h2{ font-size:14px; margin:0 0 4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .badge{ font-size:9.5px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:999px; }
+  .b-sample{ background:#f0a50022; color:var(--amber); border:1px solid #f0a50055; }
+  .b-real{ background:#2fd08a1f; color:var(--green); border:1px solid #2fd08a55; }
+  .b-app{ background:#38bdf81f; color:var(--blue); border:1px solid #38bdf855; }
+  .app-note{ color:var(--blue); font-size:11.5px; margin-top:10px; font-weight:700; line-height:1.5; }
+  .metrics{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:12px; }
+  .m{ background:#0e1428; border:1px solid var(--line); border-radius:12px; padding:12px; }
+  .m .v{ font-size:20px; font-weight:900; color:#fff; }
+  .m .k{ color:var(--mut); font-size:11.5px; font-weight:700; margin-top:3px; }
+  .rows{ margin-top:12px; }
+  .row{ display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid #1e263c; }
+  .row:last-child{ border-bottom:0; }
+  .row .rk{ width:22px; text-align:center; font-weight:900; color:var(--mut); font-size:13px; }
+  .row .nm{ flex:1; font-weight:700; font-size:13.5px; } .row .nm small{ display:block; color:var(--mut); font-weight:600; font-size:11px; }
+  .row .val{ font-weight:900; color:var(--blue); font-size:13.5px; white-space:nowrap; }
+  .bars{ display:flex; align-items:flex-end; gap:5px; height:96px; margin-top:14px; padding-top:6px; }
+  .bars .col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:5px; height:100%; }
+  .bars i{ width:100%; border-radius:4px 4px 0 0; background:linear-gradient(180deg,#7c3aed,#38bdf8); display:block; min-height:2px; }
+  .bars small{ font-size:8.5px; color:var(--mut); font-weight:700; }
+  .empty{ margin-top:12px; background:#0e1428; border:1px dashed var(--line); border-radius:12px; padding:14px; color:var(--mut); font-size:12.5px; line-height:1.5; }
+  .sample-note{ color:var(--amber); font-size:11.5px; margin-top:10px; font-weight:700; }
+  .cta{ display:block; text-align:center; text-decoration:none; margin:26px 0 8px; background:var(--acc); color:#fff; font-weight:900; font-size:16px; border-radius:14px; padding:17px 16px; box-shadow:0 14px 34px #7c3aed44; }
+  .cta small{ display:block; font-weight:700; font-size:12px; color:#e7dcff; margin-top:4px; }
+  .foot{ color:var(--mut); font-size:11.5px; text-align:center; margin-top:16px; line-height:1.6; }
+  .foot a{ color:var(--blue); }
+  .err{ text-align:center; color:var(--mut); padding:60px 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="kick">🌹 StageFill · The Data Report</div>
+    <h1 id="title">Festival Report</h1>
+    <div class="sub" id="sub">Loading the report…</div>
+    <div class="free-tag">Free · LESS tier — a teaser of the full data</div>
+  </div>
+
+  <div class="banner" id="banner">
+    <b>How to read this:</b> sections tagged <span class="badge b-app">📡 APP-MEASURED</span> are REAL numbers
+    measured by the DeadDance map. Today DeadDance is an <b>opt-in sample</b> — not MusikFest's official app — so
+    these are what the map actually saw, <b>not</b> total festival attendance. As your <b>official app</b>, coverage
+    reaches 100% and the same numbers become real total attendance. Sections tagged
+    <span class="badge b-sample">SAMPLE / preview</span> have no live pipeline yet — an illustration of what
+    <b>Complete Access</b> delivers, never dressed up as real. Cells reading “Not enough data yet” are measured but
+    withheld to protect small groups (fewer than 20). 🌹
+  </div>
+
+  <div id="report"><div class="err">Reading the report…</div></div>
+
+  <a class="cta" id="cta" href="data_module.html">🔓 Unlock Complete Access
+    <small>full filterable data + raw feed — the MORE / MOST tiers</small></a>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function qp(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
+
+  var R = window.DDReport;
+  if(!R){ $('report').innerHTML='<div class="err">Report module unavailable. Please retry.</div>'; return; }
+
+  var fest = qp('festival') || 'musikfest-2026';
+  var act  = qp('act');
+
+  function badge(sec){
+    if(sec.sample) return '<span class="badge b-sample">SAMPLE / preview</span>';
+    if(sec.appMeasured) return '<span class="badge b-app">📡 APP-MEASURED</span>';
+    return '<span class="badge b-real">LIVE DATA</span>';
+  }
+  function metricsHTML(sec){
+    if(!sec.metrics || !sec.metrics.length) return '';
+    return '<div class="metrics">'+sec.metrics.map(function(m){
+      return '<div class="m"><div class="v">'+esc(m.v)+'</div><div class="k">'+esc(m.k)+'</div></div>';
+    }).join('')+'</div>';
+  }
+  function rowsHTML(rows){
+    if(!rows || !rows.length) return '';
+    return '<div class="rows">'+rows.map(function(r){
+      return '<div class="row"><div class="rk">'+(r.rank!=null?esc(r.rank):'')+'</div>'+
+        '<div class="nm">'+esc(r.name)+(r.sub?'<small>'+esc(r.sub)+'</small>':'')+'</div>'+
+        '<div class="val">'+esc(r.v)+'</div></div>';
+    }).join('')+'</div>';
+  }
+  function barsHTML(bars){
+    if(!bars || !bars.length) return '';
+    return '<div class="bars">'+bars.map(function(b){
+      return '<div class="col"><i style="height:'+(b.h||0)+'%"></i><small>'+esc(b.label||'')+'</small></div>';
+    }).join('')+'</div>';
+  }
+  function emptyHTML(sec){
+    return '<div class="empty">'+esc(sec.note||'No data yet — this fills in live during the festival.')+'</div>';
+  }
+  function sectionHTML(sec){
+    var body='';
+    // REAL section that hasn't loaded any rows/metrics → honest empty state
+    var realEmpty = (sec.real && sec.empty);
+    if(realEmpty){
+      body = emptyHTML(sec);
+    } else {
+      body = metricsHTML(sec) + rowsHTML(sec.rows) + barsHTML(sec.bars);
+      if(!body) body = emptyHTML(sec);
+    }
+    var appNote = (!sec.sample && sec.appMeasured && R.APP_MEASURED_NOTE)
+      ? '<div class="app-note">'+esc(R.APP_MEASURED_NOTE)+'</div>' : '';
+    return '<div class="sec"><h2>'+esc(sec.label)+' '+badge(sec)+'</h2>'+
+      (sec.sample? '<div class="sample-note">⚠ Illustrative preview — not real festival data.</div>':appNote)+
+      body+'</div>';
+  }
+
+  function render(model){
+    document.title = model.title + ' · StageFill';
+    $('title').textContent = model.title;
+    $('sub').textContent = model.kind==='act'
+      ? ('A preview of the per-act slice for '+model.act+' at '+model.title.replace(/ —.*/,''))
+      : ('Festival-wide report for '+model.title);
+    $('report').innerHTML = model.sections.map(sectionHTML).join('');
+    // keep the CTA text in sync with the brain's copy
+    if(model.cta){ $('cta').setAttribute('href', model.cta.href);
+      $('cta').innerHTML = esc(model.cta.label)+'<small>full filterable data + raw feed — the MORE / MOST tiers</small>'; }
+    $('foot').innerHTML = 'This free report is the top of the funnel. The full breakdown — every filter, every hour, the raw feed — lives in <a href="data_module.html">the Data Module</a>.<br>🌹 DeadDance · StageFill — verified festival data, from Bethlehem.';
+  }
+
+  // Build + guarded live fetch. Render immediately with the synchronous model
+  // (sample sections + honest-empty real sections), then re-render when the
+  // guarded REAL reads settle. Every read is chained .then/.catch inside dd_report.js.
+  if(act){
+    var m0 = R.actReport(fest, act, function(m){ render(m); });
+    render(m0);
+  } else {
+    var f0 = R.festivalReport(fest, function(m){ render(m); });
+    render(f0);
+  }
+})();
+</script>
+</body>
+</html>

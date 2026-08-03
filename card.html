@@ -50,6 +50,8 @@ h1{font-size:26px;margin:4px 0 2px;font-weight:900}
   <a class="btn rose" id="fanDoor" href="#">Loading…</a>
   <div class="claimline" id="ownerDoor"></div>
 
+  <a class="sec" id="reportCard" href="#" style="display:none;text-decoration:none;color:inherit;align-items:center;gap:12px"></a>
+
   <div class="sec" id="showsSec" style="display:none">
     <h2 id="showsTitle">Upcoming shows</h2>
     <div id="shows"></div>
@@ -264,6 +266,14 @@ fan.onclick=function(e){ e.preventDefault(); window[CFG.fan.act] && window[CFG.f
 
 /* ---- owner door ---- */
 document.getElementById('ownerDoor').innerHTML=CFG.owner.label+' <a href="'+CFG.owner.to+'">'+CFG.owner.cta+' &rarr;</a>';
+
+/* Act container → its own Festival Report card: the FREE per-act data teaser that sells Complete Access.
+   report.html labels the per-act numbers as SAMPLE / preview (no anon per-act aggregate pipeline yet). */
+(function(){ if(T!=='band'&&T!=='group') return; var rc=document.getElementById('reportCard'); if(!rc) return;
+  rc.href='report.html?festival=musikfest-2026&act='+encodeURIComponent(NAME||ID||'');
+  rc.style.display='flex';
+  rc.innerHTML='<div style="font-size:26px">📊</div><div style="flex:1"><b style="font-size:15px">'+esc(NAME)+' — Festival Report</b>'+
+    '<div style="font-size:12px;color:var(--muted);margin-top:2px">Free data teaser — their MusikFest 2026 slice &rsaquo;</div></div>'; })();
 
 /* ---- fan actions ---- */
 window.joinBand=function(){ try{ if(window.DDJoin&&DDJoin.track){ DDJoin.track({band:NAME,src:'qr',role:'fan'}); } }catch(e){}
