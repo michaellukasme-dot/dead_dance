@@ -78,5 +78,79 @@
     } catch (e) { return Promise.resolve(false); }
   }
 
-  root.DDSetlistCrowd = { add: add, get: get, view: view, status: status, locked: locked, pull: pull, fanId: fanId, _norm: norm, _merge: merge, _slug: slug };
+  // ============================================================================
+  // ESTIMATED TIMELINE (pure, node-testable) — honest "est." elapsed for a
+  // crowdsourced setlist. The band declared NOTHING, so we can't know real
+  // lengths; we INFER play order + spacing from when fans REPORTED each song.
+  //   • anchor the earliest-reported song to 00:00
+  //   • each later song's elapsed = (its report time − first report time)
+  //   • normalize monotonic non-decreasing (clamp a negative to the prior start)
+  //   • clamp outlier gaps (a single wild timestamp can't blow up the clock)
+  // Every value here is an ESTIMATE — the fan display MUST label it "est.".
+  // ============================================================================
+  function _median(arr) {
+    var a = (arr || []).filter(function (x) { return typeof x === 'number' && isFinite(x); }).slice().sort(function (x, y) { return x - y; });
+    if (!a.length) return null; var m = Math.floor(a.length / 2);
+    return (a.length % 2) ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+  function _fmt(sec) {
+    sec = Math.max(0, Math.round(+sec || 0)); var m = Math.floor(sec / 60), s = sec % 60;
+    return (m < 10 ? '0' + m : '' + m) + ':' + (s < 10 ? '0' + s : '' + s);
+  }
+  // reports: [{n, t}] (earliest report ms) OR [{n, times:[ms,...]}] (uses median).
+  // opts.maxGapSec caps any single inter-song gap (default 3600s = 1h).
+  function estimateTimeline(reports, opts) {
+    opts = opts || {};
+    var maxGap = (opts.maxGapSec != null) ? Math.max(0, +opts.maxGapSec) : 3600;
+    var rows = (reports || []).map(function (r) {
+      var rep = (r && r.times && r.times.length) ? _median(r.times) : (r && typeof r.t === 'number' ? r.t : null);
+      return { n: (r && r.n) || '', rep: rep };
+    }).filter(function (r) { return r.rep != null; });
+    rows.sort(function (a, b) { return a.rep - b.rep; });        // play order = report order in time
+    if (!rows.length) return [];
+    var t0 = rows[0].rep, prev = 0, out = [];
+    for (var i = 0; i < rows.length; i++) {
+      var raw = Math.round((rows[i].rep - t0) / 1000);            // seconds since first report
+      var start = Math.max(raw, prev);                            // monotonic: clamp negatives to prior
+      if (start - prev > maxGap) start = prev + maxGap;           // clamp outlier gap
+      out.push({ n: rows[i].n, start: start, startLabel: _fmt(start), est: true });
+      prev = start;
+    }
+    return out;
+  }
+  // reports(band,date) → [{n, t, fans}] from the local crowd cache (t = earliest add ms).
+  function reports(band, date) {
+    var songs = _read(band, date).songs || [];
+    return songs.map(function (s) { return { n: s.n, t: s.t, fans: _count(s) }; });
+  }
+
+  // ============================================================================
+  // LIFT CROWD → BAND EDITOR (pure, node-testable) — the reverse path.
+  //   The crowd built the list; the band posted nothing. BEFORE archive the band
+  //   may pull that crowd list INTO their editor to correct it. We hand them
+  //   editable songs seeded from the ESTIMATED timeline:
+  //     • names kept in estimated play order
+  //     • each song's LENGTH inferred from the gap to the NEXT est. start
+  //       (last song has no next → blank length, band fills it)
+  //     • est. start/label carried as the starting value the band sees
+  //     • est:true stays until the band SAVES (then it becomes band-confirmed)
+  //   Returns { songs:[{n,len,lenLabel,start,startLabel,est}], text:"Name  m:ss\n…" }
+  //   where `text` prefills the band's textarea (its "Name  m:ss" format).
+  // ============================================================================
+  function liftToEditable(repList, opts) {
+    var est = estimateTimeline(repList, opts) || [];
+    var out = [];
+    for (var i = 0; i < est.length; i++) {
+      var next = est[i + 1];
+      var len = next ? Math.max(0, next.start - est[i].start) : 0;   // infer length from est. gaps
+      out.push({ n: est[i].n, len: len, lenLabel: (len ? _fmt(len) : ''),
+        start: est[i].start, startLabel: est[i].startLabel, est: true });
+    }
+    var text = out.map(function (s) { return s.n + (s.lenLabel ? ('  ' + s.lenLabel) : ''); }).join('\n');
+    return { songs: out, text: text, est: est };
+  }
+
+  root.DDSetlistCrowd = { add: add, get: get, view: view, status: status, locked: locked, pull: pull, fanId: fanId,
+    estimateTimeline: estimateTimeline, reports: reports, liftToEditable: liftToEditable,
+    _median: _median, _norm: norm, _merge: merge, _slug: slug };
 })(typeof window !== 'undefined' ? window : this);

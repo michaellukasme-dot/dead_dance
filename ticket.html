@@ -372,7 +372,11 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   function rKey(){ return 'dd.roster.'+slug(band)+'.'+(date||'na'); }        // per-SHOW roster (subs + sit-ins), keyed band+date
   function sKey(){ return 'dd.setlist.'+slug(band)+'.'+(date||'na'); }       // per-SHOW setlist (the band's record)
   function getRoster(){ try{ var v=JSON.parse(localStorage.getItem(rKey())||'null'); if(v&&v.length) return v; }catch(e){} try{ if(window.DDRoster&&DDRoster.forBand) return DDRoster.forBand(band)||[]; }catch(e){} return []; }
-  function getSongs(){ try{ var v=JSON.parse(localStorage.getItem(sKey())||'null'); if(v&&v.songs) return v; }catch(e){} try{ if(window.DDSetlist){ var sl=(DDSetlist.get&&DDSetlist.get(band,date))||(DDSetlist.now&&DDSetlist.now(band)); if(sl) return {start:sl.start||'',songs:sl.songs||sl||[]}; } }catch(e){} return {start:'',songs:[]}; }
+  // strip any {_h:1,...} header sentinel out of a songs list, lifting it into rec.meta/setBreaks (sentinel-safe read)
+  function _slLift(rec){ if(!rec) return {start:'',songs:[]}; var songs=rec.songs||[], meta=rec.meta, setBreaks=rec.setBreaks, clean=[];
+    songs.forEach(function(s){ if(s&&s._h){ meta=meta||{eventLen:s.eventLen,sets:s.sets,breakMin:s.breakMin}; if(setBreaks==null) setBreaks=s.setBreaks; return; } clean.push(s); });
+    var out={start:rec.start||'',songs:clean}; if(meta)out.meta=meta; if(setBreaks!=null)out.setBreaks=setBreaks; if(rec.archived)out.archived=true; return out; }
+  function getSongs(){ try{ var v=JSON.parse(localStorage.getItem(sKey())||'null'); if(v&&v.songs) return _slLift(v); }catch(e){} try{ if(window.DDSetlist){ var sl=(DDSetlist.get&&DDSetlist.get(band,date))||(DDSetlist.now&&DDSetlist.now(band)); if(sl) return _slLift({start:sl.start||'',songs:sl.songs||sl||[]}); } }catch(e){} return {start:'',songs:[]}; }
   var chead=function(icon,title){ return '<button class="curtx" onclick="curtainClose()" aria-label="Close">×</button><div class="curth">'+icon+' '+title+'</div><div class="curtsub">'+esc(band)+' · '+esc(venueShort)+(date?(' · '+esc(fmtD(date))):'')+'</div>'; };
 
   // ----- ROSTER -----
@@ -402,6 +406,16 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     try{ if(date){ var dd=new Date(date+'T23:59:59'); if(!isNaN(dd.getTime()) && dd.getTime() < Date.now()-2*864e5) return true; } }catch(e){}   // auto-locks >2 days after the show
     return false; }
   function songRevealed(s){ return !!(s&&(s.teased||s.revealed)); }
+  // ---- setlist header (band-entered): event length · #sets · break — shown at the TOP ----
+  function _slHeaderHTML(meta){ meta=meta||{}; var bits=[];
+    if(meta.eventLen) bits.push('🕒 '+esc(meta.eventLen));
+    if(meta.sets) bits.push('🎶 '+esc(meta.sets)+' set'+(meta.sets>1?'s':''));
+    if(meta.breakMin) bits.push('☕ '+esc(meta.breakMin)+'-min break');
+    if(!bits.length) return '';
+    return '<div class="slmeta" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:4px 0 12px;font-size:12px;opacity:.85">'+bits.map(function(b){return '<span>'+b+'</span>';}).join('')+'</div>'; }
+  // pure-math elapsed timeline + wall-clock tease times for a stored setlist record (guarded).
+  function _slComputed(d){ try{ if(window.DDSetlist&&DDSetlist.schedule) return DDSetlist.schedule((d&&d.songs)||[], (d&&d.start)||'', { breakMin:(+(((d&&d.meta)||{}).breakMin)||0), setBreaks:(d&&d.setBreaks)||[] }); }catch(e){} return (d&&d.songs)||[]; }
+  function _slEditRow(s,i){ var nm=(s&&(s.n||s.name))||s; return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b><span class="sat" style="margin-left:auto">'+esc((s&&s.startLabel)||'00:00')+((s&&s.teaseAt)?(' · ≈'+esc(s.teaseAt)):'')+'</span></div>'; }
   function setlistHTML(){ if(isBand) return setlistEditHTML();
     var d=getSongs(), all=d.songs||[], arch=isArchived();
     if(!all.length && window.DDSetlistCrowd) return crowdSetlistHTML(arch);   // band left it blank → fans crowdsource it (Cookie asks + rewards). Band setlist present = LOCKED, no Cookie.
@@ -409,12 +423,14 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     // fans see only teased songs (the reveal IS the show). Archived: show what was actually PLAYED (teased);
     // if nothing was teased (band logged the set post-show), the whole list is the record.
     var songs = arch ? (teasedOnly.length ? teasedOnly : all) : teasedOnly;
-    var head=chead('🎼', arch?'The Setlist — that night':'The Setlist — live');
+    var head=chead('🎼', arch?'The Setlist — that night':'The Setlist — live')+_slHeaderHTML(d.meta);
     if(!songs.length) return head+'<div class="curtempty">'+(all.length?('The set’s about to start — songs appear here the moment '+esc(band)+' teases each one. 🌹'):'No setlist yet.')+'<span class="cookie">🍪 In the van up 476? The band texts it in — every song lands here live, then keeps as history.</span></div>';
     var hasAudio=false;
+    // band-declared elapsed stamp: prefer the computed 00:00-timeline label; fall back to old wall-clock {at}.
     var rows=songs.map(function(s,i){ var nm=(s&&(s.n||s.name))||s; var au=null; try{ au=window.__songAudio&&__songAudio(band,date,nm); }catch(e){}
       if(au) hasAudio=true;
-      return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b>'+(s&&s.at?('<span class="sat">'+esc(s.at)+'</span>'):'')+(au?('<button class="splay" title="Play" onclick="ticketPlay(\''+encodeURIComponent(au)+'\')">▶</button>'):'')+'</div>'; }).join('');
+      var stamp=(s&&(s.startLabel||s.at))||'';
+      return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b>'+(stamp?('<span class="sat">'+esc(stamp)+'</span>'):'')+(au?('<button class="splay" title="Play" onclick="ticketPlay(\''+encodeURIComponent(au)+'\')">▶</button>'):'')+'</div>'; }).join('');
     return head+'<div>'+rows+'</div>'+(arch?'':'<div class="cookie">🌹 Live — more songs fill in as '+esc(band)+' teases them.</div>')+((!arch)?'':(hasAudio?'':'<div class="cookie">🍪 Owsley to '+esc(band)+': upload this show’s audio → every song gets a ▶ right here.</div>'));
   }
   // ----- CROWDSOURCE — the band posted NO setlist, so any fan writes it. Cookie asks, and rewards each add.
@@ -423,12 +439,23 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     try{ if(window.DDSetlistCrowd&&DDSetlistCrowd.pull) DDSetlistCrowd.pull(band,date); }catch(e){}   // merge other fans' adds (guarded, async)
     var list=[]; try{ list=DDSetlistCrowd.get(band,date)||[]; }catch(e){}
     var head=chead('🍪', arch?'The Setlist — by the crowd':'Cookie asks: what did they play?');
-    var rows=list.map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n)+'</b>'+(s.fans>1?('<span class="sat" style="margin-left:auto">🌹 '+s.fans+' heard it</span>'):(s.byMe?'<span class="sat" style="margin-left:auto">you</span>':''))+'</div>'; }).join('');
+    // ESTIMATED timeline: infer each song's elapsed start from WHEN fans reported it (est., not band-declared).
+    var est=[], fanBy={}; try{ var reps=DDSetlistCrowd.reports(band,date)||[]; reps.forEach(function(r){ fanBy[r.n]=r.fans; });
+      if(DDSetlistCrowd.estimateTimeline) est=DDSetlistCrowd.estimateTimeline(reps)||[]; }catch(e){}
+    var byMe={}; list.forEach(function(s){ if(s.byMe) byMe[s.n]=true; });
+    var rows;
+    if(est.length){   // render in ESTIMATED play order, each stamped "mm:ss est." so it's honestly not band-declared
+      rows=est.map(function(s,i){ var f=fanBy[s.n]||0;
+        return '<div class="srow"><span class="snum">'+(i+1)+'</span><span class="sat" title="Estimated from fan report times — not band-declared">'+esc(s.startLabel)+' est.</span><b style="margin-left:8px">'+esc(s.n)+'</b>'+(f>1?('<span class="sat" style="margin-left:auto">🌹 '+f+' heard it</span>'):(byMe[s.n]?'<span class="sat" style="margin-left:auto">you</span>':''))+'</div>'; }).join('');
+    } else {
+      rows=list.map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n)+'</b>'+(s.fans>1?('<span class="sat" style="margin-left:auto">🌹 '+s.fans+' heard it</span>'):(s.byMe?'<span class="sat" style="margin-left:auto">you</span>':''))+'</div>'; }).join('');
+    }
     var addUI = arch ? '' : ('<div style="display:flex;gap:8px;margin-top:12px"><input id="crowdSong" class="slin" style="flex:1;margin:0" placeholder="A song they played…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();crowdAdd();}"><button class="tmb" style="margin:0;border-color:#12854f;color:#0e7d4f;white-space:nowrap" onclick="crowdAdd()">🍪 Add</button></div>');
+    var estNote = est.length ? '<div class="cookie" style="opacity:.8">⏱ Times shown are <b>est.</b> — estimated from when fans reported each song, not declared by '+esc(band)+'.</div>' : '';
     var note = arch
       ? '<div class="cookie">🌹 '+esc(band)+' didn’t log this one — the crowd did. Every song was added by a fan who was there.</div>'
       : '<div class="cookie">🍪 '+esc(band)+' hasn’t posted a setlist — so you write it. Add a song you heard; it fills every fan’s ticket, and when the crowd agrees on it you earn a Cookie 🍪. 🌹</div>';
-    return head + (rows?('<div>'+rows+'</div>'):'<div class="curtempty">Be the first — add the song playing right now. 🍪</div>') + addUI + note;
+    return head + (rows?('<div>'+rows+'</div>'):'<div class="curtempty">Be the first — add the song playing right now. 🍪</div>') + addUI + estNote + note;
   }
   window.crowdAdd=function(){ var el=document.getElementById('crowdSong'); var t=el?(el.value||''):''; if(!t.trim())return;
     var d=getSongs(), res={}; try{ res=DDSetlistCrowd.add(band,date,t,{songs:d.songs||[],archived:d.archived})||{}; }catch(e){}
@@ -443,17 +470,45 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   function setlistEditHTML(){ var d=getSongs();
     if(isArchived()){ var lst=(d.songs||[]).map(function(s,i){ return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b></div>'; }).join('');
       return chead('🎼','Setlist — archived')+'<div class="curtempty">This show is <b>archived</b> 🌹 — locked as history.</div>'+(lst?('<div>'+lst+'</div>'):''); }
-    var text=(d.songs||[]).map(function(s){ return (s.n||s.name||s)+(s.at?(' '+s.at):''); }).join('\n');
+    var meta=d.meta||{};
+    // NOT-COMPLETE + CROWD LIFT: the band posted nothing but fans crowdsourced a list → this event isn't
+    // complete. Invite the band to pull that crowd list INTO the editor (est. timeline as starting values),
+    // correct it, and Save → it becomes band-confirmed. Available ONLY while not archived (locked above).
+    var bandHas=(d.songs||[]).length>0, crowdN=0;
+    try{ if(window.DDSetlistCrowd){ if(DDSetlistCrowd.pull) DDSetlistCrowd.pull(band,date); crowdN=(DDSetlistCrowd.get(band,date)||[]).length; } }catch(e){}
+    var reviewBlock='';
+    if(!bandHas && crowdN){
+      reviewBlock='<div class="cookie" style="border:1px solid #b8002e;color:#b8002e;background:#fff5f6;margin-top:10px">⚠️ This event isn’t complete — the crowd estimated the setlist ('+crowdN+' song'+(crowdN>1?'s':'')+'), but you haven’t confirmed it. Review &amp; correct it before you close out.</div>'
+        +'<button class="tmb" style="width:100%;margin-top:8px;border-color:#12854f;color:#0e7d4f" onclick="loadCrowdSetlist()">📝 Review &amp; correct the crowd’s setlist</button>';
+    }
+    // round-trip the songs box as "Name  m:ss" (song LENGTH), re-inserting --- set-break markers.
+    var brk={}; (d.setBreaks||[]).forEach(function(i){ brk[i]=1; });
+    var lines=[]; (d.songs||[]).forEach(function(s,i){ if(brk[i]) lines.push('---');
+      var nm=(s.n||s.name||s), ln=s.lenLabel||((s.len!=null&&window.DDSetlist&&DDSetlist.fmtClock)?DDSetlist.fmtClock(s.len):'');
+      lines.push(nm+(ln?('  '+ln):'')); });
+    var text=lines.join('\n');
+    var sch=_slComputed(d);   // computed elapsed timeline + wall-clock tease times (pure math)
+    var preview=(d.songs||[]).length
+      ? ('<label class="slbl" style="margin-top:14px">Elapsed timeline (00:00 →) · scheduled tease</label><div id="slPreview">'+sch.map(_slEditRow).join('')+'</div>')
+      : '<div id="slPreview"></div>';
     var teaseList=(d.songs||[]).length ? ('<label class="slbl" style="margin-top:14px">Go live — tease each song to your fans</label><div id="teaseList">'
-        +(d.songs||[]).map(function(s,i){ var t=songRevealed(s); return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(s.n||s.name||s)+'</b>'+audioBtn((s.n||s.name||s),i)+'<button class="tmb" style="margin-left:auto;padding:4px 11px;'+(t?'border-color:#12854f;color:#0e7d4f':'border-color:#b8002e;color:#b8002e')+'" onclick="teaseSong('+i+')">'+(t?'✓ Teased':'▶ Tease')+'</button></div>'; }).join('')+'</div>') : '';
+        +sch.map(function(s,i){ var t=songRevealed(d.songs[i]); var nm=(s.n||s.name||s);
+          return '<div class="srow"><span class="snum">'+(i+1)+'</span><b>'+esc(nm)+'</b><span class="sat" title="scheduled tease" style="margin-left:8px">'+esc((s&&s.startLabel)||'00:00')+((s&&s.teaseAt)?(' · ≈'+esc(s.teaseAt)):'')+'</span>'+audioBtn(nm,i)+'<button class="tmb" style="margin-left:8px;padding:4px 11px;'+(t?'border-color:#12854f;color:#0e7d4f':'border-color:#b8002e;color:#b8002e')+'" onclick="teaseSong('+i+')">'+(t?'✓ Teased':'▶ Tease')+'</button></div>'; }).join('')+'</div>') : '';
     return chead('🎼','Set the list &amp; tease time')
-      +'<label class="slbl">Tease / set-start time</label><input id="slStart" class="slin" placeholder="9:00" value="'+esc(d.start||'')+'">'
-      +'<label class="slbl" title="Enter your setlist and a time for each song — we text each one to your fans when you tease it">Songs — one per line (add a time if you have it)</label>'
-      +'<textarea id="slSongs" class="slta" onfocus="slHint()" onmouseenter="slHint()" title="Enter your setlist and a time for each song — we text each one to your fans when you tease it" placeholder="Suzy Greenberg 2:30\nWolfmans Brother 4:55\nTweezer">'+esc(text)+'</textarea>'
+      +reviewBlock
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+        +'<div style="flex:1;min-width:96px"><label class="slbl">Event length</label><input id="slEventLen" class="slin" placeholder="e.g. 2h" value="'+esc(meta.eventLen||'')+'" oninput="slPreview()"></div>'
+        +'<div style="flex:1;min-width:64px"><label class="slbl"># Sets</label><input id="slSets" class="slin" placeholder="2" inputmode="numeric" value="'+esc(meta.sets!=null?meta.sets:'')+'" oninput="slPreview()"></div>'
+        +'<div style="flex:1;min-width:88px"><label class="slbl">Break (min)</label><input id="slBreak" class="slin" placeholder="15" inputmode="numeric" value="'+esc(meta.breakMin?meta.breakMin:'')+'" oninput="slPreview()"></div>'
+      +'</div>'
+      +'<label class="slbl">Set-start time (wall clock — anchors the live tease)</label><input id="slStart" class="slin" placeholder="9:00" value="'+esc(d.start||'')+'" oninput="slPreview()">'
+      +'<label class="slbl" title="One song per line as  Name  m:ss  (the song LENGTH). Type --- on its own line to start a new set — the break goes there.">Songs — one per line: <b>Name&nbsp;&nbsp;m:ss</b> (song length). <code>---</code> = new set</label>'
+      +'<textarea id="slSongs" class="slta" oninput="slPreview()" onfocus="slHint()" onmouseenter="slHint()" title="One song per line as  Name  m:ss  (the song LENGTH). Type --- on its own line to start a new set." placeholder="Suzy Greenberg  2:30\nWolfmans Brother  4:55\n---\nTweezer  9:12">'+esc(text)+'</textarea>'
+      +preview
       +'<button class="tmb" style="width:100%;margin-top:10px;border-color:#12854f;color:#0e7d4f" onclick="saveSetlist()">💾 Save the setlist</button>'
       + teaseList
       +'<button class="tmb" style="width:100%;margin-top:14px;border-color:#b8002e;color:#b8002e" onclick="archiveShow()">🔒 Archive this show → lock to history</button>'
-      +'<div class="cookie">🌹 Fans see an <b>empty</b> setlist until you <b>tease</b> — each song you tease fills into their ticket live. Edit freely until you archive. 🍪</div>';
+      +'<div class="cookie">🌹 Enter each song with its <b>length</b> (m:ss) — the ticket builds a 00:00 elapsed clock like a cassette. Fans see an <b>empty</b> list until you <b>tease</b> each song live. 🍪</div>';
   }
   function _persistSongs(rec){ try{ localStorage.setItem(sKey(), JSON.stringify(rec)); }catch(e){}
     try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band,{date:date,start:rec.start,songs:rec.songs}); }catch(e){}
@@ -461,24 +516,82 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     // The "Setlist saved / Archived" toast reflects the REAL local save (always works); if the SERVER sync fails we add
     // an honest heads-up so the band knows other devices / fan texts may not have it yet. Token-gated (?key).
     try{ var key=g('key',''), cl=window.ddClient&&ddClient();
-      if(key&&cl&&cl.rpc){ cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:rec.start||null,p_end:null,p_songs:rec.songs})
+      // songs jsonb carries {n, len, start, at}; the HEADER rides in the SAME payload as a trailing
+      // {_h:1,...} sentinel (no SQL change — reuses dd_setlist_upsert_web). Every reader strips _h.
+      var srvSongs=(rec.songs||[]).slice();
+      if(rec.meta) srvSongs=srvSongs.concat([{_h:1,eventLen:rec.meta.eventLen||'',sets:(rec.meta.sets!=null?rec.meta.sets:null),breakMin:(rec.meta.breakMin||0),setBreaks:(rec.setBreaks||[])}]);
+      if(key&&cl&&cl.rpc){ cl.rpc('dd_setlist_upsert_web',{p_band:slug(band),p_token:key,p_date:date||null,p_start:rec.start||null,p_end:null,p_songs:srvSongs})
         .then(function(r){ if(r&&r.error){ var t=(window.parent&&window.parent.toast); if(t) t('Saved on this device, but it didn’t reach the server 🌹 — reopen with your key or screenshot to Michael'); } })
         .catch(function(){ var t=(window.parent&&window.parent.toast); if(t) t('Saved on this device — offline, hasn’t synced to the server yet 🌹'); }); } }catch(e){} }
   // idiot-proof hint on the blank setlist — fires once when the band hovers/taps the songs box.
   var _slHinted=false;
   window.slHint=function(){ if(_slHinted)return; _slHinted=true;
-    try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('🎼 Enter your setlist and a time for each song — tap Tease and we text that song to your fans, live. 🌹'); }catch(e){} };
+    try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('🎼 One song per line as  Name  m:ss  — the song LENGTH. The ticket builds a 00:00 elapsed clock; ▶ Tease texts each song to your fans, live. 🌹'); }catch(e){} };
+  // ---- shared parse: textarea → {songs:[{n,len,lenLabel}], setBreaks:[i,...]} ----
+  function _slParse(raw){ var songs=[], setBreaks=[];
+    String(raw||'').split(/\n/).forEach(function(l){ l=l.trim(); if(!l) return;
+      if(/^(--+|\/\/+|—+|set\b.*|break\b.*)$/i.test(l)){ if(songs.length) setBreaks.push(songs.length); return; }   // set boundary → break precedes next song
+      var m=l.match(/(\d{1,2}:\d{2})\s*$/), nm=m?l.slice(0,m.index).trim():l, o={n:nm};
+      if(m){ o.lenLabel=m[1]; o.len=(window.DDSetlist&&DDSetlist.parseLen)?DDSetlist.parseLen(m[1]):0; }
+      songs.push(o); });
+    return { songs:songs, setBreaks:setBreaks }; }
+  // ---- LIVE preview: recompute the elapsed timeline + tease times from the editor as the band types ----
+  window.slPreview=function(){ var el=document.getElementById('slPreview'); if(!el) return;
+    var p=_slParse((document.getElementById('slSongs')||{}).value||'');
+    var start=((document.getElementById('slStart')||{}).value||'').trim();
+    var breakMin=parseInt(((document.getElementById('slBreak')||{}).value||''),10)||0;
+    var sch; try{ sch=DDSetlist.schedule(p.songs,start,{breakMin:breakMin,setBreaks:p.setBreaks}); }catch(e){ sch=p.songs; }
+    el.innerHTML = sch.length ? sch.map(_slEditRow).join('') : '<div class="curtempty" style="padding:8px 4px">Add songs as <b>Name&nbsp;&nbsp;m:ss</b> to see the elapsed clock.</div>'; };
   window.saveSetlist=function(){ var start=((document.getElementById('slStart')||{}).value||'').trim();
-    var raw=((document.getElementById('slSongs')||{}).value||''); var prev=getSongs(); var prevMap={};
+    var eventLen=((document.getElementById('slEventLen')||{}).value||'').trim();
+    var setsN=((document.getElementById('slSets')||{}).value||'').trim();
+    var breakMinV=((document.getElementById('slBreak')||{}).value||'').trim();
+    var prev=getSongs(); var prevMap={};
     (prev.songs||[]).forEach(function(s){ if(s&&(s.n||s.name)) prevMap[(s.n||s.name)]=s; });   // keep tease flags across edits
-    var songs=raw.split(/\n/).map(function(l){ l=l.trim(); if(!l) return null; var m=l.match(/(\d{1,2}:\d{2})\s*$/); var nm=m?l.slice(0,m.index).trim():l, o={n:nm}; if(m)o.at=m[1]; if(prevMap[nm]&&songRevealed(prevMap[nm]))o.teased=true; return o; }).filter(Boolean);
-    var rec={start:start,songs:songs}; if(prev.archived)rec.archived=true; _persistSongs(rec);
+    var p=_slParse((document.getElementById('slSongs')||{}).value||''), songs=p.songs, setBreaks=p.setBreaks;
+    songs.forEach(function(o){ if(prevMap[o.n]&&songRevealed(prevMap[o.n])) o.teased=true; });
+    var meta={ eventLen:eventLen, sets:(parseInt(setsN,10)||null), breakMin:(parseInt(breakMinV,10)||0) };
+    // PURE MATH: cumulative 00:00 elapsed timeline, then derive each song's wall-clock tease time (at).
+    // Only stamp the elapsed clock when real LENGTHS exist — a names-only list must NOT show a fake 00:00 wall.
+    var hasLen=songs.some(function(s){ return s.len>0; });
+    try{ if(window.DDSetlist&&DDSetlist.schedule){ var sch=DDSetlist.schedule(songs,start,{breakMin:meta.breakMin,setBreaks:setBreaks});
+      sch.forEach(function(s,i){ if(hasLen){ songs[i].start=s.start; songs[i].startLabel=s.startLabel; } if(s.teaseAt&&hasLen) songs[i].at=s.teaseAt; }); } }catch(e){}
+    var rec={start:start,meta:meta,setBreaks:setBreaks,songs:songs}; if(prev.archived)rec.archived=true; _persistSongs(rec);
     ticketCurtain('setlist'); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Setlist saved 🌹'); }catch(e){} };
   window.teaseSong=function(i){ var d=getSongs(), songs=d.songs||[]; if(!songs[i]||isArchived())return; songs[i].teased=!songs[i].teased;
-    var rec={start:d.start||'',songs:songs}; if(d.archived)rec.archived=true; _persistSongs(rec); ticketCurtain('setlist');
+    var rec={start:d.start||'',meta:d.meta,setBreaks:d.setBreaks,songs:songs}; if(d.archived)rec.archived=true; _persistSongs(rec); ticketCurtain('setlist');
     try{ (window.parent&&window.parent.toast?window.parent.toast:alert)(songs[i].teased?('🌹 Teased “'+(songs[i].n||'')+'” — it just filled into every fan’s ticket'):'Un-teased'); }catch(e){} };
-  window.archiveShow=function(){ if(!confirm('Archive “'+band+'” — lock the setlist & roster as history? You won’t be able to edit after.'))return;
-    var d=getSongs(); _persistSongs({start:d.start||'',songs:d.songs||[],archived:true});
+  // BAND pulls the CROWD's estimated setlist INTO the editor to correct it (names, lengths, order, breaks,
+  // header). Blocked once archived (locked). Fills the textarea with "Name  m:ss" seeded from the est. timeline;
+  // on Save the songs become BAND-CONFIRMED and the "est." labels drop. Pure transform via DDSetlistCrowd.
+  window.loadCrowdSetlist=function(){
+    if(isArchived())return;   // archived → locked, no edit
+    var reps=[]; try{ reps=DDSetlistCrowd.reports(band,date)||[]; }catch(e){}
+    if(!reps.length){ try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('No crowd songs to load yet 🌹'); }catch(e){} return; }
+    var lift={songs:[],text:''}; try{ lift=DDSetlistCrowd.liftToEditable(reps)||lift; }catch(e){}
+    var ta=document.getElementById('slSongs'); if(ta){ ta.value=lift.text; try{ ta.focus(); }catch(_){} }
+    try{ slPreview(); }catch(e){}
+    var nSong=(lift.songs||[]).length;
+    try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('📝 Loaded '+nSong+' crowd-estimated song'+(nSong===1?'':'s')+' — correct the names & lengths, then 💾 Save to confirm. The “est.” labels drop once you save. 🌹'); }catch(e){} };
+  // CLOSE-OUT with an HONEST "not complete" notification. If the setlist the band is about to lock is still
+  // crowd-estimated / unconfirmed / empty (isComplete=false), warn first and offer: Review now (opens the editor)
+  // vs Close out as-is (a second confirm → proceeds to archive). A band who chooses to close as-is is NOT blocked.
+  // A band-confirmed setlist archives with the plain lock confirm (no nag). Archive is final — locks forever.
+  window.archiveShow=function(){
+    var d=getSongs();
+    var willBe={songs:d.songs||[],archived:true};
+    var complete=(window.DDSetlist&&DDSetlist.isComplete)?DDSetlist.isComplete(willBe):((d.songs||[]).length>0);
+    if(!complete){
+      var crowdN=0; try{ if(window.DDSetlistCrowd) crowdN=(DDSetlistCrowd.get(band,date)||[]).length; }catch(e){}
+      var state=crowdN?('still crowd-estimated ('+crowdN+' fan song'+(crowdN>1?'s':'')+')'):'unconfirmed / empty';
+      if(confirm('⚠️ This event isn’t marked complete — the setlist is '+state+'.\n\nReview & correct it now?\n\nOK = Review now   ·   Cancel = choose to close out as-is')){
+        ticketCurtain('setlist'); return;   // Review now → open the editor (offers the crowd lift)
+      }
+      if(!confirm('Close out “'+band+'” as-is? This LOCKS it forever — the setlist stays '+state+' and can’t be edited after.')) return;
+    } else {
+      if(!confirm('Archive “'+band+'” — lock the setlist & roster as history? You won’t be able to edit after.')) return;
+    }
+    _persistSongs({start:d.start||'',meta:d.meta,setBreaks:d.setBreaks,songs:d.songs||[],archived:true});
     ticketCurtain('setlist'); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Archived 🌹 — locked to history.'); }catch(e){} };
   /* ---------- VENUE VIEW — same ticket, operator's pills. Their event, their numbers, close it out.
      A venue flips through the tickets for their OWN events (a deck of nights). Role via ?role=venue.
@@ -497,7 +610,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       +'<button class="tmb" style="border-color:#b8002e;color:#b8002e;margin-top:12px;width:100%" onclick="venueClose()">🔒 Close this event → move to history</button>';
   }
   window.venueClose=function(){ if(!confirm('Close “'+band+'” — settle and move it to your history?')) return; curtainClose();
-    try{ var d=getSongs(); localStorage.setItem(sKey(), JSON.stringify({start:d.start||'',songs:d.songs||[],archived:true})); }catch(e){}   // closing the event archives the setlist → locks it to history
+    try{ var d=getSongs(); localStorage.setItem(sKey(), JSON.stringify({start:d.start||'',meta:d.meta,setBreaks:d.setBreaks,songs:d.songs||[],archived:true})); }catch(e){}   // closing the event archives the setlist → locks it to history
     try{ var n=document.getElementById('issuedNote'); if(n){ n.classList.remove('hidden'); n.textContent='✓ Event closed · settled 🌹'; } }catch(e){}
     try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Event closed 🌹 — it lives in your venue history now.'); }catch(e){} };
   window.ticketCurtain=function(which){ var el=document.getElementById('curtcard'); if(!el)return;
