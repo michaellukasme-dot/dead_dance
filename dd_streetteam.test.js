@@ -107,6 +107,97 @@ function ok(name, cond){ if(cond){ pass++; } else { fail++; fails.push(name); co
     });
   });
 })
+// ============ FEATURE 1: BONUS JOB = DOUBLE COOKIES ============
+.then(function(){
+  // isBonus / cookiesFor — PURE
+  ok('isBonus: proximity-accept ref is bonus', ST.isBonus('proximity-accept')===true);
+  ok('isBonus: prefixed ref (proximity-accept:Rift) is bonus', ST.isBonus('proximity-accept:Rift')===true);
+  ok('isBonus: normal ref is NOT bonus', ST.isBonus('seed')===false);
+  ok('isBonus: null ref is NOT bonus', ST.isBonus(null)===false);
+  ok('cookiesFor: bonus → 2', ST.cookiesFor('bonus-job')===2);
+  ok('cookiesFor: normal → 1', ST.cookiesFor('seed')===1);
+
+  var calls=[];
+  global.window.ddClient=function(){ return { rpc:function(n,a){ calls.push({name:n,args:a}); return Promise.resolve({error:null,data:{ok:true,cookies:5}}); } }; };
+  ST._resetDedupe();
+  return ST.cookie('musikfest-2026', 2, {ref:'proximity-accept:Rift'}).then(function(v){
+    ok('cookie() → true on server success', v===true);
+    ok('cookie() SENT sf_st_log with kind=cookie', calls[0].name==='sf_st_log' && calls[0].args.p_kind==='cookie');
+    ok('cookie(amount 2) passes p_secs=2 (bonus → 2× cookies)', calls[0].args.p_secs===2);
+  }).then(function(){
+    calls.length=0; ST._resetDedupe();
+    return ST.cookie('musikfest-2026', 1, {ref:'seed'}).then(function(){
+      ok('cookie(amount 1) passes p_secs=1 (normal → 1×)', calls[0].args.p_secs===1);
+    });
+  }).then(function(){
+    calls.length=0; ST._resetDedupe();
+    return ST.cookie('musikfest-2026', null, {ref:'proximity-accept:X'}).then(function(){
+      ok('cookie() derives p_secs=2 from a BONUS ref when amount omitted', calls[0].args.p_secs===2);
+    });
+  }).then(function(){
+    calls.length=0; ST._resetDedupe();
+    return ST.cookie('musikfest-2026', null, {ref:'plainjob'}).then(function(){
+      ok('cookie() derives p_secs=1 from a NORMAL ref when amount omitted', calls[0].args.p_secs===1);
+    });
+  }).then(function(){
+    global.window.ddClient=null; ST._resetDedupe();
+    return ST.cookie('musikfest-2026', 2, {ref:'bonus-job'}).then(function(v){
+      ok('cookie() → false with no client (honest, never fakes a save)', v===false);
+    });
+  });
+})
+// ============ FEATURE 2: MUG CHALLENGE / PAYOUT (never pays) ============
+.then(function(){
+  var calls=[];
+  function client(result){ return function(){ return { rpc:function(n,a){ calls.push({name:n,args:a}); return Promise.resolve(result); } }; }; }
+  var ME = ST.me();
+
+  ok('refMemberFromUrl() → null without a URL (node)', ST.refMemberFromUrl()===null);
+
+  return ST.refer('musikfest-2026', ME).then(function(r){
+    ok('refer(self) → NOT counted (a member can’t count themselves)', r.ok===false && r.reason==='self');
+  }).then(function(){
+    return ST.refer('musikfest-2026', null).then(function(r){
+      ok('refer(no sharer) → {ok:false, no-ref}', r.ok===false && r.reason==='no-ref');
+    });
+  }).then(function(){
+    calls.length=0;
+    global.window.ddClient = client({ error:null, data:{ ok:true, count:1 } });
+    return ST.refer('musikfest-2026','st-sharer').then(function(r){
+      ok('refer() SENT sf_st_refer', calls[0].name==='sf_st_refer');
+      ok('refer() credits the SHARER + sends THIS device (never the sharer)', calls[0].args.p_member==='st-sharer' && calls[0].args.p_device===ME);
+      ok('refer() → ok + server count', r.ok===true && r.count===1);
+    });
+  }).then(function(){
+    calls.length=0;
+    return ST.refer('musikfest-2026','st-sharer').then(function(r){
+      ok('refer() LOCAL-dedupes (same sharer+device → no re-send; phone counted once)', calls.length===0 && r.deduped===true);
+    });
+  }).then(function(){
+    global.window.ddClient = client({ error:null, data:{ ok:true, count:42 } });
+    return ST.phoneCount('musikfest-2026').then(function(n){
+      ok('phoneCount() passes the server count through', n===42);
+    });
+  }).then(function(){
+    calls.length=0;
+    global.window.ddClient = client({ error:null, data:{ ok:false, eligible:false, count:12, needed:100 } });
+    return ST.claimPayout('musikfest-2026','@me','venmo').then(function(r){
+      ok('claimPayout() SENT sf_st_payout_claim', calls[0].name==='sf_st_payout_claim');
+      ok('claimPayout(below 100) → eligible:false with count+needed (threshold gate)', r.eligible===false && r.count===12 && r.needed===100);
+    });
+  }).then(function(){
+    global.window.ddClient = client({ error:null, data:{ ok:true, eligible:true, status:'pending', amount_cents:1300, count:100 } });
+    return ST.claimPayout('musikfest-2026','@me','venmo','lehigh-mug').then(function(r){
+      ok('claimPayout(>=100) → PENDING claim, amount 1300, NOT paid', r.ok===true && r.status==='pending' && r.status!=='paid' && r.amount_cents===1300);
+    });
+  }).then(function(){
+    global.window.ddClient=null;
+    return Promise.all([ ST.phoneCount('musikfest-2026'), ST.claimPayout('musikfest-2026','@me','venmo') ]).then(function(res){
+      ok('phoneCount() → null with no client (no fake number)', res[0]===null);
+      ok('claimPayout() → {ok:false} with no client (honest, never pays)', res[1].ok===false);
+    });
+  });
+})
 .then(function(){
   console.log('\n dd_streetteam harness: '+pass+' passed, '+fail+' failed');
   if(fail){ console.log(' ❌ FAILURES ABOVE: '+fails.join('; ')); process.exit(1); }

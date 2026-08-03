@@ -948,6 +948,11 @@ window.adWindowQR=function(){ try{ if(window.DDQR) DDQR.save('https://deaddance.
   mfToastHTML('🖨️ <b>Your 2′×2′ Musikfest QR</b><br><span style="font-size:12px;color:#e7ddf3">Downloading — print it big for your window. Every scan opens the whole festival map.</span>'); };
 // deep link from a retailer's FB post: deaddance.app/musikfest?ad=<slug> → open the CART, preselect their shop, pre-fill their ad
 (function(){ try{ var _s=(location.search.match(/[?&]src=([^&]+)/)||[])[1]; if(_s){ _s=decodeURIComponent(_s); try{ localStorage.setItem('dd.mf.src',_s); }catch(e){} try{ if(window.DDTele&&DDTele.event) DDTele.event('scan.src',{src:_s}); }catch(e){} } }catch(e){} })();  /* QR/sign attribution — e.g. ?src=matchplatz. ids-only, no PII. */
+/* MUG CHALLENGE referral landing — a NEW device that opened a member's ?ref=st:<member> link
+   credits that member ONCE (server-deduped by this device; a member can't count themselves).
+   Guarded + .then/.catch (it actually fires); honest no-op with no client. */
+(function(){ try{ if(window.DDStreetTeam && DDStreetTeam.refMemberFromUrl && DDStreetTeam.refMemberFromUrl()){
+  var p=DDStreetTeam.refer('musikfest-2026'); if(p&&p.then) p.then(function(){},function(){}); } }catch(e){} })();
 (function(){ try{ var m=(location.search.match(/[?&]ad=([^&]+)/)||[])[1]; if(!m)return; m=decodeURIComponent(m);
   setTimeout(function(){ adOpen(); var sel=document.getElementById('adBiz'); if(sel){ for(var i=0;i<sel.options.length;i++){ if(adSlug(sel.options[i].value)===adSlug(m)){ sel.value=sel.options[i].value; adBizChange(); break; } } } }, 450); }catch(e){} })();
 
@@ -1010,7 +1015,7 @@ window.mfShareMap=function(){
 window.mfPhoneToPhone=function(){
   try{ if(window.mfStLog) mfStLog('phoneshare',{ref:'p2p'}); }catch(e){}   // Street-Team: member opened the phone-to-phone share
   var ex=document.getElementById('mfP2P'); if(ex){ ex.remove(); return; }   // toggle
-  var url='https://deaddance.app/musikfest';
+  var url=(typeof stRefUrl==='function')?stRefUrl('https://deaddance.app/musikfest'):'https://deaddance.app/musikfest';   // MUG CHALLENGE: members' share link carries ?ref=st:<me> so real referred joins count
   var wrap=document.createElement('div'); wrap.id='mfP2P';
   wrap.style.cssText='position:fixed;inset:0;z-index:640;background:rgba(20,12,34,.72);display:flex;align-items:center;justify-content:center;padding:24px';
   var card=document.createElement('div');
@@ -1041,6 +1046,10 @@ window.mfPhoneToPhone=function(){
  * ================================================================================= */
 var ST_FEST='musikfest-2026', ST_BASE='https://deaddance.app/';
 function stVenue(){ try{ return (window.DDStCurtain && DDStCurtain.venue(ST_FEST)) || null; }catch(e){ return null; } }
+// MUG CHALLENGE: append this member's referral tag to a share URL — ONLY for joined members
+// (so credit flows to a real street-teamer). Non-members share the plain link (honest, no tag).
+window.stRefUrl=function(u){ try{ if(window.DDStreetTeam && DDStreetTeam.isMember(ST_FEST)){ var me=DDStreetTeam.me();
+  if(me) return u+(u.indexOf('?')>=0?'&':'?')+'ref=st:'+encodeURIComponent(me); } }catch(e){} return u; };
 // generic phone-to-phone share modal (a real scannable QR + Web Share + copy — no fake NFC)
 window.stShare=function(opts){ opts=opts||{}; var url=opts.url; if(!url) return;
   var ex=document.getElementById('stShareM'); if(ex) ex.remove();
@@ -1167,7 +1176,12 @@ window.stU5Accept=function(){ var ctx=window._stU5ctx||null; var host=document.g
   var me=null; try{ me=(window.DDStreetTeam&&DDStreetTeam.me())||null; }catch(e){}
   var here=(window.WALK&&WALK.last)?WALK.last:null;
   host.innerHTML='<div style="font-size:12.5px;color:#4a4356">Accepting your free ticket\u2026</div>';
-  try{ mfStLog('task', {ref:'proximity-accept:'+(act||band)}); }catch(e){}
+  var stBonusRef='proximity-accept:'+(act||band);
+  try{ mfStLog('task', {ref:stBonusRef}); }catch(e){}
+  // BONUS JOB \u2192 2\u00d7 cookies. proximity-accept is a bonus-flagged action; a normal job is 1\u00d7.
+  var stBonusAwarded=false;
+  try{ if(window.DDStreetTeam && DDStreetTeam.isMember(ST_FEST) && DDStreetTeam.cookie && DDStreetTeam.isBonus(stBonusRef)){
+        DDStreetTeam.cookie(ST_FEST, 2, {ref:stBonusRef}); stBonusAwarded=true; } }catch(e){}
   try{ if(window.DDFlywheel&&DDFlywheel.grab&&act) DDFlywheel.grab(act,{stage:stName,date:(typeof todayISO==='function'?todayISO():''),source:'proximity'}); }catch(e){}
 
   // FRIEND SUGGESTIONS: add this attendee to the event's social group (local brain), then
@@ -1190,8 +1204,11 @@ window.stU5Accept=function(){ var ctx=window._stU5ctx||null; var host=document.g
         : offline
         ? '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\ud83d\udcf4 Granted on your phone (offline) \u2014 it\u2019ll sync when you\u2019re back online.</div>'
         : '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\u26a0\ufe0f Ticket granted on your phone, but we couldn\u2019t reach the server to verify-at-show. It\u2019s still yours.</div>';
+      var bonus = stBonusAwarded
+        ? '<div style="font-size:12px;color:#7a4a12;font-weight:800;margin-top:6px;background:#fff3d6;border:1px solid #f0d9a6;border-radius:10px;padding:7px 9px">\ud83c\udf6a\ud83c\udf6a BONUS \u00b7 2\u00d7 cookies \u2014 proximity-accept is a bonus job.</div>'
+        : '';
       host.innerHTML='<div style="font-size:12.5px;color:#241535;font-weight:800;margin-bottom:8px">\ud83c\udf9f Your free ticket for <b>'+esc(band)+'</b> is ready.</div>'
-        +'<a class="stbtn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">Open my free ticket \u203a</a>'+audit+status;
+        +'<a class="stbtn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">Open my free ticket \u203a</a>'+bonus+audit+status;
       try{ window.open(url,'_blank','noopener'); }catch(e){} };
     try{ var p=(window.ddPresence&&ddPresence.accept)?ddPresence.accept(ev,{id:stName,name:stName}):null;
       if(p&&p.then){ p.then(done,function(){ done({ok:true,synced:false}); }); } else { done({ok:true,synced:false,offline:true}); }
@@ -1251,7 +1268,42 @@ window.mfRenderStreetTeam=function(){ var host=document.getElementById('stCurtai
       +'<input id="stQ" oninput="stSearch()" placeholder="Act, stage, or band-member name…" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink);margin-bottom:6px">'
       +'<div id="stResults"></div></div>'
     +'<div class="stcard"><div class="sth"><span class="stnum">4</span>'+(v&&DDStCurtain.approvedForPaid(v)?'Accept a paid ticket (staff)':'Hand out free tickets at the door')+'</div><div id="stU4Body">'+stU4()+'</div></div>'
-    +'<div class="stcard"><div class="sth"><span class="stnum">5</span>\u2713 Accept your FREE ticket (you\u2019re here)</div><div id="stU5Body">'+stU5()+'</div></div>';
+    +'<div class="stcard"><div class="sth"><span class="stnum">5</span>\u2713 Accept your FREE ticket (you\u2019re here) <span style="margin-left:auto;font-size:11px;background:#fff3d6;border:1px solid #f0d9a6;color:#7a4a12;border-radius:999px;padding:2px 8px">\ud83c\udf6a\ud83c\udf6a BONUS \u00b7 2\u00d7</span></div><div id="stU5Body">'+stU5()+'</div></div>'
+    +'<div class="stcard"><div class="sth"><span class="stnum">6</span>\ud83c\udf7a MusikFest Mug Challenge</div><div id="stU6Body">'+stMugInit()+'</div></div>';
+  try{ stMugLoad(); }catch(e){}
+};
+
+// UTILITY 6 \u2014 the Lehigh "$13 MUG + FIRST BEER" program. Counts REAL referred joins
+// (distinct new phones that opened THIS member's ?ref=st:<me> link and landed). At 100 \u2192
+// a claim form. HONEST: this only RECORDS a claim; Michael sends the $13 BY HAND \u2014 not instant.
+window.stMugInit=function(){ var member=false; try{ member=!!(window.DDStreetTeam&&DDStreetTeam.isMember(ST_FEST)); }catch(e){}
+  if(!member){ return '<div style="font-size:12.5px;color:#4a4356">Join the Street Team above, then spread the app to <b>100 phones</b> \u2192 we send you <b>$13</b> (a MusikFest mug + your first beer).</div>'; }
+  var share='<button class="stbtn" style="margin-top:8px" onclick="mfPhoneToPhone()">\ud83d\udcf2 Spread the app (your referral link) \u203a</button>';
+  var note='<div style="font-size:11.5px;color:#8a7bbf;font-weight:700;margin-top:8px">Counts <b>real referred joins</b> \u2014 new phones that open <i>your</i> link and land in MusikFest. Not taps. The $13 is sent <b>by hand by Michael</b> \u2014 not an instant/auto payment.</div>';
+  return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">Spread the app to <b>100 phones</b> \u2192 we send you <b>$13</b> (a MusikFest mug + first beer).</div>'
+    +'<div id="stMugProg" style="font-size:13px;font-weight:800;color:#5a2e86">Counting your referred phones\u2026</div>'+share+note; };
+window.stMugLoad=function(){ var el=document.getElementById('stMugProg'); if(!el) return;
+  var ST=window.DDStreetTeam; if(!ST||!ST.phoneCount){ el.textContent=''; return; }
+  Promise.resolve(ST.phoneCount(ST_FEST)).then(function(n){
+    if(n==null){ el.textContent='Can\u2019t reach the server to count right now.'; return; }
+    var pct=Math.min(100, Math.round(n/100*100));
+    var bar='<div style="height:10px;background:#efeafa;border-radius:6px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,#7c3aed,#12854f)"></i></div>';
+    if(n>=100){ el.innerHTML='<div style="color:#12854f">\u2705 '+n+' / 100 phones \u2014 you earned your $13!</div>'+bar+stMugClaimForm(); }
+    else { el.innerHTML='<div>'+n+' / 100 phones</div>'+bar; }
+  }).catch(function(){ el.textContent='Can\u2019t reach the server to count right now.'; });
+};
+window.stMugClaimForm=function(){ return '<div style="margin-top:6px"><input id="stMugHandle" placeholder="Your Venmo or PayPal handle" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:13px;margin-bottom:6px">'
+  +'<select id="stMugMethod" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:13px;margin-bottom:6px"><option value="venmo">Venmo</option><option value="paypal">PayPal</option></select>'
+  +'<button class="stbtn" onclick="stMugClaim()">Claim my $13 \u203a</button><div id="stMugClaimOut" style="font-size:12px;font-weight:700;margin-top:6px"></div></div>'; };
+window.stMugClaim=function(){ var h=(document.getElementById('stMugHandle')||{}).value||''; var m=(document.getElementById('stMugMethod')||{}).value||'venmo'; var out=document.getElementById('stMugClaimOut'); if(!out) return;
+  if(!h.trim()){ out.style.color='#b8002e'; out.textContent='Enter your Venmo/PayPal handle first.'; return; }
+  var ST=window.DDStreetTeam; if(!ST||!ST.claimPayout){ out.style.color='#b8002e'; out.textContent='Payout module not loaded.'; return; }
+  out.style.color='#5a2e86'; out.textContent='Submitting your claim\u2026';
+  Promise.resolve(ST.claimPayout(ST_FEST, h.trim(), m, 'lehigh-mug')).then(function(r){
+    if(r&&r.ok&&r.eligible!==false){ out.style.color='#12854f'; out.innerHTML='\u2705 Claim submitted \u2014 <b>Michael will send your $13 by hand</b> ('+esc(m)+': '+esc(h.trim())+'). This is not an instant/auto payment.'; }
+    else if(r&&r.eligible===false){ out.style.color='#8a6d1f'; out.textContent='Not there yet \u2014 '+(r.count!=null?r.count:0)+' / '+(r.needed||100)+' phones.'; }
+    else { out.style.color='#b8002e'; out.textContent='Couldn\u2019t reach the server to record your claim. Try again.'; }
+  }).catch(function(){ out.style.color='#b8002e'; out.textContent='Couldn\u2019t reach the server to record your claim.'; });
 };
 window._mfLocked=false;
 function mfLockMap(){ if(window._mfLocked||!window.LMAP)return; try{

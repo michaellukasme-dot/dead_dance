@@ -127,10 +127,100 @@
     } catch (e) { return Promise.resolve(null); }
   }
 
+  // ---- BONUS jobs → DOUBLE cookies (Feature 1) ------------------------------------
+  // A small registry of task refs that are "bonus jobs" worth 2× cookies. isBonus is
+  // prefix-aware ('proximity-accept:Rift' matches the 'proximity-accept' bonus).
+  var BONUS = {
+    'proximity-accept': true,   // a fan physically AT the stage accepting → bonus job
+    'staff-accept':     true,   // proximity paid-staff accept
+    'bonus-job':        true    // a designated bonus job in the curtain
+  };
+  function _refHead(ref){ var s = String(ref == null ? '' : ref); var i = s.indexOf(':'); return (i >= 0 ? s.slice(0, i) : s).toLowerCase().trim(); }
+  function isBonus(ref){ if (ref == null) return false; return !!BONUS[_refHead(ref)] || !!BONUS[String(ref).toLowerCase().trim()]; }
+  function cookiesFor(ref){ return isBonus(ref) ? 2 : 1; }
+
+  // cookie(festival, amount, opts) — log a cookie earn worth `amount` (bonus job → 2,
+  // normal → 1) through the SAME sf_st_log path (kind='cookie' increments by p_secs).
+  // Guarded + .then/.catch INSIDE log() → false without a client (honest). When amount
+  // is omitted it is derived from whether opts.ref is a bonus ref.
+  function cookie(fest, amount, opts){
+    opts = opts || {};
+    var ref = (opts.ref != null ? opts.ref : null);
+    var amt = (amount != null && amount > 0) ? Math.round(amount) : cookiesFor(ref);
+    return log(fest, 'cookie', { ref: ref, secs: amt, lat: opts.lat, lng: opts.lng });
+  }
+
+  // ---- MUG CHALLENGE / PAYOUT (Feature 2) -----------------------------------------
+  // Honest REFERRED-JOIN counting: a NEW device that landed on a member's share link
+  // (?ref=st:<member>) logs ONE referral to that member. Dedupe is server-side (UNIQUE
+  // (festival, member, device)) AND locally (one send per member from this device). A
+  // member can NEVER count themselves. NO auto-payment — claimPayout only RECORDS a
+  // pending claim for Michael to pay BY HAND.
+  function refMemberFromUrl(){
+    try {
+      var s = (root.location && root.location.search) || '';
+      var m = s.match(/[?&]ref=st:([^&]+)/);
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+  }
+  function refSentKey(fest, member){ return 'dd.st.refsent.' + String(fest || '') + '.' + String(member || ''); }
+  // refer(festival, member?) — THIS device credits `member` (the sharer) once. Reads the
+  // sharer from ?ref=st:<member> when not passed. Returns {ok, saved, ...} honestly.
+  function refer(fest, member){
+    member = member || refMemberFromUrl();
+    if (!member) return Promise.resolve({ ok:false, reason:'no-ref' });
+    var dev = me();
+    if (String(dev) === String(member)) return Promise.resolve({ ok:false, reason:'self' });   // can't count yourself
+    var ls = LS(), key = refSentKey(fest, member);
+    try { if (ls && ls.getItem(key) === '1') return Promise.resolve({ ok:true, saved:false, deduped:true }); } catch (e) {}
+    var c = C();
+    if (!c || !c.rpc) { emit('refer', { fest:fest, saved:false }); return Promise.resolve({ ok:false, saved:false }); }
+    try {
+      return c.rpc('sf_st_refer', { p_festival: fest, p_member: member, p_device: dev })
+        .then(function (r){
+          var d = (r && r.data) || {};
+          var okv = !(r && r.error) && d.ok !== false;
+          if (okv) { try { if (ls) ls.setItem(key, '1'); } catch (e) {} }
+          emit('refer', { fest:fest, saved:okv });
+          return { ok:okv, saved:okv, count:(d.count != null ? d.count : null) };
+        })
+        .catch(function (){ emit('refer', { fest:fest, saved:false }); return { ok:false, saved:false }; });
+    } catch (e) { return Promise.resolve({ ok:false, saved:false }); }
+  }
+  // phoneCount(festival, member?) — distinct referred devices for a member (self by default).
+  // null without a client / on error (no fake number).
+  function phoneCount(fest, member){
+    var c = C(); if (!c || !c.rpc) return Promise.resolve(null);
+    var mem = member || me();
+    try {
+      return c.rpc('sf_st_phone_count', { p_festival: fest, p_member: mem })
+        .then(function (r){ var d = (r && r.data); if (d && d.count != null) return d.count; return (typeof d === 'number' ? d : null); })
+        .catch(function (){ return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+  // claimPayout(festival, handle, method, program?) — RECORD a pending claim. NEVER pays.
+  // Passes through the server's honest {ok, eligible, count, needed, ...}. false w/o a client.
+  function claimPayout(fest, handle, method, program){
+    var c = C(); if (!c || !c.rpc) return Promise.resolve({ ok:false, saved:false });
+    program = program || 'lehigh-mug';
+    try {
+      return c.rpc('sf_st_payout_claim', {
+        p_festival: fest, p_member: me(), p_program: program, p_handle: handle, p_method: method
+      })
+      .then(function (r){ if (r && r.error) return { ok:false, saved:false, err:(r.error.message || 'error') };
+                          return (r && r.data) || { ok:false, saved:false }; })
+      .catch(function (){ return { ok:false, saved:false }; });
+    } catch (e) { return Promise.resolve({ ok:false, saved:false }); }
+  }
+
   var api = {
     me: me, isMember: isMember, setMember: setMember,
     join: join, log: log,
     stats: me_stats, leaderboard: leaderboard,
+    // Feature 1 — bonus cookies:
+    cookie: cookie, isBonus: isBonus, cookiesFor: cookiesFor, BONUS: BONUS,
+    // Feature 2 — mug challenge / payout claim (never pays):
+    refer: refer, phoneCount: phoneCount, claimPayout: claimPayout, refMemberFromUrl: refMemberFromUrl,
     // pure helpers exposed for the harness:
     dedupeKey: dedupeKey, allowLog: allowLog, _resetDedupe: _resetDedupe,
     LOG_WINDOW_MS: LOG_WINDOW_MS

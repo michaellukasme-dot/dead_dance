@@ -193,6 +193,18 @@
     <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px">Real timer is 10 minutes. Everyone grabs their phone when it turns green.</div>
   </div>
 
+  <!-- MUG CHALLENGE — the Lehigh "$13 mug + first beer" program -->
+  <h2><span class="n">🍺</span>Mug Challenge</h2>
+  <div class="lead">Spread the app to <b>100 phones</b> → we send you <b>$13</b> (a MusikFest mug + your first beer).</div>
+  <div class="demo">
+    <div class="title">🍺 MusikFest Mug Challenge</div>
+    <div class="sub">Counts <b>real referred joins</b> — new phones that open <i>your</i> link and land in MusikFest. Not taps, not screenshots.</div>
+    <div id="mugProg" style="font-weight:900;color:var(--acc);font-size:15px;margin:6px 0">Join the Street Team above to start counting.</div>
+    <div id="mugShare"></div>
+    <div id="mugClaim"></div>
+    <div class="say" style="margin-top:10px">💵 <b>Honest payout:</b> once you hit 100, submit your Venmo/PayPal to <b>claim</b>. The $13 is then sent <b>by hand by Michael</b> — it is not an instant or automatic payment.</div>
+  </div>
+
   <div class="foot">
     🌹 <b>DeadDance · StageFill</b> — from Bethlehem.<br>
     Illustrative training. Your crew lead sends you the live links on the day.
@@ -251,11 +263,52 @@
       setBtnJoined();
       if(okv){ st.textContent='✅ Joined & synced — welcome to the crew 🌹'; renderStats(); }
       else { st.textContent="🌹 Joined on this phone — couldn't reach the server (offline). Your stats will sync when you're back online."; }
-    }).catch(function(){ setBtnJoined(); st.textContent="🌹 Joined on this phone — couldn't reach the server right now."; });
+      try{ if(window.mugRender) mugRender(); }catch(e){}
+    }).catch(function(){ setBtnJoined(); st.textContent="🌹 Joined on this phone — couldn't reach the server right now."; try{ if(window.mugRender) mugRender(); }catch(e){} });
   };
 
   // reflect existing membership on load (honest: local flag says joined; stats only if server answers)
   try{ if(ST && ST.isMember(FEST)){ setBtnJoined(); st.textContent="🌹 You're on the Street Team."; renderStats(); } }catch(e){}
+})();
+</script>
+<script>
+/* Mug Challenge — REAL referred-join progress + honest CLAIM (never pays). Uses DDStreetTeam
+   .phoneCount / .claimPayout (guarded, .then/.catch). The share link carries ?ref=st:<me> so
+   new phones that open it and land in the app are counted server-side (device-deduped). */
+(function(){
+  function qp(n){ try{ return new URLSearchParams(location.search).get(n); }catch(e){ return null; } }
+  var FEST=(qp('festival')||'musikfest-2026').toLowerCase();
+  var ST=window.DDStreetTeam;
+  var prog=document.getElementById('mugProg'), share=document.getElementById('mugShare'), claim=document.getElementById('mugClaim');
+  function refUrl(){ try{ var me=ST&&ST.me(); return 'https://deaddance.app/musikfest'+(me?('?ref=st:'+encodeURIComponent(me)):''); }catch(e){ return 'https://deaddance.app/musikfest'; } }
+  window.mugShareLink=function(){ var u=refUrl();
+    if(navigator.share){ navigator.share({title:'MusikFest 2026 · DeadDance', url:u}).catch(function(){}); }
+    else { try{ navigator.clipboard.writeText(u); var b=document.getElementById('mugShareBtn'); if(b) b.textContent='Link copied ✓'; }catch(e){} } };
+  window.mugRender=function(){
+    if(!ST||!prog){ return; }
+    var member=false; try{ member=!!ST.isMember(FEST); }catch(e){}
+    if(!member){ prog.textContent='Join the Street Team above to start counting your referred phones.'; share.innerHTML=''; claim.innerHTML=''; return; }
+    share.innerHTML='<button id="mugShareBtn" class="btn" onclick="mugShareLink()" style="margin-top:4px">📲 Share your app link</button>';
+    prog.textContent='Counting your referred phones…';
+    Promise.resolve(ST.phoneCount(FEST)).then(function(n){
+      if(n==null){ prog.textContent='Can’t reach the server to count right now.'; return; }
+      var pct=Math.min(100,Math.round(n/100*100));
+      prog.innerHTML=(n>=100?'✅ ':'')+n+' / 100 phones<div style="height:12px;background:#efeafa;border-radius:7px;overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,#7c3aed,#12854f)"></i></div>';
+      if(n>=100){ claim.innerHTML='<div style="margin-top:10px"><input id="mugHandle" placeholder="Your Venmo or PayPal handle" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:14px;margin-bottom:8px"><select id="mugMethod" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:14px;margin-bottom:8px"><option value="venmo">Venmo</option><option value="paypal">PayPal</option></select><button class="btn" onclick="mugClaim()">Claim my $13 ›</button><div id="mugClaimOut" style="font-weight:800;margin-top:8px;font-size:13px"></div></div>'; }
+      else { claim.innerHTML=''; }
+    }).catch(function(){ prog.textContent='Can’t reach the server to count right now.'; });
+  };
+  window.mugClaim=function(){ var h=(document.getElementById('mugHandle')||{}).value||''; var m=(document.getElementById('mugMethod')||{}).value||'venmo'; var out=document.getElementById('mugClaimOut'); if(!out) return;
+    if(!h.trim()){ out.style.color='var(--rose)'; out.textContent='Enter your Venmo/PayPal handle first.'; return; }
+    if(!ST||!ST.claimPayout){ out.style.color='var(--rose)'; out.textContent='Payout module not loaded — refresh and try again.'; return; }
+    out.style.color='var(--acc)'; out.textContent='Submitting your claim…';
+    Promise.resolve(ST.claimPayout(FEST,h.trim(),m,'lehigh-mug')).then(function(r){
+      if(r&&r.ok&&r.eligible!==false){ out.style.color='var(--green)'; out.textContent='✅ Claim submitted — Michael will send your $13 by hand ('+m+': '+h.trim()+'). Not an instant/auto payment.'; }
+      else if(r&&r.eligible===false){ out.style.color='#8a6d1f'; out.textContent='Not there yet — '+(r.count!=null?r.count:0)+' / '+(r.needed||100)+' phones.'; }
+      else { out.style.color='var(--rose)'; out.textContent='Couldn’t reach the server to record your claim. Try again.'; }
+    }).catch(function(){ out.style.color='var(--rose)'; out.textContent='Couldn’t reach the server to record your claim.'; });
+  };
+  try{ mugRender(); }catch(e){}
 })();
 </script>
 </body>
