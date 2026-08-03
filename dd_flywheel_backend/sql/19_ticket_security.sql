@@ -105,7 +105,7 @@ alter table public.dd_event_staff enable row level security;   -- server-side on
 drop function if exists public.dd_ticket_sig(text, text, text, timestamptz);
 create or replace function public.dd_ticket_sig(
   p_id text, p_event text, p_tier text, p_issued timestamptz)
-returns text language plpgsql security definer set search_path = public as $$
+returns text language plpgsql security definer set search_path = public, extensions as $$
 declare v_key text; v_basis text;
 begin
   select val into v_key from public.dd_secret where name = 'ticket_hmac';
@@ -125,7 +125,7 @@ revoke all on function public.dd_ticket_sig(text, text, text, timestamptz) from 
 drop function if exists public.sf_ticket_issue(text, text, boolean, numeric, text, text);
 create or replace function public.sf_ticket_issue(
   p_event text, p_tier text, p_paid boolean, p_price numeric, p_owner text, p_issued_by text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_event text; v_tier text; v_id text; v_issued timestamptz; v_sig text;
 begin
   v_event := lower(btrim(coalesce(p_event, '')));
@@ -158,7 +158,7 @@ end $$;
 -- ---------------------------------------------------------------------------
 drop function if exists public.sf_ticket_verify(text, text);
 create or replace function public.sf_ticket_verify(p_ticket text, p_sig text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_id text; r record; v_expected text; v_authentic boolean;
 begin
   v_id := btrim(coalesce(p_ticket, ''));
@@ -186,7 +186,7 @@ end $$;
 -- ---------------------------------------------------------------------------
 drop function if exists public.sf_ticket_staff_claim(text, text, text);
 create or replace function public.sf_ticket_staff_claim(p_event text, p_staff_token text, p_by text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_event text; v_tok text; v_existing text;
 begin
   v_event := lower(btrim(coalesce(p_event, '')));
@@ -216,7 +216,7 @@ drop function if exists public.sf_ticket_redeem(text, text, text, double precisi
 create or replace function public.sf_ticket_redeem(
   p_ticket text, p_sig text, p_staff_token text,
   p_lat double precision, p_lng double precision, p_by text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_id text; r record; v_expected text; v_staff text; v_rows int; v_when timestamptz; v_by text;
 begin
   v_id := btrim(coalesce(p_ticket, ''));
@@ -281,7 +281,7 @@ end $$;
 -- ---------------------------------------------------------------------------
 drop function if exists public.sf_ticket_prov(text);
 create or replace function public.sf_ticket_prov(p_ticket text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_id text; v_out jsonb;
 begin
   v_id := btrim(coalesce(p_ticket, ''));
@@ -301,7 +301,7 @@ end $$;
 -- ---------------------------------------------------------------------------
 drop function if exists public.sf_ticket_attend(text);
 create or replace function public.sf_ticket_attend(p_ticket text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_id text; r record;
 begin
   v_id := btrim(coalesce(p_ticket, ''));

@@ -90,8 +90,7 @@
   <h1>20 minutes an act.<br>Here's the whole job.</h1>
   <p>Seed the band, spread the free ticket, and let the crowd carry it. Do it right and every set you work grows the map. This page shows you exactly how.</p>
   <div class="deal">
-    <span class="chip">💵 <b>~$20–30</b>/hr</span>
-    <span class="chip">🍪 <b>Daily Cookie Contest</b></span>
+    <span class="chip" onclick="ccModal()" style="cursor:pointer">🍪 <b>Daily Cookie Contest</b> ›</span>
   </div>
   <button id="joinBtn" onclick="stJoin()" style="margin-top:16px;border:0;border-radius:14px;padding:14px 22px;font-weight:900;font-size:16px;color:#241535;background:var(--gold);cursor:pointer;box-shadow:0 8px 22px rgba(240,165,0,.35)">🌹 Join the Street Team</button>
   <div id="joinState" style="margin-top:10px;font-size:13px;font-weight:800;color:#d6cbe8;min-height:16px"></div>
@@ -310,6 +309,24 @@
   };
   try{ mugRender(); }catch(e){}
 })();
+</script>
+<script>
+window.ccModal=function(){
+  var ex=document.getElementById('ccM'); if(ex){ ex.remove(); return; }
+  var w=document.createElement('div'); w.id='ccM';
+  w.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(20,12,34,.6);display:flex;align-items:center;justify-content:center;padding:22px';
+  w.innerHTML='<div style="background:#fff;border-radius:18px;max-width:340px;width:100%;padding:20px;box-shadow:0 20px 50px #0007">'
+    +'<div style="font-weight:900;font-size:18px;color:#241535">🍪 Daily Cookie Contest</div>'
+    +'<div style="font-size:14px;color:#4a4460;line-height:1.5;margin:9px 0 6px">Share the app. Every phone that joins from your link counts.</div>'
+    +'<ul style="margin:6px 0 14px;padding-left:18px;color:#4a4460;font-size:14px;line-height:1.6">'
+      +'<li><b>100 shares</b> → a free <b>shirt</b>.</li>'
+      +'<li>Each day, the <b>top 3</b> sharers over 100 earn <b>double cookies</b> all day.</li>'
+    +'</ul>'
+    +'<button onclick="var m=document.getElementById(\'ccM\');if(m)m.remove()" style="width:100%;border:0;border-radius:12px;padding:12px;font-weight:900;font-size:14px;background:#7c3aed;color:#fff;cursor:pointer">Got it</button>'
+    +'</div>';
+  w.addEventListener('click', function(e){ if(e.target===w) w.remove(); });
+  document.body.appendChild(w);
+};
 </script>
 </body>
 </html>
