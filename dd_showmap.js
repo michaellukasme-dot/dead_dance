@@ -181,7 +181,7 @@
     { band: "Life After Dead", venue: "Lost Tavern Brewing", city: "Bethlehem, PA", date: "2026-10-31", real: true }
   ];
   try {
-    [window.dealMapRows, window.hotSauceMapRows, window.kgbMapRows, window.cncMapRows, window.shakedownCitiMapRows, window.stageFillMapRows].forEach(function (fn) {   // kgbMapRows/cncMapRows: Karl's Garcia Band + Crickets and Cicadas · stageFillMapRows: only on the StageFill national map; undefined (no-op) on the DeadDance home map
+    [window.dealMapRows, window.hotSauceMapRows, window.kgbMapRows, window.cncMapRows, window.shakedownCitiMapRows, window.riftMapRows, window.stageFillMapRows].forEach(function (fn) {   // kgbMapRows/cncMapRows: Karl's Garcia Band + Crickets and Cicadas · riftMapRows: Rift (Phish tribute) · stageFillMapRows: only on the StageFill national map; undefined (no-op) on the DeadDance home map
       if (!fn) return;
       fn().forEach(function (r) {
         SHOWS.push({ band: r.band, venue: r.venue, city: r.city, date: r.date, time: r.time, real: true });

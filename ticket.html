@@ -199,7 +199,16 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   (function(){ var se=document.getElementById('sub'); se.textContent=sub; se.style.display=sub?'':'none'; })();   /* hide the subtitle when there's no real genre */
   document.getElementById('venue').textContent=venue+(date?(' · '+date):'');
   document.getElementById('gate').textContent=gate;
-  var vl=document.getElementById('veloc'); if(vl) vl.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(String(venue||'')+(date?'':''));
+  // Directions & parking → resolve INTO our own map at the platz (never a Google name search — "Stadtplatz"
+  // alone geocodes to Austria). MusikFest/festival ticket (fest+coords) → our map centered on the stage;
+  // else exact-coord Google DIRECTIONS; last resort only, a name query.
+  var vl=document.getElementById('veloc');
+  if(vl){ var _f=g('fest',''), _la=g('lat',''), _ln=g('lng','');
+    if(_f && _la && _ln){ vl.href='musikfest.html?fest='+encodeURIComponent(_f)+'&ll='+encodeURIComponent(_la+','+_ln); }
+    else if(_la && _ln){ vl.href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(_la+','+_ln); }
+    else if(String(venue||'').indexOf(',')>=0){ vl.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(String(venue||'')); }  // only if venue carries city/state locality
+    else { vl.removeAttribute('href'); vl.style.opacity='.45'; vl.style.pointerEvents='none'; }   // bare name + no coords → don't risk a wrong-country search
+  }
 
   // price / buy label
   var numeric=/\$|\d/.test(price);

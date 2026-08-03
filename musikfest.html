@@ -638,6 +638,8 @@ function ensureMap(){ if(LMAP||!window.L)return; var el=document.getElementById(
   // (SteelStacks) is never hidden behind it. Content sits higher, centered vertically in the visible frame.
   try{ LMAP.fitBounds(STAGES.map(function(s){return [s.lat,s.lng];}),{paddingTopLeft:[24,48], paddingBottomRight:[24,200]}); }catch(e){ LMAP.setView([40.6172,-75.3762],15); }
   setTimeout(function(){ try{ LMAP.invalidateSize(); }catch(e){} },250);
+  // Deep-link focus: a ticket's "Directions & parking" opens THIS map centered on its platz (?ll=lat,lng).
+  try{ var _ll=(new URLSearchParams(location.search).get('ll')||'').split(','); if(_ll.length===2){ var _la=parseFloat(_ll[0]), _ln=parseFloat(_ll[1]); if(isFinite(_la)&&isFinite(_ln)){ setTimeout(function(){ try{ LMAP.setView([_la,_ln],17,{animate:true}); }catch(e){} }, 650); } } }catch(e){}
 }
 function updateYou(){ if(!LG_YOU)return; LG_YOU.clearLayers(); if(!window.YOU) return;
   if(!document.getElementById('mfyoucss')){ var st=document.createElement('style'); st.id='mfyoucss';
@@ -2096,7 +2098,9 @@ window.mfOpenTicket=function(el){ var b=el.getAttribute('data-b')||'', st=el.get
   if(!paid){ try{ if(window.DDFlywheel&&DDFlywheel.grab) DDFlywheel.grab(b,{stage:st,date:d}); }catch(e){} }   // free → grab: fan of this band + joins its group
   var sub=''; try{ if(window.BAND_INFO&&BAND_INFO[b]&&BAND_INFO[b].kind) sub=BAND_INFO[b].kind;
     else if(window.MF||window.DD_MUSIKFEST){ var _r=(window.MF||window.DD_MUSIKFEST).filter(function(x){return x.b===b;})[0]; if(_r&&_r.kind) sub=_r.kind; } }catch(e){}   // REAL per-act genre → no wrong label
-  var base='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(st)+'&date='+encodeURIComponent(d)+(sub?('&sub='+encodeURIComponent(sub)):'');
+  var _FEST=(new URLSearchParams(location.search).get('fest'))||'musikfest-2026';
+  var _sc=null; try{ _sc=(window.STAGE_BY_KEY&&STAGE_BY_KEY[st])||null; }catch(e){}
+  var base='ticket.html?band='+encodeURIComponent(b)+'&venue='+encodeURIComponent(st)+'&date='+encodeURIComponent(d)+'&fest='+encodeURIComponent(_FEST)+((_sc&&_sc.lat!=null)?('&lat='+_sc.lat+'&lng='+_sc.lng):'')+(sub?('&sub='+encodeURIComponent(sub)):'');
   var url= paid ? (base+'&price=FREE&record=1&buy='+encodeURIComponent(MF_BUY_URL)) : (base+'&price=FREE');   // Wind Creek = FREE record/keepsake (not entry); Buy links to ArtsQuest for real entry
   var m=document.getElementById('mfTixModal'), f=document.getElementById('mfTixFrame'); if(f)f.src=url; if(m)m.style.display='flex';
   try{ if(!paid && window.mfToast) mfToast('🎟 Free ticket — now a '+b+' fan 🌹'); }catch(e){} };

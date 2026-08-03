@@ -2045,6 +2045,7 @@ function dealMergeOnce(){ if(_dealMerged)return; try{
     if(window.kgbCalendarRows) ma=ma.concat(window.kgbCalendarRows());             // band #3 — Karl's Garcia Band (KGB)
     if(window.cncCalendarRows) ma=ma.concat(window.cncCalendarRows());             // band #4 — Crickets and Cicadas
     if(window.shakedownCitiCalendarRows) ma=ma.concat(window.shakedownCitiCalendarRows()); // band #5 — Shakedown Citi
+    if(window.riftCalendarRows) ma=ma.concat(window.riftCalendarRows());          // band #6 — Rift (Philadelphia's Phish Tribute)
     ma=ma.concat(MF_DEAD_ACTS);                                                    // Musikfest Dead/jam → StageFill
     REGIONS["Mid-Atlantic"].shows=ma;
     _dealMerged=true;
@@ -4286,6 +4287,7 @@ function ddAddFriend(id,name,btn){
 <script src="kgb_shows.js"></script>
 <script src="cnc_shows.js"></script>
 <script src="shakedown_citi_shows.js"></script>
+<script src="rift_shows.js"></script>
 <!-- LAUNCH: music bar (LISTEN·PLAY·SING "ambient bed") is DOWN until the songbook is licensed & working.
      It goes back in as the External Tuesday-Night National Sing-Along (see TUESDAY_NIGHT_SING_ALONG doc).
      Re-enable by uncommenting the next line. -->

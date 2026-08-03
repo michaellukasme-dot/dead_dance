@@ -155,12 +155,15 @@ function render(){
     '<div style="color:var(--muted);font-size:13px">🌹 Public · anyone in the family · '+(SHOW.cover?('$'+String(SHOW.cover).replace('$','')+' at the door'):'free / at the door')+'</div>'+
     (SHOW.band?('<a href="https://www.setlist.fm/search?query='+encodeURIComponent(SHOW.band)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;color:#5a2e86;font-weight:800;font-size:13px;text-decoration:none">🎵 Setlists on setlist.fm →</a>'):'');
   // map — real Google embed by venue query (no key), + directions + print-near-venue
-  var q=encodeURIComponent([SHOW.venue,SHOW.city,SHOW.state].filter(Boolean).join(', '));
+  // NEVER a bare-name map search (a bare venue like "Stadtplatz" geocodes to the wrong country).
+  // Only search when we have city/state locality to disambiguate; otherwise show the address, no map link.
+  var _loc2=[SHOW.city,SHOW.state].filter(Boolean).join(', ');
+  var q=_loc2?encodeURIComponent([SHOW.venue,_loc2].filter(Boolean).join(', ')):'';
   document.getElementById('mapCard').innerHTML=
     (q?'<iframe loading="lazy" src="https://maps.google.com/maps?q='+q+'&z=15&output=embed" title="Map"></iframe>':'')+
     '<div class="addr"><b>'+esc(SHOW.venue||'Venue')+'</b><span>'+esc(loc)+'</span></div>'+
     '<div class="mapbtns">'+
-      '<a class="dir" href="https://maps.google.com/?q='+q+'" target="_blank" rel="noopener">🧭 Directions</a>'+
+      (q?'<a class="dir" href="https://maps.google.com/?q='+q+'" target="_blank" rel="noopener">🧭 Directions</a>':'')+
       '<a class="print" href="poster_maker.html?band='+encodeURIComponent(SHOW.band||'')+'&venue='+encodeURIComponent(SHOW.venue||'')+'&date='+encodeURIComponent(SHOW.date||'')+'&city='+encodeURIComponent(SHOW.city||'')+'&print=near">🖨️ Print a poster near here</a>'+
     '</div>';
   // StageFill ticket routing (official seller, no markup) + follow state
