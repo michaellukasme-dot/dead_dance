@@ -86,6 +86,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script src="dd_roster.js"></script><script src="dd_setlist.js"></script><script src="dd_setlist_crowd.js"></script><script src="dd_media.js"></script>
+<script src="dd_ticketsec.js"></script><script src="dd_groups.js"></script><script src="dd_pymk.js"></script><!-- attendance fact + friend suggestions on the ticket back (guarded) -->
 <style>
 .pillrow{display:flex;gap:8px;margin-top:9px}
 .tpill{flex:1;border:1px solid var(--line,#e6e0ef);background:#fff;border-radius:12px;padding:10px 6px;font:800 12.5px system-ui;color:#5a2e86;cursor:pointer}
@@ -161,6 +162,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   <div class="perf"></div>
   <div class="stub" style="flex-direction:column;align-items:stretch;gap:12px;background:#0f0b18;padding:16px 18px 18px">
     <div style="display:flex;justify-content:space-between;align-items:center;color:#c9bfe0;font-size:11px"><span>Ticket ID <b id="tid" style="color:#fff">d.dance/t/····</b></span><span class="chip" style="background:#ffffff14;color:#7ad7ff;border-color:#7ad7ff55">SHOW PASS</span></div>
+    <div id="ddAttendBack"></div><!-- ATTENDANCE FACT (sf_ticket_attend) + friend suggestions — filled only on a REAL server confirmation -->
     <div style="display:flex;gap:13px;align-items:center">
       <div id="showqr" onclick="ticketPrint()" title="Click Me — print at home or order the paper 🌹" style="width:118px;height:118px;flex:0 0 auto;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer">▦</div>
       <div style="color:#cfc6e6;font-size:12px;line-height:1.45"><b style="color:#fff">Your show QR.</b> The <b>same code</b> before, during &amp; after — scan at the gate, get each song texted live, then keep it as your night in history. 🌹<br><b style="color:#ffd76a">🖨️ Tap the code</b> — print at home free, or order the paper.</div>
@@ -566,4 +568,51 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 })();
 </script>
 <div id="tixSecModal" onclick="if(event.target===this)closeTixSec()"><div style="max-width:360px;max-height:88vh;overflow:auto;background:#1b1e26;color:#fff;border-radius:20px;padding:20px 20px 22px;box-shadow:0 24px 60px #000c;position:relative"><button onclick="closeTixSec()" aria-label="Close" style="position:absolute;top:12px;right:14px;border:0;background:#ffffff1a;color:#fff;width:34px;height:34px;border-radius:17px;font-size:18px;cursor:pointer">×</button><div style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:16.5px;padding-right:30px"><span style="font-size:21px">🌹</span> The most secure ticket on the market</div><p style="font-size:14px;line-height:1.6;color:#d7d2e2;margin:12px 0 0">From the smallest bar room or restaurant to the largest stadium, DeadDance secures both the <b>ticket</b> and the <b>sale</b> — engineered to thwart the scalper hacks that still work on other ticket vendors.</p><div style="margin-top:14px;display:flex;flex-direction:column;gap:11px"><div style="display:flex;gap:10px"><span style="font-size:17px">🔒</span><div style="font-size:13.5px;line-height:1.55"><b>Can’t be cloned.</b> The barcode rotates like the one you already trust — but the signing key never leaves your phone. A screenshot is dead on arrival, and it can’t be copied onto another device the way the big vendors’ can.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🪑</span><div style="font-size:13.5px;line-height:1.55"><b>Seat-true.</b> Your section, row, and seat are signed into the ticket — nobody edits a screenshot into a better seat.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🎟️</span><div style="font-size:13.5px;line-height:1.55"><b>Distribution locked end to end.</b> Every sale and transfer is signed, so tickets can’t be siphoned into scalper inventory or resold through a back door.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">📶</span><div style="font-size:13.5px;line-height:1.55"><b>Works offline at the gate.</b> No signal in a packed room? It still verifies — no network required.</div></div><div style="display:flex;gap:10px"><span style="font-size:17px">🌹</span><div style="font-size:13.5px;line-height:1.55"><b>Still yours.</b> Free transfers to friends, no resale toll booth — Ticketmaster-grade security, Grateful-Dead ethics.</div></div></div></div></div><script>window.openTixSec=function(){var m=document.getElementById("tixSecModal");if(m)m.classList.add("on");};window.closeTixSec=function(){var m=document.getElementById("tixSecModal");if(m)m.classList.remove("on");};</script>
+<script>
+/* ATTENDANCE FACT + FRIEND SUGGESTIONS on the ticket back.
+   HONEST: this fills ONLY from a real server confirmation (sf_ticket_attend). No ?tix token,
+   or no reachable server, or not-yet-redeemed → the back shows NOTHING new (the existing
+   historical rollover stub still applies). We never fake "Attended". */
+(function(){
+  var SB_URL="https://vmbqfzxhrqxpwgidogfm.supabase.co",
+      SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM";
+  var tix=(new URLSearchParams(location.search)).get('tix')||'';
+  if(!tix) return;                                   // no secure ticket associated → nothing to show
+  var host=document.getElementById('ddAttendBack'); if(!host) return;
+
+  function mkClient(){ try{ var C=window.supabase.createClient(SB_URL,SB_ANON); window.ddClient=function(){return C;};
+    try{ C.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) C.auth.signInAnonymously(); }); }catch(e){} return true; }catch(e){ return false; } }
+  function resolveClient(cb){
+    try{ if(window.ddClient && ddClient()){ return cb(true); } }catch(e){}
+    try{ if(window.parent && window.parent!==window && window.parent.ddClient){ window.ddClient=window.parent.ddClient; if(ddClient()) return cb(true); } }catch(e){}
+    try{ if(window.top && window.top!==window && window.top.ddClient){ window.ddClient=window.top.ddClient; if(ddClient()) return cb(true); } }catch(e){}
+    try{ if(window.supabase && window.supabase.createClient){ return cb(mkClient()); } }catch(e){}
+    var s=document.createElement('script'); s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+    s.onload=function(){ cb(mkClient()); }; s.onerror=function(){ cb(false); }; document.head.appendChild(s);
+  }
+  function fmtDate(s){ try{ return new Date(s).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return String(s||''); } }
+  function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,''); }
+
+  function render(){
+    if(!window.DDTicketSec){ return; }
+    DDTicketSec.attend(tix).then(function(res){
+      if(!(res && res.attended)) return;             // not redeemed yet (or offline) → show nothing (honest)
+      host.innerHTML='<div style="margin-top:4px;background:#12351f;border:1px solid #1f7a4d;border-radius:11px;padding:9px 11px;color:#8ff0bd;font-size:12px;font-weight:800">✓ Attended · '+esc(res.event||'this event')+(res.at?(' · '+esc(fmtDate(res.at))):'')+'</div>'
+        +'<div id="ddCoAttend" style="margin-top:8px"></div>';
+      // FRIEND SUGGESTIONS: this ticket surfaces in its event social group; show co-attendees you may know.
+      try{ if(window.ddGroups){ ddGroups.join('festivaldance'); ddGroups.addTicket({ id:tix, communities:['festivaldance'] }); } }catch(e){}
+      try{
+        if(window.DDPymk && DDPymk.suggestions){
+          DDPymk.suggestions(3).then(function(list){
+            var box=document.getElementById('ddCoAttend'); if(!box||!list||!list.length) return;
+            box.innerHTML='<div style="color:#c9bfe0;font-size:11px;font-weight:800;margin-bottom:5px">🤝 People you were both there with</div>'
+              +list.map(function(p){ return '<div style="color:#cfc6e6;font-size:12px;padding:3px 0">• <b style="color:#fff">'+esc(p.name||'A fan')+'</b> <span style="color:#9c93b8">— '+esc(p.reason||'in your scene')+'</span></div>'; }).join('');
+          });
+        }
+      }catch(e){}
+    });
+  }
+  resolveClient(function(ok){ if(ok) render(); });   // no client → honest no-op (back unchanged)
+})();
+</script>
 </body></html>

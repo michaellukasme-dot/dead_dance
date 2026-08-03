@@ -497,9 +497,11 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
 <script src="dd_bandgroups.js"></script><script src="dd_flywheel.js"></script><!-- Band→Fan flywheel: free ticket → fan → band group -->
+<script src="dd_groups.js"></script><!-- community/festival social groups: attendee → event group for friend suggestions -->
 <script src="dd_streetteam.js"></script><!-- Street Team: opted-in members' activity → cookies (guarded, never blocks GPS) -->
 <script src="dd_mf_bands.js"></script><!-- Dead & Jam roster + member names → the Street Team search index -->
 <script src="dd_stcurtain.js"></script><!-- Street Team CURTAIN brain: search/resolve/ticketUrl/venue-coords/paid-gate (pure, tested) -->
+<script src="dd_ticketsec.js"></script><!-- ticket-security brain: issue/redeem/verify/prov (guarded, .then-chained) -->
 <script src="dd_musikfest.js"></script>
 <script src="dd_festivals.js"></script><!-- multi-festival registry (Option B): one map engine, many SteelStacks festivals -->
 <script src="dd_countryfest.js"></script><!-- CountryFest — reuses the Southside stages -->
@@ -1100,10 +1102,25 @@ window.stSearch=function(){ var q=(document.getElementById('stQ')||{}).value||''
 
 // UTILITY 4 — door. Gated on the venue's paid-sales approval (honest). MusikFest is
 // FREE → hand out the event's FREE ticket; no fake verify.
+function stStaffTok(){ try{ return localStorage.getItem('dd.st.staff.'+ST_FEST)||''; }catch(e){ return ''; } }
+window.stSetStaffTok=function(){ var v=stVenue(); if(!(window.DDStCurtain && DDStCurtain.approvedForPaid(v))) return;
+  var t=''; try{ t=(prompt('Enter the venue STAFF TOKEN (given to you by the venue — a shared secret; only staff can admit PAID tickets):')||'').trim(); }catch(e){}
+  if(!t) return; try{ localStorage.setItem('dd.st.staff.'+ST_FEST, t); }catch(e){}
+  var slug=(v&&v.doorSlug)||ST_FEST;
+  try{ if(window.DDTicketSec){ DDTicketSec.staffClaim(slug, t, (window.DDStreetTeam&&DDStreetTeam.me())||'st').then(function(res){
+      var host=document.getElementById('stU4Body'); if(host){ if(res&&res.ok&&res.valid){ mfRenderStreetTeam(); }
+        else { host.insertAdjacentHTML('afterbegin','<div style="font-size:12px;color:#b8002e;font-weight:700;margin-bottom:6px">That token isn’t the venue’s staff token — you can’t admit paid tickets with it.</div>'); } } }); }
+    else mfRenderStreetTeam(); }catch(e){ mfRenderStreetTeam(); } };
 function stU4(){ var v=stVenue();
   if(window.DDStCurtain && DDStCurtain.approvedForPaid(v)){ var du=DDStCurtain.doorUrl(v, ST_BASE);
-    return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">This venue is <b>approved for ticket sales</b> — verify &amp; sell at the door.</div>'
-      +'<a class="stbtn" href="'+esc(du)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">🚪 Open Door Mode — verify &amp; sell ›</a>'; }
+    var hasTok=!!stStaffTok();
+    if(!hasTok){   // honest gate: paid acceptance is staff-only, and you don't hold the token yet
+      return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">This venue is <b>approved for paid ticket sales</b>. Accepting a <b>paid</b> ticket is <b>staff-only</b> — it needs the venue’s staff token, which you don’t hold yet.</div>'
+        +'<button class="stbtn" onclick="stSetStaffTok()">🔑 I’m venue staff — enter the staff token ›</button>'
+        +'<div style="font-size:11.5px;color:#8a7bbf;font-weight:700;margin-top:8px">No token = no paid admit. We don’t fake staff.</div>'; }
+    return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">You hold this venue’s <b>staff token</b> — you can accept paid tickets. Scanning + the atomic single-use redeem run in <b>Door Mode</b> (sf_ticket_redeem, staff-gated).</div>'
+      +'<a class="stbtn" href="'+esc(du)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">🚪 Accept paid ticket (staff) — open Door Mode ›</a>'
+      +'<button class="stbtn2" style="margin-top:8px" onclick="stSetStaffTok()">Re-enter staff token</button>'; }
   var freeUrl=DDStCurtain.ticketUrl((v&&v.freeTicketBand)||'MusikFest 2026', ST_BASE);
   return '<div style="font-size:12.5px;color:#4a4356;margin-bottom:8px">MusikFest is <b>free</b> — so there’s nothing to verify. Instead, <b>hand out free tickets</b>: let people at the door/inside scan this to grab their own.</div>'
     +'<button class="stbtn" onclick="stShare({url:'+JSON.stringify(freeUrl)+',title:\'🎟 MusikFest — free ticket\',sub:\'Point your camera here to grab your <b>free</b> MusikFest ticket.\',logKind:\'phoneshare\',logRef:\'freeticket\'})">📲 Hand out a free ticket ›</button>'
@@ -1146,22 +1163,53 @@ function stU5(){ var v=stVenue();
 }
 // FAN CONFIRM \u2192 grant the free ticket + record verified-at-show. Reflect the REAL result.
 window.stU5Accept=function(){ var ctx=window._stU5ctx||null; var host=document.getElementById('stU5Body'); if(!ctx||!host) return;
-  var band=ctx.band, act=ctx.act, stName=ctx.st, ev=ctx.ev, url=DDStCurtain.ticketUrl(band, ST_BASE);
+  var band=ctx.band, act=ctx.act, stName=ctx.st, ev=ctx.ev, baseUrl=DDStCurtain.ticketUrl(band, ST_BASE);
+  var me=null; try{ me=(window.DDStreetTeam&&DDStreetTeam.me())||null; }catch(e){}
+  var here=(window.WALK&&WALK.last)?WALK.last:null;
   host.innerHTML='<div style="font-size:12.5px;color:#4a4356">Accepting your free ticket\u2026</div>';
   try{ mfStLog('task', {ref:'proximity-accept:'+(act||band)}); }catch(e){}
   try{ if(window.DDFlywheel&&DDFlywheel.grab&&act) DDFlywheel.grab(act,{stage:stName,date:(typeof todayISO==='function'?todayISO():''),source:'proximity'}); }catch(e){}
-  var done=function(res){ var synced=res&&res.synced, offline=res&&res.offline;
-    var status = synced
-      ? '<div style="font-size:12px;color:#1f7a4d;font-weight:700;margin-top:8px">\u2705 Verified at the show \u2014 synced to your account.</div>'
-      : offline
-      ? '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\ud83d\udcf4 Granted on your phone (offline) \u2014 it\u2019ll sync when you\u2019re back online.</div>'
-      : '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\u26a0\ufe0f Ticket granted on your phone, but we couldn\u2019t reach the server to verify-at-show. It\u2019s still yours.</div>';
-    host.innerHTML='<div style="font-size:12.5px;color:#241535;font-weight:800;margin-bottom:8px">\ud83c\udf9f Your free ticket for <b>'+esc(band)+'</b> is ready.</div>'
-      +'<a class="stbtn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">Open my free ticket \u203a</a>'+status;
-    try{ window.open(url,'_blank','noopener'); }catch(e){} };
-  try{ var p=(window.ddPresence&&ddPresence.accept)?ddPresence.accept(ev,{id:stName,name:stName}):null;
-    if(p&&p.then){ p.then(done,function(){ done({ok:true,synced:false}); }); } else { done({ok:true,synced:false,offline:true}); }
-  }catch(e){ done({ok:true,synced:false}); }
+
+  // FRIEND SUGGESTIONS: add this attendee to the event's social group (local brain), then
+  // surface co-attendees on the ticket back. Guarded \u2014 no group brain = silent no-op.
+  var suggestGroup=function(tok){ try{ if(window.ddGroups){ ddGroups.join('festivaldance');
+    if(tok) ddGroups.addTicket({ id:tok, holder:me, communities:['festivaldance'] }); } }catch(e){} };
+
+  // reflect the REAL result of the provenance redeem + the presence verify-at-show.
+  var finish=function(secureTok, redeemed){
+    var url = secureTok ? (baseUrl + (baseUrl.indexOf('?')>=0?'&':'?') + 'tix=' + encodeURIComponent(secureTok)) : baseUrl;
+    suggestGroup(secureTok);
+    var done=function(res){ var synced=res&&res.synced, offline=res&&res.offline;
+      var audit = redeemed
+        ? '<div style="font-size:12px;color:#1f7a4d;font-weight:700;margin-top:6px">\ud83e\uddfe Audited + attendance recorded on your ticket back.</div>'
+        : (secureTok
+          ? '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:6px">\ud83d\udcf4 Ticket issued; attendance will record when the server is reachable.</div>'
+          : '');
+      var status = synced
+        ? '<div style="font-size:12px;color:#1f7a4d;font-weight:700;margin-top:8px">\u2705 Verified at the show \u2014 synced to your account.</div>'
+        : offline
+        ? '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\ud83d\udcf4 Granted on your phone (offline) \u2014 it\u2019ll sync when you\u2019re back online.</div>'
+        : '<div style="font-size:12px;color:#8a6d1f;font-weight:700;margin-top:8px">\u26a0\ufe0f Ticket granted on your phone, but we couldn\u2019t reach the server to verify-at-show. It\u2019s still yours.</div>';
+      host.innerHTML='<div style="font-size:12.5px;color:#241535;font-weight:800;margin-bottom:8px">\ud83c\udf9f Your free ticket for <b>'+esc(band)+'</b> is ready.</div>'
+        +'<a class="stbtn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">Open my free ticket \u203a</a>'+audit+status;
+      try{ window.open(url,'_blank','noopener'); }catch(e){} };
+    try{ var p=(window.ddPresence&&ddPresence.accept)?ddPresence.accept(ev,{id:stName,name:stName}):null;
+      if(p&&p.then){ p.then(done,function(){ done({ok:true,synced:false}); }); } else { done({ok:true,synced:false,offline:true}); }
+    }catch(e){ done({ok:true,synced:false}); }
+  };
+
+  // Issue + redeem the FREE ticket through the SAME security spine (no staff needed for free),
+  // so free acceptances are audited + attendance-recorded. Guarded + .then-chained.
+  try{
+    if(window.DDTicketSec && DDTicketSec.issue){
+      DDTicketSec.issue({ event:ev, tier:'ga', paid:false, owner:me, by:me }).then(function(r){
+        if(r && r.ok && r.token){
+          DDTicketSec.redeem(r.token, { lat:here&&here[0], lng:here&&here[1], by:me }).then(function(rd){
+            finish(r.token, !!(rd&&rd.ok)); });
+        } else { finish(null, false); }   // offline / secret-not-set \u2192 honest: no secure token
+      });
+    } else { finish(null, false); }
+  }catch(e){ finish(null, false); }
 };
 
 // membership header + %VENUE% direction (Your post: stage — coords → tap to center)
@@ -1202,7 +1250,7 @@ window.mfRenderStreetTeam=function(){ var host=document.getElementById('stCurtai
     +'<div class="stcard"><div class="sth"><span class="stnum">3</span>Search → ticket</div>'
       +'<input id="stQ" oninput="stSearch()" placeholder="Act, stage, or band-member name…" style="width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink);margin-bottom:6px">'
       +'<div id="stResults"></div></div>'
-    +'<div class="stcard"><div class="sth"><span class="stnum">4</span>'+(v&&DDStCurtain.approvedForPaid(v)?'Accept / verify a ticket at the door':'Hand out free tickets at the door')+'</div>'+stU4()+'</div>'
+    +'<div class="stcard"><div class="sth"><span class="stnum">4</span>'+(v&&DDStCurtain.approvedForPaid(v)?'Accept a paid ticket (staff)':'Hand out free tickets at the door')+'</div><div id="stU4Body">'+stU4()+'</div></div>'
     +'<div class="stcard"><div class="sth"><span class="stnum">5</span>\u2713 Accept your FREE ticket (you\u2019re here)</div><div id="stU5Body">'+stU5()+'</div></div>';
 };
 window._mfLocked=false;
