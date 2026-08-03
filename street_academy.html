@@ -9,6 +9,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>try{ var _C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _C;}; }catch(e){}</script>
 <script src="dd_streetteam.js"></script>
+<script src="dd_mf_bands.js"></script><!-- roster: names -> Share-Ticket search index + Adopt curated slugs -->
+<script src="dd_musikfest.js"></script><!-- schedule: builds the Adopt lineup + Share-Ticket stages -->
+<script src="dd_stcurtain.js"></script><!-- Street-Team CURTAIN brain: buildIndex/search/ticketUrl (pure, tested) -->
+<script src="dd_adopt.js"></script><!-- Adopt-a-Band engine: guarded dd_bandadopt_claim + flushMine + counter -->
 <style>
   :root{ --purple:#241535; --acc:#7c3aed; --rose:#b8002e; --gold:#f0a500; --green:#12854f; --blue:#2f7bf6;
          --ink:#1b1430; --muted:#6f6a88; --line:#ece7f5; --bg:#f7f5fc; }
@@ -82,9 +86,18 @@
   .say b{ color:#5a3400; }
   .foot{ text-align:center; color:var(--muted); font-size:12px; margin-top:34px; line-height:1.6; }
   .tag{ display:inline-block; background:#eafaf3; color:var(--green); font-weight:800; font-size:11px; padding:3px 9px; border-radius:999px; }
+  /* unified Street-Team shell: tab row + swappable panels */
+  .sttabs{ position:sticky; top:0; z-index:600; display:flex; gap:6px; overflow-x:auto; background:#241535; padding:10px 12px; border-bottom:1px solid #3a2a55; scrollbar-width:none; }
+  .sttabs::-webkit-scrollbar{ display:none; }
+  .sttab{ white-space:nowrap; border:0; cursor:pointer; font-weight:800; font-size:13px; padding:8px 14px; border-radius:999px; background:#ffffff14; color:#e9e2f7; }
+  .sttab.on{ background:var(--gold); color:#241535; }
+  .stpanel[hidden]{ display:none; }
+  .shq{ width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font:inherit; font-size:15px; margin:2px 0 6px; }
+  .shrow{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin-top:8px; }
+  .note{ color:var(--muted); font-size:12.5px; }
 </style>
 </head>
-<body>
+<body data-default-tab="academy">
 <div class="hero">
   <div class="k">🌹 DeadDance · Street Team Academy</div>
   <h1>20 minutes an act.<br>Here's the whole job.</h1>
@@ -105,7 +118,14 @@
   </div>
 </div>
 
-<div class="wrap">
+<nav class="sttabs" id="sttabs">
+  <button class="sttab" data-tab="academy" onclick="stTab('academy')">🌹 The Job</button>
+  <button class="sttab" data-tab="share" onclick="stTab('share')">🎟️ Share Ticket</button>
+  <button class="sttab" data-tab="adopt" onclick="stTab('adopt')">🎸 Adopt a Band</button>
+  <button class="sttab" data-tab="tune" onclick="stTab('tune')">🎚️ Stage Tuning</button>
+</nav>
+
+<div class="stpanel" id="panel-academy"><div class="wrap">
 
   <!-- 1. INFORM -->
   <h2><span class="n">1</span>The Job</h2>
@@ -208,7 +228,41 @@
     🌹 <b>DeadDance · StageFill</b> — from Bethlehem.<br>
     Illustrative training. Your crew lead sends you the live links on the day.
   </div>
-</div>
+</div></div><!-- /panel-academy -->
+
+<div class="stpanel" id="panel-share" hidden><div class="wrap">
+  <h2><span class="n">🎟️</span>Share a free ticket</h2>
+  <div class="lead">Search any act, stage, or band member — get their free ticket link and pass it phone-to-phone, or share the whole map.</div>
+  <div class="demo">
+    <input class="shq" id="stShareQ" oninput="stShareSearch(this.value)" placeholder="Search an act, stage, or member…" autocomplete="off">
+    <div id="stShareResults"></div>
+    <div style="margin-top:12px"><button class="btn ghost" onclick="stShareMap()">🗺️ Share the festival map</button></div>
+    <div class="note" style="margin-top:8px">Every link is the canonical FREE ticket — it walks the fan to the stage and texts the setlist as it’s played. 🌹</div>
+  </div>
+</div></div>
+
+<div class="stpanel" id="panel-adopt" hidden><div class="wrap">
+  <h2><span class="n">🎸</span>Adopt a Band</h2>
+  <div class="lead">Pick one or two acts and post their free ticket. Every act you cover drops off the list — we go until zero.</div>
+  <div id="adoptHost"></div>
+</div></div>
+
+<div class="stpanel" id="panel-tune" hidden><div class="wrap">
+  <h2><span class="n">🎚️</span>Stage Tuning</h2>
+  <div class="lead">Some crews GPS-tune the stages: 4 phones, 4 corners, 10 minutes, hands-off. This is the whole job.</div>
+  <div class="say" style="background:#fdecec;border-color:#f6c9c9;color:#8a1220">⚠️ <b>Step 0 — do this first:</b> set each phone’s <b>Auto-Lock to NEVER</b> (iPhone: Settings → Display &amp; Brightness → Auto-Lock → Never). A locked phone stops the GPS mid-count.</div>
+  <div class="demo">
+    <div class="title">📍 The corner session</div>
+    <ol style="margin:9px 0 2px;padding-left:18px;font-size:13.5px;line-height:1.8">
+      <li>Open the crew tool → <b>tap your corner</b> (NW · NE · SW · SE).</li>
+      <li><b>Lay the phone down</b> on the spot and walk away.</li>
+      <li>Wait ~10 minutes — grab it when it turns <b style="color:var(--green)">✅ DONE</b>.</li>
+      <li>Tap <b style="color:var(--rose)">✓ Covered</b> — the stage drops off the shared checklist.</li>
+    </ol>
+    <a class="btn" href="stage_crew.html" style="display:block;text-align:center;margin-top:12px;padding:14px;text-decoration:none">🎚️ Open the live Stage Crew tool →</a>
+    <div class="note" style="text-align:center;margin-top:10px">Real GPS timer + shared stage checklist (dd_stagecrew_claim). Northside first, then Southside.</div>
+  </div>
+</div></div>
 
 <script>
   function playTouch(){ var s=document.getElementById('stage1'); s.classList.remove('go'); void s.offsetWidth; s.classList.add('go'); }
@@ -327,6 +381,74 @@ window.ccModal=function(){
   w.addEventListener('click', function(e){ if(e.target===w) w.remove(); });
   document.body.appendChild(w);
 };
+</script>
+<script>
+/* Unified Street-Team SHELL — tab switching + Share-Ticket (DDStCurtain) + Adopt mount (DDAdopt).
+   REAL, not chrome-over-stubs:
+   • Share panel builds a live search index (DDStCurtain.buildIndex) and shares the canonical FREE
+     ticket URL (DDStCurtain.ticketUrl) via the native share sheet / clipboard.
+   • Adopt panel mounts the extracted engine (DDAdopt.mount) which fires the guarded
+     dd_bandadopt_claim write + flushMine retroactive sync + the live counter.
+   • Stage Tuning links to the real crew tool (stage_crew.html · dd_stagecrew_claim). */
+(function(){
+  var PANELS=['academy','share','adopt','tune'];
+  var _adoptMounted=false, _idx=null;
+
+  function mountAdopt(){
+    if(_adoptMounted) return;
+    try{ if(window.DDAdopt && document.getElementById('adoptHost')){ DDAdopt.mount('adoptHost'); _adoptMounted=true; } }catch(e){}
+  }
+
+  window.stTab=function(name){
+    if(PANELS.indexOf(name)<0) name='academy';
+    PANELS.forEach(function(p){ var el=document.getElementById('panel-'+p); if(el) el.hidden=(p!==name); });
+    var tabs=document.querySelectorAll('#sttabs .sttab');
+    for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('on', tabs[i].getAttribute('data-tab')===name); }
+    if(name==='adopt') mountAdopt();
+    try{ window.scrollTo(0,0); }catch(e){}
+  };
+
+  // ---- Share Ticket: real reuse of dd_stcurtain.js (buildIndex / search / ticketUrl) ----
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function js(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+  var BASE='https://deaddance.app/';
+  function idx(){ if(_idx) return _idx;
+    try{ _idx=(window.DDStCurtain?DDStCurtain.buildIndex(window.DD_MF_BANDS||null,(window.DD_MUSIKFEST||[])):[]); }catch(e){ _idx=[]; }
+    return _idx; }
+  window.stShareSearch=function(q){
+    var host=document.getElementById('stShareResults'); if(!host) return;
+    q=(q||'').trim();
+    if(!window.DDStCurtain){ host.innerHTML='<div class="note">Search brain not loaded (dd_stcurtain.js).</div>'; return; }
+    if(!q){ host.innerHTML=''; return; }
+    var hits=DDStCurtain.search(q, idx(), 12);
+    if(!hits.length){ host.innerHTML='<div class="note">No act, stage, or member matches “'+esc(q)+'”.</div>'; return; }
+    host.innerHTML=hits.map(function(h){
+      var label=esc(h.label), sub=(h.type==='member'?('member · '+esc(h.act)):(h.type==='stage'?'stage':'act'));
+      if(h.act){ return '<div class="shrow"><div><b>'+label+'</b><div class="note">'+sub+'</div></div>'
+        +'<button class="btn" style="padding:8px 12px;font-size:13px" onclick="stShareTicket(\''+js(h.act)+'\')">📲 Share ticket</button></div>'; }
+      return '<div class="shrow"><div><b>'+label+'</b><div class="note">'+sub+' — its ticket depends on who’s playing</div></div>'
+        +'<button class="btn ghost" style="padding:8px 12px;font-size:13px" onclick="stShareMap()">🗺️ Share map</button></div>';
+    }).join('');
+  };
+  window.stShareTicket=function(act){ if(!act||!window.DDStCurtain) return;
+    var url=DDStCurtain.ticketUrl(act, BASE);
+    var text=act+' — your FREE MusikFest ticket 🌹 it walks you to the stage and texts the setlist as they play:';
+    if(navigator.share){ navigator.share({title:act+' · free ticket', text:text, url:url}).catch(function(){}); }
+    else { try{ navigator.clipboard.writeText(text+' '+url); alert('🔗 Copied '+act+'’s ticket link — paste it or touch phones.'); }catch(e){ alert(url); } }
+  };
+  window.stShareMap=function(){ var url=BASE+'musikfest', text='MusikFest live map 🌹 every stage, every set:';
+    if(navigator.share){ navigator.share({title:'MusikFest · DeadDance map', text:text, url:url}).catch(function(){}); }
+    else { try{ navigator.clipboard.writeText(text+' '+url); alert('🔗 Map link copied.'); }catch(e){ alert(url); } }
+  };
+
+  // ---- boot: honor ?tab= (recruit deep-links) then the page's data-default-tab ----
+  function boot(){
+    var qp=null; try{ qp=new URLSearchParams(location.search).get('tab'); }catch(e){}
+    var def=(document.body.getAttribute('data-default-tab')||'academy');
+    stTab(qp||def);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
 </script>
 </body>
 </html>
