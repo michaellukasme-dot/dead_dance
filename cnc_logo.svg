@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Crickets and Cicadas">
+  <!-- Honest placeholder badge — DeadDance's own treatment, NOT the band's artwork.
+       Replaced automatically by cnc_logo.png when the band supplies their real logo. -->
+  <defs>
+    <linearGradient id="cncg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a7a12"/>
+      <stop offset="1" stop-color="#c79a3a"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="url(#cncg)"/>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="#f4ecd0" stroke-width="2" opacity="0.75"/>
+  <text x="60" y="54" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="6" fill="#fff">C&amp;C</text>
+  <text x="60" y="82" text-anchor="middle" font-family="'Trebuchet MS', Verdana, sans-serif" font-size="12" font-weight="800" letter-spacing="1" fill="#f4ecd0">CRICKETS · CICADAS</text>
+  <text x="60" y="104" text-anchor="middle" font-size="14">🦗</text>
+</svg>
