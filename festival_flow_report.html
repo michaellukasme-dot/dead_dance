@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Festival Flow & Crowd Analytics · StageFill</title>
+<meta name="theme-color" content="#0c1020">
+<link rel="icon" href="rose-32.png">
+<script>try{ window.supabase; }catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>try{ var _c=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _c;}; }catch(e){}</script>
+<script src="dd_geo_analytics.js"></script>
+<style>
+  :root{ --bg:#0c1020; --card:#141a2e; --line:#26304a; --ink:#eaf0ff; --mut:#8b96b4; --acc:#7c3aed; --gold:#f0a500; --green:#2fd08a; --blue:#38bdf8; --amber:#f0a500; --red:#f0506e; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:820px; margin:0 auto; padding:0 15px 70px; }
+  .hero{ text-align:center; padding:30px 12px 6px; }
+  .kick{ color:var(--gold); font-weight:900; font-size:12px; letter-spacing:.18em; text-transform:uppercase; }
+  h1{ font-size:27px; margin:8px 0 6px; line-height:1.1; }
+  .hero .sub{ color:var(--mut); font-size:14px; margin:0 auto; max-width:600px; }
+  .demo-banner{ background:#3a2708; border:1px solid var(--amber); border-radius:14px; padding:13px 15px; margin:16px 0 4px; font-size:13px; color:#ffe6ad; line-height:1.5; font-weight:700; }
+  .demo-banner b{ color:#fff; }
+  .privacy-banner{ background:#1b1330; border:1px solid #5b3fb0; border-radius:14px; padding:12px 14px; margin:10px 0 4px; font-size:12.5px; color:#cdd6ef; line-height:1.5; }
+  .privacy-banner b{ color:#fff; }
+  .modebar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:16px 0 2px; }
+  .seg{ display:inline-flex; background:#0e1428; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .seg button{ background:transparent; color:var(--mut); border:0; padding:9px 15px; font-weight:800; font-size:12.5px; cursor:pointer; }
+  .seg button.on{ background:var(--acc); color:#fff; }
+  .modebar input{ background:#0e1428; border:1px solid var(--line); color:var(--ink); border-radius:10px; padding:9px 11px; font-size:12.5px; min-width:230px; }
+  .modebar .go{ background:var(--blue); color:#04121e; border:0; border-radius:10px; padding:9px 15px; font-weight:900; font-size:12.5px; cursor:pointer; }
+  .modehint{ color:var(--mut); font-size:11.5px; margin-top:6px; }
+  .sec{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-top:14px; }
+  .sec h2{ font-size:15px; margin:0 0 3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .sec .desc{ color:var(--mut); font-size:12px; margin:2px 0 8px; line-height:1.5; }
+  .badge{ font-size:9.5px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:999px; }
+  .b-demo{ background:#f0a50022; color:var(--amber); border:1px solid #f0a50055; }
+  .b-live{ background:#2fd08a1f; color:var(--green); border:1px solid #2fd08a55; }
+  .b-off{ background:#8b96b41f; color:var(--mut); border:1px solid #8b96b455; }
+  .status{ font-size:11.5px; font-weight:700; margin:2px 0 8px; }
+  .rows{ margin-top:4px; }
+  .row{ display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid #1e263c; }
+  .row:last-child{ border-bottom:0; }
+  .row .nm{ flex:1; font-weight:700; font-size:13.5px; } .row .nm small{ display:block; color:var(--mut); font-weight:600; font-size:11px; }
+  .row .val{ font-weight:900; color:var(--blue); font-size:13.5px; white-space:nowrap; }
+  .heatbar{ height:9px; border-radius:6px; background:#0e1428; overflow:hidden; margin-top:6px; }
+  .heatbar i{ display:block; height:100%; background:linear-gradient(90deg,#38bdf8,#7c3aed,#f0506e); }
+  .empty{ margin-top:8px; background:#0e1428; border:1px dashed var(--line); border-radius:12px; padding:14px; color:var(--mut); font-size:12.5px; line-height:1.5; }
+  .supnote{ color:var(--mut); font-size:11px; margin-top:8px; font-style:italic; }
+  table.flow{ width:100%; border-collapse:collapse; margin-top:6px; font-size:12px; }
+  table.flow th, table.flow td{ border:1px solid #1e263c; padding:6px 7px; text-align:center; }
+  table.flow th{ color:var(--mut); font-weight:800; }
+  table.flow td.o{ color:var(--ink); font-weight:800; text-align:left; background:#0e1428; }
+  table.flow td.n{ color:var(--blue); font-weight:800; }
+  table.flow td.z{ color:#3a445e; }
+  .foot{ color:var(--mut); font-size:11.5px; text-align:center; margin-top:20px; line-height:1.6; }
+  .foot a{ color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="kick">🌹 StageFill · Festival Flow & Crowd Analytics</div>
+    <h1 id="title">Festival Flow & Crowd Analytics</h1>
+    <div class="sub">Aggregate, consented, de-identified crowd movement — the institutional data an organizer buys. Stage attendance, dwell, corridor flow, stage→vendor attribution, and zone heat, every cohort suppressed below 20 people.</div>
+  </div>
+
+  <div class="demo-banner" id="demoBanner">
+    ⚠️ <b>DEMO DATA — synthetic.</b> These are illustrative numbers for the pitch, NOT real festival data.
+    They are replaced by live data once native GPS is validated on device. Nothing here was measured from a real phone yet.
+  </div>
+
+  <div class="privacy-banner">
+    <b>How this stays legal &amp; private:</b> data comes from an <b>opt-in, background-GPS sample</b> under a
+    <b>rotating, de-identified token — never an identity</b>. Every number is an <b>aggregate cohort count</b>; any
+    cohort under <b>20 people</b> is <b>dropped</b>, never shown. GNSS is 3–10 m, so everything resolves to a
+    <b>zone/geofence</b> (e.g. "the Beer Garden"), <b>never a specific unit</b>. There is <b>no individual-journey
+    view</b> — that is out of scope by design. 🌹
+  </div>
+
+  <div class="modebar">
+    <div class="seg" id="seg">
+      <button id="btnDemo" class="on">DEMO (synthetic)</button>
+      <button id="btnLive">LIVE (real device data)</button>
+    </div>
+    <input id="venue" placeholder="Venue UUID (live mode)" />
+    <button class="go" id="go">Load live</button>
+  </div>
+  <div class="modehint" id="modehint">Showing labeled synthetic demo data. Switch to LIVE and enter a venue UUID to read the real cohort-suppressed RPCs (empty until native GPS ships).</div>
+
+  <div id="report"></div>
+
+  <div class="foot" id="foot">
+    🌹 DeadDance · StageFill — aggregate festival analytics, cohort-suppressed at 20, from Bethlehem.<br>
+    Live mode reads <code>dd_geo_*</code> RPCs (23_geo_analytics.sql). Synthetic demo never touches the server.
+  </div>
+</div>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function qp(k){ try{ return new URLSearchParams(location.search).get(k)||''; }catch(e){ return ''; } }
+  var G = window.DDGeoAnalytics;
+  if(!G){ $('report').innerHTML='<div class="empty">Analytics module unavailable. Please retry.</div>'; return; }
+
+  var A = G.STATUS;
+  function tlabel(iso){ try{ return G.clockLabel(Date.parse(iso)); }catch(e){ return esc(iso); } }
+
+  // ---- renderers for each metric (take a normalized metric result) ----
+  function supnote(m){ return m.suppressedRows>0
+      ? '<div class="supnote">'+m.suppressedRows+' cohort'+(m.suppressedRows===1?'':'s')+' withheld (under 20 people) to protect small groups.</div>' : ''; }
+
+  function renderAttendance(m, kind){
+    var body='';
+    if(!m.rows.length){ body='<div class="empty">No stage has a large-enough cohort yet — this fills in live during the festival.</div>'; }
+    else {
+      // group by stage
+      var byStage={}; m.rows.forEach(function(r){ (byStage[r.stage]=byStage[r.stage]||[]).push(r); });
+      body='<div class="rows">'+Object.keys(byStage).map(function(st){
+        var pts=byStage[st].sort(function(a,b){return Date.parse(a.window_start)-Date.parse(b.window_start);});
+        var peak=pts.reduce(function(mx,x){return Math.max(mx,+x.headcount||0);},0);
+        var spark=pts.map(function(p){ return tlabel(p.window_start)+': '+(+p.headcount||0); }).join('  ·  ');
+        return '<div class="row"><div class="nm">'+esc(st)+'<small>'+esc(spark)+'</small></div>'+
+          '<div class="val">peak '+peak+'</div></div>';
+      }).join('')+'</div>';
+    }
+    return sec('Stage attendance over time', '📡 Headcount by stage by 30-min bucket. Each bucket is a cohort; sub-floor buckets are dropped.', kind, m, body);
+  }
+  function renderDwell(m, kind){
+    var body='';
+    if(!m.rows.length){ body='<div class="empty">No zone has a large-enough cohort yet.</div>'; }
+    else { body='<div class="rows">'+m.rows.map(function(r){
+      return '<div class="row"><div class="nm">'+esc(r.zone)+'<small>cohort '+(+r.cohort_n||0)+' · '+tlabel(r.window_start)+'</small></div>'+
+        '<div class="val">'+esc(r.median_dwell_min)+' min median</div></div>';
+    }).join('')+'</div>'; }
+    return sec('Dwell time', '📡 Median minutes a cohort spent in each zone/geofence.', kind, m, body);
+  }
+  function renderFlow(m, kind){
+    var body='';
+    if(!m.rows.length){ body='<div class="empty">No corridor has a large-enough cohort yet.</div>'; }
+    else {
+      var fm=G.buildFlowMatrix(m.rows);
+      var head='<tr><th>from ↓ / to →</th>'+fm.nodes.map(function(n){return '<th>'+esc(n)+'</th>';}).join('')+'</tr>';
+      var body_rows=fm.nodes.map(function(o,i){
+        return '<tr><td class="o">'+esc(o)+'</td>'+fm.nodes.map(function(d,j){
+          var v=fm.matrix[i][j];
+          return v>0 ? '<td class="n">'+v+'</td>' : '<td class="z">·</td>';
+        }).join('')+'</tr>';
+      }).join('');
+      body='<table class="flow">'+head+body_rows+'</table>';
+    }
+    return sec('Corridor flow', '📡 How crowds moved: origin→destination cohort counts (gate→stage, stage→stage, stage→vendor).', kind, m, body);
+  }
+  function renderAttribution(m, kind){
+    var body='';
+    if(!m.rows.length){ body='<div class="empty">No stage→vendor pair has a large-enough cohort yet.</div>'; }
+    else { body='<div class="rows">'+m.rows.map(function(r){
+      return '<div class="row"><div class="nm">'+esc(r.stage)+' → '+esc(r.vendor)+'<small>within '+(+r.within_min||0)+' min · '+tlabel(r.window_start)+'</small></div>'+
+        '<div class="val">'+(+r.cohort_n||0)+' people</div></div>';
+    }).join('')+'</div>'; }
+    return sec('Stage → vendor attribution', '📡 "N people who attended a stage also visited a vendor within T minutes."', kind, m, body);
+  }
+  function renderHeat(m, kind){
+    var body='';
+    if(!m.rows.length){ body='<div class="empty">No zone has a large-enough cohort yet.</div>'; }
+    else { body='<div class="rows">'+m.rows.map(function(r){
+      var pct=Math.round((+r.density||0)*100);
+      return '<div class="row"><div class="nm">'+esc(r.zone)+'<small>cohort '+(+r.cohort_n||0)+' · '+tlabel(r.window_start)+'</small>'+
+        '<div class="heatbar"><i style="width:'+pct+'%"></i></div></div>'+
+        '<div class="val">'+pct+'%</div></div>';
+    }).join('')+'</div>'; }
+    return sec('Zone heat', '📡 Relative density by geofence (share of the busiest published zone).', kind, m, body);
+  }
+
+  function sec(title, desc, kind, m, body){
+    var b = kind==='demo' ? '<span class="badge b-demo">DEMO · synthetic</span>'
+          : (m.status===A.LIVE && m.ok!==false ? '<span class="badge b-live">'+A.LIVE+' LIVE</span>'
+             : '<span class="badge b-off">'+(m.status||A.OFFLINE)+' no live data</span>');
+    var st = kind==='demo'
+      ? '<div class="status" style="color:var(--amber)">'+esc(G.DEMO_LABEL)+'</div>'
+      : '<div class="status" style="color:'+(m.status===A.LIVE?'var(--green)':'var(--mut)')+'">'+esc(m.statusText||'')+'</div>';
+    return '<div class="sec"><h2>'+esc(title)+' '+b+'</h2><div class="desc">'+esc(desc)+'</div>'+st+body+supnote(m)+'</div>';
+  }
+
+  function renderAll(ds, kind){
+    $('report').innerHTML =
+      renderAttendance(ds.attendance, kind) +
+      renderDwell(ds.dwell, kind) +
+      renderFlow(ds.flow, kind) +
+      renderAttribution(ds.attribution, kind) +
+      renderHeat(ds.heat, kind);
+  }
+
+  // ---- DEMO path (default) ----
+  var festival = qp('festival') || 'musikfest-2026';
+  function showDemo(){
+    $('demoBanner').style.display='';
+    $('btnDemo').classList.add('on'); $('btnLive').classList.remove('on');
+    $('modehint').textContent='Showing labeled synthetic demo data (deterministic). Nothing is read from the server in this mode.';
+    var ds = G.buildDemoDataset(festival);
+    renderAll(ds, 'demo');
+  }
+
+  // ---- LIVE path (guarded, honest empty/status) ----
+  function showLive(){
+    $('demoBanner').style.display='none';
+    $('btnLive').classList.add('on'); $('btnDemo').classList.remove('on');
+    var venue = ($('venue').value||'').trim();
+    if(!venue){ $('modehint').textContent='LIVE mode: enter a venue UUID and press "Load live" to read the real cohort-suppressed RPCs.'; $('report').innerHTML='<div class="empty">Enter a venue UUID above to load live data.</div>'; return; }
+    $('modehint').textContent='LIVE mode: reading dd_geo_* RPCs for venue '+venue+' (cohort-suppressed at 20). Empty until native GPS ships and the pipeline runs.';
+    $('report').innerHTML='<div class="empty">Reading live cohort-suppressed analytics…</div>';
+    G.fetchAllMetrics(venue, null, null, function(out){
+      var ds = {
+        attendance: out['dd_geo_attendance'] || { rows:[], suppressedRows:0 },
+        dwell:      out['dd_geo_dwell'] || { rows:[], suppressedRows:0 },
+        flow:       out['dd_geo_flow'] || { rows:[], suppressedRows:0 },
+        attribution:out['dd_geo_attribution'] || { rows:[], suppressedRows:0 },
+        heat:       out['dd_geo_heat'] || { rows:[], suppressedRows:0 }
+      };
+      renderAll(ds, 'live');
+    });
+  }
+
+  $('btnDemo').addEventListener('click', showDemo);
+  $('btnLive').addEventListener('click', function(){ showLive(); });
+  $('go').addEventListener('click', function(){ showLive(); });
+
+  // default = DEMO, clearly labeled
+  showDemo();
+})();
+</script>
+</body>
+</html>
