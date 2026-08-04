@@ -7,6 +7,10 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>dead_dance</title>
 <meta name="theme-color" content="#2a1b3d">
+<!-- hybrid-native bridge (Phase 0): window.DDShell; no-op in a browser, gates the SW below. -->
+<script src="dd_native_bridge.js"></script>
+<!-- Phase-1 native-GPS brain (window.DDGeoNative): pure logic + guarded runtime; no-op in a browser. -->
+<script src="dd_geo_native.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="rose.svg" type="image/svg+xml">
@@ -1898,7 +1902,7 @@ function render(){
  view.innerHTML={home:viewHome,chapters:viewChapters,events:viewEvents,shakedown:viewShakedown,you:viewYou,dash:viewDash}[S.tab]();
  if(S.tab==="home"&&typeof ddHeroMount==="function")ddHeroMount();
 }
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+if('serviceWorker' in navigator && !(window.DDShell && DDShell.isNative && DDShell.isNative())){navigator.serviceWorker.register('sw.js').catch(function(){});} /* Phase 0: native shell owns cache — don't register SW there */
 /* a11y: ESC closes any open modal/panel (Claudine: keyboard users were trapped) */
 document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;var ov=document.getElementById("ovl");if(ov&&ov.classList.contains("on"))closeModal();else if(typeof NEAR!=="undefined"&&NEAR.open)toggleNear();});
 render();

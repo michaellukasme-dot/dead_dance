@@ -56,6 +56,15 @@
     if (!sb && root.supabase) { sb = root.supabase.createClient(SUPA_URL, SUPA_KEY); }
     return sb;
   }
+  // Auth redirect target. In a plain browser this returns the app's own URL UNCHANGED
+  // (no behavior change). Inside the Capacitor native shell the origin is
+  // capacitor://localhost / https://localhost, which Supabase can't redirect back to,
+  // so DDShell.authRedirect() swaps in the allow-listed https site URL. Progressive
+  // enhancement: if DDShell isn't present, we keep the exact old value.
+  function authRedir(){
+    var def = location.origin + location.pathname;
+    try { return (root.DDShell && root.DDShell.authRedirect) ? root.DDShell.authRedirect(def) : def; } catch (_) { return def; }
+  }
   function esc(t){ return String(t==null?"":t).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
   function toast(msg){
     var t = document.getElementById("lc-toast-note");
@@ -96,7 +105,7 @@
     var em = (document.getElementById("lc-email").value || "").trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { toast("That email doesn’t look right — check it?"); return; }
     var btn = document.getElementById("lc-send-btn"); btn.disabled = true; btn.textContent = "Sending…";
-    client().auth.signInWithOtp({ email: em, options: { emailRedirectTo: location.origin + location.pathname } })
+    client().auth.signInWithOtp({ email: em, options: { emailRedirectTo: authRedir() } })
       .then(function(r){
         btn.disabled = false; btn.textContent = "Email my link";
         if (r.error) { toast("Couldn’t send the link — " + (r.error.message || "try again")); return; }
@@ -110,7 +119,7 @@
     var btn = document.getElementById("lc-fb-btn"); if (btn){ btn.disabled = true; btn.textContent = "Opening Facebook…"; }
     function fail(msg){ if (btn){ btn.disabled = false; btn.innerHTML = '<span style="font-weight:900;font-size:16px">f</span> Continue with Facebook'; } toast(msg || "Facebook sign-in is still being switched on — use email for now."); }
     try {
-      var p = client().auth.signInWithOAuth({ provider: "facebook", options: { redirectTo: location.origin + location.pathname } });
+      var p = client().auth.signInWithOAuth({ provider: "facebook", options: { redirectTo: authRedir() } });
       if (p && p.then) p.then(function(r){
         if (r && r.error) { try{ console.warn("[DeadDance] Facebook OAuth error:", r.error.message || r.error); }catch(_e){}
           fail(/provider|enable|config/i.test(r.error.message||"") ? "Facebook sign-in is still being switched on — use email for now." : ("Facebook sign-in: " + (r.error.message||"try again"))); }
@@ -123,7 +132,7 @@
     var btn = document.getElementById("lc-google-btn"); if (btn){ btn.disabled = true; btn.textContent = "Opening Google…"; }
     function fail(msg){ if (btn){ btn.disabled = false; btn.innerHTML = '<span style="font-weight:900;font-size:16px;color:#4285F4">G</span> Continue with Google'; } toast(msg || "Google sign-in is still being switched on — use email for now."); }
     try {
-      var p = client().auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+      var p = client().auth.signInWithOAuth({ provider: "google", options: { redirectTo: authRedir() } });
       if (p && p.then) p.then(function(r){
         if (r && r.error) { try{ console.warn("[DeadDance] Google OAuth error:", r.error.message || r.error); }catch(_e){}
           fail(/provider|enable|config/i.test(r.error.message||"") ? "Google sign-in is still being switched on — use email for now." : ("Google sign-in: " + (r.error.message||"try again"))); }

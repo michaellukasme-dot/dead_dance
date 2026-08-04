@@ -12,6 +12,12 @@
 <link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="rose.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="dd-180.png">
+<!-- hybrid-native bridge (Phase 0): defines window.DDShell. NO-OP in a browser (window.Capacitor absent),
+     routes to native plugins only inside the Capacitor shell. Must load BEFORE the service-worker
+     registration (it gates on DDShell.isNative()). Safe if it 404s: callers guard on window.DDShell. -->
+<script src="dd_native_bridge.js"></script>
+<!-- Phase-1 native-GPS brain (window.DDGeoNative): pure logic + guarded runtime; no-op in a browser. -->
+<script src="dd_geo_native.js"></script>
 <meta name="description" content="The national community of Deadheads, tribute bands, and the rooms that host them. A Facebook enhancement — your calendar, your store, your family, all in one place.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DeadDance">
@@ -4571,7 +4577,12 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
     document.getElementById('ddUpdGo').onclick=function(){ try{ if(DD_SWREG&&DD_SWREG.waiting) DD_SWREG.waiting.postMessage({type:'SKIP_WAITING'}); }catch(e){} location.reload(); };
     document.getElementById('ddUpdX').onclick=function(){ b.remove(); };
   }
-  if('serviceWorker' in navigator){
+  // Service-worker handoff (Phase 0): in the Capacitor native shell the native
+  // layer owns cache/offline, so we DO NOT register the SW there (it would fight
+  // the native update flow / serve stale assets against the local origin). In a
+  // plain browser DDShell.isNative() is false → SW registers exactly as before.
+  // Reversible: delete the `&& !(...)` clause to restore the original behavior.
+  if('serviceWorker' in navigator && !(window.DDShell && DDShell.isNative && DDShell.isNative())){
     navigator.serviceWorker.register('sw.js').then(function(reg){
       if(!reg) return; DD_SWREG=reg;
       if(reg.waiting && navigator.serviceWorker.controller) ddUpdateBanner();      // a build was already waiting
