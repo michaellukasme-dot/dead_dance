@@ -30,16 +30,25 @@
                    where redelivery is safe. The sync engine deliberately does NOT
                    use drain() on the send path — see dd_sync_engine.js §crash-safety.
 
-   AT-REST SAFETY (House Law + panel security note):
-     The queue this store holds is geo-ingest items that are IDS-ONLY / de-identified
-     by design (dd_geo_native.buildIngestItem: venue/corridor ids + a ROTATING token
-     + decimated points — NO lat/lng-as-identity, NO email, NO user id, NO name).
-     Therefore this store holds NO PII and at-rest encryption is not required for it.
-     ⚠️ SEAM + TODO: if a FUTURE item type carries PII (e.g. a ticket with a name),
-     it MUST be encrypted at rest (SQLCipher / @capacitor-community/sqlite encryption
-     on native; do NOT put raw PII in IndexedDB/localStorage). This file leaves the
-     `encryptAtRest` option as the seam; it is NOT implemented now and MUST be built
-     before any PII-bearing item type is stored. See assertPiiFree() below.
+   AT-REST SAFETY (House Law + panel security note) — PHASE 3: the seam is now REAL:
+     The default queue this store holds is geo-ingest items that are IDS-ONLY /
+     de-identified by design (dd_geo_native.buildIngestItem: venue/corridor ids + a
+     ROTATING token + decimated points — NO lat/lng-as-identity, NO email, NO id, NO
+     name). That path holds NO PII and needs no encryption; behavior is UNCHANGED.
+     ⚠️ If an item carries PII (a PII-looking key: email/name/user_id/...), the store
+     now REFUSES it UNLESS a real cipher is present (opts.cipher, a dd_crypto_atrest
+     instance with encrypt()/decrypt()). With a cipher, a PII item is TRANSPARENTLY
+     sealed: the whole record is AES-GCM encrypted before it touches the backend, and
+     decrypted on get()/list()/drain(). The backend (IndexedDB/localStorage/SQLite)
+     only ever sees { id, _seq, _sealed:true, _enc:{iv,ct} } — no plaintext PII on disk.
+       • opts.cipher present + PII → sealed & stored.
+       • opts.cipher present + non-PII → stored plaintext (backward compatible), unless
+         opts.encryptAll is set.
+       • NO cipher + PII → THROWS (fail loud). This is the enforceable rule.
+     KEY MANAGEMENT is the caller's job and the hard part — see dd_crypto_atrest.js
+     KEY_MANAGEMENT: native key in Keychain/Keystore (meaningful); web/PWA has no safe
+     keystore, so the honest rule is DO NOT STORE PII IN THE PWA AT ALL. A sealed record
+     read back with NO cipher REJECTS (we refuse to hand out ciphertext) — never a lie.
 
    EXPORTS: module.exports (Node) AND window.DDDurableStore (browser) — dual, guarded.
    The SQLite plugin is INJECTED (opts.sqlite / opts.sqlitePlugin), never imported.
@@ -83,14 +92,25 @@
   // has NOT explicitly opted into encryption-at-rest (which is not built yet). This
   // makes the "no PII unencrypted" rule enforceable, not just documented.
   var PII_KEYS = ["email", "phone", "name", "full_name", "user_id", "userId", "auth_uid", "ssn", "dob", "address"];
-  function assertPiiFree(record, allowPii) {
-    if (allowPii) return; // caller asserted an encrypted-at-rest path exists (future)
+  // Return the first PII-looking key present (with a non-null value), or null.
+  function piiOffender(record) {
     var payload = record && record.payload ? record.payload : record;
     for (var i = 0; i < PII_KEYS.length; i++) {
       if (payload && Object.prototype.hasOwnProperty.call(payload, PII_KEYS[i]) && payload[PII_KEYS[i]] != null) {
-        throw new Error("dd_durable_store: refusing to persist PII-looking key '" + PII_KEYS[i] +
-          "' unencrypted. Build encrypt-at-rest (opts.encryptAtRest) first. TODO seam in header.");
+        return PII_KEYS[i];
       }
+    }
+    return null;
+  }
+  // assertPiiFree throws if PII is present and no cipher is available. In PHASE 3 the
+  // ONLY thing that unlocks PII persistence is a REAL cipher (hasCipher), not a boolean.
+  function assertPiiFree(record, hasCipher) {
+    if (hasCipher) return; // a real encrypt-at-rest cipher is present → PII is sealed, not stored raw
+    var offender = piiOffender(record);
+    if (offender) {
+      throw new Error("dd_durable_store: refusing to persist PII-looking key '" + offender +
+        "' unencrypted. Provide opts.cipher (a dd_crypto_atrest instance) — a boolean flag is NOT enough. " +
+        "On web, prefer NOT storing PII at all (see dd_crypto_atrest KEY_MANAGEMENT).");
     }
   }
 
@@ -300,26 +320,56 @@
   function create(opts) {
     opts = opts || {};
     var state = { _seqHi: 0 };
-    var allowPii = !!opts.encryptAtRest;   // SEAM: not implemented; asserting it unlocks PII persistence (future)
+    // PHASE 3: a REAL cipher (dd_crypto_atrest instance) unlocks PII persistence.
+    // Accept opts.cipher, or opts.encryptAtRest ONLY if it is a real cipher object
+    // (a bare `encryptAtRest:true` boolean is intentionally NOT enough — see assertPiiFree).
+    var cipher = opts.cipher ||
+                 (opts.encryptAtRest && typeof opts.encryptAtRest === "object" ? opts.encryptAtRest : null);
+    var hasCipher = !!(cipher && typeof cipher.encrypt === "function" && typeof cipher.decrypt === "function");
+    var encryptAll = !!opts.encryptAll && hasCipher;   // opt-in: seal even non-PII records
     var be = pickBackend(opts, state);
+
+    // seal the WHOLE record so the backend never sees any plaintext field.
+    function sealAndPut(rec) {
+      var plain = JSON.stringify(rec);
+      return cipher.encrypt(plain).then(function (env) {
+        return be.put({ id: rec.id, _seq: rec._seq, _sealed: true, _enc: env });
+      }).then(function () { return rec; });   // contract: put resolves the (decrypted) stored record
+    }
+    // reverse of sealAndPut. A sealed record with NO cipher REJECTS (never leak ciphertext).
+    function unseal(rec) {
+      if (!rec) return rec;
+      if (rec._sealed && rec._enc) {
+        if (!hasCipher) {
+          return Promise.reject(new Error("dd_durable_store: sealed record present but no cipher to decrypt " +
+            "(key missing). Refusing to return ciphertext."));
+        }
+        return cipher.decrypt(rec._enc).then(function (pt) { return JSON.parse(pt); });
+      }
+      return rec;
+    }
+    function unsealAll(arr) { return Promise.all((arr || []).map(unseal)); }
 
     return {
       backend: be.name,
+      encrypted: hasCipher,                    // truthful flag: is a real cipher wired?
       ready: function () { return be.ready(); },
       put: function (record) {
         try {
           var rec = normalizeRecord(record, state);
-          assertPiiFree(rec, allowPii);          // fail LOUD before any PII touches disk
-          return be.put(rec);
+          var offender = piiOffender(rec);
+          if (offender && !hasCipher) { assertPiiFree(rec, false); return; } // throws → caught below
+          if (offender || encryptAll) { return sealAndPut(rec); }            // PII (or opt-in) → seal transparently
+          return be.put(rec);                                                 // non-PII → unchanged behavior
         } catch (e) { return Promise.reject(e); }
       },
-      get: function (id) { return be.get(id); },
-      list: function () { return be.list(); },
+      get: function (id) { return be.get(id).then(unseal); },
+      list: function () { return be.list().then(unsealAll); },
       delete: function (id) { return be.del(id); },
       // drain(): read-all + clear in one step. ⚠️ crash window (see header). Not used
       // by the sync send path. Provided for teardown / safe-redelivery consumers.
       drain: function () {
-        return be.list().then(function (arr) { return be.clear().then(function () { return arr; }); });
+        return be.list().then(function (arr) { return be.clear().then(function () { return unsealAll(arr); }); });
       },
       clear: function () { return be.clear(); },
       size: function () { return be.list().then(function (a) { return a.length; }); },
@@ -328,5 +378,5 @@
     };
   }
 
-  return { create: create, VERSION: "1.0.0-phase2", _assertPiiFree: assertPiiFree };
+  return { create: create, VERSION: "1.1.0-phase3", _assertPiiFree: assertPiiFree, _piiOffender: piiOffender };
 });
