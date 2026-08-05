@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>PREVIEW — In-App Images Curtain</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html,body{margin:0;height:100%;background:#f6f4fa;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;color:#1b1226}
+  #map{position:fixed;inset:0}
+  .leaflet-attribution-flag{display:none!important}
+  /* PREVIEW banner — this page is NOT the live map; it uses SAMPLE photos. Said loudly, up top. */
+  #previewBar{position:fixed;left:0;right:0;top:0;z-index:1200;background:#b8002e;color:#fff;
+    padding:8px 14px;font-size:12.5px;font-weight:800;letter-spacing:.01em;box-shadow:0 2px 10px #0004;
+    display:flex;align-items:center;gap:10px}
+  #previewBar .tag{background:#fff;color:#b8002e;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:900;white-space:nowrap}
+  #previewBar .txt{flex:1 1 auto}
+  #previewBar button{border:0;background:#ffffff26;color:#fff;border-radius:8px;padding:5px 10px;font-weight:800;font-size:12px;cursor:pointer}
+  #note{position:fixed;left:10px;top:52px;z-index:1100;max-width:300px;background:#241535ee;color:#e0cdf5;
+    border-radius:12px;padding:10px 12px;font-size:11.5px;line-height:1.45;box-shadow:0 3px 14px #0006}
+  #note b{color:#fff}
+  #note code{color:#ffd27a;font-size:11px}
+</style>
+</head>
+<body>
+
+<div id="previewBar">
+  <span class="tag">PREVIEW</span>
+  <span class="txt">Feature under construction — SAMPLE photos, not real captures. Not yet wired into the live festival map.</span>
+  <button id="hideNote" type="button">Hide notes</button>
+</div>
+
+<div id="note">
+  <b>What you can try:</b><br>
+  • Drag the curtain handle up/down (min ⟷ max)<br>
+  • Scroll the filmstrip; tap a card to select + fly the map<br>
+  • Double-click a card OR a map pin → opens the modal (Esc / × / backdrop / ‹ › to close/navigate)<br>
+  • Work the <b>Small⟷Big</b> slider → resizes the on-map pins <code>(assumed — confirm intent)</code><br>
+  • Purple-badge pin = overlapping photos merged<br>
+  • One sample has <b>no location</b> → shows in the strip labelled "No location", no pin (honest fallback)
+</div>
+
+<div id="map"></div>
+
+<!-- REAL app deps (match dd_map.js: CARTO tiles + fallback) + the sibling controllers we REUSE -->
+<script src="dd_map.js"></script>
+<script src="dd_curtain_drag.js"></script>
+<script src="dd_pillscroll.js"></script>
+<!-- THE REAL MODULE under review (not a throwaway mock) -->
+<script src="dd_images_curtain.js"></script>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── the map (CARTO via dd_map.js DDtile, exactly like the live festival map) ── */
+  var CENTER = [40.6112, -75.3782];   // a festival-ish block; generic sample coords, no real venue implied
+  var map = L.map("map", { zoomControl: true, doubleClickZoom: false }).setView(CENTER, 17);
+  if (window.DDtile) { DDtile(map); }
+  else { L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+        { attribution: "© OpenStreetMap © CARTO", subdomains: "abcd", maxZoom: 20 }).addTo(map); }
+
+  /* ── OFFLINE sample photos: inline SVG data-URIs (no network needed to render) ──
+     Shapes match the dd_photos.js record: {id,lat,lng,ts,day,kind,exif,url}. NO place/caption
+     field exists in real records → captions fall back to time (that's the honest behaviour). */
+  function svgThumb(label, c1, c2) {
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="170" viewBox="0 0 240 170">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>' +
+      '<rect width="240" height="170" fill="url(#g)"/>' +
+      '<circle cx="120" cy="70" r="34" fill="#ffffff33"/>' +
+      '<text x="120" y="80" font-family="sans-serif" font-size="34" font-weight="900" fill="#fff" text-anchor="middle">' + label + '</text>' +
+      '<text x="120" y="150" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffffcc" text-anchor="middle">sample photo</text>' +
+      '</svg>';
+    return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+  }
+
+  var base = Date.UTC(2026, 7, 5, 18, 0, 0);   // 2026-08-05 evening
+  var MIN = 60000;
+  var SAMPLES = [
+    { id: "s1", lat: 40.6108, lng: -75.3790, exif: true,  ts: base + 4 * MIN,  url: svgThumb("1", "#b8002e", "#e0577a") },
+    { id: "s2", lat: 40.6115, lng: -75.3775, exif: true,  ts: base + 18 * MIN, url: svgThumb("2", "#5a2e86", "#a06fd6") },
+    { id: "s3", lat: 40.6120, lng: -75.3788, exif: true,  ts: base + 31 * MIN, url: svgThumb("3", "#0d7d5c", "#41c79a") },
+    { id: "s4", lat: 40.6108, lng: -75.3790, exif: true,  ts: base + 33 * MIN, url: svgThumb("4", "#b07d17", "#e0b64a") }, // same spot as s1 → clusters
+    { id: "s5", lat: 40.6102, lng: -75.3770, exif: true,  ts: base + 47 * MIN, url: svgThumb("5", "#1f6fb8", "#5aa6e0") },
+    { id: "s6", lat: 40.6125, lng: -75.3762, exif: true,  ts: base + 55 * MIN, url: svgThumb("6", "#c2410c", "#f0894a") },
+    { id: "s7", lat: 40.6098, lng: -75.3796, exif: true,  ts: base + 66 * MIN, url: svgThumb("7", "#7a1f5a", "#d66fb0") },
+    // NO-GEO sample → shows in strip labelled "No location", gets no map pin (honest fallback)
+    { id: "s8", lat: null,    lng: null,      exif: false, ts: base + 72 * MIN, url: svgThumb("8", "#444", "#888") }
+  ];
+  SAMPLES.forEach(function (s) { s.day = "2026-08-05"; s.kind = "crowd"; });
+
+  /* ── mount the REAL module ── */
+  var ctrl = window.DDImagesCurtain.mount({
+    map: map,
+    container: document.body,
+    getPhotos: function () { return SAMPLES.slice(); },
+    title: "Explore",
+    tzOffsetMin: 0,           // fix the preview to UTC so sample captions read consistently
+    startMaximized: true
+  });
+
+  // fit the map to the sample pins so they're all visible on load
+  try {
+    var pts = SAMPLES.filter(function (s) { return s.lat != null; }).map(function (s) { return [s.lat, s.lng]; });
+    if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.35));
+  } catch (e) {}
+
+  document.getElementById("hideNote").addEventListener("click", function () {
+    var n = document.getElementById("note");
+    n.style.display = (n.style.display === "none") ? "block" : "none";
+    this.textContent = (n.style.display === "none") ? "Show notes" : "Hide notes";
+  });
+
+  // expose for console poking during review
+  window._ic = ctrl;
+})();
+</script>
+</body>
+</html>
