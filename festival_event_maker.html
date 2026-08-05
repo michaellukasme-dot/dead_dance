@@ -380,6 +380,15 @@ body.mfdrag .sheet{transition:none}
 <script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
 <script src="qr.js"></script>
 <script src="dd_categories.js"></script>
+<script src="dd_curtain_drag.js"></script><!-- shared thumb-drag curtain controller (pure geometry unit-tested in dd_curtain_drag.test.js) -->
+<script src="dd_pillscroll.js"></script><!-- on-screen pill-scroll chevrons (Apple/Google-Maps affordance; pure logic unit-tested in dd_pillscroll.test.js) -->
+<script>
+/* Wire the curtainbar's scroll-position chevrons (guarded no-op if module/bar absent). */
+(function(){
+  function go(){ try{ if(window.DDPillScroll){ var bar=document.querySelector('.curtainbar'); if(bar) DDPillScroll.attach(bar); } }catch(e){} }
+  if(document.readyState!=='loading') go(); else document.addEventListener('DOMContentLoaded', go);
+})();
+</script>
 <script>
 var LS='dd.eventmaker.draft';
 var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,floorIcons:[],stageW:'',stageD:'',survey:[],partners:[],started:false,slug:'',ticketPrice:0};
@@ -799,16 +808,31 @@ function sfGeofences(){ var g=[]; (state.acts||[]).forEach(function(a){ if(a.lat
 function sfCheckGate(){ if(!state.slug)return; var cl=window.ddClient&&ddClient(); if(!(cl&&cl.rpc))return; cl.rpc('sf_gate',{p_slug:state.slug}).then(function(r){ if(r&&!r.error&&r.data&&r.data.locked){ sfLockToast(r.data); } }).catch(function(){}); }
 function sfLockToast(g){ if(el('sfLock'))return; var d=document.createElement('div'); d.id='sfLock'; d.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(10,8,24,.94);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff'; d.innerHTML='<div style="max-width:430px"><div style="font-size:42px">🔒</div><h2 style="margin:10px 0 8px;font-size:22px;font-weight:900">Your festival is almost here</h2><p style="color:#cdd6ef;font-size:14px;line-height:1.55">Everything you built is ready to go. Building &amp; testing stays free \u2014 activate your StageFill subscription to turn the map on for the public before your gates open.</p><a href="mailto:hello@stagefill.app?subject=Activate%20'+encodeURIComponent(g.slug||'')+'" style="display:inline-block;margin-top:16px;background:linear-gradient(135deg,#4d8bff,#2f6feb);color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:12px 22px">Activate subscription</a></div>'; document.body.appendChild(d); }
 
-/* draggable curtain — up / down, like the Festival Map */
-(function(){ var sheet,grab,dragY=null,startTop=0,moved=false,curTop=0;
+/* draggable curtain — up / down, like the Festival Map — now via the SHARED dd_curtain_drag.js
+   controller (thumb-follow + content-adaptive max + release-velocity snap). Same .sheet / .grab
+   DOM and look; tap-the-grab still snaps to the next anchor. Falls back to the original inline
+   drag if the shared module is ever absent, so the sheet is never un-openable. */
+(function(){
   function H(){return window.innerHeight;} function vh(p){return p/100*H();}
-  function snaps(){return [vh(12),vh(42),vh(92)];}
-  function nearest(px){var a=snaps(),b=a[0];a.forEach(function(v){if(Math.abs(v-px)<Math.abs(b-px))b=v;});return b;}
-  function setTop(px){ if(sheet) sheet.style.top=px+'px'; }
-  function start(e){ sheet=document.querySelector('.sheet'); if(!sheet)return; dragY=e.clientY; startTop=sheet.getBoundingClientRect().top; moved=false; document.body.classList.add('mfdrag'); window.addEventListener('pointermove',move); window.addEventListener('pointerup',end); e.preventDefault(); }
-  function move(e){ if(dragY==null)return; if(Math.abs(e.clientY-dragY)>3)moved=true; setTop(Math.max(vh(8),Math.min(vh(94),startTop+(e.clientY-dragY)))); }
-  function end(){ if(dragY==null)return; dragY=null; document.body.classList.remove('mfdrag'); window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',end); var t=sheet.getBoundingClientRect().top; if(!moved){ var st=snaps(),idx=0,bb=1e9; st.forEach(function(v,i){var dd=Math.abs(v-t); if(dd<bb){bb=dd;idx=i;}}); curTop=st[(idx+1)%st.length]; } else { curTop=nearest(t); } setTop(curTop); setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },320); }
-  window.addEventListener('load',function(){ sheet=document.querySelector('.sheet'); grab=document.querySelector('.grab'); curTop=vh(42); if(grab) grab.addEventListener('pointerdown',start); });
+  var CFG={ peekVh:92, midVh:42, minTopVh:12, maxTopVh:94, handlePx:0, dragClass:'mfdrag', velThreshold:0.5 };
+  var sheet=null, grab=null, ctrl=null;
+  function contentPx(){ return sheet ? sheet.scrollHeight : 0; }
+  function anchors(){ var D=window.DDCurtainDrag; if(D) return D.contentAnchors(window.innerHeight, contentPx(), CFG); return {full:vh(12),mid:vh(42),peek:vh(92)}; }
+  function nearest(px){ var a=anchors(),arr=[a.full,a.mid,a.peek],b=arr[0]; arr.forEach(function(v){if(Math.abs(v-px)<Math.abs(b-px))b=v;}); return b; }
+  function invalidate(){ setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },320); }
+  function tapNextFem(){ if(!ctrl)return; var D=window.DDCurtainDrag, a=anchors(); ctrl.setTop(D.tapNext(ctrl.getTop(),[a.full,a.mid,a.peek])); invalidate(); }
+  // ---- fallback inline drag (used ONLY if dd_curtain_drag.js is absent) ----
+  var fb={dragY:null,startTop:0,moved:false,curTop:0};
+  function fbSet(px){ if(sheet) sheet.style.top=px+'px'; }
+  function fbMove(e){ if(fb.dragY==null)return; if(Math.abs(e.clientY-fb.dragY)>3)fb.moved=true; fbSet(Math.max(vh(8),Math.min(vh(94),fb.startTop+(e.clientY-fb.dragY)))); }
+  function fbEnd(){ if(fb.dragY==null)return; fb.dragY=null; document.body.classList.remove('mfdrag'); window.removeEventListener('pointermove',fbMove); window.removeEventListener('pointerup',fbEnd); var t=sheet.getBoundingClientRect().top; if(!fb.moved){ var a=anchors(),arr=[a.full,a.mid,a.peek],idx=0,bb=1e9; arr.forEach(function(v,i){var d2=Math.abs(v-t); if(d2<bb){bb=d2;idx=i;}}); fb.curTop=arr[(idx+2)%3]; } else { fb.curTop=nearest(t); } fbSet(fb.curTop); invalidate(); }
+  function fbStart(e){ if(!sheet)sheet=document.querySelector('.sheet'); if(!sheet)return; fb.dragY=e.clientY; fb.startTop=sheet.getBoundingClientRect().top; fb.moved=false; document.body.classList.add('mfdrag'); window.addEventListener('pointermove',fbMove); window.addEventListener('pointerup',fbEnd); e.preventDefault(); }
+  window.addEventListener('load',function(){ sheet=document.querySelector('.sheet'); grab=document.querySelector('.grab');
+    var D=window.DDCurtainDrag;
+    if(D && sheet){ ctrl=D.attach({ sheet:sheet, handle:grab, config:CFG, getContentPx:contentPx, onSettle:invalidate, onTap:tapNextFem }); ctrl.setTop(anchors().mid); }
+    else if(grab){ grab.addEventListener('pointerdown',fbStart); fb.curTop=vh(42); fbSet(fb.curTop); }
+  });
+  window.addEventListener('resize',function(){ if(ctrl&&ctrl.refresh){ ctrl.refresh(); invalidate(); } });
 })();
 /* ===== Partners — ad-sales CRM (register → buy ad → admin pins lat/lon like the potty discovery) ===== */
 var PPLAN={none:['No ad',0],prox:['Proximity · $25/day',25],roll:['Rolling · $100/day',100],both:['Both · $125/day',125]};

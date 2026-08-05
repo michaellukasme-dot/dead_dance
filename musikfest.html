@@ -1416,6 +1416,8 @@ window.openPoster=function(src){ var m=document.getElementById('posterModal'), i
   if(m) m.style.display='flex'; };
 window.closePoster=function(){ var m=document.getElementById('posterModal'); if(m) m.style.display='none';
   try{ if(window._sheetPrevTop!=null && window.mfSheetToPx){ mfSheetToPx(window._sheetPrevTop); window._sheetPrevTop=null; } }catch(e){} };   // × on Doug Boehm → curtain returns to its previous height
+// Esc dismisses the Doug Boehm poster — same as the corner × and the backdrop tap (consistent modal behavior)
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'||e.key==='Esc'||e.keyCode===27){ var m=document.getElementById('posterModal'); if(m && m.style.display==='flex'){ closePoster(); } } });
 
 // ---- schedule browser: date-range + Dead/jam filter, drives the list AND the map ----
 var MF=window.DD_MUSIKFEST||[];
@@ -2215,36 +2217,72 @@ window.mfRefineX=function(){ var el=document.getElementById('mfRefine'); if(el) 
 </script>
 <script src="dd_health.js" defer></script>
 <script src="lukas_a2hs.js" defer></script>
+<script src="dd_curtain_drag.js" defer></script><!-- shared thumb-drag curtain controller (pure geometry unit-tested in dd_curtain_drag.test.js) -->
+<script src="dd_pillscroll.js" defer></script><!-- on-screen pill-scroll chevrons (Apple/Google-Maps affordance; pure logic unit-tested in dd_pillscroll.test.js) -->
 <script>
-/* ===== Maps paradigm: draggable bottom sheet + floating chips (animate TOP, never transform) ===== */
+/* Wire the curtain pill-tab bar's scroll-position chevrons. Guarded no-op if the module or
+   the bar is absent; independent of the curtain drag (arrows live inside the bar, the drag
+   lives on the .mf-grab handle — they never touch). */
+(function(){
+  function go(){ try{ if(window.DDPillScroll){ var bar=document.getElementById('mfCurtainBar'); if(bar) DDPillScroll.attach(bar); } }catch(e){} }
+  if(document.readyState!=='loading') go(); else document.addEventListener('DOMContentLoaded', go);
+})();
+</script>
+<script>
+/* ===== Maps paradigm: draggable bottom sheet + floating chips (animate TOP, never transform) =====
+   The curtain drag now runs through the SHARED dd_curtain_drag.js controller: the sheet FOLLOWS
+   THE THUMB continuously, the max stop ADAPTS to the current pill's content length (short pill vs
+   full Musikfest lineup), and release-velocity gives a light momentum snap. Tap-the-handle is kept
+   as a bonus quick-action (snap to the next anchor). If the shared module ever fails to load we
+   fall back to the original inline thumb-drag, so the curtain is NEVER un-openable. Public API
+   (mfSheetSnap / mfSheetTop / mfSheetToPx / mfDragStart / mfChip) and the DOM are unchanged, so the
+   pill tabs and the Doug Boehm button keep working exactly as before. ===== */
 (function(){
   function isApp(){ return document.body.classList.contains('mfapp'); }
-  var sheet=null, curTop=0, dragY=null, liveTop=0;
+  function dd(){ return (typeof window!=='undefined') ? window.DDCurtainDrag : null; }
+  var sheet=null, ctrl=null;
+  var CFG={ peekVh:78, midVh:52, minTopVh:8, maxTopVh:86, handlePx:0, dragClass:'mf-drag', velThreshold:0.5 };
   function vh(){ return window.innerHeight/100; }
-  function SNAPS(){ return [10*vh(), 52*vh(), 78*vh()]; }          // full · mid · peek
-  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-  function setTop(px){ if(sheet) sheet.style.top=px+'px'; }
-  function nearest(px){ var s=SNAPS(),b=s[0]; s.forEach(function(x){ if(Math.abs(x-px)<Math.abs(b-px))b=x; }); return b; }
+  function ensure(){ if(!sheet) sheet=document.querySelector('.wrap'); return sheet; }
+  function contentPx(){ return sheet ? sheet.scrollHeight : 0; }
+  function anchors(){ var D=dd(); if(D) return D.contentAnchors(window.innerHeight, contentPx(), CFG); var h=vh(); return {full:10*h,mid:52*h,peek:78*h}; }
+  function nearest(px){ var a=anchors(),arr=[a.full,a.mid,a.peek],b=arr[0]; arr.forEach(function(x){ if(Math.abs(x-px)<Math.abs(b-px))b=x; }); return b; }
   function invalidate(){ setTimeout(function(){ try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} },330); }
-  function isDown(){ return curTop >= 68*vh(); }                    // sheet sitting low = map big
-  function goTo(px){ curTop=px; setTop(px); invalidate(); }
-  window.mfSheetSnap=function(w){ if(!sheet)sheet=document.querySelector('.wrap'); if(!sheet)return; var s=SNAPS(); goTo(w==='full'?s[0]:(w==='peek'?s[2]:s[1])); };   // full · mid(curtain height) · peek — driven by the curtain tabs
-  window.mfSheetTop=function(){ return curTop; };                                          // remember where the curtain is
-  window.mfSheetToPx=function(px){ if(!sheet)sheet=document.querySelector('.wrap'); if(sheet && px!=null) goTo(px); };   // restore it exactly
-  var _startY=0,_startT=0,_moved=false,_taps=0,_tapTimer=null;
-  function tapSnap(n){ if(isDown()) goTo(n>=2 ? 10*vh() : 52*vh()); else goTo(78*vh()); }   // down: 1 tap→½up, 2 taps→all up · ½/full: 1 tap→all down
-  window.mfDragStart=function(e){ if(!isApp())return; sheet=document.querySelector('.wrap'); if(!sheet)return;
-    dragY=e.clientY; _startY=e.clientY; _startT=Date.now(); _moved=false; liveTop=curTop; document.body.classList.add('mf-drag');
+
+  // ---- fallback (used ONLY if dd_curtain_drag.js is absent): the original inline thumb-drag ----
+  var fb={ curTop:0, dragY:null, liveTop:0, startY:0, startT:0, moved:false };
+  function fbClamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function fbSet(px){ if(sheet) sheet.style.top=px+'px'; }
+  function fbMove(e){ if(fb.dragY==null)return; if(Math.abs(e.clientY-fb.startY)>3)fb.moved=true; fb.liveTop=fbClamp(fb.curTop+(e.clientY-fb.dragY), 8*vh(), 86*vh()); fbSet(fb.liveTop); }
+  function fbEnd(){ if(fb.dragY==null)return; fb.dragY=null; document.body.classList.remove('mf-drag');
+    window.removeEventListener('pointermove',fbMove); window.removeEventListener('pointerup',fbEnd);
+    if(!fb.moved && (Date.now()-fb.startT)<400){ var a=anchors(); fb.curTop=(fb.curTop<=(a.full+(a.mid-a.full)/2)? a.peek : (fb.curTop>=(a.mid+a.peek)/2? a.mid : a.full)); fbSet(fb.curTop); invalidate(); return; }
+    fb.curTop=nearest(fb.liveTop); fbSet(fb.curTop); invalidate(); }
+  function fbStart(e){ if(!ensure())return; fb.dragY=e.clientY; fb.startY=e.clientY; fb.startT=Date.now(); fb.moved=false; fb.liveTop=fb.curTop; document.body.classList.add('mf-drag');
     try{ if(e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId); }catch(x){}
-    window.addEventListener('pointermove',move); window.addEventListener('pointerup',end); e.preventDefault(); };
-  function move(e){ if(dragY==null)return; if(Math.abs(e.clientY-_startY)>3)_moved=true; liveTop=clamp(curTop+(e.clientY-dragY), 8*vh(), 86*vh()); setTop(liveTop); }
-  function end(){ if(dragY==null)return; dragY=null; document.body.classList.remove('mf-drag');
-    window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',end);
-    if(!_moved && (Date.now()-_startT)<400){ setTop(curTop); _taps++; clearTimeout(_tapTimer); _tapTimer=setTimeout(function(){ tapSnap(_taps); _taps=0; }, 250); return; }   // it was a TAP → snap by tap-count
-    curTop=nearest(liveTop); setTop(curTop); invalidate(); }        // it was a DRAG → snap to nearest
-  function init(){ if(!isApp())return; sheet=document.querySelector('.wrap'); curTop=52*vh(); setTop(curTop);
+    window.addEventListener('pointermove',fbMove); window.addEventListener('pointerup',fbEnd); e.preventDefault(); }
+
+  // ---- public API (signatures unchanged) ----
+  window.mfSheetSnap=function(w){ if(!ensure())return; if(ctrl){ ctrl.snapTo(w==='full'?'full':(w==='peek'?'peek':'mid')); invalidate(); return; } var a=anchors(); fb.curTop=(w==='full'?a.full:(w==='peek'?a.peek:a.mid)); fbSet(fb.curTop); invalidate(); };   // full · mid(curtain height) · peek — driven by the curtain tabs
+  window.mfSheetTop=function(){ return ctrl?ctrl.getTop():fb.curTop; };                     // remember where the curtain is
+  window.mfSheetToPx=function(px){ if(!ensure()||px==null)return; if(ctrl){ ctrl.setTop(px); invalidate(); return; } fb.curTop=px; fbSet(px); invalidate(); };   // restore it exactly
+  window.mfDragStart=function(e){ if(!isApp())return; if(!ensure())return; if(ctrl&&ctrl.beginDrag){ ctrl.beginDrag(e); return; } fbStart(e); };
+
+  function tapNext(){ var D=dd(), a=anchors(), cur=window.mfSheetTop();
+    var target = D ? D.tapNext(cur,[a.full,a.mid,a.peek]) : nearest(cur===a.peek?a.mid:(cur===a.mid?a.full:a.peek));
+    if(ctrl) ctrl.setTop(target); else { fb.curTop=target; fbSet(target); } invalidate(); }
+
+  function init(){ if(!isApp())return; if(!ensure())return;
+    var D=dd(), handle=document.getElementById('mfGrab');
+    if(D){ ctrl=D.attach({ sheet:sheet, handle:handle, manualStart:true, config:CFG, getContentPx:contentPx,
+      onSettle:function(){ invalidate(); }, onTap:function(){ tapNext(); } }); }
+    // the handle's DOM uses inline onpointerdown; on a browser WITHOUT Pointer Events that never
+    // fires — add a touch/mouse fallback there (guarded so it can't double-fire where pointer exists)
+    if(handle && !window.PointerEvent){ handle.addEventListener('touchstart',window.mfDragStart,{passive:false}); handle.addEventListener('mousedown',window.mfDragStart); }
+    var start=anchors().mid;
+    if(ctrl) ctrl.setTop(start); else { fb.curTop=start; fbSet(start); }
     setTimeout(function(){ try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} },500); }
-  window.addEventListener('resize',function(){ if(isApp()&&sheet){ curTop=clamp(curTop,8*vh(),86*vh()); setTop(curTop); try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} } });
+  window.addEventListener('resize',function(){ if(!isApp()||!ensure())return; if(ctrl&&ctrl.refresh){ ctrl.refresh(); } else { fb.curTop=fbClamp(fb.curTop,8*vh(),86*vh()); fbSet(fb.curTop); } try{ if(window.LMAP) LMAP.invalidateSize(); }catch(e){} });
   if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded',init);
   // floating chips → map layer filters (+ 🎶 Acts-on-Now filters the flowing list)
   window.mfChip=function(btn){ var f=btn.getAttribute('data-f'); btn.classList.toggle('on');
