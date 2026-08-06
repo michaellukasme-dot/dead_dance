@@ -12,6 +12,26 @@
 <link rel="icon" href="rose-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="rose.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="dd-180.png">
+<!-- DEV-ONLY startup error breadcrumb. Silent no-op unless window.DD_GEO_DEBUG is set (this frame OR
+     the same-origin top frame). When on, prints the exact file:line:col + stack of any uncaught error or
+     unhandled rejection to the console, so the next device run reveals WHERE "A JavaScript exception
+     occurred" originates. Loaded FIRST so it sees the bridge + every later script. Zero effect on the
+     web PWA (flag off) — see the console-noise fix notes. -->
+<script>(function(){try{
+  var dbg=false;
+  try{ if(window.DD_GEO_DEBUG) dbg=true; }catch(e){}
+  try{ if(window.top&&window.top!==window&&window.top.DD_GEO_DEBUG) dbg=true; }catch(e){}
+  if(!dbg) return;
+  window.addEventListener('error', function(ev){
+    try{
+      if(ev && ev.filename){ console.error('[DD_ERR]', ev.message, 'at', ev.filename+':'+ev.lineno+':'+ev.colno, (ev.error&&ev.error.stack)||''); }
+      else { console.error('[DD_ERR] resource/load error', (ev&&ev.target&&(ev.target.src||ev.target.href))||ev); }
+    }catch(_){}
+  }, true);
+  window.addEventListener('unhandledrejection', function(ev){
+    try{ var r=ev&&ev.reason; console.error('[DD_REJECT]', (r&&r.message)||r, (r&&r.stack)||''); }catch(_){}
+  });
+}catch(e){}})();</script>
 <!-- hybrid-native bridge (Phase 0): defines window.DDShell. NO-OP in a browser (window.Capacitor absent),
      routes to native plugins only inside the Capacitor shell. Must load BEFORE the service-worker
      registration (it gates on DDShell.isNative()). Safe if it 404s: callers guard on window.DDShell. -->
@@ -1040,33 +1060,33 @@ body.dd-insider .dd-only{display:block}
       var AD_BETHLEHEM=[
         {logo:'logos/jay_customz.png',       ic:'👕', bg:'linear-gradient(135deg,#b8002e,#7a3cc0)', biz:'Jay\'s Customz T-Shirt Printing', off:'Custom graphic tees to match your footwear & much more · 50 Broad St', cta:'Shop now ›', url:'https://jayscustomzprint.company.site', beth:true},
         {logo:'logos/artsquest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'ArtsQuest',                 off:'16 stages · 500+ acts · all free',                cta:'Plan your fest ›', beth:true},
-        {logo:'logos/mf_airproducts.webp',   ic:'🏭', bg:_MFLB, biz:'Air Products',            off:'Lehigh Valley’s own · Americaplatz @ Levitt',      cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_pnc.webp',           ic:'🏦', bg:_MFLB, biz:'PNC',                     off:'PNC Plaza · Steel Stage sponsor',                  cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_yuengling.webp',     ic:'🍺', bg:_MFLB, biz:'Yuengling',               off:'America’s oldest brewery · Lagerplatz',            cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_windcreek.webp',     ic:'🎰', bg:_MFLB, biz:'Wind Creek Bethlehem',    off:'Wind Creek Steel Stage sponsor',                   cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_martinguitar.webp',  ic:'🎸', bg:_MFLB, biz:'Martin Guitar',           off:'Handcrafted in Nazareth, PA since 1833 · Handwerkplatz', cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_lvhn.webp',          ic:'⚕️', bg:_MFLB, biz:'Lehigh Valley Health Network', off:'Official Musikfest 2026 partner',              cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_highmark.webp',      ic:'⚕️', bg:_MFLB, biz:'Highmark Blue Shield',     off:'Highmark Blue Shield Community Stage',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_airproducts.png',   ic:'🏭', bg:_MFLB, biz:'Air Products',            off:'Lehigh Valley’s own · Americaplatz @ Levitt',      cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_pnc.png',           ic:'🏦', bg:_MFLB, biz:'PNC',                     off:'PNC Plaza · Steel Stage sponsor',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_yuengling.png',     ic:'🍺', bg:_MFLB, biz:'Yuengling',               off:'America’s oldest brewery · Lagerplatz',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_windcreek.png',     ic:'🎰', bg:_MFLB, biz:'Wind Creek Bethlehem',    off:'Wind Creek Steel Stage sponsor',                   cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_martinguitar.png',  ic:'🎸', bg:_MFLB, biz:'Martin Guitar',           off:'Handcrafted in Nazareth, PA since 1833 · Handwerkplatz', cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_lvhn.png',          ic:'⚕️', bg:_MFLB, biz:'Lehigh Valley Health Network', off:'Official Musikfest 2026 partner',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_highmark.png',      ic:'⚕️', bg:_MFLB, biz:'Highmark Blue Shield',     off:'Highmark Blue Shield Community Stage',              cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_capitalbluecross.png',ic:'⚕️',bg:_MFLB, biz:'Capital Blue Cross',       off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_crayola.webp',       ic:'🖍️', bg:_MFLB, biz:'Crayola',                 off:'Made in Easton, PA · Creativity Tent',             cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_crayola.png',       ic:'🖍️', bg:_MFLB, biz:'Crayola',                 off:'Made in Easton, PA · Creativity Tent',             cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_lutron.png',         ic:'💡', bg:_MFLB, biz:'Lutron',                  off:'Coopersburg, PA · Lutron Jazz Cabaret',            cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_guardian.png',       ic:'🛡️', bg:_MFLB, biz:'The Guardian Life Insurance Co.', off:'Zinzenplatz sponsor',                       cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_ibew375.png',        ic:'⚡', bg:_MFLB, biz:'IBEW Local 375',           off:'IBEW Local 375 Liederplatz sponsor',               cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_sectv.webp',         ic:'📺', bg:_MFLB, biz:'Service Electric',        off:'Festplatz sponsor · Lehigh Valley’s hometown cable', cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_wfmz.webp',          ic:'📺', bg:_MFLB, biz:'WFMZ-TV 69 News',         off:'Official Musikfest 2026 media partner',            cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_6abc.webp',          ic:'📺', bg:_MFLB, biz:'6abc',                    off:'Official Musikfest 2026 media partner',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_sectv.png',         ic:'📺', bg:_MFLB, biz:'Service Electric',        off:'Festplatz sponsor · Lehigh Valley’s hometown cable', cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_wfmz.png',          ic:'📺', bg:_MFLB, biz:'WFMZ-TV 69 News',         off:'Official Musikfest 2026 media partner',            cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_6abc.png',          ic:'📺', bg:_MFLB, biz:'6abc',                    off:'Official Musikfest 2026 media partner',            cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_shift4.png',         ic:'💳', bg:_MFLB, biz:'Shift4',                  off:'Allentown, PA · powering payments',                cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_hotelbethlehem.png', ic:'🏨', bg:_MFLB, biz:'Historic Hotel Bethlehem', off:'437 Main St · since 1922',                       cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_lehighu.png',        ic:'🎓', bg:_MFLB, biz:'Lehigh University',       off:'Bethlehem, PA',                                    cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_moravianu.webp',     ic:'🎓', bg:_MFLB, biz:'Moravian University',     off:'Bethlehem, PA · since 1742',                       cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_moravianu.png',     ic:'🎓', bg:_MFLB, biz:'Moravian University',     off:'Bethlehem, PA · since 1742',                       cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_moravianchurch.png', ic:'⛪', bg:_MFLB, biz:'Moravian Church Settlements', off:'UNESCO World Heritage · Bethlehem',              cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_discoverlv.png',     ic:'🧭', bg:_MFLB, biz:'Discover Lehigh Valley',  off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_morningcall.png',    ic:'📰', bg:_MFLB, biz:'The Morning Call',        off:'Lehigh Valley news · media partner',               cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_b104.webp',          ic:'📻', bg:_MFLB, biz:'B104',                    off:'Lehigh Valley radio · media partner',              cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_b104.png',          ic:'📻', bg:_MFLB, biz:'B104',                    off:'Lehigh Valley radio · media partner',              cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_catcountry.png',     ic:'📻', bg:_MFLB, biz:'Cat Country 96',          off:'Lehigh Valley country radio',                      cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_wzzo.webp',          ic:'📻', bg:_MFLB, biz:'WZZO',                    off:'Lehigh Valley rock radio',                         cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_sysco.webp',         ic:'🍽️', bg:_MFLB, biz:'Sysco',                  off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
-        {logo:'logos/mf_monster.webp',       ic:'🥤', bg:_MFLB, biz:'Monster Energy',          off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_wzzo.png',          ic:'📻', bg:_MFLB, biz:'WZZO',                    off:'Lehigh Valley rock radio',                         cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_sysco.png',         ic:'🍽️', bg:_MFLB, biz:'Sysco',                  off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
+        {logo:'logos/mf_monster.png',       ic:'🥤', bg:_MFLB, biz:'Monster Energy',          off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_united.png',         ic:'✈️', bg:_MFLB, biz:'United Airlines',         off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_palottery.png',      ic:'🎟️', bg:_MFLB, biz:'Pennsylvania Lottery',   off:'Official Musikfest 2026 partner',                  cta:'Musikfest 2026 partner ›', beth:true},
         {logo:'logos/mf_banko.png',          ic:'🍺', bg:_MFLB, biz:'Banko Beverage Co.',      off:'Lehigh Valley · official Musikfest 2026 partner',  cta:'Musikfest 2026 partner ›', beth:true}
