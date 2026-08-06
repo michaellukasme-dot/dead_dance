@@ -415,6 +415,203 @@
     return Promise.resolve(false);
   }
 
+  // ===========================================================================
+  // BACKGROUND-GEO WATCH  — the REAL background engine seam (drives the live dot).
+  //   DDShell.watchGeo({ mode, onFix, onError, lockAcc, timeout }) → { stop(), setMode(m), source() }
+  //     mode 'active'  : responsive — distanceFilter 5, then changePace(true) → instant continuous
+  //     mode 'passive' : adaptive   — distanceFilter 10, NO changePace → battery-saving (DEFAULT)
+  //   • LAZY-LOADS dd_bggeo.js on FIRST use only (injected <script>, awaited, timeout→fallback).
+  //     dd_bggeo.js is NEVER preloaded and is kept OFF the web PWA (not in sw.js / index.html).
+  //   • Registers onLocation BEFORE ready(); config is the nested v9 shape proven on-device
+  //     (gps_bg_test.html): { geolocation:{desiredAccuracy High, distanceFilter}, app:{stopOnTerminate:false,
+  //     startOnBoot:false}, logger }. Each native location → the EXACT dd_gps onFix shape via the
+  //     DDGeoNative adapter (passthrough — native fused is already smoothed; dd_gps decides any Kalman).
+  //   • Fallback chain, never throws, fails honest:
+  //         native bg engine  →  foreground @capacitor/geolocation  →  onError({_useWeb:true})
+  //     so the caller (dd_gps) drops to the web engine. In a plain browser isNative() is false →
+  //     it signals _useWeb immediately and the live PWA is untouched. NO license/secret lives here.
+  // ===========================================================================
+  var _bgMode = "passive";       // last requested mode (for setGeoMode)
+  // dev-only VERBOSE flag: window.DD_GEO_DEBUG on THIS frame OR the top frame (same-origin).
+  // Unset/false (default) = PRODUCTION-QUIET: bg-geo debug OFF → no notification sounds /
+  // "Motion-trigger timer engaged" spam, and the dd_gps debug overlay is never created.
+  function geoDebugOn() {
+    try { if (w.DD_GEO_DEBUG) return true; } catch (e) {}
+    try { if (w.top && w.top !== w && w.top.DD_GEO_DEBUG) return true; } catch (e) {}
+    return false;
+  }
+  var _bgLoadPromise = null;     // in-flight lazy-load (idempotent across repeat calls)
+
+  function loadBgGeo() {
+    if (w.DDBgGeo) return Promise.resolve(w.DDBgGeo);
+    if (_bgLoadPromise) return _bgLoadPromise;
+    _bgLoadPromise = new Promise(function (resolve, reject) {
+      try {
+        if (!w.document || !w.document.createElement) { reject(new Error("no document")); return; }
+        var done = false;
+        var to = setTimeout(function () { if (!done) { done = true; reject(new Error("dd_bggeo load timeout")); } }, 8000);
+        var s = w.document.createElement("script");
+        s.src = "dd_bggeo.js"; s.async = true;
+        s.onload = function () { if (done) return; done = true; clearTimeout(to); if (w.DDBgGeo) resolve(w.DDBgGeo); else reject(new Error("DDBgGeo missing after load")); };
+        s.onerror = function () { if (done) return; done = true; clearTimeout(to); reject(new Error("dd_bggeo failed to load")); };
+        (w.document.head || w.document.documentElement).appendChild(s);
+      } catch (e) { reject(e); }
+    });
+    // allow a later call to retry after a failed load (but keep DDBgGeo once it exists)
+    _bgLoadPromise.catch(function () { _bgLoadPromise = null; });
+    return _bgLoadPromise;
+  }
+
+  // native location → EXACT dd_gps onFix shape (reuse DDGeoNative adapter if present)
+  function adaptNativeFix(loc, opts) {
+    try {
+      if (w.DDGeoNative && typeof w.DDGeoNative.normalizeNativeFix === "function") {
+        var f = w.DDGeoNative.normalizeNativeFix(loc, { lockAcc: opts.lockAcc, kalmanMode: "passthrough", background: true });
+        if (f && f.ts == null && loc && loc.timestamp != null) {
+          f.ts = (typeof loc.timestamp === "number") ? loc.timestamp : (Date.parse(loc.timestamp) || Date.now());
+        }
+        return f;
+      }
+    } catch (e) {}
+    // inline fallback — identical shape to dd_gps onFix
+    var c = (loc && loc.coords) ? loc.coords : (loc || {});
+    var rawAcc = (c.accuracy != null ? c.accuracy : 99);
+    var ts = loc && loc.timestamp != null ? (typeof loc.timestamp === "number" ? loc.timestamp : (Date.parse(loc.timestamp) || Date.now())) : Date.now();
+    var lockAcc = opts.lockAcc != null ? opts.lockAcc : 25;
+    return {
+      lat: c.latitude, lng: c.longitude,
+      acc: rawAcc, rawAcc: rawAcc,
+      speed: (c.speed != null && c.speed >= 0) ? c.speed : null,
+      heading: (c.heading != null && !isNaN(c.heading)) ? c.heading : null,
+      alt: (c.altitude != null ? c.altitude : null),
+      locked: rawAcc <= lockAcc, raw: [c.latitude, c.longitude],
+      _native: true, _bg: true, ts: ts
+    };
+  }
+
+  function watchGeo(opts) {
+    opts = opts || {};
+    var onFix = typeof opts.onFix === "function" ? opts.onFix : function () {};
+    var onError = typeof opts.onError === "function" ? opts.onError : function () {};
+    var mode = (opts.mode === "active") ? "active" : "passive";
+    _bgMode = mode;
+
+    var state = { dead: false, source: "pending", sub: null, fgStop: null };
+    var handle = {
+      stop: function () {
+        if (state.dead) return; state.dead = true;
+        try { if (state.sub && state.sub.remove) state.sub.remove(); } catch (e) {}
+        state.sub = null;
+        if (state.source === "native-bg") { try { if (w.DDBgGeo && w.DDBgGeo.stop) Promise.resolve(w.DDBgGeo.stop()).catch(function () {}); } catch (e) {} }
+        if (state.source === "foreground" && state.fgStop) { try { state.fgStop(); } catch (e) {} }
+      },
+      setMode: function (m) { return setGeoMode(m); },
+      source: function () { return state.source; }
+    };
+
+    if (!isNative()) {                              // plain browser / PWA — never touch native
+      state.source = "web";
+      onError({ code: 0, message: "not native", _useWeb: true });
+      return handle;
+    }
+
+    loadBgGeo().then(function (BG) {
+      if (state.dead) return;
+      if (!BG || typeof BG.ready !== "function" || typeof BG.onLocation !== "function" || typeof BG.start !== "function") {
+        throw new Error("DDBgGeo API incomplete");
+      }
+      var acc = (BG.DesiredAccuracy && BG.DesiredAccuracy.High != null) ? BG.DesiredAccuracy.High : -1;
+      // PRODUCTION-QUIET by default: debug OFF + logLevel Error → NO Transistorsoft notification
+      // sounds / motion-trigger alerts. Dev escape hatch: DD_GEO_DEBUG truthy → debug ON + Verbose.
+      var _geoDebug = geoDebugOn();
+      var LL = BG.LogLevel || {};
+      var lvl = _geoDebug ? (LL.Verbose != null ? LL.Verbose : 5) : (LL.Error != null ? LL.Error : 1);
+      var df = (mode === "active") ? 5 : 10;
+      // register onLocation BEFORE ready()
+      state.sub = BG.onLocation(function (loc) {
+        if (state.dead) return;
+        try { onFix(adaptNativeFix(loc, opts)); } catch (e) {}
+      }, function (err) {
+        if (state.dead) return; // a live fix error is NOT a reason to abandon native — forward honestly
+        onError({ code: (err && err.code) || 0, message: (err && err.message) || "onLocation error" });
+      });
+      var cfg = {
+        reset: true,
+        geolocation: { desiredAccuracy: acc, distanceFilter: df },
+        app: { stopOnTerminate: false, startOnBoot: false },
+        // v9 NAMESPACED shape (matches the on-device-proven gps_bg_test.html config). debug is
+        // gated: false + Error(1) in production = SILENT; true + Verbose(5) only with DD_GEO_DEBUG.
+        logger: { debug: _geoDebug, logLevel: lvl }
+      };
+      return BG.ready(cfg).then(function () {
+        if (state.dead) return null;
+        return BG.destroyLocations ? Promise.resolve(BG.destroyLocations()).catch(function () {}) : null;
+      }).then(function () {
+        if (state.dead) return null;
+        return BG.start();
+      }).then(function () {
+        if (state.dead) { try { if (BG.stop) BG.stop(); } catch (e) {} return; }
+        state.source = "native-bg";
+        if (mode === "active" && BG.changePace) { try { Promise.resolve(BG.changePace(true)).catch(function () {}); } catch (e) {} }
+      });
+    }).catch(function () {
+      if (state.dead) return;
+      startForegroundOrWeb(opts, state, onFix, onError);
+    });
+
+    return handle;
+  }
+
+  // foreground @capacitor/geolocation, else signal the caller to use the web engine
+  function startForegroundOrWeb(opts, state, onFix, onError) {
+    var geo = plugin("Geolocation");
+    if (geo && typeof geo.watchPosition === "function") {
+      var lockAcc = opts.lockAcc || 25, watchId = null;
+      try {
+        var p = geo.watchPosition(
+          { enableHighAccuracy: true, timeout: opts.timeout || 30000, maximumAge: 8000 },
+          function (pos, err) {
+            if (state.dead) return;
+            if (err) { onError({ code: err.code || 0, message: err.message || "geolocation error" }); return; }
+            if (!pos || !pos.coords) return;
+            var c = pos.coords, rawAcc = (c.accuracy != null ? c.accuracy : 99);
+            onFix({
+              lat: c.latitude, lng: c.longitude, acc: rawAcc, rawAcc: rawAcc,
+              speed: (c.speed != null && c.speed >= 0) ? c.speed : null,
+              heading: (c.heading != null && !isNaN(c.heading)) ? c.heading : null,
+              alt: (c.altitude != null ? c.altitude : null),
+              locked: rawAcc <= lockAcc, raw: [c.latitude, c.longitude],
+              _native: true, _bg: false
+            });
+          }
+        );
+        if (p && p.then) p.then(function (id) { watchId = id; }, function () {});
+        state.source = "foreground";
+        state.fgStop = function () { try { if (watchId != null && geo.clearWatch) geo.clearWatch({ id: watchId }); } catch (e) {} };
+        return;
+      } catch (e) {}
+    }
+    state.source = "web";
+    onError({ code: 0, message: "native geolocation unavailable", _useWeb: true });
+  }
+
+  function stopGeo(handle) {
+    try { if (handle && typeof handle.stop === "function") { handle.stop(); return; } } catch (e) {}
+    // no handle passed → best-effort stop of the singleton native engine
+    try { if (isNative() && w.DDBgGeo && w.DDBgGeo.stop) Promise.resolve(w.DDBgGeo.stop()).catch(function () {}); } catch (e) {}
+  }
+
+  // runtime mode switch — active → changePace(true) (continuous); passive → changePace(false) (adaptive)
+  function setGeoMode(m) {
+    var mode = (m === "active") ? "active" : "passive";
+    _bgMode = mode;
+    if (isNative() && w.DDBgGeo && typeof w.DDBgGeo.changePace === "function") {
+      try { return Promise.resolve(w.DDBgGeo.changePace(mode === "active")).then(function () { return true; }, function () { return false; }); }
+      catch (e) {}
+    }
+    return Promise.resolve(false);
+  }
+
   // ---- passthroughs to DDNative (web-native helpers) — do NOT reimplement -----
   function buzz(p) { try { if (w.DDNative && w.DDNative.buzz) w.DDNative.buzz(p); else if (w.navigator && navigator.vibrate) navigator.vibrate(p || 12); } catch (e) {} }
   function legacyKeepAwake(on) { try { if (w.DDNative && w.DDNative.keepAwake) w.DDNative.keepAwake(on); } catch (e) {} }
@@ -426,6 +623,10 @@
     hasPlugin: function (name) { return !!plugin(name); },
     // seams
     watchPosition: watchPosition,
+    // background-geo watch (drives the live festival-map dot; survives a locked screen in native)
+    watchGeo: watchGeo,
+    stopGeo: stopGeo,
+    setGeoMode: setGeoMode,
     hasBackgroundGeo: function () { return isNative() && !!bgGeoPlugin() && !!(w.DDGeoNative && w.DDGeoNative.startBackground); },
     storageGet: storageGet,
     storageSet: storageSet,
@@ -448,6 +649,6 @@
     buzz: buzz,
     // meta
     _phase: 4,
-    _version: "0.4.0"
+    _version: "0.5.0"
   };
 })(typeof window !== "undefined" ? window : this);

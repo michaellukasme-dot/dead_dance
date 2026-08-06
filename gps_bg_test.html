@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BG-GPS Test — DeadDance</title>
+<style>
+  :root{ --bg:#0d0f14; --card:#161a22; --ink:#f2f4f8; --dim:#9aa4b2; --ok:#39d98a; --warn:#ffcc4d; --bad:#ff6b6b; --acc:#7aa2ff; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:16px;padding-bottom:60px}
+  h1{font-size:19px;margin:0 0 2px}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 12px}
+  .card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0}
+  .k{color:var(--dim);font-size:13px}
+  .big{font-size:30px;font-weight:700;letter-spacing:.5px}
+  button{width:100%;border:0;border-radius:12px;padding:16px;font-size:18px;font-weight:700;color:#0d0f14;margin:8px 0;-webkit-appearance:none}
+  #start{background:var(--ok)} #stop{background:var(--bad);color:#fff} #copy{background:var(--acc)}
+  button:disabled{opacity:.4}
+  .pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:20px;background:#22283340;color:var(--dim);margin-left:6px}
+  .live{color:var(--ok)} .gap{color:var(--warn)} .stale{color:var(--bad)}
+  pre{white-space:pre-wrap;word-break:break-all;font-size:11px;color:var(--dim);max-height:200px;overflow:auto;background:#0b0d12;border-radius:10px;padding:10px;margin:6px 0}
+  .note{font-size:12px;color:var(--dim);line-height:1.4}
+  .amber{background:#3a2f10;color:var(--warn);border-radius:10px;padding:10px;font-size:12.5px;margin:8px 0}
+  .err{background:#3a1414;color:var(--bad);border-radius:10px;padding:10px;font-size:12.5px;margin:8px 0;white-space:pre-wrap;word-break:break-word;display:none}
+  #engine{font-size:12px}
+  label.chk{display:flex;align-items:center;gap:8px;margin:6px 2px;font-size:12.5px;color:var(--dim)}
+</style>
+</head>
+<body>
+  <h1>BG-GPS Test <span class="pill" id="mode">idle</span></h1>
+  <p class="sub">Native background engine (Transistorsoft). Engine: <b id="engine">checking…</b></p>
+
+  <div class="amber"><b>Battery walk (production config):</b> leave "proof mode" OFF. Tap Start, grant location, <b>lock the screen</b>, and walk <b>12–15+ minutes</b> (longer = truer battery number). Then wake → <b>Stop → Copy Log</b>. Bottom of the log shows the real <b>battery %/hour</b> drain.</div>
+
+  <label class="chk"><input type="checkbox" id="proofmode"> Force continuous (proof mode — hammers GPS, NOT battery-safe; use only to re-prove background)</label>
+
+  <div class="err" id="err"></div>
+
+  <button id="start">▶︎ Start</button>
+  <button id="stop" disabled>■ Stop</button>
+
+  <div class="card">
+    <div class="row"><span class="k">Fixes logged</span><b id="n">0</b></div>
+    <div class="row"><span class="k">Elapsed</span><b id="elapsed">0s</b></div>
+    <div class="row"><span class="k">Last fix</span><b id="last" class="live">—</b></div>
+    <div class="row"><span class="k">Current accuracy</span><b id="acc">—</b></div>
+    <div class="row"><span class="k">Median accuracy</span><b id="medacc">—</b></div>
+    <div class="row"><span class="k">Best / worst</span><b id="bw">—</b></div>
+    <div class="row"><span class="k">Longest gap</span><b id="maxgap" class="big">0s</b></div>
+    <div class="row"><span class="k">Distance walked</span><b id="dist">0 m</b></div>
+    <div class="row"><span class="k">Battery</span><b id="batt">—</b></div>
+  </div>
+
+  <button id="copy" disabled>⧉ Copy Log</button>
+  <p class="note">Copy includes summary + battery drain + CSV + native-persisted log. Paste it all back to Claude.</p>
+  <pre id="log">log will appear here…</pre>
+
+<script src="dd_bggeo.js"></script>
+<script>
+(function(){
+  var BG = window.DDBgGeo || null;
+  var sub=null, t0=0, last=null, fixes=[], gaps=[], accs=[], dist=0, maxgap=0, tick=null, started=false, errs=[], hidden=false, visLog=[];
+  var battStart=null, battStartTs=null, battLast=null, battLastTs=null, everCharging=false, proof=false;
+  var nativeLocs=null, nativeCount=null;
+  var $=function(id){return document.getElementById(id)};
+  function showErr(msg){ errs.push(msg); var e=$('err'); e.style.display='block'; e.textContent=errs.join('\n\n'); }
+  try{ document.addEventListener('visibilitychange', function(){ hidden=!!document.hidden; if(started){ visLog.push({t:((Date.now()-t0)/1000).toFixed(1), s: hidden?'→ BACKGROUNDED (screen off / app hidden)':'→ FOREGROUND'}); } }); }catch(e){}
+  function hav(a,b,c,d){var R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,s=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2);return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s))}
+  function med(arr){if(!arr.length)return 0;var s=arr.slice().sort(function(a,b){return a-b});var m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2}
+  function fmt(s){s=Math.round(s);if(s<90)return s+'s';var m=Math.floor(s/60);return m+'m'+(s%60)+'s'}
+
+  if(!BG){ $('engine').textContent='NOT native (open in the DeadDance app)'; $('engine').style.color='var(--bad)'; $('start').disabled=true; showErr('window.DDBgGeo is not present — rebuild the app (npx cap copy + run) and open from the 🛰 BG-GPS Test link.'); }
+  else { $('engine').textContent='native DDBgGeo present ✓'; $('engine').style.color='var(--ok)'; }
+
+  function paint(){
+    var now=(Date.now()-t0)/1000;
+    $('elapsed').textContent=fmt(now);
+    $('n').textContent=fixes.length;
+    if(last){ var since=(Date.now()-last.ts)/1000; var el=$('last'); el.textContent=fmt(since)+' ago'; el.className= since<10?'live':(since<25?'gap':'stale'); }
+    $('medacc').textContent=accs.length?Math.round(med(accs))+' m':'—';
+    if(accs.length){$('bw').textContent=Math.round(Math.min.apply(null,accs))+' / '+Math.round(Math.max.apply(null,accs))+' m';}
+    $('maxgap').textContent=fmt(maxgap);
+    $('maxgap').className='big '+(maxgap<12?'':(maxgap<45?'gap':'stale'));
+    $('dist').textContent=(dist<1000?Math.round(dist)+' m':(dist/1000).toFixed(2)+' km');
+    if(battLast!=null){ $('batt').textContent=Math.round(battLast*100)+'%'+(everCharging?' ⚡charging':''); }
+  }
+  function onLoc(loc){
+    try{
+      var c=loc.coords||{}, ts=loc.timestamp?Date.parse(loc.timestamp):Date.now();
+      if(isNaN(ts)) ts=Date.now();
+      var gap = last ? (ts-last.ts)/1000 : 0;
+      if(gap>maxgap) maxgap=gap;
+      if(last){ gaps.push(gap); var d=hav(last.lat,last.lng,c.latitude,c.longitude); if(c.accuracy<40) dist+=d; }
+      fixes.push({ts:ts,t:((ts-t0)/1000).toFixed(1),lat:c.latitude,lng:c.longitude,acc:c.accuracy,spd:c.speed,gap:gap.toFixed(1),hid:(typeof document!=='undefined'&&!!document.hidden)});
+      accs.push(c.accuracy); last={ts:ts,lat:c.latitude,lng:c.longitude};
+      // battery straight off the plugin's location object
+      if(loc.battery && typeof loc.battery.level==='number' && loc.battery.level>=0){
+        if(battStart==null){ battStart=loc.battery.level; battStartTs=ts; }
+        battLast=loc.battery.level; battLastTs=ts;
+        if(loc.battery.is_charging) everCharging=true;
+      }
+      $('acc').textContent=Math.round(c.accuracy)+' m';
+      paint();
+    }catch(e){ showErr('onLocation parse error: '+e.message); }
+  }
+
+  $('start').onclick=function(){
+    if(!BG){ showErr('No native engine.'); return; }
+    proof = !!($('proofmode') && $('proofmode').checked);
+    t0=Date.now(); last=null; fixes=[]; gaps=[]; accs=[]; dist=0; maxgap=0; errs=[]; $('err').style.display='none';
+    battStart=null; battStartTs=null; battLast=null; battLastTs=null; everCharging=false;
+    $('start').disabled=true; $('stop').disabled=false; $('copy').disabled=true;
+    $('mode').textContent='starting…'; $('mode').style.color='var(--warn)';
+    try{
+      sub = BG.onLocation(onLoc, function(err){ showErr('onLocation error: '+(err&&err.message?err.message:JSON.stringify(err))); });
+      var acc = (BG.DesiredAccuracy && BG.DesiredAccuracy.High!=null) ? BG.DesiredAccuracy.High : -1;
+      var vlog = (BG.LogLevel && BG.LogLevel.Verbose!=null) ? BG.LogLevel.Verbose : 5;
+      BG.ready({
+        reset:true,
+        geolocation:{ desiredAccuracy:acc, distanceFilter: proof?5:10 },
+        app:{ stopOnTerminate:false, startOnBoot:false },
+        logger:{ debug:true, logLevel:vlog }
+      }).then(function(state){
+        showErrState(state);
+        return (BG.destroyLocations ? BG.destroyLocations().catch(function(){}) : null);
+      }).then(function(){
+        return BG.start();
+      }).then(function(st){
+        return (proof && BG.changePace ? BG.changePace(true) : null); // proof mode only: force continuous
+      }).then(function(){
+        started=true;
+        $('mode').textContent = proof ? 'recording (PROOF · continuous)' : 'recording (PRODUCTION · adaptive)';
+        $('mode').style.color='var(--ok)';
+        tick=setInterval(paint,1000);
+      }).catch(function(e){
+        showErr('ready/start failed: '+(e&&e.message?e.message:JSON.stringify(e)));
+        $('start').disabled=false; $('stop').disabled=true; $('mode').textContent='error'; $('mode').style.color='var(--bad)';
+      });
+    }catch(e){ showErr('start() threw: '+e.message); $('start').disabled=false; $('stop').disabled=true; }
+  };
+  function showErrState(state){ try{ if(state){ $('log').textContent='[ready] enabled='+state.enabled+' trackingMode='+state.trackingMode; } }catch(e){} }
+
+  $('stop').onclick=function(){
+    if(tick){clearInterval(tick);tick=null;}
+    $('start').disabled=false; $('stop').disabled=true;
+    $('mode').textContent='fetching native log…'; $('mode').style.color='var(--warn)';
+    var done=function(){
+      $('copy').disabled = (fixes.length===0 && !(nativeLocs&&nativeLocs.length));
+      $('mode').textContent='stopped'; $('mode').style.color='var(--dim)';
+      try{ if(sub&&sub.remove) sub.remove(); }catch(e){}
+      render();
+    };
+    var pCount = (BG&&BG.getCount)? BG.getCount().then(function(n){nativeCount=n;}).catch(function(e){showErr('getCount error: '+(e&&e.message||JSON.stringify(e)));}) : Promise.resolve();
+    var pLocs  = (BG&&BG.getLocations)? BG.getLocations().then(function(rows){nativeLocs=rows||[];}).catch(function(e){showErr('getLocations error: '+(e&&e.message||JSON.stringify(e)));}) : Promise.resolve();
+    Promise.all([pCount,pLocs]).then(function(){
+      try{ if(BG&&BG.stop) return BG.stop(); }catch(e){ showErr('stop threw: '+e.message); }
+    }).catch(function(e){ showErr('stop() error: '+(e&&e.message||JSON.stringify(e))); }).then(done, done);
+  };
+
+  function render(){
+    var dur=fixes.length?((fixes[fixes.length-1].ts-t0)/1000):0;
+    var nowRel=(Date.now()-t0)/1000;
+    var bgWins=[], openBg=null;
+    visLog.forEach(function(v){ var ts=parseFloat(v.t); if(v.s.indexOf('BACKGROUND')>=0){ if(openBg===null) openBg=ts; } else { if(openBg!==null){ bgWins.push([openBg,ts]); openBg=null; } } });
+    if(openBg!==null) bgWins.push([openBg, nowRel]);
+    function inBg(rel){ for(var i=0;i<bgWins.length;i++){ if(rel>=bgWins[i][0]-1 && rel<=bgWins[i][1]+1) return true; } return false; }
+    var natBg=0, natTot=0;
+    if(nativeLocs){ nativeLocs.forEach(function(r){ var ts=r.timestamp||r.time; var ms=ts?Date.parse(ts):NaN; if(!isNaN(ms)){ var rel=(ms-t0)/1000; if(rel>=-5 && rel<=nowRel+5){ natTot++; if(inBg(rel)) natBg++; } } }); }
+    var hidCount=fixes.filter(function(f){return f.hid;}).length;
+    // battery drain
+    var battLine;
+    if(battStart!=null && battLast!=null && battStartTs && battLastTs && battLastTs>battStartTs){
+      var dropPct=(battStart-battLast)*100;
+      var hrs=(battLastTs-battStartTs)/3600000;
+      var rate=hrs>0?(dropPct/hrs):0;
+      battLine='BATTERY: '+Math.round(battStart*100)+'% -> '+Math.round(battLast*100)+'% over '+fmt((battLastTs-battStartTs)/1000)+
+        ' = '+rate.toFixed(1)+' %/hour drain'+(everCharging?'  (⚠ was CHARGING — drain number invalid)':'')+
+        (hrs<0.15?'  (⚠ sample <9min — noisy; walk 12-15min+ for a real number)':'')+'\n';
+    } else { battLine='BATTERY: not reported by plugin this run\n'; }
+    var head='=== BG-GPS TEST — DeadDance (NATIVE background / Transistorsoft) ===\n'+
+      'MODE: '+(proof?'PROOF (continuous, GPS-hammering — NOT production)':'PRODUCTION (adaptive/motion-based — battery profile)')+'\n'+
+      'device: '+navigator.userAgent+'\n'+
+      'fixes: '+fixes.length+'  duration: '+fmt(dur)+'  cadence: '+(fixes.length>1?(dur/(fixes.length-1)).toFixed(1)+'s/fix':'n/a')+'\n'+
+      'accuracy m — median: '+Math.round(med(accs))+'  best: '+(accs.length?Math.round(Math.min.apply(null,accs)):'-')+'  worst: '+(accs.length?Math.round(Math.max.apply(null,accs)):'-')+'\n'+
+      'LONGEST GAP: '+maxgap.toFixed(1)+'s   median gap: '+med(gaps).toFixed(1)+'s   (adaptive mode pauses when stationary — gaps are EXPECTED + battery-saving)\n'+
+      'distance (acc<40m steps): '+Math.round(dist)+' m\n'+
+      battLine+
+      'backgrounded proof — native fixes inside a screen-locked window: '+natBg+' of '+natTot+' native fixes  (secondary: '+hidCount+' of '+fixes.length+' realtime tagged screen-off)\n'+
+      (visLog.length?('VISIBILITY TIMELINE (lock/unlock):\n'+visLog.map(function(v){return '  t='+v.t+'s  '+v.s;}).join('\n')+'\n'):'(no background transition recorded)\n')+
+      (errs.length?('ERRORS:\n'+errs.join('\n')+'\n'):'')+
+      '--- CSV: t_s,lat,lng,acc_m,speed_mps,gap_s,backgrounded ---\n';
+    var csv=fixes.map(function(f){return f.t+','+(f.lat!=null?f.lat.toFixed(6):'')+','+(f.lng!=null?f.lng.toFixed(6):'')+','+Math.round(f.acc)+','+(f.spd==null?'':(''+f.spd))+','+f.gap+','+(f.hid?'BG':'fg')}).join('\n');
+    var nat='';
+    if(nativeCount!=null || nativeLocs){
+      nat='\n\n--- NATIVE PERSISTED LOCATIONS ---\n'+
+        'getCount: '+(nativeCount==null?'?':nativeCount)+'   getLocations rows: '+(nativeLocs?nativeLocs.length:'?')+'\n';
+      if(nativeLocs&&nativeLocs.length){
+        nat+='ts_iso,lat,lng,acc_m\n'+nativeLocs.map(function(r){var c=(r.coords)||r; var ts=r.timestamp||r.time||''; return ts+','+(c.latitude!=null?(+c.latitude).toFixed(6):'')+','+(c.longitude!=null?(+c.longitude).toFixed(6):'')+','+(c.accuracy!=null?Math.round(c.accuracy):'');}).join('\n');
+      }
+    }
+    $('log').textContent=head+csv+nat;
+  }
+  $('copy').onclick=function(){
+    var txt=$('log').textContent;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){$('copy').textContent='✓ Copied — paste to Claude';},function(){fallback(txt)});}
+    else fallback(txt);
+  };
+  function fallback(txt){var r=document.createRange();r.selectNodeContents($('log'));var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');$('copy').textContent='✓ Copied';}catch(e){$('copy').textContent='Select the log & copy manually';}}
+})();
+</script>
+</body>
+</html>

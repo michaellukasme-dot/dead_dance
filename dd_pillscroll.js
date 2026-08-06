@@ -17,7 +17,14 @@
    is device-validated-later. Said plainly, not buried.
 
    Dependency-free. Dual export (Node module.exports for the test + browser global DDPillScroll).
-   Guarded + no-op safe: attach touches the DOM only when called in a browser. */
+   Guarded + no-op safe: attach touches the DOM only when called in a browser.
+
+   STANDARD / one-line convention: put `data-pillscroll` on ANY horizontally-scrollable pill/tab
+   row and this file auto-attaches the chevrons on DOMContentLoaded — no per-page JS needed. e.g.
+       <div class="mflayers" data-pillscroll> … pills … </div>
+   Idempotent: attach() guards double-wiring via the data-ddps flag, so auto-attach + an explicit
+   DDPillScroll.attach(el) on the same element never double-bind. Explicit attach() still works
+   exactly as before (used for bars wired in page script). Node/no-DOM → the auto-attach is a no-op. */
 (function (root) {
   "use strict";
 
@@ -206,7 +213,23 @@
     return { update: schedule, destroy: destroy };
   }
 
-  var API = { arrowState: arrowState, attach: attach };
+  // Auto-attach: on DOMContentLoaded, wire every [data-pillscroll] element. Idempotent (attach()
+  // no-ops on an already-wired bar), and a pure no-op in Node / non-DOM (no `document`).
+  function autoInit() {
+    try {
+      if (typeof document === "undefined" || !document.querySelectorAll) return;
+      var els = document.querySelectorAll("[data-pillscroll]");
+      for (var i = 0; i < els.length; i++) { try { attach(els[i]); } catch (e) {} }
+    } catch (e) {}
+  }
+  try {
+    if (typeof document !== "undefined" && document.addEventListener) {
+      if (document.readyState !== "loading") autoInit();     // defer/late-load → DOM already parsed
+      else document.addEventListener("DOMContentLoaded", autoInit);
+    }
+  } catch (e) {}
+
+  var API = { arrowState: arrowState, attach: attach, autoInit: autoInit };
 
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   if (root) root.DDPillScroll = API;

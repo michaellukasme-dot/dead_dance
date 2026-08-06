@@ -176,8 +176,9 @@ body.mfapp .curtainbar{top:32px}   /* sit just under the sticky drag-handle (.mf
          the poster now lives on the "Doug Boehm" curtain button below. -->
     <span id="roseTotalN" style="display:none">0</span>
   </div>
-  <div class="mflayers">
-    <span class="mfll">🗺 Show on map</span>
+  <!-- data-pillscroll → auto-attached scroll chevrons (dd_pillscroll.js). "🗺 Show on map" label
+       removed 2026-08-06: self-evident, and its width is reclaimed for the scrollable filter pills. -->
+  <div class="mflayers" data-pillscroll>
     <button class="mflay" id="sideToggle" onclick="mfToggleSide()" title="Toggle the map between the South Side (SteelStacks) and North Side (Main St)">⬇ Southside</button>
     <button class="mflay" id="cutesyToggle" onclick="mfCutesyToggle()" title="Cutesy Map">🎨 Cutesy</button>
     <button class="mflay on" data-f="stage" onclick="mfChip(this)">🌹 Stages</button>
@@ -495,7 +496,7 @@ window.ddId=function(){ try{ var k='dd.deviceid',v=localStorage.getItem(k); if(!
 <script src="dd_crumbs.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="qr.js"></script>
-<script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
+<script src="dd_native_bridge.js"></script><script src="dd_geo_native.js"></script><!-- native seam: in the Capacitor app, dd_gps sources background GPS so the dot survives a locked screen. Honest no-ops in a browser (dd_bggeo.js lazy-loads native-only). --><script src="dd_qrmark.js"></script><script src="dd_map.js"></script><script src="dd_gps.js"></script><script src="dd_steps.js"></script><script src="dd_telemetry.js"></script><script src="dd_photos.js"></script><script src="dd_surround.js"></script><script src="dd_roster.js"></script><script src="dd_setlist.js"></script>
 <script src="dd_bandgroups.js"></script><script src="dd_flywheel.js"></script><!-- Band→Fan flywheel: free ticket → fan → band group -->
 <script src="dd_groups.js"></script><!-- community/festival social groups: attendee → event group for friend suggestions -->
 <script src="dd_streetteam.js"></script><!-- Street Team: opted-in members' activity → cookies (guarded, never blocks GPS) -->
@@ -741,7 +742,7 @@ function drawAid(){ if(!LG_AID)return; LG_AID.clearLayers();
 }
 function mfApplyMapFilter(){ if(!LMAP)return; var lm={stage:LG_STAGE,shop:LG_SHOP,food:LG_FOOD,potty:LG_POTTY,aid:LG_AID};
   Object.keys(lm).forEach(function(k){ var lg=lm[k]; if(!lg)return; try{ if(MF_MAPON[k]){ if(!LMAP.hasLayer(lg)) lg.addTo(LMAP); } else if(LMAP.hasLayer(lg)) LMAP.removeLayer(lg); }catch(e){} }); }   // show ALL toggled-on layers
-function mfDirectTo(lat,lng,name){ try{ ensureMap(); if(!LMAP||!LG_DIR)return; LG_DIR.clearLayers();
+function mfDirectTo(lat,lng,name){ try{ ensureMap(); if(!LMAP||!LG_DIR)return; try{ mfNavActive(); }catch(e){}  /* walk-me-there → tighter native tracking, self-reverting (native no-op on web) */ LG_DIR.clearLayers();
   if(!window.YOU){ mfToast('📍 Tap “🥾 Start my walk” first — then I draw the line from you.'); try{ LMAP.setView([lat,lng],17,{animate:true}); }catch(e){} return; }
   var a=window.YOU, b=[lat,lng];
   L.polyline([a,b],{color:'#1f6fe0',weight:5,opacity:.9,dashArray:'2,9',lineCap:'round'}).addTo(LG_DIR);
@@ -750,6 +751,41 @@ function mfDirectTo(lat,lng,name){ try{ ensureMap(); if(!LMAP||!LG_DIR)return; L
   var mi=hav(a[0],a[1],b[0],b[1]), ft=Math.round(mi*5280);
   mfToast('🚶 '+(name||'There')+' — '+(ft<1000?ft+' ft':mi.toFixed(2)+' mi')+' away. Follow the blue line. 🌹');
 }catch(e){} }
+/* ── "Walk me to my stage" → tighter, continuous NATIVE tracking (active mode), but
+   SELF-REVERTING so 'active' can never persist and cook the battery. Native-gated: on web
+   (isNative()===false) mfNavActive is a pure no-op, so the web path is behavior-identical.
+   Reverts to 'passive' on WHICHEVER fires first: (a) a ~13-min HARD timeout that is ALWAYS
+   scheduled (so active can never outlive it, even with no gesture/close), (b) the next user
+   map drag/zoom, (c) the map sheet closing (mfTeardownGeo). Re-invoking directions resets
+   the timer. _mfNavTimer is the single "armed" flag; on web it stays null so mfNavRevert is a no-op. ── */
+var _mfNavTimer=null;
+function _mfNavGesture(){ mfNavRevert(); }
+function mfNavRevert(){
+  if(!_mfNavTimer) return;                                   // not armed (web, or already reverted) → nothing to touch
+  clearTimeout(_mfNavTimer); _mfNavTimer=null;
+  try{ if(LMAP && LMAP.off) LMAP.off('dragstart zoomstart', _mfNavGesture); }catch(e){}
+  try{ if(window.DDGPS && DDGPS.setNavMode) DDGPS.setNavMode('passive'); }catch(e){}
+}
+function mfNavActive(){
+  try{ if(!(window.DDShell && DDShell.isNative && DDShell.isNative())) return; }catch(e){ return; }  // native-only; web untouched
+  try{ if(window.DDGPS && DDGPS.setNavMode) DDGPS.setNavMode('active'); }catch(e){}
+  if(_mfNavTimer) clearTimeout(_mfNavTimer);
+  _mfNavTimer=setTimeout(mfNavRevert, 13*60*1000);           // hard cap — active NEVER outlives ~13 min
+  try{ if(LMAP && LMAP.off) LMAP.off('dragstart zoomstart', _mfNavGesture); }catch(e){}  // clear any stale binding
+  try{ if(LMAP && LMAP.on)  LMAP.on('dragstart zoomstart', _mfNavGesture); }catch(e){}    // next user pan/zoom reverts (one binding)
+}
+/* ── Explicit teardown — STOP the native bg engine when the MAP SHEET CLOSES. All three close
+   controls (parent ✕, scrim, "‹ Back to StageFill") route through the parent's ddSheetClose(),
+   which calls this SYNCHRONOUSLY (same-origin) BEFORE blanking the iframe. Deliberately NOT hooked
+   to pagehide / visibilitychange / blur — those fire on screen-lock / backgrounding and would kill
+   the very background survival we built. Native-gated: on web this is a no-op (the browser already
+   clears the geolocation watch when the iframe unloads), so the web path is unchanged. ── */
+window.mfTeardownGeo=function(){
+  try{ mfNavRevert(); }catch(e){}                            // drop active mode + clear its timer (no-op if not armed)
+  try{ if(!(window.DDShell && DDShell.isNative && DDShell.isNative())) return; }catch(e){ return; }
+  try{ if(WALK && WALK.gps && WALK.gps.stop){ WALK.gps.stop(); WALK.gps=null; } }catch(e){}
+  try{ if(window.DDShell && DDShell.stopGeo) DDShell.stopGeo(); }catch(e){}  // belt-and-suspenders: stop the native singleton
+};
 function actAtStage(name){ try{ if(typeof MF==='undefined'||!MF.length) return '';
   var psel=document.getElementById('planDate'); var day=(psel&&psel.value)||(typeof todayISO==='function'?todayISO():'');
   var now=(typeof nowMins==='function'?nowMins():0), ln=String(name).toLowerCase(), best=null;

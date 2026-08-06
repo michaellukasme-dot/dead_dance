@@ -1473,7 +1473,7 @@ window.ddOAuth=function(p){ try{ var c=window.ddClient&&ddClient(); if(c&&c.auth
 <script>
 function ddSheet(url,title,modal){var s=document.getElementById('ddsheet');if(!s)return;try{ if(/^(band_onboard|band_console|venue_ops|venue_console|influencer_console|sales_console)/.test(String(url))&&window.ddMarkInsider) ddMarkInsider(); }catch(e){}document.getElementById('ddsheet-f').src=url;if(title)document.getElementById('ddsheet-t').textContent=title;s.classList.toggle('card',!!modal);s.style.display='block';document.body.style.overflow='hidden';}
 function ddSheetExpand(){var s=document.getElementById('ddsheet');if(s)s.classList.toggle('card');}
-function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;s.style.display='none';document.getElementById('ddsheet-f').src='about:blank';document.body.style.overflow='';}
+function ddSheetClose(){var s=document.getElementById('ddsheet');if(!s)return;try{var _f=document.getElementById('ddsheet-f');if(_f&&_f.contentWindow&&_f.contentWindow.mfTeardownGeo)_f.contentWindow.mfTeardownGeo();}catch(e){}/* explicit close → stop native bg-GPS BEFORE blanking (same-origin, sync). NOT pagehide → survives screen-lock. No-op on web/other sheets. */s.style.display='none';document.getElementById('ddsheet-f').src='about:blank';document.body.style.overflow='';}
 /* Ticket = white modal floating over Home: header-less, transparent iframe so Home shows behind the ticket's own scrim */
 function ddTix(url){var s=document.getElementById('ddtix');if(!s)return;document.getElementById('ddtix-f').src=url;s.style.display='block';document.body.style.overflow='hidden';}
 function ddTixClose(){var s=document.getElementById('ddtix');if(!s)return;s.style.display='none';document.getElementById('ddtix-f').src='about:blank';document.body.style.overflow='';}
@@ -4602,6 +4602,18 @@ function karaokeBuild(){ var host=document.getElementById('karaokeCard'); if(!ho
     else if(p.get('sub')==='ok') setTimeout(function(){ toast('✅ Subscription active — your console is unlocked.'); },900);
     if(p.get('order')||p.get('sub')) history.replaceState({},'',location.pathname);
   }catch(e){} })();
+</script>
+<script>
+/* Phase-1 dev link — DEV+NATIVE ONLY. Gated behind window.DD_GEO_DEBUG (this frame OR the top
+   frame). Default (flag unset) → the link is NEVER created, so real users never see it and it can't
+   overlap the Home nav tab. Set window.DD_GEO_DEBUG=1 to restore it. Invisible on the web PWA. */
+(function(){try{
+  var dbg=false;
+  try{ if(window.DD_GEO_DEBUG) dbg=true; }catch(e){}
+  try{ if(window.top&&window.top!==window&&window.top.DD_GEO_DEBUG) dbg=true; }catch(e){}
+  if(!dbg) return;                                   // production default → nothing created
+  if(window.DDShell&&DDShell.isNative&&DDShell.isNative()){var a=document.createElement('a');a.href='gps_bg_test.html';a.textContent='🛰 BG-GPS Test';a.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;background:#7a3cc0;color:#fff;font:600 12px -apple-system,sans-serif;padding:8px 12px;border-radius:20px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.4)';document.body.appendChild(a);}
+}catch(e){}})();
 </script>
 <!-- AA_VER: live build badge (AA_DEPLOY) --><script>(function(){try{if(!window.caches||!caches.keys)return;caches.keys().then(function(ks){var b=null;(ks||[]).forEach(function(k){var m=/-v(\d+)/.exec(k);if(m){var n=+m[1];if(!b||n>b.n)b={n:n,s:'v'+m[1]};}});if(!b)return;if(document.getElementById('ddVer')||document.getElementById('fffVer')||document.getElementById('appVer'))return;var d=document.createElement('div');d.id='appVer';d.textContent=b.s;d.style.cssText='position:fixed;right:8px;bottom:8px;z-index:99999;font:600 11px/1 -apple-system,system-ui,sans-serif;color:#7a7a7a;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:4px 7px;opacity:.8;pointer-events:none';document.body.appendChild(d);});}catch(e){}})();</script>
 </body></html>
