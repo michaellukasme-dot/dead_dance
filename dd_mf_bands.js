@@ -41,7 +41,7 @@
       conf: "Set: Aug 5. No public roster or links found — awaiting the band." },
     /* SAMPLE of the ticketed treatment — a band that lets us sell tickets for their OWN show. */
     "demo-ticketed": { name: "Your Band", kind: "Ticketed headline show · sample", home: "Bethlehem, PA",
-      tier: "most", bg: "https://deaddance.app/MUSIKFEST_poster.jpg",
+      tier: "most", bg: "https://deaddance.app/musikfest_poster.jpg",
       members: [{ n: "— your lineup —", r: "appears here" }],
       ticketed: true, host: "managed",
       set: { date: "2026-09-19", time: "8:00 PM", stage: "The Foundry · SteelStacks" },
