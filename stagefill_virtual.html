@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>StageFill · Virtual</title>
+<style>
+:root{--dead:#6a4bb0;--fest:#e0a92e;--genre:#2f7dd1;--ink:#241a33;--bar:#2b1d42;--paper:#ffffff;--muted:#8a8398}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;font-family:'DM Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#efedf3;color:var(--ink);overflow:hidden}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+/* top */
+#top{flex:0 0 auto;background:linear-gradient(180deg,#2b1d42,#3a2352);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:14px}
+#top .brand{font-weight:700;letter-spacing:.02em}
+#crumbs{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#e7dcff;font-size:13px}
+#crumbs .c{cursor:pointer;text-decoration:none}
+#crumbs .c:not(:last-child):after{content:' ›';color:#9b7fd6}
+#crumbs .c.here{font-weight:700;color:#fff}
+#pill{background:#c0334b;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
+/* map */
+#stage{flex:1 1 auto;position:relative;background:var(--paper)}
+#svg{width:100%;height:100%;display:block;touch-action:manipulation}
+.node{cursor:pointer}
+.bub{transition:opacity .2s}
+.lbl{font-weight:700;fill:#241a33;text-anchor:middle;dominant-baseline:middle;pointer-events:none;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.container-ring{fill:none;stroke-width:5;stroke-dasharray:14 12;stroke-linecap:round;opacity:.9}
+.container-lbl{font-weight:800;text-anchor:middle;dominant-baseline:middle}
+.live-ring{fill:none;stroke-width:3;opacity:.0}
+@keyframes pulse{0%{opacity:.85;transform:scale(1)}70%{opacity:0;transform:scale(1.5)}100%{opacity:0;transform:scale(1.5)}}
+.live .live-ring{animation:pulse 1.8s ease-out infinite;transform-origin:center;transform-box:fill-box}
+.livebadge{fill:#c0334b}
+/* resolve panel */
+#panel{position:absolute;left:0;right:0;bottom:0;transform:translateY(110%);transition:transform .28s cubic-bezier(.2,.7,.2,1);background:#fff;border-top-left-radius:16px;border-top-right-radius:16px;box-shadow:0 -8px 30px rgba(40,25,60,.22);padding:16px 18px 20px}
+#panel.up{transform:translateY(0)}
+#panel h3{margin:2px 0 2px;font-size:18px}
+#panel .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+#panel .row{display:flex;gap:10px}
+#panel button{flex:1;border:0;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+#panel .go{background:#c0334b;color:#fff}#panel .sec{background:#efe9f6;color:#3a2352}
+#panel .x{position:absolute;top:10px;right:14px;border:0;background:none;font-size:20px;color:#b3adc0;cursor:pointer}
+/* bottom bar (signed-in only) */
+#bar{flex:0 0 auto;background:var(--bar);color:#cfc3e6;display:flex;justify-content:space-around;padding:9px 4px 12px}
+#bar .t{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;letter-spacing:.02em;opacity:.9}
+#bar .t .ic{font-size:19px}
+/* signed-out */
+#signBtn{background:#c0334b;color:#fff;border:0;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer}
+#signsheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(120%);transition:transform .28s cubic-bezier(.2,.7,.2,1);background:#fff;border-top-left-radius:16px;border-top-right-radius:16px;box-shadow:0 -8px 30px rgba(40,25,60,.24);padding:20px 18px 22px;text-align:center}
+#signsheet.up{transform:translateY(0)}
+#signsheet h3{margin:2px 0 3px;font-size:19px}
+#signsheet .sub{color:var(--muted);font-size:13px;margin:0 auto 14px;max-width:34ch}
+#signsheet button{width:280px;max-width:84vw;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin:5px auto;display:block}
+#signsheet .x{position:absolute;top:8px;right:14px;background:none;font-size:20px;color:#b3adc0;width:auto;padding:0}
+.fb{background:#1877f2;color:#fff}.gg{background:#fff;color:#3c4043;border:1px solid #dcd7e2}
+.skip{background:transparent;color:#8a8398;font-weight:600}
+.hidden{display:none!important}
+</style></head><body>
+<div id="app">
+  <div id="top">
+    <span class="brand">StageFill</span>
+    <span id="crumbs"></span>
+    <span id="pill" class="hidden">LIVE</span>
+    <button id="signBtn" onclick="openSign()">Sign in</button>
+  </div>
+  <div id="stage">
+    <svg id="svg" preserveAspectRatio="xMidYMid meet"></svg>
+    <div id="panel">
+      <button class="x" onclick="closePanel()">×</button>
+      <h3 id="pTitle"></h3>
+      <div class="sub" id="pSub"></div>
+      <div class="row"><button class="go" id="pGo">Enter</button><button class="sec" onclick="closePanel()">Not now</button></div>
+    </div>
+    <div id="signsheet">
+      <button class="x" onclick="closeSign()">×</button>
+      <h3 id="signTitle">Continue to jump in</h3>
+      <div class="sub">You're seeing what's hot right now — sign in to drill in, see who's going, and grab tickets.</div>
+      <button class="fb" onclick="signIn()">Continue with Facebook</button>
+      <button class="gg" onclick="signIn()">Continue with Google</button>
+      <button class="skip" onclick="closeSign()">Keep looking</button>
+    </div>
+  </div>
+  <div id="bar" class="hidden">
+    <div class="t"><span class="ic">&#128101;</span>Friends</div>
+    <div class="t"><span class="ic">&#128142;</span>Dealer</div>
+    <div class="t"><span class="ic">&#127918;</span>Games</div>
+    <div class="t"><span class="ic">&#128276;</span>Alerts</div>
+    <div class="t"><span class="ic">&#128273;</span>You</div>
+  </div>
+</div>
+<script>
+"use strict";
+/* ---- DATA: the container tree. tickets+tier drive size; live drives brightness; vertical drives color ---- */
+var TREE = {
+  id:"root", name:"All", children:[
+    { id:"dead", name:"DeadDance", vert:"dead", children:[
+      { id:"deal", name:"Deal & Co", vert:"dead", tier:3, tickets:1400, live:true, place:"Easton · today" },
+      { id:"dso",  name:"DSO",       vert:"dead", tier:3, tickets:900 },
+      { id:"jrad", name:"JRAD",      vert:"dead", tier:3, tickets:820 },
+      { id:"jgb",  name:"JGB",       vert:"dead", tier:2, tickets:560 },
+      { id:"gd",   name:"GD",        vert:"dead", tier:2, tickets:520 },
+      { id:"kim",  name:"Kimock",    vert:"dead", tier:2, tickets:360 },
+      { id:"ss",   name:"S&S",       vert:"dead", tier:1, tickets:240 },
+      { id:"trib", name:"%Tribute%", vert:"dead", tier:1, tickets:300 }
+    ]},
+    { id:"fest", name:"FestivalDance", vert:"fest", children:[
+      { id:"musik", name:"MusikFest", vert:"fest", tier:3, tickets:9000, live:true, place:"Bethlehem · this week" },
+      { id:"peach", name:"The Peach", vert:"fest", tier:3, tickets:2600, place:"Scranton" },
+      { id:"dsj",   name:"Dark Star Jubilee", vert:"fest", tier:2, tickets:1500, place:"OH" },
+      { id:"x800",  name:"×800 more", vert:"fest", tier:2, tickets:6000, meta:true }
+    ]},
+    { id:"genre", name:"AnyDance", vert:"genre", children:[
+      { id:"pop",  name:"Pop",    vert:"genre", tier:2, tickets:900 },
+      { id:"rock", name:"Rock",   vert:"genre", tier:2, tickets:760 },
+      { id:"latin",name:"Latin",  vert:"genre", tier:2, tickets:640 },
+      { id:"kara", name:"Karaoke",vert:"genre", tier:1, tickets:420 },
+      { id:"hip",  name:"HipHop", vert:"genre", tier:1, tickets:480, children:[
+        { id:"nika", name:"Andre Nickatina", vert:"genre", tier:2, tickets:540, place:"old-school · live" },
+        { id:"hh2",  name:"More", vert:"genre", tier:1, tickets:220, meta:true } ] },
+      { id:"house",name:"House",  vert:"genre", tier:1, tickets:360 },
+      { id:"any",  name:"More",   vert:"genre", tier:3, tickets:1100, meta:true }
+    ]}
+  ]
+};
+var COLOR = { dead:"#6a4bb0", fest:"#e0a92e", genre:"#2f7dd1" };
+function tint(hex,amt){ // lighten toward white by amt (0..1)
+  var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+  r=Math.round(r+(255-r)*amt);g=Math.round(g+(255-g)*amt);b=Math.round(b+(255-b)*amt);
+  return "rgb("+r+","+g+","+b+")";
+}
+function weight(n){ return (n.tickets||150) * (1 + (n.tier||0)*0.35); }
+function radiusFor(w){ return 16 + Math.sqrt(w)*1.15; }        // px in svg units
+function brightness(n){ return n.live ? 1 : (n.tier>=3?0.86:0.62); } // liveness -> vibrancy
+/* heat = where the action is: live + ticket density -> warm glow (the heat map) */
+function heat(n){ var base=n.live?0.80:0; var dens=Math.min(1,(n.tickets||0)/3000);
+  return Math.min(1, base + dens*0.55 + ((n.tier||0)>=3?0.08:0)); }
+function heatColor(h){ var s=[[244,182,74],[242,121,46],[224,52,46]]; // amber -> orange -> red
+  var lo=h<=.5?0:1, t=h<=.5?h/.5:(h-.5)/.5, a=s[lo], b=s[lo+1];
+  return "rgb("+Math.round(a[0]+(b[0]-a[0])*t)+","+Math.round(a[1]+(b[1]-a[1])*t)+","+Math.round(a[2]+(b[2]-a[2])*t)+")"; }
+
+/* ---- spiral pack: place circles (with .r) around 0,0 avoiding overlap ---- */
+function pack(nodes){
+  nodes.sort(function(a,b){return b.r-a.r;});
+  var placed=[];
+  nodes.forEach(function(n){
+    if(placed.length===0){ n.x=0;n.y=0;placed.push(n);return; }
+    var a=0,step=0.5,ok,x,y,rad;
+    for(var i=0;i<6000;i++){
+      rad = 4 + a*3.2;
+      x=Math.cos(a)*rad; y=Math.sin(a)*rad;
+      ok=true;
+      for(var j=0;j<placed.length;j++){ var p=placed[j];
+        if(Math.hypot(p.x-x,p.y-y) < p.r+n.r+7){ ok=false; break; } }
+      if(ok){ n.x=x;n.y=y;placed.push(n);return; }
+      a+=step;
+    }
+    n.x=x;n.y=y;placed.push(n); // fallback
+  });
+  return nodes;
+}
+/* fit placed nodes (with x,y,r) into rect (cx,cy center; maxW,maxH) with a max scale cap */
+function fitInto(nodes,cx,cy,maxW,maxH,cap){
+  var minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  nodes.forEach(function(n){ minx=Math.min(minx,n.x-n.r);miny=Math.min(miny,n.y-n.r);
+    maxx=Math.max(maxx,n.x+n.r);maxy=Math.max(maxy,n.y+n.r); });
+  var bw=maxx-minx||1, bh=maxy-miny||1;
+  var s=Math.min(maxW/bw, maxH/bh); if(cap) s=Math.min(s,cap);
+  var bxc=(minx+maxx)/2, byc=(miny+maxy)/2;
+  nodes.forEach(function(n){ n.sx=cx+(n.x-bxc)*s; n.sy=cy+(n.y-byc)*s; n.sr=n.r*s; });
+  return s;
+}
+
+/* ---- state ---- */
+var stack=[TREE];               // navigation stack; top = current node
+var VBW=1000, VBH=1000;         // svg viewbox (recomputed to element size)
+var svg=document.getElementById("svg");
+function cur(){ return stack[stack.length-1]; }
+
+function setViewBox(){
+  var r=document.getElementById("stage").getBoundingClientRect();
+  VBW=Math.max(320,Math.round(r.width)); VBH=Math.max(320,Math.round(r.height));
+  svg.setAttribute("viewBox","0 0 "+VBW+" "+VBH);
+}
+function el(tag,attrs){ var e=document.createElementNS("http://www.w3.org/2000/svg",tag);
+  for(var k in attrs) e.setAttribute(k,attrs[k]); return e; }
+
+function drawBubble(g,n,onDark){
+  var op=brightness(n);
+  var fill = tint(COLOR[n.vert], n.live?0.0:(1-op)*0.9);
+  var group=el("g",{class:"node"+(n.live?" live":""),transform:"translate("+n.sx+","+n.sy+")"});
+  var h=heat(n);
+  if(h>0.16){ group.appendChild(el("circle",{r:n.sr*1.8,fill:heatColor(h),"fill-opacity":(0.12+h*0.5).toFixed(3),filter:"url(#glow)"})); }
+  if(n.live){ group.appendChild(el("circle",{class:"live-ring",r:n.sr,stroke:COLOR[n.vert]})); }
+  var c=el("circle",{class:"bub",r:n.sr,fill:fill,"fill-opacity":n.live?1:op,stroke:COLOR[n.vert],"stroke-opacity":.35,"stroke-width":1.5});
+  group.appendChild(c);
+  if(n.live){ group.appendChild(el("circle",{r:Math.max(4,n.sr*0.14),cx:n.sr*0.6,cy:-n.sr*0.6,class:"livebadge"})); }
+  var below=n.sr<=26;
+  var fs=below?Math.max(10,Math.min(n.sr*0.5,13)):Math.max(11,Math.min(n.sr*0.42,22));
+  var t=el("text",{class:"lbl","font-size":fs,y:below?(n.sr+13):1}); t.textContent=n.name;
+  group.appendChild(t);
+  group.addEventListener("click",function(ev){ ev.stopPropagation(); onNode(n); });
+  g.appendChild(group);
+}
+
+function render(){
+  setViewBox();
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  var defs=el("defs",{}); var flt=el("filter",{id:"glow",x:"-70%",y:"-70%",width:"240%",height:"240%"});
+  flt.appendChild(el("feGaussianBlur",{stdDeviation:"11"})); defs.appendChild(flt); svg.appendChild(defs);
+  var node=cur();
+  renderCrumbs();
+  var pad=16;
+  if(node.id==="root"){
+    // Overlapping sets (a Venn) — NOT mutually exclusive. The same fan/act lives in more than one.
+    var verts=node.children, cx=VBW/2, cy=VBH*0.5;
+    var R=Math.min(VBW*0.34, VBH*0.30);          // lobe radius
+    var s=R*0.72;                                 // center offset -> lobes overlap
+    var centers=[ {x:cx, y:cy - s},                        // DeadDance (top)
+                  {x:cx - s*0.87, y:cy + s*0.52},          // FestivalDance (lower-left)
+                  {x:cx + s*0.87, y:cy + s*0.52} ];        // AnyDance (lower-right)
+    // faint fills so the intersections blend
+    verts.forEach(function(vg,i){ var c=centers[i];
+      svg.appendChild(el("ellipse",{cx:c.x,cy:c.y,rx:R,ry:R,fill:COLOR[vg.vert],"fill-opacity":0.06})); });
+    // dashed rings + labels (both drill the vertical)
+    verts.forEach(function(vg,i){ var c=centers[i];
+      var ring=el("ellipse",{class:"container-ring",cx:c.x,cy:c.y,rx:R,ry:R,stroke:COLOR[vg.vert]});
+      ring.style.pointerEvents="stroke"; ring.style.cursor="pointer";
+      ring.addEventListener("click",function(){ onNode(vg); }); svg.appendChild(ring);
+      var dx=c.x-cx, dy=c.y-cy, m=Math.hypot(dx,dy)||1;
+      var lx=c.x+dx/m*(R*0.66), ly=c.y+dy/m*(R*0.66)+(i===0?-6:14);
+      var vl=el("text",{class:"container-lbl","font-size":Math.min(R*0.32,26),x:lx,y:ly,fill:COLOR[vg.vert]});
+      vl.textContent=vg.name; vl.style.cursor="pointer";
+      vl.addEventListener("click",function(){ onNode(vg); }); svg.appendChild(vl);
+    });
+    // pack each vertical's children into its lobe (biased outward so the center reads as shared)
+    verts.forEach(function(vg,i){ var c=centers[i];
+      var dx=c.x-cx, dy=c.y-cy, m=Math.hypot(dx,dy)||1;
+      var bx=c.x+dx/m*(R*0.16), by=c.y+dy/m*(R*0.16);
+      var kids=vg.children.map(function(k){ k.r=radiusFor(weight(k)); return k; });
+      pack(kids); fitInto(kids,bx,by,R*1.35,R*1.35,2.2);
+      kids.forEach(function(k){ drawBubble(svg,k); });
+    });
+  } else {
+    // drilled: fill canvas with this node's children
+    var kids2=(node.children||[]).map(function(k){ k.r=radiusFor(weight(k)); return k; });
+    if(kids2.length===0){ resolve(node); stack.pop(); render(); return; }
+    pack(kids2); fitInto(kids2,VBW/2,VBH*0.5,VBW-pad*2.4,VBH-pad*3,2.6);
+    kids2.forEach(function(k){ drawBubble(svg,k,true); });
+  }
+}
+function onNode(n){
+  if(!signedIn){ openSign(n); return; }          // browse-then-gate: click invites sign-in
+  if(n.children && n.children.length){ drill(n); }
+  else { resolve(n); }
+}
+function drill(n){ stack.push(n); render(); }
+function renderCrumbs(){
+  var c=document.getElementById("crumbs"); c.innerHTML="";
+  stack.forEach(function(s,i){
+    var a=document.createElement("span"); a.className="c"+(i===stack.length-1?" here":"");
+    a.textContent=(s.id==="root"?"All":s.name);
+    a.addEventListener("click",function(){ stack=stack.slice(0,i+1); render(); });
+    c.appendChild(a);
+  });
+}
+/* resolve = "the fan is now IN this level" */
+function resolve(n){
+  document.getElementById("pTitle").textContent=n.name;
+  document.getElementById("pSub").textContent=(n.live?"● LIVE — ":"")+(n.place||"in the Virtual")+" · "+(n.tickets||0).toLocaleString()+" fans near";
+  document.getElementById("pill").classList.toggle("hidden",!n.live);
+  var go=document.getElementById("pGo"); go.textContent=n.live?"Enter · it's on now":"Enter";
+  document.getElementById("panel").classList.add("up");
+}
+function closePanel(){ document.getElementById("panel").classList.remove("up");
+  document.getElementById("pill").classList.add("hidden"); }
+
+/* ---- auth: browse-then-gate. Signed-out visitors SEE the heat; a click invites them in. ---- */
+var signedIn=false, pendingNode=null;
+function openSign(n){ pendingNode=n||null; document.getElementById("signsheet").classList.add("up"); }
+function closeSign(){ document.getElementById("signsheet").classList.remove("up"); pendingNode=null; }
+function signIn(){
+  signedIn=true;
+  document.getElementById("signsheet").classList.remove("up");
+  document.getElementById("signBtn").classList.add("hidden");
+  document.getElementById("bar").classList.remove("hidden");
+  var p=pendingNode; pendingNode=null;
+  if(p){ if(p.children&&p.children.length){ drill(p); } else { render(); resolve(p); } }
+  else { render(); }
+}
+window.addEventListener("resize",render);
+document.getElementById("svg").addEventListener("click",function(){ closePanel(); });
+render();   // show the hot map immediately — before sign-in
+</script>
+</body></html>

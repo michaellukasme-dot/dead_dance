@@ -63,6 +63,7 @@
     var reason = res.reason || (res.authentic === false ? 'forged' : 'error');
     switch (reason) {
       case 'already_used': return { tone: 'warn', label: 'Already used', sub: res.redeemed_at ? ('Admitted ' + fmtAt(res.redeemed_at)) : 'This ticket was already redeemed.' };
+      case 'stale':        return { tone: 'bad',  label: 'Expired code — refresh', sub: 'This code is stale (likely a screenshot). Have them reopen their live ticket.' };
       case 'forged':       return { tone: 'bad',  label: 'FORGED — do not admit', sub: 'Signature does not match. Not an authentic ticket.' };
       case 'not_staff':    return { tone: 'bad',  label: 'Not staff', sub: 'A paid ticket needs the event staff token to admit.' };
       case 'no_staff':     return { tone: 'bad',  label: 'No staff token set', sub: 'Register this event’s staff token before admitting paid tickets.' };
@@ -187,8 +188,68 @@
     } catch (e) { return Promise.resolve(null); }
   }
 
+  // ---- ROTATING (time-based) entry code — makes "screenshots won't get you in" TRUE -----------
+  // The device fetches its per-ticket seed once (getSeed), then rolls a fresh code every ~15s
+  // on-device: code = HMAC(seed, id|step). A screenshot shows one step and goes stale within ~30s.
+  function _hmacHex(seedStr, msg) {
+    try {
+      var subtle = (root.crypto && root.crypto.subtle) || (typeof crypto !== 'undefined' && crypto.subtle);
+      if (!subtle || typeof TextEncoder === 'undefined') return Promise.resolve(null);
+      var enc = new TextEncoder();
+      return subtle.importKey('raw', enc.encode(String(seedStr)), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+        .then(function (k) { return subtle.sign('HMAC', k, enc.encode(String(msg))); })
+        .then(function (buf) { var b = new Uint8Array(buf), s = ''; for (var i = 0; i < b.length; i++) s += ('0' + b[i].toString(16)).slice(-2); return s; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+  function rotStep(win) { win = win || 15; return Math.floor(Date.now() / 1000 / win); }
+  function rotCode(seed, id, step) { return _hmacHex(seed, String(id) + '|' + step).then(function (h) { return h ? h.slice(0, 16) : null; }); }
+  function parseRot(s) {
+    var str = String(s == null ? '' : s).trim();
+    try { if (str.indexOf('http') === 0 && str.indexOf('tix=') >= 0) { var u = new URL(str); var q = u.searchParams.get('tix'); if (q) str = q.trim(); } } catch (e) {}
+    if (str.indexOf('TIXR:') !== 0) return null;
+    var p = str.slice(5).split(':'); if (p.length < 3) return null;
+    var step = parseInt(p[1], 10); if (!(step >= 0)) return null;
+    if (!p[0] || !p[2]) return null;
+    return { id: p[0], step: step, code: p[2] };
+  }
+  // start rolling. onTick(token, secondsLeft, step) fires now + every second. Returns a stop() fn.
+  function startRotating(id, seed, onTick, opts) {
+    opts = opts || {}; var win = opts.window || 15; var stopped = false, timer = null;
+    function tick() {
+      if (stopped) return; var step = rotStep(win);
+      rotCode(seed, id, step).then(function (code) {
+        if (stopped || !code) return;
+        var secsLeft = win - (Math.floor(Date.now() / 1000) % win);
+        try { onTick('TIXR:' + id + ':' + step + ':' + code, secsLeft, step); } catch (e) {}
+      });
+    }
+    tick(); timer = setInterval(tick, 1000);
+    return function stop() { stopped = true; if (timer) clearInterval(timer); };
+  }
+  // fetch this ticket's seed (server hands it over ONLY on a valid static sig). Cache it, roll offline.
+  function getSeed(token) {
+    var p = parseToken(token); if (!p) return Promise.resolve({ ok: false, reason: 'not_found' });
+    var c = C(); if (!c) return Promise.resolve({ offline: true, ok: false });
+    try { return c.rpc('sf_ticket_seed', { p_ticket: p.id, p_sig: p.sig }).then(function (r) { return unwrap(r) || { offline: true, ok: false }; }).catch(function () { return { offline: true, ok: false }; }); }
+    catch (e) { return Promise.resolve({ offline: true, ok: false }); }
+  }
+  // redeem a scanned ROTATING token (TIXR:id:step:code). opts: { staffToken, lat, lng, by }.
+  function redeemRot(token, opts) {
+    opts = opts || {}; var p = parseRot(token); if (!p) return Promise.resolve({ ok: false, reason: 'not_found' });
+    var c = C(); if (!c) return Promise.resolve({ offline: true, ok: false });
+    try {
+      return c.rpc('sf_ticket_redeem_rot', {
+        p_ticket: p.id, p_step: p.step, p_code: p.code,
+        p_staff_token: (opts.staffToken != null ? String(opts.staffToken) : null),
+        p_lat: (opts.lat != null ? opts.lat : null), p_lng: (opts.lng != null ? opts.lng : null),
+        p_by: (opts.by != null ? String(opts.by) : null)
+      }).then(function (r) { return unwrap(r) || { offline: true, ok: false }; }).catch(function () { return { offline: true, ok: false }; });
+    } catch (e) { return Promise.resolve({ offline: true, ok: false }); }
+  }
+
   var api = {
     encodeToken: encodeToken, parseToken: parseToken,
+    rotStep: rotStep, rotCode: rotCode, parseRot: parseRot, startRotating: startRotating, getSeed: getSeed, redeemRot: redeemRot,
     redeemDecision: redeemDecision, humanStatus: humanStatus, verifyStatus: verifyStatus,
     formatProv: formatProv,
     verify: verify, redeem: redeem, issue: issue, staffClaim: staffClaim, prov: prov, attend: attend

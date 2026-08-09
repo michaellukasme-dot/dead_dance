@@ -2,7 +2,7 @@
  * dd_citymap.js — the CITY WALKING MAP brain.
  *
  * Every city gets a QR that resolves to THEIR downtown walking map — a year-round
- * proximity ad network for the ~1-mile regentrified corridor. Same engine as the
+ * proximity ad network for the ~1-mile revitalized downtown corridor ("The Corridor"). Same engine as the
  * festival map; the corridor is just the footprint. One level up the container tree:
  *     City → corridor (always-on) + festivals + farmers markets + recurring events
  *
