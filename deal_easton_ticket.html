@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>DEAL · Scott Park · StageFill</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+:root{--ink:#241a33;--blue:#2f6fe0;--red:#c0334b;--muted:#8a8398;--line:#ece8f2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#eae6f0;font-family:'DM Sans',system-ui,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:22px 12px}
+.tk{width:100%;max-width:360px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(30,20,45,.28)}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:12px 15px 8px}
+.hd .b{font-weight:800;font-size:13px;color:var(--ink)}.hd .b span{color:var(--blue)}
+.hd .s{font-size:11px;font-weight:700;color:#2e7d46;display:flex;align-items:center;gap:4px}
+.hd .x{width:26px;height:26px;border-radius:50%;background:#f0edf5;color:#a39db3;display:flex;align-items:center;justify-content:center;font-size:15px}
+.body{padding:4px 18px 16px}
+.eg{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;font-weight:700}
+.gate{font-size:22px;font-weight:800;color:var(--ink);line-height:1.1;margin:2px 0 6px}
+.ev{font-size:15px;font-weight:700;color:var(--ink)}
+.sub{font-size:13px;color:#5b5568;margin:1px 0 2px}
+.dir{font-size:13px;color:var(--red);font-weight:700;text-decoration:none}
+.when{margin:10px 0 4px;display:flex;gap:8px;align-items:baseline}
+.when b{font-size:16px;color:var(--ink)}.when span{font-size:13px;color:var(--muted)}
+.ga{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#c98a1a;font-weight:800;text-align:center;margin:12px 0 6px}
+.code{border:1px solid var(--line);border-radius:12px;padding:12px 10px 8px;text-align:center;position:relative;overflow:hidden}
+.bars{height:66px;display:flex;gap:2px;align-items:stretch;justify-content:center}
+.bars i{width:3px;background:var(--ink);border-radius:1px}
+.scan{position:absolute;top:8px;bottom:26px;left:50%;width:3px;background:linear-gradient(#2f6fe0,#8fb6ff);box-shadow:0 0 10px #2f6fe0;animation:sc 2.2s ease-in-out infinite}
+@keyframes sc{0%{left:16%}50%{left:84%}100%{left:16%}}
+.code .note{font-size:12px;color:var(--ink);font-weight:600;margin-top:7px}
+.price{display:flex;align-items:center;justify-content:space-between;margin:12px 0 4px}
+.price .p{font-size:22px;font-weight:800;color:var(--ink)}.price .p small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.buy{background:var(--red);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:800;cursor:pointer}
+.tag{font-size:12px;color:#5b5568;text-align:center;margin:8px 0}
+.act{width:100%;border:1px dashed #d9c6cf;background:#fff;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--red);margin:7px 0;cursor:pointer;text-align:center}
+.act.mic{border-color:#cdbfe6;color:#6a4bb0}
+.trip{display:flex;gap:7px;margin-top:2px}
+.trip button{flex:1;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-weight:700;font-size:12.5px;color:#3a2352;cursor:pointer}
+.qrwrap{background:#241a33;color:#efe9f6;padding:15px 16px 18px;margin-top:12px}
+.qrid{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#b9aee0;margin-bottom:10px}
+.qrid .pass{border:1px solid #4a3d63;border-radius:14px;padding:3px 10px;font-weight:700;color:#e7dcff}
+.qrrow{display:flex;gap:12px}
+.qr{background:#fff;border-radius:8px;padding:7px;flex:0 0 92px}
+.qr svg{display:block;width:78px;height:78px}
+.qrtx{font-size:11.5px;color:#cfc3e6;line-height:1.5}
+.qrtx b{color:#fff}
+.ft{font-size:10.5px;color:#8a8398;text-align:center;padding:10px 16px 16px}
+</style></head><body>
+<div class="tk">
+  <div class="hd"><div class="b">DEAL · <span>StageFill</span></div><div class="s">🔒 SECURE</div><div class="x">×</div></div>
+  <div class="body">
+    <div class="eg">Entry Gate</div>
+    <div class="gate">Scott Park Stage</div>
+    <div class="ev">DEAL — A Tribute to the Grateful Dead</div>
+    <div class="sub">130 Larry Holmes Dr, Easton, PA 18042</div>
+    <a class="dir" href="https://maps.google.com/?q=130+Larry+Holmes+Dr+Easton+PA+18042" target="_blank">📍 Directions &amp; parking ›</a>
+    <div class="when"><b>Today · Sun, Aug 9</b><span>· doors set · 4:00 PM</span></div>
+
+    <div class="ga">General Admission</div>
+    <div class="code">
+      <div class="bars" id="bars"></div><div class="scan"></div>
+      <div class="note">Screenshots won't get you in.</div>
+    </div>
+
+    <div class="price"><div class="p">Free<small>community show · Easton Partnership</small></div>
+      <button class="buy">🎟 Get my pass · one tap</button></div>
+    <div class="tag">Your ticket. Your friends. No toll booth.</div>
+
+    <div class="act">📍 Check in — in your voice</div>
+    <div class="act mic">🎤 That's my band — sell my tickets</div>
+    <div class="trip"><button>🎼 Setlist</button><button>🎸 Roster</button><button>↗ Share</button></div>
+  </div>
+  <div class="qrwrap">
+    <div class="qrid"><span>Pass ID · d.dance/t/DEAL-0809</span><span class="pass">SHOW PASS</span></div>
+    <div class="qrrow">
+      <div class="qr">
+        <svg viewBox="0 0 33 33" xmlns="http://www.w3.org/2000/svg"><rect width="33" height="33" fill="#fff"/>
+        <g fill="#241a33"><path d="M0 0h7v7H0zM1 1v5h5V1z" transform="translate(0,0)"/><rect x="1" y="1" width="5" height="5"/><path d="M26 0h7v7h-7z"/><rect x="27" y="1" width="5" height="5" fill="#fff"/><rect x="28" y="2" width="3" height="3" fill="#241a33"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><path d="M0 26h7v7H0z"/><rect x="1" y="27" width="5" height="5" fill="#fff"/><rect x="2" y="28" width="3" height="3"/></g>
+        <g fill="#241a33"><rect x="9" y="2" width="2" height="2"/><rect x="13" y="1" width="2" height="2"/><rect x="17" y="3" width="2" height="2"/><rect x="21" y="1" width="2" height="2"/><rect x="10" y="9" width="2" height="2"/><rect x="14" y="10" width="2" height="2"/><rect x="18" y="8" width="2" height="2"/><rect x="22" y="11" width="2" height="2"/><rect x="26" y="9" width="2" height="2"/><rect x="30" y="10" width="2" height="2"/><rect x="9" y="14" width="2" height="2"/><rect x="12" y="16" width="2" height="2"/><rect x="16" y="14" width="2" height="2"/><rect x="20" y="17" width="2" height="2"/><rect x="24" y="15" width="2" height="2"/><rect x="28" y="16" width="2" height="2"/><rect x="10" y="20" width="2" height="2"/><rect x="14" y="22" width="2" height="2"/><rect x="18" y="20" width="2" height="2"/><rect x="22" y="23" width="2" height="2"/><rect x="26" y="21" width="2" height="2"/><rect x="30" y="22" width="2" height="2"/><rect x="11" y="27" width="2" height="2"/><rect x="15" y="29" width="2" height="2"/><rect x="19" y="27" width="2" height="2"/><rect x="23" y="30" width="2" height="2"/><rect x="27" y="27" width="2" height="2"/><rect x="30" y="29" width="2" height="2"/></g></svg>
+      </div>
+      <div class="qrtx"><b>Your show QR.</b> The same code before, during &amp; after — scan at the gate, get each song texted live, then keep it as your night in history. 🌹</div>
+    </div>
+  </div>
+  <div class="ft">Sample StageFill pass — the live rotating code &amp; QR are issued by the server (see the white paper). Demo for the Easton / Deal show.</div>
+</div>
+<script>
+// draw the rotating-style barcode (visual)
+var bars=document.getElementById('bars'),h='';
+for(var i=0;i<64;i++){var w=2+Math.round(Math.random()*4);h+='<i style="height:'+(38+Math.round(Math.random()*28))+'px"></i>';}
+bars.innerHTML=h;
+</script>
+</body></html>

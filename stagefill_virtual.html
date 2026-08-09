@@ -210,6 +210,7 @@ function render(){
     var verts=node.children, cx=VBW/2, cy=VBH*0.5;
     var R=Math.min(VBW*0.34, VBH*0.30);          // lobe radius
     var s=R*0.72;                                 // center offset -> lobes overlap
+    cy = VBH*0.5 + s*0.26;                         // lower the cluster so it sits centered in the frame
     var centers=[ {x:cx, y:cy - s},                        // DeadDance (top)
                   {x:cx - s*0.87, y:cy + s*0.52},          // FestivalDance (lower-left)
                   {x:cx + s*0.87, y:cy + s*0.52} ];        // AnyDance (lower-right)

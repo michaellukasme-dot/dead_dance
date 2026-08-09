@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CityWalk</title>
+<title>Karnival of the Arts · The Maker</title>
 <style>
 :root{--dead:#6a4bb0;--fest:#e0a92e;--genre:#2f7dd1;--ink:#241a33;--bar:#2b1d42;--paper:#ffffff;--muted:#8a8398}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -53,7 +53,7 @@ html,body{margin:0;height:100%;font-family:'DM Sans',system-ui,-apple-system,Seg
 </style></head><body>
 <div id="app">
   <div id="top">
-    <span class="brand">CityWalk</span>
+    <span class="brand">Karnival · Sep 3–7 · Kempton PA</span>
     <span id="crumbs"></span>
     <span id="pill" class="hidden">LIVE</span>
     <button id="signBtn" onclick="openSign()">Sign in</button>
@@ -69,7 +69,7 @@ html,body{margin:0;height:100%;font-family:'DM Sans',system-ui,-apple-system,Seg
     <div id="signsheet">
       <button class="x" onclick="closeSign()">×</button>
       <h3 id="signTitle">Continue to jump in</h3>
-      <div class="sub">You're seeing what's open and on right now — sign in to save spots, get alerts, and check in.</div>
+      <div class="sub">You're seeing the Karnival lineup — sign in to build your schedule, grab tickets, and get set times.</div>
       <button class="fb" onclick="signIn()">Continue with Facebook</button>
       <button class="gg" onclick="signIn()">Continue with Google</button>
       <button class="skip" onclick="closeSign()">Keep looking</button>
@@ -87,31 +87,36 @@ html,body{margin:0;height:100%;font-family:'DM Sans',system-ui,-apple-system,Seg
 "use strict";
 /* ---- DATA: the container tree. tickets+tier drive size; live drives brightness; vertical drives color ---- */
 var TREE = {
-  id:"root", name:"CityWalk", children:[
-    { id:"corridor", name:"The Corridor", vert:"dead", children:[
-      { id:"bread", name:"Gourmet Breads", vert:"dead", tier:2, tickets:420, live:true, place:"open now · also in the Market" },
-      { id:"coffee",name:"Coffee",   vert:"dead", tier:1, tickets:360, live:true, place:"open now" },
-      { id:"bistro",name:"Bistro",   vert:"dead", tier:2, tickets:300 },
-      { id:"books", name:"Bookshop", vert:"dead", tier:1, tickets:180 },
-      { id:"vint",  name:"Vintage",  vert:"dead", tier:1, tickets:150 }
+  id:"root", name:"Karnival", children:[
+    { id:"live", name:"Live Music", vert:"dead", children:[
+      { id:"nz",   name:"Night Zero", vert:"dead", tier:3, tickets:2600, place:"Sun · Twiddle/Kung Fu/Dopapod members" },
+      { id:"hj",   name:"Hayley Jane Band", vert:"dead", tier:3, tickets:2400, place:"Thursday" },
+      { id:"sn",   name:"Sneezy", vert:"dead", tier:3, tickets:2300, place:"Friday" },
+      { id:"5am",  name:"5AM Trio", vert:"dead", tier:3, tickets:2200, place:"Saturday" },
+      { id:"hc",   name:"Honeycomb", vert:"dead", tier:2, tickets:1300, place:"late-night set" },
+      { id:"deal", name:"Deal", vert:"dead", tier:2, tickets:1300, place:"Grateful Dead tribute" },
+      { id:"mums", name:"Mums The Word", vert:"dead", tier:2, tickets:1100, place:"feat. The Bally Girls" },
+      { id:"nest", name:"Nester's Extra Credit", vert:"dead", tier:2, tickets:1000 },
+      { id:"lm",   name:"+17 bands", vert:"dead", tier:2, tickets:1700, meta:true }
     ]},
-    { id:"market", name:"Farmers Market", vert:"fest", children:[
-      { id:"mbread",name:"Gourmet Breads", vert:"fest", tier:2, tickets:420, live:true, place:"also in The Corridor" },
-      { id:"veg",   name:"Vegetable Stand",vert:"fest", tier:2, tickets:520, live:true, place:"market day" },
-      { id:"flor",  name:"Flowers", vert:"fest", tier:1, tickets:280, live:true },
-      { id:"cheese",name:"Cheese",  vert:"fest", tier:1, tickets:240, live:true },
-      { id:"tent",  name:"Music Tent", vert:"fest", tier:2, tickets:300, live:true, place:"live now" }
+    { id:"elec", name:"Electronic", vert:"genre", children:[
+      { id:"bak",  name:"Bakked", vert:"genre", tier:2, tickets:900 },
+      { id:"tro",  name:"Trowl B2B Della", vert:"genre", tier:1, tickets:560 },
+      { id:"kon",  name:"Konverge", vert:"genre", tier:1, tickets:520 },
+      { id:"lan",  name:"La Noir", vert:"genre", tier:1, tickets:480 },
+      { id:"rose", name:"Rosebud", vert:"genre", tier:1, tickets:460 },
+      { id:"sg",   name:"Space Grace", vert:"genre", tier:1, tickets:440 },
+      { id:"em",   name:"+27 DJs", vert:"genre", tier:2, tickets:1500, meta:true }
     ]},
-    { id:"walk", name:"City Walking Map", vert:"genre", children:[
-      { id:"park",  name:"Park Stage", vert:"genre", tier:3, tickets:900, live:true, place:"concert today" },
-      { id:"river", name:"Riverwalk", vert:"genre", tier:2, tickets:600 },
-      { id:"track", name:"Track",     vert:"genre", tier:1, tickets:220, place:"where permitted" },
-      { id:"trail", name:"Trailhead", vert:"genre", tier:1, tickets:260 },
-      { id:"hist",  name:"Historic Sites", vert:"genre", tier:1, tickets:300 }
+    { id:"flow", name:"Flow & Art", vert:"fest", children:[
+      { id:"fl",   name:"Flow Stage", vert:"fest", tier:2, tickets:700, place:"fire & flow" },
+      { id:"art",  name:"Art Gallery", vert:"fest", tier:1, tickets:420 },
+      { id:"ven",  name:"Vendors", vert:"fest", tier:1, tickets:500 },
+      { id:"wrk",  name:"Workshops", vert:"fest", tier:1, tickets:360 }
     ]}
   ]
 };
-var COLOR = { dead:"#b5651d", fest:"#4a8c3f", genre:"#2f7dd1" }; // Corridor / Market / Walking Map
+var COLOR = { dead:"#d98a2b", genre:"#7a4bb0", fest:"#2f9bb0" }; // Live / Electronic / Flow&Art
 function tint(hex,amt){ // lighten toward white by amt (0..1)
   var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
   r=Math.round(r+(255-r)*amt);g=Math.round(g+(255-g)*amt);b=Math.round(b+(255-b)*amt);
