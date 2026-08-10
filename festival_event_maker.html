@@ -416,6 +416,7 @@ body.mfdrag .sheet{transition:none}
 <script>try{ var _SFC=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.ddClient=function(){return _SFC;}; try{ _SFC.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) _SFC.auth.signInAnonymously(); }); }catch(_e){} }catch(e){}</script>
 <script src="qr.js"></script>
 <script src="dd_categories.js"></script>
+<script src="dd_cutesy_art.js"></script><!-- shared illustrated-map generator (festival / market / corridor themes) -->
 <script src="dd_curtain_drag.js"></script><!-- shared thumb-drag curtain controller (pure geometry unit-tested in dd_curtain_drag.test.js) -->
 <script src="dd_pillscroll.js"></script><!-- on-screen pill-scroll chevrons (Apple/Google-Maps affordance; pure logic unit-tested in dd_pillscroll.test.js) -->
 <script>
@@ -1089,7 +1090,9 @@ function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state
 /* ===== 🎨 CUTESY MAP — generate illustrated art FROM the geo, snapped to the exact grounds =====
    No hand-alignment: we render the boundary + pavilion containers onto a canvas keyed to the geo
    bounding box, then overlay it bounded to that same box — real markers land right on the illustration. */
-function cutesyArtURL(bbox, feats){ try{
+function cutesyArtURL(bbox, feats, theme){
+  try{ if(window.DDCutesyArt && DDCutesyArt.render){ var _u=DDCutesyArt.render(bbox, feats, theme); if(_u) return _u; } }catch(e){}   // shared themed engine (festival/market/corridor)
+  try{
   var sw=bbox[0], ne=bbox[1], latSpan=ne[0]-sw[0], lngSpan=ne[1]-sw[1]; if(latSpan<=0||lngSpan<=0) return null;
   var midLat=(sw[0]+ne[0])/2, lngM=lngSpan*111320*Math.cos(midLat*Math.PI/180), latM=latSpan*110540;
   var W=1100, H=Math.max(520, Math.min(1600, Math.round(W*(latM/Math.max(1,lngM)))));
@@ -1115,13 +1118,24 @@ function mkrCutesyBBox(){ var pts=[]; try{ var s=activeSec&&activeSec(); if(s&&s
   var pl=(A-a)*0.06||0.0004, pn=(O-o)*0.06||0.0004; return [[a-pl,o-pn],[A+pl,O+pn]]; }
 var _cutesyLayer=null, _cutesyOn=false;
 window.mkrCutesyToggle=function(){ var b=document.getElementById('cutesyPill');
-  if(_cutesyOn){ if(_cutesyLayer){ try{ map.removeLayer(_cutesyLayer); }catch(e){} _cutesyLayer=null; } _cutesyOn=false; if(b)b.classList.remove('on'); return; }
-  var bbox=mkrCutesyBBox(); if(!bbox){ toast('Draw your grounds first — then tap 🎨 Cutesy.'); return; }
+  if(_cutesyOn){ if(_cutesyLayer){ try{ map.removeLayer(_cutesyLayer); }catch(e){} _cutesyLayer=null; } _cutesyOn=false; if(b)b.classList.remove('on'); var pk=document.getElementById('cutesyPick'); if(pk)pk.parentNode.removeChild(pk); return; }
+  if(!mkrCutesyBBox()){ toast('Draw your grounds first — then tap 🎨 Cutesy.'); return; }
+  mkrCutesyChooser(); };
+function mkrCutesyChooser(){ var old=document.getElementById('cutesyPick'); if(old){ old.parentNode.removeChild(old); return; }   // toggle the chooser
+  var host=document.createElement('div'); host.id='cutesyPick';
+  host.style.cssText='position:absolute;top:calc(54px + env(safe-area-inset-top,0));left:50%;transform:translateX(-50%);z-index:7;background:#fff;border-radius:14px;box-shadow:0 10px 30px #0005;padding:9px;display:flex;gap:7px';
+  var themes=[['festival','🎪','Festival'],['market','🥕','Market'],['corridor','🏘','Corridor']];
+  host.innerHTML='<span style="align-self:center;font-size:11px;font-weight:800;color:var(--muted);padding:0 4px">🎨 Look:</span>'+themes.map(function(t){ return '<button onclick="mkrCutesyGen(\''+t[0]+'\')" style="border:1.5px solid var(--line);background:'+((state.cutesyTheme||"festival")===t[0]?'#efe6fb':'#faf7ff')+';border-radius:11px;padding:9px 12px;font-weight:800;font-size:12.5px;color:var(--purple);cursor:pointer;white-space:nowrap">'+t[1]+' '+t[2]+'</button>'; }).join('');
+  document.body.appendChild(host); }
+window.mkrCutesyGen=function(theme){ var pk=document.getElementById('cutesyPick'); if(pk)pk.parentNode.removeChild(pk);
+  try{ state.cutesyTheme=theme; emSave(); }catch(e){}
+  var b=document.getElementById('cutesyPill'), bbox=mkrCutesyBBox(); if(!bbox){ toast('Draw your grounds first.'); return; }
   var bd=(function(){ var s=activeSec&&activeSec(); if(s&&s.pts&&s.pts.length>=3) return s.pts; var o=[]; (state.sections||[]).forEach(function(x){ if(x.pts&&!o.length)o=x.pts; }); return o; })();
-  var url=cutesyArtURL(bbox, { title:(state.name||'Festival'), boundary:bd, containers:(state.tents||[]).map(function(t){return {corners:t.corners,name:t.name,covered:t.covered};}) });
+  var tl=state.name||({festival:'Festival',market:'Farmers Market',corridor:'The Corridor'}[theme]||'Map');
+  var url=cutesyArtURL(bbox, { title:tl, boundary:bd, containers:(state.tents||[]).map(function(t){return {corners:t.corners,name:t.name,covered:t.covered};}) }, theme);
   if(!url){ toast('Couldn’t render the cutesy map.'); return; }
   try{ if(!map.getPane('cutesy')){ map.createPane('cutesy'); map.getPane('cutesy').style.zIndex=250; map.getPane('cutesy').style.pointerEvents='none'; } }catch(e){}
-  try{ _cutesyLayer=L.imageOverlay(url, bbox, { opacity:0.97, pane:'cutesy', interactive:false }).addTo(map); _cutesyOn=true; if(b)b.classList.add('on'); map.fitBounds(bbox,{animate:true}); }catch(e){ toast('Cutesy overlay failed.'); } };
+  try{ if(_cutesyLayer){ map.removeLayer(_cutesyLayer); } _cutesyLayer=L.imageOverlay(url, bbox, { opacity:0.97, pane:'cutesy', interactive:false }).addTo(map); _cutesyOn=true; if(b)b.classList.add('on'); map.fitBounds(bbox,{animate:true}); }catch(e){ toast('Cutesy overlay failed.'); } };
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); rebuildSections(); renderOverlays(); renderOvList(); redrawAllAreas(); renderAreas(); setTimeout(function(){ try{ map.invalidateSize(); frameGrounds(); }catch(e){} },320); });
 </script>
