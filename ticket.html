@@ -438,7 +438,10 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   function _slLift(rec){ if(!rec) return {start:'',songs:[]}; var songs=rec.songs||[], meta=rec.meta, setBreaks=rec.setBreaks, clean=[];
     songs.forEach(function(s){ if(s&&s._h){ meta=meta||{eventLen:s.eventLen,sets:s.sets,breakMin:s.breakMin}; if(setBreaks==null) setBreaks=s.setBreaks; return; } clean.push(s); });
     var out={start:rec.start||'',songs:clean}; if(meta)out.meta=meta; if(setBreaks!=null)out.setBreaks=setBreaks; if(rec.archived)out.archived=true; return out; }
-  function getSongs(){ try{ var v=JSON.parse(localStorage.getItem(sKey())||'null'); if(v&&v.songs) return _slLift(v); }catch(e){} try{ if(window.DDSetlist){ var sl=(DDSetlist.get&&DDSetlist.get(band,date))||(DDSetlist.now&&DDSetlist.now(band)); if(sl) return _slLift({start:sl.start||'',songs:sl.songs||sl||[]}); } }catch(e){} return {start:'',songs:[]}; }
+  function getSongs(){ try{ var v=JSON.parse(localStorage.getItem(sKey())||'null'); if(v&&v.songs) return _slLift(v); }catch(e){}
+    try{ if(window.DDSetlist){ var sl=(DDSetlist.get&&DDSetlist.get(band))||(DDSetlist.now&&DDSetlist.now(band));   // tidy: get()/now() are band-keyed — no stray date arg
+      if(sl){ var songs=sl.songs||(Array.isArray(sl)?sl:(sl?[sl]:[]));   // tidy: now() returns a bare current song → coerce to an array
+        return _slLift({start:sl.start||'',songs:songs}); } } }catch(e){} return {start:'',songs:[]}; }
   var chead=function(icon,title){ return '<button class="curtx" onclick="curtainClose()" aria-label="Close">×</button><div class="curth">'+icon+' '+title+'</div><div class="curtsub">'+esc(band)+' · '+esc(venueShort)+(date?(' · '+esc(fmtD(date))):'')+'</div>'; };
 
   // ----- ROSTER -----
@@ -701,9 +704,10 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     var inp=document.createElement('input'); inp.type='file'; inp.accept='audio/*'; inp.style.display='none';
     inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f){ return; }
       try{ window.__ddAudio[akey(band,date,nm)] = URL.createObjectURL(f); }catch(e){}   // immediate local playback
-      // PHASE 6 — PERMANENT: upload to the 'event-audio' bucket, then bind the public URL so EVERY ticket
-      // (any device) gets the ▶. No-ops cleanly until the bucket exists (device playback still works now).
-      try{ window.SFClient && window.SFClient(function(cl){ if(!(cl&&cl.storage)) return;
+      // PHASE 6 — PERMANENT (GATED): upload to the 'event-audio' bucket + bind the public URL so EVERY ticket
+      // (any device) gets the ▶. DARK until AUDIO_RIGHTS_GATE is flipped AND dd_event_audio_bucket_UNRUN.sql
+      // is run. Until then, local device playback still works — nothing leaves the device.
+      if(window.AUDIO_RIGHTS_GATE===true){ try{ window.SFClient && window.SFClient(function(cl){ if(!(cl&&cl.storage)) return;
         var path=slug(band)+'/'+(date||'na')+'/'+slug(nm)+'-'+Date.now()+'.audio';
         cl.storage.from('event-audio').upload(path, f, {upsert:true, contentType:(f.type||'audio/mpeg')}).then(function(res){
           if(res&&res.error) return;
@@ -712,7 +716,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
           try{ cl.rpc('dd_event_media_set',{ p_band_slug:slug(band), p_event_key:(ev||date||''), p_song:nm, p_kind:'audio', p_url:url, p_caption:null }); }catch(e){}
           try{ ticketCurtain('setlist'); }catch(e){}
         }).catch(function(){});
-      }); }catch(e){}
+      }); }catch(e){} }
       ticketCurtain('setlist');
       try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('🎧 Audio added to “'+nm+'” — every ticket now gets a ▶ on this song 🌹'); }catch(e){}
       try{ document.body.removeChild(inp); }catch(e){} };

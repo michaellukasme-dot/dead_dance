@@ -12,8 +12,9 @@ body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
 .card{background:#fff;color:#1f2430;border-radius:22px;max-width:360px;width:100%;padding:24px;text-align:center;box-shadow:0 20px 60px #0008}
 .card h1{font-size:18px;margin:0 0 2px}
 .card .sub{color:#8a92a6;font-weight:700;font-size:13px;margin-bottom:14px}
-#qr{width:260px;height:260px;background:#fff;border-radius:14px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+#qr{width:260px;height:260px;background:#fff;border-radius:14px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .tok{font:700 12px/1.4 ui-monospace,Menlo,monospace;color:#8a92a6;word-break:break-all}
+.cd{font:800 13px/1.4 -apple-system,system-ui,sans-serif;color:#1a7a3f;margin-top:6px;min-height:16px}
 .badge{display:inline-block;background:#eef2fb;color:var(--accent);font-weight:800;font-size:11px;padding:3px 12px;border-radius:999px;margin-top:8px}
 .note{color:#8a92a6;font-size:11.5px;margin-top:14px}
 </style>
@@ -24,15 +25,51 @@ body{font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-s
   <h1 style="margin-top:10px">Show this at the door</h1>
   <div class="sub">Staff will scan it to admit you</div>
   <div id="qr">…</div>
+  <div class="cd" id="cd"></div>
   <div class="tok" id="tok"></div>
-  <div class="note">Screenshot this to keep it — the code is your entry. One scan admits your party.</div>
+  <div class="note" id="note">Screenshot this to keep it — the code is your entry. One scan admits your party.</div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="qr.js"></script>
+<script src="dd_ticketsec.js"></script><!-- ticket-security brain: parse/getSeed/startRotating (guarded) -->
 <script>
 function qs(k){ return new URLSearchParams(location.search).get(k); }
-var t=qs('t')||'';
-document.getElementById('tok').textContent=t?('#'+t.slice(0,8).toUpperCase()):'No ticket code in this link.';
-if(t){ try{ if(window.DDQR&&DDQR.into) DDQR.into('qr',location.origin+'/sf_ticket.html?t='+encodeURIComponent(t),{size:260,css:60,caption:false}); }catch(e){ document.getElementById('qr').textContent=t; } }
+var t=qs('t')||'', tix=qs('tix')||'';
+
+/* COMMERCE GATE — the secure ROTATING paid ticket is BUILT but DARK until the commerce gate is met
+   (Stripe live + mint-a-signed-dd_ticket on paid fulfillment, then pass ?tix=TIX:<id>:<sig> here).
+   Until then, paid uses the opaque single-use check-in QR below (unchanged). Flip to true ONLY when
+   the paid pipeline is live and issuing real signed tickets. */
+window.SF_PAID_SECURE = false;
+
+/* the current, unchanged opaque single-use pass (system B) */
+function opaquePass(){
+  var cd=document.getElementById('cd'); if(cd) cd.textContent='';
+  document.getElementById('tok').textContent = t ? ('#'+t.slice(0,8).toUpperCase()) : 'No ticket code in this link.';
+  if(t){ try{ if(window.DDQR&&DDQR.into) DDQR.into('qr', location.origin+'/sf_ticket.html?t='+encodeURIComponent(t), {size:260,css:60,caption:false}); }catch(e){ document.getElementById('qr').textContent=t; } }
+}
+
+/* the secure ROTATING pass — a live TIXR code the door redeems via sf_ticket_redeem_rot */
+function securePass(){
+  var U="https://vmbqfzxhrqxpwgidogfm.supabase.co",
+      A="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM";
+  function mk(){ try{ var C=window.supabase.createClient(U,A); window.ddClient=function(){return C;}; try{ C.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) C.auth.signInAnonymously(); }); }catch(e){} return C; }catch(e){ return null; } }
+  if(!mk() || !(window.DDTicketSec&&DDTicketSec.getSeed&&DDTicketSec.startRotating&&DDTicketSec.parseToken)){ opaquePass(); return; }
+  var p=DDTicketSec.parseToken(tix); if(!p){ opaquePass(); return; }
+  DDTicketSec.getSeed(tix).then(function(res){
+    if(!(res&&res.ok&&res.seed)){ opaquePass(); return; }   // not a real signed ticket / offline → honest fallback
+    document.getElementById('tok').textContent = '#'+String(p.id).slice(0,8).toUpperCase();
+    var note=document.getElementById('note'); if(note) note.textContent='Live code — screenshots won’t get you in. It refreshes every ~15s.';
+    var lastStep=-1;
+    DDTicketSec.startRotating(p.id, res.seed, function(token, secsLeft, step){
+      if(step!==lastStep){ lastStep=step; try{ if(window.DDQR&&DDQR.into){ var q=document.getElementById('qr'); if(q){ q.innerHTML=''; DDQR.into('qr', token, {size:300, css:260, caption:false, mark:false}); } } }catch(e){} }
+      var cd=document.getElementById('cd'); if(cd) cd.textContent='↻ '+secsLeft+'s';
+    }, {window:(res.window||15)});
+  }).catch(function(){ opaquePass(); });
+}
+
+if(window.SF_PAID_SECURE===true && tix && window.DDTicketSec && DDTicketSec.parseToken && DDTicketSec.parseToken(tix)){ securePass(); }
+else { opaquePass(); }
 </script>
 </body>
 </html>
