@@ -157,6 +157,23 @@ body.mfdrag .sheet{transition:none}
 .tbig{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:9px;cursor:pointer;font:inherit;color:var(--ink)}
 .tbig b{font-size:15px}.tbig span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .tbig:hover{border-color:var(--purple)}
+/* ---- Self-service SETUP WIZARD ("we ask, you build it") ---- */
+#emWizOv{position:fixed;inset:0;z-index:2147483000;background:rgba(18,10,28,.55);display:none;align-items:flex-end;justify-content:center}
+#emWizOv.on{display:flex}
+#emWizWin{background:#fff;width:min(460px,96vw);max-height:90vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -14px 50px #0007}
+@media(min-width:640px){#emWizOv{align-items:center}#emWizWin{border-radius:20px}}
+#emWizHd{background:linear-gradient(90deg,#2a1b3d,#4a1e5c);color:#fff;padding:13px 15px;display:flex;align-items:center;gap:9px}
+#emWizHd b{font-size:15px;flex:1}#emWizHd .x{background:#ffffff22;border:0;color:#fff;width:30px;height:30px;border-radius:9px;font-size:17px;cursor:pointer}
+#emWizBarWrap{height:3px;background:#ece7f2}#emWizBar{height:3px;background:linear-gradient(90deg,#7a3cc0,#e0a92e);width:0;transition:width .35s}
+#emWizBody{flex:1;overflow:auto;padding:18px 16px}
+#emWizBody h3{margin:0 0 8px;font-size:18px;color:#241026}
+#emWizBody p{margin:0 0 12px;font-size:13.5px;line-height:1.5;color:#5b4f63}#emWizBody p b{color:#4a1e5c}
+.wzin{width:100%;border:1px solid #e7e0ee;border-radius:10px;padding:11px;font:inherit;font-size:14px;background:#fff;color:#241026;margin-bottom:2px}
+.wzta{width:100%;min-height:92px;border:1px solid #e7e0ee;border-radius:10px;padding:11px;font:600 13px/1.5 ui-monospace,Menlo,monospace;background:#fff;color:#241026;margin-top:8px;resize:vertical;box-sizing:border-box}
+.wzlbl{flex:1;display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:800;color:#8a7d92}
+#emWizFoot{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));border-top:1px solid #eee}
+.wbtn{flex:1;border:0;border-radius:11px;padding:12px;font-weight:800;font-size:14px;cursor:pointer}
+.wbtn.p{background:linear-gradient(135deg,#6d28d9,#4a1e5c);color:#fff}.wbtn.g{background:#f0ebf6;color:#4a1e5c;flex:0 0 auto;padding:12px 16px}
 .tlabel{font-size:12px;font-weight:800;color:var(--muted);margin:8px 0 8px}
 .titems{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .titem{display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 4px;font-size:20px;cursor:pointer}
@@ -168,7 +185,8 @@ body.mfdrag .sheet{transition:none}
   <div class="ov">
     <h2>StageFill Event Maker</h2>
     <p>Original event content flows in — every stage, potty, shop &amp; act, pinpoint-mapped, on any device.</p>
-    <button onclick="emStart()">Start building →</button>
+    <button onclick="wizOpen()">🧭 Guide me — build it step by step</button>
+    <button onclick="emStart()" style="background:#ffffff1f;box-shadow:none;margin-top:8px">Start from scratch →</button>
   </div>
 </div>
 <div class="em-top">
@@ -215,7 +233,15 @@ body.mfdrag .sheet{transition:none}
       <input id="placeQ" placeholder="🔍 Search a place — e.g. Bethlehem, PA" onkeydown="if(event.key==='Enter'){emSearchPlace(this.value);return false;}" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:14px;background:#fff;color:var(--ink)">
       <button class="btn p" onclick="emSearchPlace(document.getElementById('placeQ').value)">Go</button>
     </div>
-    <div class="sec">Sections <span style="font-weight:700;color:var(--muted);font-size:12px">· <span id="secCount">1</span></span></div>
+    <div class="sec">📍 Center point <span style="font-weight:700;color:var(--muted);font-size:12px">· the event's absolute anchor (required)</span></div>
+    <div class="hint">Every event resolves to one true center — the map, the tickets and “Drive me there” all use it. Easiest: in <b>Google Maps</b>, zoom way in, <b>right-click the dead center</b> of your grounds → the coordinates copy → <b>paste</b> below. Or center this map and tap 🎯, or capture your GPS on-site.</div>
+    <div id="ctrReadout" style="font:800 13px/1.4 ui-monospace,Menlo,monospace;color:#b0338a;background:#faf7ff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0">Center: — not set —</div>
+    <input id="ctrPaste" placeholder="Paste: 40.630194, -75.851005" oninput="emCenterPaste(this.value)" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;font-size:13px;background:#fff;color:var(--ink)">
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn p" style="flex:1;min-width:130px" onclick="emSetCenterMap()">🎯 Set = map middle</button>
+      <button class="btn g" style="flex:1;min-width:120px" onclick="emCenterGPS()">📍 Capture my GPS</button>
+    </div>
+    <div class="sec" style="margin-top:16px">Sections <span style="font-weight:700;color:var(--muted);font-size:12px">· <span id="secCount">1</span></span></div>
     <div class="hint">Each section is one map you zoom to. MusikFest = <b>North</b> &amp; <b>South</b>; Bacon Fest = Centre Square + a spoke per street. Tap a section to switch · drag its pins to frame it (<b>4 by default</b>). For an awkward-shaped or <b>curved</b> park, tap <b>📍 ＋ Corner</b> to add pins and trace the outline · tap a pin to remove it. Add a whole section with <b>➕ → 🗺️ New section</b>.</div>
     <div class="secbar" id="secBar"></div>
     <div class="sectools">
@@ -357,11 +383,20 @@ body.mfdrag .sheet{transition:none}
     <h3>What are you adding?</h3>
     <button class="tbig" onclick="emAddSection()">🗺️ <b>New section</b><span>Another rectangular map to zoom to — a second side, or a spoke. Name it (North Side, Ferry St…).</span></button>
     <button class="tbig act" onclick="emCloseType();emAddAct()">🎸 <b>Act / stage</b><span>A band on the schedule — with time &amp; category.</span></button>
+    <button class="tbig" onclick="emCloseType();emTab('cur_platz')">⛺ <b>Pavilion / Tent / Camping area</b><span>A container you draw the corners of — a covered pavilion, a beer tent, a camping field. Put stages &amp; vendors inside it.</span></button>
+    <button class="tbig" onclick="emAddCustom()">➕ <b>Add Custom</b><span>Anything we didn't list — name it, pick an emoji, drop it on the map. Your festival, your pins.</span></button>
     <div class="tlabel">Official items — tap one, then tap the map</div>
     <div class="titems" id="typeItems"></div>
     <div class="btnrow"><button class="btn g" style="width:100%" onclick="emCloseType()">Cancel</button></div>
   </div>
 </div>
+
+<div id="emWizOv"><div id="emWizWin">
+  <div id="emWizHd"><span style="font-size:18px">🧭</span><b>Build your festival</b><button class="x" onclick="wizClose()" aria-label="Close">×</button></div>
+  <div id="emWizBarWrap"><div id="emWizBar"></div></div>
+  <div id="emWizBody"></div>
+  <div id="emWizFoot"></div>
+</div></div>
 
 <div class="scrim" id="calScrim">
   <div class="modal">
@@ -391,13 +426,15 @@ body.mfdrag .sheet{transition:none}
 </script>
 <script>
 var LS='dd.eventmaker.draft';
-var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',corners:null,acts:[],floor:null,floorIcons:[],stageW:'',stageD:'',survey:[],partners:[],started:false,slug:'',ticketPrice:0};
+var state={name:'',dateStart:'',dateEnd:'',startTime:'18:00',city:'',state:'',cat:'live_music',venue:'',center:null,corners:null,acts:[],floor:null,floorIcons:[],stageW:'',stageD:'',survey:[],partners:[],started:false,slug:'',ticketPrice:0};
+var centerMarker=null;
 var map, tiles, cornerMarkers={}, footprint=null, actMarkers=[], placingAct=null, placeMode=null;
 
 function el(id){return document.getElementById(id);}
 function emTab(id){ ['cur_map','cur_floor','cur_acts','cur_platz','cur_partners','cur_survey','cur_share'].forEach(function(x){ var n=el(x); if(n)n.classList.toggle('on',x===id); });
   document.querySelectorAll('.curtainbar .tab').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-t')===id); });
-  setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },40); }
+  setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },40);
+  if(id==='cur_map'){ try{ paintCenter(); }catch(e){} } }
 /* teach a venue how to upload + mark up their indoor floor plan (opened via ?teach=floor) */
 function emFloorTeach(){ if(document.getElementById('floorTeach'))return;
   var o=document.createElement('div'); o.id='floorTeach';
@@ -622,12 +659,18 @@ window.emOvOpacity=function(id,v){ var o=ovById(id); if(!o)return; o.opacity=(+v
 window.emOvEdit=function(id){ OV_EDIT=(OV_EDIT===id?null:id); renderOverlays(); renderOvList(); };
 window.emOvRemove=function(id){ if(!confirm('Remove this map overlay?'))return; ensureOv(); state.mapOverlays=state.mapOverlays.filter(function(o){return o.id!==id;}); if(OV_EDIT===id)OV_EDIT=null; emSave(); renderOverlays(); renderOvList(); };
 /* ===== ➕ TYPE PICKER — New section · official MF items · Act/stage ===== */
-var EM_ITEMS=[['stage','🎪','Stage'],['potty','🚻','Restroom'],['first_aid','⛑️','First Aid'],['merch','🛍','Merch / Shop'],['food','🍔','Food'],['bar','🍺','Bar'],['atm','🏧','ATM'],['parking','🅿️','Parking'],['shuttle','🚐','Shuttle'],['bus','🚌','Bus'],['recycle','♻️','Recycling'],['info','ℹ️','Info'],['water','🚰','Water'],['misting','💧','Misting']];
+var EM_ITEMS=[['stage','🎪','Stage'],['potty','🚻','Restroom'],['first_aid','⛑️','First Aid'],['merch','🛍','Merch / Shop'],['food','🍔','Food'],['bar','🍺','Bar'],['atm','🏧','ATM'],['parking','🅿️','Parking'],['camping','🏕️','Camping'],['gate','🚪','Gate / Entrance'],['shuttle','🚐','Shuttle'],['bus','🚌','Bus'],['recycle','♻️','Recycling'],['info','ℹ️','Info'],['water','🚰','Water'],['misting','💧','Misting']];
 function emOpenType(){ var g=el('typeItems'); if(g&&!g.dataset.done){ g.innerHTML=EM_ITEMS.map(function(t){ return '<button class="titem" onclick="emAddFacility(\''+t[0]+'\',\''+t[1]+'\',\''+t[2].replace(/'/g,"")+'\')">'+t[1]+'<span>'+t[2]+'</span></button>'; }).join(''); g.dataset.done='1'; } el('typeScrim').classList.add('on'); }
 function emCloseType(){ el('typeScrim').classList.remove('on'); }
 function emAddFacility(key,icon,label){ emCloseType(); emTab('cur_map');
   placingAct={name:label,kind:'facility',stage:'',time:'',where:'map',cat:key,catLabel:label,catIcon:icon};
   placeMode='map'; toast('Tap the map to place the '+label+'.'); }
+// ➕ Add Custom — the extensible primitive: the admin names ANYTHING we didn't anticipate, picks an
+// emoji, and drops it. Container doctrine — the operator can add whatever their festival needs.
+function emAddCustom(){ var name=prompt('Name it — anything (e.g. Silent Disco, Kids Zone, Sponsor Lounge, Petting Zoo):',''); if(name==null)return; name=(name||'').trim(); if(!name)return;
+  var icon=(prompt('Pick an emoji for it (or leave the default 📍):','📍')||'📍').trim()||'📍';
+  emAddFacility('custom_'+Date.now().toString(36), icon, name); }
+window.emAddCustom=emAddCustom;
 
 /* ---------- acts ---------- */
 function emCats(){ var sel=el('a_cat'); if(!sel||!window.DDCats)return; if(sel.options.length)return; sel.innerHTML=DDCats.list().map(function(c){ return '<option value="'+c.key+'">'+c.icon+' '+c.label+'</option>'; }).join(''); }
@@ -785,7 +828,16 @@ window.emShareCloud=function(){ var F=window.DD_FEST||{};
   try{ navigator.clipboard.writeText(u); toast(F.slug?'Cloud link copied.':'Publish first to get a live link — draft link copied.'); }catch(e){ toast('Saved on this device.'); } };
 function emShareInit(){ var sc=el('evCat'); if(sc&&!sc.options.length&&window.DDCats){ sc.innerHTML=DDCats.list().map(function(c){return '<option value="'+c.key+'">'+c.icon+' '+c.label+'</option>';}).join(''); }
   if(el('evCity'))el('evCity').value=state.city||''; if(el('evState'))el('evState').value=state.state||''; if(el('evVenue'))el('evVenue').value=state.venue||''; if(el('evTicket'))el('evTicket').value=state.ticketPrice||''; if(el('evCat')&&state.cat)el('evCat').value=state.cat; }
-function emCenter(){ if(state.corners&&state.corners.tl){ var c=state.corners; return [(c.tl[0]+c.br[0])/2,(c.tl[1]+c.br[1])/2]; } try{ var ll=map.getCenter(); return [ll.lat,ll.lng]; }catch(e){ return [40.6187,-75.3803]; } }
+// ---- absolute CENTER POINT (the required anchor) ----
+function paintCenter(){ var r=el('ctrReadout'); if(r){ if(state.center&&state.center.length===2&&isFinite(state.center[0])){ r.textContent='Center: '+(+state.center[0]).toFixed(6)+', '+(+state.center[1]).toFixed(6); r.style.color='#1f9e6b'; } else { r.textContent='Center: — not set —'; r.style.color='#b0338a'; } }
+  var p=el('ctrPaste'); if(p&&state.center&&!p.value){ p.value=(+state.center[0]).toFixed(6)+', '+(+state.center[1]).toFixed(6); } }
+function setCenter(lat,lng){ if(!isFinite(lat)||!isFinite(lng)) return false; if(lat<-90||lat>90||lng<-180||lng>180) return false; state.center=[+lat,+lng]; try{ emSave(); }catch(e){} paintCenter();
+  try{ if(centerMarker){ centerMarker.setLatLng([lat,lng]); } else if(window.L&&map){ centerMarker=L.marker([lat,lng]).addTo(map).bindPopup('📍 Event center'); } }catch(e){} return true; }
+function emCenterPaste(v){ var m=String(v||'').match(/(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)/); if(m && setCenter(parseFloat(m[1]),parseFloat(m[2]))){ try{ map.setView([parseFloat(m[1]),parseFloat(m[2])], Math.max(map.getZoom(),16)); }catch(e){} } }
+function emSetCenterMap(){ try{ var c=map.getCenter(); setCenter(c.lat,c.lng); }catch(e){} }
+function emCenterGPS(){ if(!navigator.geolocation){ alert('No GPS here — paste the coordinate or tap “Set = map middle”.'); return; } navigator.geolocation.getCurrentPosition(function(p){ setCenter(p.coords.latitude,p.coords.longitude); try{ map.setView([p.coords.latitude,p.coords.longitude], Math.max(map.getZoom(),16)); }catch(e){} }, function(){ alert('Couldn’t get GPS — paste the coordinate instead.'); }, {enableHighAccuracy:true,timeout:8000}); }
+window.emCenterPaste=emCenterPaste; window.emSetCenterMap=emSetCenterMap; window.emCenterGPS=emCenterGPS;
+function emCenter(){ if(state.center&&state.center.length===2&&isFinite(state.center[0])) return [state.center[0],state.center[1]]; if(state.corners&&state.corners.tl){ var c=state.corners; return [(c.tl[0]+c.br[0])/2,(c.tl[1]+c.br[1])/2]; } try{ var ll=map.getCenter(); return [ll.lat,ll.lng]; }catch(e){ return [40.6187,-75.3803]; } }
 function emPayload(){ var ctr=emCenter(); return {name:state.name,city:state.city||'',state:state.state||'',cat:state.cat||'live_music',start:state.dateStart||'',end:state.dateEnd||'',time:state.startTime||'',venue:state.venue||'',lat:ctr[0],lng:ctr[1],corners:state.corners,sections:state.sections,acts:(state.acts||[]).map(function(a){return {name:a.name,stage:a.stage,time:a.time,cat:a.cat,catLabel:a.catLabel,catIcon:a.catIcon,lat:a.lat,lng:a.lng};}),ticket_types:[{name:'General Admission',price_cents:(state.ticketPrice>0?Math.round(state.ticketPrice*100):0),currency:'usd'}]}; }  /* every event gets a ticket type — FREE if no price set (democratize) */
 function emEncode(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
 function emShare(){ emSave(); if(!state.name){ toast('Name your event first.'); emTab('cur_map'); return; }
@@ -793,11 +845,12 @@ function emShare(){ emSave(); if(!state.name){ toast('Name your event first.'); 
   if(navigator.share){ navigator.share({title:state.name+' — StageFill',url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(url); toast('🔗 Event-page link copied.'); }catch(e){ prompt('Copy link:',url); } } }
 function emPublish(){ emSave(); if(!state.name){ toast('Name your event first.'); emTab('cur_map'); return; }
+  if(!(state.center&&state.center.length===2&&isFinite(state.center[0]))){ toast('📍 Set the event center point first — paste it from Google Maps.'); emTab('cur_map'); try{ var cp=el('ctrPaste'); if(cp) cp.focus(); }catch(e){} return; }
   var slug=state.slug||((state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'event')+'-'+Date.now().toString(36));
   var ev=emPayload(); ev.slug=slug;
   var mine=[]; try{ mine=JSON.parse(localStorage.getItem('dd.sf.myevents')||'[]'); }catch(e){} mine=mine.filter(function(m){return m.slug!==slug;}); mine.unshift(ev);
   try{ localStorage.setItem('dd.sf.myevents',JSON.stringify(mine)); }catch(e){}
-  var payload={ slug:slug, name:state.name, city:state.city, state:state.state, venue:state.venue, cat:state.cat, start:state.dateStart, end:state.dateEnd, time:state.startTime, lat:ev.lat, lng:ev.lng, corners:state.corners, acts:ev.acts, ticket_types:ev.ticket_types, geofences:sfGeofences(), status:'live' };  /* Phase 4: carry ticket_types so the event's %NEW_EVENT_Ticket% exists on inception (was dropped) */
+  var payload={ slug:slug, name:state.name, city:state.city, state:state.state, venue:state.venue, cat:state.cat, start:state.dateStart, end:state.dateEnd, time:state.startTime, center:state.center, lat:ev.lat, lng:ev.lng, corners:state.corners, acts:ev.acts, ticket_types:ev.ticket_types, geofences:sfGeofences(), status:'live' };  /* Phase 4: carry ticket_types + absolute center so %NEW_EVENT_Ticket% + map resolve to the true anchor */
   var cl=window.ddClient&&ddClient(); var go=function(){ location.href='stagefill_events.html'; };
   if(cl&&cl.rpc){ toast('📡 Publishing…'); cl.rpc('sf_publish',{p:payload}).then(function(r){ if(r&&!r.error&&r.data){ state.slug=r.data; emSave(); toast('✅ Published live \u2014 it\u2019s on the national list.'); setTimeout(go,700); } else { toast('Saved locally (offline).'); setTimeout(go,900); } }).catch(function(){ toast('Saved locally (offline).'); setTimeout(go,900); }); }
   else { toast('✅ Published (local).'); setTimeout(go,800); } }
@@ -873,6 +926,90 @@ function pinCancel(){ el("pinScrim").classList.remove("on"); _pinP=null; }
 function pDel(id){ state.partners=(state.partners||[]).filter(function(x){return x.id!==id;}); pRender(); emSave(); }
 function emCoverShow(sh){ var c=el('emCover'); if(c) c.style.display=sh?'block':'none'; var t=document.querySelector('.em-top'); if(t) t.style.display=sh?'none':'flex'; if(sh){ ccStart(); } else { ccStop(); } }
 function emStart(){ state.started=true; emSave(); emCoverShow(false); emTab('cur_map'); setTimeout(function(){ try{ map.invalidateSize(); frameGrounds(); }catch(e){} },80); }
+
+/* KOTA prefill — the product loop: we create the first draft, the operator (Miguel) opens ?seed=kota,
+   edits, publishes. Loads the Karnival of the Arts with its absolute center, dates, grounds boundary,
+   and the 3 covered pavilions pre-drawn. Everything stays fully editable. */
+function applyKotaSeed(){
+  state.name='Karnival of the Arts East 2026'; state.city='Kempton'; state.state='PA';
+  state.venue='Kempton Community Center'; state.cat='festival'; state.ticketPrice=0;
+  state.dateStart='2026-09-03'; state.dateEnd='2026-09-07'; state.startTime='12:00';
+  state.center=[40.630193558952094,-75.85100503933494];   // the dead-center you eyeballed in Google Maps
+  state.sections=[{ id:Date.now(), name:'Grounds', corners:{
+    tl:[40.631292155480125,-75.85275083628017], tr:[40.631357886462766,-75.84871021063702],
+    br:[40.62872002274831,-75.84890979419627],  bl:[40.62876289243905,-75.85271317900482] } }];
+  state.activeSection=0;
+  // 3 covered pavilions (from Miguel's structure corners) → editable covered tents
+  state.tents=[
+    { id:Date.now()+1, name:'Pavilion 1 · NW', covered:true, corners:[[40.63063087940102,-75.85149433359459],[40.63030128525979,-75.8512919266192],[40.63022224207909,-75.85152184522231],[40.63054736248743,-75.85172425219749]] },
+    { id:Date.now()+2, name:'Pavilion 2 · N',  covered:true, corners:[[40.630882920881916,-75.85060020569337],[40.63091423957937,-75.85036046150891],[40.63052499186784,-75.85027596150947],[40.630493672987846,-75.8505117754614]] },
+    { id:Date.now()+3, name:'Pavilion 3 · SE', covered:true, corners:[[40.63022076214234,-75.85046006867493],[40.63025333178798,-75.85020995269335],[40.62985777126366,-75.8501227277921],[40.62982544472115,-75.85037474682422]] }
+  ];
+  // 3 stages at the far (outward) end of each pavilion — placeholders Miguel confirms
+  state.acts=[
+    { name:'Main Stage', stage:'Pavilion 1', time:'19:00', cat:'live_music', catLabel:'Live Music', catIcon:'🎤', lat:40.6305891, lng:-75.8516093 },
+    { name:'Stage 2',    stage:'Pavilion 2', time:'19:00', cat:'live_music', catLabel:'Live Music', catIcon:'🎸', lat:40.6308986, lng:-75.8504803 },
+    { name:'Stage 3',    stage:'Pavilion 3', time:'19:00', cat:'live_music', catLabel:'Live Music', catIcon:'🎶', lat:40.6298416, lng:-75.8502487 }
+  ];
+  state.started=true;
+  if(el('emName'))el('emName').value=state.name; if(el('evCity'))el('evCity').value=state.city;
+  if(el('evState'))el('evState').value=state.state; if(el('evVenue'))el('evVenue').value=state.venue;
+  if(el('evTicket'))el('evTicket').value='0';
+  try{ paintCalChip(); }catch(e){} try{ emSave(); }catch(e){}
+  setTimeout(function(){ try{
+    emCoverShow(false); emTab('cur_map');
+    try{ rebuildSections(); }catch(e){} try{ redrawAllAreas&&redrawAllAreas(); renderAreas&&renderAreas(); }catch(e){}
+    try{ state.acts.forEach(addActMarker); renderActs(); }catch(e){}
+    paintCenter();
+    try{ if(window.L&&map&&state.center){ if(centerMarker)centerMarker.setLatLng(state.center); else centerMarker=L.marker(state.center).addTo(map).bindPopup('📍 Event center'); } }catch(e){}
+    try{ frameGrounds(); }catch(e){}
+  }catch(e){} }, 420);
+}
+
+/* ===== SELF-SERVICE SETUP WIZARD — "we ask, the admin builds it" =====
+   A first-time admin (Miguel) is walked through building their festival from coordinates:
+   name → where → when → center → grounds → containers → tickets. Populates state as it goes,
+   then hands off to the full Maker to drop stages, add the lineup, and publish. Nothing hand-built by us. */
+function _wzLL(s){ var m=String(s||'').match(/(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)/); return m?[parseFloat(m[1]),parseFloat(m[2])]:null; }
+function _wzPts(txt){ var out=[]; String(txt||'').split(/[\n;]/).forEach(function(ln){ var ll=_wzLL(ln); if(ll)out.push(ll); }); return out; }
+function _wzGroundsText(){ try{ var s=state.sections&&state.sections[0]; if(s&&s.pts&&s.pts.length) return s.pts.map(function(p){return (+p[0]).toFixed(6)+', '+(+p[1]).toFixed(6);}).join('\n'); }catch(e){} return ''; }
+var WIZ={ i:0 };
+var WIZ_STEPS=[
+  { render:function(){ _wzPaint('<h3>Let’s build your festival 🎪</h3><p>I’ll ask a handful of things — mostly you’ll <b>right-click a spot in Google Maps and paste</b> the coordinates. About five minutes, and you can edit anything after.</p>',
+      '<button class="wbtn p" onclick="wizNext()">Start →</button>'); } },
+  { render:function(){ _wzPaint('<h3>What’s it called?</h3><input id="wzName" class="wzin" placeholder="e.g. Karnival of the Arts" value="'+esc(state.name||'')+'">',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">Next →</button>'); setTimeout(function(){try{el('wzName').focus();}catch(e){}},60); },
+    save:function(){ var v=(el('wzName').value||'').trim(); if(!v){ el('wzName').focus(); return false; } state.name=v; if(el('emName'))el('emName').value=v; return true; } },
+  { render:function(){ _wzPaint('<h3>Where is it?</h3><input id="wzVenue" class="wzin" placeholder="Venue / grounds" value="'+esc(state.venue||'')+'"><div style="display:flex;gap:8px;margin-top:8px"><input id="wzCity" class="wzin" placeholder="City" value="'+esc(state.city||'')+'"><input id="wzState" class="wzin" style="max-width:96px" placeholder="State" value="'+esc(state.state||'')+'"></div>',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">Next →</button>'); },
+    save:function(){ state.venue=(el('wzVenue').value||'').trim(); state.city=(el('wzCity').value||'').trim(); state.state=(el('wzState').value||'').trim(); if(el('evVenue'))el('evVenue').value=state.venue; if(el('evCity'))el('evCity').value=state.city; if(el('evState'))el('evState').value=state.state; return true; } },
+  { render:function(){ _wzPaint('<h3>What days?</h3><div style="display:flex;gap:8px"><label class="wzlbl">Start<input type="date" id="wzStart" class="wzin" value="'+(state.dateStart||'')+'"></label><label class="wzlbl">End<input type="date" id="wzEnd" class="wzin" value="'+(state.dateEnd||'')+'"></label></div>',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">Next →</button>'); },
+    save:function(){ state.dateStart=el('wzStart').value||''; state.dateEnd=el('wzEnd').value||state.dateStart; if(state.dateStart){ try{paintCalChip();}catch(e){} } return true; } },
+  { render:function(){ _wzPaint('<h3>📍 The center point</h3><p>In <b>Google Maps</b>, zoom in, <b>right-click the dead center</b> of your grounds — the coordinates copy — and paste them here.</p><input id="wzCtr" class="wzin" placeholder="40.630194, -75.851005"'+(state.center?(' value="'+(+state.center[0]).toFixed(6)+', '+(+state.center[1]).toFixed(6)+'"'):'')+'>',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">Next →</button>'); },
+    save:function(){ var ll=_wzLL(el('wzCtr').value); if(!ll){ alert('Paste the center as  lat, lng  — right-click it in Google Maps first.'); return false; } setCenter(ll[0],ll[1]); try{ map.setView(ll,16); }catch(e){} return true; } },
+  { render:function(){ _wzPaint('<h3>The grounds outline</h3><p>Right-click <b>each corner</b> of your grounds in Google Maps and paste — <b>one per line</b>, going around. Three or more; any shape.</p><textarea id="wzCorners" class="wzta" placeholder="40.631292, -75.852751\n40.631358, -75.848710\n40.628720, -75.848910\n40.628763, -75.852713">'+_wzGroundsText()+'</textarea>',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">Next →</button>'); },
+    save:function(){ var pts=_wzPts(el('wzCorners').value); if(pts.length<3){ alert('Paste at least 3 corners, one per line.'); return false; } state.sections=[{id:Date.now(),name:'Grounds',pts:pts}]; state.activeSection=0; return true; } },
+  { render:function(){ _wzPaint('<h3>Pavilions, tents &amp; camping</h3><p>Any covered pavilions, tents, or camping areas? Name one, paste its corners (one per line), add it — repeat for each. Skip if none.</p><input id="wzTn" class="wzin" placeholder="e.g. Pavilion 1, Beer Tent, Camping"><textarea id="wzTp" class="wzta" placeholder="paste this container’s corners, one per line"></textarea><label style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;margin-top:6px"><input type="checkbox" id="wzTc" checked> Covered (roof / tent)</label><button class="wbtn g" style="width:100%;margin-top:8px" onclick="wizAddTent()">＋ Add this container</button><div id="wzTl" style="margin-top:8px"></div>',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">'+((state.tents&&state.tents.length)?'Next →':'Skip →')+'</button>'); _wzTentList(); } },
+  { render:function(){ _wzPaint('<h3>Tickets</h3><p>Free, or a price? (Change it and add tiers anytime.)</p><div style="display:flex;gap:8px;align-items:center"><span style="font-weight:800;font-size:16px">$</span><input id="wzPrice" class="wzin" type="number" min="0" step="1" placeholder="0 = free" value="'+(state.ticketPrice||'')+'"></div>',
+      '<button class="wbtn g" onclick="wizBack()">Back</button><button class="wbtn p" onclick="wizNext()">Next →</button>'); },
+    save:function(){ state.ticketPrice=parseFloat(el('wzPrice').value)||0; if(el('evTicket'))el('evTicket').value=state.ticketPrice||0; return true; } },
+  { render:function(){ _wzPaint('<h3>🎉 Built.</h3><p>Your grounds, center and containers are on the map. Now drop your <b>stages</b> inside the pavilions, add the <b>lineup</b> in the Schedule, and <b>Publish</b> when it’s ready. Everything stays editable.</p>',
+      '<button class="wbtn p" onclick="wizFinish()">Open my festival →</button>'); } }
+];
+function _wzPaint(body,foot){ el('emWizBody').innerHTML=body; el('emWizFoot').innerHTML=foot||''; }
+function _wzTentList(){ var b=el('wzTl'); if(!b)return; var t=state.tents||[]; b.innerHTML=t.length? t.map(function(x){return '<div style="font-size:12.5px;font-weight:700;color:#4a1e5c;padding:4px 0">'+(x.covered?'⛺':'▢')+' '+esc(x.name)+' · '+x.corners.length+' corners</div>';}).join('') : '<div style="font-size:12px;color:#8a7d92;font-style:italic">No containers yet.</div>'; }
+window.wizAddTent=function(){ var name=(el('wzTn').value||'').trim()||'Container'; var pts=_wzPts(el('wzTp').value); if(pts.length<3){ alert('Paste at least 3 corners for this container.'); return; } try{ensureAreas();}catch(e){ state.tents=state.tents||[]; } state.tents.push({id:Date.now()+Math.floor(Math.random()*999),name:name,covered:el('wzTc').checked,corners:pts}); el('wzTn').value=''; el('wzTp').value=''; try{emSave();}catch(e){} _wzTentList(); };
+function _wzRender(){ var st=WIZ_STEPS[WIZ.i]; try{ el('emWizBar').style.width=Math.round(WIZ.i/(WIZ_STEPS.length-1)*100)+'%'; }catch(e){} st.render(); }
+window.wizOpen=function(){ WIZ.i=0; el('emWizOv').classList.add('on'); _wzRender(); };
+window.wizClose=function(){ el('emWizOv').classList.remove('on'); };
+window.wizNext=function(){ var st=WIZ_STEPS[WIZ.i]; if(st.save && st.save()===false) return; try{emSave();}catch(e){} if(WIZ.i<WIZ_STEPS.length-1){ WIZ.i++; _wzRender(); } };
+window.wizBack=function(){ if(WIZ.i>0){ WIZ.i--; _wzRender(); } };
+window.wizFinish=function(){ wizClose(); state.started=true; try{emSave();}catch(e){} try{emCoverShow(false);}catch(e){} emTab('cur_map');
+  setTimeout(function(){ try{ rebuildSections(); }catch(e){} try{ redrawAllAreas&&redrawAllAreas(); renderAreas&&renderAreas(); }catch(e){} try{ paintCenter(); if(window.L&&map&&state.center){ if(centerMarker)centerMarker.setLatLng(state.center); else centerMarker=L.marker(state.center).addTo(map).bindPopup('📍 Event center'); } }catch(e){} try{ frameGrounds(); }catch(e){} },320); };
 function emCoverInit(){ var empty=!(state.name||(state.acts&&state.acts.length)||state.city||(state.survey&&state.survey.length)); emCoverShow(!state.started && empty); }
 /* animated StageFill universe — moving 'original content', adapted from the DeadDance solar-system */
 var CC={cv:null,ctx:null,run:false,raf:0,tick:0,W:0,H:0,S:0,cx:0,cy:0,built:false,center:null};
@@ -945,7 +1082,7 @@ function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state
   el('emName').value=state.name||'';
   if(state.date&&!state.dateStart){ state.dateStart=state.date; } paintCalChip();
   if(state.floor){ showFloor(); }
-  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender(); emShareInit(); pRender(); if(el('stageW'))el('stageW').value=state.stageW||''; if(el('stageD'))el('stageD').value=state.stageD||''; try{ var _q=new URLSearchParams(location.search); if(_q.get('n')&&!state.name){ state.name=_q.get('n'); if(el('emName'))el('emName').value=state.name; } if(_q.get('c')&&!state.city){ state.city=_q.get('c'); if(el('evCity'))el('evCity').value=state.city; } if(_q.get('s')&&!state.state){ state.state=_q.get('s'); if(el('evState'))el('evState').value=state.state; } if(_q.get('v')&&!state.venue){ state.venue=_q.get('v'); if(el('evVenue'))el('evVenue').value=state.venue; } if(_q.get('teach')==='floor'){ setTimeout(function(){ try{ emTab('cur_floor'); emFloorTeach(); }catch(_e){} }, 350); } emSave(); }catch(_e){} emCoverInit(); sfCheckGate();
+  state.acts.forEach(addActMarker); renderActs(); svInit(); svRender(); emShareInit(); pRender(); if(el('stageW'))el('stageW').value=state.stageW||''; if(el('stageD'))el('stageD').value=state.stageD||''; try{ var _q=new URLSearchParams(location.search); if(_q.get('n')&&!state.name){ state.name=_q.get('n'); if(el('emName'))el('emName').value=state.name; } if(_q.get('c')&&!state.city){ state.city=_q.get('c'); if(el('evCity'))el('evCity').value=state.city; } if(_q.get('s')&&!state.state){ state.state=_q.get('s'); if(el('evState'))el('evState').value=state.state; } if(_q.get('v')&&!state.venue){ state.venue=_q.get('v'); if(el('evVenue'))el('evVenue').value=state.venue; } if(_q.get('teach')==='floor'){ setTimeout(function(){ try{ emTab('cur_floor'); emFloorTeach(); }catch(_e){} }, 350); } if(_q.get('seed')==='kota' && !state.started){ applyKotaSeed(); } if(_q.get('setup')==='1' && !state.started){ setTimeout(function(){ try{ wizOpen(); }catch(e){} }, 420); } emSave(); }catch(_e){} emCoverInit(); sfCheckGate();
 }
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); rebuildSections(); renderOverlays(); renderOvList(); redrawAllAreas(); renderAreas(); setTimeout(function(){ try{ map.invalidateSize(); frameGrounds(); }catch(e){} },320); });
