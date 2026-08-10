@@ -194,6 +194,7 @@ body.mfdrag .sheet{transition:none}
   <button class="em-chip" onclick="emActsNow()">🎶 Acts on Now</button>
   <button class="em-chip" onclick="frameGrounds()" title="Zoom to the active section">⤢ Fit section</button>
   <button class="em-chip" onclick="frameAll()" title="Zoom to show every section">🗺 All</button>
+  <button class="em-chip" id="cutesyPill" onclick="mkrCutesyToggle()" title="Illustrated map — generated to your exact grounds, auto-snapped (no corner-dragging)">🎨 Cutesy</button>
   <span class="em-stat" id="emStat">🥾 0.00 mi · 0 acts</span>
 </div>
 <!-- on-map section switcher (North / South / spokes) -->
@@ -1084,6 +1085,43 @@ function emLoad(){ try{ var s=JSON.parse(localStorage.getItem(LS)); if(s){ state
   if(state.floor){ showFloor(); }
   state.acts.forEach(addActMarker); renderActs(); svInit(); svRender(); emShareInit(); pRender(); if(el('stageW'))el('stageW').value=state.stageW||''; if(el('stageD'))el('stageD').value=state.stageD||''; try{ var _q=new URLSearchParams(location.search); if(_q.get('n')&&!state.name){ state.name=_q.get('n'); if(el('emName'))el('emName').value=state.name; } if(_q.get('c')&&!state.city){ state.city=_q.get('c'); if(el('evCity'))el('evCity').value=state.city; } if(_q.get('s')&&!state.state){ state.state=_q.get('s'); if(el('evState'))el('evState').value=state.state; } if(_q.get('v')&&!state.venue){ state.venue=_q.get('v'); if(el('evVenue'))el('evVenue').value=state.venue; } if(_q.get('teach')==='floor'){ setTimeout(function(){ try{ emTab('cur_floor'); emFloorTeach(); }catch(_e){} }, 350); } if(_q.get('seed')==='kota' && !state.started){ applyKotaSeed(); } if(_q.get('setup')==='1' && !state.started){ setTimeout(function(){ try{ wizOpen(); }catch(e){} }, 420); } emSave(); }catch(_e){} emCoverInit(); sfCheckGate();
 }
+
+/* ===== 🎨 CUTESY MAP — generate illustrated art FROM the geo, snapped to the exact grounds =====
+   No hand-alignment: we render the boundary + pavilion containers onto a canvas keyed to the geo
+   bounding box, then overlay it bounded to that same box — real markers land right on the illustration. */
+function cutesyArtURL(bbox, feats){ try{
+  var sw=bbox[0], ne=bbox[1], latSpan=ne[0]-sw[0], lngSpan=ne[1]-sw[1]; if(latSpan<=0||lngSpan<=0) return null;
+  var midLat=(sw[0]+ne[0])/2, lngM=lngSpan*111320*Math.cos(midLat*Math.PI/180), latM=latSpan*110540;
+  var W=1100, H=Math.max(520, Math.min(1600, Math.round(W*(latM/Math.max(1,lngM)))));
+  var cv=document.createElement('canvas'); cv.width=W; cv.height=H; var x=cv.getContext('2d');
+  function px(lat,lng){ return [ (lng-sw[1])/lngSpan*W, (ne[0]-lat)/latSpan*H ]; }
+  function poly(pts){ x.beginPath(); pts.forEach(function(p,i){ var q=px(p[0],p[1]); if(i===0)x.moveTo(q[0],q[1]); else x.lineTo(q[0],q[1]); }); x.closePath(); }
+  var g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#d3ebbd'); g.addColorStop(1,'#bfe0a6'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.globalAlpha=.5; var trees=Math.round(W*H/9000); for(var i=0;i<trees;i++){ x.fillStyle=(Math.random()<.5?'#a6cf86':'#93c26f'); x.beginPath(); x.arc(Math.random()*W,Math.random()*H,3+Math.random()*4,0,7); x.fill(); } x.globalAlpha=1;
+  var bd=feats.boundary||[]; if(bd.length>=3){ poly(bd); x.fillStyle='#fbf3df'; x.fill(); x.lineWidth=6; x.strokeStyle='#8a5a2a'; x.setLineDash([14,10]); x.stroke(); x.setLineDash([]); }
+  (feats.containers||[]).forEach(function(c){ var pts=c.corners||[]; if(pts.length<3)return; poly(pts); x.fillStyle=c.covered?'#e6c79a':'#dfe9c6'; x.fill(); x.lineWidth=3; x.strokeStyle='#9a6b34'; x.stroke();
+    var cx=0,cy=0; pts.forEach(function(p){ var q=px(p[0],p[1]); cx+=q[0]; cy+=q[1]; }); cx/=pts.length; cy/=pts.length;
+    x.fillStyle='#5a3c18'; x.font='700 15px -apple-system,sans-serif'; x.textAlign='center'; x.fillText((c.covered?'⛺ ':'')+(c.name||''), cx, cy); });
+  if(feats.title){ x.font='800 26px -apple-system,sans-serif'; var m=x.measureText(feats.title).width, pw=Math.min(W-30,m+50), ph=46, pxx=(W-pw)/2, pyy=16;
+    x.beginPath(); if(x.roundRect)x.roundRect(pxx,pyy,pw,ph,23); else x.rect(pxx,pyy,pw,ph); x.fillStyle='rgba(74,30,92,.92)'; x.fill();
+    x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(feats.title, W/2, pyy+ph/2); x.textBaseline='alphabetic'; }
+  return cv.toDataURL('image/png');
+}catch(e){ return null; } }
+function mkrCutesyBBox(){ var pts=[]; try{ var s=activeSec&&activeSec(); if(s&&s.pts) pts=pts.concat(s.pts); }catch(e){}
+  if(!pts.length){ (state.sections||[]).forEach(function(s){ if(s.pts&&!pts.length) pts=pts.concat(s.pts); }); }
+  (state.tents||[]).forEach(function(t){ (t.corners||[]).forEach(function(p){ pts.push(p); }); });
+  if(pts.length<3) return null;
+  var a=90,A=-90,o=180,O=-180; pts.forEach(function(p){ if(p[0]<a)a=p[0]; if(p[0]>A)A=p[0]; if(p[1]<o)o=p[1]; if(p[1]>O)O=p[1]; });
+  var pl=(A-a)*0.06||0.0004, pn=(O-o)*0.06||0.0004; return [[a-pl,o-pn],[A+pl,O+pn]]; }
+var _cutesyLayer=null, _cutesyOn=false;
+window.mkrCutesyToggle=function(){ var b=document.getElementById('cutesyPill');
+  if(_cutesyOn){ if(_cutesyLayer){ try{ map.removeLayer(_cutesyLayer); }catch(e){} _cutesyLayer=null; } _cutesyOn=false; if(b)b.classList.remove('on'); return; }
+  var bbox=mkrCutesyBBox(); if(!bbox){ toast('Draw your grounds first — then tap 🎨 Cutesy.'); return; }
+  var bd=(function(){ var s=activeSec&&activeSec(); if(s&&s.pts&&s.pts.length>=3) return s.pts; var o=[]; (state.sections||[]).forEach(function(x){ if(x.pts&&!o.length)o=x.pts; }); return o; })();
+  var url=cutesyArtURL(bbox, { title:(state.name||'Festival'), boundary:bd, containers:(state.tents||[]).map(function(t){return {corners:t.corners,name:t.name,covered:t.covered};}) });
+  if(!url){ toast('Couldn’t render the cutesy map.'); return; }
+  try{ if(!map.getPane('cutesy')){ map.createPane('cutesy'); map.getPane('cutesy').style.zIndex=250; map.getPane('cutesy').style.pointerEvents='none'; } }catch(e){}
+  try{ _cutesyLayer=L.imageOverlay(url, bbox, { opacity:0.97, pane:'cutesy', interactive:false }).addTo(map); _cutesyOn=true; if(b)b.classList.add('on'); map.fitBounds(bbox,{animate:true}); }catch(e){ toast('Cutesy overlay failed.'); } };
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); rebuildSections(); renderOverlays(); renderOvList(); redrawAllAreas(); renderAreas(); setTimeout(function(){ try{ map.invalidateSize(); frameGrounds(); }catch(e){} },320); });
 </script>

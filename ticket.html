@@ -744,6 +744,77 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       }).catch(function(){});
     });
   }catch(e){} }, 0);
+  /* ===== 🐻 OWSLEY — two gentle tip asks during the show + a quick POST-SHOW survey. All stays with the ticket. =====
+     Pure-go UI. The tip PAYMENT rides the counsel-gated payout rail (DDPay / Stripe Connect); until it's
+     live the sheet is an honest thank-you. The rating + favorite part are saved WITH this ticket (its
+     night, kept forever) and mirrored onto the fan's deck entry so they travel with the ticket. */
+  function _owsKey(){ return 'dd.owsley|'+slug(band)+'|'+(date||'na'); }
+  function owsGet(){ try{ return JSON.parse(localStorage.getItem(_owsKey())||'{}')||{}; }catch(e){ return {}; } }
+  function owsSet(o){ try{ localStorage.setItem(_owsKey(), JSON.stringify(o)); }catch(e){}
+    try{ var mk='dd.mytix', arr=JSON.parse(localStorage.getItem(mk)||'[]'); var hit=arr.filter(function(t){return t&&((g('ev','')&&t.event===g('ev',''))||(t.band===band&&t.date===date));})[0];
+      if(hit){ hit.review={rating:o.rating||null, fav:o.fav||null, tip:o.tip||null, at:o.at||Date.now()}; localStorage.setItem(mk, JSON.stringify(arr)); } }catch(e){} }   // the review travels WITH the ticket
+  // report ONE datum to the band's free feedback aggregate (no fan id) — correlated to venue/festival/event.
+  function owsReport(row){ try{ if(!window.SFClient) return; window.SFClient(function(cl){ if(!(cl&&cl.rpc)) return;
+    cl.rpc('dd_band_feedback_log', { p_band:slug(band), p_event:(g('ev','')||null), p_venue:(venue||null), p_festival:(g('fest','')||null),
+      p_rating:(row.rating!=null?row.rating:null), p_fav:(row.fav||null), p_tip_cents:(row.tip_cents||0) }).catch(function(){}); }); }catch(e){} }
+  var _owsT0=Date.now();
+  function owsPassed(){ try{ return (iso && new Date(iso+'T23:59:59') < new Date()) || isArchived(); }catch(e){ return false; } }
+  function owsCSS(){ if(document.getElementById('owsCSS'))return; var st=document.createElement('style'); st.id='owsCSS'; st.textContent='@keyframes owsIn{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}'; document.head.appendChild(st); }
+  // ---- two gentle tip asks during the show (not tied to any set) ----
+  function owsTick(){ var st=owsGet(); if(owsPassed()||(st.asks||0)>=2) return; var el=Date.now()-_owsT0;
+    if((st.asks||0)===0 && el>42000){ st.asks=1; st.lastAsk=Date.now(); owsSet(st); owsNudge(1); }
+    else if((st.asks||0)===1 && el>300000 && Date.now()-(st.lastAsk||0)>120000){ st.asks=2; st.lastAsk=Date.now(); owsSet(st); owsNudge(2); } }
+  function owsNudge(n){ owsCSS(); var host=document.getElementById('owsNudge'); if(!host){ host=document.createElement('div'); host.id='owsNudge';
+      host.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0));z-index:400;background:#1b1e26;color:#fff;border-radius:16px;padding:13px 14px;box-shadow:0 12px 34px #000a;display:flex;align-items:center;gap:11px;max-width:460px;margin:0 auto;animation:owsIn .35s ease'; document.body.appendChild(host); }
+    host.style.display='flex';
+    var line = n===1 ? ('If '+esc(band)+' is making your night, buy ’em a cup of coffee. ☕ No pressure — only if it moves you.')
+                     : ('Last little nudge 🌹 — a couple bucks in '+esc(band)+'’s jar goes straight to the band.');
+    host.innerHTML='<span style="font-size:22px;flex:none">🐻</span><div style="flex:1;font-size:13px;line-height:1.45"><b style="color:#e0b3f5">Owsley</b><br>'+line+'</div>'
+      +'<button onclick="owsleyTip()" style="flex:none;background:#e0a92e;color:#241026;border:0;border-radius:11px;padding:9px 13px;font-weight:800;font-size:13px;cursor:pointer">☕ Tip</button>'
+      +'<button onclick="owsDismiss()" aria-label="Dismiss" style="flex:none;background:#ffffff1a;border:0;color:#fff;width:28px;height:28px;border-radius:14px;font-size:15px;cursor:pointer">×</button>';
+    clearTimeout(host._t); host._t=setTimeout(owsDismiss, 22000); }
+  window.owsDismiss=function(){ var h=document.getElementById('owsNudge'); if(h) h.style.display='none'; };
+  // ---- the "buy a coffee" sheet ----
+  window.owsleyTip=function(){ owsDismiss();
+    try{ if(window.DDPay && DDPay.status){ DDPay.status(slug(band)).then(function(s){ owsCoffee(!!(s&&s.charges_enabled)); }).catch(function(){ owsCoffee(false); }); return; } }catch(e){}
+    owsCoffee(false); };
+  function owsSheetEl(){ var sh=document.getElementById('owsSheet'); if(!sh){ sh=document.createElement('div'); sh.id='owsSheet'; sh.onclick=function(e){ if(e.target===sh) owsCloseSheet(); }; sh.style.cssText='position:fixed;inset:0;z-index:600;background:#000a;display:flex;align-items:flex-end;justify-content:center'; document.body.appendChild(sh); } sh.style.display='flex'; return sh; }
+  window.owsCloseSheet=function(){ var s=document.getElementById('owsSheet'); if(s) s.style.display='none'; };
+  function owsCoffee(live){ var sh=owsSheetEl();
+    sh.innerHTML='<div style="background:#fff;color:#241026;width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0))">'
+      +'<div style="font-weight:900;font-size:17px">☕ Buy '+esc(band)+' a coffee</div>'
+      +'<div style="font-size:12.5px;color:#6b6675;margin:4px 0 12px">A little love, straight to the band.'+(live?'':' <b>Their jar opens for real money the moment they connect payouts</b> — for now it’s a thank-you note. 🌹')+'</div>'
+      +'<div style="display:flex;gap:8px">'+[3,5,10].map(function(a){ return '<button onclick="owsGive('+a+')" style="flex:1;border:1.5px solid #e0a92e;background:#fff8ea;color:#7a5a12;border-radius:12px;padding:14px 0;font-weight:800;font-size:15px;cursor:pointer">$'+a+'</button>'; }).join('')+'</div>'
+      +'<button onclick="owsCloseSheet()" style="width:100%;margin-top:12px;background:#f0ebf6;color:#4a1e5c;border:0;border-radius:11px;padding:11px;font-weight:800;cursor:pointer">Maybe later</button></div>'; }
+  window.owsGive=function(a){ owsCloseSheet(); var st=owsGet(); st.tip=(st.tip||0)+a; st.at=Date.now(); owsSet(st);
+    owsReport({ tip_cents:Math.round(a*100) });   // → the band's free feedback aggregate
+    try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('☕ $'+a+' for '+band+' — they feel the love. 🌹'); }catch(e){} };
+  // ---- POST-SHOW survey: rank the night + favorite part, then a final tip ask. Once. Kept with the ticket. ----
+  var _owsStar=0, _owsFav='';
+  function owsPostShow(){ var st=owsGet(); if(st.reviewed) return; owsCSS();
+    var sh=document.getElementById('owsPost'); if(!sh){ sh=document.createElement('div'); sh.id='owsPost'; sh.style.cssText='position:fixed;inset:0;z-index:650;background:#000b;display:flex;align-items:flex-end;justify-content:center'; document.body.appendChild(sh); }
+    sh.style.display='flex';
+    var favs=['The jams 🎸','A song 🎶','The crowd 🌈','The whole night 🌹'];
+    sh.innerHTML='<div style="background:#fff;color:#241026;width:100%;max-width:460px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0));animation:owsIn .35s ease">'
+      +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">🐻</span><div style="font-weight:900;font-size:18px">How was '+esc(band)+'? 🌹</div></div>'
+      +'<div style="font-size:12.5px;color:#6b6675;margin:3px 0 12px">Two taps — it stays on your ticket forever, and it helps the band.</div>'
+      +'<div id="owsStars" style="font-size:34px;letter-spacing:6px;text-align:center;margin:2px 0 12px">'+[1,2,3,4,5].map(function(i){return '<span onclick="owsStar('+i+')" data-s="'+i+'" style="opacity:.3;cursor:pointer">★</span>';}).join('')+'</div>'
+      +'<div style="font-size:12.5px;font-weight:800;color:#4a1e5c;margin-bottom:6px">Favorite part?</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:7px">'+favs.map(function(f){return '<button class="owsFav" data-f="'+esc(f)+'" onclick="owsFav(this)" style="border:1.5px solid #e7e0ee;background:#faf7ff;color:#4a1e5c;border-radius:16px;padding:8px 13px;font-weight:700;font-size:12.5px;cursor:pointer">'+f+'</button>';}).join('')+'</div>'
+      +'<button onclick="owsPostSave()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#6d28d9,#4a1e5c);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:14px;cursor:pointer">Save to my ticket →</button>'
+      +'<button onclick="owsPostSkip()" style="width:100%;margin-top:8px;background:#f0ebf6;color:#4a1e5c;border:0;border-radius:11px;padding:10px;font-weight:700;cursor:pointer">Skip</button></div>'; }
+  window.owsStar=function(i){ _owsStar=i; try{ document.querySelectorAll('#owsStars span').forEach(function(s){ var on=(+s.getAttribute('data-s'))<=i; s.style.opacity=on?'1':'.3'; s.style.color=on?'#e0a92e':''; }); }catch(e){} };
+  window.owsFav=function(b){ _owsFav=b.getAttribute('data-f')||''; try{ document.querySelectorAll('.owsFav').forEach(function(x){ x.style.background='#faf7ff'; x.style.borderColor='#e7e0ee'; }); b.style.background='#efe6fb'; b.style.borderColor='#6d28d9'; }catch(e){} };
+  window.owsPostSave=function(){ var st=owsGet(); st.rating=_owsStar||st.rating||null; st.fav=_owsFav||st.fav||null; st.reviewed=true; st.at=Date.now(); owsSet(st);
+    owsReport({ rating:st.rating, fav:st.fav });   // rating + favorite → the band's free feedback aggregate
+    var p=document.getElementById('owsPost'); if(p) p.style.display='none';
+    try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('🌹 Saved to your ticket — this is your night now.'); }catch(e){}
+    setTimeout(function(){ try{ owsleyTip(); }catch(e){} }, 750); };   // the second (final) tip ask, right after the survey
+  window.owsPostSkip=function(){ var st=owsGet(); st.reviewed=true; owsSet(st); var p=document.getElementById('owsPost'); if(p) p.style.display='none'; };
+  // during the show → two gentle asks; after the show → the post-show survey (once)
+  try{ if(owsPassed()){ setTimeout(function(){ try{ owsPostShow(); }catch(e){} }, 1200); }
+       else { setInterval(function(){ try{ owsTick(); }catch(e){} }, 20000); setTimeout(function(){ try{ owsTick(); }catch(e){} }, 42000); } }catch(e){}
+
   /* 🖨️ PRINT — tap the show QR → "do you miss paper tickets?" → the printable stub (per-event Claude Gaude art), print at home free or order card stock mailed */
   window.ticketPrint=function(){
     function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}

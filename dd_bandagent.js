@@ -68,7 +68,17 @@
       consentPosts: st.consent.posts === true };
   }
 
+  // ---- FAN-FEEDBACK INTELLIGENCE (free help for the band) ------------------------------------------
+  // The exhaust of the ticket, handed back: every fan's post-show rating, favorite part, and tip-intent
+  // (from Owsley) aggregated by VENUE and FESTIVAL. insights() reads the server summary so the band's
+  // console can show "you rate highest at X, fans love your jams, this festival drew the most love."
+  // We correlate it; we don't charge for it. Resolves null when offline or there's nothing yet.
+  function insights(s){ var c = C(); if (!c || !c.rpc) return Promise.resolve(null);
+    try { return c.rpc('dd_band_feedback_summary', { p_band: slug(s) })
+      .then(function (r) { return (r && r.data) || null; }).catch(function () { return null; }); }
+    catch (e) { return Promise.resolve(null); } }
+
   root.DDBandAgent = { get: get, setConsent: setConsent, consent: consent, learnRole: learnRole, learnSelfProvide: learnSelfProvide,
     learnMember: learnMember, memberIds: memberIds, whoToAsk: whoToAsk, shouldAsk: shouldAsk, logAsk: logAsk, fulfill: fulfill,
-    composePostSpec: composePostSpec, slug: slug };
+    composePostSpec: composePostSpec, insights: insights, slug: slug };
 })(typeof window !== 'undefined' ? window : this);
