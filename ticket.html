@@ -238,6 +238,16 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   var storedArt=null; try{ storedArt=localStorage.getItem(artKey()); }catch(e){}
   var initialArt = img || storedArt;
   if(initialArt){ var im=new Image(); im.onload=function(){ setArt(initialArt); }; im.onerror=function(){ art.classList.remove('on'); }; im.src=initialArt; setArt(initialArt); }
+  // GAP CLOSED — server-persisted art follows the ticket across devices. Deferred (so SFClient exists),
+  // only when there's no local art yet; caches what it finds so later opens are instant.
+  setTimeout(function(){ try{
+    if(initialArt) return; var evk=(ev||date||''); if(!evk || !window.SFClient) return;
+    window.SFClient(function(cl){ if(!(cl&&cl.rpc)) return;
+      cl.rpc('dd_event_art_get',{ p_band_slug:slug(band), p_event_key:evk }).then(function(r){
+        var a=r&&r.data; if(a){ setArt(a); try{ localStorage.setItem(artKey(), a); }catch(e){} }
+      }).catch(function(){});
+    });
+  }catch(e){} }, 0);
   // the act (band role) gets an upload button → picks an image → it becomes the top-third cover, saved per show
   (function(){ var up=document.getElementById('artUp'); if(!up) return;
     if(!isBand){ up.classList.remove('on'); return; } up.classList.add('on');
@@ -245,6 +255,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f) return;
         var rd=new FileReader(); rd.onload=function(){ var data=rd.result; setArt(data);
           try{ localStorage.setItem(artKey(), data); }catch(e){ try{ setArt(URL.createObjectURL(f)); }catch(_){} }   // dataURL persists; fall to object URL if too big
+          try{ if(window.SFClient){ var evk=(ev||date||''); if(evk) window.SFClient(function(cl){ if(cl&&cl.rpc) cl.rpc('dd_event_art_set',{ p_band_slug:slug(band), p_event_key:evk, p_art:data }).catch(function(){}); }); } }catch(e){}   // GAP CLOSED — persist server-side so every fan's ticket inherits it, any device
           try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})('🖼️ Cover set — it’s behind every fan’s ticket for this show 🌹'); }catch(e){}
         }; rd.readAsDataURL(f); };
       document.body.appendChild(inp); inp.click(); setTimeout(function(){ try{document.body.removeChild(inp);}catch(e){} },600); }; })();
@@ -707,10 +718,21 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     var venue=((document.getElementById('venue')||{}).textContent||'');
     var sub=((document.getElementById('sub')||{}).textContent||'');
     var tid=(((document.getElementById('tid')||{}).textContent||'').replace('d.dance/t/','')||'—');
+    // PHASE 5 · SECURED PRINT-MATCH — if the holder has a real signed ticket, the paper carries a QR of the
+    // static TIX token. It resolves to the SAME secure record; the door verifies the signature and admits ONCE
+    // (single-use), so a photocopy scans as "already used". No secure token → the decorative barcode stays.
+    var _ptix=''; try{ _ptix=(new URLSearchParams(location.search)).get('tix')||''; }catch(e){}
+    var tixTok=''; try{ if(window.DDTicketSec&&DDTicketSec.parseToken&&DDTicketSec.parseToken(_ptix)) tixTok=_ptix; }catch(e){}
+    var rightBar = tixTok
+      ? '<div id="pmQR" style="width:112px;flex:none;background:#fff;display:flex;align-items:center;justify-content:center;padding:7px"></div>'
+      : '<div style="flex:1;background:repeating-linear-gradient(0deg,#111 0 2px,#fff 2px 3px,#111 3px 6px,#fff 6px 7px,#111 7px 9px,#fff 9px 12px)"></div>';
+    var secNote = tixTok
+      ? '<div style="font-size:8.5px;color:#1a7a3f;font-weight:800;margin-top:6px">🔒 Secure code — scan at the gate · single-use (a copy won’t get in twice)</div>'
+      : '';
     var stub='<div style="display:flex;background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden;font-family:ui-monospace,\'Courier New\',monospace;color:#1a1a1a;min-height:158px">'
       +'<div style="width:104px;flex:none;background:#dadada;padding:9px 8px"><div style="font-size:7px;font-weight:700;color:#555">TICKET #</div><div style="font-size:12px;font-weight:800;word-break:break-all">'+esc(tid)+'</div><div style="font-size:7px;font-weight:700;color:#555;margin-top:7px">ADMISSION</div><div style="font-size:13px;font-weight:800">GA</div><div style="font-size:9px;font-weight:800;color:#333;margin-top:12px">StageFill<span style="font-size:6px;vertical-align:super">™</span></div></div>'
-      +'<div style="flex:1;padding:10px 12px;border-left:6px solid '+acc+'"><div style="font-size:9px;font-weight:800;letter-spacing:.06em;color:'+acc+'">STAGEFILL'+(sub?(' · '+esc(sub).toUpperCase()):'')+'</div><div style="font-size:9px;letter-spacing:.1em;color:#555;margin-top:7px">YOU ARE GOING TO SEE</div><div style="font-size:21px;font-weight:800;line-height:1;margin-top:2px">'+esc(band).toUpperCase()+'</div><div style="font-size:12px;font-weight:700;margin-top:7px">'+esc(venue)+'</div><div style="font-size:8.5px;color:#777;margin-top:8px">🎨 art for this show by Claude Gaude · <b>same #'+esc(tid)+'</b> as your digital ticket</div><div style="font-size:8px;color:#8a8a8a;margin-top:5px">setlist texted live · directions to your stage · yours to keep forever 🌹</div></div>'
-      +'<div style="width:132px;flex:none;display:flex"><div style="flex:1;background:repeating-linear-gradient(0deg,#111 0 2px,#fff 2px 3px,#111 3px 6px,#fff 6px 7px,#111 7px 9px,#fff 9px 12px)"></div><div style="width:32px;background:#111;color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">StageFill™</div></div>'
+      +'<div style="flex:1;padding:10px 12px;border-left:6px solid '+acc+'"><div style="font-size:9px;font-weight:800;letter-spacing:.06em;color:'+acc+'">STAGEFILL'+(sub?(' · '+esc(sub).toUpperCase()):'')+'</div><div style="font-size:9px;letter-spacing:.1em;color:#555;margin-top:7px">YOU ARE GOING TO SEE</div><div style="font-size:21px;font-weight:800;line-height:1;margin-top:2px">'+esc(band).toUpperCase()+'</div><div style="font-size:12px;font-weight:700;margin-top:7px">'+esc(venue)+'</div><div style="font-size:8.5px;color:#777;margin-top:8px">🎨 art for this show by Claude Gaude · <b>same #'+esc(tid)+'</b> as your digital ticket</div><div style="font-size:8px;color:#8a8a8a;margin-top:5px">setlist texted live · directions to your stage · yours to keep forever 🌹</div>'+secNote+'</div>'
+      +'<div style="width:132px;flex:none;display:flex">'+rightBar+'<div style="width:32px;background:#111;color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">StageFill™</div></div>'
     +'</div>';
     var ov=document.createElement('div'); ov.id='printOverlay';
     ov.style.cssText='position:fixed;inset:0;z-index:800;background:rgba(10,8,20,.72);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto';
@@ -723,6 +745,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       +'<div class="pm-actions" style="display:flex;gap:9px;margin-top:13px"><button onclick="window.print()" style="flex:1;border:1.5px solid '+acc+';border-radius:11px;padding:11px;font-weight:800;background:#fff;color:'+acc+';cursor:pointer">🖨️ Print at home · free</button><button onclick="ticketPrintMail()" style="flex:1;border:0;border-radius:11px;padding:11px;font-weight:800;background:'+acc+';color:#fff;cursor:pointer">📮 Order keepsakes · mailed</button></div>'
     +'</div>';
     document.body.appendChild(ov);
+    // render the secure QR into the paper stub (the printed code that resolves to the same signed record)
+    if(tixTok){ try{ if(window.DDQR&&DDQR.into){ DDQR.into('pmQR', tixTok, {size:300, css:112, caption:false, mark:false}); } }catch(e){} }
   };
   window.ticketPrintMail=function(){ try{ alert('📮 Card stock, mailed: your ticket in this show’s Claude Gaude art — and after the show, your setlist + the crowd’s photos as one keepsake collage. Printed by PostNet, Bethlehem. A StageFill premium.'); }catch(e){} };
   window.ticketShare=function(){ var link=url||('https://deaddance.app/event.html'+(ev?('?ev='+encodeURIComponent(ev)):''));
