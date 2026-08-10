@@ -573,7 +573,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       +'<div class="cookie">🌹 Enter each song with its <b>length</b> (m:ss) — the ticket builds a 00:00 elapsed clock like a cassette. Fans see an <b>empty</b> list until you <b>tease</b> each song live. 🍪</div>';
   }
   function _persistSongs(rec){ try{ localStorage.setItem(sKey(), JSON.stringify(rec)); }catch(e){}
-    try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band,{date:date,start:rec.start,songs:rec.songs}); }catch(e){}
+    try{ if(window.DDSetlist&&DDSetlist.set) DDSetlist.set(band, rec.songs||[], null, null); }catch(e){}   // fixed: API wants the songs ARRAY (was passing an object → server setlist never persisted)
     // TRUTHFUL SERVER SYNC: chain .then/.catch so the upsert actually SENDS (supabase-js v2 fires only on then/catch).
     // The "Setlist saved / Archived" toast reflects the REAL local save (always works); if the SERVER sync fails we add
     // an honest heads-up so the band knows other devices / fan texts may not have it yet. Token-gated (?key).
@@ -654,6 +654,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       if(!confirm('Archive “'+band+'” — lock the setlist & roster as history? You won’t be able to edit after.')) return;
     }
     _persistSongs({start:d.start||'',meta:d.meta,setBreaks:d.setBreaks,songs:d.songs||[],archived:true});
+    try{ if(window.DDSetlist&&DDSetlist.archive) DDSetlist.archive(band); }catch(e){}   // Phase 6: lock server-side too — permanent, cross-device history
     ticketCurtain('setlist'); try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('Archived 🌹 — locked to history.'); }catch(e){} };
   /* ---------- VENUE VIEW — same ticket, operator's pills. Their event, their numbers, close it out.
      A venue flips through the tickets for their OWN events (a deck of nights). Role via ?role=venue.
@@ -699,13 +700,32 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   window.uploadSongAudio = function(i){ var d=getSongs(), s=(d.songs||[])[i]; if(!s) return; var nm=s.n||s.name||s;
     var inp=document.createElement('input'); inp.type='file'; inp.accept='audio/*'; inp.style.display='none';
     inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f){ return; }
-      try{ window.__ddAudio[akey(band,date,nm)] = URL.createObjectURL(f); }catch(e){}
-      try{ var key=g('key',''), cl=window.ddClient&&ddClient();                      // guarded cloud upload hook (backend TODO — device playback works now)
-           if(key&&cl&&cl.storage){ /* cl.storage.upload(...) when the audio bucket exists */ } }catch(e){}
+      try{ window.__ddAudio[akey(band,date,nm)] = URL.createObjectURL(f); }catch(e){}   // immediate local playback
+      // PHASE 6 — PERMANENT: upload to the 'event-audio' bucket, then bind the public URL so EVERY ticket
+      // (any device) gets the ▶. No-ops cleanly until the bucket exists (device playback still works now).
+      try{ window.SFClient && window.SFClient(function(cl){ if(!(cl&&cl.storage)) return;
+        var path=slug(band)+'/'+(date||'na')+'/'+slug(nm)+'-'+Date.now()+'.audio';
+        cl.storage.from('event-audio').upload(path, f, {upsert:true, contentType:(f.type||'audio/mpeg')}).then(function(res){
+          if(res&&res.error) return;
+          var pu=cl.storage.from('event-audio').getPublicUrl(path); var url=pu&&pu.data&&pu.data.publicUrl; if(!url) return;
+          try{ window.__ddAudio[akey(band,date,nm)] = url; }catch(e){}                 // swap the local blob for the durable URL
+          try{ cl.rpc('dd_event_media_set',{ p_band_slug:slug(band), p_event_key:(ev||date||''), p_song:nm, p_kind:'audio', p_url:url, p_caption:null }); }catch(e){}
+          try{ ticketCurtain('setlist'); }catch(e){}
+        }).catch(function(){});
+      }); }catch(e){}
       ticketCurtain('setlist');
       try{ (window.parent&&window.parent.toast?window.parent.toast:alert)('🎧 Audio added to “'+nm+'” — every ticket now gets a ▶ on this song 🌹'); }catch(e){}
       try{ document.body.removeChild(inp); }catch(e){} };
     document.body.appendChild(inp); inp.click(); };
+  // PHASE 6 — load the event's bound media so hosted audio lights a real ▶ on EVERY device (the permanent record).
+  setTimeout(function(){ try{ var evk=(ev||date||''); if(!evk||!window.SFClient) return;
+    window.SFClient(function(cl){ if(!(cl&&cl.rpc)) return;
+      cl.rpc('dd_event_media_list',{ p_band_slug:slug(band), p_event_key:evk }).then(function(r){ var list=(r&&r.data)||[]; if(!list.length) return;
+        list.forEach(function(m){ if(m&&m.kind==='audio'&&m.url&&m.song){ try{ window.__ddAudio[akey(band,date,m.song)] = m.url; }catch(e){} } });
+        try{ var c=document.getElementById('curtain'); if(c&&c.classList.contains('on')) ticketCurtain('setlist'); }catch(e){}
+      }).catch(function(){});
+    });
+  }catch(e){} }, 0);
   /* 🖨️ PRINT — tap the show QR → "do you miss paper tickets?" → the printable stub (per-event Claude Gaude art), print at home free or order card stock mailed */
   window.ticketPrint=function(){
     function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}

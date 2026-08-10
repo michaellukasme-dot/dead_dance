@@ -25,6 +25,12 @@
     return c.rpc('dd_setlist_now', { p_band_slug: slugify(band) })
       .then(function (r) { return (r && r.data) || null; }).catch(function () { return null; });
   }
+  // Phase 6 — lock the set as permanent history (server-side). After this, dd_setlist_set is refused.
+  function archive(band) {
+    var c = C(); if (!c || !band) return Promise.resolve(null);
+    return c.rpc('dd_setlist_archive', { p_band_slug: slugify(band) })
+      .then(function (r) { return (r && r.data) || null; }).catch(function () { return null; });
+  }
   // ============================================================================
   // PURE TIMELINE MATH (no network, no DOM) — the CD/cassette elapsed clock.
   //   A song has a NAME + a LENGTH. Song 1 starts at 00:00; every later song's
@@ -117,7 +123,7 @@
   // The band MAY edit the setlist ONLY before archive. Archived → locked forever.
   function canEdit(setlist) { return !(setlist && setlist.archived); }
 
-  root.DDSetlist = { set: set, get: get, now: now, slugify: slugify,
+  root.DDSetlist = { set: set, get: get, now: now, archive: archive, slugify: slugify,
     parseLen: parseLen, fmtClock: fmtClock, timeline: timeline, clockAdd: clockAdd, schedule: schedule,
     isComplete: isComplete, isBandConfirmed: isBandConfirmed, canEdit: canEdit };
 })(typeof window !== 'undefined' ? window : this);
