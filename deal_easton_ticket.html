@@ -41,6 +41,17 @@
 .qrtx{font-size:11.5px;color:#cfc3e6;line-height:1.5}
 .qrtx b{color:#fff}
 .ft{font-size:10.5px;color:#8a8398;text-align:center;padding:10px 16px 16px}
+.q{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;border:0;background:#2f6fe0;color:#fff;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;margin-left:3px}
+.secov{position:fixed;inset:0;background:rgba(15,20,40,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.secov.on{display:flex}
+.secmod{background:#fff;border-radius:18px;max-width:340px;width:100%;padding:20px;box-shadow:0 22px 64px rgba(0,0,0,.5);text-align:left}
+.secmod .lock{font-size:26px}.secmod .tg{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#2e7d46;font-weight:800;margin-top:4px}
+.secmod h3{margin:3px 0 2px;color:var(--ink);font-size:19px;line-height:1.1}
+.secmod p{font-size:13px;color:#4a4356;margin:8px 0}
+.secmod .two{display:flex;gap:8px;margin:10px 0}
+.secmod .two div{flex:1;background:#f4f7ff;border:1px solid #e3ecfb;border-radius:10px;padding:9px 10px;font-size:11.5px;color:#1f3a6b}
+.secmod .two b{display:block;color:#2f6fe0;font-size:12px;margin-bottom:2px}
+.secmod .close{width:100%;border:0;border-radius:11px;background:#2f6fe0;color:#fff;font-weight:800;padding:11px;font-size:14px;cursor:pointer;margin-top:6px}
 </style></head><body>
 <div class="tk">
   <div class="hd"><div class="b">DEAL · <span>StageFill</span></div><div class="s">🔒 SECURE</div><div class="x">×</div></div>
@@ -55,7 +66,7 @@
     <div class="ga">General Admission</div>
     <div class="code">
       <div class="bars" id="bars"></div><div class="scan"></div>
-      <div class="note">Screenshots won't get you in.</div>
+      <div class="note">Screenshots won't get you in. <button class="q" onclick="openSec()" aria-label="Why so secure?">?</button></div>
     </div>
 
     <div class="price"><div class="p">Free<small>community show · Easton Partnership</small></div>
@@ -79,10 +90,20 @@
   </div>
   <div class="ft">Sample StageFill pass — the live rotating code &amp; QR are issued by the server (see the white paper). Demo for the Easton / Deal show.</div>
 </div>
+<div class="secov" id="secov" onclick="if(event.target===this)closeSec()"><div class="secmod">
+  <span class="lock">&#128274;</span><div class="tg">Most Secure Ticket</div>
+  <h3>Screenshots won't get you in &mdash; really.</h3>
+  <p>Your pass is a <b>rotating, single-use code</b>. The barcode regenerates every ~15&nbsp;seconds from a key only our server holds.</p>
+  <div class="two"><div><b>Your phone</b>rolls a fresh code every 15s &mdash; the screen is always live.</div><div><b>The gate</b>takes only the current code, and rejects any stale or reused one.</div></div>
+  <p>So a screenshot freezes a code that's already dead by the time anyone reaches the door. One tap, one entry, no fakes.</p>
+  <button class="close" onclick="closeSec()">Got it</button>
+</div></div>
 <script>
 // draw the rotating-style barcode (visual)
 var bars=document.getElementById('bars'),h='';
 for(var i=0;i<64;i++){var w=2+Math.round(Math.random()*4);h+='<i style="height:'+(38+Math.round(Math.random()*28))+'px"></i>';}
 bars.innerHTML=h;
+function openSec(){document.getElementById('secov').classList.add('on');}
+function closeSec(){document.getElementById('secov').classList.remove('on');}
 </script>
 </body></html>
