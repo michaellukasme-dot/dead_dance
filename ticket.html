@@ -321,18 +321,60 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       if(TN&&TN.onPurchase) TN.onPurchase(show);
     }catch(e){}
   }
-  window.startCheckout=function(){
-    if(url){ try{ window.open(url,'_blank','noopener'); }catch(e){} return; }
+  // stable, opaque per-fan owner id (NO PII) — so a fan's tickets tie together across shows.
+  function ownerId(){ try{ var k='dd.owner', v=localStorage.getItem(k); if(!v){ v='f_'+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem(k,v); } return v; }catch(e){ return null; } }
+  // a resolvable Supabase client for issuing (reuses one if the page already made it; else creates anon).
+  window.SFClient = window.SFClient || function(cb){
+    try{ if(window.ddClient && ddClient() && ddClient().rpc) return cb(ddClient()); }catch(e){}
+    try{ if(window.parent && window.parent.ddClient && window.parent.ddClient()){ window.ddClient=window.parent.ddClient; return cb(ddClient()); } }catch(e){}
+    try{ if(window.top && window.top.ddClient && window.top.ddClient()){ window.ddClient=window.top.ddClient; return cb(ddClient()); } }catch(e){}
+    var U="https://vmbqfzxhrqxpwgidogfm.supabase.co",
+        A="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM";
+    function mk(){ try{ var C=window.supabase.createClient(U,A); window.ddClient=function(){return C;}; try{ C.auth.getSession().then(function(r){ if(!(r&&r.data&&r.data.session)) C.auth.signInAnonymously(); }); }catch(e){} return C; }catch(e){ return null; } }
+    try{ if(window.supabase && window.supabase.createClient) return cb(mk()); }catch(e){}
+    var s=document.createElement('script'); s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+    s.onload=function(){ cb(mk()); }; s.onerror=function(){ cb(null); }; document.head.appendChild(s);
+  };
+  // the OLD local grab — kept as the honest fallback (paid, external seller, preview with no event, or offline).
+  function grabLocal(){
     var bb=document.getElementById('buybar');
-    document.getElementById('bbBuy').textContent='Processing…';
+    var btn=document.getElementById('bbBuy'); if(btn) btn.textContent='Processing…';
     setTimeout(function(){
-      bb.classList.add('hidden');
-      document.getElementById('issuedNote').classList.remove('hidden');
+      if(bb) bb.classList.add('hidden');
+      var iN=document.getElementById('issuedNote'); if(iN) iN.classList.remove('hidden');
       armReminder();
-      /* append to the fan's DECK (persists; DDTickets reads this) — flip through & share them */
       try{ var mk='dd.mytix', arr=JSON.parse(window.localStorage.getItem(mk)||'[]'); arr.push({ref:'t'+Date.now(), band:band, venue:venue, date:date, iso:iso||date, price:price, at:Date.now()}); window.localStorage.setItem(mk, JSON.stringify(arr)); }catch(e){}
       try{ if(window.parent&&window.parent.toast) window.parent.toast('🎟️ Ticket issued — it lives on your phone now. 🌹'); }catch(e){}
     }, 750);
+  }
+  window.startCheckout=function(){
+    if(url){ try{ window.open(url,'_blank','noopener'); }catch(e){} return; }
+    var isFree = /free/i.test(price) || /^\$?\s*0(\.0+)?$/.test(String(price||'').trim());
+    /* PHASE 3 · ISSUE-ON-GRAB — a FREE grab on a REAL event mints a SIGNED dd_ticket (the live rotating
+       ticket you tested), joins the fan into the band's group, then reloads INTO the live credential.
+       Paid, external-seller, no-event previews, and offline all fall back to grabLocal (honest, no fake). */
+    if(ev && isFree && window.DDTicketSec && DDTicketSec.issue){
+      // already hold a secure ticket for THIS event? → open it, never mint a duplicate.
+      try{ var have=(JSON.parse(localStorage.getItem('dd.mytix')||'[]')||[]).filter(function(t){return t&&t.event===ev&&t.token;})[0];
+        if(have && have.token && g('tix','')!==have.token){ var uu=new URL(location.href); uu.searchParams.set('tix', have.token); location.replace(uu.toString()); return; } }catch(e){}
+      var btn=document.getElementById('bbBuy'); if(btn) btn.textContent='Issuing…';
+      window.SFClient(function(cl){
+        if(!(cl && cl.rpc)){ grabLocal(); return; }                       // offline → honest local fallback
+        DDTicketSec.issue({ event:ev, tier:'ga', paid:false, price:0, owner:ownerId(), by:'grab' }).then(function(res){
+          if(!(res && res.ok && res.ticket_id && res.sig)){ grabLocal(); return; }   // couldn't mint → local fallback
+          var token='TIX:'+res.ticket_id+':'+res.sig;
+          try{ var mk='dd.mytix', arr=JSON.parse(localStorage.getItem(mk)||'[]');
+            arr.push({ ref:res.ticket_id, ticket_id:res.ticket_id, sig:res.sig, token:token, event:ev, band:band, venue:venue, date:date, iso:iso||date, price:price, at:Date.now() });
+            localStorage.setItem(mk, JSON.stringify(arr)); }catch(e){}
+          armReminder();
+          try{ if(window.ddGroups){ var comm=slug(band)||'festivaldance'; ddGroups.join(comm); ddGroups.addTicket({ id:res.ticket_id, communities:[comm,'festivaldance'] }); } }catch(e){}   // fan-graph join
+          try{ if(window.parent&&window.parent.toast) window.parent.toast('🎟️ Secure ticket issued — a live code, on your phone. 🌹'); }catch(e){}
+          try{ var u=new URL(location.href); u.searchParams.set('tix', token); location.replace(u.toString()); }catch(e){ location.reload(); }   // reload into the live rotating credential
+        }).catch(function(){ grabLocal(); });
+      });
+      return;
+    }
+    grabLocal();
   };
   // "That's my band" → the non-pushy permission ask. We sell NOTHING until the band says yes + confirms their true schedule.
   window.bandPerm=function(step){
@@ -756,6 +798,8 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       try{ if(window.__barsTimer){ clearInterval(window.__barsTimer); window.__barsTimer=null; } }catch(e){}  // retire the faux barcode
       // swap the wide faux barcode for a LIVE rotating QR the door scanner reads
       try{ canvas.style.display='none'; var sw=wrap.querySelector('.sweep'); if(sw) sw.style.display='none'; }catch(e){}
+      // a live credential means this ticket is HELD → retire the Buy button, show the wallet state
+      try{ var bb=document.getElementById('buybar'); if(bb) bb.classList.add('hidden'); var iN=document.getElementById('issuedNote'); if(iN) iN.classList.remove('hidden'); }catch(e){}
       var box=document.getElementById('liveTix');
       if(!box){ box=document.createElement('div'); box.id='liveTix';
         box.style.cssText='display:flex;align-items:center;justify-content:center;padding:4px 0 2px';
