@@ -114,7 +114,7 @@ window.DD_FESTIVALS=[];
 
 /* StageFill events → the roll-up map. coords carry lat/lng so any city plots (engine adds it to CITY). */
 window.stageFillMapRows=function(){
-  var rows=[]; function push(e){ if(!e)return; var city=[e.city,e.state].filter(Boolean).join(', '); var d=e.start||e.dateStart||e.date_start||'';
+  var rows=[]; function push(e){ if(!e)return; if(e.map===false)return; var city=[e.city,e.state].filter(Boolean).join(', '); var d=e.start||e.dateStart||e.date_start||'';
     var co=(e.lat!=null&&e.lng!=null)?[e.lat,e.lng]:null; if(!city&&!co)return;
     rows.push({ band:e.name||e.venue||'Event', venue:e.venue||'', city:city, date:d, time:e.time||e.start_time||'', coords:co, slug:e.slug, real:true }); }
   try{ (window.STAGEFILL_EVENTS||[]).forEach(push); }catch(e){}

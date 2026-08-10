@@ -3,7 +3,8 @@
    otherwise event_page.html?ev=<slug>. Categories align with dd_categories.js (DDCats). */
 (function (root) {
   var EVENTS = [
-    { slug:'musikfest-2026', name:'Musikfest 2026', city:'Bethlehem', state:'PA', start:'2026-08-01', end:'2026-08-09', time:'12:00', cat:'festival', venue:'Historic Bethlehem · SteelStacks', lat:40.6187, lng:-75.3803, url:'artsquest_musikfest.html' },
+    { slug:'karnival-of-the-arts-2026', name:'Karnival of the Arts East 2026', city:'Kempton', state:'PA', start:'2026-09-03', end:'2026-09-07', time:'12:00', cat:'festival', venue:'Kempton Community Center', lat:40.6302, lng:-75.8510, url:'kota_map.html' },
+    { slug:'musikfest-2026', name:'Musikfest 2026', city:'Bethlehem', state:'PA', start:'2026-08-01', end:'2026-08-09', time:'12:00', cat:'festival', venue:'Historic Bethlehem · SteelStacks', url:'artsquest_musikfest.html', map:false },
     { slug:'red-rocks-jam-nights', name:'Red Rocks Jam Nights', city:'Morrison', state:'CO', start:'2026-07-18', time:'19:30', cat:'live_music', venue:'Red Rocks Amphitheatre', lat:39.6655, lng:-105.2053 },
     { slug:'french-quarter-fest', name:'French Quarter Fest', city:'New Orleans', state:'LA', start:'2026-04-16', end:'2026-04-19', time:'11:00', cat:'jazz_blues', venue:'French Quarter', lat:29.9584, lng:-90.0644 },
     { slug:'austin-americana', name:'Austin Americana Weekender', city:'Austin', state:'TX', start:'2026-10-03', end:'2026-10-04', time:'16:00', cat:'country', venue:'Zilker Park', lat:30.2669, lng:-97.7728 },
