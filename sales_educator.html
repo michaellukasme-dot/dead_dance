@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The StageFill Sales Educator</title>
+<style>
+:root{--purple:#4a1e5c;--purple2:#6d28d9;--gold:#e0a92e;--ink:#241026;--muted:#8a7d92;--line:#e7e0ee;--bg:#faf7fe}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:15.5px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.bar{background:linear-gradient(180deg,#2c1338,#4a1e5c);color:#fff;padding:16px 18px;position:sticky;top:0;z-index:10}
+.bar h1{margin:0;font-size:clamp(17px,4.5vw,22px);font-weight:900}.bar h1 span{color:var(--gold)}
+.bar p{margin:3px 0 0;font-size:12.5px;color:#d8c6e6}
+.nav{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:9}
+.nav button{flex:0 0 auto;border:1px solid var(--line);background:#faf7ff;color:var(--purple);border-radius:20px;padding:7px 13px;font-weight:800;font-size:12.5px;cursor:pointer}
+.nav button.on{background:var(--purple2);color:#fff;border-color:var(--purple2)}
+.wrap{max-width:720px;margin:0 auto;padding:18px 16px 60px}
+.mod{display:none}.mod.on{display:block}
+.mod h2{font-size:20px;margin:6px 0 4px}
+.kick{color:var(--purple2);font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 16px;margin:12px 0;box-shadow:0 2px 10px #4a1e5c0a}
+.card h3{margin:0 0 6px;font-size:15.5px}
+.big{font-size:26px;font-weight:900;color:var(--purple)}
+.gold{color:#a9791a;font-weight:900}
+.pill{display:inline-block;background:#f3eefb;border:1px solid #e2d5f2;border-radius:14px;padding:3px 10px;font-size:12px;font-weight:800;color:var(--purple);margin:2px 4px 2px 0}
+.money{background:linear-gradient(180deg,#fff9ec,#fff);border-color:#f0dca6}
+.q{background:#f7f4fb;border-left:4px solid var(--gold);padding:10px 13px;border-radius:0 10px 10px 0;margin:10px 0;font-style:italic;color:#4a3b52}
+.step{display:flex;gap:11px;align-items:flex-start;margin:10px 0}
+.step .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--purple2);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:13px}
+.two{display:flex;gap:10px;flex-wrap:wrap}.two>div{flex:1;min-width:220px}
+.foot{color:var(--muted);font-size:12px;text-align:center;padding:22px 10px}
+b.hl{background:#fdf3d6;padding:0 3px;border-radius:4px}
+.nextbar{display:flex;justify-content:space-between;margin-top:18px}
+.nextbar button{border:0;border-radius:11px;padding:11px 16px;font-weight:800;cursor:pointer}
+.nextbar .p{background:var(--purple2);color:#fff}.nextbar .g{background:#f0ebf6;color:var(--purple)}
+ul{margin:6px 0;padding-left:20px}li{margin:4px 0}
+</style></head>
+<body>
+<div class="bar"><h1>The StageFill <span>Sales Educator</span></h1><p>How to sell it — and where the money is. For Miguel, and every rep after him.</p></div>
+<div class="nav" id="nav"></div>
+<div class="wrap" id="wrap">
+
+<div class="mod" data-t="Start">
+  <div class="kick">Module 0 · The one idea</div>
+  <h2>You’re not selling software. You’re selling a festival its own map, its own fans, and its own money back.</h2>
+  <div class="card"><p>Every festival already <b>pays</b> for these things — badly. They rent a ticketer that takes ~<b>27%</b> in fees and <b>keeps the fan data</b>. They pay a designer <b>$1,000–$3,000</b> for a paper map. They lose the crowd the second the gates open.</p>
+  <p>StageFill gives them <b class="hl">less fees, their data, a live map, and a growing menu of things to add</b> — and we <b>publish our prices</b> when every competitor hides theirs. That transparency <i>is</i> the wedge.</p></div>
+  <div class="q">“Land the map. Demo the value. Sell the ladder.” — the whole motion in six words.</div>
+  <div class="nextbar"><span></span><button class="p" onclick="go(1)">Who you sell to →</button></div>
+</div>
+
+<div class="mod" data-t="Who">
+  <div class="kick">Module 1 · Who you sell to</div>
+  <h2>It’s always the same shape — a <span class="gold">container</span> with an owner.</h2>
+  <div class="card"><p>One engine, four buyers. You’re looking for the person who <b>owns the footprint</b> and answers for it:</p>
+  <span class="pill">🎪 Festival organizer</span><span class="pill">🏘 Downtown / BID (GEDP)</span><span class="pill">🥕 Farmers market manager</span><span class="pill">🍺 Venue owner</span>
+  <p style="margin-top:10px">They differ in label — “admitted,” “bought a loaf,” “checked in” — but the tool is identical. If you can build one, you can sell all four. <b>Start with the one you already have a door into.</b></p></div>
+  <div class="q">Miguel’s door: he’s already selling GEDP / Easton — that’s a downtown corridor, the Easton Farmers’ Market, <i>and</i> festivals. One relationship, three containers.</div>
+  <div class="nextbar"><button class="g" onclick="go(0)">← Back</button><button class="p" onclick="go(2)">The motion →</button></div>
+</div>
+
+<div class="mod" data-t="Motion">
+  <div class="kick">Module 2 · The motion (5 steps)</div>
+  <h2>Never pitch a deck. Hand them their own festival, half-built.</h2>
+  <div class="step"><div class="n">1</div><div><b>Warm text, then email.</b> “Sent you something — check your email today.” Low pressure. (This exact move just got a reply in 30 minutes.)</div></div>
+  <div class="step"><div class="n">2</div><div><b>Send the link, not a pitch.</b> Their event, already started in <b>The Maker</b> — center, grounds, pavilions. They open it and see <i>their</i> place.</div></div>
+  <div class="step"><div class="n">3</div><div><b>Let them build.</b> The self-service wizard asks; they paste coordinates from Google Maps; it snaps. <b>They</b> own the build — so it’s right, and it’s theirs.</div></div>
+  <div class="step"><div class="n">4</div><div><b>Show one wow.</b> Tap <b>🎨 Cutesy</b> — the illustrated map appears, snapped to their streets. This is the moment they stop evaluating and start wanting.</div></div>
+  <div class="step"><div class="n">5</div><div><b>Sell the ladder.</b> Land free/cheap. Then add modules — self-service, one line at a time. Expansion forever.</div></div>
+  <div class="q">The first festival (KOTA) is <b>free</b> — it’s the reference, not the revenue. You give one away to win the relationship, then every festival after it pays.</div>
+  <div class="nextbar"><button class="g" onclick="go(1)">← Back</button><button class="p" onclick="go(3)">The money →</button></div>
+</div>
+
+<div class="mod" data-t="++ Money">
+  <div class="kick">Module 3 · The ++ menu (where the margin is)</div>
+  <h2>The base gets you in. The <span class="gold">++ items</span> are the business.</h2>
+
+  <div class="card money"><h3>🎨 Cutesy Illustrated Map — <span class="big">$499</span></h3>
+    <p>One-time, per festival. Generated from their geo, auto-snapped, done-for-you. Festivals pay a designer <b>$1,000–$3,000</b> for a worse, un-georeferenced one.</p>
+    <p><b class="hl">~100% margin.</b> TAM on this SKU alone: 800 festivals × $499 ≈ <b class="gold">$400,000</b>. The killer line: <i>“$499 covers the AI cost of your custom festival map — instant, and it lines up with the real streets.”</i></p>
+    <p style="font-size:12.5px;color:var(--muted)">Sell it as the wow of the demo. Escalate gently as the event date nears: “upload your own, or Buy Now $499.”</p></div>
+
+  <div class="card money"><h3>🎤 The Crowd-Games Machine — <span class="gold">recurring · every stage · every genre</span></h3>
+    <p><b>Re-imagined karaoke</b> — really a <b>real-time crowd-games engine</b>: karaoke, live <b>trivia</b>, and genre games that <b>match the room</b> — Latin-music trivia at a Latin fest, Dead trivia at a jam fest, country at a country fest. The whole crowd plays on their phones together. It <b>runs itself</b> — and it <b>books like an act</b>: it drops into the lineup exactly like a band, so slotting it into a changeover or a slow Tuesday is one tap.</p>
+    <p><b>The festival play (the big one):</b> fill the <b>changeover</b> — every stage’s <b>20–30 dead minutes</b> between bands while crews set up and tear down. Instead of the crowd drifting, they’re <i>playing</i>: sing-alongs, trivia for prizes, a stage-wide game. Turns the festival’s worst dead air into its own little party.</p>
+    <p><b class="hl">Every festival, every stage, every genre.</b> Price it at <b class="gold">$99 an intermission set</b> — and it pays for itself: an engaged crowd doesn’t drift to the parking lot, they stay and <b>keep buying beers at the bar</b> right through the changeover. The $99 comes back many times over in drink sales. One festival = many stages = many intermissions — it <b>multiplies</b>. (Also the venue play: a bar books a set to fill a slow night, no band guarantee.)</p></div>
+
+  <div class="card money"><h3>📊 Data + Reports (+ the sponsor gateway) — <span class="gold">the whale</span></h3>
+    <p>Live per-area footfall — how many people, where, when. Ops and public safety both want it. Each stakeholder (police, EMS, city, sponsors) gets <b>their own report</b>, so each is bought in.</p>
+    <p>The reports justify a fee — but the real number is the <b>sponsor gateway</b>: hard attendance data turns “estimates” into “6 gateway sponsors × $9,999,” ≈ <b class="gold">~$260K / festival</b>. The data fee is the wedge; the sponsorship book is the prize.</p></div>
+
+  <div class="card"><h3>🎫 Secure ticketing — <span class="gold">the crown, earned last</span></h3>
+    <p>The rotating, un-screenshottable ticket. Don’t lead with it — it’s the biggest ask and the incumbent’s only moat. Land the map + reports first; ticketing is the prize you earn once they trust you.</p></div>
+
+  <div class="nextbar"><button class="g" onclick="go(2)">← Back</button><button class="p" onclick="go(4)">Objections →</button></div>
+</div>
+
+<div class="mod" data-t="Objections">
+  <div class="kick">Module 4 · Objections &amp; closes</div>
+  <h2>Every “no” is a “not yet” with a reason. Name it first.</h2>
+  <div class="two">
+    <div class="card"><h3>“We already use [Eventbrite / Events.com].”</h3><p>“Great — keep them for now. Start with the <b>map</b>, which they don’t give you, and <b>keep your fan data</b>, which they take. Add the rest when you’re ready.” <i>Land small.</i></p></div>
+    <div class="card"><h3>“What does it cost?”</h3><p>Tell them a number — instantly. <b>Everyone else hides pricing; you don’t.</b> “$499 for the map, and modules you turn on yourself.” The number builds trust; the vagueness is the competitor’s tell.</p></div>
+  </div>
+  <div class="two">
+    <div class="card"><h3>“I need to think about it.”</h3><p>“Totally — here’s your festival already half-built; play with it tonight, nothing to sign.” The build in their hands does the closing.</p></div>
+    <div class="card"><h3>“Does it actually work?”</h3><p>Hand them the live one. It’s fixed — <b>it no longer freezes when the screen sleeps</b>. Let them feel it work on their own phone. (That gut-check is what a demo lives or dies on.)</p></div>
+  </div>
+  <div class="nextbar"><button class="g" onclick="go(3)">← Back</button><button class="p" onclick="go(5)">Your first week →</button></div>
+</div>
+
+<div class="mod" data-t="Week 1">
+  <div class="kick">Module 5 · Your first week</div>
+  <h2>Do these five things.</h2>
+  <div class="card"><ul>
+    <li><b>Pick one container you already have a door into.</b> (Miguel: GEDP / Easton.)</li>
+    <li><b>Build their thing in The Maker yourself, halfway.</b> Center + grounds + a container or two. Fifteen minutes.</li>
+    <li><b>Warm text → email → the link.</b> Not a deck. Their place, on their phone.</li>
+    <li><b>On the call, tap 🎨 Cutesy.</b> That’s the wow. Watch their face.</li>
+    <li><b>Name one ++ item and one price.</b> Usually the $499 map. Publish the number; let them say yes to something small.</li>
+  </ul></div>
+  <div class="q">Give the first one away. Win the relationship. Then the 800 are line items — and you already know how to run every one of them.</div>
+  <div class="foot">The StageFill Sales Educator · a Lukas Apps Entertainment company · sell to your strengths, bootstrap on sales 🌹</div>
+  <div class="nextbar"><button class="g" onclick="go(4)">← Back</button><span></span></div>
+</div>
+
+</div>
+<script>
+var mods=[].slice.call(document.querySelectorAll('.mod'));
+var nav=document.getElementById('nav');
+mods.forEach(function(m,i){ var b=document.createElement('button'); b.textContent=(i)+'· '+m.getAttribute('data-t'); if(i===0)b.textContent='★ '+m.getAttribute('data-t'); b.onclick=function(){go(i);}; nav.appendChild(b); });
+function go(i){ mods.forEach(function(m,j){ m.classList.toggle('on',j===i); nav.children[j].classList.toggle('on',j===i); });
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); } }
+go(0);
+</script>
+</body></html>
