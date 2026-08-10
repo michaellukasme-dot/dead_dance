@@ -22,6 +22,39 @@ body{font:14.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sa
 .botbar .pw{margin-left:auto;font-size:11.5px;font-weight:800;opacity:.9}.botbar .pw b{color:#e0b3f5}
 .note{font-size:10.5px;color:#a08fb0;font-style:italic;flex-basis:100%;margin-top:2px}
 .leaflet-popup-content{font:13px/1.4 -apple-system,sans-serif}.leaflet-popup-content b{color:var(--purple)}
+/* ---- Schedule & Details CURTAIN ---- */
+.fab{position:fixed;right:14px;bottom:60px;z-index:900;background:var(--purple2);color:#fff;border:0;border-radius:24px;padding:11px 17px;font:800 13.5px/1 -apple-system,sans-serif;box-shadow:0 6px 18px rgba(60,20,80,.4);cursor:pointer;display:flex;align-items:center;gap:7px}
+.curt{position:fixed;inset:0;z-index:1000;background:rgba(20,8,26,.55);display:none;align-items:flex-end}
+.curt.on{display:flex}
+.curtc{background:#fff;width:100%;max-height:88vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -10px 40px #0006}
+.curthd{background:linear-gradient(180deg,#2c1338,#4a1e5c);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.curthd h2{margin:0;font-size:16px;font-weight:800}.curthd h2 span{color:var(--gold)}
+.curtx{margin-left:auto;background:#ffffff22;border:0;color:#fff;width:32px;height:32px;border-radius:16px;font-size:18px;cursor:pointer}
+.curtb{overflow:auto;padding:14px 16px calc(16px + env(safe-area-inset-bottom,0))}
+.sec{margin-bottom:18px}
+.sec h3{margin:0 0 8px;font-size:12.5px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.04em}
+.days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.day{padding:7px 12px;border-radius:20px;border:1px solid var(--line);background:#faf7fe;font-weight:800;font-size:12.5px;cursor:pointer;color:#5b4f63}
+.day.on{background:var(--purple2);color:#fff;border-color:var(--purple2)}
+.slot{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;background:#fff}
+.slot .t{font-weight:800;color:var(--purple2);min-width:58px;font-size:12.5px}
+.slot .b{font-weight:700}.slot .s{margin-left:auto;font-size:11px;color:var(--muted);font-weight:700}
+.tba{color:#b0338a;font-style:italic}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{background:#f3eefb;border:1px solid #e2d5f2;border-radius:16px;padding:5px 11px;font-size:12px;font-weight:700;color:#5b4f63}
+.tkbtn{display:block;width:100%;text-align:center;background:var(--gold);color:#3a2a06;font-weight:800;border:0;border-radius:12px;padding:13px;font-size:14px;cursor:pointer;text-decoration:none}
+.miguel{font-size:11px;color:#a08fb0;font-style:italic;margin-top:6px}
+.drange{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.drange label{font-size:11px;font-weight:800;color:#5b4f63;display:flex;flex-direction:column;gap:3px}
+.drange input{border:1px solid var(--line);border-radius:9px;padding:7px 9px;font:inherit;font-size:13px}
+.daypager{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.darrow{background:#faf7fe;border:1px solid var(--line);border-radius:20px;padding:8px 13px;font-weight:800;font-size:12.5px;cursor:pointer;color:var(--purple2)}
+.daylbl{flex:1;text-align:center;font-weight:800;color:var(--purple);font-size:13px}
+.addrow{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.fin{border:1px solid var(--line);border-radius:9px;padding:9px;font:inherit;font-size:13px}
+.ft{width:82px}.fb{flex:1;min-width:110px}.fs{width:98px}
+.addbtn{background:var(--purple2);color:#fff;border:0;border-radius:9px;padding:9px 14px;font-weight:800;cursor:pointer}
+.del{margin-left:8px;background:0;border:0;color:#c0334b;font-weight:800;cursor:pointer;font-size:16px;line-height:1}
 </style></head>
 <body>
 <div class="bar"><span style="font-size:19px">🎪</span><h1>Karnival of the Arts · <span>StageFill</span></h1>
@@ -35,6 +68,38 @@ body{font:14.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sa
   <span class="lg other"><b>📌</b> OTHER — Miguel's pin (add to standard set)</span>
   <span class="note">Provisional placements from the grounds corners + structure coordinates. Miguel confirms stages, restrooms, first aid, vendor &amp; sponsor booths, and names the "OTHER" pin.</span>
 </div>
+<button class="fab" onclick="openCurt()">📋 Schedule &amp; Details</button>
+<div class="curt" id="curt" onclick="if(event.target===this)closeCurt()">
+  <div class="curtc">
+    <div class="curthd"><span style="font-size:18px">🎪</span><h2>Karnival of the Arts · <span>Details</span></h2><button class="curtx" onclick="closeCurt()" aria-label="Close">×</button></div>
+    <div class="curtb">
+      <div class="sec">
+        <h3>🎸 Band Schedule · Full Lineup</h3>
+        <div class="drange">
+          <label>Start<input type="date" id="dStart" value="2026-09-03" onchange="rebuildDays()"></label>
+          <label>End<input type="date" id="dEnd" value="2026-09-07" onchange="rebuildDays()"></label>
+        </div>
+        <div class="daypager">
+          <button class="darrow" onclick="dayArrow(-1)" aria-label="Previous day">‹ Day</button>
+          <span class="daylbl" id="dayLbl"></span>
+          <button class="darrow" onclick="dayArrow(1)" aria-label="Next day">Day ›</button>
+        </div>
+        <div id="sched"></div>
+        <div class="addrow">
+          <input id="aTime" class="fin ft" placeholder="7:00 PM">
+          <input id="aBand" class="fin fb" placeholder="Band / act">
+          <select id="aStage" class="fin fs"><option>🎤 Main</option><option>🎸 Stage 2</option><option>🎶 Stage 3</option></select>
+          <button class="addbtn" onclick="addSet()">+ Add</button>
+        </div>
+        <div class="miguel">Pick the run of dates, page each day with ‹ ›, add the lineup. Saved on this device — Miguel has full editing.</div>
+      </div>
+      <div class="sec"><h3>🛍 Vendors</h3><div class="chiprow" id="vendors"></div><div class="miguel">Miguel confirms the vendor list, count &amp; booth layout.</div></div>
+      <div class="sec"><h3>⭐ Sponsors</h3><div class="chiprow"><span class="chip2">StageFill</span><span class="chip2 tba">+ add sponsor</span></div><div class="miguel">StageFill among the sponsor logos (per our ask). Miguel adds the rest.</div></div>
+      <div class="sec"><h3>➕ Amenities &amp; Ops</h3><div class="chiprow"><span class="chip2">🚻 Restrooms</span><span class="chip2">➕ First Aid</span><span class="chip2">ℹ️ Info / Box Office</span><span class="chip2">🅿️ Parking</span><span class="chip2">⛺ Camping</span></div><div class="miguel">Locations &amp; counts — Miguel confirms.</div></div>
+      <div class="sec"><h3>🎫 Tickets</h3><a class="tkbtn" href="kota_ticket.html">Get the StageFill ticket →</a></div>
+    </div>
+  </div>
+</div>
 <div class="botbar"><span style="font-size:17px">🎫</span><span class="pw">Powered by <b>StageFill</b> · a Lukas Apps Entertainment company</span></div>
 <script>
 var CENTER=[40.630200440131915,-75.85101107016216];
@@ -44,18 +109,29 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,att
 // grounds boundary
 var poly=L.polygon(CORNERS,{color:'#6d28d9',weight:2.5,dashArray:'8 7',fillColor:'#6d28d9',fillOpacity:0.05}).addTo(map);
 map.fitBounds(poly.getBounds().pad(0.08));
+// ---- 3 COVERED PAVILIONS (from Miguel's structure corners). Each is a covered rectangle; the stage
+//      sits tentatively at the FAR (outward) end of each so the three don't overrun one another. Miguel confirms. ----
+var PAVILIONS=[
+  { name:'Pavilion 1 · NW', corners:[[40.63063087940102,-75.85149433359459],[40.63030128525979,-75.8512919266192],[40.63022224207909,-75.85152184522231],[40.63054736248743,-75.85172425219749]] },
+  { name:'Pavilion 2 · N',  corners:[[40.630882920881916,-75.85060020569337],[40.63091423957937,-75.85036046150891],[40.63052499186784,-75.85027596150947],[40.630493672987846,-75.8505117754614]] },
+  { name:'Pavilion 3 · SE', corners:[[40.63022076214234,-75.85046006867493],[40.63025333178798,-75.85020995269335],[40.62985777126366,-75.8501227277921],[40.62982544472115,-75.85037474682422]] }
+];
+PAVILIONS.forEach(function(pv){
+  L.polygon(pv.corners,{color:'#7a5a2a',weight:2,fillColor:'#caa54e',fillOpacity:0.30}).addTo(map)
+   .bindPopup('<b>'+pv.name+'</b> — covered pavilion.<br>Stage tentatively at the far end (Miguel confirms).');
+});
 function pin(cls,emoji){return L.divIcon({className:'',html:'<div class="pin '+cls+'"><span>'+emoji+'</span></div>',iconSize:[30,30],iconAnchor:[15,28],popupAnchor:[0,-26]});}
-// [lat,lng, class, emoji, name, note]  — 3 stages placed on the 3 mapped structures
+// [lat,lng, class, emoji, name, note]  — stages tentatively at the FAR end of each covered pavilion
 var PINS=[
- [40.63042,-75.85150,'stage','🎤','Main Stage','NW structure · confirm'],
- [40.63070,-75.85044,'stage','🎸','Stage 2','NE structure · confirm'],
- [40.63004,-75.85029,'stage','🎶','Stage 3','SE structure · confirm'],
+ [40.6305891,-75.8516093,'stage','🎤','Main Stage','Pavilion 1 (NW) · far end — TENTATIVE, Miguel confirms'],
+ [40.6308986,-75.8504803,'stage','🎸','Stage 2','Pavilion 2 (N) · far end — TENTATIVE, Miguel confirms'],
+ [40.6298416,-75.8502487,'stage','🎶','Stage 3','Pavilion 3 (SE) · far end — TENTATIVE, Miguel confirms'],
  [40.62958,-75.85110,'bldg','🏛','Kempton Community Center','indoor / ops'],
  [40.63005,-75.85210,'camp','⛺','Camping','open field · confirm extent'],
  [40.63032,-75.85088,'amen','🛍','Vendor Booths','# & layout — Miguel'],
  [40.62996,-75.85072,'amen','🍕','Food','confirm'],
  [40.63016,-75.85104,'amen','➕','First Aid','# & location — Miguel'],
- [40.62978,-75.85098,'amen','🚻','Restrooms','# & location — Miguel'],
+ [40.62965,-75.85098,'amen','🚻','Restrooms','likely at the Community Center — Miguel confirms the building'],
  [40.63022,-75.85120,'amen','ℹ️','Info / Box Office','confirm'],
  [40.62880,-75.85150,'amen','🅿️','Parking / Entrance','lot(s) & car capacity — Miguel'],
  [40.63058,-75.85005,'other','📌','OTHER','the pin Miguel asked for — name it & we add it']
@@ -64,5 +140,47 @@ PINS.forEach(function(p){
   L.marker([p[0],p[1]],{icon:pin(p[2],p[3])}).addTo(map)
    .bindPopup('<b>'+p[4]+'</b><br>'+p[5]);
 });
+
+// ---- Schedule & Details curtain — Full Lineup form + Plan-my-day (checkbox selections) ----
+function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+var VENDORS=['Food','Crafts','Fine Art','Makers','Merch'];
+var SCHED={}, MINE={}, planMode=false, days=[], curIdx=0;
+try{ SCHED=JSON.parse(localStorage.getItem('kota.sched')||'{}'); }catch(e){ SCHED={}; }
+try{ MINE=JSON.parse(localStorage.getItem('kota.myday')||'{}'); }catch(e){ MINE={}; }
+function save(){ try{ localStorage.setItem('kota.sched',JSON.stringify(SCHED)); localStorage.setItem('kota.myday',JSON.stringify(MINE)); }catch(e){} }
+function keyOf(iso,x){ return iso+'|'+(x.time||'')+'|'+(x.band||'')+'|'+(x.stage||''); }
+function fmtDay(iso){ try{ return new Date(iso+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return iso; } }
+function rebuildDays(){ var s=(document.getElementById('dStart')||{}).value, e=(document.getElementById('dEnd')||{}).value; days=[];
+  if(s&&e){ var d=new Date(s+'T12:00'), end=new Date(e+'T12:00'), g=0; while(d<=end&&g<60){ days.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1); g++; } }
+  if(curIdx>=days.length) curIdx=Math.max(0,days.length-1); renderDay();
+}
+window.dayArrow=function(n){ if(!days.length)return; curIdx=(curIdx+n+days.length)%days.length; renderDay(); };
+window.togglePlan=function(){ planMode=!planMode; var b=document.getElementById('planBtn'); if(b){ b.textContent=planMode?'🎫 Full lineup':'📋 Plan my day'; b.classList.toggle('on',planMode); } renderDay(); };
+function renderDay(){ var lbl=document.getElementById('dayLbl'); if(!lbl) return;
+  if(!days.length){ lbl.textContent='— set dates —'; document.getElementById('sched').innerHTML=''; return; }
+  var iso=days[curIdx]; lbl.textContent='Day '+(curIdx+1)+' · '+fmtDay(iso);
+  var list=(SCHED[iso]||[]).slice().sort(function(a,c){return String(a.time).localeCompare(String(c.time));});
+  if(planMode) list=list.filter(function(x){ return MINE[keyOf(iso,x)]; });
+  document.getElementById('sched').innerHTML = list.length ? list.map(function(x){ var k=keyOf(iso,x), on=!!MINE[k];
+    return '<label class="slot" style="cursor:pointer"><input type="checkbox" '+(on?'checked':'')+' onchange="pick(\''+encodeURIComponent(k)+'\')" style="width:17px;height:17px;accent-color:#6d28d9">'
+      +'<span class="t">'+esc(x.time||'')+'</span><span class="b">'+esc(x.band||'')+'</span><span class="s">'+esc(x.stage||'')+'</span>'
+      +(planMode?'':'<button class="del" onclick="event.preventDefault();delSet(\''+encodeURIComponent(k)+'\')" title="Remove">×</button>')+'</label>';
+  }).join('') : '<div class="miguel" style="margin:6px 0">'+(planMode?'Nothing checked yet — check sets in the full lineup to build your day.':'No sets yet for this day — add below.')+'</div>';
+}
+window.pick=function(ek){ var k=decodeURIComponent(ek); if(MINE[k]) delete MINE[k]; else MINE[k]=1; save(); renderDay(); };
+window.addSet=function(){ if(!days.length){ alert('Pick a start and end date first.'); return; } var iso=days[curIdx];
+  var t=(document.getElementById('aTime').value||'').trim(), b=(document.getElementById('aBand').value||'').trim(), s=document.getElementById('aStage').value;
+  if(!b){ document.getElementById('aBand').focus(); return; }
+  (SCHED[iso]=SCHED[iso]||[]).push({time:t,band:b,stage:s}); save();
+  document.getElementById('aTime').value=''; document.getElementById('aBand').value=''; renderDay();
+};
+window.delSet=function(ek){ var k=decodeURIComponent(ek), iso=days[curIdx], arr=SCHED[iso]||[];
+  for(var i=0;i<arr.length;i++){ if(keyOf(iso,arr[i])===k){ arr.splice(i,1); break; } } delete MINE[k]; save(); renderDay();
+};
+window.rebuildDays=rebuildDays;
+function renderVendors(){ var v=document.getElementById('vendors'); if(v) v.innerHTML=VENDORS.map(function(x){return '<span class="chip2">'+x+'</span>';}).join('')+'<span class="chip2 tba">+ add</span>'; }
+window.openCurt=function(){ document.getElementById('curt').classList.add('on'); };
+window.closeCurt=function(){ document.getElementById('curt').classList.remove('on'); };
+rebuildDays(); renderVendors();
 </script>
 </body></html>
