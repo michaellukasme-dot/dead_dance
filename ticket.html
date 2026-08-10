@@ -86,7 +86,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
 <script src="dd_roster.js"></script><script src="dd_setlist.js"></script><script src="dd_setlist_crowd.js"></script><script src="dd_media.js"></script>
-<script src="dd_ticketsec.js"></script><script src="dd_groups.js"></script><script src="dd_pymk.js"></script><!-- attendance fact + friend suggestions on the ticket back (guarded) -->
+<script src="dd_ticketsec.js"></script><script src="dd_groups.js"></script><script src="dd_pymk.js"></script><script src="dd_arrival.js"></script><!-- attendance fact + friend suggestions + "Drive me there" / arrival proximity (arrival broadcast DARK) -->
 <style>
 .pillrow{display:flex;gap:8px;margin-top:9px}
 .tpill{flex:1;border:1px solid var(--line,#e6e0ef);background:#fff;border-radius:12px;padding:10px 6px;font:800 12.5px system-ui;color:#5a2e86;cursor:pointer}
@@ -134,6 +134,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     <div class="act"><b id="band">—</b><span id="sub"></span></div>
     <div class="venue" id="venue">—</div>
     <a class="veloc" id="veloc" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:12px;font-weight:800;color:#2f7bf6;text-decoration:none">📍 Directions &amp; parking ›</a>
+    <button id="driveBtn" onclick="driveThere()" style="display:none;margin-top:8px;background:#2f7bf6;color:#fff;border:0;border-radius:11px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer">🚗 Drive me there</button>
     <div class="srs" id="srs"></div>
     <div class="ga hidden" id="ga">GENERAL ADMISSION</div>
 
@@ -209,6 +210,19 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     else if(String(venue||'').indexOf(',')>=0){ vl.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(String(venue||'')); }  // only if venue carries city/state locality
     else { vl.removeAttribute('href'); vl.style.opacity='.45'; vl.style.pointerEvents='none'; }   // bare name + no coords → don't risk a wrong-country search
   }
+  // 🚗 DRIVE ME THERE — hand off to the phone's DEFAULT map (pure go); the fan is driven back to OUR
+  // context (grounds map). The arrival BROADCAST (host Twilio + pre-park + pre-check-in) is DARK — it
+  // arms only when SF_ARRIVAL_ENABLED + the fan's 'arrival' consent; otherwise arm() is a no-op.
+  (function(){ var _la=g('lat',''), _ln=g('lng',''), db=document.getElementById('driveBtn');
+    if(db && _la && _ln){ db.style.display='inline-block'; }
+    window.driveThere=function(){
+      if(!(window.DDArrival&&_la&&_ln)) return;
+      var evt={ slug:(g('ev','')||slug(band)), lat:+_la, lng:+_ln, name:(venue||band||'Event') };
+      DDArrival.driveTo({ lat:+_la, lng:+_ln, name:evt.name });                 // phone's default map, turn-by-turn
+      try{ DDArrival.arm(evt, { owner:(function(){try{return localStorage.getItem('dd.owner')||null;}catch(e){return null;}})(),
+        onFanNotice:function(msg){ try{ (window.parent&&window.parent.toast?window.parent.toast:function(){})(msg); }catch(e){} } }); }catch(e){}   // DARK unless gated
+    };
+  })();
 
   // price / buy label
   var numeric=/\$|\d/.test(price);
