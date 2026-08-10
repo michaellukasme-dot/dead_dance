@@ -82,7 +82,7 @@ function ui(){
      +'<div class="res" id="res"></div>'
      +'<button class="provbtn" id="provBtn" onclick="provPeek()">🔎 See this ticket\'s provenance (audit)</button>'
      +'<div class="provbox" id="provBox"></div>'
-     +'<p class="hint">Point at a fan\'s ticket QR. A green ✓ admits them; amber = already used; RED = forged, do not admit. Secure tickets (TIX:…) verify their signature on the server.</p>'
+     +'<p class="hint">Point at a fan\'s ticket QR. A green ✓ admits them; amber = already used; RED = forged, do not admit. Live tickets show a rotating code that refreshes every ~15s — a screenshot goes stale (“Expired code — refresh”) within ~30s. Signatures and single-use are verified on the server.</p>'
    +'</div>'
    +'<div class="panel" id="pSell">'
      +'<p class="hint">Pick a ticket, then take payment. Card = fan scans &amp; pays on their own phone (Apple/Google Pay or card). Cash = you take the money, we issue the ticket.</p>'
@@ -108,9 +108,13 @@ function loop(){ if(!scanning)return; var v=$('vid');
 function tokenFrom(s){ try{ if(s.indexOf('http')===0){ var u=new URL(s); return u.searchParams.get('t')||''; } }catch(e){} return String(s||'').trim(); }
 var _lastSecureTok=null;   // last scanned TIX token (for the provenance peek)
 function onScan(data){
-  // SECURE (HMAC-signed) ticket?  Route through the ticket-security spine (sf_ticket_redeem).
+  // ROTATING secure ticket (TIXR:id:step:code)? — the LIVE SafeTix-style code. Check FIRST:
+  // a TIXR token would false-match parseToken, so rotating must win. Routes to sf_ticket_redeem_rot.
+  var rot=null; try{ rot=(window.DDTicketSec&&DDTicketSec.parseRot&&DDTicketSec.parseRot(data))||null; }catch(e){}
+  if(rot){ redeemSecure(String(data), true); return; }
+  // STATIC (HMAC-signed) ticket (TIX:id:sig)?  Route through the ticket-security spine (sf_ticket_redeem).
   var sec=null; try{ sec=(window.DDTicketSec&&DDTicketSec.parseToken(data))||null; }catch(e){}
-  if(sec){ redeemSecure(String(data)); return; }
+  if(sec){ redeemSecure(String(data), false); return; }
   _lastSecureTok=null; hideProv();
   var tok=tokenFrom(data); if(!tok){ banner('bad','Not a ticket',''); return; }
   var cl=ddClient(); cl.rpc('sf_checkin',{p_token:tok}).then(function(r){ var d=r&&r.data||{};
@@ -129,12 +133,16 @@ function doorStaff(){ var k='dd.door.staff.'+SLUG, t=''; try{ t=localStorage.get
       try{ if(window.DDTicketSec) DDTicketSec.staffClaim(SLUG,t,(EV&&EV.id)||'door'); }catch(e){} } }
   return t||null; }
 // redeem a secure ticket. HMAC + single-use verified SERVER-SIDE; banner reflects the REAL result only.
-function redeemSecure(rawTok){ _lastSecureTok=rawTok; hideProv();
+// isRot=true → a LIVE rotating code (sf_ticket_redeem_rot: staleness + authenticity + single-use);
+// isRot=false → the static signed token (sf_ticket_redeem). Either way the CLIENT never asserts admit.
+function redeemSecure(rawTok, isRot){ _lastSecureTok=rawTok; hideProv();
   if(!window.DDTicketSec){ banner('bad','Security brain not loaded',''); return; }
-  banner('warn','Checking…','Verifying signature on the server.');
+  banner('warn','Checking…', isRot?'Verifying the live rotating code on the server.':'Verifying signature on the server.');
   var by=(EV&&EV.id)||'door';
   var go=function(here){
-    DDTicketSec.redeem(rawTok,{staffToken:doorStaff(),lat:here&&here[0],lng:here&&here[1],by:by}).then(function(res){
+    var opts={staffToken:doorStaff(),lat:here&&here[0],lng:here&&here[1],by:by};
+    var pr=(isRot && DDTicketSec.redeemRot) ? DDTicketSec.redeemRot(rawTok,opts) : DDTicketSec.redeem(rawTok,opts);
+    pr.then(function(res){
       var h=DDTicketSec.humanStatus(res); banner(h.tone, h.label, h.sub);
       if(h.tone==='ok') beep();
       var pb=$('provBtn'); if(pb) pb.style.display='block';   // audit is available for any scanned ticket

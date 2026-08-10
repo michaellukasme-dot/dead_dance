@@ -167,7 +167,8 @@
   }
 
   function prov(token) {
-    var p = parseToken(token); var id = p ? p.id : String(token || '').trim();
+    var pr = parseRot(token); var p = parseToken(token);   // a TIXR token would false-match parseToken → try rotating first
+    var id = pr ? pr.id : (p ? p.id : String(token || '').trim());
     if (!id) return Promise.resolve([]);
     var c = C(); if (!c) return Promise.resolve([]);
     try {
@@ -178,7 +179,8 @@
   }
 
   function attend(token) {
-    var p = parseToken(token); var id = p ? p.id : String(token || '').trim();
+    var pr = parseRot(token); var p = parseToken(token);   // TIXR-safe id resolution
+    var id = pr ? pr.id : (p ? p.id : String(token || '').trim());
     if (!id) return Promise.resolve(null);
     var c = C(); if (!c) return Promise.resolve(null);
     try {

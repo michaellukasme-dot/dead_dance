@@ -298,7 +298,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
     var cw=W/COLS,rh=H/ROWS;
     for(var r=0;r<ROWS;r++){ for(var col=2;col<COLS-2;col++){ if(Math.random()<0.52){ var run=1+((Math.random()*3)|0); x.fillRect(col*cw,r*rh+gap,run*cw-gap,rh-gap*2); col+=run-1; } } }
   }
-  drawBars(); setInterval(drawBars,4000);
+  drawBars(); window.__barsTimer=setInterval(drawBars,4000);   // handle kept so the LIVE rotating credential can retire the faux barcode
 
   // Buy → Stripe Checkout handoff (hosted/PCI-compliant; keys set up outside the app). Preview flips to "in your wallet".
   // Enroll the just-bought show into the reminder routine + My Tickets. dd_tixnotify.js is
@@ -734,7 +734,46 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
       }catch(e){}
     });
   }
-  resolveClient(function(ok){ if(ok) render(); });   // no client → honest no-op (back unchanged)
+  /* ---- PHASE 1 · the LIVE rotating credential (TIX Protocol) --------------------------------
+     If `tix` is a REAL signed ticket (TIX:<id>:<sig>), fetch this ticket's per-ticket seed and roll
+     a fresh TIXR:<id>:<step>:<code> on-device every ~15s — the door scans THAT. A screenshot shows
+     one step and dies within ~30s. If the token isn't signed, or the seed can't be fetched (offline /
+     forged / not a real ticket), we DO NOTHING — the pretty barcode stays. Never a faked live code. */
+  function liveCredential(){
+    try{
+      if(!(window.DDTicketSec && DDTicketSec.parseToken && DDTicketSec.getSeed && DDTicketSec.startRotating)) return;
+      var p=DDTicketSec.parseToken(tix); if(!p || !p.id || !p.sig) return;   // not a signed ticket → pretty barcode stays
+      DDTicketSec.getSeed(tix).then(function(res){
+        if(!(res && res.ok && res.seed)) return;                            // offline / forged / not_found → pretty barcode stays (honest)
+        goLive(p.id, res.seed, (res.window||15));
+      }).catch(function(){});
+    }catch(e){}
+  }
+  function goLive(id, seed, win){
+    try{
+      var canvas=document.getElementById('bars'); if(!canvas) return;
+      var wrap=canvas.parentNode; if(!wrap) return;
+      try{ if(window.__barsTimer){ clearInterval(window.__barsTimer); window.__barsTimer=null; } }catch(e){}  // retire the faux barcode
+      // swap the wide faux barcode for a LIVE rotating QR the door scanner reads
+      try{ canvas.style.display='none'; var sw=wrap.querySelector('.sweep'); if(sw) sw.style.display='none'; }catch(e){}
+      var box=document.getElementById('liveTix');
+      if(!box){ box=document.createElement('div'); box.id='liveTix';
+        box.style.cssText='display:flex;align-items:center;justify-content:center;padding:4px 0 2px';
+        box.innerHTML='<div id="liveqr" style="width:152px;height:152px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden"></div>';
+        wrap.insertBefore(box, canvas);
+      }
+      var lastStep=-1;
+      DDTicketSec.startRotating(id, seed, function(token, secsLeft, step){
+        if(step!==lastStep){ lastStep=step;                                  // the CODE only changes each step → redraw the QR then
+          try{ if(window.DDQR&&DDQR.into){ var q=document.getElementById('liveqr'); if(q){ q.innerHTML=''; DDQR.into('liveqr', token, {size:300, css:152, caption:false, mark:false}); } } }catch(e){}
+        }
+        try{ var rf=document.querySelector('.barfoot .rf'); if(rf){ rf.style.animation='none'; rf.textContent='↻ '+secsLeft+'s'; } }catch(e){}
+        try{ var lbl=document.querySelector('.barfoot span'); if(lbl) lbl.textContent='Live code · screenshots won’t get you in'; }catch(e){}
+      }, {window:win});
+    }catch(e){}
+  }
+
+  resolveClient(function(ok){ if(ok){ render(); liveCredential(); } });   // no client → honest no-op (back unchanged)
 })();
 </script>
 </body></html>
