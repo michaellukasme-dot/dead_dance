@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stock Reconcile — physical crate vs. what's listed</title>
+<meta name="theme-color" content="#0f1620">
+<!--
+  stock_reconcile.html — BRAND-NEUTRAL store-owner tool.
+  Paste/load a store's PHYSICAL inventory → match against what's LISTED in the network → show unlisted stock,
+  Discogs price references, and a to-list worklist (CSV export). "List all" is honest-state (StageFill-gated).
+  Seeded with Penny Lane's listed catalog so Glen sees value on load.
+-->
+<style>
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620;--good:#0b7f7c;--warn:#a86a00}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:var(--ink2);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:9px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:19px;letter-spacing:-.4px;display:flex;align-items:center;gap:9px}
+.top .logo .b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:15px}
+.top .logo span{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.wrap{max-width:1040px;margin:0 auto;padding:18px}
+h1{font-size:22px;letter-spacing:-.4px;margin:6px 0 2px}.lede{color:var(--muted);font-size:14px;margin:0 0 16px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
+textarea{width:100%;min-height:120px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--ink);background:#fff;resize:vertical}
+textarea:focus{outline:none;border-color:var(--teal)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;font-weight:800;border-radius:10px;padding:10px 15px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink)}
+button.pri{background:var(--teal);color:#fff;border-color:var(--teal)}button.pri:hover{background:var(--teal-d)}
+button.amber{background:var(--amber);color:#2a1c00;border-color:var(--amber)}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
+.chip{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:120px}
+.chip b{display:block;font-size:22px;line-height:1.1}.chip small{color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.chip.g b{color:var(--good)}.chip.w b{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);position:sticky;top:56px;background:var(--bg)}
+tr.unl{background:#fff9ec}
+.tag{font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.tag.listed{background:#e9faf4;color:var(--good);border:1px solid #b7ead9}
+.tag.tolist{background:#fff7e6;color:var(--warn);border:1px solid #f3d99a}
+.ref{color:var(--teal-d);text-decoration:none;font-weight:700}.ref:hover{text-decoration:underline}
+.filt{display:flex;gap:8px;align-items:center;margin:2px 0 10px}.filt select{font:inherit;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#fff}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0b0f14e6;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80;max-width:92vw;text-align:center}#toast.on{opacity:1}
+.muted{color:var(--muted)}
+</style></head>
+<body>
+<div class="top"><div class="logo"><span class="b">◍</span>Stock Reconcile <span>store tools</span></div></div>
+<div class="wrap">
+  <h1>Your physical crate vs. what's listed</h1>
+  <p class="lede">Paste your shelf inventory. We match it against what's live in the network, flag what's sitting <b>unlisted</b>, and give you a market price reference for each — so nothing sells blind.</p>
+
+  <div class="panel">
+    <label>Physical inventory — one per line: <span class="muted">Artist, Title, Format, Condition, Qty, YourPrice</span></label>
+    <textarea id="inp" placeholder="Fleetwood Mac, Rumours, Vinyl, VG+, 1, 18.00&#10;The Rolling Stones, Exile on Main St., Vinyl, VG, 1,"></textarea>
+    <div class="row">
+      <button class="pri" onclick="run()">Reconcile ▸</button>
+      <button onclick="loadSample()">Load Penny Lane sample</button>
+      <button onclick="document.getElementById('inp').value='';document.getElementById('out').innerHTML='';document.getElementById('chips').innerHTML='';">Clear</button>
+    </div>
+    <div class="hint">Header row optional. Copies are matched on artist + title + format (case/punctuation-insensitive).</div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div id="out"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2800);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function norm(s){return String(s==null?'':s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function key(a,t,f){return norm(a)+'|'+norm(t)+'|'+norm(f);}
+function discogs(a,t){return 'https://www.discogs.com/search/?type=release&q='+encodeURIComponent(a+' '+t);}
+
+/* What is LISTED for this store in the network (mirror of the Penny Lane crate on records.html). */
+var LISTED=[
+ ['Fleetwood Mac','Rumours','Vinyl',1800],['Pink Floyd','The Dark Side of the Moon','Vinyl',3200],
+ ['Led Zeppelin','Led Zeppelin IV','Vinyl',2800],['Miles Davis','Kind of Blue','Vinyl',4000],
+ ['The Beatles','Abbey Road','Vinyl',4500],['Bob Dylan','Blood on the Tracks','Vinyl',2400],
+ ['Stevie Wonder','Songs in the Key of Life','Vinyl',3000],['Neil Young','Harvest','Vinyl',3400],
+ ['John Coltrane','A Love Supreme','Vinyl',3800],['The Allman Brothers Band','At Fillmore East','Vinyl',3000],
+ ['Talking Heads','Remain in Light','Vinyl',2200],['Prince','Purple Rain','Vinyl',2600],
+ ['Nirvana','Nevermind','CD',1000],['Radiohead','OK Computer','CD',1200]
+];
+var LMAP={}; LISTED.forEach(function(r){ LMAP[key(r[0],r[1],r[2])]={price:r[3]}; });
+
+var SAMPLE=[
+ 'Artist, Title, Format, Condition, Qty, YourPrice',
+ 'Fleetwood Mac, Rumours, Vinyl, VG+, 2, 18.00',
+ 'Pink Floyd, The Dark Side of the Moon, Vinyl, VG, 1, 30.00',
+ 'Led Zeppelin, Led Zeppelin IV, Vinyl, VG+, 1, 28.00',
+ 'Miles Davis, Kind of Blue, Vinyl, VG, 1, 40.00',
+ 'The Beatles, Abbey Road, Vinyl, VG+, 1, 45.00',
+ 'Bob Dylan, Blood on the Tracks, Vinyl, VG, 1, 24.00',
+ 'Stevie Wonder, Songs in the Key of Life, Vinyl, VG+, 1, 30.00',
+ 'Neil Young, Harvest, Vinyl, NM, 1, 34.00',
+ 'John Coltrane, A Love Supreme, Vinyl, VG, 1, 38.00',
+ 'The Allman Brothers Band, At Fillmore East, Vinyl, VG+, 1, 30.00',
+ 'Talking Heads, Remain in Light, Vinyl, VG+, 1, 22.00',
+ 'Prince, Purple Rain, Vinyl, NM, 1, 26.00',
+ 'Nirvana, Nevermind, CD, NM, 3, 10.00',
+ 'Radiohead, OK Computer, CD, VG+, 1, 12.00',
+ 'The Rolling Stones, Exile on Main St., Vinyl, VG, 1,',
+ 'The Doors, L.A. Woman, Vinyl, VG+, 1,',
+ 'Marvin Gaye, Whats Going On, Vinyl, VG, 2,',
+ 'Santana, Abraxas, Vinyl, VG+, 1,',
+ 'Steely Dan, Aja, Vinyl, NM, 1,',
+ 'The Band, Music from Big Pink, Vinyl, VG, 1,',
+ 'Joni Mitchell, Blue, Vinyl, VG+, 1,',
+ 'Grateful Dead, Wake of the Flood, Vinyl, VG, 1,'
+].join('\n');
+function loadSample(){ document.getElementById('inp').value=SAMPLE; run(); }
+
+var ROWS=[];
+function parse(txt){ var out=[]; (txt||'').split(/\r?\n/).forEach(function(ln){ if(!ln.trim())return;
+   var c=ln.split(','); var a=(c[0]||'').trim(); if(norm(a)==='artist')return; // skip header
+   out.push({a:a, t:(c[1]||'').trim(), f:(c[2]||'Vinyl').trim(), cond:(c[3]||'').trim(), qty:(c[4]||'1').trim(), price:(c[5]||'').trim()}); });
+  return out; }
+
+function run(){ ROWS=parse(document.getElementById('inp').value);
+  if(!ROWS.length){ toast('Paste some inventory, or tap “Load Penny Lane sample”.'); return; }
+  var listed=0, tolist=0;
+  ROWS.forEach(function(r){ var m=LMAP[key(r.a,r.t,r.f)]; r.listed=!!m; r.listPrice=m?m.price:null; if(m)listed++; else tolist++; });
+  document.getElementById('chips').innerHTML=
+    '<div class="chip"><b>'+ROWS.length+'</b><small>titles on shelf</small></div>'+
+    '<div class="chip g"><b>'+listed+'</b><small>already listed</small></div>'+
+    '<div class="chip w"><b>'+tolist+'</b><small>to list</small></div>';
+  draw('all'); }
+
+function draw(mode){ var el=document.getElementById('out');
+  var list=ROWS.filter(function(r){ return mode==='tolist'? !r.listed : (mode==='listed'? r.listed : true); });
+  var rows=list.map(function(r){ return '<tr class="'+(r.listed?'':'unl')+'">'+
+     '<td><b>'+esc(r.t)+'</b><br><span class="muted">'+esc(r.a)+'</span></td>'+
+     '<td>'+esc(r.f)+'</td><td>'+esc(r.cond||'—')+'</td><td>'+esc(r.qty||'1')+'</td>'+
+     '<td>'+(r.price?('$'+esc(r.price)):'<span class="muted">—</span>')+'</td>'+
+     '<td>'+(r.listed?('<span class="tag listed">✓ listed $'+(r.listPrice/100).toFixed(2)+'</span>'):'<span class="tag tolist">to list</span>')+'</td>'+
+     '<td><a class="ref" target="_blank" rel="noopener" href="'+discogs(r.a,r.t)+'">market ref ↗</a></td></tr>'; }).join('');
+  el.innerHTML='<div class="panel"><div class="filt"><label style="margin:0">Show</label>'+
+     '<select onchange="draw(this.value)"><option value="all">All copies</option><option value="tolist"'+(mode==='tolist'?' selected':'')+'>To list only</option><option value="listed"'+(mode==='listed'?' selected':'')+'>Listed only</option></select>'+
+     '<div class="row" style="margin:0 0 0 auto"><button class="amber" onclick="exportCsv()">⬇ Export to-list CSV</button><button class="pri" onclick="listAll()">List unlisted ▸</button></div></div>'+
+     '<table><thead><tr><th>Title / Artist</th><th>Fmt</th><th>Cond</th><th>Qty</th><th>Your $</th><th>Network</th><th>Price ref</th></tr></thead><tbody>'+rows+'</tbody></table></div>'; }
+
+function exportCsv(){ var un=ROWS.filter(function(r){return !r.listed;});
+  if(!un.length){ toast('Nothing to list — every copy is already listed. 🌹'); return; }
+  var lines=['Artist,Title,Format,Condition,Qty,YourPrice'].concat(un.map(function(r){
+    return [r.a,r.t,r.f,r.cond,r.qty,r.price].map(function(x){return '"'+String(x||'').replace(/"/g,'""')+'"';}).join(','); }));
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'}); var u=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=u; a.download='to_list.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+  toast('Exported '+un.length+' copies to list.'); }
+
+function listAll(){ var un=ROWS.filter(function(r){return !r.listed;});
+  if(!un.length){ toast('Every copy is already listed. 🌹'); return; }
+  toast('🛒 '+un.length+' copies queued to list via StageFill — honest-state; nothing goes public until checkout is live.'); }
+</script>
+</body></html>
