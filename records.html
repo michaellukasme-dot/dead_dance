@@ -64,6 +64,7 @@ footer b{color:var(--muted)}
 <div class="sub"><div class="w"><h1>Used vinyl &amp; CDs — <span class="g">dig the crate</span></h1><p>Real, graded, secondhand copies. Secure checkout powered by StageFill.</p></div></div>
 
 <div class="ctrl">
+  <select id="fStore" onchange="applyStore(this.value)"></select>
   <select id="fArtist" onchange="render()"></select>
   <select id="fFmt" onchange="render()"><option value="">All formats</option><option>Vinyl</option><option>CD</option></select>
   <select id="fDecade" onchange="render()"><option value="">All years</option><option>1960s</option><option>1970s</option><option>1980s</option><option>1990s</option><option>2000s+</option></select>
@@ -86,10 +87,16 @@ var STORES = {
   pennylane:{name:'Penny Lane Records', loc:'Chester, NJ', tag:'used vinyl · CDs · collectibles'},
   seed:{name:'Records — the crate', loc:'', tag:'used vinyl & CDs'}
 };
-function setStoreChrome(){ var s=STORES[STORE]; if(!s)return;
-  document.querySelector('.top .logo').innerHTML='<span class="b">◍</span>'+esc(s.name)+' <span>'+esc(s.loc||s.tag)+'</span>';
-  document.querySelector('.sub .w').innerHTML='<h1>'+esc(s.name)+(s.loc?' — <span class="g">'+esc(s.loc)+'</span>':' — <span class="g">the crate</span>')+'</h1><p>'+esc(s.tag)+' · secure checkout powered by StageFill.</p>';
-  document.title=s.name; }
+function fillStores(){ var sel=document.getElementById('fStore'); if(!sel)return; var o='<option value="">All stores</option>';
+  for(var k in STORES){ o+='<option value="'+k+'"'+(k===STORE?' selected':'')+'>'+esc(STORES[k].name)+'</option>'; } sel.innerHTML=o; }
+function applyStore(v){ STORE=v; try{ var u=new URL(location.href); if(v)u.searchParams.set('store',v); else u.searchParams.delete('store'); history.replaceState(null,'',u); }catch(e){} brandChrome(); fillArtists(); render(); }
+function brandChrome(){ var s=STORES[STORE]; var logo=document.querySelector('.top .logo'), sub=document.querySelector('.sub .w');
+  if(s){ logo.innerHTML='<span class="b">◍</span>'+esc(s.name)+' <span>'+esc(s.loc||s.tag)+'</span>';
+    sub.innerHTML='<h1>'+esc(s.name)+(s.loc?' — <span class="g">'+esc(s.loc)+'</span>':' — <span class="g">the crate</span>')+'</h1><p>'+esc(s.tag)+' · secure checkout powered by StageFill.</p>';
+    document.title=s.name; }
+  else { logo.innerHTML='<span class="b">◍</span>Records <span>the crate</span>';
+    sub.innerHTML='<h1>Used vinyl &amp; CDs — <span class="g">dig the crate</span></h1><p>Real, graded, secondhand copies. Secure checkout powered by StageFill.</p>';
+    document.title='Records — the crate'; } }
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2900);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function disc(q){ return 'https://www.discogs.com/search/?type=release&q='+encodeURIComponent(q); }
@@ -133,7 +140,8 @@ var ALBUMS=[
  {t:"OK Computer",a:'Radiohead',y:1997,f:'CD',c:'VG+',p:1200,store:'pennylane',dc:'Radiohead OK Computer'}
 ];
 function decadeOf(y){ if(y<1970)return'1960s'; if(y<1980)return'1970s'; if(y<1990)return'1980s'; if(y<2000)return'1990s'; return'2000s+'; }
-function fillArtists(){ var sel=document.getElementById('fArtist'); var arts=['All artists'].concat(ALBUMS.map(function(a){return a.a;}).filter(function(v,i,s){return s.indexOf(v)===i;}).sort());
+function fillArtists(){ var sel=document.getElementById('fArtist'); var pool=ALBUMS.filter(function(a){return !STORE||(a.store||'seed')===STORE;});
+  var arts=['All artists'].concat(pool.map(function(a){return a.a;}).filter(function(v,i,s){return s.indexOf(v)===i;}).sort());
   sel.innerHTML=arts.map(function(a){return '<option>'+esc(a)+'</option>';}).join(''); }
 function filtered(){ var art=document.getElementById('fArtist').value, fmt=document.getElementById('fFmt').value, dec=document.getElementById('fDecade').value, tx=(document.getElementById('fText').value||'').toLowerCase();
   return ALBUMS.filter(function(al){ if(STORE&&(al.store||'seed')!==STORE)return false; if(art&&art!=='All artists'&&al.a!==art)return false; if(fmt&&al.f!==fmt)return false; if(dec&&decadeOf(al.y)!==dec)return false;
@@ -182,6 +190,6 @@ function buy(i){ var al=ALBUMS[i];
      if(window.SF_FLYWHEEL_ENABLED && fanConsented()) cl.rpc('sf_taste_signal',{p:{artist:al.artist,format:al.f}}); */
 }
 
-setStoreChrome(); fillArtists(); render(); updCart();
+fillStores(); brandChrome(); fillArtists(); render(); updCart();
 </script>
 </body></html>
