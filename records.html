@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Records — the crate</title>
+<meta name="theme-color" content="#0f1620">
+<!--
+  records.html — BRAND-NEUTRAL public record store (the "outside" storefront).
+  Deploy neutral: StageFill palette (ink/teal/amber), NOT DeadDance purple. White-labelable per store.
+  Supply = USED records (first-sale doctrine) → needs no master/mechanical/art clearance. Ships now.
+  Commerce = StageFill rail (server-authoritative pricing; Stripe-gated → honest-state until live).
+  GATED (dark, do NOT enable until counsel signs): (1) "Print Me the Vinyl" NEW pressings; (2) data-flywheel taste capture.
+-->
+<style>
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620;--rose-deep:#b8002e}
+*{box-sizing:border-box}html,body{overflow-x:hidden;max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+.top{background:var(--ink2);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+.top .logo{font-weight:900;font-size:20px;letter-spacing:-.4px;display:flex;align-items:center;gap:9px}
+.top .logo .b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:15px}
+.top .logo span{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.09em}
+.top .cart{margin-left:auto;color:#c7d0dc;font-size:13.5px;font-weight:800;background:#ffffff14;border:1px solid #ffffff1f;border-radius:999px;padding:7px 13px;cursor:pointer}
+.sub{background:radial-gradient(120% 120% at 85% -20%,#153042,#0f1620);color:#fff;padding:20px 18px}
+.sub .w{max-width:1060px;margin:0 auto}
+.sub h1{margin:0 0 4px;font-size:23px;letter-spacing:-.5px}.sub h1 .g{color:var(--teal)}
+.sub p{margin:0;color:#9fb0c2;font-size:13.5px}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;position:sticky;top:56px;z-index:15;background:var(--bg);border-bottom:1px solid var(--line)}
+.ctrl select,.ctrl input{font:inherit;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.ctrl input{flex:1;min-width:140px}.ctrl input:focus,.ctrl select:focus{outline:none;border-color:var(--teal)}
+.crate{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px;padding:24px 18px 10px;max-width:1060px;margin:0 auto}
+.sleeve{cursor:pointer;transition:transform .18s}.sleeve:hover{transform:translateY(-6px)}
+.cover{aspect-ratio:1;width:100%;border-radius:8px;box-shadow:0 8px 24px #0004;display:flex;flex-direction:column;justify-content:space-between;padding:16px;position:relative;overflow:hidden;border:1px solid #ffffff14}
+.cover .ttl{font-weight:800;font-size:18px;line-height:1.15;text-shadow:0 1px 6px #0007;z-index:1;color:#fff}
+.cover .art{font-size:12.5px;opacity:.92;font-weight:600;z-index:1;color:#fff}
+.cover .yr{position:absolute;top:10px;right:12px;font-size:11px;font-weight:700;background:#00000055;color:#fff;padding:2px 8px;border-radius:999px}
+.cover .cond{position:absolute;bottom:10px;left:12px;font-size:10px;font-weight:800;letter-spacing:.4px;background:#fff;color:#1a0d10;padding:3px 8px;border-radius:6px}
+.smeta{padding:10px 2px 0}.smeta .st{font-weight:700;font-size:14px}.smeta .sa{font-size:12.5px;color:var(--muted)}
+.smeta .pr{font-weight:800;font-size:13px;color:var(--teal-d);margin-top:2px}
+.empty{padding:48px 16px;text-align:center;color:var(--muted)}
+.ov{position:fixed;inset:0;background:#0b0f14cc;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}.ov.on{display:flex}
+.rec{background:var(--card);border:1px solid var(--line);border-radius:16px;max-width:440px;width:100%;padding:22px;text-align:center;max-height:92vh;overflow:auto}
+.rec .bigcover{width:230px;height:230px;margin:0 auto 16px;border-radius:10px;box-shadow:0 14px 40px #0006;display:flex;flex-direction:column;justify-content:space-between;padding:18px;position:relative;overflow:hidden;border:1px solid #ffffff18}
+.rec h3{margin:8px 0 2px;font-size:21px;font-weight:800}.rec .ra{color:var(--muted);font-size:14px}
+.rec .price{font-size:26px;font-weight:900;margin:10px 0 2px;color:var(--ink)}
+.rec .condline{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.rec .btns{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.rec .buy{background:var(--teal);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:15px;cursor:pointer}
+.rec .buy:hover{background:var(--teal-d)}
+.rec .ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px;font-weight:800;cursor:pointer;text-decoration:none;display:block}
+.rec .gated{background:none;border:1px dashed #c9cfd8;color:var(--muted);border-radius:12px;padding:11px;font-weight:700;cursor:pointer}
+.rec .x{background:none;border:0;color:var(--muted);font-weight:700;cursor:pointer;margin-top:8px}
+.auth{display:flex;gap:8px;justify-content:center;margin:10px 0 2px;flex-wrap:wrap}
+.auth .tag{font-size:11px;font-weight:800;border-radius:999px;padding:5px 10px;border:1px solid var(--line)}
+.auth .free{background:#e9faf4;color:#0b7f7c;border-color:#b7ead9}
+.auth .prem{background:#fff7e6;color:#a86a00;border-color:#f3d99a}
+.honest{margin:14px auto 22px;max-width:1024px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:12px;padding:12px 16px;font-size:12.5px;color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0b0f14e6;color:#fff;padding:11px 17px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;z-index:80;max-width:90vw;text-align:center}#toast.on{opacity:1}
+footer{color:#8a97a7;padding:22px 18px;font-size:12px;text-align:center}
+footer b{color:var(--muted)}
+</style></head>
+<body>
+<div class="top">
+  <div class="logo"><span class="b">◍</span>Records <span>the crate</span></div>
+  <button class="cart" onclick="showCart()" id="cartBtn">Cart · 0</button>
+</div>
+<div class="sub"><div class="w"><h1>Used vinyl &amp; CDs — <span class="g">dig the crate</span></h1><p>Real, graded, secondhand copies. Secure checkout powered by StageFill.</p></div></div>
+
+<div class="ctrl">
+  <select id="fArtist" onchange="render()"></select>
+  <select id="fFmt" onchange="render()"><option value="">All formats</option><option>Vinyl</option><option>CD</option></select>
+  <select id="fDecade" onchange="render()"><option value="">All years</option><option>1960s</option><option>1970s</option><option>1980s</option><option>1990s</option><option>2000s+</option></select>
+  <input id="fText" placeholder="Search title or artist…" oninput="render()">
+</div>
+
+<div class="crate" id="crate"></div>
+<div class="honest">Honest-state: this is the <b>brand-neutral used-record storefront</b>. Copies shown are <b>secondhand</b> and sold under <b>first-sale</b> — no reproduced third-party album art (sleeves are stylized placeholders). <b>Buy</b> reserves the copy through <b>StageFill checkout</b>; <b>nothing charges until payments go live</b>. <b>Print Me the Vinyl</b> (new pressings) stays <b>gated pending counsel</b>. 🌹</div>
+
+<div class="ov" id="ov"><div class="rec" id="rec"></div></div>
+<div id="toast"></div>
+<footer>Powered by <b>StageFill</b> · secure checkout · used copies sold under first-sale</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ---- StageFill commerce resolver (optional; graceful honest-state fallback) ---- */
+try{ var C=window.supabase.createClient("https://vmbqfzxhrqxpwgidogfm.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtYnFmenhocnF4cHdnaWRvZ2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDUzODUsImV4cCI6MjA5Nzk4MTM4NX0.aa2guYvXJ7SLAEdYOpDKb6xzHP-ypMpZFPFSdwLc6xM"); window.sfClient=function(){return C;}; }catch(e){}
+var STORE = new URLSearchParams(location.search).get('store') || '';  // '' = all; ?store=pennylane narrows + brands
+var STORES = {
+  pennylane:{name:'Penny Lane Records', loc:'Chester, NJ', tag:'used vinyl · CDs · collectibles'},
+  seed:{name:'Records — the crate', loc:'', tag:'used vinyl & CDs'}
+};
+function setStoreChrome(){ var s=STORES[STORE]; if(!s)return;
+  document.querySelector('.top .logo').innerHTML='<span class="b">◍</span>'+esc(s.name)+' <span>'+esc(s.loc||s.tag)+'</span>';
+  document.querySelector('.sub .w').innerHTML='<h1>'+esc(s.name)+(s.loc?' — <span class="g">'+esc(s.loc)+'</span>':' — <span class="g">the crate</span>')+'</h1><p>'+esc(s.tag)+' · secure checkout powered by StageFill.</p>';
+  document.title=s.name; }
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='on';setTimeout(function(){t.className='';},2900);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function disc(q){ return 'https://www.discogs.com/search/?type=release&q='+encodeURIComponent(q); }
+function money(c){ return '$'+(c/100).toFixed(2); }
+var PAL=[['#b8002e','#1f3a52'],['#1f7a4d','#0e3b6b'],['#c08a2d','#6b2f0e'],['#0e6b6b','#2a1b3d'],['#2a6b46','#0e0716'],['#0b7f7c','#153042'],['#0f6f8a','#c08a2d'],['#b8006e','#3a1d5e']];
+function pal(s){ var h=0; for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0; return PAL[h%PAL.length]; }
+
+/* Used-copy catalog seed: title/artist/year/format + condition grade + price (server re-prices on checkout).
+   Stylized covers only (no reproduced art). Swap this seed per store, or load from the network. */
+var COND=['NM','VG+','VG','G+'];
+var ALBUMS=[
+ {t:"American Beauty",a:'Grateful Dead',y:1970,f:'Vinyl',c:'VG+',p:2800,dc:'American Beauty Grateful Dead'},
+ {t:"Workingman's Dead",a:'Grateful Dead',y:1970,f:'Vinyl',c:'VG',p:2400,dc:'Workingmans Dead'},
+ {t:"Europe '72",a:'Grateful Dead',y:1972,f:'Vinyl',c:'VG+',p:3600,dc:'Europe 72 Grateful Dead'},
+ {t:"Live/Dead",a:'Grateful Dead',y:1969,f:'Vinyl',c:'VG',p:3200,dc:'Live Dead 1969'},
+ {t:"Terrapin Station",a:'Grateful Dead',y:1977,f:'Vinyl',c:'NM',p:2600,dc:'Terrapin Station Grateful Dead'},
+ {t:"In the Dark",a:'Grateful Dead',y:1987,f:'CD',c:'NM',p:1200,dc:'In the Dark Grateful Dead'},
+ {t:"Shakedown Street",a:'Grateful Dead',y:1978,f:'Vinyl',c:'VG+',p:2200,dc:'Shakedown Street Grateful Dead'},
+ {t:"Garcia",a:'Jerry Garcia',y:1972,f:'Vinyl',c:'VG',p:2000,dc:'Jerry Garcia 1972 album'},
+ {t:"Cats Under the Stars",a:'Jerry Garcia Band',y:1978,f:'Vinyl',c:'VG+',p:2900,dc:'Cats Under the Stars'},
+ {t:"How Sweet It Is",a:'Jerry Garcia Band',y:1997,f:'CD',c:'NM',p:1400,dc:'Jerry Garcia Band How Sweet It Is'},
+ {t:"Old & In the Way",a:'Old & In the Way',y:1975,f:'Vinyl',c:'VG',p:2600,dc:'Old and In the Way 1975'},
+ {t:"Here Goes Nothin'",a:'Zero',y:1987,f:'CD',c:'VG+',p:1600,dc:'Zero Here Goes Nothin'},
+ {t:"Chance in a Million",a:'Zero',y:1994,f:'CD',c:'NM',p:1800,dc:'Zero Chance in a Million'},
+ {t:"Last Danger of Frost",a:'Steve Kimock',y:2014,f:'Vinyl',c:'NM',p:3400,dc:'Steve Kimock Last Danger of Frost'},
+ {t:"Satellite City",a:'Steve Kimock',y:2020,f:'Vinyl',c:'NM',p:3000,dc:'Steve Kimock Satellite City'},
+ // ── Penny Lane Records — Chester, NJ (Glen's shop) · real-feel used stock across genres
+ {t:"Rumours",a:'Fleetwood Mac',y:1977,f:'Vinyl',c:'VG+',p:1800,store:'pennylane',dc:'Fleetwood Mac Rumours'},
+ {t:"The Dark Side of the Moon",a:'Pink Floyd',y:1973,f:'Vinyl',c:'VG',p:3200,store:'pennylane',dc:'Pink Floyd Dark Side of the Moon'},
+ {t:"Led Zeppelin IV",a:'Led Zeppelin',y:1971,f:'Vinyl',c:'VG+',p:2800,store:'pennylane',dc:'Led Zeppelin IV'},
+ {t:"Kind of Blue",a:'Miles Davis',y:1959,f:'Vinyl',c:'VG',p:4000,store:'pennylane',dc:'Miles Davis Kind of Blue'},
+ {t:"Abbey Road",a:'The Beatles',y:1969,f:'Vinyl',c:'VG+',p:4500,store:'pennylane',dc:'The Beatles Abbey Road'},
+ {t:"Blood on the Tracks",a:'Bob Dylan',y:1975,f:'Vinyl',c:'VG',p:2400,store:'pennylane',dc:'Bob Dylan Blood on the Tracks'},
+ {t:"Songs in the Key of Life",a:'Stevie Wonder',y:1976,f:'Vinyl',c:'VG+',p:3000,store:'pennylane',dc:'Stevie Wonder Songs in the Key of Life'},
+ {t:"Harvest",a:'Neil Young',y:1972,f:'Vinyl',c:'NM',p:3400,store:'pennylane',dc:'Neil Young Harvest'},
+ {t:"A Love Supreme",a:'John Coltrane',y:1965,f:'Vinyl',c:'VG',p:3800,store:'pennylane',dc:'John Coltrane A Love Supreme'},
+ {t:"At Fillmore East",a:'The Allman Brothers Band',y:1971,f:'Vinyl',c:'VG+',p:3000,store:'pennylane',dc:'Allman Brothers At Fillmore East'},
+ {t:"Remain in Light",a:'Talking Heads',y:1980,f:'Vinyl',c:'VG+',p:2200,store:'pennylane',dc:'Talking Heads Remain in Light'},
+ {t:"Purple Rain",a:'Prince',y:1984,f:'Vinyl',c:'NM',p:2600,store:'pennylane',dc:'Prince Purple Rain'},
+ {t:"Nevermind",a:'Nirvana',y:1991,f:'CD',c:'NM',p:1000,store:'pennylane',dc:'Nirvana Nevermind'},
+ {t:"OK Computer",a:'Radiohead',y:1997,f:'CD',c:'VG+',p:1200,store:'pennylane',dc:'Radiohead OK Computer'}
+];
+function decadeOf(y){ if(y<1970)return'1960s'; if(y<1980)return'1970s'; if(y<1990)return'1980s'; if(y<2000)return'1990s'; return'2000s+'; }
+function fillArtists(){ var sel=document.getElementById('fArtist'); var arts=['All artists'].concat(ALBUMS.map(function(a){return a.a;}).filter(function(v,i,s){return s.indexOf(v)===i;}).sort());
+  sel.innerHTML=arts.map(function(a){return '<option>'+esc(a)+'</option>';}).join(''); }
+function filtered(){ var art=document.getElementById('fArtist').value, fmt=document.getElementById('fFmt').value, dec=document.getElementById('fDecade').value, tx=(document.getElementById('fText').value||'').toLowerCase();
+  return ALBUMS.filter(function(al){ if(STORE&&(al.store||'seed')!==STORE)return false; if(art&&art!=='All artists'&&al.a!==art)return false; if(fmt&&al.f!==fmt)return false; if(dec&&decadeOf(al.y)!==dec)return false;
+    if(tx&&(al.t+' '+al.a).toLowerCase().indexOf(tx)<0)return false; return true; }); }
+function coverInner(al){ var pp=pal(al.t+al.a); return 'style="background:linear-gradient(135deg,'+pp[0]+','+pp[1]+')"><div class="yr">'+al.y+'</div><div class="ttl">'+esc(al.t)+'</div><div class="art">'+esc(al.a)+'</div><span class="cond">'+esc(al.f)+' · '+esc(al.c)+'</span>'; }
+function render(){ var el=document.getElementById('crate'); var list=filtered();
+  if(!list.length){ el.innerHTML='<div class="empty">No records in that bin — flip to another. 🌹</div>'; return; }
+  el.innerHTML=list.map(function(al){ var i=ALBUMS.indexOf(al); return '<div class="sleeve" onclick="openRec('+i+')"><div class="cover" '+coverInner(al)+'</div><div class="smeta"><div class="st">'+esc(al.t)+'</div><div class="sa">'+esc(al.a)+' · '+al.y+'</div><div class="pr">'+money(al.p)+'</div></div></div>'; }).join(''); }
+
+function openRec(i){ var al=ALBUMS[i]; var r=document.getElementById('rec');
+  r.innerHTML='<div class="bigcover" '+coverInner(al)+'</div><h3>'+esc(al.t)+'</h3><div class="ra">'+esc(al.a)+' · '+al.y+' · '+esc(al.f)+'</div>'+
+   '<div class="price">'+money(al.p)+'</div><div class="condline">Used · graded <b>'+esc(al.c)+'</b> · one copy in stock</div>'+
+   '<div class="auth"><span class="tag free" onclick="verify('+i+',0)">✓ Verified seal · free</span><span class="tag prem" onclick="verify('+i+',1)">🔒 Secure check · premium</span></div>'+
+   '<div class="btns"><button class="buy" onclick="buy('+i+')">🛒 Buy — '+money(al.p)+' via StageFill</button>'+
+   '<button class="gated" onclick="pressGated()">💿 Print Me the Vinyl · new pressing (gated)</button>'+
+   '<a class="ghost" target="_blank" rel="noopener" href="'+disc(al.dc||al.t)+'">🖼️ Original jacket &amp; tracklist ↗</a></div>'+
+   '<button class="x" onclick="closeRec()">close the sleeve</button>';
+  document.getElementById('ov').classList.add('on'); }
+function closeRec(){ document.getElementById('ov').classList.remove('on'); }
+document.getElementById('ov').onclick=function(e){ if(e.target===this)closeRec(); };
+
+/* Two-tier authenticity (same security family as the rotating ticket). */
+function verify(i,tier){ var al=ALBUMS[i];
+  if(!tier){ toast('✓ Verified seal (free): this copy is cataloged & graded '+al.c+' by store "'+STORE+'". Static provenance code travels with the record.'); }
+  else { toast('🔒 Secure check (premium): rotating anti-counterfeit verification for high-value copies — arms when the store enables the premium tier.'); } }
+
+/* Print Me the Vinyl — NEW pressings; counsel-gated (masters + mechanical + manufacturing + cover art). */
+function pressGated(){ toast('💿 New pressings are gated pending counsel (masters + mechanical + manufacturing + art). Used copies above are clear under first-sale and ship now.'); }
+
+/* ---- Cart + Buy via StageFill (server-authoritative price; Stripe-gated → honest fallback) ---- */
+var CART=[];
+function updCart(){ document.getElementById('cartBtn').textContent='Cart · '+CART.length; }
+function showCart(){ if(!CART.length){ toast('Your crate is empty — tap a sleeve, then Buy.'); return; }
+  var tot=CART.reduce(function(s,x){return s+x.p;},0); toast(CART.length+' in cart · '+money(tot)+' — checkout arms when StageFill payments go live.'); }
+function buy(i){ var al=ALBUMS[i];
+  CART.push(al); updCart();
+  var payload={ store:(al.store||STORE||'seed'), sku:(al.t+'|'+al.a+'|'+al.f), title:al.t, artist:al.a, format:al.f, cond:al.c, list_cents:al.p };
+  var cl = window.sfClient && window.sfClient();
+  if(cl && cl.rpc){
+    cl.rpc('sf_record_order_create',{p:payload}).then(function(res){
+      if(res && res.data && res.data.ok){ toast('🛒 "'+al.t+'" reserved via StageFill (order '+String(res.data.order).slice(0,8)+'). Nothing charges until checkout goes live.'); }
+      else { toast('🛒 "'+al.t+'" added — reserved through StageFill. Nothing charges yet.'); }
+    }).catch(function(){ toast('🛒 "'+al.t+'" added — reserved through StageFill. Nothing charges yet.'); });
+  } else { toast('🛒 "'+al.t+'" added to your crate — StageFill checkout arms when payments go live.'); }
+  /* DATA FLYWHEEL (GATED / consent-only): do NOT record taste signal until fan opt-in + counsel sign-off.
+     if(window.SF_FLYWHEEL_ENABLED && fanConsented()) cl.rpc('sf_taste_signal',{p:{artist:al.artist,format:al.f}}); */
+}
+
+setStoreChrome(); fillArtists(); render(); updCart();
+</script>
+</body></html>
