@@ -49,6 +49,12 @@ footer{color:#8a97a7;padding:6px 18px 30px;font-size:12px;text-align:center;max-
 .empty{padding:20px;color:var(--muted);font-size:13px;text-align:center}
 .gedpbtn{display:inline-block;margin-top:14px;background:linear-gradient(135deg,#153042,#0f6f8a);color:#fff;font-weight:800;font-size:14px;text-decoration:none;padding:12px 20px;border-radius:12px;box-shadow:0 4px 14px rgba(15,111,138,.28);transition:transform .1s,box-shadow .1s}
 .gedpbtn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(15,111,138,.36)}
+.frontdoor{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:28px 0 2px}
+@media(max-width:640px){.frontdoor{grid-template-columns:1fr}}
+.fd{display:block;background:#fff;border:1px solid #e5e9ef;border-left:4px solid #0b7f7c;border-radius:12px;padding:14px 16px;text-decoration:none;transition:transform .1s,box-shadow .1s}
+.fd:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(15,111,138,.16)}
+.fd b{display:block;color:#141a22;font-size:15px}
+.fd span{display:block;color:#697586;font-size:12.5px;margin-top:3px}
 </style></head>
 <body>
 <div class="top"><div class="logo"><span class="b">◍</span>Easton <span>Powered by StageFill</span></div></div>
@@ -61,6 +67,11 @@ footer{color:#8a97a7;padding:6px 18px 30px;font-size:12px;text-align:center;max-
 <div class="wrap">
   <div class="sec" id="secTitle">The 12 · Markets, Festivals &amp; Events</div>
   <div class="grid" id="grid"></div>
+
+  <div class="frontdoor">
+    <a class="fd" href="stagefill_model.html"><b>▤ Play with the business model</b><span>Move any lever — watch revenue, cost &amp; ROI recompute live.</span></a>
+    <a class="fd" href="vendor_register.html"><b>◍ Register a vendor</b><span>Upload a logo → proximity ad + premium coupon → sell right there.</span></a>
+  </div>
 
   <div class="sec" style="margin-top:30px">City Calendar</div>
   <div class="chips" id="chips"></div>
