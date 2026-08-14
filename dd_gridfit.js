@@ -119,6 +119,48 @@
     };
   }
 
-  root.DDGridFit = { layout: layout, model: model, _util:{ ringArea:ringArea, inRing:inRing } };
+  // PSEUDO-COUNT parking, WITH SUGGESTED CONFIGS (like the booths). A standard space is 9x18 ft.
+  // Double-loaded rows with a drive aisle every 2 rows (~60-ft module → industry ~300-330 sq ft/space
+  // incl. aisles). Draw a lot/field → estimated car count for each layout + every space as geometry.
+  function parking(ring, opts){
+    opts = opts || {};
+    var space = opts.space || (ring[0] && Math.abs(ring[0][0])<=90 && Math.abs(ring[0][1])<=180 && Math.abs(ring[0][1])>10 ? 'geo':'plane');
+    var fpu = opts.feetPerUnit||1, o=centroid(ring), ringFt;
+    if(space==='geo'){ ringFt = ring.map(function(p){ return [ (p[1]-o[1])*ftPerDegLng(o[0]), (p[0]-o[0])*FT_PER_DEG_LAT ]; }); }
+    else { ringFt = ring.map(function(p){ return [ p[0]*fpu, p[1]*fpu ]; }); }
+    var ang = (opts.align===false)?0:dominantAngle(ringFt);
+    var rr = ringFt.map(function(p){ return rot(p[0],p[1],-ang); });
+    var area = ringArea(ringFt);
+    // CARVE-OUTS: a designated Shakedown area / vendor zone / reserved tailgate block CONSUMES spots.
+    // Each carve-out ring is projected + rotated and its bbox is treated as occupied → cars pack around it.
+    function projFt(rng){ return (space==='geo') ? rng.map(function(p){ return [ (p[1]-o[1])*ftPerDegLng(o[0]), (p[0]-o[0])*FT_PER_DEG_LAT ]; }) : rng.map(function(p){ return [ p[0]*fpu, p[1]*fpu ]; }); }
+    var carve = [], carveArea = 0;
+    (opts.carveouts||[]).forEach(function(cr){ var cf=projFt(cr); carve.push(bbox(cf.map(function(p){ return rot(p[0],p[1],-ang); }))); carveArea += ringArea(cf); });
+    function recipe(name, W, D, aisle){
+      var cells = packAligned(rr, W, D, { gap:0, aisle:aisle, aisleEvery:2, pad:(opts.pad!=null?opts.pad:2) }, carve.slice());
+      var items = cells.map(function(c){ return {
+        corners: (space==='geo') ? cellToCorners(c,ang,o,'geo') : cellToCorners(c,ang,o,'plane').map(function(p){return [p[0]/fpu,p[1]/fpu];}),
+        center: (function(){ var cc=cellCenter(c); var g=rot(cc[0],cc[1],ang); return (space==='geo')?[o[0]+g[1]/FT_PER_DEG_LAT,o[1]+g[0]/ftPerDegLng(o[0])]:[g[0]/fpu,g[1]/fpu]; })()
+      }; });
+      return { name:name, stall:{w:W,d:D,aisle:aisle}, count:cells.length, sqft_per_space: cells.length?Math.round(area/cells.length):0, items:items };
+    }
+    var configs = [
+      recipe('Compact 90° (8.5×16, densest)', 8.5, 16, 22),
+      recipe('Standard 90° (9×18)',            9,   18, 24),
+      recipe('Event / generous (10×20)',       10,  20, 26)
+    ];
+    return { space:space, area_ft2:Math.round(area), carveout_area_ft2:Math.round(carveArea), configs:configs, note:'pseudo-count (geometry estimate) — suggests configs; carve-outs (Shakedown/tailgate/vendor) consume spots' };
+  }
+
+  // Parking revenue — because we can SELL PARKING TICKETS (a parking pass = a ticket on the StageFill rail).
+  function parkingRevenue(config, opts){
+    opts = opts || {};
+    var price = opts.price!=null?opts.price:15, events = opts.events!=null?opts.events:1, take = opts.take!=null?opts.take:0.06;
+    var spaces = (config && config.count) || 0, g = spaces*price;
+    return { spaces:spaces, price:price, gross_event:Math.round(g), gross_season:Math.round(g*events),
+             stagefill_take_event:Math.round(g*take), stagefill_take_season:Math.round(g*take*events) };
+  }
+
+  root.DDGridFit = { layout: layout, model: model, parking: parking, parkingRevenue: parkingRevenue, _util:{ ringArea:ringArea, inRing:inRing } };
   if (typeof module!=='undefined' && module.exports) module.exports = root.DDGridFit;
 })(typeof window!=='undefined'?window:globalThis);
