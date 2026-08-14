@@ -1101,6 +1101,25 @@ body.dd-insider .dd-only{display:block}
         {trek:true, ic:'⛰️', biz:'Triple Crown Trek Planner', off:'Appalachian · Continental Divide · Pacific Crest — one plan', cta:'Plan your thru-hike ›', house:true},
         {trade:true, ic:'⚡', biz:'Electric Trade School', off:'VOTECH · IBEW · JATC — Journeyman, Master, Lineman', url:'https://calculator.amp-academy.com/', cta:'Open the Load Calculator ›', house:true}
       ];
+      /* ===== EASTON plays the business model (like the ArtsQuest/Musikfest sponsor roll, now for GEDP).
+         13 SPECIAL cards — GEDP + its 12 programs — each differentiated by accent + real logo, all premium. ===== */
+      var _EZL='https://pabaconfest.com/wp-content/uploads/';
+      var AD_EASTON=[
+        {easton:true, biz:'Greater Easton Development Partnership', off:'The whole city — 12 programs, one live map', cta:'Open the GEDP City Map ›', accent:'#153042', logo:_EZL+'2026/08/logo_emsi.png', ic:'◍', url:'easton_hub.html'},
+        {easton:true, biz:'Easton Main Street', off:'20-block downtown district · storefront map', cta:'Explore downtown ›', accent:'#2f3e73', logo:_EZL+'2026/08/logo_emsi.png', ic:'🏙️', url:'festival_vendors.html?fest=easton_main'},
+        {easton:true, biz:"Easton Farmers' Market", off:'Oldest open-air market in the U.S. · est. 1752', cta:"See this week's vendors ›", accent:'#7a8f1f', logo:_EZL+'2025/09/logo_efm.png', ic:'🥕', url:'festival_vendors.html?fest=easton_fm'},
+        {easton:true, biz:'Easton Public Market', off:'Indoor artisan market · 325 Northampton', cta:'Meet the makers ›', accent:'#9aa81f', logo:_EZL+'2026/08/epm_logo_color-e1786366892537.png', ic:'🍽️', url:'festival_vendors.html?fest=easton_public_market'},
+        {easton:true, biz:'Easton Ambassadors', off:'Clean & safe downtown · Community Event Cart', cta:'See coverage ›', accent:'#7a1f2b', logo:_EZL+'2025/09/logo_ea.png', ic:'🧭', url:'festival_vendors.html?fest=easton_ambassadors'},
+        {easton:true, biz:'Easton Garden Works', off:'Urban gardens & tool library', cta:'Find a garden ›', accent:'#3f8f4a', logo:_EZL+'2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png', ic:'🌱', url:'festival_vendors.html?fest=easton_garden_works'},
+        {easton:true, biz:'West Ward Community Market', off:'Neighborhood market · the West Ward', cta:'Visit the West Ward ›', accent:'#0f6f8a', logo:_EZL+'2026/08/ww_logo-scaled-e1786367359948.png', ic:'🏘️', url:'festival_vendors.html?fest=west_ward'},
+        {easton:true, biz:'PA Bacon Fest', off:'Nov 7–8 · zones B·A·C·O·N + Second St', cta:'Map the fest ›', accent:'#3b3f8f', logo:_EZL+'2026/08/pabaconfest_logo_square-e1786367273579.png', ic:'🥓', url:'festival_vendors.html?fest=pa_bacon_fest'},
+        {easton:true, biz:'Easton Criterium', off:'Pro bike race · downtown course', cta:'See the course ›', accent:'#1b2430', logo:_EZL+'2026/08/ec_blackstacked_logo-e1786367288805.png', ic:'🚴', url:'festival_vendors.html?fest=easton_criterium'},
+        {easton:true, biz:'Easton Heritage Day', off:'July heritage festival · Centre Square', cta:'Explore the day ›', accent:'#c0392b', logo:_EZL+'2026/08/heritageday2022_logo_color-e1786367329513.png', ic:'🏛️', url:'festival_vendors.html?fest=easton_heritage_day'},
+        {easton:true, biz:'Easton Winter Village', off:'Holiday market · chalets on the Circle', cta:'Walk the village ›', accent:'#2a7fb0', logo:_EZL+'2026/08/wintervillage-logo-trans-4c-e1786367715358.png', ic:'❄️', url:'festival_vendors.html?fest=easton_winter_village'},
+        {easton:true, biz:'Live At The Falls', off:'Riverfront concerts · Thursdays · free', cta:'See the lineup ›', accent:'#8a3d6b', logo:_EZL+'2026/08/latf_logo_color-e1786367800123.jpg', ic:'🎶', url:'festival_vendors.html?fest=live_at_the_falls'},
+        {easton:true, biz:'Spring Into Easton', off:'Spring kickoff · downtown', cta:'Explore spring ›', accent:'#4a8f3f', logo:_EZL+'2026/08/sie_logo_color-1-e1786367927958.png', ic:'🌷', url:'festival_vendors.html?fest=spring_into_easton'},
+        {easton:true, sf:true, biz:'StageFill', off:'The operating system behind the whole campus — play with the business model', cta:'Open & configure the model ›', accent:'#0fa3a0', ic:'◍', url:'stagefill_model.html'}
+      ];
       var AD_NATIONAL=[
         {logo:'logos/peach_fest.png',         ic:'🎪', bg:'linear-gradient(135deg,#7a3cc0,#b8002e)', biz:'Peach Music Festival', off:'3 days of jams · on sale now', cta:'Get tickets ›'},
         {logo:'logos/ardmore_music_hall.png', ic:'🎸', bg:'linear-gradient(135deg,#5a2e86,#241535)', biz:'Ardmore Music Hall', off:'Splintered Sunlight · Fri — nearly sold out', cta:'Grab seats ›'},
@@ -1122,11 +1141,13 @@ body.dd-insider .dd-only{display:block}
           biz:r.b, off:'Musikfest · '+r.st+' · '+_mfDay(r.d)+' '+r.t, cta:(sc==='dd'?'🌹 Claim your StageFill page ›':'🎪 Claim your StageFill page ›'), stagefill:true }); }); }catch(e){} return out; }
       var POOL_PARTNER=[], POOL_HOUSE=AD_HOUSE, POOL_NAT=AD_NATIONAL, POOL_DD=[], POOL_SF=[];
       var POOL_FEST=[AD_ALLENTOWN, AD_STAGEFILL, AD_ALLENTOWN];   // Allentown 2:1 in its own pool → extra recurrence
-      function buildPools(){ POOL_PARTNER=AD_BETHLEHEM.concat(bethRetail(), [AD_POSTER, AD_ACI, AD_ACI]); POOL_DD=bandAds('dd'); POOL_SF=bandAds('sf'); }
+      /* EASTON plays the model: partner pool = the 13 Easton entities + StageFill. Musikfest partners,
+         poster, and Musikfest band ads removed. Lukas Apps house ads (AD_HOUSE) and national jam ads stay. */
+      function buildPools(){ POOL_PARTNER=AD_EASTON.slice(); POOL_DD=[]; POOL_SF=[]; }
       buildPools();
       // rotation frame — dd appears 8×, sf 2× (the 4:1 Dead-first pace); 'fest' (Allentown/StageFill premium QR)
       // gets 3 of its own slots so it recurs well above an average partner; house/national/pitch interleaved.
-      var FRAME=['partner','dd','fest','sf','dd','dd','house','dd','national','fest','dd','partner','sf','dd','dd','pitch','fest','partner','dd','national','partner'];
+      var FRAME=['partner','house','partner','fest','partner','national','partner','house','partner','fest','partner','pitch'];
       var POOLS={partner:function(){return POOL_PARTNER;},house:function(){return POOL_HOUSE;},national:function(){return POOL_NAT;},dd:function(){return POOL_DD;},sf:function(){return POOL_SF;},fest:function(){return POOL_FEST;}};
       var CUR={partner:0,house:0,national:0,dd:0,sf:0,fest:0}, fi=0, curAd=null, at=null, FX=['fade','zoom','up','slideL','flip','down','slideR','blur'], fxi=0;
       function nextAd(depth){ depth=depth||0; if(depth>FRAME.length+1) return AD_PITCH;
@@ -1143,6 +1164,23 @@ body.dd-insider .dd-only{display:block}
             +'<div class="poster-cap"><b>'+a.biz+'</b><span class="by">Original poster art by <b>Doug Boehm</b></span><span class="cta">★ Celebrating America 250</span></div>'
             +'</div>';
           var pdt=document.getElementById('adRollDots'); if(pdt) pdt.innerHTML='<i class="on"></i><i></i><i></i>';
+          return;
+        }
+        if(a.easton){   // EASTON campus card — special, premium, differentiated by accent + real logo
+          var ez=a.accent||'#153042';
+          var lbox = a.logo
+            ? '<img src="'+a.logo+'" alt="" style="max-width:88%;max-height:88%;object-fit:contain" onerror="this.parentNode.textContent=\''+(a.ic||'◍')+'\'">'
+            : (a.ic||'◍');
+          var foot = a.sf ? 'StageFill · the configurable model' : 'GEDP · Easton, PA · powered by StageFill';
+          v.innerHTML='<div class="adroll-slide adfx-'+fx+'" onclick="adRollTap()" style="background:#fff;border-top:5px solid '+ez+';border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px;height:100%;box-sizing:border-box">'
+            +'<div style="display:flex;gap:11px;align-items:center">'
+              +'<div style="width:56px;height:56px;border-radius:12px;border:1px solid #e5e9ef;background:'+(a.sf?ez:'#fff')+';color:#fff;display:grid;place-items:center;flex:none;font-size:26px;overflow:hidden">'+lbox+'</div>'
+              +'<div><b style="display:block;font-size:16px;color:#141a22;line-height:1.15">'+a.biz+'</b><span style="font-size:12px;color:#697586">'+(a.off||'')+'</span></div>'
+            +'</div>'
+            +'<div style="margin-top:auto;background:'+ez+';color:#fff;font-weight:800;font-size:13px;text-align:center;border-radius:10px;padding:11px">'+(a.cta||'Explore ›')+'</div>'
+            +'<div style="font-size:10px;color:#9aa6b2;text-align:center;letter-spacing:.3px">'+foot+'</div>'
+          +'</div>';
+          var ezd=document.getElementById('adRollDots'); if(ezd) ezd.innerHTML='<i class="on"></i><i></i><i></i>';
           return;
         }
         if(a.logo && a.logo.indexOf('logos/mf_')===0){   // official Musikfest partner → premium, uniform sponsor card

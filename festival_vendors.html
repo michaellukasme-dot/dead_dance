@@ -26,6 +26,11 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 #dir .dh{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--line);font-weight:800;font-size:14px}
 #dir .dh .ct{margin-left:auto;font-size:11px;color:var(--muted);font-weight:700}
 #dir .dh .tog{border:0;background:#eef2f6;border-radius:8px;width:26px;height:26px;cursor:pointer;font-weight:800;color:var(--muted)}
+#dir .drow{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);background:#f8fbfc}
+#dir .drow .dlab{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+#dir #datepick{flex:1;font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#fff;color:var(--ink)}
+#dir #datepick:focus{outline:none;border-color:var(--teal)}
+#dir.collapsed .drow{display:none !important}
 #dir .srch{padding:10px 12px;border-bottom:1px solid var(--line)}
 #dir input{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
 #dir input:focus{outline:none;border-color:var(--teal)}
@@ -41,6 +46,22 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 #dir .v small{font-size:11.5px;color:var(--muted)}
 #dir.collapsed .srch,#dir.collapsed .cats,#dir.collapsed .list{display:none}
 .leaflet-container{background:#dfe6ee}
+/* Vendor card (registration payoff: logo + proximity ad + premium coupon + sell) */
+.vcard{min-width:212px;max-width:250px;font-family:-apple-system,system-ui,sans-serif}
+.vc-head{display:flex;align-items:flex-start;gap:9px;margin-bottom:7px}
+.vc-logo{width:40px;height:40px;border-radius:9px;flex:none;object-fit:contain;background:#fff;border:1px solid #e5e9ef}
+.vc-ini{width:40px;height:40px;border-radius:9px;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:14px}
+.vc-head b{font-size:14px;display:block;line-height:1.15;color:#141a22}
+.vc-cat{font-size:11px;color:#697586}
+.vc-prem{margin-left:auto;font-size:8.5px;font-weight:900;letter-spacing:.5px;color:#8a5a00;background:#ffe9b3;border-radius:999px;padding:2px 6px;white-space:nowrap}
+.vc-ad{font-size:12px;color:#1b2430;background:#eef6f6;border-left:3px solid #0fa3a0;border-radius:6px;padding:5px 8px;margin-bottom:6px}
+.vc-coupon{display:flex;gap:7px;align-items:center;border:1.5px dashed #c98a00;background:#fff8e8;border-radius:8px;padding:6px 8px;margin-bottom:7px}
+.vc-coupon b{font-size:12px;color:#7a4a00;display:block;line-height:1.2}
+.vc-coupon small{font-size:10.5px;color:#a06a15;font-weight:700}
+.vc-buy{display:block;text-align:center;background:#0f6f8a;color:#fff;font-weight:800;font-size:12.5px;text-decoration:none;border-radius:9px;padding:9px}
+.vc-buy:hover{background:#0b7f7c}
+#dir .v .cpn{color:#c98a00;font-weight:900;margin-left:4px}
+#dir .v .prm{color:#c07a00;margin-left:3px}
 .vlabel{background:#fff;border:1px solid #c9d2dc;border-left-width:4px;border-radius:6px;padding:2px 6px;font:700 11px/1.2 -apple-system,system-ui,sans-serif;color:#1b2430;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .vlabel.lit{outline:3px solid var(--amber);outline-offset:1px;animation:pulse 1s ease-out 2}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.7)}100%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
@@ -56,6 +77,7 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
   <div id="map"></div>
   <div id="dir">
     <div class="dh"><span>Vendor Directory</span><span class="ct" id="vcount"></span><button class="tog" onclick="toggleDir()" aria-label="Collapse">▾</button></div>
+    <div class="drow" id="daterow" style="display:none"><span class="dlab">Market day</span><select id="datepick" onchange="pickDate(this.value)"></select></div>
     <div class="srch"><input id="q" placeholder="Search vendors or products…" oninput="renderList()"></div>
     <div class="cats" id="cats"></div>
     <div class="list" id="list"></div>
@@ -64,7 +86,13 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
   <div class="credit">Powered by StageFill · snaps to real coordinates</div>
 </div>
 
+<script>/* preview-webview shim: some embedded webviews inject a CommonJS module/exports,
+   which makes Leaflet's UMD populate module.exports instead of the global window.L
+   ("L is not defined"). Hide them so Leaflet defines the global, then restore. */
+window.__m=window.module;window.__e=window.exports;try{window.module=undefined;window.exports=undefined;}catch(_){}</script>
 <script src="leaflet/leaflet.js"></script>
+<script>try{window.module=window.__m;window.exports=window.__e;}catch(_){}
+if(typeof L==='undefined'&&window.__e&&window.__e.map){window.L=window.__e;}</script>
 <script src="dd_cutesy_art.js"></script>
 <script>
 /* ---------- Festival registry (a surface for %FESTIVAL%) ---------- */
@@ -72,38 +100,436 @@ var NAMES = { easton_fm:"Easton Farmers' Market", easton_main:"Easton Main Stree
   easton_ambassadors:"Easton Ambassadors", easton_garden_works:"Easton Garden Works", west_ward:"West Ward Market",
   pa_bacon_fest:"PA Bacon Fest", easton_criterium:"Easton Criterium", easton_heritage_day:"Easton Heritage Day",
   easton_winter_village:"Easton Winter Village", live_at_the_falls:"Live At The Falls", spring_into_easton:"Spring Into Easton",
-  kota:"King of the Arts Festival" };
+  easton_winter_market:"Easton Winter Market", kota:"King of the Arts Festival" };
 
 var CATCOLOR = { "Farmer":"#2a8a4a", "Food":"#e0662e", "Beverages":"#0f6f8a", "Bakery":"#b07d17",
-  "Craft & Art":"#7a3cc0", "Specialty":"#0b7f7c", "Body":"#b8006e", "Merchandise":"#334155", "Sweets":"#d1477a" };
+  "Craft & Art":"#7a3cc0", "Specialty":"#0b7f7c", "Body":"#b8006e", "Merchandise":"#334155", "Sweets":"#d1477a",
+  "Music / Stage":"#7a1f2b", "Fixed Retail":"#4a5568", "Food Truck":"#c05621",
+  "Move / Fitness":"#2f855a", "Glow / Beauty":"#b83280", "Nourish":"#b7791f", "Live Well":"#2c7a7b",
+  "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#7a3cc0", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568" };
+var KINDLABEL = { fixed:"Storefront", street:"Stall", truck:"Truck", tent:"Tent", stage:"Stage" };  // fixed vs temporary vs stage
+function kindOf(v){ return KINDLABEL[(v&&v.k)||'street']||'Stall'; }
+
+// VENDOR REGISTRATION payoff — logo + proximity ad + premium coupon + "sell right here".
+// Keyed by vendor name; merged onto matching vendors at load. (In production this is what a
+// vendor uploads on the registration page; premium placement + coupons = StageFill revenue.)
+var VENDOR_XTRA = {
+  "Aladdin Restaurant":{booth:"75, 76", premium:true, ad:"Fresh Lebanese — spinach & meat pies, falafel, baklava", coupon:{text:"Free baklava with any platter", code:"ALADDIN"}, shop:"https://aladdinlv.com"},
+  "Apple Ridge Farm":{premium:true, ad:"Wood-fired sourdough & pastured eggs — pulled at 9am", coupon:{text:"$1 off any sourdough loaf", code:"RIDGE1"}, shop:"https://www.appleridge.net"},
+  "Breakaway Farms":{ad:"100% grass-fed meats, poultry & eggs", coupon:{text:"Free bone broth with $50+ order", code:"BREAK50"}, shop:"https://www.breakawayfarms.net"},
+  "Jersey Pickles":{coupon:{text:"Buy 2 jars, get the 3rd half-off", code:"PICKLE3"}, shop:"https://jerseypickles.com"},
+  "Tolino Vineyards":{premium:true, ad:"Family estate wines — Cab Franc, Chardonnay, Chambourcin", coupon:{text:"$5 off any bottle", code:"TOLINO5"}, shop:"https://tolinovineyards.com"},
+  "Green Vida Co.":{coupon:{text:"$2 off any cold-pressed juice", code:"VIDA2"}, shop:"https://www.greenvidacompany.com"},
+  "Silverback Distillery":{ad:"Award-winning gin, rye & bourbon", shop:"https://www.sbdistillery.com"},
+  "Primordia Mushroom Farm":{ad:"Lion's Mane, oyster & shiitake — cut fresh", shop:"https://www.primordiafarm.com"}
+};
+function iniBox(v){ var color=CATCOLOR[v.c]||'#334155'; return '<span class="vc-ini" style="background:'+color+'">'+initials(v.n)+'</span>'; }
+function vendorCard(v){
+  var logo = v.logo
+    ? '<img class="vc-logo" src="'+esc(v.logo)+'" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'"><span class="vc-ini" style="display:none;background:'+(CATCOLOR[v.c]||'#334155')+'">'+initials(v.n)+'</span>'
+    : iniBox(v);
+  var booth = v.booth ? (' · Booth '+esc(v.booth)) : '';
+  var h='<div class="vcard"><div class="vc-head">'+logo+'<div><b>'+esc(v.n)+'</b><span class="vc-cat">'+esc(v.c)+' · '+esc(kindOf(v))+booth+'</span></div>'+(v.premium?'<span class="vc-prem">PREMIUM</span>':'')+'</div>';
+  if(v.ad) h+='<div class="vc-ad">📣 '+esc(v.ad)+'</div>';
+  else if(v.p) h+='<div class="vc-ad" style="background:#f4f6f8;border-left-color:#c9d2dc;color:#697586">'+esc(v.p)+'</div>';
+  if(v.coupon) h+='<div class="vc-coupon"><span style="font-size:18px">🎟</span><div><b>'+esc(v.coupon.text)+'</b><small>Code '+esc(v.coupon.code)+' · show at booth</small></div></div>';
+  if(v.shop) h+='<a class="vc-buy" href="'+esc(v.shop)+'" target="_blank" rel="noopener">Order / Shop right here →</a>';
+  h+='</div>';
+  return h;
+}
 
 var FESTS = {
   easton_fm: {
     name: "Easton Farmers' Market", theme: "market",
-    // bbox = [[swLat,swLng],[neLat,neLng]] — the real market footprint
     bbox: [[40.68776495920509,-75.20766],[40.690458521435495,-75.20463241745338]],
     boundary: [[40.690458521435495,-75.20765901501589],[40.69044008853104,-75.20463241745338],[40.687997683592144,-75.20463241745338],[40.68776495920509,-75.20730348096488]],
-    // vendors walk along the market row (spine), auto-placed inside the footprint
-    spine: [[40.68820,-75.20715],[40.68930,-75.20635],[40.69005,-75.20545],[40.69035,-75.20486]],
+    spine: [[40.6882,-75.20715],[40.6893,-75.20635],[40.69005,-75.20545],[40.69035,-75.20486]],
+    dates: ["2026-08-29","2026-09-05","2026-09-12","2026-09-15","2026-09-19","2026-09-22","2026-09-26","2026-10-10","2026-10-17","2026-10-24","2026-10-31","2026-11-14","2026-11-21","2026-12-05","2026-12-12","2026-12-19"],
+    schedule: {
+      "2026-08-29": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Zekraft"],
+      "2026-09-05": ["Aladdin Restaurant","Apple Ridge Farm","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Zekraft"],
+      "2026-09-12": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Zekraft"],
+      "2026-09-15": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Candle Co","Easton Salsa Co.","Eclectic Collective","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","I See Spain","Jersey Pickles","Lis Forno","Mattie's Strudel Haus","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","NuVGN Soaps and Body Works","Oley Ravioli","Penn State Extension","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Spectracolor Coffee Roasters","Stehly's Bakery","Taste Tent","Teels Hill Soapworks","The Bubbly Goat","The Flour Shop Bakery","The Modern Bakery","The Smokin' Pasty Company","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Wild for Salmon","Zekraft"],
+      "2026-09-19": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Zekraft"],
+      "2026-09-22": ["Aladdin Restaurant","Apple Ridge Farm","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Zekraft"],
+      "2026-09-26": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Zekraft"],
+      "2026-10-10": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tolino Vineyards","Zekraft"],
+      "2026-10-17": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Eclectic Collective","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Zekraft"],
+      "2026-10-24": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Zekraft"],
+      "2026-10-31": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Zekraft"],
+      "2026-11-14": ["Aladdin Restaurant","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","High Point Kombucha","Lis Forno","Love The Soup","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","The Modern Bakery","Tierra de Fuego Restaurant"],
+      "2026-11-21": ["Aladdin Restaurant","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","High Point Kombucha","Lis Forno","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","The Modern Bakery","Tierra de Fuego Restaurant"],
+      "2026-12-05": ["Aladdin Restaurant","Apple Ridge Farm","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Zekraft"],
+      "2026-12-12": ["Aladdin Restaurant","Apple Ridge Farm","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Zekraft"],
+      "2026-12-19": ["Aladdin Restaurant","Apple Ridge Farm","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Cuz'n Vinny's Homemade Pasta","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","High Point Kombucha","Jersey Pickles","Lis Forno","Love The Soup","Mia & Maddie's Bakery","Mona's Bakery, LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant"]
+    },
     vendors: [
-      {n:"Aladdin Restaurant", c:"Food", p:"Mediterranean"},
-      {n:"Apple Ridge Farm", c:"Specialty", p:"Sourdough bread"},
-      {n:"Barley Creek Brewing & Distillery", c:"Beverages", p:"Beer, spirits"},
-      {n:"Bizzle's Bites", c:"Craft & Art", p:"Handmade goods"},
-      {n:"Breakaway Farms", c:"Farmer", p:"Pastured meats"},
-      {n:"Bright Path Brewing", c:"Beverages", p:"Craft beer"},
-      {n:"Cabbage Throw Farm", c:"Farmer", p:"Seasonal produce"},
-      {n:"The Bubbly Goat", c:"Specialty", p:"Goat-milk soaps"},
-      {n:"The Smokin' Pastry Company", c:"Bakery", p:"Pastries"},
-      {n:"Eclectic Collective", c:"Craft & Art", p:"Local art"},
-      {n:"Spectacular Coffee Roasters", c:"Beverages", p:"Coffee"},
-      {n:"NaVON Lotions & Body Works", c:"Body", p:"Lotions, balms"},
-      {n:"Green Vida Co", c:"Food", p:"Plant-based"},
-      {n:"Terra de Fuego", c:"Food", p:"Empanadas"},
-      {n:"Sam Rocco's Treats", c:"Sweets", p:"Confections"},
-      {n:"Stehly's Bakery", c:"Bakery", p:"Breads, rolls"},
-      {n:"Lis Forno", c:"Bakery", p:"Wood-fired bread"},
-      {n:"Easton Candle Co", c:"Merchandise", p:"Candles"}
+      {n:"Aladdin Restaurant", c:"Food Cart"},
+      {n:"Apple Ridge Farm", c:"Specialty Food Artisan", p:"Sourdough bread"},
+      {n:"Barley Creek Brewing and Distillery", c:"Beverages"},
+      {n:"Bizzle's Bites", c:"Material Goods/Craft/Flea/Art", p:"Pet treats"},
+      {n:"Breakaway Farms", c:"Farmer"},
+      {n:"Bright Path Brewing", c:"Beverages"},
+      {n:"Bussin' Butters", c:"Served/To Go Foods", p:"Nut butters"},
+      {n:"Cabbage Throw Farm LLC", c:"Farmer/Dealer"},
+      {n:"Collective Culture", c:"Specialty Food Artisan", p:"Ferments"},
+      {n:"Cotton Cattle Company", c:"Farmer/Dealer"},
+      {n:"Cuz'n Vinny's Homemade Pasta", c:"Specialty Food Artisan"},
+      {n:"Easton Candle Co", c:"Material Goods/Craft/Flea/Art"},
+      {n:"Easton Salsa Co.", c:"Served/To Go Foods"},
+      {n:"Eclectic Collective", c:"Material Goods/Craft/Flea/Art", p:"Jewelry"},
+      {n:"Elm Hill Vineyard & Winery", c:"Beverages"},
+      {n:"Funny Farm Apiaries", c:"Specialty Food Artisan", p:"Honey"},
+      {n:"Green Vida Co.", c:"Beverages", p:"Cold-pressed juice"},
+      {n:"High Point Kombucha", c:"Beverages"},
+      {n:"I See Spain", c:"Material Goods/Craft/Flea/Art"},
+      {n:"Jersey Pickles", c:"Specialty Food Artisan"},
+      {n:"Lis Forno", c:"Food Cart", p:"Wood-fired bread"},
+      {n:"Love The Soup", c:"Specialty Food Artisan"},
+      {n:"Mattie's Strudel Haus", c:"Served/To Go Foods"},
+      {n:"Mia & Maddie's Bakery", c:"Specialty Food Artisan"},
+      {n:"Minsi Mountain Flower Farm", c:"Farmer", p:"Cut flowers"},
+      {n:"Mona's Bakery, LLC", c:"Specialty Food Artisan"},
+      {n:"Nuts About Millets LLC", c:"Specialty Food Artisan"},
+      {n:"NuVGN Soaps and Body Works", c:"Exhibitor"},
+      {n:"Oley Ravioli", c:"Served/To Go Foods"},
+      {n:"Penn State Extension", c:"Organization"},
+      {n:"Phillips Farms", c:"Farmer"},
+      {n:"Primordia Mushroom Farm", c:"Farmer/Dealer", p:"Mushrooms"},
+      {n:"Raspberry Ridge Creamery", c:"Farmer", p:"Sheep cheese"},
+      {n:"Roastwell Coffee Roasters", c:"Beverages"},
+      {n:"Saint Rocco's Treats", c:"Material Goods/Craft/Flea/Art", p:"Dog treats"},
+      {n:"Salvaterra's Gardens", c:"Farmer"},
+      {n:"Scholl Orchards LLC", c:"Farmer"},
+      {n:"Silverback Distillery", c:"Beverages"},
+      {n:"Spectracolor Coffee Roasters", c:"Beverages"},
+      {n:"Stehly's Bakery", c:"Specialty Food Artisan"},
+      {n:"Taste Tent", c:"Organization", p:"Sampling tent"},
+      {n:"Teels Hill Soapworks", c:"Material Goods/Craft/Flea/Art"},
+      {n:"The Bubbly Goat", c:"Farmer", p:"Goat-milk soap"},
+      {n:"The Flour Shop Bakery", c:"Specialty Food Artisan"},
+      {n:"The Modern Bakery", c:"Specialty Food Artisan", p:"Macarons"},
+      {n:"The Smokin' Pasty Company", c:"Served/To Go Foods"},
+      {n:"Tierra de Fuego Restaurant", c:"Food Cart"},
+      {n:"Tolino Vineyards", c:"Beverages"},
+      {n:"Twin Maple Farms", c:"Farmer"},
+      {n:"Wild for Salmon", c:"Fisher/Seafood"},
+      {n:"Zekraft", c:"Food Cart"}
+    ]
+  },
+  easton_main: {
+    name: "Easton Main Street — Downtown District", theme: "corridor",
+    bbox: [[40.687329267795384,-75.2145202030975],[40.69431758386459,-75.20530830847488]],
+    boundary: [[40.69390535618244,-75.21288000543034],[40.69431758386459,-75.20554393627357],[40.69042612067843,-75.20530830847488],[40.68759791801233,-75.20906413219257],[40.687329267795384,-75.21387362326738],[40.692349489371075,-75.2145202030975]],
+    vendors: [
+      {n:"Bittersweet Vintage", c:"Fixed Retail", p:"437 Ferry St · vintage", k:"fixed", lat:40.69045, lng:-75.2101},
+      {n:"Jimmy's Hot Dogs", c:"Food", p:"9 N. Third St · classic dogs", k:"fixed", lat:40.69208, lng:-75.20758},
+      {n:"Ciao! Sandwich Shoppe", c:"Food", p:"9 N. Third St · sandwiches (moved in w/ Jimmy's)", k:"fixed", lat:40.69214, lng:-75.2077},
+      {n:"Launchpad Bikes", c:"Fixed Retail", p:"507 Northampton St · bike shop", k:"fixed", lat:40.6912, lng:-75.21145},
+      {n:"Sango Kura Sake", c:"Beverages", p:"42 Centre Sq · sake brewery", k:"fixed", lat:40.69168, lng:-75.20768},
+      {n:"Repeater Coffee", c:"Beverages", p:"13 S. Second St · coffee", k:"fixed", lat:40.6912, lng:-75.20632},
+      {n:"Fort & Arrow", c:"Fixed Retail", p:"52 S. Second St · goods", k:"fixed", lat:40.69085, lng:-75.20648},
+      {n:"Easton Nutrition", c:"Food", p:"444 Northampton St · nutrition", k:"fixed", lat:40.69112, lng:-75.2103},
+      {n:"Tortuga Club", c:"Fixed Retail", p:"325 Northampton St", k:"fixed", lat:40.69128, lng:-75.20865},
+      {n:"Raeyah's Natural Hair Braiding", c:"Body", p:"500 Northampton St", k:"fixed", lat:40.69102, lng:-75.21135},
+      {n:"Marcy's Hamburgers", c:"Food", p:"125 Northampton St · new location", k:"fixed", lat:40.6915, lng:-75.20812},
+      {n:"Easton Public Market", c:"Fixed Retail", p:"325 Northampton St · indoor artisan market", k:"fixed", lat:40.69138, lng:-75.20888},
+      {n:"State Theatre", c:"Music / Stage", p:"453 Northampton St · historic theatre", k:"stage", lat:40.69108, lng:-75.21052},
+      {n:"Crayola Experience", c:"Specialty", p:"30 Centre Sq · family attraction", k:"fixed", lat:40.69176, lng:-75.20792},
+      {n:"Scott Park — Live At The Falls", c:"Music / Stage", p:"Riverfront concerts", k:"stage", lat:40.6903, lng:-75.20632}
+    ]
+  },
+  self_care_social: {
+    name: "The Self Care Social — Riverside Park", theme: "market",
+    bbox: [[40.6864,-75.208],[40.6883,-75.2054]],
+    boundary: [[40.6883,-75.208],[40.6883,-75.2054],[40.6864,-75.2054],[40.6864,-75.208]],
+    zones: [
+      {id:"MOVE", name:"Move · fitness, movement, active living", bbox:[[40.6874,-75.208],[40.6883,-75.20675]], col:"#2f855a"},
+      {id:"GLOW", name:"Glow · beauty, skincare, aesthetics", bbox:[[40.6874,-75.2067],[40.6883,-75.2054]], col:"#b83280"},
+      {id:"NRSH", name:"Nourish · nutrition, hydration, mindful", bbox:[[40.6864,-75.208],[40.68735,-75.20675]], col:"#b7791f"},
+      {id:"WELL", name:"Live Well · recovery, breathwork, longevity", bbox:[[40.6864,-75.2067],[40.68735,-75.2054]], col:"#2c7a7b"}
+    ],
+    vendors: [
+      {n:"Run Club — Start Line", c:"Move / Fitness", p:"Group run", k:"stage", zone:"MOVE", lat:40.6881, lng:-75.2076},
+      {n:"Yoga Flow Stage", c:"Move / Fitness", p:"Live class", k:"stage", zone:"MOVE", lat:40.68788, lng:-75.20718},
+      {n:"HIIT Bootcamp", c:"Move / Fitness", p:"Mini class", k:"tent", zone:"MOVE", lat:40.68762, lng:-75.207},
+      {n:"Live Skin Demo", c:"Glow / Beauty", p:"Demonstration", k:"tent", zone:"GLOW", lat:40.68808, lng:-75.2063},
+      {n:"Skincare Bar", c:"Glow / Beauty", p:"Sampling", k:"tent", zone:"GLOW", lat:40.68786, lng:-75.20596},
+      {n:"Aesthetics Consult", c:"Glow / Beauty", p:"Complimentary consult", k:"tent", zone:"GLOW", lat:40.68762, lng:-75.20566},
+      {n:"Hydration Bar", c:"Nourish", p:"Infused water", k:"tent", zone:"NRSH", lat:40.6871, lng:-75.2076},
+      {n:"Mindful Tasting", c:"Nourish", p:"Curated bites", k:"tent", zone:"NRSH", lat:40.68686, lng:-75.2072},
+      {n:"Smoothie Lab", c:"Nourish", p:"Blend & learn", k:"tent", zone:"NRSH", lat:40.68664, lng:-75.20696},
+      {n:"Breathwork Dome", c:"Live Well", p:"Guided session", k:"tent", zone:"WELL", lat:40.6871, lng:-75.2063},
+      {n:"Recovery & Cold Plunge", c:"Live Well", p:"Try it", k:"tent", zone:"WELL", lat:40.68686, lng:-75.20596},
+      {n:"Longevity Talk", c:"Live Well", p:"Mini talk", k:"stage", zone:"WELL", lat:40.68664, lng:-75.20566}
+    ]
+  },
+  gedp: {
+    name: "Greater Easton Development Partnership — City Map", theme: "corridor",
+    bbox: [[40.685329263328065,-75.21666384525288],[40.695622534772845,-75.20256499537321]],
+    boundary: [[40.69560626590416,-75.21594385300502],[40.695622534772845,-75.20256499537321],[40.68533168194352,-75.20303706412685],[40.685329263328065,-75.21666384525288]],
+    vendors: [
+      {n:"Centre Square (The Circle)", c:"Specialty", p:"Bacon Fest · Winter Village · Heritage Day · Criterium hub", k:"fixed", lat:40.69126, lng:-75.20913},
+      {n:"Easton Farmers' Market", c:"Farmer", p:"Scott Park · Saturdays · est. 1752 (oldest in the U.S.)", k:"tent", lat:40.6891, lng:-75.2062},
+      {n:"Easton Public Market", c:"Fixed Retail", p:"325 Northampton · indoor artisan market", k:"fixed", lat:40.691, lng:-75.2088},
+      {n:"State Theatre", c:"Music / Stage", p:"453 Northampton · Taste of Bacon Fest", k:"stage", lat:40.6911, lng:-75.2105},
+      {n:"Scott Park — Live At The Falls", c:"Music / Stage", p:"Riverfront concerts · Thursdays", k:"stage", lat:40.6885, lng:-75.2056},
+      {n:"Riverside Park", c:"Move / Fitness", p:"Self Care Social · Easton Currents", k:"tent", lat:40.687, lng:-75.208},
+      {n:"West Ward Market", c:"Farmer", p:"Neighborhood market", k:"tent", lat:40.6905, lng:-75.2145},
+      {n:"Easton Garden Works", c:"Farmer", p:"Urban gardens · tool library", k:"street", lat:40.6915, lng:-75.2135},
+      {n:"Easton Ambassadors HQ", c:"Specialty", p:"Clean & safe · Community Event Cart", k:"fixed", lat:40.6914, lng:-75.2095},
+      {n:"Easton Highline — Trailhead", c:"Specialty", p:"Washington St & Lehigh Dr · new elevated trail", k:"fixed", lat:40.6865, lng:-75.211},
+      {n:"Dutchtown Pointe Apartments", c:"Fixed Retail", p:"40 S. Sixth St · new residents", k:"fixed", lat:40.69, lng:-75.2115},
+      {n:"Crayola Experience", c:"Specialty", p:"30 Centre Sq · family attraction", k:"fixed", lat:40.69135, lng:-75.2093},
+      {n:"PA Bacon Fest — Centre Sq zones", c:"Food Truck", p:"Nov 7-8 · zones B·A·C·O·N + Second St", k:"truck", lat:40.6915, lng:-75.2088},
+      {n:"Lafayette College — College Hill", c:"Music / Stage", p:"Aug 22 first-years downtown", k:"stage", lat:40.6954, lng:-75.2095},
+      {n:"Nurture Nature Center", c:"Specialty", p:"South Side · environmental education", k:"fixed", lat:40.6895, lng:-75.207}
+    ]
+  },
+  easton_public_market: {
+    name: "Easton Public Market — Indoor Stalls", theme: "market",
+    bbox: [[40.6912,-75.20915],[40.69155,-75.2086]],
+    boundary: [[40.69155,-75.20915],[40.69155,-75.2086],[40.6912,-75.2086],[40.6912,-75.20915]],
+    vendors: [
+      {n:"Full of Crepe", c:"Food", p:"Sweet & savory crepes", k:"fixed", lat:40.69148, lng:-75.20905},
+      {n:"Mister Lee's Noodles", c:"Food", p:"Ramen & noodle bowls", k:"fixed", lat:40.69148, lng:-75.2089},
+      {n:"Scratch Bakery", c:"Bakery", p:"Fresh bread & pastry", k:"fixed", lat:40.69148, lng:-75.20875},
+      {n:"Modern Crumb", c:"Bakery", p:"Cakes & sweets", k:"fixed", lat:40.6914, lng:-75.20908},
+      {n:"Olive with a Twist", c:"Specialty", p:"Oils & vinegars", k:"fixed", lat:40.6914, lng:-75.2089},
+      {n:"The Tallow Kitchen", c:"Body", p:"Natural skincare", k:"fixed", lat:40.6914, lng:-75.20873},
+      {n:"Prime Butcher Shop", c:"Food", p:"Local meats", k:"fixed", lat:40.69132, lng:-75.20906},
+      {n:"Chocodiem", c:"Sweets", p:"Belgian chocolate", k:"fixed", lat:40.69132, lng:-75.2089},
+      {n:"Great Bear Coffee", c:"Beverages", p:"Roasted in-house", k:"fixed", lat:40.69132, lng:-75.20873},
+      {n:"Mercantile Home", c:"Merchandise", p:"Home goods", k:"fixed", lat:40.69126, lng:-75.209},
+      {n:"Highmark Blueprint", c:"Specialty", p:"Community wellness space", k:"fixed", lat:40.69126, lng:-75.20882},
+      {n:"Acoustic Kitchen Stage", c:"Music / Stage", p:"Fri live music · Sun Sounds", k:"stage", lat:40.69126, lng:-75.20868}
+    ]
+  },
+  west_ward: {
+    name: "West Ward Community Market", theme: "market",
+    bbox: [[40.6896,-75.2158],[40.6911,-75.2139]],
+    boundary: [[40.6911,-75.2158],[40.6911,-75.2139],[40.6896,-75.2139],[40.6896,-75.2158]],
+    vendors: [
+      {n:"WWM Info Tent", c:"Specialty", p:"Welcome & SNAP tokens", k:"tent", lat:40.6905, lng:-75.2149},
+      {n:"Fresh Produce Stand", c:"Farmer", p:"Neighborhood-grown", k:"tent", lat:40.6906, lng:-75.2147},
+      {n:"Community Kitchen", c:"Food", p:"Prepared meals", k:"tent", lat:40.6904, lng:-75.2151},
+      {n:"Zucchini 500 — Start", c:"Move / Fitness", p:"Jul 23 · veggie derby", k:"stage", lat:40.6907, lng:-75.2145},
+      {n:"Melon Madness", c:"Sweets", p:"Aug 20", k:"street", lat:40.6903, lng:-75.2153},
+      {n:"Hispanic Cultural Day Stage", c:"Music / Stage", p:"Sept 17", k:"stage", lat:40.69055, lng:-75.2143},
+      {n:"Clean & Safe Committee", c:"Specialty", p:"Resident leaders' space", k:"tent", lat:40.69035, lng:-75.2149},
+      {n:"Kids Corner", c:"Specialty", p:"Activities & crafts", k:"street", lat:40.69075, lng:-75.21505}
+    ]
+  },
+  easton_ambassadors: {
+    name: "Easton Ambassadors — Clean & Safe Coverage", theme: "corridor",
+    bbox: [[40.6885,-75.2118],[40.693,-75.2058]],
+    boundary: [[40.693,-75.2118],[40.693,-75.2058],[40.6885,-75.2058],[40.6885,-75.2118]],
+    zones: [
+      {id:"CTR", name:"Zone · Centre Square Core", bbox:[[40.691,-75.2088],[40.6922,-75.2071]], col:"#0b7f7c"},
+      {id:"NRT", name:"Zone · North Downtown", bbox:[[40.6922,-75.2093],[40.693,-75.2068]], col:"#2c7a7b"},
+      {id:"STH", name:"Zone · South Side Gateway", bbox:[[40.6885,-75.2088],[40.691,-75.2068]], col:"#2f855a"},
+      {id:"WST", name:"Zone · West Corridor", bbox:[[40.691,-75.2118],[40.6923,-75.2088]], col:"#b7791f"}
+    ],
+    vendors: [
+      {n:"Ambassador HQ", c:"Specialty", p:"Operations base", k:"fixed", zone:"CTR", lat:40.69168, lng:-75.2074},
+      {n:"Community Event Cart Depot", c:"Specialty", p:"Rentable block-party kit · Eric Shamis", k:"tent", zone:"CTR", lat:40.69175, lng:-75.2079},
+      {n:"Clean Team — North", c:"Specialty", p:"Sweep & maintain", k:"street", zone:"NRT", lat:40.69255, lng:-75.2078},
+      {n:"Hospitality Kiosk", c:"Specialty", p:"Directions & help", k:"tent", zone:"NRT", lat:40.6924, lng:-75.2082},
+      {n:"Safe Walk — South", c:"Specialty", p:"Evening escorts", k:"street", zone:"STH", lat:40.6898, lng:-75.2076},
+      {n:"Riverfront Patrol", c:"Specialty", p:"Scott Park loop", k:"street", zone:"STH", lat:40.6892, lng:-75.2073},
+      {n:"West Corridor Patrol", c:"Specialty", p:"Northampton St west", k:"street", zone:"WST", lat:40.6916, lng:-75.2103},
+      {n:"Wayfinding Hub", c:"Specialty", p:"Map & Guide distribution", k:"fixed", zone:"WST", lat:40.6915, lng:-75.2093}
+    ]
+  },
+  easton_garden_works: {
+    name: "Easton Garden Works — Urban Gardens", theme: "market",
+    bbox: [[40.687,-75.2153],[40.694,-75.2063]],
+    boundary: [[40.694,-75.2153],[40.694,-75.2063],[40.687,-75.2063],[40.687,-75.2153]],
+    vendors: [
+      {n:"Garden Works HQ / Tool Library", c:"Specialty", p:"Shared tools & seeds", k:"fixed", lat:40.691, lng:-75.2133},
+      {n:"West Ward Giving Garden", c:"Farmer", p:"Donation beds", k:"street", lat:40.6905, lng:-75.2145},
+      {n:"6th St Pollinator Garden", c:"Farmer", p:"Native pollinators", k:"street", lat:40.6912, lng:-75.2131},
+      {n:"Community Plot — LaFarm", c:"Farmer", p:"Member plots", k:"street", lat:40.692, lng:-75.2138},
+      {n:"Nurture Nature Green", c:"Farmer", p:"Education beds", k:"street", lat:40.6908, lng:-75.2068},
+      {n:"South Side Orchard", c:"Farmer", p:"Fruit trees", k:"street", lat:40.689, lng:-75.2093},
+      {n:"Riverside Rain Garden", c:"Farmer", p:"Stormwater beds", k:"street", lat:40.6876, lng:-75.2071}
+    ]
+  },
+  easton_criterium: {
+    name: "Easton Criterium — Downtown Race Course", theme: "corridor",
+    bbox: [[40.6904,-75.2093],[40.6926,-75.2065]],
+    boundary: [[40.6926,-75.2093],[40.6926,-75.2065],[40.6904,-75.2065],[40.6904,-75.2093]],
+    zones: [
+      {id:"SF", name:"Start / Finish · Centre Sq", bbox:[[40.6912,-75.2082],[40.6919,-75.2073]], col:"#1b2430"},
+      {id:"BS", name:"Back Straight · N. Third St.", bbox:[[40.6919,-75.2085],[40.6925,-75.2069]], col:"#9c2b2b"},
+      {id:"T3", name:"Turn 3 · Spectator Zone", bbox:[[40.6905,-75.2085],[40.6912,-75.2069]], col:"#c05621"}
+    ],
+    vendors: [
+      {n:"Start / Finish Line", c:"Music / Stage", p:"Timing & podium", k:"stage", zone:"SF", lat:40.69155, lng:-75.20775},
+      {n:"Announcer Stage", c:"Music / Stage", p:"Race commentary", k:"stage", zone:"SF", lat:40.6915, lng:-75.208},
+      {n:"Registration", c:"Specialty", p:"Rider check-in", k:"tent", zone:"SF", lat:40.6913, lng:-75.2076},
+      {n:"Prime Bell Corner", c:"Specialty", p:"Prime sprints", k:"street", zone:"BS", lat:40.6922, lng:-75.2077},
+      {n:"Beer Garden", c:"Beverages", p:"Local craft", k:"tent", zone:"BS", lat:40.69215, lng:-75.2073},
+      {n:"Team Pit Row", c:"Specialty", p:"Mechanics & staging", k:"tent", zone:"BS", lat:40.692, lng:-75.2082},
+      {n:"Turn 3 Grandstand", c:"Specialty", p:"Best viewing", k:"street", zone:"T3", lat:40.6908, lng:-75.2077},
+      {n:"Food Truck Row", c:"Food Truck", p:"Race-day eats", k:"truck", zone:"T3", lat:40.6907, lng:-75.2073},
+      {n:"Kids Bike Zone", c:"Move / Fitness", p:"Youth races", k:"street", zone:"T3", lat:40.6909, lng:-75.2082}
+    ]
+  },
+  easton_heritage_day: {
+    name: "Easton Heritage Day", theme: "corridor",
+    bbox: [[40.69,-75.2093],[40.6924,-75.2063]],
+    boundary: [[40.6924,-75.2093],[40.6924,-75.2063],[40.69,-75.2063],[40.69,-75.2093]],
+    zones: [
+      {id:"HR", name:"Heritage Row", bbox:[[40.6912,-75.2088],[40.6921,-75.2074]], col:"#c0392b"},
+      {id:"KID", name:"Family & Kids", bbox:[[40.6902,-75.2088],[40.6911,-75.2074]], col:"#b7791f"},
+      {id:"FD", name:"Food & Music", bbox:[[40.6912,-75.2073],[40.6921,-75.2064]], col:"#7a1f2b"}
+    ],
+    vendors: [
+      {n:"Colonial Reenactment", c:"Specialty", p:"Living history", k:"tent", zone:"HR", lat:40.6916, lng:-75.2082},
+      {n:"Bachmann Publick House Tour", c:"Specialty", p:"1753 landmark", k:"fixed", zone:"HR", lat:40.6918, lng:-75.2085},
+      {n:"Heritage Crafts", c:"Craft & Art", p:"Colonial trades", k:"street", zone:"HR", lat:40.6914, lng:-75.2078},
+      {n:"Kids History Camp", c:"Specialty", p:"Hands-on history", k:"tent", zone:"KID", lat:40.6906, lng:-75.2082},
+      {n:"Old-Time Games", c:"Move / Fitness", p:"Sack races & more", k:"street", zone:"KID", lat:40.6908, lng:-75.2077},
+      {n:"Storytelling Tent", c:"Specialty", p:"Founding tales", k:"tent", zone:"KID", lat:40.6904, lng:-75.2085},
+      {n:"Main Stage", c:"Music / Stage", p:"Fife & drum, folk", k:"stage", zone:"FD", lat:40.6916, lng:-75.2069},
+      {n:"Colonial Food Court", c:"Food", p:"Period fare", k:"tent", zone:"FD", lat:40.6914, lng:-75.2067},
+      {n:"Local Brews", c:"Beverages", p:"Tavern tent", k:"tent", zone:"FD", lat:40.6918, lng:-75.2068}
+    ]
+  },
+  easton_winter_village: {
+    name: "Easton Winter Village — Holiday Market", theme: "market",
+    bbox: [[40.6911,-75.2084],[40.692,-75.20715]],
+    boundary: [[40.692,-75.2084],[40.692,-75.20715],[40.6911,-75.20715],[40.6911,-75.2084]],
+    vendors: [
+      {n:"Holiday Tree", c:"Specialty", p:"Tree lighting", k:"fixed", lat:40.69157, lng:-75.20775},
+      {n:"Chalet — Handmade Ornaments", c:"Craft & Art", p:"Local makers", k:"fixed", lat:40.6918, lng:-75.20775},
+      {n:"Chalet — Hot Cocoa Bar", c:"Beverages", p:"Cocoa & cider", k:"fixed", lat:40.69172, lng:-75.20745},
+      {n:"Chalet — Roasted Nuts", c:"Sweets", p:"Warm treats", k:"fixed", lat:40.6915, lng:-75.20735},
+      {n:"Chalet — Local Makers", c:"Craft & Art", p:"Gifts & goods", k:"fixed", lat:40.69135, lng:-75.2075},
+      {n:"Chalet — Winter Apparel", c:"Merchandise", p:"Hats & scarves", k:"fixed", lat:40.69132, lng:-75.2078},
+      {n:"Chalet — Candles & Soaps", c:"Body", p:"Handmade", k:"fixed", lat:40.69138, lng:-75.20805},
+      {n:"Chalet — Mulled Wine", c:"Beverages", p:"21+ tent", k:"fixed", lat:40.69158, lng:-75.20815},
+      {n:"Chalet — Holiday Bakery", c:"Bakery", p:"Cookies & stollen", k:"fixed", lat:40.69175, lng:-75.20805},
+      {n:"Warming Stage — Carolers", c:"Music / Stage", p:"Live holiday music", k:"stage", lat:40.69185, lng:-75.2076}
+    ]
+  },
+  live_at_the_falls: {
+    name: "Live At The Falls — Scott Park", theme: "market",
+    bbox: [[40.6882,-75.2068],[40.6898,-75.2044]],
+    boundary: [[40.6898,-75.2068],[40.6898,-75.2044],[40.6882,-75.2044],[40.6882,-75.2068]],
+    vendors: [
+      {n:"Main Stage", c:"Music / Stage", p:"Thursdays, June–Sept · free", k:"stage", lat:40.689, lng:-75.2056},
+      {n:"DEAL — Grateful Dead Cover Band", c:"Music / Stage", p:"Sept 3 · DeadDance night", k:"stage", lat:40.68905, lng:-75.20575},
+      {n:"Lilly Moss", c:"Music / Stage", p:"Aug 27 · Lafayette In Session", k:"stage", lat:40.68895, lng:-75.20545},
+      {n:"Lawn Seating", c:"Specialty", p:"BYO chairs & blankets", k:"street", lat:40.6888, lng:-75.2056},
+      {n:"Food Truck Row", c:"Food Truck", p:"Rotating trucks", k:"truck", lat:40.6893, lng:-75.2052},
+      {n:"Beer & Wine Garden", c:"Beverages", p:"21+ riverside", k:"tent", lat:40.6887, lng:-75.2052},
+      {n:"Free Parking Entrance", c:"Specialty", p:"Scott Park lot", k:"fixed", lat:40.6895, lng:-75.206},
+      {n:"Riverside Overlook", c:"Specialty", p:"Confluence view", k:"street", lat:40.6886, lng:-75.2048},
+      {n:"Kids Area", c:"Move / Fitness", p:"Family space", k:"street", lat:40.6892, lng:-75.2048}
+    ]
+  },
+  spring_into_easton: {
+    name: "Spring Into Easton", theme: "corridor",
+    bbox: [[40.6908,-75.2093],[40.6923,-75.2069]],
+    boundary: [[40.6923,-75.2093],[40.6923,-75.2069],[40.6908,-75.2069],[40.6908,-75.2093]],
+    vendors: [
+      {n:"Main Stage", c:"Music / Stage", p:"Spring kickoff concert", k:"stage", lat:40.6916, lng:-75.20775},
+      {n:"Spring Market — Flowers", c:"Farmer", p:"Blooms & bulbs", k:"tent", lat:40.69175, lng:-75.2082},
+      {n:"Garden Works Plant Sale", c:"Farmer", p:"Seedlings & starts", k:"tent", lat:40.6915, lng:-75.2084},
+      {n:"Kids Craft Tent", c:"Craft & Art", p:"Family activities", k:"tent", lat:40.6913, lng:-75.208},
+      {n:"Food Court", c:"Food", p:"Local eats", k:"tent", lat:40.6912, lng:-75.2076},
+      {n:"Local Makers Row", c:"Craft & Art", p:"Artisan goods", k:"street", lat:40.6919, lng:-75.2076},
+      {n:"Sidewalk Cafe", c:"Beverages", p:"Coffee & pastries", k:"fixed", lat:40.6914, lng:-75.2072},
+      {n:"Sweet Stroll Station", c:"Sweets", p:"Treat trail", k:"street", lat:40.6911, lng:-75.2074}
+    ]
+  },
+  pa_bacon_fest: {
+    name: "PA Bacon Fest — Easton", theme: "corridor",
+    bbox: [[40.6903,-75.2101],[40.6932,-75.2061]],
+    boundary: [[40.6932,-75.2101],[40.6932,-75.2061],[40.6903,-75.2061],[40.6903,-75.2101]],
+    zones: [
+      {id:"O", name:"Zone O · Centre Square", bbox:[[40.6914,-75.20805],[40.6919,-75.20745]], col:"#1e3a5f"},
+      {id:"A", name:"Zone A · W. Northampton St.", bbox:[[40.6914,-75.2097],[40.6919,-75.20825]], col:"#9c2b2b"},
+      {id:"N", name:"Zone N · E. Northampton St.", bbox:[[40.6914,-75.2073],[40.6919,-75.2063]], col:"#9c2b2b"},
+      {id:"B", name:"Zone B · N. Third St.", bbox:[[40.6921,-75.2081],[40.693,-75.2074]], col:"#9c2b2b"},
+      {id:"C", name:"Zone C · S. Third St.", bbox:[[40.6905,-75.20805],[40.6913,-75.2074]], col:"#9c2b2b"}
+    ],
+    vendors: [
+      {n:"Main Stage", c:"Music / Stage", p:"Live music all day", k:"stage", zone:"O", lat:40.6915, lng:-75.20775},
+      {n:"Godshall's Bacon HQ", c:"Food", p:"Presenting sponsor", k:"tent", zone:"O", lat:40.69178, lng:-75.2079},
+      {n:"Info & First Aid", c:"Specialty", p:"Festival help", k:"tent", zone:"O", lat:40.6918, lng:-75.20758},
+      {n:"Bacon BBQ Pit", c:"Food Truck", p:"Smoked & seared", k:"truck", zone:"A", lat:40.69168, lng:-75.2085},
+      {n:"Craft Beer Garden", c:"Beverages", p:"Local brews", k:"tent", zone:"A", lat:40.69156, lng:-75.2088},
+      {n:"Maple Bacon Donuts", c:"Food Truck", p:"Sweet & savory", k:"truck", zone:"A", lat:40.6917, lng:-75.20918},
+      {n:"Storefront — Antiques", c:"Fixed Retail", p:"Sidewalk sale", k:"fixed", zone:"A", lat:40.69148, lng:-75.20852},
+      {n:"Smokehouse Truck", c:"Food Truck", p:"Brisket & bacon", k:"truck", zone:"N", lat:40.69162, lng:-75.2071},
+      {n:"Bacon Flight Bar", c:"Beverages", p:"Tasting flights", k:"tent", zone:"N", lat:40.69154, lng:-75.20675},
+      {n:"Family Activities", c:"Specialty", p:"Kids zone", k:"street", zone:"N", lat:40.69175, lng:-75.20676},
+      {n:"Storefront — Coffee", c:"Fixed Retail", p:"Open + patio", k:"fixed", zone:"N", lat:40.6915, lng:-75.20712},
+      {n:"Bacon Mac Truck", c:"Food Truck", p:"Mac & cheese", k:"truck", zone:"B", lat:40.69226, lng:-75.2078},
+      {n:"Cider Stand", c:"Beverages", p:"Hard cider", k:"tent", zone:"B", lat:40.69256, lng:-75.2076},
+      {n:"Kettle Corn", c:"Sweets", p:"Fresh popped", k:"street", zone:"B", lat:40.69256, lng:-75.20796},
+      {n:"Storefront — Gallery", c:"Fixed Retail", p:"Open studio", k:"fixed", zone:"B", lat:40.69224, lng:-75.2075},
+      {n:"Pork Belly Tacos", c:"Food Truck", p:"Street tacos", k:"truck", zone:"C", lat:40.691, lng:-75.20775},
+      {n:"Local Brewery Tent", c:"Beverages", p:"Craft beer", k:"tent", zone:"C", lat:40.69066, lng:-75.2076},
+      {n:"Bacon Jam Vendor", c:"Specialty", p:"Jars & goods", k:"street", zone:"C", lat:40.69066, lng:-75.20792},
+      {n:"Storefront — Sweet Treats", c:"Fixed Retail", p:"Sidewalk sale", k:"fixed", zone:"C", lat:40.691, lng:-75.2075}
+    ]
+  },
+  easton_winter_market: {
+    name: "Easton Winter Market — outside the Public Market", theme: "market",
+    bbox: [[40.69085,-75.2096],[40.6915,-75.2084]],
+    boundary: [[40.6915,-75.2096],[40.6915,-75.2084],[40.69085,-75.2084],[40.69085,-75.2096]],
+    spine: [[40.691,-75.20945],[40.6912,-75.209],[40.69138,-75.20858]],
+    dates: ["2026-01-10","2026-01-17","2026-01-24","2026-01-31","2026-02-07","2026-02-14","2026-02-21","2026-02-28","2026-03-07","2026-03-14","2026-03-21","2026-03-28","2026-04-04","2026-04-11","2026-04-18","2026-04-25"],
+    schedule: {
+      "2026-01-10": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha","Funny Farm Apiaries","Saint Rocco's Treats"],
+      "2026-01-17": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","High Point Kombucha","Wild for Salmon"],
+      "2026-01-24": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha","Funny Farm Apiaries","Saint Rocco's Treats"],
+      "2026-01-31": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","High Point Kombucha","Earthen Goat"],
+      "2026-02-07": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Saint Rocco's Treats"],
+      "2026-02-14": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha","Earthen Goat"],
+      "2026-02-21": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Saint Rocco's Treats","Wild for Salmon"],
+      "2026-02-28": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha"],
+      "2026-03-07": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Saint Rocco's Treats","Earthen Goat"],
+      "2026-03-14": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha"],
+      "2026-03-21": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Saint Rocco's Treats","Wild for Salmon"],
+      "2026-03-28": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha","Serrenta"],
+      "2026-04-04": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Saint Rocco's Treats","Serrenta"],
+      "2026-04-11": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha","Funny Farm Apiaries","Earthen Goat","Serrenta"],
+      "2026-04-18": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Saint Rocco's Treats","Wild for Salmon","Tucker's Pond & Predatory Plants","Serrenta"],
+      "2026-04-25": ["AquaSprout Farms","Cabbage Throw Farm LLC","Primordia Mushroom Farm","Salvaterra's Gardens","Scholl Orchards LLC","Breakaway Farms","Raspberry Ridge Creamery","Apple Ridge Farm","Collective Culture","The Flour Shop Bakery","Mia & Maddie's Bakery","Easton Salsa Co.","Fresh Tofu Inc.","Jersey Pickles","Love The Soup","Oley Ravioli","Bussin' Butters","Zekraft","Elm Hill Vineyard & Winery","Bizzle's Bites","High Point Kombucha","Funny Farm Apiaries","Serrenta"]
+    },
+    vendors: [
+      {n:"AquaSprout Farms", c:"Farmer"},
+      {n:"Cabbage Throw Farm LLC", c:"Farmer/Dealer"},
+      {n:"Primordia Mushroom Farm", c:"Farmer/Dealer"},
+      {n:"Salvaterra's Gardens", c:"Farmer"},
+      {n:"Scholl Orchards LLC", c:"Farmer"},
+      {n:"Breakaway Farms", c:"Farmer"},
+      {n:"Raspberry Ridge Creamery", c:"Farmer"},
+      {n:"Apple Ridge Farm", c:"Specialty Food Artisan"},
+      {n:"Collective Culture", c:"Specialty Food Artisan"},
+      {n:"The Flour Shop Bakery", c:"Specialty Food Artisan"},
+      {n:"Mia & Maddie's Bakery", c:"Specialty Food Artisan"},
+      {n:"Easton Salsa Co.", c:"Served/To Go Foods"},
+      {n:"Fresh Tofu Inc.", c:"Specialty Food Artisan"},
+      {n:"Jersey Pickles", c:"Specialty Food Artisan"},
+      {n:"Love The Soup", c:"Specialty Food Artisan"},
+      {n:"Oley Ravioli", c:"Served/To Go Foods"},
+      {n:"Bussin' Butters", c:"Served/To Go Foods"},
+      {n:"Zekraft", c:"Food Cart"},
+      {n:"Elm Hill Vineyard & Winery", c:"Beverages"},
+      {n:"Bizzle's Bites", c:"Material Goods/Craft/Flea/Art"},
+      {n:"High Point Kombucha", c:"Beverages"},
+      {n:"Funny Farm Apiaries", c:"Specialty Food Artisan"},
+      {n:"Saint Rocco's Treats", c:"Material Goods/Craft/Flea/Art"},
+      {n:"Wild for Salmon", c:"Fisher/Seafood"},
+      {n:"Earthen Goat", c:"Material Goods/Craft/Flea/Art"},
+      {n:"Tucker's Pond & Predatory Plants", c:"Specialty Food Artisan"},
+      {n:"Serrenta", c:"Exhibitor"}
     ]
   }
 };
@@ -116,14 +542,14 @@ function initials(s){ return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/
 function ptAlong(spine,f){ var segs=spine.length-1; var s=Math.min(segs-1,Math.floor(f*segs)); var lt=(f*segs)-s; var a=spine[s],b=spine[s+1]; return [a[0]+(b[0]-a[0])*lt, a[1]+(b[1]-a[1])*lt]; }
 // perpendicular unit (approx, small-angle) to the local spine direction
 function perpAt(spine,f){ var segs=spine.length-1; var s=Math.min(segs-1,Math.floor(f*segs)); var a=spine[s],b=spine[s+1]; var dLat=b[0]-a[0], dLng=b[1]-a[1]; var m=Math.sqrt(dLat*dLat+dLng*dLng)||1; return [-dLng/m, dLat/m]; }
-function placeVendors(f){ var n=f.vendors.length, off=0.00007;
-  f.vendors.forEach(function(v,i){ var t=(i+0.5)/n; var base=ptAlong(f.spine,t); var pp=perpAt(f.spine,t); var side=(i%2?1:-1);
+function placeVendors(f){ if(!f.spine){ return; } var n=f.vendors.length, off=0.00007;   // explicit-coord fests (zones) skip the spine
+  f.vendors.forEach(function(v,i){ if(v.lat!=null && v.lng!=null) return; var t=(i+0.5)/n; var base=ptAlong(f.spine,t); var pp=perpAt(f.spine,t); var side=(i%2?1:-1);
     v.lat=base[0]+pp[0]*off*side; v.lng=base[1]+pp[1]*off*side; }); }
 
 /* ---------- state ---------- */
 var FID = qp('fest') || 'easton_fm';
 var F = FESTS[FID];
-var map, MARKERS = {}, ACTIVE_CAT = '';
+var map, MARKERS = {}, ACTIVE_CAT = '', SELDATE = '', PRESENT = null;
 document.getElementById('fname').textContent = (F && F.name) || NAMES[FID] || 'Festival';
 document.title = ((F && F.name) || NAMES[FID] || 'Vendor') + ' — Vendor Map';
 
@@ -134,6 +560,7 @@ function boot(){
     document.getElementById('empty').style.display='grid';
     return;
   }
+  F.vendors.forEach(function(v){ var x=VENDOR_XTRA[v.n]; if(x){ for(var k in x) v[k]=x[k]; } });  // merge registration payoff
   placeVendors(F);
   map = L.map('map',{zoomControl:true,attributionControl:false});
   map.fitBounds(F.bbox);
@@ -149,14 +576,39 @@ function boot(){
     var color = CATCOLOR[v.c] || '#334155';
     var icon = L.divIcon({className:'', html:'<div class="vlabel" id="lab'+i+'" style="border-left-color:'+color+'">'+esc(v.n)+'</div>', iconSize:null});
     var m = L.marker([v.lat,v.lng],{icon:icon}).addTo(map);
-    m.bindPopup('<b>'+esc(v.n)+'</b><br><span style="color:#697586">'+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</span>');
+    m.bindPopup(vendorCard(v),{maxWidth:280});
     m.on('click',function(){ select(i,false); });
     MARKERS[i]=m;
   });
-  buildCats(); renderList();
+  // draw ZONE regions (street festival) — festival → zone → booth
+  if(F.zones){ F.zones.forEach(function(z){
+    L.rectangle(z.bbox, {color:z.col, weight:2, fillColor:z.col, fillOpacity:0.10}).addTo(map).bindPopup('<b>'+esc(z.name)+'</b>');
+    var cy=(z.bbox[0][0]+z.bbox[1][0])/2, cx=(z.bbox[0][1]+z.bbox[1][1])/2;
+    L.marker([cy,cx],{interactive:false,icon:L.divIcon({className:'',html:'<div style="background:'+z.col+';color:#fff;font:800 12px/1 -apple-system,system-ui,sans-serif;padding:4px 8px;border-radius:5px;white-space:nowrap;box-shadow:0 2px 5px rgba(0,0,0,.3)">'+esc(z.id)+'</div>',iconSize:null})}).addTo(map);
+  }); }
+  buildCats();
+  // per-week schedule → date picker (Farmers' Market swaps vendors by market day)
+  if(F.schedule && F.dates && F.dates.length){
+    var sel=document.getElementById('datepick');
+    sel.innerHTML=F.dates.map(function(dd){ return '<option value="'+dd+'">'+fmtDate(dd)+'</option>'; }).join('');
+    SELDATE=F.dates[0]; sel.value=SELDATE;
+    document.getElementById('daterow').style.display='flex';
+    applyDate();
+  } else { renderList(); }
   window.addEventListener('resize', function(){ setTimeout(function(){ try{ map.invalidateSize(); map.fitBounds(F.bbox,{animate:false}); }catch(e){} }, 120); });
 }
 function squareAround(lat,lng,d){ return [[lat+d,lng-d],[lat+d,lng+d],[lat-d,lng+d],[lat-d,lng-d]]; }
+function fmtDate(iso){ var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+function isPresent(v){ if(!F.schedule||!SELDATE) return true; var set=PRESENT; return set ? !!set[v.n] : true; }
+function pickDate(v){ SELDATE=v; applyDate(); }
+function applyDate(){
+  PRESENT=null;
+  if(F.schedule && SELDATE){ PRESENT={}; (F.schedule[SELDATE]||[]).forEach(function(n){ PRESENT[n]=1; }); }
+  // show only present vendors' markers
+  F.vendors.forEach(function(v,i){ var m=MARKERS[i]; if(!m) return;
+    if(isPresent(v)){ if(!map.hasLayer(m)) m.addTo(map); } else { if(map.hasLayer(m)) map.removeLayer(m); } });
+  renderList();
+}
 
 function buildCats(){ var cats=['All']; F.vendors.forEach(function(v){ if(cats.indexOf(v.c)<0)cats.push(v.c); });
   document.getElementById('cats').innerHTML = cats.map(function(c){ var v=(c==='All'?'':c); return '<span class="cat'+((ACTIVE_CAT===v)?' on':'')+'" onclick="pickCat(\''+v+'\')">'+esc(c)+'</span>'; }).join(''); }
@@ -166,14 +618,17 @@ function renderList(){
   var q=(document.getElementById('q').value||'').toLowerCase();
   var rows=''; var shown=0;
   F.vendors.forEach(function(v,i){
+    if(!isPresent(v)) return;
     if(ACTIVE_CAT && v.c!==ACTIVE_CAT) return;
     if(q && (v.n+' '+v.c+' '+(v.p||'')).toLowerCase().indexOf(q)<0) return;
     shown++;
     var color=CATCOLOR[v.c]||'#334155';
-    rows+='<div class="v" id="row'+i+'" onclick="select('+i+',true)"><div class="dot" style="background:'+color+'">'+initials(v.n)+'</div><div><b>'+esc(v.n)+'</b><small>'+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</small></div></div>';
+    var flags=(v.coupon?'<span class="cpn" title="Premium coupon">🎟</span>':'')+(v.premium?'<span class="prm" title="Premium placement">★</span>':'');
+    rows+='<div class="v" id="row'+i+'" onclick="select('+i+',true)"><div class="dot" style="background:'+color+'">'+initials(v.n)+'</div><div><b>'+esc(v.n)+flags+'</b><small>'+(v.zone?('Zone '+esc(v.zone)+' · '):'')+esc(kindOf(v))+' · '+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</small></div></div>';
   });
   document.getElementById('list').innerHTML = rows || '<div style="padding:16px;color:#697586;font-size:13px">No vendors match.</div>';
-  document.getElementById('vcount').textContent = shown+' / '+F.vendors.length;
+  var tot = (F.schedule && SELDATE && PRESENT) ? Object.keys(PRESENT).length : F.vendors.length;
+  document.getElementById('vcount').textContent = shown+' / '+tot;
 }
 
 function select(i,fromList){

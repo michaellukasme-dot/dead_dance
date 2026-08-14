@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill × GEDP — Configure the Model</title>
+<meta name="theme-color" content="#0f1620">
+<!--
+  stagefill_model.html — the CONFIGURABLE business model. GEDP plays with it live:
+  three revenue streams (year-round fixed retailers · programmatic street vendors · StageFill acts),
+  an adoption ramp, and DCED Main Street Matters funding → live Revenue, TCO and ROI.
+  Pinstripe/civic register (neutral ink + teal + amber, no purple). Mirrors the xlsx model exactly.
+  Zero dependencies.
+-->
+<style>
+:root{--ink:#141a22;--bg:#f5f7fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620;--navy:#153042}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:var(--ink2);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.top .b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:15px}
+.top b{font-size:18px;letter-spacing:-.3px}.top .sub{color:#9fb0c2;font-size:12.5px;font-weight:700;margin-left:2px}
+.top a{margin-left:auto;color:#9fb0c2;font-size:12.5px;font-weight:700;text-decoration:none}
+.hero{background:radial-gradient(120% 120% at 82% -20%,#1b3b52,#0f1620);color:#fff;padding:24px 18px}
+.hero h1{margin:0 0 4px;font-size:22px}.hero p{margin:0;color:#b9c6d4;font-size:13.5px}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 18px 70px;display:grid;grid-template-columns:1fr 340px;gap:24px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 12px}
+.ctl{margin-bottom:13px}
+.ctl .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;margin-bottom:4px}
+.ctl .lab .v{color:var(--teal-d);font-weight:900;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--teal);margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.num{display:flex;justify-content:space-between;align-items:center;font-size:13px;gap:8px}
+.num input{width:88px;font:inherit;font-size:13px;text-align:right;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.num input:focus{outline:none;border-color:var(--teal)}
+.num .cap{color:#3a444e;font-weight:600}
+
+/* results */
+.res{position:sticky;top:14px;align-self:start}
+.big{background:linear-gradient(135deg,#153042,#0f6f8a);color:#fff;border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.big .k{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#bcd0dd}
+.big .val{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:3px}
+.big .sm{font-size:12px;color:#cfe0ea;margin-top:4px}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.rrow{display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;border-bottom:1px dashed #eef1f4}
+.rrow:last-child{border-bottom:0}
+.rrow b{font-variant-numeric:tabular-nums}
+.rrow.tot{font-weight:800;border-top:1px solid var(--line);border-bottom:0;margin-top:4px;padding-top:8px}
+.bars{display:flex;gap:10px;align-items:flex-end;height:90px;margin:6px 2px 2px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;height:100%}
+.bar .fill{width:100%;background:linear-gradient(180deg,#12c2be,#0b7f7c);border-radius:6px 6px 0 0;min-height:3px}
+.bar .yl{font-size:10.5px;color:var(--muted);font-weight:700}
+.bar .bv{font-size:10.5px;color:#3a444e;font-weight:800}
+.roi{background:#0f1620;color:#fff;border-radius:12px;padding:14px 16px;text-align:center}
+.roi .k{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#9fb0c2}
+.roi .val{font-size:26px;font-weight:900;color:#12c2be;margin-top:2px}
+.note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.45}
+.reset{margin-top:6px;background:#eef2f6;border:0;border-radius:9px;padding:8px 12px;font-weight:700;font-size:12px;color:var(--muted);cursor:pointer}
+.pill{display:inline-block;background:#e9faf4;color:#0b7f7c;font-weight:800;font-size:11px;border-radius:999px;padding:3px 9px}
+</style></head>
+<body>
+<div class="top"><span class="b">◍</span><b>StageFill</b><span class="sub">× GEDP — the model, yours to configure</span><a href="easton_hub.html">← Easton campus</a></div>
+<div class="hero"><h1>Play with the business model</h1><p>Three revenue streams. One adoption ramp. Move any lever — Revenue, Total Cost of Ownership and ROI recompute instantly. Year 1 is funded by DCED Main Street Matters.</p></div>
+
+<div class="wrap">
+  <div>
+    <div class="panel"><h2>Stream 1 · Year-round fixed retailers</h2>
+      <div class="ctl"><div class="lab">Annual subscription <span class="v" id="v_sub"></span></div><input type="range" id="sub" min="120" max="900" step="30"></div>
+      <div class="grid2">
+        <div class="num"><span class="cap">District retailers</span><input id="retailers" type="number"></div>
+        <div class="num"><span class="cap">Premium fee ($/yr)</span><input id="premFee" type="number"></div>
+        <div class="num"><span class="cap">Coupon fee ($/yr)</span><input id="cpnFee" type="number"></div>
+        <div class="num"><span class="cap">Premium attach</span><input id="premAtt" type="number" step="0.05"></div>
+        <div class="num"><span class="cap">Coupon attach</span><input id="cpnAtt" type="number" step="0.05"></div>
+      </div>
+    </div>
+
+    <div class="panel"><h2>Stream 2 · Programmatic street vendors</h2>
+      <div class="ctl"><div class="lab">Booth-tech fee ($/vendor/market day) <span class="v" id="v_booth"></span></div><input type="range" id="booth" min="0" max="15" step="1"></div>
+      <div class="grid2">
+        <div class="num"><span class="cap">EFM market days/yr</span><input id="efmDays" type="number"></div>
+        <div class="num"><span class="cap">Avg vendors/day</span><input id="vendDay" type="number"></div>
+        <div class="num"><span class="cap">Festivals/yr</span><input id="fests" type="number"></div>
+        <div class="num"><span class="cap">Avg vendors/fest</span><input id="vendFest" type="number"></div>
+        <div class="num"><span class="cap">Unique vendors/yr</span><input id="uniqV" type="number"></div>
+      </div>
+    </div>
+
+    <div class="panel"><h2>Stream 3 · StageFill acts (paid sets on budget)</h2>
+      <div class="ctl"><div class="lab">Marketplace take rate <span class="v" id="v_take"></span></div><input type="range" id="take" min="0" max="0.30" step="0.01"></div>
+      <div class="grid2">
+        <div class="num"><span class="cap">Stages/yr</span><input id="stages" type="number"></div>
+        <div class="num"><span class="cap">Paid sets/stage</span><input id="setsStage" type="number"></div>
+        <div class="num"><span class="cap">Avg set budget ($)</span><input id="setBud" type="number"></div>
+      </div>
+    </div>
+
+    <div class="panel"><h2>Adoption ramp &amp; GEDP funding</h2>
+      <div class="ctl"><div class="lab">Fixed-retailer adoption — Year 1 <span class="v" id="v_ad1"></span></div><input type="range" id="ad1" min="0" max="1" step="0.05"></div>
+      <div class="grid2">
+        <div class="num"><span class="cap">Adoption Yr 2</span><input id="ad2" type="number" step="0.05"></div>
+        <div class="num"><span class="cap">Adoption Yr 3</span><input id="ad3" type="number" step="0.05"></div>
+        <div class="num"><span class="cap">Utilization Yr1/2/3</span><input id="ut1" type="number" step="0.05" style="width:52px"></div>
+        <div class="num"><span class="cap">&nbsp;</span><span><input id="ut2" type="number" step="0.05" style="width:52px"> <input id="ut3" type="number" step="0.05" style="width:52px"></span></div>
+        <div class="num"><span class="cap">Platform license ($/yr)</span><input id="license" type="number"></div>
+        <div class="num"><span class="cap">MSM funding (Yr1, no match)</span><input id="msm" type="number"></div>
+        <div class="num"><span class="cap">Staff hrs saved/wk</span><input id="staffHrs" type="number"></div>
+        <div class="num"><span class="cap">Staff $/hr</span><input id="staffRate" type="number"></div>
+        <div class="num"><span class="cap">Active weeks/yr</span><input id="weeks" type="number"></div>
+        <div class="num"><span class="cap">Sponsorship uplift/yr</span><input id="sponsor" type="number"></div>
+      </div>
+      <button class="reset" onclick="resetAll()">↺ Reset to Easton baseline</button>
+    </div>
+  </div>
+
+  <div class="res">
+    <div class="big"><div class="k">Total StageFill revenue · 3-year</div><div class="val" id="o_rev3"></div><div class="sm" id="o_revyr"></div></div>
+    <div class="rcard"><h2 style="margin-top:0">Revenue by stream · Year 1 → Year 3</h2>
+      <div class="rrow"><span>① Fixed retailers</span><b id="o_s1"></b></div>
+      <div class="rrow"><span>② Street vendors</span><b id="o_s2"></b></div>
+      <div class="rrow"><span>③ StageFill acts</span><b id="o_s3"></b></div>
+      <div class="rrow tot"><span>Total (Year 3)</span><b id="o_tot"></b></div>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div class="rcard"><h2 style="margin-top:0">GEDP · cost &amp; value</h2>
+      <div class="rrow"><span>Year-1 net cash cost <span class="pill" id="o_funded">funded</span></span><b id="o_net1"></b></div>
+      <div class="rrow"><span>3-yr value delivered</span><b id="o_val3"></b></div>
+    </div>
+    <div class="roi"><div class="k">3-year cumulative ROI to GEDP</div><div class="val" id="o_roi"></div></div>
+    <div class="note" id="o_note"></div>
+  </div>
+</div>
+
+<script>
+var DEF={sub:360,retailers:120,premFee:120,cpnFee:60,premAtt:0.30,cpnAtt:0.40,
+  booth:4,efmDays:26,vendDay:40,fests:8,vendFest:30,uniqV:90,
+  take:0.10,stages:20,setsStage:4,setBud:300,
+  ad1:0.15,ad2:0.30,ad3:0.45,ut1:0.60,ut2:0.85,ut3:1.00,
+  license:12000,msm:50000,onboard:2000,staffHrs:6,staffRate:35,weeks:40,sponsor:8000};
+var IDS=Object.keys(DEF);
+function g(id){return +document.getElementById(id).value;}
+function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+function pct(n){return Math.round(n*100)+'%';}
+function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+function calcYear(V,ad,ut){
+  var subs=V.retailers*ad;
+  var s1=subs*V.sub + subs*V.premAtt*V.premFee + subs*V.cpnAtt*V.cpnFee;
+  var vdays=(V.efmDays*V.vendDay + V.fests*V.vendFest)*ut;
+  var s2=vdays*V.booth + V.uniqV*V.premAtt*V.premFee*ut + V.uniqV*V.cpnAtt*V.cpnFee*ut;
+  var sets=V.stages*V.setsStage*ut;
+  var s3=sets*V.setBud*V.take;
+  return {s1:s1,s2:s2,s3:s3,tot:s1+s2+s3,subs:subs};
+}
+function recalc(){
+  var V={}; IDS.forEach(function(k){ V[k]=g(k); });
+  set('v_sub',money(V.sub)); set('v_booth',money(V.booth)); set('v_take',pct(V.take)); set('v_ad1',pct(V.ad1));
+  var Y=[calcYear(V,V.ad1,V.ut1), calcYear(V,V.ad2,V.ut2), calcYear(V,V.ad3,V.ut3)];
+  var rev3=Y[0].tot+Y[1].tot+Y[2].tot;
+  set('o_rev3',money(rev3));
+  set('o_revyr','Year 1 '+money(Y[0].tot)+'  ·  Year 3 '+money(Y[2].tot));
+  set('o_s1',money(Y[0].s1)+' → '+money(Y[2].s1));
+  set('o_s2',money(Y[0].s2)+' → '+money(Y[2].s2));
+  set('o_s3',money(Y[0].s3)+' → '+money(Y[2].s3));
+  set('o_tot',money(Y[2].tot));
+  // bars
+  var mx=Math.max(Y[0].tot,Y[1].tot,Y[2].tot)||1;
+  document.getElementById('bars').innerHTML=Y.map(function(y,i){
+    return '<div class="bar"><span class="bv">'+money(y.tot)+'</span><div class="fill" style="height:'+(y.tot/mx*70+3)+'px"></div><span class="yl">Yr '+(i+1)+'</span></div>';
+  }).join('');
+  // GEDP TCO/ROI
+  var net=[],val=[];
+  for(var i=0;i<3;i++){
+    var gross=V.license+(i===0?V.onboard:0);
+    var msmApplied=(i===0)?Math.min(gross,V.msm):0;
+    net.push(gross-msmApplied);
+    val.push(V.staffHrs*V.staffRate*V.weeks + V.sponsor + Y[i].subs*V.sub);
+  }
+  set('o_net1', net[0]<=0?money(0):money(net[0]));
+  document.getElementById('o_funded').style.display = net[0]<=0 ? 'inline-block':'none';
+  var val3=val[0]+val[1]+val[2], net3=net[0]+net[1]+net[2];
+  set('o_val3',money(val3));
+  set('o_roi', net3<=0?'Fully funded':(Math.round(val3/net3*10)/10)+'×');
+  set('o_note','① fixed retailers pay subscription + premium placement + coupon. ② street vendors pay booth-tech + premium + coupon. ③ acts fill each stage on budget; StageFill takes '+pct(V.take)+'. Year-1 platform cost ('+money(V.license+V.onboard)+') is offset by DCED Main Street Matters (first '+money(V.msm)+', no match). Each merchant’s '+money(V.sub)+' subscription qualifies as a Technology Upgrade + Marketing Assistance under GEDP’s Business Improvement Forgivable Loan (up to $5,000).');
+}
+function resetAll(){ IDS.forEach(function(k){ var e=document.getElementById(k); if(e) e.value=DEF[k]; }); recalc(); }
+IDS.forEach(function(k){ var e=document.getElementById(k); if(e) e.addEventListener('input',recalc); });
+resetAll();
+</script>
+</body></html>

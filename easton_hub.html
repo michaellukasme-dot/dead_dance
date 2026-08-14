@@ -1,56 +1,167 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Easton — Events & Markets</title>
+<title>Explore Easton — Markets, Festivals & Events</title>
 <meta name="theme-color" content="#0f1620">
-<!-- easton_hub.html — the GEDP event grid. Each tile links to that event's vendor-granularity map. -->
+<!-- easton_hub.html — the CITY container: "Explore Easton" discovery grid (Proxi-style presentation, our 12 GEDP
+     programs) + a single filterable City Calendar. Neutral / pinstripe (NO DeadDance purple). Each tile → its map. -->
 <style>
-:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620}
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620;--dk:#9fb0c2}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.top{background:var(--ink2);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:9px}
+.top{background:var(--ink2);color:#fff;padding:13px 18px;display:flex;align-items:center;gap:9px;position:sticky;top:0;z-index:20}
 .top .logo{font-weight:900;font-size:19px;letter-spacing:-.4px;display:flex;align-items:center;gap:8px}
 .top .logo .b{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:14px}
 .top .logo span{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
-.sub{background:radial-gradient(120% 120% at 85% -20%,#153042,#0f1620);color:#fff;padding:22px 18px}
-.sub .w{max-width:1060px;margin:0 auto}.sub h1{margin:0 0 4px;font-size:23px;letter-spacing:-.5px}.sub p{margin:0;color:#9fb0c2;font-size:13.5px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1060px;margin:0 auto;padding:22px 18px 40px}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
-.tile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 16px;text-decoration:none;color:var(--ink);transition:transform .15s,border-color .15s,box-shadow .15s;position:relative}
-.tile:hover{transform:translateY(-4px);border-color:var(--teal);box-shadow:0 10px 26px rgba(20,26,34,.10)}
-.tile .mk{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:20px;letter-spacing:.5px}
-.tile b{font-size:14.5px;font-weight:800;line-height:1.2}
-.tile .go{font-size:12px;font-weight:800;color:var(--teal-d)}
-.tile .live{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:900;letter-spacing:.5px;background:#e9faf4;color:#0b7f7c;border:1px solid #b7ead9;border-radius:999px;padding:3px 7px}
-.tile .soon{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:800;letter-spacing:.4px;background:#f4f6f8;color:#8a97a7;border:1px solid var(--line);border-radius:999px;padding:3px 7px}
-footer{color:#8a97a7;padding:0 18px 28px;font-size:12px;text-align:center}
+.hero{background:radial-gradient(120% 120% at 85% -20%,#153042,#0f1620);color:#fff;padding:34px 18px 30px;text-align:center}
+.hero h1{margin:0 0 6px;font-size:32px;letter-spacing:-.6px}.hero p{margin:0 auto 18px;color:var(--dk);font-size:15px;max-width:620px}
+.search{max-width:520px;margin:0 auto;display:flex;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 26px rgba(0,0,0,.25)}
+.search input{flex:1;border:0;padding:13px 15px;font:inherit;font-size:15px;color:var(--ink)}.search input:focus{outline:none}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 18px 44px}
+.sec{font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:8px 2px 14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.tile{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s,border-color .15s}
+.tile:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(20,26,34,.12);border-color:var(--teal)}
+.thumb{height:96px;background:linear-gradient(135deg,#153042,#0f6f8a);display:grid;place-items:center;position:relative}
+.thumb .mk{font-weight:900;font-size:26px;color:#eaf6f6;letter-spacing:1px}
+.thumb .badge{position:absolute;top:9px;right:9px;font-size:9.5px;font-weight:900;letter-spacing:.4px;border-radius:999px;padding:3px 8px}
+.badge.live{background:#e9faf4;color:#0b7f7c}.badge.soon{background:#ffffffcc;color:#5a6a7a}
+.thumb.white{background:#fff;border-bottom:1px solid var(--line)}
+.thumb .lg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-height:66px;max-width:82%;object-fit:contain}
+.thumb.white .mk{color:#c8d0da}
+.tb{padding:12px 14px 14px}
+.tb b{display:block;font-size:14.5px;font-weight:800;line-height:1.2}
+.tb .meta{margin-top:5px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tb .go{margin-top:8px;font-size:12px;font-weight:800;color:var(--teal-d)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:2px 0 16px}
+.chip{font-size:12px;font-weight:800;border:1px solid var(--line);border-radius:999px;padding:6px 11px;cursor:pointer;color:var(--muted);background:#fff;white-space:nowrap}
+.chip.on{background:var(--ink2);color:#fff;border-color:var(--ink2)}
+.cal{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ev{display:flex;align-items:center;gap:14px;padding:12px 15px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.ev:last-child{border-bottom:0}.ev:hover{background:#f4f8fb}
+.ev .d{flex:none;width:52px;text-align:center}
+.ev .d .m{font-size:10.5px;font-weight:900;letter-spacing:.06em;color:var(--teal-d);text-transform:uppercase}
+.ev .d .n{font-size:20px;font-weight:900;line-height:1}
+.ev .body{flex:1;min-width:0}
+.ev .body b{font-size:14px;font-weight:700;display:block}
+.ev .body small{font-size:12px;color:var(--muted)}
+.ev .tag{flex:none;font-size:10.5px;font-weight:800;color:#fff;border-radius:6px;padding:3px 8px;white-space:nowrap}
+.ev .arrow{flex:none;color:var(--muted);font-weight:800}
+footer{color:#8a97a7;padding:6px 18px 30px;font-size:12px;text-align:center;max-width:1080px;margin:0 auto}
+.empty{padding:20px;color:var(--muted);font-size:13px;text-align:center}
+.gedpbtn{display:inline-block;margin-top:14px;background:linear-gradient(135deg,#153042,#0f6f8a);color:#fff;font-weight:800;font-size:14px;text-decoration:none;padding:12px 20px;border-radius:12px;box-shadow:0 4px 14px rgba(15,111,138,.28);transition:transform .1s,box-shadow .1s}
+.gedpbtn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(15,111,138,.36)}
 </style></head>
 <body>
 <div class="top"><div class="logo"><span class="b">◍</span>Easton <span>Powered by StageFill</span></div></div>
-<div class="sub"><div class="w"><h1>Easton — Markets, Festivals &amp; Events</h1><p>Every program of the Greater Easton Development Partnership. Tap any one to open its live vendor map.</p></div></div>
-<div class="grid" id="grid"></div>
+<div class="hero">
+  <h1>Explore Easton</h1>
+  <p>Every market, festival, and event in the city — one map, one calendar. A program of the Greater Easton Development Partnership.</p>
+  <div class="search"><input id="q" placeholder="Search markets, festivals & events…" oninput="renderTiles()"></div>
+  <a class="gedpbtn" href="festival_vendors.html?fest=gedp">◍ Open the GEDP City Map — all programs on one map →</a>
+</div>
+<div class="wrap">
+  <div class="sec" id="secTitle">The 12 · Markets, Festivals &amp; Events</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="sec" style="margin-top:30px">City Calendar</div>
+  <div class="chips" id="chips"></div>
+  <div class="cal" id="cal"></div>
+</div>
 <footer>Separate programs, one Easton — connected via the GEDP. Vendor maps snap to real coordinates.</footer>
+
 <script>
-var EVENTS=[
- {id:"easton_main",           n:"Easton Main Street Initiative", col:"#2f3e73", live:false},
- {id:"easton_fm",             n:"Easton Farmers' Market",        col:"#b6c33a", live:true},
- {id:"easton_public_market",  n:"Easton Public Market",          col:"#c3d63a", live:false},
- {id:"easton_ambassadors",    n:"Easton Ambassadors",            col:"#7a1f2b", live:false},
- {id:"easton_garden_works",   n:"Easton Garden Works",           col:"#3f8f4a", live:false},
- {id:"west_ward",             n:"West Ward Community Initiative", col:"#0f6f8a", live:false},
- {id:"pa_bacon_fest",         n:"PA Bacon Fest",                 col:"#3b3f8f", live:false},
- {id:"easton_criterium",      n:"Easton Criterium",              col:"#1b2430", live:false},
- {id:"easton_heritage_day",   n:"Easton Heritage Day",           col:"#c0392b", live:false},
- {id:"easton_winter_village", n:"Easton Winter Village",         col:"#2a7fb0", live:false},
- {id:"live_at_the_falls",     n:"Live At The Falls",             col:"#8a3d6b", live:false},
- {id:"spring_into_easton",    n:"Spring Into Easton",            col:"#4a8f3f", live:false}
+var COLORS = { easton_main:"#2f3e73", easton_fm:"#7a8f1f", easton_public_market:"#9aa81f", easton_ambassadors:"#7a1f2b",
+  easton_garden_works:"#3f8f4a", west_ward:"#0f6f8a", pa_bacon_fest:"#3b3f8f", easton_criterium:"#1b2430",
+  easton_heritage_day:"#c0392b", easton_winter_village:"#2a7fb0", live_at_the_falls:"#8a3d6b", spring_into_easton:"#4a8f3f" };
+var LG = "https://pabaconfest.com/wp-content/uploads/";
+var PROGRAMS = [
+ {id:"easton_main",           n:"Easton Main Street Initiative", meta:"20-block district", live:true, spots:16, logo:LG+"2026/08/logo_emsi.png"},
+ {id:"easton_fm",             n:"Easton Farmers' Market",        meta:"Weekly · est. 1752", live:true, spots:23, logo:LG+"2025/09/logo_efm.png"},
+ {id:"easton_public_market",  n:"Easton Public Market",          meta:"Indoor artisan market", live:true, spots:12, logo:LG+"2026/08/epm_logo_color-e1786366892537.png"},
+ {id:"easton_ambassadors",    n:"Easton Ambassadors",            meta:"Clean & safe downtown", live:true, spots:8, logo:LG+"2025/09/logo_ea.png"},
+ {id:"easton_garden_works",   n:"Easton Garden Works",           meta:"Urban gardens", live:true, spots:7, logo:LG+"2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png"},
+ {id:"west_ward",             n:"West Ward Community Initiative", meta:"Neighborhood market", live:true, spots:8, logo:LG+"2026/08/ww_logo-scaled-e1786367359948.png"},
+ {id:"pa_bacon_fest",         n:"PA Bacon Fest",                 meta:"Street festival · zones", live:true, spots:19, logo:LG+"2026/08/pabaconfest_logo_square-e1786367273579.png"},
+ {id:"easton_criterium",      n:"Easton Criterium",              meta:"Pro bike race", live:true, spots:9, logo:LG+"2026/08/ec_blackstacked_logo-e1786367288805.png"},
+ {id:"easton_heritage_day",   n:"Easton Heritage Day",           meta:"July heritage festival", live:true, spots:9, logo:LG+"2026/08/heritageday2022_logo_color-e1786367329513.png"},
+ {id:"easton_winter_village",  n:"Easton Winter Village",         meta:"Holiday market", live:true, spots:10, logo:LG+"2026/08/wintervillage-logo-trans-4c-e1786367715358.png"},
+ {id:"live_at_the_falls",     n:"Live At The Falls",             meta:"Riverfront concerts", live:true, spots:9, logo:LG+"2026/08/latf_logo_color-e1786367800123.jpg"},
+ {id:"spring_into_easton",    n:"Spring Into Easton",            meta:"Spring kickoff", live:true, spots:8, logo:LG+"2026/08/sie_logo_color-1-e1786367927958.png"}
 ];
+var PNAME = {}; PROGRAMS.forEach(function(p){ PNAME[p.id]=p.n; });
+
+// Single GEDP City Calendar — real 2025 dates, tagged by program, each row → its map.
+// Real 2026 Easton calendar — sourced from Business Bugler Summer 2026 (GEDP/EMSI)
+var CAL = [
+ {date:"2026-07-11", t:"274th Birthday Celebration (in the Circle)", prog:"easton_fm"},
+ {date:"2026-07-21", t:"Business Owner Breakfast Roundtable — Hologram Zoo LV", prog:"easton_main"},
+ {date:"2026-07-23", t:"Zucchini 500", prog:"west_ward"},
+ {date:"2026-07-24", t:"Plaza Party + Downtown Cash Mob (4th Fri)", prog:"easton_main"},
+ {date:"2026-08-01", t:"Peach Day", prog:"easton_fm"},
+ {date:"2026-08-08", t:"Easton Currents Music Series — Riverside Amphitheater", prog:"easton_main"},
+ {date:"2026-08-09", t:"Easton Vintage Market", prog:"easton_main"},
+ {date:"2026-08-15", t:"Tomato Day", prog:"easton_fm"},
+ {date:"2026-08-20", t:"Melon Madness", prog:"west_ward"},
+ {date:"2026-08-22", t:"Lafayette First-Years Take On Downtown (~700 frosh)", prog:"easton_main"},
+ {date:"2026-08-27", t:"Lafayette In Session — Lilly Moss @ Live At The Falls", prog:"live_at_the_falls"},
+ {date:"2026-08-28", t:"Plaza Party w/ Nite Liters", prog:"easton_main"},
+ {date:"2026-08-29", t:"The Self Care Social — Riverside Park (4 zones)", prog:"easton_main"},
+ {date:"2026-08-29", t:"Market After Hours w/ MINKA", prog:"easton_public_market"},
+ {date:"2026-09-03", t:"DEAL — Grateful Dead Cover Band @ Live At The Falls", prog:"live_at_the_falls"},
+ {date:"2026-09-05", t:"Funky Ferments Fest", prog:"easton_fm"},
+ {date:"2026-09-12", t:"Easton Currents Music Series — Riverside Amphitheater", prog:"easton_main"},
+ {date:"2026-09-13", t:"Easton Vintage Market", prog:"easton_main"},
+ {date:"2026-09-17", t:"Hispanic Cultural Day", prog:"west_ward"},
+ {date:"2026-09-25", t:"Plaza Party + Downtown Cash Mob (4th Fri)", prog:"easton_main"},
+ {date:"2026-09-26", t:"Hot Pepper Showdown", prog:"easton_fm"},
+ {date:"2026-09-26", t:"Taste of Bacon Fest @ State Theatre", prog:"pa_bacon_fest"},
+ {date:"2026-10-03", t:"Easton Garlic Fest (NO regular market)", prog:"easton_fm"},
+ {date:"2026-10-10", t:"Easton Currents Music Series — Riverside Amphitheater", prog:"easton_main"},
+ {date:"2026-10-11", t:"Easton Vintage Market", prog:"easton_main"},
+ {date:"2026-10-15", t:"Harvest Fest / Closing Day", prog:"west_ward"},
+ {date:"2026-10-17", t:"Apple Jam", prog:"easton_fm"},
+ {date:"2026-10-24", t:"Market After Hours — Freaky Deaky Halloween", prog:"easton_public_market"},
+ {date:"2026-10-31", t:"Pumpkins & Pooches", prog:"easton_fm"},
+ {date:"2026-11-07", t:"PA Bacon Fest — Day 1 (15th anniversary · zones B·A·C·O·N + Second St.)", prog:"pa_bacon_fest"},
+ {date:"2026-11-08", t:"PA Bacon Fest — Day 2", prog:"pa_bacon_fest"}
+];
+
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function initials(s){ return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
-document.getElementById('grid').innerHTML = EVENTS.map(function(e){
-  return '<a class="tile" href="festival_vendors.html?fest='+e.id+'">'+
-    (e.live?'<span class="live">LIVE MAP</span>':'<span class="soon">MAP →</span>')+
-    '<div class="mk" style="background:'+e.col+'">'+initials(e.n)+'</div>'+
-    '<b>'+esc(e.n)+'</b>'+
-    '<span class="go">'+(e.live?'Open vendor map →':'Open / build map →')+'</span></a>';
-}).join('');
+
+function renderTiles(){
+  var q=(document.getElementById('q').value||'').toLowerCase();
+  var list=PROGRAMS.filter(function(p){ return !q || (p.n+' '+p.meta).toLowerCase().indexOf(q)>=0; });
+  document.getElementById('grid').innerHTML = list.map(function(p){
+    var badge = p.live ? '<span class="badge live">LIVE MAP</span>' : '<span class="badge soon">MAP →</span>';
+    var meta = p.live ? ('▣ '+(p.spots||'')+' spots · '+esc(p.meta)) : esc(p.meta);
+    return '<a class="tile" href="festival_vendors.html?fest='+p.id+'">'+
+      (p.logo
+        ? '<div class="thumb white">'+badge+'<span class="mk">'+initials(p.n)+'</span><img class="lg" src="'+p.logo+'" alt="'+esc(p.n)+'" loading="lazy" onerror="this.style.display=\'none\'"></div>'
+        : '<div class="thumb" style="background:linear-gradient(135deg,#153042,'+(COLORS[p.id]||'#0f6f8a')+')">'+badge+'<span class="mk">'+initials(p.n)+'</span></div>')+
+      '<div class="tb"><b>'+esc(p.n)+'</b><div class="meta">'+meta+'</div><div class="go">'+(p.live?'Open live map →':'Open / build map →')+'</div></div></a>';
+  }).join('') || '<div class="empty">No programs match.</div>';
+}
+
+var CALFILTER='';
+function renderChips(){
+  var chips='<span class="chip'+(CALFILTER===''?' on':'')+'" onclick="pickCal(\'\')">All</span>';
+  // only programs that actually have calendar entries
+  var have={}; CAL.forEach(function(e){ have[e.prog]=1; });
+  PROGRAMS.forEach(function(p){ if(!have[p.id])return; chips+='<span class="chip'+(CALFILTER===p.id?' on':'')+'" onclick="pickCal(\''+p.id+'\')">'+esc(p.n)+'</span>'; });
+  document.getElementById('chips').innerHTML=chips;
+}
+function pickCal(id){ CALFILTER=id; renderChips(); renderCal(); }
+function renderCal(){
+  var rows=CAL.filter(function(e){ return !CALFILTER || e.prog===CALFILTER; }).map(function(e){
+    var d=new Date(e.date+'T12:00:00'); var m=d.toLocaleDateString('en-US',{month:'short'}); var n=d.getDate();
+    var col=COLORS[e.prog]||'#334155';
+    return '<a class="ev" href="festival_vendors.html?fest='+e.prog+'"><div class="d"><div class="m">'+m+'</div><div class="n">'+n+'</div></div>'+
+      '<div class="body"><b>'+esc(e.t)+'</b><small>'+esc(PNAME[e.prog]||'')+'</small></div>'+
+      '<span class="tag" style="background:'+col+'">'+esc((PNAME[e.prog]||'').split(' ')[0])+'</span><span class="arrow">→</span></a>';
+  }).join('');
+  document.getElementById('cal').innerHTML = rows || '<div class="empty">No events for that filter.</div>';
+}
+
+renderTiles(); renderChips(); renderCal();
 </script>
 </body></html>
