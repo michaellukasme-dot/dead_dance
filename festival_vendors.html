@@ -69,12 +69,29 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 #empty .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;max-width:380px;box-shadow:0 10px 30px rgba(20,26,34,.12)}
 #empty h2{margin:0 0 6px;font-size:19px}#empty p{color:var(--muted);font-size:14px;margin:0 0 14px}
 #empty a{display:inline-block;background:var(--teal);color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px 16px}
+/* ── Elegance pass: clean pins, hover labels, base toggle ── */
+.vpin{position:relative}
+.vdot{display:block;width:13px;height:13px;border-radius:50%;background:var(--c,#334155);border:2.5px solid #fff;box-shadow:0 1px 4px rgba(20,26,34,.4);cursor:pointer;transition:transform .12s ease}
+.vplabel{position:absolute;left:15px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #dde3ea;border-left:3px solid var(--c,#334155);border-radius:7px;padding:2px 8px;font:700 11px/1.25 -apple-system,system-ui,sans-serif;color:#1b2430;white-space:nowrap;box-shadow:0 3px 10px rgba(20,26,34,.16);opacity:0;pointer-events:none;transition:opacity .12s ease;display:none}
+.vpin:hover{z-index:1000 !important}
+.vpin:hover .vdot{transform:scale(1.4)}
+.vpin:hover .vplabel,.vpin.sel .vplabel{opacity:1;display:block}
+.vpin.sel{z-index:1001 !important}
+.vpin.sel .vdot{transform:scale(1.6);box-shadow:0 0 0 4px rgba(245,158,11,.42),0 2px 6px rgba(20,26,34,.45)}
+.zlabel{background:var(--zc,#153042);color:#fff;font:800 11px/1 -apple-system,system-ui,sans-serif;padding:4px 9px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(20,26,34,.3);letter-spacing:.3px}
+.mtoggle{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:800 12px/1 -apple-system,system-ui,sans-serif;color:var(--ink);box-shadow:0 4px 14px rgba(20,26,34,.16);cursor:pointer;display:flex;align-items:center;gap:7px}
+.mtoggle:hover{border-color:var(--teal)}
+.mtoggle .sw{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}
+.leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 12px 30px rgba(20,26,34,.24)}
+.leaflet-popup-content{margin:12px 13px}
+.leaflet-popup-tip{box-shadow:0 12px 30px rgba(20,26,34,.24)}
 .credit{position:absolute;right:8px;bottom:6px;z-index:1100;font-size:11px;color:#6b7684;background:#ffffffcc;border-radius:6px;padding:2px 7px}
 </style></head>
 <body>
 <div class="top"><div class="logo"><span class="b">◍</span>Vendor Map</div><span class="fname" id="fname"></span><a class="cta" href="festival_event_maker.html">Build one →</a></div>
 <div id="wrap">
   <div id="map"></div>
+  <button id="mapToggle" class="mtoggle" onclick="toggleBase()"><span class="sw"></span>Illustrated view</button>
   <div id="dir">
     <div class="dh"><span>Vendor Directory</span><span class="ct" id="vcount"></span><button class="tog" onclick="toggleDir()" aria-label="Collapse">▾</button></div>
     <div class="drow" id="daterow" style="display:none"><span class="dlab">Market day</span><select id="datepick" onchange="pickDate(this.value)"></select></div>
@@ -83,7 +100,7 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
     <div class="list" id="list"></div>
   </div>
   <div id="empty"><div class="card"><h2 id="emptyName">No vendor map yet</h2><p>This event hasn't published a vendor map. Build it on real coordinates in The Maker.</p><a href="festival_event_maker.html">Open The Maker →</a></div></div>
-  <div class="credit">Powered by StageFill · snaps to real coordinates</div>
+  <div class="credit">Powered by StageFill · © OpenStreetMap © CARTO</div>
 </div>
 
 <script>/* preview-webview shim: some embedded webviews inject a CommonJS module/exports,
@@ -550,6 +567,10 @@ function placeVendors(f){ if(!f.spine){ return; } var n=f.vendors.length, off=0.
 var FID = qp('fest') || 'easton_fm';
 var F = FESTS[FID];
 var map, MARKERS = {}, ACTIVE_CAT = '', SELDATE = '', PRESENT = null;
+var baseTiles, cutesyLayer, boundaryLayer, ILLUS = false;
+/* ── REAL BOOTH NUMBERS ── paste from the booth sheet: "Vendor name":"booth". Assumed fixed each
+   week. Only Aladdin is confirmed (from MarketSpread); the rest await Michael's hunt-and-peck. */
+var BOOTHS = { "Aladdin Restaurant":"75, 76" };
 document.getElementById('fname').textContent = (F && F.name) || NAMES[FID] || 'Festival';
 document.title = ((F && F.name) || NAMES[FID] || 'Vendor') + ' — Vendor Map';
 
@@ -561,30 +582,37 @@ function boot(){
     return;
   }
   F.vendors.forEach(function(v){ var x=VENDOR_XTRA[v.n]; if(x){ for(var k in x) v[k]=x[k]; } });  // merge registration payoff
+  F.vendors.forEach(function(v){ if(BOOTHS[v.n]) v.booth=BOOTHS[v.n]; });                          // merge real booth numbers
   placeVendors(F);
+  var fn=document.getElementById('fname'); if(fn) fn.textContent=F.name;
   map = L.map('map',{zoomControl:true,attributionControl:false});
   map.fitBounds(F.bbox);
-  // geo-bound cutesy art overlay — the same bbox → auto-snaps and holds on resize/zoom
+  // CIVIC BASE — real streets on a clean light basemap (Carto Positron): the pinstripe register
+  baseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    {maxZoom:20, subdomains:'abcd', crossOrigin:true}).addTo(map);
+  // footprint outline so the grounds read even on the real map
+  if(F.boundary){ boundaryLayer = L.polygon(F.boundary,{color:'#0b7f7c',weight:2,fill:false,opacity:.85,dashArray:'4 5'}).addTo(map); }
+  // ILLUSTRATED overlay (the fan skin) — built, OFF by default, toggled on demand
   try{
     var url = window.DDCutesyArt && DDCutesyArt.render(F.bbox, { title:F.name, boundary:F.boundary,
       containers:F.vendors.map(function(v){ return { corners:squareAround(v.lat,v.lng,0.00006), name:v.n }; }) }, F.theme);
-    if(url){ L.imageOverlay(url, F.bbox, {opacity:0.97, interactive:false}).addTo(map); }
-    else { L.rectangle(F.bbox,{color:'#2a8a4a',weight:1,fillColor:'#e7f0e9',fillOpacity:.5}).addTo(map); }
-  }catch(e){ L.rectangle(F.bbox,{color:'#2a8a4a',weight:1,fillColor:'#e7f0e9',fillOpacity:.5}).addTo(map); }
-  // vendor spot markers
+    if(url){ cutesyLayer = L.imageOverlay(url, F.bbox, {opacity:0.97, interactive:false}); }
+  }catch(e){}
+  // vendor pins — a clean dot; the name floats in on hover / when selected (scales to 70+ vendors)
   F.vendors.forEach(function(v,i){
     var color = CATCOLOR[v.c] || '#334155';
-    var icon = L.divIcon({className:'', html:'<div class="vlabel" id="lab'+i+'" style="border-left-color:'+color+'">'+esc(v.n)+'</div>', iconSize:null});
-    var m = L.marker([v.lat,v.lng],{icon:icon}).addTo(map);
+    var icon = L.divIcon({className:'', iconSize:[13,13], iconAnchor:[6,6],
+      html:'<div class="vpin" id="pin'+i+'" style="--c:'+color+'"><span class="vdot"></span><span class="vplabel">'+esc(v.n)+(v.booth?(' · '+esc(v.booth)):'')+'</span></div>'});
+    var m = L.marker([v.lat,v.lng],{icon:icon,riseOnHover:true}).addTo(map);
     m.bindPopup(vendorCard(v),{maxWidth:280});
     m.on('click',function(){ select(i,false); });
     MARKERS[i]=m;
   });
   // draw ZONE regions (street festival) — festival → zone → booth
   if(F.zones){ F.zones.forEach(function(z){
-    L.rectangle(z.bbox, {color:z.col, weight:2, fillColor:z.col, fillOpacity:0.10}).addTo(map).bindPopup('<b>'+esc(z.name)+'</b>');
+    L.rectangle(z.bbox, {color:z.col, weight:1.5, fillColor:z.col, fillOpacity:0.12, dashArray:'5 5'}).addTo(map).bindPopup('<b>'+esc(z.name)+'</b>');
     var cy=(z.bbox[0][0]+z.bbox[1][0])/2, cx=(z.bbox[0][1]+z.bbox[1][1])/2;
-    L.marker([cy,cx],{interactive:false,icon:L.divIcon({className:'',html:'<div style="background:'+z.col+';color:#fff;font:800 12px/1 -apple-system,system-ui,sans-serif;padding:4px 8px;border-radius:5px;white-space:nowrap;box-shadow:0 2px 5px rgba(0,0,0,.3)">'+esc(z.id)+'</div>',iconSize:null})}).addTo(map);
+    L.marker([cy,cx],{interactive:false,icon:L.divIcon({className:'',html:'<div class="zlabel" style="--zc:'+z.col+'">'+esc(z.id)+'</div>',iconSize:null})}).addTo(map);
   }); }
   buildCats();
   // per-week schedule → date picker (Farmers' Market swaps vendors by market day)
@@ -624,7 +652,7 @@ function renderList(){
     shown++;
     var color=CATCOLOR[v.c]||'#334155';
     var flags=(v.coupon?'<span class="cpn" title="Premium coupon">🎟</span>':'')+(v.premium?'<span class="prm" title="Premium placement">★</span>':'');
-    rows+='<div class="v" id="row'+i+'" onclick="select('+i+',true)"><div class="dot" style="background:'+color+'">'+initials(v.n)+'</div><div><b>'+esc(v.n)+flags+'</b><small>'+(v.zone?('Zone '+esc(v.zone)+' · '):'')+esc(kindOf(v))+' · '+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</small></div></div>';
+    rows+='<div class="v" id="row'+i+'" onclick="select('+i+',true)"><div class="dot" style="background:'+color+'">'+initials(v.n)+'</div><div><b>'+esc(v.n)+flags+'</b><small>'+(v.zone?('Zone '+esc(v.zone)+' · '):'')+(v.booth?('Booth '+esc(v.booth)+' · '):'')+esc(kindOf(v))+' · '+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</small></div></div>';
   });
   document.getElementById('list').innerHTML = rows || '<div style="padding:16px;color:#697586;font-size:13px">No vendors match.</div>';
   var tot = (F.schedule && SELDATE && PRESENT) ? Object.keys(PRESENT).length : F.vendors.length;
@@ -635,9 +663,15 @@ function select(i,fromList){
   var v=F.vendors[i]; if(!v) return;
   Array.prototype.forEach.call(document.querySelectorAll('#dir .v.sel'), function(el){ el.classList.remove('sel'); });
   var row=document.getElementById('row'+i); if(row){ row.classList.add('sel'); row.scrollIntoView({block:'nearest'}); }
-  try{ map.setView([v.lat,v.lng], Math.max(map.getZoom(),18), {animate:true}); }catch(e){}
-  var m=MARKERS[i]; if(m){ m.openPopup(); }
-  var lab=document.getElementById('lab'+i); if(lab){ lab.classList.remove('lit'); void lab.offsetWidth; lab.classList.add('lit'); }
+  Array.prototype.forEach.call(document.querySelectorAll('.vpin.sel'), function(el){ el.classList.remove('sel'); });
+  var pin=document.getElementById('pin'+i); if(pin){ pin.classList.add('sel'); }
+  try{ map.flyTo([v.lat,v.lng], Math.max(map.getZoom(),18), {duration:0.6}); }catch(e){}
+  var m=MARKERS[i]; if(m){ setTimeout(function(){ try{ m.openPopup(); }catch(e){} }, 320); }
+}
+function toggleBase(){
+  ILLUS=!ILLUS; var btn=document.getElementById('mapToggle');
+  if(ILLUS){ if(cutesyLayer) cutesyLayer.addTo(map); if(btn) btn.innerHTML='<span class="sw"></span>Map view'; }
+  else { if(cutesyLayer && map.hasLayer(cutesyLayer)) map.removeLayer(cutesyLayer); if(btn) btn.innerHTML='<span class="sw"></span>Illustrated view'; }
 }
 function toggleDir(){ document.getElementById('dir').classList.toggle('collapsed'); }
 
