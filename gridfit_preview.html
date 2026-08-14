@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Layout &amp; Revenue — GridFit</title>
+<meta name="theme-color" content="#0f1620">
+<!-- gridfit_preview.html — visual proof of DDGridFit: pack a space with booths of multiple sizes,
+     flip configurations, and watch the business model compute. Geo demo (Easton market block). -->
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<style>
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:var(--ink2);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:9px}
+.top .logo{font-weight:900;font-size:18px;display:flex;align-items:center;gap:8px}.top .logo .b{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:14px}
+.top .fname{color:#9fb0c2;font-weight:700;font-size:13px}
+#wrap{display:flex;height:calc(100% - 50px)}@media(max-width:820px){#wrap{flex-direction:column}}
+#map{flex:1;min-height:280px;background:#dfe6ee}
+#side{width:340px;max-width:100%;flex:none;border-left:1px solid var(--line);background:#fff;overflow:auto;padding:14px}
+@media(max-width:820px){#side{width:100%;border-left:0;border-top:1px solid var(--line)}}
+h2{font-size:15px;margin:0 0 8px}label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin:10px 0 4px}
+select,input{width:100%;font:inherit;border:1px solid var(--line);border-radius:9px;padding:9px 10px}select:focus,input:focus{outline:none;border-color:var(--teal)}
+.legend{display:flex;gap:12px;margin:10px 0 4px;font-size:12px;font-weight:700;color:var(--muted)}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.big{background:#f4f8fb;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+.big .r{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.big .r b{font-weight:800}
+.big .hd{font-weight:900;font-size:13px;margin-bottom:4px}
+.take{background:#e9faf4;border-color:#b7ead9}
+.note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+.count{font-weight:900;font-size:20px}
+</style></head>
+<body>
+<div class="top"><div class="logo"><span class="b">◍</span>GridFit</div><span class="fname">Layout &amp; revenue — booths inside the grounds</span></div>
+<div id="wrap">
+  <div id="map"></div>
+  <div id="side">
+    <h2>Configuration</h2>
+    <select id="cfg" onchange="draw()"></select>
+    <div class="legend"><span><span class="sw" style="background:#0fa3a0"></span>10×10</span><span><span class="sw" style="background:#f59e0b"></span>25×25</span><span><span class="sw" style="background:none;border:2px solid #d1477a"></span>premium</span></div>
+    <div><span class="count" id="cnt">—</span> <span style="color:var(--muted)">booths this layout</span></div>
+
+    <label>Booth fee — 10×10 ($/event)</label><input id="f10" type="number" value="40" oninput="calc()">
+    <label>Booth fee — 25×25 ($/event)</label><input id="f25" type="number" value="120" oninput="calc()">
+    <div class="grid2"><div><label>Events / season</label><input id="ev" type="number" value="26" oninput="calc()"></div><div><label>Ad unit ($/event)</label><input id="ad" type="number" value="150" oninput="calc()"></div></div>
+
+    <div class="big" id="model"></div>
+    <div class="big take" id="take"></div>
+    <div class="note" id="scale"></div>
+    <div class="note">Same engine runs <b>indoors</b> (floor plan) and <b>out</b> (grounds) — a bounded space is a bounded space. Demo grounds ≈ a market block; swap in any event's real coordinates.</div>
+  </div>
+</div>
+
+<script src="leaflet/leaflet.js"></script>
+<script src="dd_gridfit.js"></script>
+<script>
+// Demo market block near Easton Farmers' Market (~110ft x 310ft) — realistic booth counts to render.
+var GROUNDS = [[40.68990,-75.20640],[40.68990,-75.20600],[40.68905,-75.20600],[40.68905,-75.20640]];
+var SIZES=[{name:'10×10',w:10,d:10,fee:40},{name:'25×25',w:25,d:25,fee:120}];
+var LAYOUT = DDGridFit.layout(GROUNDS,{sizes:SIZES});
+var map = L.map('map',{zoomControl:true,attributionControl:false});
+L.polygon(GROUNDS,{color:'#2a8a4a',weight:2,fill:true,fillColor:'#eaf3ec',fillOpacity:.5}).addTo(map);
+map.fitBounds(GROUNDS); setTimeout(function(){ try{map.invalidateSize(); map.fitBounds(GROUNDS);}catch(e){} },200);
+var booths = L.layerGroup().addTo(map);
+
+document.getElementById('cfg').innerHTML = LAYOUT.configs.map(function(c,i){ return '<option value="'+i+'">'+c.name+' — '+c.total+' booths</option>'; }).join('');
+
+function curCfg(){ var i=+document.getElementById('cfg').value||0; return LAYOUT.configs[i]||LAYOUT.configs[0]; }
+function draw(){
+  booths.clearLayers(); var c=curCfg();
+  c.items.forEach(function(it){
+    var fill = it.type==='25×25' ? '#f59e0b' : '#0fa3a0';
+    L.polygon(it.corners,{ color: it.premium?'#d1477a':'#ffffff', weight: it.premium?2:1, fillColor:fill, fillOpacity:.75 })
+      .addTo(booths).bindPopup('<b>'+it.type+'</b>'+(it.premium?' · premium frontage':''));
+  });
+  document.getElementById('cnt').textContent = c.total;
+  calc();
+}
+function money(n){ return '$'+Math.round(n).toLocaleString(); }
+function calc(){
+  var pricing={ fees:{'10×10':+document.getElementById('f10').value||0,'25×25':+document.getElementById('f25').value||0},
+    events:+document.getElementById('ev').value||1, adPrice:+document.getElementById('ad').value||0 };
+  var m=DDGridFit.model(curCfg(), pricing);
+  var bt=Object.keys(m.byType).map(function(k){return k+': '+m.byType[k];}).join(' · ');
+  document.getElementById('model').innerHTML='<div class="hd">Per event</div>'+
+    '<div class="r"><span>Booths ('+bt+')</span><b>'+m.booths+'</b></div>'+
+    '<div class="r"><span>Premium frontage</span><b>'+m.premium_count+'</b></div>'+
+    '<div class="r"><span>Booth revenue</span><b>'+money(m.booth_gross_event)+'</b></div>'+
+    '<div class="r"><span>Proximity ads ('+m.ad_units+' units)</span><b>'+money(m.ad_revenue_event)+'</b></div>'+
+    '<div class="r"><span><b>Total / event</b></span><b>'+money(m.gross_event)+'</b></div>';
+  document.getElementById('take').innerHTML='<div class="hd">Season &amp; StageFill</div>'+
+    '<div class="r"><span>Gross / season</span><b>'+money(m.gross_season)+'</b></div>'+
+    '<div class="r"><span>StageFill take / event (6%)</span><b>'+money(m.stagefill_take_event)+'</b></div>'+
+    '<div class="r"><span><b>StageFill take / season</b></span><b>'+money(m.stagefill_take_season)+'</b></div>';
+}
+// full-footprint scale note (compute, don't draw — thousands of booths)
+try{
+  var EF=[[40.690458521435495,-75.20765901501589],[40.69044008853104,-75.20463241745338],[40.687997683592144,-75.20463241745338],[40.68776495920509,-75.20730348096488]];
+  var big=DDGridFit.layout(EF,{sizes:SIZES});
+  document.getElementById('scale').innerHTML='At the <b>full Easton Farmers’ Market footprint</b> ('+big.area_ft2.toLocaleString()+' ft²): up to <b>'+big.configs[0].total.toLocaleString()+'</b> × 10×10, or a mixed <b>'+big.configs[2].total.toLocaleString()+'</b>. (Real grounds exclude streets/water — draw the true boundary in The Maker.)';
+}catch(e){}
+draw();
+</script>
+</body></html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vendor Map</title>
+<meta name="theme-color" content="#0f1620">
+<!--
+  festival_vendors.html — VENDOR-GRANULARITY MAP, a reusable surface for %FESTIVAL%.
+  Geo-anchored cutesy art (DDCutesyArt → L.imageOverlay bound to the SAME bbox = auto-snaps, resize-safe).
+  Each vendor = a container placed on real coordinates; the searchable directory ILLUMINATES the exact spot.
+  Parameterized: ?fest=<id>  (seeded: easton_fm = Easton Farmers' Market, real coordinates).
+  Beats MarketSpread's map on the one thing it does worst: it does not break on resize/zoom.
+-->
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<style>
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:var(--ink2);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:9px;position:relative;z-index:1200}
+.top .logo{font-weight:900;font-size:18px;letter-spacing:-.4px;display:flex;align-items:center;gap:8px}
+.top .logo .b{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:14px}
+.top .fname{font-weight:700;color:#c7d0dc;font-size:13.5px;margin-left:2px}
+.top .cta{margin-left:auto;color:#9fb0c2;font-size:12.5px;font-weight:700;text-decoration:none}
+#wrap{position:absolute;inset:52px 0 0 0}
+#map{position:absolute;inset:0;background:#dfe6ee}
+/* Vendor directory panel (MarketSpread-style, but ours snaps) */
+#dir{position:absolute;top:12px;left:12px;width:300px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(20,26,34,.16);z-index:1100;display:flex;flex-direction:column;overflow:hidden}
+#dir .dh{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--line);font-weight:800;font-size:14px}
+#dir .dh .ct{margin-left:auto;font-size:11px;color:var(--muted);font-weight:700}
+#dir .dh .tog{border:0;background:#eef2f6;border-radius:8px;width:26px;height:26px;cursor:pointer;font-weight:800;color:var(--muted)}
+#dir .srch{padding:10px 12px;border-bottom:1px solid var(--line)}
+#dir input{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+#dir input:focus{outline:none;border-color:var(--teal)}
+#dir .cats{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 10px}
+#dir .cat{font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:999px;padding:5px 9px;cursor:pointer;color:var(--muted);background:#fff}
+#dir .cat.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+#dir .list{overflow:auto;flex:1}
+#dir .v{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+#dir .v:hover{background:#f4f8fb}
+#dir .v.sel{background:#e9faf4}
+#dir .dot{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:11px}
+#dir .v b{font-size:13.5px;font-weight:700;display:block}
+#dir .v small{font-size:11.5px;color:var(--muted)}
+#dir.collapsed .srch,#dir.collapsed .cats,#dir.collapsed .list{display:none}
+.leaflet-container{background:#dfe6ee}
+.vlabel{background:#fff;border:1px solid #c9d2dc;border-left-width:4px;border-radius:6px;padding:2px 6px;font:700 11px/1.2 -apple-system,system-ui,sans-serif;color:#1b2430;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.vlabel.lit{outline:3px solid var(--amber);outline-offset:1px;animation:pulse 1s ease-out 2}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.7)}100%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
+#empty{position:absolute;inset:0;display:none;place-items:center;z-index:1050;padding:24px;text-align:center}
+#empty .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;max-width:380px;box-shadow:0 10px 30px rgba(20,26,34,.12)}
+#empty h2{margin:0 0 6px;font-size:19px}#empty p{color:var(--muted);font-size:14px;margin:0 0 14px}
+#empty a{display:inline-block;background:var(--teal);color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px 16px}
+.credit{position:absolute;right:8px;bottom:6px;z-index:1100;font-size:11px;color:#6b7684;background:#ffffffcc;border-radius:6px;padding:2px 7px}
+</style></head>
+<body>
+<div class="top"><div class="logo"><span class="b">◍</span>Vendor Map</div><span class="fname" id="fname"></span><a class="cta" href="festival_event_maker.html">Build one →</a></div>
+<div id="wrap">
+  <div id="map"></div>
+  <div id="dir">
+    <div class="dh"><span>Vendor Directory</span><span class="ct" id="vcount"></span><button class="tog" onclick="toggleDir()" aria-label="Collapse">▾</button></div>
+    <div class="srch"><input id="q" placeholder="Search vendors or products…" oninput="renderList()"></div>
+    <div class="cats" id="cats"></div>
+    <div class="list" id="list"></div>
+  </div>
+  <div id="empty"><div class="card"><h2 id="emptyName">No vendor map yet</h2><p>This event hasn't published a vendor map. Build it on real coordinates in The Maker.</p><a href="festival_event_maker.html">Open The Maker →</a></div></div>
+  <div class="credit">Powered by StageFill · snaps to real coordinates</div>
+</div>
+
+<script src="leaflet/leaflet.js"></script>
+<script src="dd_cutesy_art.js"></script>
+<script>
+/* ---------- Festival registry (a surface for %FESTIVAL%) ---------- */
+var NAMES = { easton_fm:"Easton Farmers' Market", easton_main:"Easton Main Street", easton_public_market:"Easton Public Market",
+  easton_ambassadors:"Easton Ambassadors", easton_garden_works:"Easton Garden Works", west_ward:"West Ward Market",
+  pa_bacon_fest:"PA Bacon Fest", easton_criterium:"Easton Criterium", easton_heritage_day:"Easton Heritage Day",
+  easton_winter_village:"Easton Winter Village", live_at_the_falls:"Live At The Falls", spring_into_easton:"Spring Into Easton",
+  kota:"King of the Arts Festival" };
+
+var CATCOLOR = { "Farmer":"#2a8a4a", "Food":"#e0662e", "Beverages":"#0f6f8a", "Bakery":"#b07d17",
+  "Craft & Art":"#7a3cc0", "Specialty":"#0b7f7c", "Body":"#b8006e", "Merchandise":"#334155", "Sweets":"#d1477a" };
+
+var FESTS = {
+  easton_fm: {
+    name: "Easton Farmers' Market", theme: "market",
+    // bbox = [[swLat,swLng],[neLat,neLng]] — the real market footprint
+    bbox: [[40.68776495920509,-75.20766],[40.690458521435495,-75.20463241745338]],
+    boundary: [[40.690458521435495,-75.20765901501589],[40.69044008853104,-75.20463241745338],[40.687997683592144,-75.20463241745338],[40.68776495920509,-75.20730348096488]],
+    // vendors walk along the market row (spine), auto-placed inside the footprint
+    spine: [[40.68820,-75.20715],[40.68930,-75.20635],[40.69005,-75.20545],[40.69035,-75.20486]],
+    vendors: [
+      {n:"Aladdin Restaurant", c:"Food", p:"Mediterranean"},
+      {n:"Apple Ridge Farm", c:"Specialty", p:"Sourdough bread"},
+      {n:"Barley Creek Brewing & Distillery", c:"Beverages", p:"Beer, spirits"},
+      {n:"Bizzle's Bites", c:"Craft & Art", p:"Handmade goods"},
+      {n:"Breakaway Farms", c:"Farmer", p:"Pastured meats"},
+      {n:"Bright Path Brewing", c:"Beverages", p:"Craft beer"},
+      {n:"Cabbage Throw Farm", c:"Farmer", p:"Seasonal produce"},
+      {n:"The Bubbly Goat", c:"Specialty", p:"Goat-milk soaps"},
+      {n:"The Smokin' Pastry Company", c:"Bakery", p:"Pastries"},
+      {n:"Eclectic Collective", c:"Craft & Art", p:"Local art"},
+      {n:"Spectacular Coffee Roasters", c:"Beverages", p:"Coffee"},
+      {n:"NaVON Lotions & Body Works", c:"Body", p:"Lotions, balms"},
+      {n:"Green Vida Co", c:"Food", p:"Plant-based"},
+      {n:"Terra de Fuego", c:"Food", p:"Empanadas"},
+      {n:"Sam Rocco's Treats", c:"Sweets", p:"Confections"},
+      {n:"Stehly's Bakery", c:"Bakery", p:"Breads, rolls"},
+      {n:"Lis Forno", c:"Bakery", p:"Wood-fired bread"},
+      {n:"Easton Candle Co", c:"Merchandise", p:"Candles"}
+    ]
+  }
+};
+
+/* ---------- helpers ---------- */
+function qp(k){ return new URLSearchParams(location.search).get(k); }
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function initials(s){ return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+// walk a fraction f in [0,1] along the polyline spine
+function ptAlong(spine,f){ var segs=spine.length-1; var s=Math.min(segs-1,Math.floor(f*segs)); var lt=(f*segs)-s; var a=spine[s],b=spine[s+1]; return [a[0]+(b[0]-a[0])*lt, a[1]+(b[1]-a[1])*lt]; }
+// perpendicular unit (approx, small-angle) to the local spine direction
+function perpAt(spine,f){ var segs=spine.length-1; var s=Math.min(segs-1,Math.floor(f*segs)); var a=spine[s],b=spine[s+1]; var dLat=b[0]-a[0], dLng=b[1]-a[1]; var m=Math.sqrt(dLat*dLat+dLng*dLng)||1; return [-dLng/m, dLat/m]; }
+function placeVendors(f){ var n=f.vendors.length, off=0.00007;
+  f.vendors.forEach(function(v,i){ var t=(i+0.5)/n; var base=ptAlong(f.spine,t); var pp=perpAt(f.spine,t); var side=(i%2?1:-1);
+    v.lat=base[0]+pp[0]*off*side; v.lng=base[1]+pp[1]*off*side; }); }
+
+/* ---------- state ---------- */
+var FID = qp('fest') || 'easton_fm';
+var F = FESTS[FID];
+var map, MARKERS = {}, ACTIVE_CAT = '';
+document.getElementById('fname').textContent = (F && F.name) || NAMES[FID] || 'Festival';
+document.title = ((F && F.name) || NAMES[FID] || 'Vendor') + ' — Vendor Map';
+
+function boot(){
+  if(!F || !F.vendors || !F.vendors.length){ // unseeded fest → honest empty state
+    document.getElementById('dir').style.display='none';
+    document.getElementById('emptyName').textContent = (NAMES[FID]||'This event');
+    document.getElementById('empty').style.display='grid';
+    return;
+  }
+  placeVendors(F);
+  map = L.map('map',{zoomControl:true,attributionControl:false});
+  map.fitBounds(F.bbox);
+  // geo-bound cutesy art overlay — the same bbox → auto-snaps and holds on resize/zoom
+  try{
+    var url = window.DDCutesyArt && DDCutesyArt.render(F.bbox, { title:F.name, boundary:F.boundary,
+      containers:F.vendors.map(function(v){ return { corners:squareAround(v.lat,v.lng,0.00006), name:v.n }; }) }, F.theme);
+    if(url){ L.imageOverlay(url, F.bbox, {opacity:0.97, interactive:false}).addTo(map); }
+    else { L.rectangle(F.bbox,{color:'#2a8a4a',weight:1,fillColor:'#e7f0e9',fillOpacity:.5}).addTo(map); }
+  }catch(e){ L.rectangle(F.bbox,{color:'#2a8a4a',weight:1,fillColor:'#e7f0e9',fillOpacity:.5}).addTo(map); }
+  // vendor spot markers
+  F.vendors.forEach(function(v,i){
+    var color = CATCOLOR[v.c] || '#334155';
+    var icon = L.divIcon({className:'', html:'<div class="vlabel" id="lab'+i+'" style="border-left-color:'+color+'">'+esc(v.n)+'</div>', iconSize:null});
+    var m = L.marker([v.lat,v.lng],{icon:icon}).addTo(map);
+    m.bindPopup('<b>'+esc(v.n)+'</b><br><span style="color:#697586">'+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</span>');
+    m.on('click',function(){ select(i,false); });
+    MARKERS[i]=m;
+  });
+  buildCats(); renderList();
+  window.addEventListener('resize', function(){ setTimeout(function(){ try{ map.invalidateSize(); map.fitBounds(F.bbox,{animate:false}); }catch(e){} }, 120); });
+}
+function squareAround(lat,lng,d){ return [[lat+d,lng-d],[lat+d,lng+d],[lat-d,lng+d],[lat-d,lng-d]]; }
+
+function buildCats(){ var cats=['All']; F.vendors.forEach(function(v){ if(cats.indexOf(v.c)<0)cats.push(v.c); });
+  document.getElementById('cats').innerHTML = cats.map(function(c){ var v=(c==='All'?'':c); return '<span class="cat'+((ACTIVE_CAT===v)?' on':'')+'" onclick="pickCat(\''+v+'\')">'+esc(c)+'</span>'; }).join(''); }
+function pickCat(c){ ACTIVE_CAT=c; buildCats(); renderList(); }
+
+function renderList(){
+  var q=(document.getElementById('q').value||'').toLowerCase();
+  var rows=''; var shown=0;
+  F.vendors.forEach(function(v,i){
+    if(ACTIVE_CAT && v.c!==ACTIVE_CAT) return;
+    if(q && (v.n+' '+v.c+' '+(v.p||'')).toLowerCase().indexOf(q)<0) return;
+    shown++;
+    var color=CATCOLOR[v.c]||'#334155';
+    rows+='<div class="v" id="row'+i+'" onclick="select('+i+',true)"><div class="dot" style="background:'+color+'">'+initials(v.n)+'</div><div><b>'+esc(v.n)+'</b><small>'+esc(v.c)+(v.p?(' · '+esc(v.p)):'')+'</small></div></div>';
+  });
+  document.getElementById('list').innerHTML = rows || '<div style="padding:16px;color:#697586;font-size:13px">No vendors match.</div>';
+  document.getElementById('vcount').textContent = shown+' / '+F.vendors.length;
+}
+
+function select(i,fromList){
+  var v=F.vendors[i]; if(!v) return;
+  Array.prototype.forEach.call(document.querySelectorAll('#dir .v.sel'), function(el){ el.classList.remove('sel'); });
+  var row=document.getElementById('row'+i); if(row){ row.classList.add('sel'); row.scrollIntoView({block:'nearest'}); }
+  try{ map.setView([v.lat,v.lng], Math.max(map.getZoom(),18), {animate:true}); }catch(e){}
+  var m=MARKERS[i]; if(m){ m.openPopup(); }
+  var lab=document.getElementById('lab'+i); if(lab){ lab.classList.remove('lit'); void lab.offsetWidth; lab.classList.add('lit'); }
+}
+function toggleDir(){ document.getElementById('dir').classList.toggle('collapsed'); }
+
+boot();
+</script>
+</body></html>

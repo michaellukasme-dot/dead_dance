@@ -1139,5 +1139,44 @@ window.mkrCutesyGen=function(theme){ var pk=document.getElementById('cutesyPick'
 
 window.addEventListener('load',function(){ emCats(); initMap(); emLoad(); emQR(); rebuildSections(); renderOverlays(); renderOvList(); redrawAllAreas(); renderAreas(); setTimeout(function(){ try{ map.invalidateSize(); frameGrounds(); }catch(e){} },320); });
 </script>
+
+<!-- ===== Self-serve Edit ⇄ View Map loop: see progress anytime · toggle cutesy · publish ===== -->
+<div id="mkrDock" style="position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9000;display:flex;gap:8px;align-items:center;background:#ffffffee;border:1px solid #e6e0f0;border-radius:16px;box-shadow:0 12px 34px #0005;padding:8px;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)">
+  <button onclick="mkrViewMap()" style="border:0;background:#5a2e86;color:#fff;border-radius:12px;padding:11px 16px;font-weight:900;font-size:14px;cursor:pointer">👁 View Map</button>
+  <button id="mkrCutesyBtn" onclick="mkrCutesyToggle()" style="border:1.5px solid #e6e0f0;background:#faf7ff;color:#5a2e86;border-radius:12px;padding:11px 14px;font-weight:800;font-size:13.5px;cursor:pointer">🎨 Cutesy</button>
+  <button onclick="mkrPublish()" style="border:0;background:#b07d17;color:#fff;border-radius:12px;padding:11px 16px;font-weight:900;font-size:14px;cursor:pointer">✅ Publish</button>
+</div>
+<script>
+/* View Map loop — additive, reuses the Maker's own render/cutesy/publish. Never redefines existing state. */
+window.mkrViewMap=function(){
+  try{ if(typeof emSave==='function') emSave(); }catch(e){}
+  try{ if(typeof emTab==='function') emTab('cur_map'); }catch(e){}
+  setTimeout(function(){
+    try{ if(window.map && map.invalidateSize) map.invalidateSize(); }catch(e){}   // the fix for "can't see map"
+    try{ if(typeof rebuildSections==='function') rebuildSections(); }catch(e){}
+    try{ if(typeof redrawAllAreas==='function') redrawAllAreas(); }catch(e){}
+    try{ if(typeof renderAreas==='function') renderAreas(); }catch(e){}
+    try{ if(typeof paintCenter==='function') paintCenter(); }catch(e){}
+    try{ if(window.L && window.map && state && state.center){ if(window.centerMarker){ window.centerMarker.setLatLng(state.center); } else { window.centerMarker=L.marker(state.center).addTo(map).bindPopup('📍 Event center'); } } }catch(e){}
+    try{ if(typeof frameGrounds==='function') frameGrounds(); }catch(e){}
+    try{ if(typeof toast==='function') toast('🗺 Your map so far — keep editing, tap View Map anytime.'); }catch(e){}
+  }, 220);
+};
+window.mkrCutesyToggle=function(){
+  try{ if(typeof emTab==='function') emTab('cur_map'); }catch(e){}
+  var btn=document.getElementById('mkrCutesyBtn');
+  if(window._cutesyOn && window._cutesyLayer && window.map){
+    try{ map.removeLayer(window._cutesyLayer); }catch(e){}
+    window._cutesyOn=false;
+    var p=document.getElementById('cutesyPill'); if(p)p.classList.remove('on');
+    if(btn){ btn.style.background='#faf7ff'; }
+    try{ if(typeof toast==='function') toast('Cutesy off — plain map.'); }catch(e){}
+  } else {
+    if(btn){ btn.style.background='#efe6fb'; }
+    try{ if(typeof mkrCutesyChooser==='function') mkrCutesyChooser(); else if(typeof mkrCutesyGen==='function') mkrCutesyGen(state&&state.cutesyTheme||'market'); }catch(e){ try{toast('Draw your grounds first.');}catch(_){} }
+  }
+};
+window.mkrPublish=function(){ try{ if(typeof emPublish==='function'){ emPublish(); } else { toast('Publish not ready.'); } }catch(e){ try{toast('Publish not ready yet.');}catch(_){} } };
+</script>
 </body>
 </html>

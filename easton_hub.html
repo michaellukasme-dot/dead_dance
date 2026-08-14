@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Easton — Events & Markets</title>
+<meta name="theme-color" content="#0f1620">
+<!-- easton_hub.html — the GEDP event grid. Each tile links to that event's vendor-granularity map. -->
+<style>
+:root{--ink:#141a22;--bg:#f6f8fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#f59e0b;--ink2:#0f1620}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:var(--ink2);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:9px}
+.top .logo{font-weight:900;font-size:19px;letter-spacing:-.4px;display:flex;align-items:center;gap:8px}
+.top .logo .b{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:14px}
+.top .logo span{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.sub{background:radial-gradient(120% 120% at 85% -20%,#153042,#0f1620);color:#fff;padding:22px 18px}
+.sub .w{max-width:1060px;margin:0 auto}.sub h1{margin:0 0 4px;font-size:23px;letter-spacing:-.5px}.sub p{margin:0;color:#9fb0c2;font-size:13.5px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1060px;margin:0 auto;padding:22px 18px 40px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.tile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 16px;text-decoration:none;color:var(--ink);transition:transform .15s,border-color .15s,box-shadow .15s;position:relative}
+.tile:hover{transform:translateY(-4px);border-color:var(--teal);box-shadow:0 10px 26px rgba(20,26,34,.10)}
+.tile .mk{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:20px;letter-spacing:.5px}
+.tile b{font-size:14.5px;font-weight:800;line-height:1.2}
+.tile .go{font-size:12px;font-weight:800;color:var(--teal-d)}
+.tile .live{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:900;letter-spacing:.5px;background:#e9faf4;color:#0b7f7c;border:1px solid #b7ead9;border-radius:999px;padding:3px 7px}
+.tile .soon{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:800;letter-spacing:.4px;background:#f4f6f8;color:#8a97a7;border:1px solid var(--line);border-radius:999px;padding:3px 7px}
+footer{color:#8a97a7;padding:0 18px 28px;font-size:12px;text-align:center}
+</style></head>
+<body>
+<div class="top"><div class="logo"><span class="b">◍</span>Easton <span>Powered by StageFill</span></div></div>
+<div class="sub"><div class="w"><h1>Easton — Markets, Festivals &amp; Events</h1><p>Every program of the Greater Easton Development Partnership. Tap any one to open its live vendor map.</p></div></div>
+<div class="grid" id="grid"></div>
+<footer>Separate programs, one Easton — connected via the GEDP. Vendor maps snap to real coordinates.</footer>
+<script>
+var EVENTS=[
+ {id:"easton_main",           n:"Easton Main Street Initiative", col:"#2f3e73", live:false},
+ {id:"easton_fm",             n:"Easton Farmers' Market",        col:"#b6c33a", live:true},
+ {id:"easton_public_market",  n:"Easton Public Market",          col:"#c3d63a", live:false},
+ {id:"easton_ambassadors",    n:"Easton Ambassadors",            col:"#7a1f2b", live:false},
+ {id:"easton_garden_works",   n:"Easton Garden Works",           col:"#3f8f4a", live:false},
+ {id:"west_ward",             n:"West Ward Community Initiative", col:"#0f6f8a", live:false},
+ {id:"pa_bacon_fest",         n:"PA Bacon Fest",                 col:"#3b3f8f", live:false},
+ {id:"easton_criterium",      n:"Easton Criterium",              col:"#1b2430", live:false},
+ {id:"easton_heritage_day",   n:"Easton Heritage Day",           col:"#c0392b", live:false},
+ {id:"easton_winter_village", n:"Easton Winter Village",         col:"#2a7fb0", live:false},
+ {id:"live_at_the_falls",     n:"Live At The Falls",             col:"#8a3d6b", live:false},
+ {id:"spring_into_easton",    n:"Spring Into Easton",            col:"#4a8f3f", live:false}
+];
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function initials(s){ return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+document.getElementById('grid').innerHTML = EVENTS.map(function(e){
+  return '<a class="tile" href="festival_vendors.html?fest='+e.id+'">'+
+    (e.live?'<span class="live">LIVE MAP</span>':'<span class="soon">MAP →</span>')+
+    '<div class="mk" style="background:'+e.col+'">'+initials(e.n)+'</div>'+
+    '<b>'+esc(e.n)+'</b>'+
+    '<span class="go">'+(e.live?'Open vendor map →':'Open / build map →')+'</span></a>';
+}).join('');
+</script>
+</body></html>
