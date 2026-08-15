@@ -125,7 +125,8 @@ var CATCOLOR = { "Farmer":"#2a8a4a", "Food":"#e0662e", "Beverages":"#0f6f8a", "B
   "Music / Stage":"#7a1f2b", "Fixed Retail":"#4a5568", "Food Truck":"#c05621",
   "Move / Fitness":"#2f855a", "Glow / Beauty":"#b83280", "Nourish":"#b7791f", "Live Well":"#2c7a7b",
   "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#7a3cc0", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568",
-  "Trail / Path":"#2f7d5a", "Park / Green":"#3f8f4a", "Rec Facility":"#0b7f7c", "Sponsor":"#8a5a00", "Restroom":"#5b6b7a" };
+  "Trail / Path":"#2f7d5a", "Park / Green":"#3f8f4a", "Rec Facility":"#0b7f7c", "Sponsor":"#8a5a00", "Restroom":"#5b6b7a",
+  "Baseball Field":"#b5651d", "Playground":"#c05299", "Pool":"#2a7fb0", "Sports Court":"#6b8e23", "Dog Park":"#7a6a3a" };
 var KINDLABEL = { fixed:"Storefront", street:"Stall", truck:"Truck", tent:"Tent", stage:"Stage", path:"Trail" };  // fixed vs temporary vs stage vs linear
 function kindOf(v){ return KINDLABEL[(v&&v.k)||'street']||'Stall'; }
 // Per-entity install identity — each fest's ORIGINAL logo becomes its home-screen app icon.
@@ -313,7 +314,9 @@ var FESTS = {
       {n:"Easton Highline", c:"Trail / Path", p:"Elevated paved trail · connects to the 144-mi D&L Trail (5 counties)", k:"path", spanCity:true, lat:40.68705, lng:-75.214, path:[[40.6868,-75.2105],[40.687,-75.213],[40.68715,-75.2152],[40.687,-75.2166]]},
       {n:"Scott Park", c:"Park / Green", p:"Riverfront green · Farmers’ Market · Live at the Falls", k:"tent", lat:40.6888, lng:-75.2056},
       {n:"Karl Stirner Arts Trail", c:"Trail / Path", p:"Paved · walk · skate · bike · along Bushkill Creek", k:"path", lat:40.6934, lng:-75.2072, path:[[40.692,-75.2044],[40.6928,-75.206],[40.6934,-75.2076],[40.6938,-75.2096]]},
-      {n:"Eddyside Pool", c:"Rec Facility", p:"Public pool · Riverside Park", k:"tent", lat:40.6867, lng:-75.2063}
+      {n:"Eddyside Pool", c:"Pool", p:"Public pool · Riverside Park", k:"tent", lat:40.6867, lng:-75.2063},
+      {n:"Scott Park Playground", c:"Playground", p:"Kids play area", k:"tent", lat:40.6893, lng:-75.206},
+      {n:"Riverside Park Playground", c:"Playground", p:"Kids play area", k:"tent", lat:40.68755, lng:-75.207}
     ]
   },
   easton_public_market: {
