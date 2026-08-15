@@ -1,0 +1,29 @@
+{
+  "name": "Easton Winter Village",
+  "short_name": "Winter Vlg",
+  "start_url": "../festival_vendors.html?fest=easton_winter_village",
+  "scope": "../",
+  "id": "/easton_winter_village",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f1620",
+  "icons": [
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/wintervillage-logo-trans-4c-e1786367715358.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/wintervillage-logo-trans-4c-e1786367715358.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/wintervillage-logo-trans-4c-e1786367715358.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

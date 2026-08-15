@@ -1,0 +1,29 @@
+{
+  "name": "Easton Garden Works",
+  "short_name": "Garden Works",
+  "start_url": "../festival_vendors.html?fest=easton_garden_works",
+  "scope": "../",
+  "id": "/easton_garden_works",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f1620",
+  "icons": [
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

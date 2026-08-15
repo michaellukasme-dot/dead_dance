@@ -1,0 +1,29 @@
+{
+  "name": "West Ward Market",
+  "short_name": "West Ward",
+  "start_url": "../festival_vendors.html?fest=west_ward",
+  "scope": "../",
+  "id": "/west_ward",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f1620",
+  "icons": [
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/ww_logo-scaled-e1786367359948.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/ww_logo-scaled-e1786367359948.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/ww_logo-scaled-e1786367359948.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

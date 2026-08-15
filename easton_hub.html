@@ -57,6 +57,7 @@ footer{color:#8a97a7;padding:6px 18px 30px;font-size:12px;text-align:center;max-
 .fd span{display:block;color:#697586;font-size:12.5px;margin-top:3px}
 </style></head>
 <body>
+<script src="dd_entity_manifest.js"></script>
 <div class="top"><div class="logo"><span class="b">◍</span>Easton <span>Powered by StageFill</span></div></div>
 <div class="hero">
   <h1>Explore Easton</h1>
@@ -174,5 +175,6 @@ function renderCal(){
 }
 
 renderTiles(); renderChips(); renderCal();
+if(window.DDEntityManifest){ DDEntityManifest.apply({ name:'Explore Easton', icon:LG+'2026/08/logo_emsi.png', manifest:'manifests/easton_hub.webmanifest', theme:'#0f6f8a', title:'Explore Easton · StageFill' }); }
 </script>
 </body></html>

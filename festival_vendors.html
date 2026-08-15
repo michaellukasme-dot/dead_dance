@@ -111,6 +111,7 @@ window.__m=window.module;window.__e=window.exports;try{window.module=undefined;w
 <script>try{window.module=window.__m;window.exports=window.__e;}catch(_){}
 if(typeof L==='undefined'&&window.__e&&window.__e.map){window.L=window.__e;}</script>
 <script src="dd_cutesy_art.js"></script>
+<script src="dd_entity_manifest.js"></script>
 <script>
 /* ---------- Festival registry (a surface for %FESTIVAL%) ---------- */
 var NAMES = { easton_fm:"Easton Farmers' Market", easton_main:"Easton Main Street", easton_public_market:"Easton Public Market",
@@ -123,9 +124,13 @@ var CATCOLOR = { "Farmer":"#2a8a4a", "Food":"#e0662e", "Beverages":"#0f6f8a", "B
   "Craft & Art":"#7a3cc0", "Specialty":"#0b7f7c", "Body":"#b8006e", "Merchandise":"#334155", "Sweets":"#d1477a",
   "Music / Stage":"#7a1f2b", "Fixed Retail":"#4a5568", "Food Truck":"#c05621",
   "Move / Fitness":"#2f855a", "Glow / Beauty":"#b83280", "Nourish":"#b7791f", "Live Well":"#2c7a7b",
-  "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#7a3cc0", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568" };
-var KINDLABEL = { fixed:"Storefront", street:"Stall", truck:"Truck", tent:"Tent", stage:"Stage" };  // fixed vs temporary vs stage
+  "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#7a3cc0", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568",
+  "Trail / Path":"#2f7d5a", "Park / Green":"#3f8f4a", "Rec Facility":"#0b7f7c" };
+var KINDLABEL = { fixed:"Storefront", street:"Stall", truck:"Truck", tent:"Tent", stage:"Stage", path:"Trail" };  // fixed vs temporary vs stage vs linear
 function kindOf(v){ return KINDLABEL[(v&&v.k)||'street']||'Stall'; }
+// Per-entity install identity — each fest's ORIGINAL logo becomes its home-screen app icon.
+var LG_E="https://pabaconfest.com/wp-content/uploads/";
+var ELOGO={ gedp:LG_E+"2026/08/logo_emsi.png", easton_main:LG_E+"2026/08/logo_emsi.png", easton_fm:LG_E+"2025/09/logo_efm.png", easton_public_market:LG_E+"2026/08/epm_logo_color-e1786366892537.png", easton_ambassadors:LG_E+"2025/09/logo_ea.png", easton_garden_works:LG_E+"2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png", west_ward:LG_E+"2026/08/ww_logo-scaled-e1786367359948.png", pa_bacon_fest:LG_E+"2026/08/pabaconfest_logo_square-e1786367273579.png", easton_criterium:LG_E+"2026/08/ec_blackstacked_logo-e1786367288805.png", easton_heritage_day:LG_E+"2026/08/heritageday2022_logo_color-e1786367329513.png", easton_winter_village:LG_E+"2026/08/wintervillage-logo-trans-4c-e1786367715358.png", live_at_the_falls:LG_E+"2026/08/latf_logo_color-e1786367800123.jpg", spring_into_easton:LG_E+"2026/08/sie_logo_color-1-e1786367927958.png", easton_winter_market:LG_E+"2025/09/logo_efm.png", self_care_social:LG_E+"2026/08/logo_emsi.png" };
 
 // VENDOR REGISTRATION payoff — logo + proximity ad + premium coupon + "sell right here".
 // Keyed by vendor name; merged onto matching vendors at load. (In production this is what a
@@ -231,7 +236,8 @@ var FESTS = {
       {n:"Tolino Vineyards", c:"Beverages"},
       {n:"Twin Maple Farms", c:"Farmer"},
       {n:"Wild for Salmon", c:"Fisher/Seafood"},
-      {n:"Zekraft", c:"Food Cart"}
+      {n:"Zekraft", c:"Food Cart"},
+      {n:"Scott Park Riverfront Path", c:"Trail / Path", p:"Paved · walk · skate · bike · along the river", k:"path", lat:40.6889, lng:-75.2056, path:[[40.6876,-75.2052],[40.6882,-75.2054],[40.6889,-75.2056],[40.6896,-75.20575],[40.6903,-75.20585]]}
     ]
   },
   easton_main: {
@@ -291,7 +297,7 @@ var FESTS = {
       {n:"Easton Public Market", c:"Fixed Retail", p:"325 Northampton · indoor artisan market", k:"fixed", lat:40.691, lng:-75.2088},
       {n:"State Theatre", c:"Music / Stage", p:"453 Northampton · Taste of Bacon Fest", k:"stage", lat:40.6911, lng:-75.2105},
       {n:"Scott Park — Live At The Falls", c:"Music / Stage", p:"Riverfront concerts · Thursdays", k:"stage", lat:40.6885, lng:-75.2056},
-      {n:"Riverside Park", c:"Move / Fitness", p:"Self Care Social · Easton Currents", k:"tent", lat:40.687, lng:-75.208},
+      {n:"Riverside Park", c:"Park / Green", p:"Self Care Social · Easton Currents", k:"tent", lat:40.687, lng:-75.208},
       {n:"West Ward Market", c:"Farmer", p:"Neighborhood market", k:"tent", lat:40.6905, lng:-75.2145},
       {n:"Easton Garden Works", c:"Farmer", p:"Urban gardens · tool library", k:"street", lat:40.6915, lng:-75.2135},
       {n:"Easton Ambassadors HQ", c:"Specialty", p:"Clean & safe · Community Event Cart", k:"fixed", lat:40.6914, lng:-75.2095},
@@ -300,7 +306,12 @@ var FESTS = {
       {n:"Crayola Experience", c:"Specialty", p:"30 Centre Sq · family attraction", k:"fixed", lat:40.69135, lng:-75.2093},
       {n:"PA Bacon Fest — Centre Sq zones", c:"Food Truck", p:"Nov 7-8 · zones B·A·C·O·N + Second St", k:"truck", lat:40.6915, lng:-75.2088},
       {n:"Lafayette College — College Hill", c:"Music / Stage", p:"Aug 22 first-years downtown", k:"stage", lat:40.6954, lng:-75.2095},
-      {n:"Nurture Nature Center", c:"Specialty", p:"South Side · environmental education", k:"fixed", lat:40.6895, lng:-75.207}
+      {n:"Nurture Nature Center", c:"Specialty", p:"South Side · environmental education", k:"fixed", lat:40.6895, lng:-75.207},
+      {n:"Scott Park Riverfront Path", c:"Trail / Path", p:"Paved · walk · skate · bike · along the river", k:"path", lat:40.6889, lng:-75.2056, path:[[40.6876,-75.2052],[40.6882,-75.2054],[40.6889,-75.2056],[40.6896,-75.20575],[40.6903,-75.20585]]},
+      {n:"Easton Highline", c:"Trail / Path", p:"Elevated paved trail · connects to the 144-mi D&L Trail (5 counties)", k:"path", spanCity:true, lat:40.68705, lng:-75.214, path:[[40.6868,-75.2105],[40.687,-75.213],[40.68715,-75.2152],[40.687,-75.2166]]},
+      {n:"Scott Park", c:"Park / Green", p:"Riverfront green · Farmers’ Market · Live at the Falls", k:"tent", lat:40.6888, lng:-75.2056},
+      {n:"Karl Stirner Arts Trail", c:"Trail / Path", p:"Paved · walk · skate · bike · along Bushkill Creek", k:"path", lat:40.6934, lng:-75.2072, path:[[40.692,-75.2044],[40.6928,-75.206],[40.6934,-75.2076],[40.6938,-75.2096]]},
+      {n:"Eddyside Pool", c:"Rec Facility", p:"Public pool · Riverside Park", k:"tent", lat:40.6867, lng:-75.2063}
     ]
   },
   easton_public_market: {
@@ -566,15 +577,68 @@ function placeVendors(f){ if(!f.spine){ return; } var n=f.vendors.length, off=0.
 /* ---------- state ---------- */
 var FID = qp('fest') || 'easton_fm';
 var F = FESTS[FID];
-var map, MARKERS = {}, ACTIVE_CAT = '', SELDATE = '', PRESENT = null;
+var map, MARKERS = {}, PATHLAYERS = {}, ACTIVE_CAT = '', SELDATE = '', PRESENT = null;
 var baseTiles, cutesyLayer, boundaryLayer, ILLUS = false;
 /* ── REAL BOOTH NUMBERS ── paste from the booth sheet: "Vendor name":"booth". Assumed fixed each
    week. Only Aladdin is confirmed (from MarketSpread); the rest await Michael's hunt-and-peck. */
-var BOOTHS = { "Aladdin Restaurant":"75, 76" };
+var BOOTHS = {
+  "Aladdin Restaurant":"75, 76",
+  "Apple Ridge Farm":"24",
+  "Barley Creek Brewing and Distillery":"50",
+  "Bizzle's Bites":"77",
+  "Breakaway Farms":"9, 10, 11, 12, 13",
+  "Bright Path Brewing":"37",
+  "Bussin' Butters":"35",
+  "Cabbage Throw Farm LLC":"69, 70",
+  "Collective Culture":"25",
+  "Cotton Cattle Company":"67,68",
+  "Cuz'n Vinny's Homemade Pasta":"81",
+  "Easton Candle Co":"84",
+  "Easton Salsa Co.":"72",
+  "Eclectic Collective":"85",
+  "Elm Hill Vineyard & Winery":"15",
+  "Funny Farm Apiaries":"62, 63",
+  "Green Vida Co.":"52",
+  "High Point Kombucha":"73",
+  "I See Spain":"54",
+  "Jersey Pickles":"6, 7",
+  "Lis Forno":"43",
+  "Love The Soup":"78",
+  "Mattie's Strudel Haus":"58",
+  "Mia & Maddie's Bakery":"8",
+  "Minsi Mountain Flower Farm":"20",
+  "Mona's Bakery, LLC":"34",
+  "NuVGN Soaps and Body Works":"85",
+  "Nuts About Millets LLC":"17",
+  "Oley Ravioli":"16",
+  "Penn State Extension":"40",
+  "Phillips Farms":"3, 4, 5, 1, 2",
+  "Primordia Mushroom Farm":"14",
+  "Raspberry Ridge Creamery":"82",
+  "Roastwell Coffee Roasters":"65, 66",
+  "Saint Rocco's Treats":"41",
+  "Salvaterra's Gardens":"21, 22, 23",
+  "Scholl Orchards LLC":"26, 27, 28, 29, 30",
+  "Silverback Distillery":"31",
+  "Spectracolor Coffee Roasters":"87",
+  "Stehly's Bakery":"42",
+  "Taste Tent":"55, 56",
+  "Teels Hill Soapworks":"36",
+  "The Bubbly Goat":"53",
+  "The Flour Shop Bakery":"59, 60, 61",
+  "The Modern Bakery":"74",
+  "The Smokin' Pasty Company":"83",
+  "Tierra de Fuego Restaurant":"51",
+  "Tolino Vineyards":"79, 80",
+  "Twin Maple Farms":"57",
+  "Wild for Salmon":"33",
+  "Zekraft":"19, 18"
+};
 document.getElementById('fname').textContent = (F && F.name) || NAMES[FID] || 'Festival';
 document.title = ((F && F.name) || NAMES[FID] || 'Vendor') + ' — Vendor Map';
 
 function boot(){
+  if(window.DDEntityManifest && ELOGO[FID]){ DDEntityManifest.apply({ name:(F&&F.name)||NAMES[FID]||'StageFill', icon:ELOGO[FID], manifest:'manifests/'+FID+'.webmanifest', theme:'#0f1620', title:((F&&F.name)||NAMES[FID]||'StageFill')+' · StageFill' }); }
   if(!F || !F.vendors || !F.vendors.length){ // unseeded fest → honest empty state
     document.getElementById('dir').style.display='none';
     document.getElementById('emptyName').textContent = (NAMES[FID]||'This event');
@@ -614,6 +678,14 @@ function boot(){
     var cy=(z.bbox[0][0]+z.bbox[1][0])/2, cx=(z.bbox[0][1]+z.bbox[1][1])/2;
     L.marker([cy,cx],{interactive:false,icon:L.divIcon({className:'',html:'<div class="zlabel" style="--zc:'+z.col+'">'+esc(z.id)+'</div>',iconSize:null})}).addTo(map);
   }); }
+  // paved PATHS / trails (walk · skate · bike) — linear features, intra- or inter-city; toggle by pill
+  F.vendors.forEach(function(v,i){ if(!v.path||!v.path.length) return;
+    var col=CATCOLOR[v.c]||'#2f7d5a';
+    var casing=L.polyline(v.path,{color:'#ffffff',weight:8,opacity:.9,lineCap:'round',lineJoin:'round'}).addTo(map);
+    var line=L.polyline(v.path,{color:col,weight:5,opacity:.95,lineCap:'round',lineJoin:'round',dashArray:v.spanCity?'10 8':null}).addTo(map)
+      .bindPopup('<b>'+esc(v.n)+'</b><br><span style="color:#697586">'+esc(v.p||'Paved path · walk · skate · bike')+(v.spanCity?' · continues to the next town →':'')+'</span>');
+    PATHLAYERS[i]=[casing,line];
+  });
   buildCats();
   // per-week schedule → date picker (Farmers' Market swaps vendors by market day)
   if(F.schedule && F.dates && F.dates.length){
@@ -632,15 +704,22 @@ function pickDate(v){ SELDATE=v; applyDate(); }
 function applyDate(){
   PRESENT=null;
   if(F.schedule && SELDATE){ PRESENT={}; (F.schedule[SELDATE]||[]).forEach(function(n){ PRESENT[n]=1; }); }
-  // show only present vendors' markers
-  F.vendors.forEach(function(v,i){ var m=MARKERS[i]; if(!m) return;
-    if(isPresent(v)){ if(!map.hasLayer(m)) m.addTo(map); } else { if(map.hasLayer(m)) map.removeLayer(m); } });
+  updateMapVisibility();
   renderList();
+}
+// Pills toggle features on the MAP (parks, walking paths, stages, vendors…) — like layers.
+function updateMapVisibility(){
+  if(!map) return;
+  F.vendors.forEach(function(v,i){
+    var vis = isPresent(v) && (!ACTIVE_CAT || v.c===ACTIVE_CAT);
+    var m=MARKERS[i]; if(m){ if(vis){ if(!map.hasLayer(m)) m.addTo(map); } else if(map.hasLayer(m)) map.removeLayer(m); }
+    var pl=PATHLAYERS[i]; if(pl){ pl.forEach(function(ly){ if(vis){ if(!map.hasLayer(ly)) ly.addTo(map); } else if(map.hasLayer(ly)) map.removeLayer(ly); }); }
+  });
 }
 
 function buildCats(){ var cats=['All']; F.vendors.forEach(function(v){ if(cats.indexOf(v.c)<0)cats.push(v.c); });
   document.getElementById('cats').innerHTML = cats.map(function(c){ var v=(c==='All'?'':c); return '<span class="cat'+((ACTIVE_CAT===v)?' on':'')+'" onclick="pickCat(\''+v+'\')">'+esc(c)+'</span>'; }).join(''); }
-function pickCat(c){ ACTIVE_CAT=c; buildCats(); renderList(); }
+function pickCat(c){ ACTIVE_CAT=c; buildCats(); updateMapVisibility(); renderList(); }
 
 function renderList(){
   var q=(document.getElementById('q').value||'').toLowerCase();

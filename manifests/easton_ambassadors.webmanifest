@@ -1,0 +1,29 @@
+{
+  "name": "Easton Ambassadors",
+  "short_name": "Ambassadors",
+  "start_url": "../festival_vendors.html?fest=easton_ambassadors",
+  "scope": "../",
+  "id": "/easton_ambassadors",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f1620",
+  "icons": [
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2025/09/logo_ea.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2025/09/logo_ea.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2025/09/logo_ea.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

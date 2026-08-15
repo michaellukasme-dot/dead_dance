@@ -1,0 +1,29 @@
+{
+  "name": "Explore Easton",
+  "short_name": "Easton",
+  "start_url": "../easton_hub.html",
+  "scope": "../",
+  "id": "/easton_hub",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f1620",
+  "icons": [
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/logo_emsi.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/logo_emsi.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/logo_emsi.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

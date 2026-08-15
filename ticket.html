@@ -85,6 +85,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
 </style>
 <script src="qr.js"></script>
 <script src="dd_qrmark.js"></script>
+<script src="dd_band_logo.js"></script>
 <script src="dd_roster.js"></script><script src="dd_setlist.js"></script><script src="dd_setlist_crowd.js"></script><script src="dd_media.js"></script>
 <script src="dd_ticketsec.js"></script><script src="dd_groups.js"></script><script src="dd_pymk.js"></script><script src="dd_arrival.js"></script><!-- attendance fact + friend suggestions + "Drive me there" / arrival proximity (arrival broadcast DARK) -->
 <style>
@@ -252,6 +253,7 @@ body{background:rgba(20,12,30,.55);font-family:-apple-system,BlinkMacSystemFont,
   var storedArt=null; try{ storedArt=localStorage.getItem(artKey()); }catch(e){}
   var initialArt = img || storedArt;
   if(initialArt){ var im=new Image(); im.onload=function(){ setArt(initialArt); }; im.onerror=function(){ art.classList.remove('on'); }; im.src=initialArt; setArt(initialArt); }
+  else if(window.DDBandLogo){ try{ setArt(DDBandLogo.cover(band)); }catch(e){} }   // default cover = the band's logo, until the band uploads its own
   // GAP CLOSED — server-persisted art follows the ticket across devices. Deferred (so SFClient exists),
   // only when there's no local art yet; caches what it finds so later opens are instant.
   setTimeout(function(){ try{

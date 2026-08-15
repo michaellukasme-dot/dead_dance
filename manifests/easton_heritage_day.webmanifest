@@ -1,0 +1,29 @@
+{
+  "name": "Easton Heritage Day",
+  "short_name": "Heritage",
+  "start_url": "../festival_vendors.html?fest=easton_heritage_day",
+  "scope": "../",
+  "id": "/easton_heritage_day",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f8fa",
+  "theme_color": "#0f1620",
+  "icons": [
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/heritageday2022_logo_color-e1786367329513.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/heritageday2022_logo_color-e1786367329513.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://pabaconfest.com/wp-content/uploads/2026/08/heritageday2022_logo_color-e1786367329513.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
