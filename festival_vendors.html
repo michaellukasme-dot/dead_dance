@@ -125,7 +125,7 @@ var CATCOLOR = { "Farmer":"#2a8a4a", "Food":"#e0662e", "Beverages":"#0f6f8a", "B
   "Music / Stage":"#7a1f2b", "Fixed Retail":"#4a5568", "Food Truck":"#c05621",
   "Move / Fitness":"#2f855a", "Glow / Beauty":"#b83280", "Nourish":"#b7791f", "Live Well":"#2c7a7b",
   "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#7a3cc0", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568",
-  "Trail / Path":"#2f7d5a", "Park / Green":"#3f8f4a", "Rec Facility":"#0b7f7c", "Sponsor":"#8a5a00" };
+  "Trail / Path":"#2f7d5a", "Park / Green":"#3f8f4a", "Rec Facility":"#0b7f7c", "Sponsor":"#8a5a00", "Restroom":"#5b6b7a" };
 var KINDLABEL = { fixed:"Storefront", street:"Stall", truck:"Truck", tent:"Tent", stage:"Stage", path:"Trail" };  // fixed vs temporary vs stage vs linear
 function kindOf(v){ return KINDLABEL[(v&&v.k)||'street']||'Stall'; }
 // Per-entity install identity — each fest's ORIGINAL logo becomes its home-screen app icon.
@@ -163,9 +163,9 @@ function vendorCard(v){
 var FESTS = {
   easton_fm: {
     name: "Easton Farmers' Market", theme: "market",
-    bbox: [[40.68776495920509,-75.20766],[40.690458521435495,-75.20463241745338]],
-    boundary: [[40.690458521435495,-75.20765901501589],[40.69044008853104,-75.20463241745338],[40.687997683592144,-75.20463241745338],[40.68776495920509,-75.20730348096488]],
-    spine: [[40.6882,-75.20715],[40.6893,-75.20635],[40.69005,-75.20545],[40.69035,-75.20486]],
+    bbox: [[40.68880410486094,-75.20710660661211],[40.69038409437032,-75.20450969003818]],
+    boundary: [[40.68897511006789,-75.20710660661211],[40.69038409437032,-75.20539222702116],[40.6903304713883,-75.20524200693974],[40.68970035101199,-75.2049493135101],[40.690259297537295,-75.20477710165909],[40.68970588758657,-75.20450969003818],[40.68964453580892,-75.20572697382609],[40.68880410486094,-75.20680613441263]],
+    spine: [[40.69035,-75.20534],[40.68995,-75.20585],[40.6895,-75.2064],[40.68905,-75.2069]],
     dates: ["2026-08-29","2026-09-05","2026-09-12","2026-09-15","2026-09-19","2026-09-22","2026-09-26","2026-10-10","2026-10-17","2026-10-24","2026-10-31","2026-11-14","2026-11-21","2026-12-05","2026-12-12","2026-12-19"],
     schedule: {
       "2026-08-29": ["Aladdin Restaurant","Apple Ridge Farm","Barley Creek Brewing and Distillery","Bizzle's Bites","Breakaway Farms","Bright Path Brewing","Bussin' Butters","Cabbage Throw Farm LLC","Collective Culture","Cotton Cattle Company","Easton Salsa Co.","Elm Hill Vineyard & Winery","Funny Farm Apiaries","Green Vida Co.","High Point Kombucha","Jersey Pickles","Lis Forno","Mia & Maddie's Bakery","Minsi Mountain Flower Farm","Mona's Bakery, LLC","Nuts About Millets LLC","Oley Ravioli","Phillips Farms","Primordia Mushroom Farm","Raspberry Ridge Creamery","Roastwell Coffee Roasters","Saint Rocco's Treats","Salvaterra's Gardens","Scholl Orchards LLC","Silverback Distillery","Stehly's Bakery","Teels Hill Soapworks","The Flour Shop Bakery","The Modern Bakery","Tierra de Fuego Restaurant","Tolino Vineyards","Twin Maple Farms","Zekraft"],
@@ -237,7 +237,9 @@ var FESTS = {
       {n:"Twin Maple Farms", c:"Farmer"},
       {n:"Wild for Salmon", c:"Fisher/Seafood"},
       {n:"Zekraft", c:"Food Cart"},
-      {n:"Scott Park Riverfront Path", c:"Trail / Path", p:"Paved · walk · skate · bike · along the river", k:"path", lat:40.6889, lng:-75.2056, path:[[40.6876,-75.2052],[40.6882,-75.2054],[40.6889,-75.2056],[40.6896,-75.20575],[40.6903,-75.20585]]}
+      {n:"Scott Park Riverfront Path", c:"Trail / Path", p:"Paved · walk · skate · bike · along the river", k:"path", lat:40.6889, lng:-75.2056, path:[[40.6876,-75.2052],[40.6882,-75.2054],[40.6889,-75.2056],[40.6896,-75.20575],[40.6903,-75.20585]]},
+      {n:"Restroom · North", c:"Restroom", k:"tent", lat:40.690312, lng:-75.20509},
+      {n:"Restroom · South", c:"Restroom", k:"tent", lat:40.689235, lng:-75.206386}
     ]
   },
   easton_main: {
@@ -735,9 +737,17 @@ function initials(s){ return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/
 function ptAlong(spine,f){ var segs=spine.length-1; var s=Math.min(segs-1,Math.floor(f*segs)); var lt=(f*segs)-s; var a=spine[s],b=spine[s+1]; return [a[0]+(b[0]-a[0])*lt, a[1]+(b[1]-a[1])*lt]; }
 // perpendicular unit (approx, small-angle) to the local spine direction
 function perpAt(spine,f){ var segs=spine.length-1; var s=Math.min(segs-1,Math.floor(f*segs)); var a=spine[s],b=spine[s+1]; var dLat=b[0]-a[0], dLng=b[1]-a[1]; var m=Math.sqrt(dLat*dLat+dLng*dLng)||1; return [-dLng/m, dLat/m]; }
+function pointInPoly(lat,lng,poly){ var inside=false; for(var a=0,b=poly.length-1;a<poly.length;b=a++){ var yi=poly[a][0],xi=poly[a][1],yj=poly[b][0],xj=poly[b][1]; if(((yi>lat)!=(yj>lat)) && (lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside; } return inside; }
+/* OBSTACLE PROTOCOL — a placement is invalid if it falls OUTSIDE the footprint OR INSIDE any
+   obstacle: river water, a bridge deck, a building… any %OBSTACLE% polygon the Maker declares.
+   Such points snap back to the aisle (the spine), so a vendor can never sit in the river or on a bridge. */
+function blockedAt(f,lat,lng){ if(f.boundary && !pointInPoly(lat,lng,f.boundary)) return true;
+  if(f.obstacles){ for(var o=0;o<f.obstacles.length;o++){ if(f.obstacles[o].poly && pointInPoly(lat,lng,f.obstacles[o].poly)) return true; } } return false; }
 function placeVendors(f){ if(!f.spine){ return; } var n=f.vendors.length, off=0.00007;   // explicit-coord fests (zones) skip the spine
   f.vendors.forEach(function(v,i){ if(v.lat!=null && v.lng!=null) return; var t=(i+0.5)/n; var base=ptAlong(f.spine,t); var pp=perpAt(f.spine,t); var side=(i%2?1:-1);
-    v.lat=base[0]+pp[0]*off*side; v.lng=base[1]+pp[1]*off*side; }); }
+    var lat=base[0]+pp[0]*off*side, lng=base[1]+pp[1]*off*side;
+    if(blockedAt(f,lat,lng)){ lat=base[0]; lng=base[1]; }   // clamp off obstacles + inside footprint
+    v.lat=lat; v.lng=lng; }); }
 
 /* ---------- state ---------- */
 var FID = qp('fest') || 'easton_fm';
@@ -815,7 +825,7 @@ function boot(){
   placeVendors(F);
   var fn=document.getElementById('fname'); if(fn) fn.textContent=F.name;
   map = L.map('map',{zoomControl:true,attributionControl:false});
-  map.fitBounds(F.bbox);
+  fitView();
   // CIVIC BASE — real streets on a clean light basemap (Carto Positron): the pinstripe register
   baseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
     {maxZoom:20, subdomains:'abcd', crossOrigin:true}).addTo(map);
@@ -860,7 +870,15 @@ function boot(){
     document.getElementById('daterow').style.display='flex';
     applyDate();
   } else { renderList(); }
-  window.addEventListener('resize', function(){ setTimeout(function(){ try{ map.invalidateSize(); map.fitBounds(F.bbox,{animate:false}); }catch(e){} }, 120); });
+  window.addEventListener('resize', function(){ setTimeout(function(){ try{ map.invalidateSize(); fitView(true); }catch(e){} }, 120); });
+}
+// center + zoom the whole grounds onto ONE screen, leaving room for the directory panel
+function fitView(noAnim){
+  if(!map || !F || !F.bbox) return;
+  var narrow = window.innerWidth < 640;
+  var padTL = narrow ? [24,150] : [315,28];   // desktop: clear the left-hand directory · mobile: clear the top panel
+  try{ map.fitBounds(F.bbox, { paddingTopLeft:padTL, paddingBottomRight:[28,28], maxZoom:19, animate:!noAnim }); }
+  catch(e){ try{ map.fitBounds(F.bbox); }catch(_){} }
 }
 function squareAround(lat,lng,d){ return [[lat+d,lng-d],[lat+d,lng+d],[lat-d,lng+d],[lat-d,lng-d]]; }
 function fmtDate(iso){ var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
