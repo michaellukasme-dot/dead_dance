@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill Reach — PA Beachhead</title>
+<meta name="theme-color" content="#0f1620">
+<!-- pa_reach.html — the beachhead / ABC expansion view. Easton at center; PA target cities as pins,
+     colored by Priority-of-Attack tier. The LFL-style RADIUS SLIDER (1–100 mi, from the Little Free
+     Library map Michael flagged) draws a ring from Easton and filters targets to those within reach —
+     the same "distance range" control, in the context where 1–100 miles actually means something. -->
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<style>
+:root{--ink:#141a22;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--ink2:#0f1620}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+#map{position:absolute;inset:0;background:#dfe6ee}
+#panel{position:absolute;top:12px;left:12px;width:300px;max-width:calc(100% - 24px);max-height:calc(100% - 120px);background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(20,26,34,.22);z-index:1100;display:flex;flex-direction:column;overflow:hidden}
+.ph{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ph .b{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;flex:none}
+.ph b{font-size:14.5px}.ph small{color:var(--muted);font-size:11.5px;display:block}
+.plist{overflow:auto}
+.crow{display:flex;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid #f1f4f7;cursor:pointer}
+.crow:hover{background:#f7fafb}.crow .dot{width:11px;height:11px;border-radius:50%;flex:none}
+.crow b{font-size:13.5px}.crow small{color:#8a94a0;font-size:11px;display:block}
+.crow .mi{margin-left:auto;font:800 12px/1 ui-monospace,monospace;color:#33404e;white-space:nowrap}
+.slider{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 30px rgba(20,26,34,.22);padding:12px 16px;width:min(520px,calc(100% - 24px))}
+.slider .lab{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:13px;margin-bottom:6px}
+.slider .lab .v{font-size:18px;color:var(--teal-d)}
+.slider input[type=range]{width:100%;accent-color:var(--teal)}
+.slider .sub{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
+.legend{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:11px;box-shadow:0 4px 14px rgba(20,26,34,.16)}
+.legend div{display:flex;align-items:center;gap:6px;margin:2px 0}.legend .dot{width:9px;height:9px;border-radius:50%}
+.cpin{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(20,26,34,.4)}
+.home{width:26px;height:26px;border-radius:50%;background:var(--ink2);border:3px solid var(--teal);display:grid;place-items:center;color:#fff;font-size:13px;box-shadow:0 3px 9px rgba(20,26,34,.5)}
+.credit{position:absolute;right:8px;bottom:6px;z-index:1100;font-size:10px;color:#6b7684;background:#ffffffcc;border-radius:6px;padding:1px 6px}
+</style></head>
+<body>
+<script>window.__m=window.module;window.__e=window.exports;try{window.module=undefined;window.exports=undefined;}catch(_){}</script>
+<script src="leaflet/leaflet.js"></script>
+<script>try{window.module=window.__m;window.exports=window.__e;}catch(_){}</script>
+<div id="map"></div>
+<div id="panel">
+  <div class="ph"><span class="b">◍</span><div><b>StageFill Reach</b><small id="sub">Targets within <span id="cnt">–</span> · from Easton</small></div></div>
+  <div class="plist" id="plist"></div>
+</div>
+<div class="legend" id="legend"></div>
+<div class="slider">
+  <div class="lab"><span>Reach from Easton</span><span class="v"><span id="rv">30</span> mi</span></div>
+  <input type="range" id="range" min="1" max="100" value="30" oninput="setR(this.value)">
+  <div class="sub"><span>1 mi</span><span>the Little Free Library slider — radius search</span><span>100 mi</span></div>
+</div>
+<div class="credit">Powered by StageFill · © OpenStreetMap © CARTO</div>
+<script>
+var HOME=[40.6884,-75.2207]; // Easton
+var TIER={"Attack First":"#b23246","Warm & Funded":"#0b7f7c","Near Ring":"#2f855a","Marquee Reach":"#b7791f"};
+var CITIES=[
+ {n:"Bethlehem",t:"Attack First",lat:40.6259,lng:-75.3705,note:"USA Today #1 Main St · Musikfest"},
+ {n:"Allentown",t:"Attack First",lat:40.6084,lng:-75.4902,note:"Largest LV city · Hamilton St"},
+ {n:"Nazareth",t:"Near Ring",lat:40.7407,lng:-75.3096,note:"Martin on Main"},
+ {n:"Wilson",t:"Near Ring",lat:40.6851,lng:-75.2496,note:"Adjacent to Easton"},
+ {n:"Hellertown",t:"Near Ring",lat:40.5795,lng:-75.3407,note:"Saucon Rail Trail"},
+ {n:"Emmaus",t:"Warm & Funded",lat:40.5395,lng:-75.4968,note:"Main Street Partners (designated)"},
+ {n:"Northampton",t:"Near Ring",lat:40.6857,lng:-75.4899,note:"Canal · Roxy"},
+ {n:"Catasauqua",t:"Near Ring",lat:40.6534,lng:-75.4657,note:"Iron heritage"},
+ {n:"Quakertown",t:"Warm & Funded",lat:40.4418,lng:-75.3416,note:"Quakertown Alive!"},
+ {n:"Bangor",t:"Near Ring",lat:40.8676,lng:-75.2071,note:"Slate Belt"},
+ {n:"Stroudsburg",t:"Near Ring",lat:40.9868,lng:-75.1946,note:"Sherman Theater · Poconos"},
+ {n:"Doylestown",t:"Warm & Funded",lat:40.3101,lng:-75.1299,note:"Discover Doylestown"},
+ {n:"Jim Thorpe",t:"Marquee Reach",lat:40.8659,lng:-75.7327,note:"Tourism · D&L Trail"},
+ {n:"Boyertown",t:"Marquee Reach",lat:40.3334,lng:-75.6382,note:"MSA-accredited 2025"},
+ {n:"Reading",t:"Marquee Reach",lat:40.3356,lng:-75.9269,note:"~95K · downtown BID"},
+ {n:"Lancaster",t:"Marquee Reach",lat:40.0379,lng:-76.3055,note:"Central Market · City Alliance"},
+ {n:"York",t:"Marquee Reach",lat:39.9626,lng:-76.7277,note:"Downtown Inc · MSA-accredited"},
+ {n:"Gettysburg",t:"Marquee Reach",lat:39.8309,lng:-77.2311,note:"Main St Gettysburg · MSA-accredited"}
+];
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function miles(a,b){var R=3958.8,dLat=(b[0]-a[0])*Math.PI/180,dLon=(b[1]-a[1])*Math.PI/180,la1=a[0]*Math.PI/180,la2=b[0]*Math.PI/180;var x=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+CITIES.forEach(function(c){ c.mi=miles(HOME,[c.lat,c.lng]); });
+CITIES.sort(function(a,b){return a.mi-b.mi;});
+var map, ring, MK={}, R=30;
+function boot(){
+  map=L.map('map',{zoomControl:true,attributionControl:false}).setView(HOME,9);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18,subdomains:'abcd',crossOrigin:true}).addTo(map);
+  L.marker(HOME,{icon:L.divIcon({className:'',html:'<div class="home">★</div>',iconSize:[26,26],iconAnchor:[13,13]}),zIndexOffset:1000}).addTo(map).bindPopup('<b>Easton</b><br><span style="color:#697586">Example 1 · home base</span>');
+  ring=L.circle(HOME,{radius:R*1609.34,color:'#0fa3a0',weight:2,fillColor:'#0fa3a0',fillOpacity:0.07,dashArray:'5 6'}).addTo(map);
+  CITIES.forEach(function(c){
+    var col=TIER[c.t]||'#334155';
+    var m=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',html:'<div class="cpin" style="background:'+col+'"></div>',iconSize:[16,16],iconAnchor:[8,8]}),riseOnHover:true}).addTo(map);
+    m.bindPopup('<b>'+esc(c.n)+'</b><br><span style="color:#697586">'+esc(c.t)+' · '+c.mi.toFixed(0)+' mi</span><br><span style="color:#8a94a0;font-size:12px">'+esc(c.note)+'</span>');
+    MK[c.n]=m;
+  });
+  document.getElementById('legend').innerHTML=Object.keys(TIER).map(function(t){return '<div><span class="dot" style="background:'+TIER[t]+'"></span>'+t+'</div>';}).join('');
+  setR(R);
+}
+function setR(v){ R=+v; document.getElementById('rv').textContent=R; if(ring) ring.setRadius(R*1609.34);
+  var inside=CITIES.filter(function(c){return c.mi<=R;});
+  CITIES.forEach(function(c){ var on=c.mi<=R; var el=MK[c.n]; if(el){ var d=el.getElement(); if(d) d.style.opacity=on?'1':'0.28'; } });
+  document.getElementById('cnt').textContent=inside.length+' of '+CITIES.length+' towns · '+R+' mi';
+  document.getElementById('plist').innerHTML=CITIES.map(function(c){
+    var on=c.mi<=R, col=TIER[c.t]||'#334155';
+    return '<div class="crow" style="opacity:'+(on?1:.4)+'" onclick="go(\''+c.n.replace(/'/g,"")+'\')"><span class="dot" style="background:'+col+'"></span><span><b>'+esc(c.n)+'</b><small>'+esc(c.t)+'</small></span><span class="mi">'+c.mi.toFixed(0)+' mi</span></div>';
+  }).join('');
+}
+function go(n){ var c=CITIES.filter(function(x){return x.n===n;})[0]; if(c){ map.setView([c.lat,c.lng],11); MK[n].openPopup(); } }
+boot();
+</script>
+</body></html>
