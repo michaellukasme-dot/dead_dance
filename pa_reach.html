@@ -28,9 +28,12 @@ body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,
 .slider .sub{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
 .legend{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:11px;box-shadow:0 4px 14px rgba(20,26,34,.16)}
 .legend div{display:flex;align-items:center;gap:6px;margin:2px 0}.legend .dot{width:9px;height:9px;border-radius:50%}
-.cpin{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(20,26,34,.4)}
+.cpin{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(20,26,34,.4);cursor:pointer;transition:transform .12s}
+.cpin:hover{transform:scale(1.45)}
 .home{width:26px;height:26px;border-radius:50%;background:var(--ink2);border:3px solid var(--teal);display:grid;place-items:center;color:#fff;font-size:13px;box-shadow:0 3px 9px rgba(20,26,34,.5)}
 .credit{position:absolute;right:8px;bottom:6px;z-index:1100;font-size:10px;color:#6b7684;background:#ffffffcc;border-radius:6px;padding:1px 6px}
+.toplevel{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1100;background:#0f1620;color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 12.5px/1 -apple-system,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(20,26,34,.3)}
+.toplevel:hover{background:#1b2430}
 </style></head>
 <body>
 <script>window.__m=window.module;window.__e=window.exports;try{window.module=undefined;window.exports=undefined;}catch(_){}</script>
@@ -42,6 +45,7 @@ body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,
   <div class="plist" id="plist"></div>
 </div>
 <div class="legend" id="legend"></div>
+<button class="toplevel" onclick="toTop()">⤢ Top level · full PA view</button>
 <div class="slider">
   <div class="lab"><span>Reach from Easton</span><span class="v"><span id="rv">30</span> mi</span></div>
   <input type="range" id="range" min="1" max="100" value="30" oninput="setR(this.value)">
@@ -85,6 +89,8 @@ function boot(){
     var col=TIER[c.t]||'#334155';
     var m=L.marker([c.lat,c.lng],{icon:L.divIcon({className:'',html:'<div class="cpin" style="background:'+col+'"></div>',iconSize:[16,16],iconAnchor:[8,8]}),riseOnHover:true}).addTo(map);
     m.bindPopup('<b>'+esc(c.n)+'</b><br><span style="color:#697586">'+esc(c.t)+' · '+c.mi.toFixed(0)+' mi</span><br><span style="color:#8a94a0;font-size:12px">'+esc(c.note)+'</span>');
+    m.bindTooltip(esc(c.n)+' · '+c.mi.toFixed(0)+' mi — click to zoom',{direction:'top',offset:[0,-9]});
+    m.on('click',function(){ go(c.n); });
     MK[c.n]=m;
   });
   document.getElementById('legend').innerHTML=Object.keys(TIER).map(function(t){return '<div><span class="dot" style="background:'+TIER[t]+'"></span>'+t+'</div>';}).join('');
@@ -99,7 +105,8 @@ function setR(v){ R=+v; document.getElementById('rv').textContent=R; if(ring) ri
     return '<div class="crow" style="opacity:'+(on?1:.4)+'" onclick="go(\''+c.n.replace(/'/g,"")+'\')"><span class="dot" style="background:'+col+'"></span><span><b>'+esc(c.n)+'</b><small>'+esc(c.t)+'</small></span><span class="mi">'+c.mi.toFixed(0)+' mi</span></div>';
   }).join('');
 }
-function go(n){ var c=CITIES.filter(function(x){return x.n===n;})[0]; if(c){ map.setView([c.lat,c.lng],11); MK[n].openPopup(); } }
+function go(n){ var c=CITIES.filter(function(x){return x.n===n;})[0]; if(c){ map.flyTo([c.lat,c.lng],11,{duration:.6}); setTimeout(function(){ try{MK[n].openPopup();}catch(e){} },660); } }
+function toTop(){ map.closePopup(); map.flyTo(HOME,9,{duration:.6}); }
 boot();
 </script>
 </body></html>
