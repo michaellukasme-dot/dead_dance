@@ -3,80 +3,108 @@
 <title>Live at the Falls — 2026 Tickets</title>
 <meta name="theme-color" content="#2a1220">
 <!-- live_falls_tickets.html — StageFill's takeover of Live at the Falls (Scott Park · GEDP). 13 REAL
-     tickets for the 2026 season, one per show. Two-sided flywheel: every act gets a live ticket the
-     moment the lineup posts — claimed or not. Until a band claims it, the ticket carries a generated
-     band mark (house logo where we have one). Bands claim to add their art, and fans claim to attend. -->
+     tickets, one per show, with the official band photos + bios. June 4 is a double bill (Bardwell 6:00 →
+     Majcen 7:30). Rosters shown where known (GruviTune, BC Combo given; Reservoir Hill + Craig Thatcher
+     from bio/search). Two-sided flywheel: tickets are live the day the lineup posts, claimed or not. -->
 <style>
-:root{--bg:#1a0e16;--card:#241019;--ink:#f6eef1;--muted:#c6a7b3;--line:#3a2230;
-      --plum:#7a2e4a;--plum2:#a0405f;--sun:#f5a623;--gold:#f6c14b;--orange:#e8823a}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(120% 90% at 50% -10%,#3a1526,#160a12);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.top{padding:20px 18px 8px;text-align:center}
-.top .lg{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:800}
-.top h1{margin:4px 0 2px;font-size:26px;background:linear-gradient(90deg,var(--plum2),var(--sun));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.top p{margin:0;color:var(--muted);font-size:13px}
-.fly{max-width:760px;margin:10px auto 0;font-size:11.5px;color:#d9b8c4;background:rgba(122,46,74,.22);border:1px solid var(--plum);border-radius:10px;padding:8px 12px;text-align:center}
-.grid{max-width:900px;margin:0 auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.tk{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.35);position:relative}
-.tk.past{opacity:.62}
-.tk .hd{background:linear-gradient(120deg,var(--plum),var(--orange) 70%,var(--sun));padding:12px 14px 10px;color:#fff;position:relative}
-.tk .hd .ev{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;font-weight:800;opacity:.95}
-.tk .hd .dt{font-size:20px;font-weight:900;line-height:1.05;margin-top:2px}
-.tk .hd .tm{font-size:12px;font-weight:700;opacity:.95}
-.tk .bd{padding:12px 14px;display:flex;gap:11px;align-items:center}
-.tk .mk{width:48px;height:48px;border-radius:11px;flex:none;display:grid;place-items:center;font-weight:900;font-size:16px;color:#2a1220;background:linear-gradient(135deg,var(--gold),var(--orange));overflow:hidden}
-.tk .mk img{width:100%;height:100%;object-fit:cover;background:#fff}
-.tk .nm{font-weight:800;font-size:15px;line-height:1.12}
-.tk .gn{font-size:11px;color:var(--muted);margin-top:2px}
-.tk .ft{border-top:1px dashed var(--line);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
-.tk .ft .venue{font-weight:700;color:#e2c3cf}
-.tk .qr{width:34px;height:34px;border-radius:6px;background:
-  conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/12px 12px,#fff;border:2px solid #fff;flex:none}
-.tk .claim{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;background:rgba(255,255,255,.9);color:var(--plum);border-radius:999px;padding:2px 8px}
-.tk .perf{position:absolute;left:-7px;top:calc(50% + 8px);width:14px;height:14px;border-radius:50%;background:#160a12}
-.tk .perf.r{left:auto;right:-7px}
-.foot{max-width:760px;margin:6px auto 40px;padding:0 16px;color:var(--muted);font-size:11.5px;text-align:center}
+:root{--bg:#1a0e16;--card:#241019;--ink:#f6eef1;--muted:#c6a7b3;--line:#3a2230;--plum:#5a2340;--plum2:#a0405f;--sun:#f5a623;--gold:#f6c14b;--orange:#e8823a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(120% 80% at 50% -8%,#4a1730,#160a12 60%);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.hero{max-width:960px;margin:0 auto;padding:18px 16px 6px;text-align:center}
+.hero img{max-width:230px;width:44%;min-width:170px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.hero h1{margin:12px 0 2px;font-size:22px;background:linear-gradient(90deg,var(--plum2),var(--sun));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin:0;color:var(--muted);font-size:13px}
+.spon{margin:8px auto 0;font-size:11px;color:#d9b8c4;max-width:640px}
+.fly{max-width:720px;margin:10px auto 0;font-size:11.5px;color:#e7cdd7;background:rgba(122,46,74,.24);border:1px solid var(--plum);border-radius:10px;padding:8px 12px;text-align:center}
+.grid{max-width:1040px;margin:6px auto 0;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.tk{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4);position:relative;display:flex;flex-direction:column}
+.tk.past{opacity:.66}
+.ph{position:relative;height:180px;background:#0e0710;overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.ph.dbl{display:flex;gap:2px}.ph.dbl img{width:50%}
+.ph .grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,8,16,0) 40%,rgba(20,8,16,.86))}
+.ph .claim{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;background:rgba(255,255,255,.92);color:var(--plum);border-radius:999px;padding:2px 9px}
+.ph .dt{position:absolute;left:12px;bottom:9px;right:12px}
+.ph .dt .d{font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.ph .dt .n{font-size:20px;font-weight:900;line-height:1.06;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.bd{padding:11px 14px 13px;flex:1;display:flex;flex-direction:column;gap:6px}
+.style{font-size:11px;font-weight:800;color:var(--sun);text-transform:uppercase;letter-spacing:.5px}
+.time{font-size:12px;color:#e7cdd7;font-weight:700}
+.bio{font-size:12px;color:var(--muted);line-height:1.45}
+.roster{font-size:10.5px;color:#b79aa6;border-top:1px dashed var(--line);padding-top:7px;margin-top:auto}
+.roster b{color:#e0c3cf}
+.ft{border-top:1px dashed var(--line);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--muted)}
+.ft .v{font-weight:800;color:#e2c3cf}
+.qr{width:32px;height:32px;border-radius:6px;background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/11px 11px,#fff;border:2px solid #fff;flex:none}
+.foot{max-width:720px;margin:6px auto 40px;padding:0 16px;color:var(--muted);font-size:11.5px;text-align:center}
 </style></head>
 <body>
-<div class="top">
-  <div class="lg">Live at the Falls · 2026</div>
-  <h1>Scott Park Season Pass</h1>
-  <p>Thursdays · 6:30 PM · Scott Park Stage, Easton · presented by the Greater Easton Development Partnership</p>
-  <div class="fly">🔁 <b>Two-sided flywheel.</b> Every act has a real ticket the day the lineup posts — claimed or not. Bands claim to add their logo, art &amp; setlist; fans claim to attend. StageFill runs the season on the map you already saw.</div>
+<div class="hero">
+  <img src="livefalls/poster.png" alt="Live at the Falls 2026">
+  <h1>Live at the Falls · 2026 Season</h1>
+  <p>Thursdays · Scott Park Stage, Easton · presented by the Greater Easton Development Partnership</p>
+  <div class="spon">Presented by <b>Lehigh Valley Health Network</b> (Jefferson Health) · Stage sponsored by <b>IBEW Local 102</b> · LiveAtFalls.com</div>
+  <div class="fly">🔁 <b>Two-sided flywheel.</b> Every act gets a real ticket the day the lineup posts — claimed or not. Bands claim to own their pass; fans claim to attend. StageFill runs the season on the Scott Park map.</div>
 </div>
 <div class="grid" id="grid"></div>
 <div class="foot" id="foot"></div>
 <script>
-var LOGO={ "DEAL":"deal_logo.svg" };  // house acts with a real mark; others get a generated tile
 var SHOWS=[
- {d:"2026-06-04",band:"Leon Majcen",gen:"Country · Folk · Americana",co:"Jesse Bardwell"},
- {d:"2026-06-18",band:"The Hazmats",gen:"80s & 90s Rock / Pop"},
- {d:"2026-06-25",band:"Project 9",gen:"Alternative Rock"},
- {d:"2026-07-02",band:"Joey Lannigan & The Spirits",gen:"Country"},
- {d:"2026-07-16",band:"Reservoir Hill",gen:"Country Rock"},
- {d:"2026-07-23",band:"Craig Thatcher Band",gen:"Rock & Blues"},
- {d:"2026-07-30",band:"Hector Rosado",gen:"Salsa"},
- {d:"2026-08-06",band:"Joyous",gen:"Pop · Funk · R&B · Soul · Swing"},
- {d:"2026-08-13",band:"Gruvitune",gen:"R&B · Soul · Funk · Blues Covers"},
- {d:"2026-08-20",band:"The BC Combo",gen:"Blues · Jazz · Swing · Folk · R&B · Soul"},
- {d:"2026-08-27",band:"Lilly Moss & The Steel Ponies",gen:"Country"},
- {d:"2026-09-03",band:"DEAL",gen:"Grateful Dead Cover Band"},
- {d:"2026-09-10",band:"Lucky 7",gen:"Classic Funk & Soul"}
+ {date:"June 4, 2026", kickoff:true, acts:[
+   {n:"Leon Majcen",time:"7:30 PM · Featuring",style:"Country · Folk · Americana",img:"01_leon_majcen.png",
+    bio:"Gulf Coast Florida musician, son of Bosnian war refugees — resilient, story-driven songwriting in the tradition of Townes Van Zandt, John Prine, Dylan and Guy Clark.",roster:"Solo"},
+   {n:"Jesse Bardwell",time:"6:00 PM · Support",style:"Americana · Bluegrass · Country",img:"02_jesse_bardwell.png",
+    bio:"NJ-native multi-instrumentalist near the Delaware in the Pocono foothills. “I am a product of both my environment and my art.”",roster:"Solo"}
+ ]},
+ {date:"June 18, 2026", acts:[{n:"The Hazmats",time:"6:00 PM",style:"80s & 90s Rock / Pop",img:"03_hazmats.png",
+   bio:"A seasoned party band built on decades of friendship — the ‘80s and ‘90s rock/pop soundtrack played with energy and zero pretense. They turn any room into a sing-along.",roster:""}]},
+ {date:"June 25, 2026", acts:[{n:"Project 9",time:"6:00 PM",style:"Alternative Rock",img:"04_project9.png",
+   bio:"High-energy Lehigh Valley alt-rock — powerful vocals, driving guitars, a rhythm section that hits hard. Named for the members’ ‘ninth project’; debut album Hot Mess.",roster:""}]},
+ {date:"July 2, 2026", acts:[{n:"Joey Lannigan & The Spirits",time:"6:00 PM",style:"Country",img:"05_joey_lannigan.png",
+   bio:"Emerging country singer-songwriter blending traditional roots with folk and Americana — Zach Bryan and Tyler Childers by way of Waylon and Merle. Heartfelt storytelling, raw vocals.",roster:""}]},
+ {date:"July 16, 2026", acts:[{n:"Reservoir Hill",time:"6:00 PM",style:"Country Rock",img:"06_reservoir_hill.png",
+   bio:"Original Allentown country-rock — modern country with Southern rock, folk and jam-band influences; heartfelt storytelling and high-energy live shows.",roster:"Dylan Flaherty & Brad Kramer (songwriting core) + band"}]},
+ {date:"July 23, 2026", acts:[{n:"Craig Thatcher Band",time:"6:00 PM",style:"Rock & Blues",img:"07_craig_thatcher.png",
+   bio:"Led by Craig Thatcher — bandleader, C.F. Martin & Co. international clinician/ambassador (Nazareth, PA), instructor and recording artist.",roster:"Craig Thatcher (guitar) · Nyke Van Wyk (violin) + band"}]},
+ {date:"July 30, 2026", acts:[{n:"Hector Rosado Orchestra",time:"6:00 PM",style:"Salsa",img:"08_hector_rosado.png",
+   bio:"A powerhouse Lehigh Valley Latin ensemble — salsa, merengue, bachata and Latin jazz led by acclaimed percussionist Hector Rosado, in the tradition of Tito Puente. Full horn section, driving rhythms.",roster:"Led by Hector Rosado (percussion) · full Latin big band"}]},
+ {date:"August 6, 2026", acts:[{n:"Joyous",time:"6:00 PM",style:"Pop · Funk · R&B · Soul · Swing",img:"09_joyous.png",
+   bio:"Established 1979 — a nine-member Lehigh Valley powerhouse. A take-no-prisoners horn section and soulful vocals across Soul, Funk, Disco, Pop and party tunes.",roster:"Nine-piece · est. 1979"}]},
+ {date:"August 13, 2026", acts:[{n:"GruviTune",time:"6:00 PM",style:"R&B · Soul · Funk · Blues Covers",img:"10_gruvitune.png",
+   bio:"Lehigh Valley R&B, soul, funk and blues — tight grooves, rich vocals, a vibrant horn section, timeless hits with a signature style.",
+   roster:"Bob Yale (bass, vox) · Mike Sciabarassi (drums) · Ken Greene (vox, perc) · Rick Repsher (keys, vox) · Miles Coursen (guitar, vox) · Rich Giancamilli (sax) · Jeremy Joseph (trumpet)"}]},
+ {date:"August 20, 2026", acts:[{n:"The BC Combo",time:"6:00 PM",style:"Blues · Jazz · Swing · Folk · R&B · Soul",img:"11_bc_combo.png",
+   bio:"MoMojo Records artist Bev Conklin’s band — blues, Americana, folk, R&B and soul for 30+ years, since BC & The Blues Crew (1992).",
+   roster:"Bev Conklin (vocals) · Wayne Smith (guitar/vox) · Joe Mac (guitar) · Glenn Spadone (drums) · Mitch Shelly (bass)"}]},
+ {date:"August 27, 2026", acts:[{n:"Lilly Moss & The Steel Ponies",time:"6:00 PM",style:"Country",img:"12_lilly_moss.png",
+   bio:"Rising country artist from Bethlehem, PA — a sound as unique as her story, performing since dancing on her hospital bed at age three.",roster:""}]},
+ {date:"September 3, 2026", acts:[{n:"DEAL",time:"6:00 PM",style:"Grateful Dead Cover Band",img:"13_deal.png",house:true,
+   bio:"A tribute to the music and improvisational spirit of the Grateful Dead — faithful songs, extended jams, spontaneous moments, the communal Deadhead vibe.",roster:"StageFill house band · DeadDance night"}]},
+ {date:"September 10, 2026", acts:[{n:"Lucky 7",time:"6:00 PM",style:"Classic Funk & Soul",img:"14_lucky7.png",
+   bio:"A Lehigh Valley funk band on one mission: getting crowds moving. Funk grooves, classic dance hits and party favorites keep the floor packed start to finish.",roster:""}]}
 ];
-function ini(n){var w=String(n).replace(/&/g,'').trim().split(/\s+/).filter(Boolean);return ((w[0]||'')[0]+((w[1]||'')[0]||'')).toUpperCase();}
-function fdate(iso){var d=new Date(iso+'T12:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 var TODAY=new Date('2026-08-16T12:00:00');
 document.getElementById('grid').innerHTML=SHOWS.map(function(s){
-  var past=new Date(s.d+'T12:00:00')<TODAY;
-  var mk=LOGO[s.band]?'<img src="'+LOGO[s.band]+'" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\''+ini(s.band)+'\'">':ini(s.band);
-  var claimed=!!LOGO[s.band];
-  return '<div class="tk'+(past?' past':'')+'"><span class="perf"></span><span class="perf r"></span>'+
-    '<div class="hd"><div class="ev">Live at the Falls</div><div class="dt">'+fdate(s.d)+'</div><div class="tm">Doors 6:30 PM · FREE · RSVP</div>'+
-      '<span class="claim">'+(claimed?'Band claimed':'Unclaimed')+'</span></div>'+
-    '<div class="bd"><div class="mk">'+mk+'</div><div><div class="nm">'+s.band+'</div><div class="gn">'+s.gen+(s.co?(' · with '+s.co):'')+'</div></div></div>'+
-    '<div class="ft"><span><span class="venue">Scott Park Stage</span><br>Larry Holmes Dr, Easton</span><span class="qr"></span></div></div>';
+  var past=new Date(s.date)<TODAY, a=s.acts, dbl=a.length>1, lead=a[0];
+  var claimed=a.some(function(x){return x.house;});
+  var imgs = dbl
+    ? '<img src="livefalls/'+a[0].img+'" alt=""><img src="livefalls/'+a[1].img+'" alt="">'
+    : '<img src="livefalls/'+lead.img+'" alt="">';
+  var names = dbl ? (a[0].n+' + '+a[1].n) : lead.n;
+  var bodies = a.map(function(x){
+    return '<div><div class="style">'+esc(x.style)+'</div><div class="time">'+esc(x.time)+'</div><div class="bio">'+esc(x.bio)+'</div>'+
+      (x.roster?'<div class="roster"><b>Lineup:</b> '+esc(x.roster)+'</div>':'')+'</div>';
+  }).join('<div style="height:8px"></div>');
+  return '<div class="tk'+(past?' past':'')+'">'+
+    '<div class="ph'+(dbl?' dbl':'')+'">'+imgs+
+      '<div class="grad"></div>'+
+      '<div class="claim">'+(claimed?'Band claimed':(s.kickoff?'Season kickoff':'Unclaimed'))+'</div>'+
+      '<div class="dt"><div class="d">'+esc(s.date)+'</div><div class="n">'+esc(names)+'</div></div>'+
+    '</div>'+
+    '<div class="bd">'+bodies+'</div>'+
+    '<div class="ft"><span><span class="v">Scott Park Stage</span> · FREE · RSVP<br>presented by GEDP</span><span class="qr"></span></div></div>';
 }).join('');
-var claimedN=SHOWS.filter(function(s){return LOGO[s.band];}).length;
-document.getElementById('foot').innerHTML='13 shows · '+claimedN+' band-claimed · '+(13-claimedN)+' live-and-waiting. '+
-  'Tickets exist the moment the lineup posts — the flywheel turns whether or not a band lifts a finger. Michael will drop in the 13 official images to finish each pass.';
+var claimedN=SHOWS.filter(function(s){return s.acts.some(function(x){return x.house;});}).length;
+document.getElementById('foot').innerHTML='13 shows · 14 acts · '+claimedN+' band-claimed, the rest live and waiting. Official photos and bios in place; the flywheel turns whether or not a band lifts a finger.';
 </script>
 </body></html>
