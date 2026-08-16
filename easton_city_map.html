@@ -37,6 +37,16 @@ body{background:#dfe6ee;color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSys
 .mappills .cat:hover{border-color:#c3ccd6}
 .mappills .cat.on{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 3px 10px rgba(15,163,160,.4)}
 @media(max-width:640px){.mappills{left:12px;right:12px;top:auto;bottom:14px}}
+.mappills .layersel{background:var(--ink2);color:#fff;border-color:var(--ink2);font-weight:800}
+.mappills .layersel:hover{border-color:var(--ink2)}
+.laymenu{position:absolute;top:54px;left:352px;z-index:1200;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(20,26,34,.26);padding:8px;display:none;grid-template-columns:repeat(2,1fr);gap:6px;width:308px}
+.laymenu.open{display:grid}
+.laymenu .lhdr{grid-column:1/-1;font:800 10.5px/1 -apple-system,system-ui,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:4px 6px 2px}
+.laychip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;cursor:pointer;font:800 12.5px/1.15 -apple-system,system-ui,sans-serif;color:#33404e}
+.laychip:hover{background:#f2f6f9}
+.laychip .lc{width:26px;height:26px;border-radius:7px;background:#eef4f4;display:grid;place-items:center;font-size:14px;flex:none}
+.laychip.on{background:#eafaf9;box-shadow:inset 0 0 0 1.5px var(--teal)}
+@media(max-width:640px){.laymenu{left:12px;right:12px;width:auto;top:auto;bottom:56px}}
 .topright{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:800 12px/1 -apple-system,system-ui,sans-serif;color:var(--muted);box-shadow:0 4px 14px rgba(20,26,34,.16)}
 /* pins */
 .smpin{width:30px;height:30px;border-radius:50% 50% 50% 50%;background:#fff;border:2.5px solid var(--teal);box-shadow:0 2px 7px rgba(20,26,34,.32);display:grid;place-items:center;overflow:hidden;cursor:pointer;transition:transform .12s}
@@ -59,6 +69,7 @@ window.__m=window.module;window.__e=window.exports;try{window.module=undefined;w
   <div class="plist" id="plist"></div>
 </div>
 <div id="mapPills" class="mappills"></div>
+<div id="layerMenu" class="laymenu"></div>
 <div class="topright">Easton · City Maps</div>
 <div class="credit">Powered by StageFill · © OpenStreetMap © CARTO</div>
 
@@ -134,15 +145,36 @@ function boot(){
     lyr.push(L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class="amark" style="--c:'+col+'">'+(AICON[a.c]||'📍')+'</div>',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('<b>'+esc(a.n)+'</b><br><span style="color:#697586">'+esc(a.c)+' · Parks & Rec</span><br><a href="'+prUrl(a.c)+'" target="_blank" rel="noopener" style="color:#0b7f7c;font-weight:800;text-decoration:none">Easton Parks &amp; Rec ↗</a>'));
     ALAYERS[i]={cat:a.c,layers:lyr};
   });
-  buildPills(); renderList(); map.on('click',onMapClick); drawVenues();
+  buildLayerMenu(); buildPills(); renderList(); map.on('click',onMapClick); drawVenues();
   if(window.DDEntityManifest){ DDEntityManifest.apply({name:'Easton · City Maps',icon:LG+'2026/08/logo_emsi.png',manifest:'manifests/easton_hub.webmanifest',theme:'#0f1620',title:'Easton · City Maps'}); }
   window.addEventListener('resize',function(){ setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },120); });
 }
 var ACT="";
+// LAYERS = the map levels the dropdown selects. Picking a layer sets which pills show.
+// Parks & Rec is local (its category pills toggle points here); festival layers open their own map.
+var LAYERS=[
+ {id:"parks", name:"Parks & Rec", icon:"🏛️", local:true},
+ {id:"easton_fm", name:"Farmers' Market", icon:"🥕", href:"festival_vendors.html?fest=easton_fm"},
+ {id:"easton_public_market", name:"Public Market", icon:"🏬", href:"festival_vendors.html?fest=easton_public_market"},
+ {id:"west_ward", name:"West Ward", icon:"🎪", href:"festival_vendors.html?fest=west_ward"},
+ {id:"pa_bacon_fest", name:"Bacon Fest", icon:"🥓", href:"festival_vendors.html?fest=pa_bacon_fest"},
+ {id:"live_at_the_falls", name:"Live at the Falls", icon:"🎵", href:"festival_vendors.html?fest=live_at_the_falls"}
+];
+var CURLAYER=LAYERS[0];
+function buildLayerMenu(){
+  document.getElementById('layerMenu').innerHTML='<div class="lhdr">Map layer — pills change per layer</div>'+
+    LAYERS.map(function(l){ return '<div class="laychip'+(CURLAYER&&CURLAYER.id===l.id?' on':'')+'" onclick="pickLayer(\''+l.id+'\')"><span class="lc">'+l.icon+'</span>'+esc(l.name)+'</div>'; }).join('');
+}
+function toggleLayerMenu(e){ if(e){e.stopPropagation();} document.getElementById('layerMenu').classList.toggle('open'); }
+function pickLayer(id){ var l=LAYERS.filter(function(x){return x.id===id;})[0]; if(!l) return;
+  document.getElementById('layerMenu').classList.remove('open');
+  if(l.local){ CURLAYER=l; ACT=''; buildPills(); applyAmen(); } else { location.href=l.href; } }
+document.addEventListener('click',function(){ var el=document.getElementById('layerMenu'); if(el) el.classList.remove('open'); });
 function hasMap(c){ return AMEN.some(function(a){ return a.c===c; }); }
 function buildPills(){
   var cats=Object.keys(ACOLOR);
-  var html='<span class="cat'+(ACT===''?' on':'')+'" onclick="pickAmen(\'\')">📍 All Parks &amp; Rec</span>';
+  var html='<span class="cat layersel" onclick="toggleLayerMenu(event)">'+CURLAYER.icon+' '+esc(CURLAYER.name)+' ▾</span>';
+  html+='<span class="cat'+(ACT===''?' on':'')+'" onclick="pickAmen(\'\')">📍 All Parks &amp; Rec</span>';
   html+=cats.map(function(c){
     if(hasMap(c)) return '<span class="cat'+(ACT===c?' on':'')+'" onclick="pickAmen(\''+c+'\')">'+(AICON[c]||'')+' '+esc(c)+'</span>';
     return '<a class="cat" href="'+prUrl(c)+'" target="_blank" rel="noopener" style="text-decoration:none">'+(AICON[c]||'')+' '+esc(c)+' ↗</a>';
