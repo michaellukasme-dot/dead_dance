@@ -173,9 +173,10 @@ var FESTS = {
     name: "Easton Farmers' Market", theme: "market",
     bbox: [[40.68880410486094,-75.20710660661211],[40.69038409437032,-75.20450969003818]],
     boundary: [[40.68897511006789,-75.20710660661211],[40.69038409437032,-75.20539222702116],[40.690259297537295,-75.20477710165909],[40.68970588758657,-75.20450969003818],[40.68964453580892,-75.20572697382609],[40.68880410486094,-75.20680613441263]],
-    stages: [{ n:"Scott Park Stage", p:"Round bandshell · Live at the Falls · Scott Park", lat:40.690167, lng:-75.205011, r:5.6,
-      pts:[[40.690218148892434,-75.20500977911192],[40.69016222010344,-75.20494607665147],[40.690114934817956,-75.20501112021635],[40.69017137209032,-75.20507549322902]] }],
-    obstacles: [{ n:"Scott Park Stage", poly:[[40.690218148892434,-75.20500977911192],[40.69016222010344,-75.20494607665147],[40.690114934817956,-75.20501112021635],[40.69017137209032,-75.20507549322902]] }],
+    stages: [{ n:"Scott Park Stage", p:"Round bandshell · Live at the Falls · Scott Park", lat:40.69017114365352, lng:-75.2050128840005, r:5.70,
+      rings:[ {lat:40.69008754486382, lng:-75.20510528631141, r:11.66, label:"Auditorium · inner path + seating"},
+              {lat:40.69008754486382, lng:-75.20510528631141, r:18.46, label:"Auditorium · outer path + seating"} ] }],
+    obstacles: [{ n:"Scott Park Auditorium", poly:[[40.6902573,-75.2051053],[40.6902076,-75.204947],[40.6900875,-75.2048814],[40.6899675,-75.204947],[40.6899178,-75.2051053],[40.6899675,-75.2052636],[40.6900875,-75.2053292],[40.6902076,-75.2052636]] }],
     spine: [[40.69035,-75.20534],[40.68995,-75.20585],[40.6895,-75.2064],[40.68905,-75.2069]],
     dates: ["2026-08-29","2026-09-05","2026-09-12","2026-09-15","2026-09-19","2026-09-22","2026-09-26","2026-10-10","2026-10-17","2026-10-24","2026-10-31","2026-11-14","2026-11-21","2026-12-05","2026-12-12","2026-12-19"],
     schedule: {
@@ -844,9 +845,11 @@ function boot(){
     {maxZoom:20, subdomains:'abcd', crossOrigin:true}).addTo(map);
   // footprint outline so the grounds read even on the real map
   if(F.boundary){ boundaryLayer = L.polygon(F.boundary,{color:'#0b7f7c',weight:2,fill:false,opacity:.85,dashArray:'4 5'}).addTo(map); }
-  // ROUND STAGES — true circular stage footprints (e.g. Scott Park bandshell), traced to the meter; a real Stage pin for the Stage Builder
+  // ROUND STAGES + AUDITORIUM RINGS — true circular footprints (Scott Park), traced to the meter; a real Stage pin for the Stage Builder
   if(F.stages){ F.stages.forEach(function(s){
-    L.circle([s.lat,s.lng],{radius:s.r||6, color:'#7a1f2b', weight:2, fillColor:'#7a1f2b', fillOpacity:0.16}).addTo(map);
+    if(s.rings){ s.rings.forEach(function(rg){ L.circle([rg.lat,rg.lng],{radius:rg.r, color:'#7a1f2b', weight:2.5, fill:false, opacity:.78, dashArray:'2 6'}).addTo(map)
+      .bindPopup('<b>'+esc(s.n)+' — '+esc(rg.label||'auditorium')+'</b>'); }); }
+    L.circle([s.lat,s.lng],{radius:s.r||6, color:'#7a1f2b', weight:2, fillColor:'#7a1f2b', fillOpacity:0.18}).addTo(map);
     L.marker([s.lat,s.lng],{riseOnHover:true, icon:L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13],
       html:'<div class="vpin" style="--c:#7a1f2b"><span class="vmark">🎵</span><span class="vplabel">'+esc(s.n)+'</span></div>'})})
       .addTo(map).bindPopup('<b>'+esc(s.n)+'</b><br><span style="color:#697586">'+esc(s.p||'Stage')+'</span>');
