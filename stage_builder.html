@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill — Stage Builder</title>
+<meta name="theme-color" content="#0f1620">
+<!-- stage_builder.html — THE TROJAN HORSE. Drop a Stage pin → name it, pick a genre, set the day's
+     window + set length → StageFill fills every timeslot with suggested acts. $1,200 per tribute band
+     + travel per-diem by distance ring. Real house roster (DEAL, Shakedown Citi, KGB, CNC, RIFT, Hot
+     Sauce, Lilly Moss) suggested first; sample roster fills the rest until a city's own acts load. -->
+<style>
+:root{--ink:#141a22;--bg:#eef1f5;--card:#fff;--line:#e3e8ee;--muted:#6b7684;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#b7791f;--ink2:#0f1620;--rose:#7a1f2b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.top{background:var(--ink2);color:#fff;padding:11px 16px;display:flex;align-items:center;gap:10px}
+.top .b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900}
+.top b{font-size:17px}.top .s{color:#9fb0c2;font-size:12px;font-weight:700;margin-left:auto}
+.hero{background:radial-gradient(120% 130% at 85% -30%,#2a1220,#0f1620);color:#fff;padding:16px 18px}
+.hero h1{margin:0 0 2px;font-size:19px}.hero p{margin:0;color:#c9b6bd;font-size:13px}
+.hero .th{display:inline-block;margin-top:7px;background:rgba(122,31,43,.35);border:1px solid #7a1f2b;color:#f2c9d0;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 16px 60px;display:grid;grid-template-columns:320px 1fr;gap:18px}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px}
+.panel h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+label.f{display:block;margin:9px 0 3px;font-size:12px;font-weight:700;color:#3b4654}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fbfcfd}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{margin-top:13px;width:100%;padding:11px;border:0;border-radius:10px;background:linear-gradient(135deg,#7a1f2b,#b23246);color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+.legend{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.5}
+.legend b{color:#3b4654}
+/* schedule */
+.sched{display:flex;flex-direction:column;gap:9px}
+.summary{background:linear-gradient(135deg,#153042,#0f6f8a);color:#fff;border-radius:13px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.summary .m{flex:1;min-width:120px}.summary .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:#bcd0dd}
+.summary .v{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
+.summary .v small{font-size:13px;font-weight:700;color:#cfe0ea}
+.slot{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.slot .sh{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f7f9fb;border-bottom:1px solid var(--line);font-size:12.5px}
+.slot .sh .tm{font-weight:800;font-variant-numeric:tabular-nums;color:#233}
+.slot .sh .len{color:var(--muted)}
+.slot .sh .swap{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--teal-d);cursor:pointer;border:1px solid #cfe6e5;background:#f0fbfa;border-radius:999px;padding:3px 10px}
+.cands{display:flex;gap:8px;padding:10px 12px;flex-wrap:wrap}
+.act{flex:1;min-width:150px;display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;background:#fff}
+.act.pick{border-color:var(--teal);box-shadow:0 0 0 2px rgba(15,163,160,.14)}
+.act .lg{width:38px;height:38px;border-radius:8px;flex:none;background:linear-gradient(135deg,#153042,#0b7f7c);display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;overflow:hidden}
+.act .lg img{width:100%;height:100%;object-fit:cover}
+.act .nm{font-weight:800;font-size:13.5px;line-height:1.15}
+.act .mt{font-size:11px;color:var(--muted);margin-top:1px}
+.act .pr{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
+.act .pr b{font-size:13px;color:#233}.act .pr small{display:block;font-size:10px;color:var(--amber)}
+.tag{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;background:#eef4f4;color:var(--teal-d);margin-right:4px}
+.ringb{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;background:#fff6e6;color:var(--amber)}
+.samp{font-size:9.5px;color:#9aa6b2;font-weight:800}
+.cta{margin-top:6px;background:#0f1620;color:#fff;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cta b{font-size:15px}.cta .go{margin-left:auto;background:linear-gradient(135deg,var(--teal),#12c2be);color:#04201f;font-weight:900;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+.cta .note{flex-basis:100%;font-size:11px;color:#9fb0c2}
+.foot{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:11.5px}
+</style></head>
+<body>
+<div class="top"><span class="b">◍</span><b>StageFill</b><span class="s">Stage Builder</span></div>
+<div class="hero"><h1>Drop a stage. Fill the day. We book the acts.</h1><p>This is what opens the moment you place a Stage pin on any StageFill map.</p><span class="th">🐴 the Trojan horse — the map gets us in, the stage pays the bills</span></div>
+<div class="wrap">
+  <div class="panel">
+    <h2>The stage</h2>
+    <label class="f">Name of stage</label><input id="sname" value="Riverfront Stage">
+    <label class="f">Music genre</label>
+    <select id="genre">
+      <option value="mixed">Mixed — anything great</option>
+      <option value="jam" selected>Jam / Improv</option>
+      <option value="tribute">Tribute</option>
+      <option value="rock">Rock</option>
+      <option value="country">Country</option>
+      <option value="hiphop">Hip-Hop</option>
+      <option value="blues">Blues</option>
+      <option value="funk">Funk / Soul</option>
+      <option value="bluegrass">Bluegrass</option>
+      <option value="reggae">Reggae</option>
+      <option value="pop">Pop</option>
+      <option value="latin">Latin</option>
+      <option value="dj">DJ / Electronic</option>
+    </select>
+    <label class="f">Date</label><input id="sdate" type="date">
+    <div class="two"><div><label class="f">Doors</label><input id="start" type="time" value="12:00"></div><div><label class="f">Close</label><input id="end" type="time" value="20:00"></div></div>
+    <div class="two"><div><label class="f">Set length</label><select id="setlen"><option>45</option><option selected>60</option><option>75</option><option>90</option></select></div><div><label class="f">Changeover</label><select id="chg"><option>0</option><option selected>15</option><option>20</option><option>30</option></select></div></div>
+    <label class="f">Source acts within…</label>
+    <select id="ring">
+      <option value="local">Local — ≤25 mi (no per-diem)</option>
+      <option value="regional">Regional — ≤60 mi</option>
+      <option value="state" selected>Statewide — ≤120 mi</option>
+      <option value="multi">Multi-state — ≤250 mi</option>
+      <option value="national">National — 250+ mi</option>
+    </select>
+    <label class="f">Suggestions per slot</label><select id="sugg"><option>1</option><option selected>2</option><option>3</option></select>
+    <button class="btn" onclick="build()">Fill the day →</button>
+    <div class="legend">
+      <b>Pricing.</b> $1,200 per act (tribute band, one set). Travel per-diem by ring — the same rings that guide where we grow: <b>Local $0 · Regional $150 · Statewide $350 · Multi-state $650 · National $1,000</b>. Widen the ring for more acts; keep it tight to hold per-diem near zero.
+    </div>
+  </div>
+  <div>
+    <div class="summary" id="summary"></div>
+    <div class="sched" id="sched" style="margin-top:12px"></div>
+    <div class="cta"><b>Book this day through StageFill</b><span style="color:#9fb0c2;font-size:12px">one invoice · we handle contracts, deposits, and settlement</span><button class="go" onclick="alert('Booking flow is a preview — no act is contracted here.')">Request booking →</button><div class="note">Preview only — nothing is contracted or charged. This is the flow a festival sees.</div></div>
+  </div>
+</div>
+<div class="foot" id="foot"></div>
+<script>
+var RING={local:{lab:'Local',per:0},regional:{lab:'Regional',per:150},state:{lab:'Statewide',per:350},multi:{lab:'Multi-state',per:650},national:{lab:'National',per:1000}};
+var RINGORD=['local','regional','state','multi','national'];
+var FEE=1200;
+// real StageFill house roster (logos in repo) + sample roster (fills any genre until a city's own acts load)
+var ROSTER=[
+ {n:'DEAL',g:['jam','tribute','rock'],ring:'local',logo:'deal_logo.svg',note:'Grateful Dead tribute'},
+ {n:'Shakedown Citi',g:['jam','tribute'],ring:'local',logo:'shakedown_citi_logo.svg',note:'Dead & jam'},
+ {n:'CNC',g:['funk','jam'],ring:'local',logo:'cnc_logo.svg'},
+ {n:'Hot Sauce',g:['funk','rock'],ring:'local',logo:'hot_sauce_logo.svg'},
+ {n:'KGB',g:['rock','jam'],ring:'regional',logo:'kgb_logo.svg'},
+ {n:'RIFT',g:['jam','rock'],ring:'regional',logo:'rift_logo.svg'},
+ {n:'Lilly Moss',g:['pop','blues'],ring:'local'},
+ {n:'Whiskey Bend',g:['country'],ring:'regional',sample:1},
+ {n:'Boot Scoot Revue',g:['country'],ring:'state',sample:1},
+ {n:'The 90s Cypher',g:['hiphop'],ring:'state',sample:1},
+ {n:'Boom Bap Collective',g:['hiphop'],ring:'multi',sample:1},
+ {n:'Delta Revival',g:['blues'],ring:'regional',sample:1},
+ {n:'String Theory',g:['bluegrass'],ring:'regional',sample:1},
+ {n:'Irie Vibes',g:['reggae'],ring:'state',sample:1},
+ {n:'Radio Ready',g:['pop'],ring:'regional',sample:1},
+ {n:'Ritmo Caliente',g:['latin'],ring:'state',sample:1},
+ {n:'DJ Selecta',g:['dj'],ring:'local',sample:1},
+ {n:'Garage Anthem',g:['rock'],ring:'regional',sample:1},
+ {n:'The Groove Section',g:['funk'],ring:'state',sample:1}
+];
+function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+function ini(n){var w=String(n).trim().split(/\s+/);return ((w[0]||'')[0]+((w[1]||'')[0]||'')).toUpperCase();}
+function perdiem(r){return RING[r]?RING[r].per:0;}
+function withinRing(actRing,cap){return RINGORD.indexOf(actRing)<=RINGORD.indexOf(cap);}
+function pool(genre,cap){
+  var p=ROSTER.filter(function(a){return withinRing(a.ring,cap) && (genre==='mixed'||a.g.indexOf(genre)>=0);});
+  if(!p.length) p=ROSTER.filter(function(a){return withinRing(a.ring,cap);});
+  // house acts first (no sample flag), then samples; keeps real roster leading
+  return p.sort(function(a,b){return (a.sample?1:0)-(b.sample?1:0);});
+}
+function toMin(t){var m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1]*60+ +m[2]):0;}
+function hhmm(m){var h=Math.floor(m/60),x=m%60;var ap=h<12?'a':'p';var hh=h%12||12;return hh+':'+(x<10?'0':'')+x+ap;}
+var STATE={slots:[]};
+function build(){
+  var genre=g('genre'),cap=g('ring'),setlen=+g('setlen'),chg=+g('chg'),N=+g('sugg');
+  var s=toMin(g('start')),e=toMin(g('end'));
+  var P=pool(genre,cap), slots=[], t=s, k=0;
+  while(t+setlen<=e){
+    var cands=[]; for(var j=0;j<N;j++){ cands.push(P[(k*Math.max(N,1)+j)%P.length]); }
+    slots.push({start:t,end:t+setlen,cands:cands,pick:0}); t+=setlen+chg; k++;
+  }
+  STATE.slots=slots; render();
+}
+function g(id){return document.getElementById(id).value;}
+function swap(i){var sl=STATE.slots[i]; sl.pick=(sl.pick+1)%sl.cands.length; render();}
+function setpick(i,j){STATE.slots[i].pick=j; render();}
+function actCard(a,i,j,picked){
+  var pd=perdiem(a.ring);
+  var lg = a.logo? '<img src="'+a.logo+'" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\''+ini(a.n)+'\'">' : ini(a.n);
+  return '<div class="act'+(picked?' pick':'')+'" onclick="setpick('+i+','+j+')">'+
+    '<div class="lg">'+lg+'</div>'+
+    '<div><div class="nm">'+a.n+(a.sample?' <span class="samp">· sample</span>':'')+'</div>'+
+    '<div class="mt"><span class="ringb">'+RING[a.ring].lab+'</span> '+(a.note||a.g[0])+'</div></div>'+
+    '<div class="pr"><b>'+money(FEE+pd)+'</b>'+(pd?'<small>+'+money(pd)+' travel</small>':'<small>local</small>')+'</div></div>';
+}
+function render(){
+  var sl=STATE.slots, fees=sl.length*FEE, pd=0;
+  sl.forEach(function(s){ pd+=perdiem(s.cands[s.pick].ring); });
+  document.getElementById('summary').innerHTML=
+    '<div class="m"><div class="k">Acts</div><div class="v">'+sl.length+'</div></div>'+
+    '<div class="m"><div class="k">Act fees</div><div class="v">'+money(fees)+'</div></div>'+
+    '<div class="m"><div class="k">Travel per-diem</div><div class="v">'+money(pd)+'</div></div>'+
+    '<div class="m"><div class="k">Total day</div><div class="v">'+money(fees+pd)+'<small> for '+g('sname')+'</small></div></div>';
+  document.getElementById('sched').innerHTML = sl.map(function(s,i){
+    return '<div class="slot"><div class="sh"><span class="tm">'+hhmm(s.start)+'–'+hhmm(s.end)+'</span><span class="len">'+(s.end-s.start)+' min set</span><span class="swap" onclick="swap('+i+')">↻ swap pick</span></div>'+
+      '<div class="cands">'+s.cands.map(function(a,j){return actCard(a,i,j,j===s.pick);}).join('')+'</div></div>';
+  }).join('');
+  document.getElementById('foot').innerHTML='Suggested acts lead with the real StageFill house roster (DEAL, Shakedown Citi, KGB, CNC, RIFT, Hot Sauce, Lilly Moss); “sample” acts stand in per genre until a city’s own roster loads. Per-diem rings mirror the beachhead: the closer the act, the lower the cost — a reason to grow the roster city by city.';
+}
+document.getElementById('sdate').value=new Date(Date.now()+6048e5).toISOString().slice(0,10);
+build();
+</script>
+</body></html>

@@ -81,11 +81,14 @@ var SUBMAPS=[
  {id:"easton_winter_market",n:"Easton Winter Market",    addr:"Outside the Public Market",    logo:LG+"2025/09/logo_efm.png", lat:40.69140, lng:-75.20895}
 ];
 /* city-level PARKS & REC / amenity layer — toggled by the top pills (free with any paid module) */
-var ACOLOR={"Parks":"#3f8f4a","Trails":"#2f7d5a","Pools":"#2a7fb0","Baseball":"#b5651d","Playgrounds":"#c05299","Restrooms":"#5b6b7a","Parking":"#c9a227"};
-var AICON={"Parks":"🌳","Trails":"🥾","Pools":"🏊","Baseball":"⚾","Playgrounds":"🛝","Restrooms":"🚻","Parking":"🅿️"};
+var PRMAIN="https://easton-pa.com/241/Parks-Recreation", PRREG="https://eastonrecdept.recdesk.com/";
+var ACOLOR={"City Parks":"#3f8f4a","Waterfront":"#2a7fb0","Trails":"#2f7d5a","Swimming Pools":"#2a7fb0","Playgrounds":"#c05299","Dog Parks":"#7a6a3a","Baseball":"#b5651d","Youth Sports":"#b0472b","Pavilion Rentals":"#8a6d3b","Restrooms":"#5b6b7a","Parking":"#c9a227"};
+var AICON={"City Parks":"🌳","Waterfront":"🌊","Trails":"🥾","Swimming Pools":"🏊","Playgrounds":"🛝","Dog Parks":"🐕","Baseball":"⚾","Youth Sports":"🏅","Pavilion Rentals":"⛺","Restrooms":"🚻","Parking":"🅿️"};
+var PRURL={"Youth Sports":PRREG}; function prUrl(c){ return PRURL[c]||PRMAIN; }
 var AMEN=[
- {c:"Parks",n:"Scott Park",lat:40.68880,lng:-75.20560},{c:"Parks",n:"Riverside Park",lat:40.68720,lng:-75.20650},{c:"Parks",n:"Centre Square",lat:40.69126,lng:-75.20913},
- {c:"Pools",n:"Eddyside Pool",lat:40.68670,lng:-75.20630},
+ {c:"City Parks",n:"Scott Park",lat:40.68880,lng:-75.20560},{c:"City Parks",n:"Riverside Park",lat:40.68720,lng:-75.20650},{c:"City Parks",n:"Centre Square",lat:40.69126,lng:-75.20913},
+ {c:"Waterfront",n:"Easton Waterfront · Confluence",lat:40.68780,lng:-75.20500},
+ {c:"Swimming Pools",n:"Eddyside Pool",lat:40.68670,lng:-75.20630},
  {c:"Playgrounds",n:"Scott Park Playground",lat:40.68930,lng:-75.20600},{c:"Playgrounds",n:"Riverside Park Playground",lat:40.68755,lng:-75.20700},
  {c:"Restrooms",n:"Restroom · North",lat:40.690312,lng:-75.205090},{c:"Restrooms",n:"Restroom · South",lat:40.689235,lng:-75.206386},
  {c:"Parking",n:"Parking Garage · N. Third",lat:40.69205,lng:-75.20740},{c:"Parking",n:"Parking Garage · S. Third",lat:40.69010,lng:-75.20820},
@@ -93,6 +96,22 @@ var AMEN=[
  {c:"Trails",n:"Karl Stirner Arts Trail",path:[[40.69200,-75.20440],[40.69340,-75.20760],[40.69380,-75.20960]],lat:40.69340,lng:-75.20720},
  {c:"Trails",n:"Easton Highline",path:[[40.68680,-75.21050],[40.68715,-75.21520],[40.68700,-75.21660]],lat:40.68705,lng:-75.21400}
 ];
+/* real performance VENUES — stages the Stage Builder books; polygons/circles traced to the meter */
+var VENUES=[
+ {n:"River Amphitheater",note:"Larry Holmes Dr riverside · fan amphitheater · owner TBD (Lafayette?)",
+  poly:[[40.69340848344101,-75.20485553150372],[40.6931811587124,-75.2048263663901],[40.69311570319923,-75.20491969475376],[40.69315550723516,-75.2052090126811],[40.693208579246075,-75.20518918040382],[40.693284649054675,-75.20513434999017],[40.693350988933105,-75.20504568804469],[40.693410252501984,-75.20485903131738]]},
+ {n:"Scott Park Bandshell",note:"Round stage · Live at the Falls · Scott Park",
+  circle:{lat:40.690167,lng:-75.205011,r:5.6}}
+];
+function polyCenter(p){var la=0,lo=0;p.forEach(function(q){la+=q[0];lo+=q[1];});return [la/p.length,lo/p.length];}
+function venuePin(la,lo,v){
+  L.marker([la,lo],{riseOnHover:true,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div class="smpin" style="border-color:#7a1f2b;background:#fff;color:#7a1f2b">🎵</div>'})}).addTo(map)
+   .bindPopup('<b>'+esc(v.n)+'</b><br><span style="color:#697586">'+esc(v.note)+'</span><br><a href="stage_builder.html" style="color:#7a1f2b;font-weight:800;text-decoration:none">Book this stage →</a>');
+}
+function drawVenues(){ VENUES.forEach(function(v){
+  if(v.poly){ L.polygon(v.poly,{color:'#7a1f2b',weight:2,fillColor:'#7a1f2b',fillOpacity:0.16}).addTo(map); var c=polyCenter(v.poly); venuePin(c[0],c[1],v); }
+  if(v.circle){ L.circle([v.circle.lat,v.circle.lng],{radius:v.circle.r,color:'#7a1f2b',weight:2,fillColor:'#7a1f2b',fillOpacity:0.16}).addTo(map); venuePin(v.circle.lat,v.circle.lng,v); }
+}); }
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function ini(s){return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();}
 
@@ -112,18 +131,24 @@ function boot(){
   AMEN.forEach(function(a,i){
     var col=ACOLOR[a.c]||'#334155', lyr=[];
     if(a.path){ lyr.push(L.polyline(a.path,{color:'#fff',weight:7,opacity:.9,lineCap:'round'})); lyr.push(L.polyline(a.path,{color:col,weight:4,opacity:.95,lineCap:'round'})); }
-    lyr.push(L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class="amark" style="--c:'+col+'">'+(AICON[a.c]||'📍')+'</div>',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('<b>'+esc(a.n)+'</b><br><span style="color:#697586">'+esc(a.c)+' · Parks & Rec</span>'));
+    lyr.push(L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class="amark" style="--c:'+col+'">'+(AICON[a.c]||'📍')+'</div>',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('<b>'+esc(a.n)+'</b><br><span style="color:#697586">'+esc(a.c)+' · Parks & Rec</span><br><a href="'+prUrl(a.c)+'" target="_blank" rel="noopener" style="color:#0b7f7c;font-weight:800;text-decoration:none">Easton Parks &amp; Rec ↗</a>'));
     ALAYERS[i]={cat:a.c,layers:lyr};
   });
-  buildPills(); renderList();
+  buildPills(); renderList(); map.on('click',onMapClick); drawVenues();
   if(window.DDEntityManifest){ DDEntityManifest.apply({name:'Easton · City Maps',icon:LG+'2026/08/logo_emsi.png',manifest:'manifests/easton_hub.webmanifest',theme:'#0f1620',title:'Easton · City Maps'}); }
   window.addEventListener('resize',function(){ setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },120); });
 }
 var ACT="";
+function hasMap(c){ return AMEN.some(function(a){ return a.c===c; }); }
 function buildPills(){
   var cats=Object.keys(ACOLOR);
-  document.getElementById('mapPills').innerHTML='<span class="cat'+(ACT===''?' on':'')+'" onclick="pickAmen(\'\')">📍 All Parks &amp; Rec</span>'+
-    cats.map(function(c){ return '<span class="cat'+(ACT===c?' on':'')+'" onclick="pickAmen(\''+c+'\')">'+(AICON[c]||'')+' '+esc(c)+'</span>'; }).join('');
+  var html='<span class="cat'+(ACT===''?' on':'')+'" onclick="pickAmen(\'\')">📍 All Parks &amp; Rec</span>';
+  html+=cats.map(function(c){
+    if(hasMap(c)) return '<span class="cat'+(ACT===c?' on':'')+'" onclick="pickAmen(\''+c+'\')">'+(AICON[c]||'')+' '+esc(c)+'</span>';
+    return '<a class="cat" href="'+prUrl(c)+'" target="_blank" rel="noopener" style="text-decoration:none">'+(AICON[c]||'')+' '+esc(c)+' ↗</a>';
+  }).join('');
+  html+='<a class="cat" href="'+PRMAIN+'" target="_blank" rel="noopener" style="text-decoration:none">🏛️ Easton P&amp;R site ↗</a>';
+  document.getElementById('mapPills').innerHTML=html;
 }
 function pickAmen(c){ ACT=(ACT===c?'':c); buildPills(); applyAmen(); }
 function applyAmen(){
@@ -131,6 +156,21 @@ function applyAmen(){
   Object.keys(ALAYERS).forEach(function(k){ var a=ALAYERS[k]; var show=(ACT!=='' && a.cat===ACT);
     a.layers.forEach(function(ly){ if(show){ if(!map.hasLayer(ly)) ly.addTo(map); } else if(map.hasLayer(ly)) map.removeLayer(ly); }); });
 }
+var ADDING=false, DRAFTS=[];
+function toast(msg){ var t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#0f1620;color:#fff;padding:8px 14px;border-radius:999px;font:700 12px -apple-system,sans-serif;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3)'; document.body.appendChild(t);} t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(function(){t.style.display='none';},3600); }
+function startAdd(){ ADDING=true; map.getContainer().style.cursor='crosshair'; map.setView([40.69010,-75.20780],17); toast('Click the map to drop the new pin — e.g. Public Market on Pine St'); }
+function onMapClick(e){
+  if(!ADDING) return;
+  var name=prompt('Name this map (its coordinates become the sub-map):','Easton Public Market');
+  ADDING=false; map.getContainer().style.cursor='';
+  if(!name) return;
+  var d={n:name,lat:e.latlng.lat,lng:e.latlng.lng};
+  var mk=L.marker([d.lat,d.lng],{draggable:true,icon:L.divIcon({className:'',html:'<div class="smpin" style="border-color:#0b7f7c;border-style:dashed;background:#eafaf9;color:#0b7f7c">＋</div>',iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
+  mk.bindPopup('<b>'+esc(d.n)+'</b><br><span style="color:#697586">Draft — drag to place. These coordinates become the sub-map.</span>').openPopup();
+  mk.on('dragend',function(){ var p=mk.getLatLng(); d.lat=p.lat; d.lng=p.lng; renderList(); });
+  d.marker=mk; DRAFTS.push(d); renderList();
+}
+function focusDraft(i){ var d=DRAFTS[i]; if(d){ map.setView([d.lat,d.lng],18); if(d.marker) d.marker.openPopup(); } }
 function renderList(){
   var q=(document.getElementById('q').value||'').toLowerCase();
   var rows=SUBMAPS.filter(function(s){ return !q || (s.n+' '+s.addr).toLowerCase().indexOf(q)>=0; }).map(function(s){
@@ -142,6 +182,12 @@ function renderList(){
   if(!q || 'parks recs recreation'.indexOf(q)>=0){
     rows+='<a class="smrow" href="festival_vendors.html?fest=gedp" onclick="pickAmen(\'Parks\');"><span class="smlogo">⚾</span><span><b>Easton Parks &amp; Recs</b><small>Parks · trails · pools · fields — free layer</small></span></a>';
   }
+  // draft pins the planner has dropped — start from Easton, add pins (coords TBD)
+  DRAFTS.forEach(function(d,i){
+    rows+='<a class="smrow" onclick="focusDraft('+i+')" style="cursor:pointer"><span class="smlogo" style="background:#0b7f7c;color:#fff">＋</span><span><b>'+esc(d.n)+' <span style="color:#b7791f;font-size:10px;font-weight:800">DRAFT</span></b><small>'+d.lat.toFixed(5)+', '+d.lng.toFixed(5)+' · drag pin to place</small></span></a>';
+  });
+  // the "+ Add" affordance — a %City% planner never starts from scratch; it starts from Easton
+  rows+='<a class="smrow" onclick="startAdd()" style="cursor:pointer;border-top:1px dashed #cbd5e1"><span class="smlogo" style="background:#eef4f4;color:#0b7f7c">＋</span><span><b>Add a map to Easton</b><small>Drop a pin — e.g. Public Market on Pine St (coords TBD)</small></span></a>';
   document.getElementById('plist').innerHTML=rows||'<div style="padding:16px;color:#697586;font-size:13px">No city maps match.</div>';
 }
 boot();
