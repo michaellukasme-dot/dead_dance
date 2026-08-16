@@ -71,17 +71,24 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 #empty a{display:inline-block;background:var(--teal);color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px 16px}
 /* ── Elegance pass: clean pins, hover labels, base toggle ── */
 .vpin{position:relative}
-.vdot{display:block;width:13px;height:13px;border-radius:50%;background:var(--c,#334155);border:2.5px solid #fff;box-shadow:0 1px 4px rgba(20,26,34,.4);cursor:pointer;transition:transform .12s ease}
-.vplabel{position:absolute;left:15px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #dde3ea;border-left:3px solid var(--c,#334155);border-radius:7px;padding:2px 8px;font:700 11px/1.25 -apple-system,system-ui,sans-serif;color:#1b2430;white-space:nowrap;box-shadow:0 3px 10px rgba(20,26,34,.16);opacity:0;pointer-events:none;transition:opacity .12s ease;display:none}
+.vmark{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;border:2.5px solid var(--c,#334155);box-shadow:0 2px 7px rgba(20,26,34,.32);font-size:14px;line-height:1;cursor:pointer;transition:transform .12s ease}
+.vplabel{position:absolute;left:30px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #dde3ea;border-left:3px solid var(--c,#334155);border-radius:7px;padding:3px 9px;font:700 11.5px/1.25 -apple-system,system-ui,sans-serif;color:#1b2430;white-space:nowrap;box-shadow:0 3px 10px rgba(20,26,34,.18);opacity:0;pointer-events:none;transition:opacity .12s ease;display:none}
 .vpin:hover{z-index:1000 !important}
-.vpin:hover .vdot{transform:scale(1.4)}
+.vpin:hover .vmark{transform:scale(1.22)}
 .vpin:hover .vplabel,.vpin.sel .vplabel{opacity:1;display:block}
 .vpin.sel{z-index:1001 !important}
-.vpin.sel .vdot{transform:scale(1.6);box-shadow:0 0 0 4px rgba(245,158,11,.42),0 2px 6px rgba(20,26,34,.45)}
+.vpin.sel .vmark{transform:scale(1.38);box-shadow:0 0 0 4px rgba(245,158,11,.42),0 2px 7px rgba(20,26,34,.42)}
 .zlabel{background:var(--zc,#153042);color:#fff;font:800 11px/1 -apple-system,system-ui,sans-serif;padding:4px 9px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(20,26,34,.3);letter-spacing:.3px}
 .mtoggle{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:800 12px/1 -apple-system,system-ui,sans-serif;color:var(--ink);box-shadow:0 4px 14px rgba(20,26,34,.16);cursor:pointer;display:flex;align-items:center;gap:7px}
 .mtoggle:hover{border-color:var(--teal)}
 .mtoggle .sw{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}
+/* Google-Maps-style category pills, ON the map, horizontally scrollable */
+.mappills{position:absolute;top:12px;left:324px;right:150px;z-index:1000;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mappills::-webkit-scrollbar{display:none}
+.mappills .cat{flex:none;background:#fff;border:1px solid #e3e7ec;border-radius:999px;padding:8px 13px;font:700 12.5px/1 -apple-system,system-ui,sans-serif;color:#3a444e;box-shadow:0 2px 8px rgba(20,26,34,.16);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:background .1s,color .1s,border-color .1s}
+.mappills .cat:hover{border-color:#c3ccd6}
+.mappills .cat.on{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 3px 10px rgba(15,163,160,.4)}
+@media(max-width:640px){.mappills{left:12px;right:12px;top:auto;bottom:14px}}
 .leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 12px 30px rgba(20,26,34,.24)}
 .leaflet-popup-content{margin:12px 13px}
 .leaflet-popup-tip{box-shadow:0 12px 30px rgba(20,26,34,.24)}
@@ -92,11 +99,11 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 <div id="wrap">
   <div id="map"></div>
   <button id="mapToggle" class="mtoggle" onclick="toggleBase()"><span class="sw"></span>Illustrated view</button>
+  <div id="mapPills" class="mappills"></div>
   <div id="dir">
     <div class="dh"><span>Vendor Directory</span><span class="ct" id="vcount"></span><button class="tog" onclick="toggleDir()" aria-label="Collapse">▾</button></div>
     <div class="drow" id="daterow" style="display:none"><span class="dlab">Market day</span><select id="datepick" onchange="pickDate(this.value)"></select></div>
     <div class="srch"><input id="q" placeholder="Search vendors or products…" oninput="renderList()"></div>
-    <div class="cats" id="cats"></div>
     <div class="list" id="list"></div>
   </div>
   <div id="empty"><div class="card"><h2 id="emptyName">No vendor map yet</h2><p>This event hasn't published a vendor map. Build it on real coordinates in The Maker.</p><a href="festival_event_maker.html">Open The Maker →</a></div></div>
@@ -121,10 +128,10 @@ var NAMES = { easton_fm:"Easton Farmers' Market", easton_main:"Easton Main Stree
   easton_winter_market:"Easton Winter Market", kota:"King of the Arts Festival" };
 
 var CATCOLOR = { "Farmer":"#2a8a4a", "Food":"#e0662e", "Beverages":"#0f6f8a", "Bakery":"#b07d17",
-  "Craft & Art":"#7a3cc0", "Specialty":"#0b7f7c", "Body":"#b8006e", "Merchandise":"#334155", "Sweets":"#d1477a",
+  "Craft & Art":"#a05a3c", "Specialty":"#0b7f7c", "Body":"#b8006e", "Merchandise":"#334155", "Sweets":"#d1477a",
   "Music / Stage":"#7a1f2b", "Fixed Retail":"#4a5568", "Food Truck":"#c05621",
   "Move / Fitness":"#2f855a", "Glow / Beauty":"#b83280", "Nourish":"#b7791f", "Live Well":"#2c7a7b",
-  "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#7a3cc0", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568",
+  "Food Cart":"#e0662e", "Specialty Food Artisan":"#0b7f7c", "Material Goods/Craft/Flea/Art":"#a05a3c", "Farmer/Dealer":"#2f855a", "Served/To Go Foods":"#c05621", "Fisher/Seafood":"#2c7a7b", "Exhibitor":"#b8006e", "Organization":"#4a5568",
   "Trail / Path":"#2f7d5a", "Park / Green":"#3f8f4a", "Rec Facility":"#0b7f7c", "Sponsor":"#8a5a00", "Restroom":"#5b6b7a",
   "Baseball Field":"#b5651d", "Playground":"#c05299", "Pool":"#2a7fb0", "Sports Court":"#6b8e23", "Dog Park":"#7a6a3a" };
 var KINDLABEL = { fixed:"Storefront", street:"Stall", truck:"Truck", tent:"Tent", stage:"Stage", path:"Trail" };  // fixed vs temporary vs stage vs linear
@@ -165,7 +172,7 @@ var FESTS = {
   easton_fm: {
     name: "Easton Farmers' Market", theme: "market",
     bbox: [[40.68880410486094,-75.20710660661211],[40.69038409437032,-75.20450969003818]],
-    boundary: [[40.68897511006789,-75.20710660661211],[40.69038409437032,-75.20539222702116],[40.6903304713883,-75.20524200693974],[40.68970035101199,-75.2049493135101],[40.690259297537295,-75.20477710165909],[40.68970588758657,-75.20450969003818],[40.68964453580892,-75.20572697382609],[40.68880410486094,-75.20680613441263]],
+    boundary: [[40.68897511006789,-75.20710660661211],[40.69038409437032,-75.20539222702116],[40.690259297537295,-75.20477710165909],[40.68970588758657,-75.20450969003818],[40.68964453580892,-75.20572697382609],[40.68880410486094,-75.20680613441263]],
     spine: [[40.69035,-75.20534],[40.68995,-75.20585],[40.6895,-75.2064],[40.68905,-75.2069]],
     dates: ["2026-08-29","2026-09-05","2026-09-12","2026-09-15","2026-09-19","2026-09-22","2026-09-26","2026-10-10","2026-10-17","2026-10-24","2026-10-31","2026-11-14","2026-11-21","2026-12-05","2026-12-12","2026-12-19"],
     schedule: {
@@ -488,7 +495,7 @@ var FESTS = {
       {id:"N", name:"Zone N · Northampton → Larry Holmes Dr", bbox:[[40.6907,-75.2072],[40.6919,-75.2061]], col:"#9c2b2b"},
       {id:"B", name:"Zone B · N. Third → Spring Garden", bbox:[[40.6921,-75.2081],[40.693,-75.2074]], col:"#9c2b2b"},
       {id:"C", name:"Zone C · S. Third → Ferry", bbox:[[40.6905,-75.20805],[40.6913,-75.2074]], col:"#9c2b2b"},
-      {id:"SEC", name:"Second St. · south of Northampton", bbox:[[40.6905,-75.2068],[40.6913,-75.2061]], col:"#7a3cc0"}
+      {id:"SEC", name:"Second St. · south of Northampton", bbox:[[40.6905,-75.2068],[40.6913,-75.2061]], col:"#a05a3c"}
     ],
     vendors: [
       {n:"All Good Eats", c:"Food", k:"tent", zone:"O", lat:40.692028, lng:-75.208234},
@@ -840,11 +847,11 @@ function boot(){
       containers:F.vendors.map(function(v){ return { corners:squareAround(v.lat,v.lng,0.00006), name:v.n }; }) }, F.theme);
     if(url){ cutesyLayer = L.imageOverlay(url, F.bbox, {opacity:0.97, interactive:false}); }
   }catch(e){}
-  // vendor pins — a clean dot; the name floats in on hover / when selected (scales to 70+ vendors)
+  // vendor pins — Proxi/Google-style icon markers; the name floats in on hover / when selected
   F.vendors.forEach(function(v,i){
     var color = CATCOLOR[v.c] || '#334155';
-    var icon = L.divIcon({className:'', iconSize:[13,13], iconAnchor:[6,6],
-      html:'<div class="vpin" id="pin'+i+'" style="--c:'+color+'"><span class="vdot"></span><span class="vplabel">'+esc(v.n)+(v.booth?(' · '+esc(v.booth)):'')+'</span></div>'});
+    var icon = L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13],
+      html:'<div class="vpin" id="pin'+i+'" style="--c:'+color+'"><span class="vmark">'+catIcon(v.c)+'</span><span class="vplabel">'+esc(v.n)+(v.booth?(' · '+esc(v.booth)):'')+'</span></div>'});
     var m = L.marker([v.lat,v.lng],{icon:icon,riseOnHover:true}).addTo(map);
     m.bindPopup(vendorCard(v),{maxWidth:280});
     m.on('click',function(){ select(i,false); });
@@ -903,8 +910,27 @@ function updateMapVisibility(){
   });
 }
 
-function buildCats(){ var cats=['All']; F.vendors.forEach(function(v){ if(cats.indexOf(v.c)<0)cats.push(v.c); });
-  document.getElementById('cats').innerHTML = cats.map(function(c){ var v=(c==='All'?'':c); return '<span class="cat'+((ACTIVE_CAT===v)?' on':'')+'" onclick="pickCat(\''+v+'\')">'+esc(c)+'</span>'; }).join(''); }
+// short, icon'd pill labels (Google-Maps style) — full category kept for filtering
+var SHORTLABEL={
+ "Food Cart":"🍴 Food","Specialty Food Artisan":"🧀 Specialty","Beverages":"🥤 Drinks",
+ "Material Goods/Craft/Flea/Art":"🎨 Crafts","Farmer":"🥕 Farmer","Farmer/Dealer":"🚜 Dealer",
+ "Served/To Go Foods":"🥡 To-Go","Exhibitor":"🎪 Exhibitor","Organization":"🏛️ Org",
+ "Fisher/Seafood":"🐟 Seafood","Trail / Path":"🥾 Trails","Restroom":"🚻 Restrooms",
+ "Food":"🍴 Food","Bakery":"🥐 Bakery","Sweets":"🍬 Sweets","Body":"🧴 Body","Craft & Art":"🎨 Art",
+ "Merchandise":"🛍️ Goods","Fixed Retail":"🏬 Shops","Music / Stage":"🎵 Stages","Food Truck":"🚚 Trucks",
+ "Sponsor":"⭐ Sponsors","Specialty":"🧀 Specialty",
+ "Park / Green":"🌳 Parks","Baseball Field":"⚾ Baseball","Playground":"🛝 Playgrounds","Pool":"🏊 Pools",
+ "Sports Court":"🏀 Courts","Dog Park":"🐕 Dog Parks","Rec Facility":"🎪 Rec",
+ "Move / Fitness":"🏃 Fitness","Glow / Beauty":"💄 Beauty","Nourish":"🥗 Nourish","Live Well":"🧘 Wellness"
+};
+function shortCat(c){ return c==='All' ? '📍 All' : (SHORTLABEL[c] || c); }
+// the single glyph that goes inside a map pin, per category
+function catIcon(c){ var s=SHORTLABEL[c]; if(s) return s.split(' ')[0];
+  var F={"Farmer":"🥕","Beverages":"🥤","Food":"🍴","Bakery":"🥐","Sweets":"🍬","Body":"🧴","Merchandise":"🛍️","Music / Stage":"🎵","Fixed Retail":"🏬"};
+  return F[c]||'📍'; }
+function buildCats(){ var el=document.getElementById('mapPills'); if(!el) return;
+  var cats=['All']; F.vendors.forEach(function(v){ if(cats.indexOf(v.c)<0)cats.push(v.c); });
+  el.innerHTML = cats.map(function(c){ var v=(c==='All'?'':c); return '<span class="cat'+((ACTIVE_CAT===v)?' on':'')+'" onclick="pickCat(\''+v.replace(/'/g,"\\'")+'\')">'+esc(shortCat(c))+'</span>'; }).join(''); }
 function pickCat(c){ ACTIVE_CAT=c; buildCats(); updateMapVisibility(); renderList(); }
 
 function renderList(){

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Easton · City Maps</title>
+<meta name="theme-color" content="#0f1620">
+<!--
+  easton_city_map.html — the %CITY_MAP% level (Google-Maps register, StageFill context).
+  A real base map + a left panel that LAUNCHES the city's sub-maps (Farmers' Market, Public
+  Market, West Ward, Bacon Fest, …), each opening its own map with its own pills. Top pills at
+  THIS level toggle the free Parks & Rec / amenity layers on the city map.
+  City Map contains sub-maps; pills differ per map level.
+-->
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<style>
+:root{--ink:#141a22;--bg:#f5f7fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--ink2:#0f1620}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
+body{background:#dfe6ee;color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#map{position:absolute;inset:0;background:#dfe6ee}
+.leaflet-container{background:#dfe6ee}
+/* ── left panel: search + sub-map launcher ── */
+#panel{position:absolute;top:12px;left:12px;width:328px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(20,26,34,.22);z-index:1100;display:flex;flex-direction:column;overflow:hidden}
+.psearch{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.psearch .b{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:15px;flex:none}
+.psearch input{flex:1;border:0;font:inherit;font-size:14.5px;outline:none;color:var(--ink);background:transparent}
+.psearch .go{width:30px;height:30px;border-radius:50%;background:#eef2f6;display:grid;place-items:center;color:var(--teal-d);flex:none}
+.plist{overflow:auto;flex:1}
+.smrow{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit}
+.smrow:hover{background:#f4f8fb}
+.smlogo{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;flex:none;overflow:hidden;font-size:20px}
+.smlogo img{max-width:86%;max-height:86%;object-fit:contain}
+.smrow b{font-size:14.5px;font-weight:800;display:block;line-height:1.15}
+.smrow small{font-size:12px;color:var(--muted);display:block;margin-top:1px}
+.smrow .sub2{font-size:11.5px;color:#9aa6b2}
+/* ── top pill bar (city level = Parks & Rec / amenity layers) ── */
+.mappills{position:absolute;top:12px;left:352px;right:150px;z-index:1000;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 8px;scrollbar-width:none}
+.mappills::-webkit-scrollbar{display:none}
+.mappills .cat{flex:none;background:#fff;border:1px solid #e3e7ec;border-radius:999px;padding:8px 13px;font:700 12.5px/1 -apple-system,system-ui,sans-serif;color:#3a444e;box-shadow:0 2px 8px rgba(20,26,34,.16);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.mappills .cat:hover{border-color:#c3ccd6}
+.mappills .cat.on{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 3px 10px rgba(15,163,160,.4)}
+@media(max-width:640px){.mappills{left:12px;right:12px;top:auto;bottom:14px}}
+.topright{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:800 12px/1 -apple-system,system-ui,sans-serif;color:var(--muted);box-shadow:0 4px 14px rgba(20,26,34,.16)}
+/* pins */
+.smpin{width:30px;height:30px;border-radius:50% 50% 50% 50%;background:#fff;border:2.5px solid var(--teal);box-shadow:0 2px 7px rgba(20,26,34,.32);display:grid;place-items:center;overflow:hidden;cursor:pointer;transition:transform .12s}
+.smpin img{max-width:80%;max-height:80%;object-fit:contain}
+.smpin:hover{transform:scale(1.18)}
+.amark{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#fff;border:2.5px solid var(--c,#334155);box-shadow:0 2px 6px rgba(20,26,34,.3);font-size:13px;cursor:pointer}
+.credit{position:absolute;right:8px;bottom:6px;z-index:1100;font-size:11px;color:#6b7684;background:#ffffffcc;border-radius:6px;padding:2px 7px}
+.leaflet-popup-content-wrapper{border-radius:13px}
+</style></head>
+<body>
+<script>/* preview-webview shim: keep Leaflet's UMD from populating module.exports instead of window.L */
+window.__m=window.module;window.__e=window.exports;try{window.module=undefined;window.exports=undefined;}catch(_){}</script>
+<script src="leaflet/leaflet.js"></script>
+<script>try{window.module=window.__m;window.exports=window.__e;}catch(_){}if(typeof L==='undefined'&&window.__e&&window.__e.map){window.L=window.__e;}</script>
+<script src="dd_entity_manifest.js"></script>
+
+<div id="map"></div>
+<div id="panel">
+  <div class="psearch"><span class="b">◍</span><input id="q" placeholder="Search Easton City Maps…" oninput="renderList()"><span class="go">➤</span></div>
+  <div class="plist" id="plist"></div>
+</div>
+<div id="mapPills" class="mappills"></div>
+<div class="topright">Easton · City Maps</div>
+<div class="credit">Powered by StageFill · © OpenStreetMap © CARTO</div>
+
+<script>
+var LG="https://pabaconfest.com/wp-content/uploads/";
+/* the city's SUB-MAPS — each launches its own map (its own pills live there) */
+var SUBMAPS=[
+ {id:"easton_fm",           n:"Easton Farmers' Market",  addr:"Scott Park · Larry Holmes Dr", logo:LG+"2025/09/logo_efm.png", lat:40.68950, lng:-75.20560},
+ {id:"easton_public_market",n:"Easton Public Market",    addr:"325 Northampton St",           logo:LG+"2026/08/epm_logo_color-e1786366892537.png", lat:40.69135, lng:-75.20880},
+ {id:"west_ward",           n:"Easton West Ward Market", addr:"West Ward · Pine St",           logo:LG+"2026/08/ww_logo-scaled-e1786367359948.png", lat:40.69050, lng:-75.21450},
+ {id:"pa_bacon_fest",       n:"Easton BaconFest 2026",   addr:"Centre Sq · zones B·A·C·O·N + 2nd St", logo:LG+"2026/08/pabaconfest_logo_square-e1786367273579.png", lat:40.69157, lng:-75.20913},
+ {id:"easton_main",         n:"Easton Main Street",      addr:"20-block downtown district",   logo:LG+"2026/08/logo_emsi.png", lat:40.69126, lng:-75.20960},
+ {id:"live_at_the_falls",   n:"Live At The Falls",       addr:"Scott Park · Thursdays",       logo:LG+"2026/08/latf_logo_color-e1786367800123.jpg", lat:40.68870, lng:-75.20545},
+ {id:"easton_winter_village",n:"Easton Winter Village",  addr:"Centre Square · holiday market",logo:LG+"2026/08/wintervillage-logo-trans-4c-e1786367715358.png", lat:40.69150, lng:-75.20885},
+ {id:"easton_heritage_day", n:"Easton Heritage Day",     addr:"Downtown · July",              logo:LG+"2026/08/heritageday2022_logo_color-e1786367329513.png", lat:40.69162, lng:-75.20790},
+ {id:"easton_criterium",    n:"Easton Criterium",        addr:"Downtown race course",         logo:LG+"2026/08/ec_blackstacked_logo-e1786367288805.png", lat:40.69152, lng:-75.20775},
+ {id:"easton_garden_works", n:"Easton Garden Works",     addr:"Urban gardens",                logo:LG+"2026/08/eastongardenworks_logo_square-scaled-e1786367159462.png", lat:40.69150, lng:-75.21350},
+ {id:"easton_ambassadors",  n:"Easton Ambassadors",      addr:"Clean & safe downtown",        logo:LG+"2025/09/logo_ea.png", lat:40.69168, lng:-75.20950},
+ {id:"spring_into_easton",  n:"Spring Into Easton",      addr:"Downtown · spring kickoff",    logo:LG+"2026/08/sie_logo_color-1-e1786367927958.png", lat:40.69160, lng:-75.20805},
+ {id:"easton_winter_market",n:"Easton Winter Market",    addr:"Outside the Public Market",    logo:LG+"2025/09/logo_efm.png", lat:40.69140, lng:-75.20895}
+];
+/* city-level PARKS & REC / amenity layer — toggled by the top pills (free with any paid module) */
+var ACOLOR={"Parks":"#3f8f4a","Trails":"#2f7d5a","Pools":"#2a7fb0","Baseball":"#b5651d","Playgrounds":"#c05299","Restrooms":"#5b6b7a","Parking":"#c9a227"};
+var AICON={"Parks":"🌳","Trails":"🥾","Pools":"🏊","Baseball":"⚾","Playgrounds":"🛝","Restrooms":"🚻","Parking":"🅿️"};
+var AMEN=[
+ {c:"Parks",n:"Scott Park",lat:40.68880,lng:-75.20560},{c:"Parks",n:"Riverside Park",lat:40.68720,lng:-75.20650},{c:"Parks",n:"Centre Square",lat:40.69126,lng:-75.20913},
+ {c:"Pools",n:"Eddyside Pool",lat:40.68670,lng:-75.20630},
+ {c:"Playgrounds",n:"Scott Park Playground",lat:40.68930,lng:-75.20600},{c:"Playgrounds",n:"Riverside Park Playground",lat:40.68755,lng:-75.20700},
+ {c:"Restrooms",n:"Restroom · North",lat:40.690312,lng:-75.205090},{c:"Restrooms",n:"Restroom · South",lat:40.689235,lng:-75.206386},
+ {c:"Parking",n:"Parking Garage · N. Third",lat:40.69205,lng:-75.20740},{c:"Parking",n:"Parking Garage · S. Third",lat:40.69010,lng:-75.20820},
+ {c:"Trails",n:"Scott Park Riverfront Path",path:[[40.68760,-75.20520],[40.68890,-75.20560],[40.69030,-75.20585]],lat:40.68890,lng:-75.20560},
+ {c:"Trails",n:"Karl Stirner Arts Trail",path:[[40.69200,-75.20440],[40.69340,-75.20760],[40.69380,-75.20960]],lat:40.69340,lng:-75.20720},
+ {c:"Trails",n:"Easton Highline",path:[[40.68680,-75.21050],[40.68715,-75.21520],[40.68700,-75.21660]],lat:40.68705,lng:-75.21400}
+];
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ini(s){return String(s||'').replace(/[^A-Za-z ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();}
+
+var map, AON={}, ALAYERS={};
+function boot(){
+  map=L.map('map',{zoomControl:true,attributionControl:false});
+  map.fitBounds([[40.6853,-75.2167],[40.6956,-75.2026]],{paddingTopLeft:[352,20],paddingBottomRight:[24,24]});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',crossOrigin:true}).addTo(map);
+  // sub-map pins → open the sub-map
+  SUBMAPS.forEach(function(s){
+    var html='<div class="smpin"><img src="'+esc(s.logo)+'" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\''+ini(s.n)+'\'"></div>';
+    var m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:html,iconSize:[30,30],iconAnchor:[15,15]}),riseOnHover:true}).addTo(map);
+    m.bindPopup('<b>'+esc(s.n)+'</b><br><span style="color:#697586">'+esc(s.addr)+'</span><br><a href="festival_vendors.html?fest='+s.id+'" style="color:#0b7f7c;font-weight:800">Open map →</a>');
+    m.on('click',function(){ location.href='festival_vendors.html?fest='+s.id; });
+  });
+  // amenity layers (hidden until a pill is on)
+  AMEN.forEach(function(a,i){
+    var col=ACOLOR[a.c]||'#334155', lyr=[];
+    if(a.path){ lyr.push(L.polyline(a.path,{color:'#fff',weight:7,opacity:.9,lineCap:'round'})); lyr.push(L.polyline(a.path,{color:col,weight:4,opacity:.95,lineCap:'round'})); }
+    lyr.push(L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class="amark" style="--c:'+col+'">'+(AICON[a.c]||'📍')+'</div>',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('<b>'+esc(a.n)+'</b><br><span style="color:#697586">'+esc(a.c)+' · Parks & Rec</span>'));
+    ALAYERS[i]={cat:a.c,layers:lyr};
+  });
+  buildPills(); renderList();
+  if(window.DDEntityManifest){ DDEntityManifest.apply({name:'Easton · City Maps',icon:LG+'2026/08/logo_emsi.png',manifest:'manifests/easton_hub.webmanifest',theme:'#0f1620',title:'Easton · City Maps'}); }
+  window.addEventListener('resize',function(){ setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },120); });
+}
+var ACT="";
+function buildPills(){
+  var cats=Object.keys(ACOLOR);
+  document.getElementById('mapPills').innerHTML='<span class="cat'+(ACT===''?' on':'')+'" onclick="pickAmen(\'\')">📍 All Parks &amp; Rec</span>'+
+    cats.map(function(c){ return '<span class="cat'+(ACT===c?' on':'')+'" onclick="pickAmen(\''+c+'\')">'+(AICON[c]||'')+' '+esc(c)+'</span>'; }).join('');
+}
+function pickAmen(c){ ACT=(ACT===c?'':c); buildPills(); applyAmen(); }
+function applyAmen(){
+  // "All" (ACT==='') = show nothing until a specific layer chosen? Google shows category on demand.
+  Object.keys(ALAYERS).forEach(function(k){ var a=ALAYERS[k]; var show=(ACT!=='' && a.cat===ACT);
+    a.layers.forEach(function(ly){ if(show){ if(!map.hasLayer(ly)) ly.addTo(map); } else if(map.hasLayer(ly)) map.removeLayer(ly); }); });
+}
+function renderList(){
+  var q=(document.getElementById('q').value||'').toLowerCase();
+  var rows=SUBMAPS.filter(function(s){ return !q || (s.n+' '+s.addr).toLowerCase().indexOf(q)>=0; }).map(function(s){
+    return '<a class="smrow" href="festival_vendors.html?fest='+s.id+'">'+
+      '<span class="smlogo"><img src="'+esc(s.logo)+'" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\''+ini(s.n)+'\'"></span>'+
+      '<span><b>'+esc(s.n)+'</b><small>'+esc(s.addr)+'</small></span></a>';
+  }).join('');
+  // Parks & Rec launcher row (free layer — toggles the amenity pills)
+  if(!q || 'parks recs recreation'.indexOf(q)>=0){
+    rows+='<a class="smrow" href="festival_vendors.html?fest=gedp" onclick="pickAmen(\'Parks\');"><span class="smlogo">⚾</span><span><b>Easton Parks &amp; Recs</b><small>Parks · trails · pools · fields — free layer</small></span></a>';
+  }
+  document.getElementById('plist').innerHTML=rows||'<div style="padding:16px;color:#697586;font-size:13px">No city maps match.</div>';
+}
+boot();
+</script>
+</body></html>

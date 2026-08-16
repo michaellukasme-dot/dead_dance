@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>StageFill — Module Pricing</title>
+<meta name="theme-color" content="#0f1620">
+<!-- module_pricing.html — the downward ladder, live. Pick modules → see the monthly/annual total.
+     Ladder: module 1 = $99, module 2 = $79, module 3+ = $49 each. Parks & Rec FREE with any paid
+     module (only $99 if P&R is the ONLY thing taken). Each program manager can decide on their own budget. -->
+<style>
+:root{--ink:#141a22;--bg:#f5f7fa;--card:#fff;--line:#e5e9ef;--muted:#697586;--teal:#0fa3a0;--teal-d:#0b7f7c;--amber:#b7791f;--ink2:#0f1620}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.top{background:var(--ink2);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.top .b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:15px}
+.top b{font-size:18px}.top .s{color:#9fb0c2;font-size:12.5px;font-weight:700}
+.hero{background:radial-gradient(120% 120% at 82% -20%,#1b3b52,#0f1620);color:#fff;padding:22px 18px}
+.hero h1{margin:0 0 3px;font-size:21px}.hero p{margin:0;color:#b9c6d4;font-size:13.5px}
+.wrap{max-width:820px;margin:0 auto;padding:20px 18px 60px;display:grid;grid-template-columns:1fr 300px;gap:22px}
+@media(max-width:780px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 4px}
+.mrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.mrow:last-child{border-bottom:0}
+.mrow input{width:19px;height:19px;accent-color:var(--teal);flex:none}
+.mrow .nm{flex:1;font-weight:700;font-size:14px}
+.mrow .pr{font-variant-numeric:tabular-nums;font-weight:800;color:var(--teal-d);font-size:13.5px;white-space:nowrap}
+.mrow.free .pr{color:var(--amber)}
+.mrow.pr0 .pr{color:#9aa6b2}
+.res{position:sticky;top:14px;align-self:start}
+.big{background:linear-gradient(135deg,#153042,#0f6f8a);color:#fff;border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.big .k{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#bcd0dd}
+.big .v{font-size:32px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.05;margin-top:2px}
+.big .v small{font-size:15px;font-weight:700;color:#cfe0ea}
+.big .sm{font-size:12.5px;color:#cfe0ea;margin-top:5px}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13px}
+.rrow{display:flex;justify-content:space-between;padding:4px 0}
+.rrow b{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;background:#fff6e6;color:var(--amber);font-weight:800;font-size:11px;border-radius:999px;padding:3px 9px;margin-left:6px}
+.note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.45}
+.ladder{font-size:12px;color:var(--muted);padding:6px 14px}
+</style></head>
+<body>
+<div class="top"><span class="b">◍</span><b>StageFill</b><span class="s">Module Pricing · Easton</span></div>
+<div class="hero"><h1>Build your city's plan</h1><p>Every module is a live map. The more you run, the less each costs — and Parks &amp; Rec is free with any paid module.</p></div>
+<div class="wrap">
+  <div>
+    <div class="ladder">Ladder: 1st module <b>$99</b> · 2nd <b>$79</b> · 3rd &amp; beyond <b>$49</b>/mo each. Parks &amp; Rec free with any paid module.</div>
+    <div class="panel" id="modules"></div>
+  </div>
+  <div class="res">
+    <div class="big"><div class="k">Total / month</div><div class="v" id="permo"></div><div class="sm" id="peryr"></div></div>
+    <div class="rcard">
+      <div class="rrow"><span>Paid modules</span><b id="cnt">0</b></div>
+      <div class="rrow"><span>Parks &amp; Rec</span><b id="pr">—</b></div>
+      <div class="rrow"><span>Blended / module</span><b id="blend">—</b></div>
+    </div>
+    <div class="note" id="note"></div>
+  </div>
+</div>
+<script>
+var LG="https://pabaconfest.com/wp-content/uploads/";
+var MODULES=[
+ {id:"easton_fm",n:"Easton Farmers' Market"},{id:"easton_main",n:"Easton Main Street"},
+ {id:"easton_public_market",n:"Easton Public Market"},{id:"pa_bacon_fest",n:"PA Bacon Fest"},
+ {id:"west_ward",n:"West Ward Market"},{id:"easton_ambassadors",n:"Easton Ambassadors"},
+ {id:"easton_garden_works",n:"Easton Garden Works"},{id:"easton_criterium",n:"Easton Criterium"},
+ {id:"easton_heritage_day",n:"Easton Heritage Day"},{id:"easton_winter_village",n:"Easton Winter Village"},
+ {id:"live_at_the_falls",n:"Live At The Falls"},{id:"spring_into_easton",n:"Spring Into Easton"}
+];
+var RUNG=[99,79,49]; // 1st, 2nd, 3rd+
+function rung(i){ return RUNG[Math.min(i,2)]; }         // price of the (i-th, 0-based) paid module
+function money(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+var picked={}, prOnly=false;
+function render(){
+  document.getElementById('modules').innerHTML =
+    MODULES.map(function(m,idx){
+      var on=!!picked[m.id];
+      // show the marginal price this module WOULD add given current count (before it), else its slot price
+      return '<label class="mrow'+(on?'':' pr0')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="toggle(\''+m.id+'\')"><span class="nm">'+m.n+'</span><span class="pr" id="pr_'+m.id+'"></span></label>';
+    }).join('') +
+    '<label class="mrow free"><input type="checkbox" id="prchk" onchange="togglePR()"><span class="nm">Easton Parks &amp; Rec ⚾ 🌳 🥾</span><span class="pr" id="pr_pr">FREE</span></label>';
+  recalc();
+}
+function toggle(id){ picked[id]=!picked[id]; render(); }
+function togglePR(){ prOnly=document.getElementById('prchk').checked; recalc(); }
+function recalc(){
+  var ids=MODULES.filter(function(m){return picked[m.id];}).map(function(m){return m.id;});
+  var n=ids.length, total=0;
+  for(var i=0;i<n;i++){ total+=rung(i); }
+  // per-module marginal price labels (what the NEXT module in each empty slot would cost)
+  var seen=0;
+  MODULES.forEach(function(m){ var el=document.getElementById('pr_'+m.id); if(!el) return;
+    if(picked[m.id]){ el.textContent=money(rung(seen)); seen++; }
+    else { el.textContent='+'+money(rung(n)); }   // marginal cost to add this one next
+  });
+  // Parks & Rec: free if any paid module; $99 if it's the only thing
+  var prLabel, prCost=0;
+  if(n>0){ prLabel='FREE'; }
+  else if(prOnly){ prLabel='$99'; prCost=99; }
+  else { prLabel='free w/ any module'; }
+  document.getElementById('pr_pr').textContent = (n>0?'FREE':(prOnly?'$99':'FREE*'));
+  var grand=total+prCost;
+  document.getElementById('permo').innerHTML = money(grand)+'<small> /mo</small>';
+  document.getElementById('peryr').textContent = money(grand*12)+' / year';
+  document.getElementById('cnt').textContent = n;
+  document.getElementById('pr').innerHTML = (n>0?'FREE <span class="pill">included</span>':(prOnly?'$99 (standalone)':'—'));
+  document.getElementById('blend').textContent = n>0? money(total/n)+' /module' : '—';
+  document.getElementById('note').innerHTML = n>=1
+    ? 'Each program manager can say yes on their own budget — the first module is a $'+99+'/mo decision, and every add-on is cheaper. All 12 Easton programs = <b>'+money((function(){var t=0;for(var i=0;i<12;i++)t+=rung(i);return t;})())+'/mo</b> ('+money((function(){var t=0;for(var i=0;i<12;i++)t+=rung(i);return t;})()*12)+'/yr) — well under a platform license, and covered by Main Street Matters.'
+    : 'Parks &amp; Rec is free the moment any paid module is added — it is the door, not the product.';
+}
+render();
+</script>
+</body></html>
