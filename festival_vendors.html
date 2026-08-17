@@ -19,6 +19,8 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 .top .logo .b{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--teal),#12c2be);display:grid;place-items:center;color:#04201f;font-weight:900;font-size:14px}
 .top .fname{font-weight:700;color:#c7d0dc;font-size:13.5px;margin-left:2px}
 .top .cta{margin-left:auto;color:#9fb0c2;font-size:12.5px;font-weight:700;text-decoration:none}
+.top .back{color:#fff;background:rgba(255,255,255,.13);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:800;text-decoration:none}
+.top .back:hover{background:rgba(255,255,255,.22)}
 #wrap{position:absolute;inset:52px 0 0 0}
 #map{position:absolute;inset:0;background:#dfe6ee}
 /* Vendor directory panel (MarketSpread-style, but ours snaps) */
@@ -95,7 +97,7 @@ body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacS
 .credit{position:absolute;right:8px;bottom:6px;z-index:1100;font-size:11px;color:#6b7684;background:#ffffffcc;border-radius:6px;padding:2px 7px}
 </style></head>
 <body>
-<div class="top"><div class="logo"><span class="b">◍</span>Vendor Map</div><span class="fname" id="fname"></span><a class="cta" href="festival_event_maker.html">Build one →</a></div>
+<div class="top"><a class="back" href="easton_city_map.html">← City Maps</a><div class="logo"><span class="b">◍</span>Vendor Map</div><span class="fname" id="fname"></span><a class="cta" href="festival_event_maker.html">Build one →</a></div>
 <div id="wrap">
   <div id="map"></div>
   <button id="mapToggle" class="mtoggle" onclick="toggleBase()"><span class="sw"></span>Illustrated view</button>
