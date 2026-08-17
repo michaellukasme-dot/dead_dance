@@ -122,6 +122,7 @@ if(typeof L==='undefined'&&window.__e&&window.__e.map){window.L=window.__e;}</sc
 <script src="dd_cutesy_art.js"></script>
 <script src="dd_entity_manifest.js"></script>
 <script src="dd_map_ui.js"></script>
+<script src="dd_cluster.js"></script>
 <script>
 /* ---------- Festival registry (a surface for %FESTIVAL%) ---------- */
 var NAMES = { easton_fm:"Easton Farmers' Market", easton_main:"Easton Main Street", easton_public_market:"Easton Public Market",
@@ -772,7 +773,7 @@ function placeVendors(f){ if(!f.spine){ return; } var n=f.vendors.length, off=0.
 /* ---------- state ---------- */
 var FID = qp('fest') || 'easton_fm';
 var F = FESTS[FID];
-var map, MARKERS = {}, PATHLAYERS = {}, ACTIVE_CAT = '', SELDATE = '', PRESENT = null;
+var map, MARKERS = {}, PATHLAYERS = {}, ACTIVE_CAT = '', SELDATE = '', PRESENT = null, VCLUSTER = null;
 var baseTiles, cutesyLayer, boundaryLayer, ILLUS = false;
 /* ── REAL BOOTH NUMBERS ── paste from the booth sheet: "Vendor name":"booth". Assumed fixed each
    week. Only Aladdin is confirmed (from MarketSpread); the rest await Michael's hunt-and-peck. */
@@ -871,11 +872,12 @@ function boot(){
     var color = CATCOLOR[v.c] || '#334155';
     var icon = L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13],
       html:'<div class="vpin" id="pin'+i+'" style="--c:'+color+'"><span class="vmark">'+catIcon(v.c)+'</span><span class="vplabel">'+esc(v.n)+(v.booth?(' · '+esc(v.booth)):'')+'</span></div>'});
-    var m = L.marker([v.lat,v.lng],{icon:icon,riseOnHover:true}).addTo(map);
+    var m = L.marker([v.lat,v.lng],{icon:icon,riseOnHover:true});
     m.bindPopup(vendorCard(v),{maxWidth:280});
     m.on('click',function(){ select(i,false); });
     MARKERS[i]=m;
   });
+  if(window.DDCluster){ VCLUSTER = new DDCluster(map, {radius:56}); updateMapVisibility(); }
   // draw ZONE regions (street festival) — festival → zone → booth
   if(F.zones){ F.zones.forEach(function(z){
     L.rectangle(z.bbox, {color:z.col, weight:1.5, fillColor:z.col, fillOpacity:0.12, dashArray:'5 5'}).addTo(map).bindPopup('<b>'+esc(z.name)+'</b>');
@@ -923,11 +925,15 @@ function applyDate(){
 // Pills toggle features on the MAP (parks, walking paths, stages, vendors…) — like layers.
 function updateMapVisibility(){
   if(!map) return;
+  var visPts=[];
   F.vendors.forEach(function(v,i){
     var vis = isPresent(v) && (!ACTIVE_CAT || v.c===ACTIVE_CAT);
-    var m=MARKERS[i]; if(m){ if(vis){ if(!map.hasLayer(m)) m.addTo(map); } else if(map.hasLayer(m)) map.removeLayer(m); }
+    var m=MARKERS[i];
+    if(VCLUSTER){ if(vis && m) visPts.push({lat:v.lat, lng:v.lng, marker:m}); }
+    else if(m){ if(vis){ if(!map.hasLayer(m)) m.addTo(map); } else if(map.hasLayer(m)) map.removeLayer(m); }
     var pl=PATHLAYERS[i]; if(pl){ pl.forEach(function(ly){ if(vis){ if(!map.hasLayer(ly)) ly.addTo(map); } else if(map.hasLayer(ly)) map.removeLayer(ly); }); }
   });
+  if(VCLUSTER) VCLUSTER.set(visPts);
 }
 
 // short, icon'd pill labels (Google-Maps style) — full category kept for filtering
@@ -977,7 +983,7 @@ function select(i,fromList){
   Array.prototype.forEach.call(document.querySelectorAll('.vpin.sel'), function(el){ el.classList.remove('sel'); });
   var pin=document.getElementById('pin'+i); if(pin){ pin.classList.add('sel'); }
   try{ map.flyTo([v.lat,v.lng], Math.max(map.getZoom(),18), {duration:0.6}); }catch(e){}
-  var m=MARKERS[i]; if(m){ setTimeout(function(){ try{ m.openPopup(); }catch(e){} }, 320); }
+  setTimeout(function(){ try{ L.popup({maxWidth:280}).setLatLng([v.lat,v.lng]).setContent(vendorCard(v)).openOn(map); }catch(e){} }, 680);
 }
 function toggleBase(){
   ILLUS=!ILLUS; var btn=document.getElementById('mapToggle');

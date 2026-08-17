@@ -45,6 +45,7 @@
 <link rel="stylesheet" href="leaflet/leaflet.css">
 <script src="dd_entity_manifest.js"></script>
 <script src="dd_map_ui.js"></script>
+<script src="dd_cluster.js"></script>
 <script>
 var TYPE={
  Park:{c:"#3f8f4a",i:"🌳"}, "Dog Park":{c:"#7a6a3a",i:"🐕"}, "Pool / Splash":{c:"#2a7fb0",i:"🏊"},
@@ -106,7 +107,7 @@ var FAC=[
  {n:"Bob Rute Fields",t:"Baseball / Softball",lat:40.7000,lng:-75.2400,note:"off map",approx:true}
 ];
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-var map, MK=[], ACT="";
+var map, MK=[], ACT="", FCLUSTER=null;
 function boot(){
   map=L.map('map',{zoomControl:true,attributionControl:false});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',crossOrigin:true}).addTo(map);
@@ -114,12 +115,13 @@ function boot(){
   map.fitBounds([[Math.min.apply(0,lats),Math.min.apply(0,lngs)],[Math.max.apply(0,lats),Math.max.apply(0,lngs)]],{paddingTopLeft:[344,20],paddingBottomRight:[24,54]});
   FAC.forEach(function(f,i){
     var ty=TYPE[f.t]||{c:"#334155",i:"📍"};
-    var mk=L.marker([f.lat,f.lng],{riseOnHover:true,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,26],html:'<div class="amark'+(f.approx?' approx':'')+'" style="--c:'+ty.c+'">'+ty.i+'</div>'})}).addTo(map);
+    var mk=L.marker([f.lat,f.lng],{riseOnHover:true,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,26],html:'<div class="amark'+(f.approx?' approx':'')+'" style="--c:'+ty.c+'">'+ty.i+'</div>'})});
     mk.bindPopup('<b>'+esc(f.n)+'</b><br><span style="color:#697586">'+esc(f.t)+(f.approx?' · ≈ approx location':'')+'</span>'+(f.note?'<br><span style="color:#8a94a0;font-size:12px">'+esc(f.note)+'</span>':''));
     mk.bindTooltip(esc(f.n)+' — click to zoom',{direction:'top',offset:[0,-24]});
     mk.on('click',function(){ go(i); });
     MK[i]=mk;
   });
+  if(window.DDCluster){ FCLUSTER=new DDCluster(map,{radius:56}); apply(); }
   buildPills(); renderList();
   if(window.DDMapUI){ DDMapUI.pillArrows('mapPills'); DDMapUI.fullscreen({style:'top:12px;right:12px'}); }
   if(window.DDEntityManifest){ DDEntityManifest.apply({name:'Easton · Parks & Rec',icon:'https://pabaconfest.com/wp-content/uploads/2026/08/logo_emsi.png',theme:'#0f1620',title:'Easton · Parks & Rec'}); }
@@ -132,7 +134,10 @@ function buildPills(){
   document.getElementById('mapPills').innerHTML=html;
 }
 function pick(t){ ACT=(ACT===t?'':t); buildPills(); apply(); renderList(); }
-function apply(){ FAC.forEach(function(f,i){ var show=(ACT===''||f.t===ACT); if(show){ if(!map.hasLayer(MK[i]))MK[i].addTo(map);} else if(map.hasLayer(MK[i]))map.removeLayer(MK[i]); }); }
+function apply(){
+  if(FCLUSTER){ var pts=[]; FAC.forEach(function(f,i){ if(ACT===''||f.t===ACT) pts.push({lat:f.lat,lng:f.lng,marker:MK[i]}); }); FCLUSTER.set(pts); return; }
+  FAC.forEach(function(f,i){ var show=(ACT===''||f.t===ACT); if(show){ if(!map.hasLayer(MK[i]))MK[i].addTo(map);} else if(map.hasLayer(MK[i]))map.removeLayer(MK[i]); });
+}
 function renderList(){
   var rows=FAC.filter(function(f){return ACT===''||f.t===ACT;}).sort(function(a,b){return a.n<b.n?-1:1;}).map(function(f){
     var i=FAC.indexOf(f), ty=TYPE[f.t]||{c:"#334155",i:"📍"};
