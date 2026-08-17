@@ -26,7 +26,7 @@ body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,
 .slider .lab .v{font-size:18px;color:var(--teal-d)}
 .slider input[type=range]{width:100%;accent-color:var(--teal)}
 .slider .sub{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
-.legend{position:absolute;top:12px;right:12px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:11px;box-shadow:0 4px 14px rgba(20,26,34,.16)}
+.legend{position:absolute;left:12px;bottom:16px;z-index:1100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:11px;box-shadow:0 4px 14px rgba(20,26,34,.16)}
 .legend div{display:flex;align-items:center;gap:6px;margin:2px 0}.legend .dot{width:9px;height:9px;border-radius:50%}
 .cpin{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(20,26,34,.4);cursor:pointer;transition:transform .12s}
 .cpin:hover{transform:scale(1.45)}
@@ -39,6 +39,7 @@ body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,
 <script>window.__m=window.module;window.__e=window.exports;try{window.module=undefined;window.exports=undefined;}catch(_){}</script>
 <script src="leaflet/leaflet.js"></script>
 <script>try{window.module=window.__m;window.exports=window.__e;}catch(_){}</script>
+<script src="dd_map_ui.js"></script>
 <div id="map"></div>
 <div id="panel">
   <div class="ph"><span class="b">◍</span><div><b>StageFill Reach</b><small id="sub">Targets within <span id="cnt">–</span> · from Easton</small></div></div>
@@ -96,17 +97,27 @@ function boot(){
   document.getElementById('legend').innerHTML=Object.keys(TIER).map(function(t){return '<div><span class="dot" style="background:'+TIER[t]+'"></span>'+t+'</div>';}).join('');
   setR(R);
 }
-function setR(v){ R=+v; document.getElementById('rv').textContent=R; if(ring) ring.setRadius(R*1609.34);
-  var inside=CITIES.filter(function(c){return c.mi<=R;});
-  CITIES.forEach(function(c){ var on=c.mi<=R; var el=MK[c.n]; if(el){ var d=el.getElement(); if(d) d.style.opacity=on?'1':'0.28'; } });
+var TIERSEL={};
+function shown(c){ var ts=Object.keys(TIERSEL).filter(function(k){return TIERSEL[k];}); return c.mi<=R && (ts.length===0 || TIERSEL[c.t]); }
+function setR(v){ R=+v; var rv=document.getElementById('rv'); if(rv) rv.textContent=R; var rg=document.getElementById('range'); if(rg) rg.value=R; if(ring) ring.setRadius(R*1609.34);
+  var inside=CITIES.filter(shown);
+  CITIES.forEach(function(c){ var on=shown(c); var el=MK[c.n]; if(el){ var d=el.getElement(); if(d) d.style.opacity=on?'1':'0.28'; } });
   document.getElementById('cnt').textContent=inside.length+' of '+CITIES.length+' towns · '+R+' mi';
   document.getElementById('plist').innerHTML=CITIES.map(function(c){
-    var on=c.mi<=R, col=TIER[c.t]||'#334155';
+    var on=shown(c), col=TIER[c.t]||'#334155';
     return '<div class="crow" style="opacity:'+(on?1:.4)+'" onclick="go(\''+c.n.replace(/'/g,"")+'\')"><span class="dot" style="background:'+col+'"></span><span><b>'+esc(c.n)+'</b><small>'+esc(c.t)+'</small></span><span class="mi">'+c.mi.toFixed(0)+' mi</span></div>';
   }).join('');
 }
 function go(n){ var c=CITIES.filter(function(x){return x.n===n;})[0]; if(c){ map.flyTo([c.lat,c.lng],11,{duration:.6}); setTimeout(function(){ try{MK[n].openPopup();}catch(e){} },660); } }
 function toTop(){ map.closePopup(); map.flyTo(HOME,9,{duration:.6}); }
 boot();
+if(window.DDMapUI){
+  var fb=document.createElement('button'); fb.style.cssText='position:absolute;top:12px;right:12px;z-index:1200'; fb.title='Filter targets'; document.body.appendChild(fb);
+  DDMapUI.filterModal({ toggle:fb, title:'Filter targets',
+    slider:{label:'Set Distance Range 1–100 Miles', min:1, max:100, value:R, suffix:'mi'},
+    tags:[{id:'Attack First',label:'Attack First'},{id:'Warm & Funded',label:'Warm & Funded'},{id:'Near Ring',label:'Near Ring'},{id:'Marquee Reach',label:'Marquee Reach'}],
+    onApply:function(s){ R=s.distance; TIERSEL={}; s.tags.forEach(function(t){TIERSEL[t]=true;}); setR(R); } });
+  DDMapUI.fullscreen({style:'top:56px;right:12px'});
+}
 </script>
 </body></html>

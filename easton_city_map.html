@@ -62,6 +62,7 @@ window.__m=window.module;window.__e=window.exports;try{window.module=undefined;w
 <script src="leaflet/leaflet.js"></script>
 <script>try{window.module=window.__m;window.exports=window.__e;}catch(_){}if(typeof L==='undefined'&&window.__e&&window.__e.map){window.L=window.__e;}</script>
 <script src="dd_entity_manifest.js"></script>
+<script src="dd_map_ui.js"></script>
 
 <div id="map"></div>
 <div id="panel">
@@ -116,8 +117,10 @@ var VENUES=[
 ];
 function polyCenter(p){var la=0,lo=0;p.forEach(function(q){la+=q[0];lo+=q[1];});return [la/p.length,lo/p.length];}
 function venuePin(la,lo,v){
-  L.marker([la,lo],{riseOnHover:true,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div class="smpin" style="border-color:#7a1f2b;background:#fff;color:#7a1f2b">🎵</div>'})}).addTo(map)
+  var vm=L.marker([la,lo],{riseOnHover:true,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div class="smpin" style="border-color:#7a1f2b;background:#fff;color:#7a1f2b">🎵</div>'})}).addTo(map)
    .bindPopup('<b>'+esc(v.n)+'</b><br><span style="color:#697586">'+esc(v.note)+'</span><br><a href="stage_builder.html" style="color:#7a1f2b;font-weight:800;text-decoration:none">Book this stage →</a>');
+  vm.bindTooltip(esc(v.n)+' — click to zoom',{direction:'top',offset:[0,-14]});
+  vm.on('click',function(){ map.flyTo([la,lo],17,{duration:.6}); });
 }
 function drawVenues(){ VENUES.forEach(function(v){
   if(v.poly){ L.polygon(v.poly,{color:'#7a1f2b',weight:2,fillColor:'#7a1f2b',fillOpacity:0.16}).addTo(map); var c=polyCenter(v.poly); venuePin(c[0],c[1],v); }
@@ -136,16 +139,21 @@ function boot(){
     var html='<div class="smpin"><img src="'+esc(s.logo)+'" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\''+ini(s.n)+'\'"></div>';
     var m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:html,iconSize:[30,30],iconAnchor:[15,15]}),riseOnHover:true}).addTo(map);
     m.bindPopup('<b>'+esc(s.n)+'</b><br><span style="color:#697586">'+esc(s.addr)+'</span><br><a href="festival_vendors.html?fest='+s.id+'" style="color:#0b7f7c;font-weight:800">Open map →</a>');
+    m.bindTooltip(esc(s.n)+' — click to open',{direction:'top',offset:[0,-16]});
     m.on('click',function(){ location.href='festival_vendors.html?fest='+s.id; });
   });
   // amenity layers (hidden until a pill is on)
   AMEN.forEach(function(a,i){
     var col=ACOLOR[a.c]||'#334155', lyr=[];
     if(a.path){ lyr.push(L.polyline(a.path,{color:'#fff',weight:7,opacity:.9,lineCap:'round'})); lyr.push(L.polyline(a.path,{color:col,weight:4,opacity:.95,lineCap:'round'})); }
-    lyr.push(L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class="amark" style="--c:'+col+'">'+(AICON[a.c]||'📍')+'</div>',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('<b>'+esc(a.n)+'</b><br><span style="color:#697586">'+esc(a.c)+' · Parks & Rec</span><br><a href="'+prUrl(a.c)+'" target="_blank" rel="noopener" style="color:#0b7f7c;font-weight:800;text-decoration:none">Easton Parks &amp; Rec ↗</a>'));
+    var amk=L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class="amark" style="--c:'+col+'">'+(AICON[a.c]||'📍')+'</div>',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('<b>'+esc(a.n)+'</b><br><span style="color:#697586">'+esc(a.c)+' · Parks & Rec</span><br><a href="'+prUrl(a.c)+'" target="_blank" rel="noopener" style="color:#0b7f7c;font-weight:800;text-decoration:none">Easton Parks &amp; Rec ↗</a>');
+    amk.bindTooltip(esc(a.n)+' — click to zoom',{direction:'top',offset:[0,-12]});
+    amk.on('click',function(){ map.flyTo([a.lat,a.lng],17,{duration:.6}); });
+    lyr.push(amk);
     ALAYERS[i]={cat:a.c,layers:lyr};
   });
   buildLayerMenu(); buildPills(); renderList(); map.on('click',onMapClick); drawVenues();
+  if(window.DDMapUI){ DDMapUI.pillArrows('mapPills'); DDMapUI.fullscreen({style:'top:52px;right:12px'}); }
   if(window.DDEntityManifest){ DDEntityManifest.apply({name:'Easton · City Maps',icon:LG+'2026/08/logo_emsi.png',manifest:'manifests/easton_hub.webmanifest',theme:'#0f1620',title:'Easton · City Maps'}); }
   window.addEventListener('resize',function(){ setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },120); });
 }

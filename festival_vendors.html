@@ -121,6 +121,7 @@ window.__m=window.module;window.__e=window.exports;try{window.module=undefined;w
 if(typeof L==='undefined'&&window.__e&&window.__e.map){window.L=window.__e;}</script>
 <script src="dd_cutesy_art.js"></script>
 <script src="dd_entity_manifest.js"></script>
+<script src="dd_map_ui.js"></script>
 <script>
 /* ---------- Festival registry (a surface for %FESTIVAL%) ---------- */
 var NAMES = { easton_fm:"Easton Farmers' Market", easton_main:"Easton Main Street", easton_public_market:"Easton Public Market",
@@ -462,18 +463,21 @@ var FESTS = {
   },
   live_at_the_falls: {
     name: "Live At The Falls — Scott Park", theme: "market",
-    bbox: [[40.6882,-75.2068],[40.6898,-75.2044]],
-    boundary: [[40.6898,-75.2068],[40.6898,-75.2044],[40.6882,-75.2044],[40.6882,-75.2068]],
+    bbox: [[40.68880410486094,-75.20710660661211],[40.69038409437032,-75.20450969003818]],
+    boundary: [[40.68897511006789,-75.20710660661211],[40.69038409437032,-75.20539222702116],[40.690259297537295,-75.20477710165909],[40.68970588758657,-75.20450969003818],[40.68964453580892,-75.20572697382609],[40.68880410486094,-75.20680613441263]],
+    stages: [{ n:"Scott Park Stage", p:"Live at the Falls main stage · the bandshell", lat:40.69017114365352, lng:-75.2050128840005, r:5.70,
+      rings:[ {lat:40.69008754486382, lng:-75.20510528631141, r:11.66, label:"Auditorium · inner path + seating"},
+              {lat:40.69008754486382, lng:-75.20510528631141, r:18.46, label:"Auditorium · outer path + seating"} ] }],
     vendors: [
-      {n:"Main Stage", c:"Music / Stage", p:"Thursdays, June–Sept · free", k:"stage", lat:40.689, lng:-75.2056},
-      {n:"DEAL — Grateful Dead Cover Band", c:"Music / Stage", p:"Sept 3 · DeadDance night", k:"stage", lat:40.68905, lng:-75.20575},
-      {n:"Lilly Moss", c:"Music / Stage", p:"Aug 27 · Lafayette In Session", k:"stage", lat:40.68895, lng:-75.20545},
-      {n:"Lawn Seating", c:"Specialty", p:"BYO chairs & blankets", k:"street", lat:40.6888, lng:-75.2056},
-      {n:"Food Truck Row", c:"Food Truck", p:"Rotating trucks", k:"truck", lat:40.6893, lng:-75.2052},
-      {n:"Beer & Wine Garden", c:"Beverages", p:"21+ riverside", k:"tent", lat:40.6887, lng:-75.2052},
-      {n:"Free Parking Entrance", c:"Specialty", p:"Scott Park lot", k:"fixed", lat:40.6895, lng:-75.206},
-      {n:"Riverside Overlook", c:"Specialty", p:"Confluence view", k:"street", lat:40.6886, lng:-75.2048},
-      {n:"Kids Area", c:"Move / Fitness", p:"Family space", k:"street", lat:40.6892, lng:-75.2048}
+      {n:"Main Stage", c:"Music / Stage", p:"Thursdays, June–Sept · free · the bandshell", k:"stage", lat:40.69017114365352, lng:-75.2050128840005},
+      {n:"DEAL — Grateful Dead Cover Band", c:"Music / Stage", p:"Sept 3 · DeadDance night", k:"stage", lat:40.690195, lng:-75.204975},
+      {n:"Lilly Moss & The Steel Ponies", c:"Music / Stage", p:"Aug 27 · country", k:"stage", lat:40.690145, lng:-75.205055},
+      {n:"Lawn Seating", c:"Specialty", p:"BYO chairs & blankets · the bowl", k:"street", lat:40.68999, lng:-75.20524},
+      {n:"Food Truck Row", c:"Food Truck", p:"Rotating trucks · Larry Holmes corridor", k:"truck", lat:40.69015, lng:-75.20535},
+      {n:"Beer & Wine Garden", c:"Beverages", p:"21+ · riverside", k:"tent", lat:40.68992, lng:-75.20548},
+      {n:"Free Parking Entrance", c:"Specialty", p:"Scott Park lot", k:"fixed", lat:40.68905, lng:-75.20658},
+      {n:"Riverside Overlook", c:"Specialty", p:"Confluence view · on the path", k:"street", lat:40.68967, lng:-75.20600},
+      {n:"Kids Area", c:"Move / Fitness", p:"Family space", k:"street", lat:40.68985, lng:-75.20582}
     ]
   },
   spring_into_easton: {
@@ -887,6 +891,7 @@ function boot(){
     PATHLAYERS[i]=[casing,line];
   });
   buildCats();
+  if(window.DDMapUI && !window.__ddInit){ window.__ddInit=1; DDMapUI.pillArrows('mapPills'); DDMapUI.fullscreen({style:'top:56px;right:14px'}); }
   // per-week schedule → date picker (Farmers' Market swaps vendors by market day)
   if(F.schedule && F.dates && F.dates.length){
     var sel=document.getElementById('datepick');
